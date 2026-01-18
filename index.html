@@ -18,8 +18,13 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2.2">
+    <link rel="stylesheet" href="css/admin.css">
 </head>
 
 <body class="dark-mode">
@@ -31,6 +36,7 @@
             <ul class="nav-links">
 
                 <li><a href="#skills">Skills</a></li>
+                <li><a href="learning.html">Learning Center</a></li>
                 <li><a href="#projects">Projects</a></li>
                 <li><a href="#experience">Experience</a></li>
                 <li><a href="#services">Services</a></li>
@@ -57,6 +63,7 @@
     <div class="mobile-menu">
 
         <a href="#skills">Skills</a>
+        <a href="learning.html">Learning Center</a>
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
         <a href="#services">Services</a>
@@ -142,115 +149,165 @@
     <!-- Projects Section -->
     <section id="projects" class="section">
         <div class="container">
-            <h2 class="section-title reveal">Projects</h2>
-            <div class="projects-grid">
-                <!-- Project 1 -->
-                <article class="project-card reveal">
-                    <div class="project-content">
-                        <div class="project-icon">
-                            <i class="fas fa-tractor"></i>
-                        </div>
-                        <h3>3D Farm Game</h3>
-                        <p>A comprehensive 3D farming simulation experiencing full farm management features, planting,
-                            and harvesting.</p>
-                        <div class="tags">
-                            <span>3D Game Dev</span>
-                            <span>Simulation</span>
-                        </div>
-                        <a href="farm-game/index.html" class="btn-link">Play Game <i class="fas fa-play"></i></a>
-                    </div>
-                </article>
+            <h2 class="section-title reveal">Projects Showcase</h2>
 
-                <!-- Project 2 -->
-                <article class="project-card reveal">
-                    <div class="project-content">
-                        <div class="project-icon">
-                            <i class="fas fa-laptop-code"></i>
-                        </div>
-                        <h3>Personal Portfolio</h3>
-                        <p>Responsive single-page website built with HTML, CSS, and vanilla JS.</p>
-                        <div class="tags">
-                            <span>Web Dev</span>
-                            <span>Responsive</span>
-                        </div>
-                        <a href="#" class="btn-link">View Project <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </article>
-
-                <!-- Project 3 -->
-                <article class="project-card reveal">
-                    <div class="project-content">
-                        <div class="project-icon">
-                            <i class="fas fa-book-quran"></i>
-                        </div>
-                        <h3>Quran App</h3>
-                        <p>Beautiful Quran application with audio recitation, verse highlighting, search, and bookmarks.
-                        </p>
-                        <div class="tags">
-                            <span>API Integration</span>
-                            <span>Audio Player</span>
-                        </div>
-                        <a href="quran-app/index.html" class="btn-link">Open App <i
-                                class="fas fa-external-link-alt"></i></a>
-                    </div>
-                </article>
-
-                <!-- Project 4 -->
-                <article class="project-card reveal">
-                    <div class="project-content">
-                        <div class="project-icon">
-                            <i class="fas fa-calculator"></i>
-                        </div>
-                        <h3>Calculator Vault</h3>
-                        <p>A sleek calculator that doubles as a secret vault. Enter the magic code to reveal hidden
-                            content.</p>
-                        <div class="tags">
-                            <span>Security</span>
-                            <span>JavaScript</span>
-                        </div>
-                        <a href="calculator-vault/index.html" class="btn-link">Open App <i
-                                class="fas fa-external-link-alt"></i></a>
-                    </div>
-                </article>
-
-                <!-- Project 5 -->
-                <article class="project-card reveal">
-                    <div class="project-content">
-                        <div class="project-icon">
-                            <i class="fas fa-brain"></i>
-                        </div>
-                        <h3>تطبيق اسألني (Quiz App)</h3>
-                        <p>اختبر معلوماتك البرمجية مع هذا التطبيق التفاعلي الذي يحتوي على مؤقت زمني ونظام احتساب نقاط
-                            ذكي.</p>
-                        <div class="tags">
-                            <span>JavaScript</span>
-                            <span>State Management</span>
-                            <span>Educational</span>
-                        </div>
-                        <a href="quiz-app/index.html" class="btn-link">ابدأ الاختبار <i class="fas fa-play"></i></a>
-                    </div>
-                </article>
-
-                <!-- Project 6 -->
-                <article class="project-card reveal" style="border: 1px solid var(--accent);">
-                    <div class="project-content">
-                        <div class="project-icon" style="background: rgba(211, 84, 0, 0.1); color: #d35400;">
-                            <i class="fas fa-mountain"></i>
-                        </div>
-                        <h3 style="color: #d35400;">Rust Survival 3D</h3>
-                        <p>A hardcore 3D survival game inspired by Rust. Harvest wood/stone, mine iron, and build your
-                            base in a procedurally generated world.</p>
-                        <div class="tags">
-                            <span>Three.js</span>
-                            <span>3D WebGL</span>
-                            <span>Game Systems</span>
-                        </div>
-                        <a href="rust-game/index.html" class="btn-link" style="color: #d35400;">Play Rust 3D <i
-                                class="fas fa-hammer"></i></a>
-                    </div>
-                </article>
-
+            <!-- Filter Buttons -->
+            <div class="project-filters reveal">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-th"></i> All Projects
+                </button>
+                <button class="filter-btn" data-filter="games">
+                    <i class="fas fa-gamepad"></i> Games
+                </button>
+                <button class="filter-btn" data-filter="apps">
+                    <i class="fas fa-tools"></i> Apps
+                </button>
             </div>
+
+            <!-- Category A: 3D Gaming Universe -->
+            <div class="project-category gaming-category" data-category="games">
+                <div class="category-header reveal">
+                    <h3><i class="fas fa-gamepad"></i> 3D Gaming Universe</h3>
+                    <p>Immersive gaming experiences built with cutting-edge web technologies</p>
+                </div>
+
+                <div class="projects-grid">
+                    <!-- Game 1: Farm Game -->
+                    <article class="project-card reveal" data-category="game">
+                        <div class="project-content">
+                            <div class="project-icon">
+                                <i class="fas fa-tractor"></i>
+                            </div>
+                            <h3>3D Farm Game</h3>
+                            <p>A comprehensive 3D farming simulation with full farm management features, planting, and
+                                harvesting mechanics.</p>
+                            <div class="tags">
+                                <span class="tag-personal">Personal Project</span>
+                                <span>3D Game Dev</span>
+                                <span>Simulation</span>
+                            </div>
+                            <a href="farm-game/index.html" class="btn-link game-btn">
+                                <i class="fas fa-play"></i> Play Game
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- Game 2: Rust 3D -->
+                    <article class="project-card reveal" data-category="game">
+                        <div class="project-content">
+                            <div class="project-icon rust-icon">
+                                <i class="fas fa-mountain"></i>
+                            </div>
+                            <h3 class="rust-title">Rust Survival 3D</h3>
+                            <p>A hardcore 3D survival game inspired by Rust. Harvest wood/stone, mine iron, and build
+                                your base in a procedurally generated world.</p>
+                            <div class="tags">
+                                <span class="tag-personal">Personal Project</span>
+                                <span>Three.js</span>
+                                <span>3D WebGL</span>
+                                <span>Game Systems</span>
+                            </div>
+                            <a href="rust-game/index.html" class="btn-link game-btn rust-btn">
+                                <i class="fas fa-hammer"></i> Play Rust 3D
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
+            <!-- Category B: Pro Apps & Tools -->
+            <div class="project-category apps-category" data-category="apps">
+                <div class="category-header reveal">
+                    <h3><i class="fas fa-tools"></i> Pro Apps & Tools</h3>
+                    <p>Professional applications designed for productivity and utility</p>
+                </div>
+
+                <div class="projects-grid">
+                    <!-- App 1: Quran App -->
+                    <article class="project-card reveal" data-category="app">
+                        <div class="project-content">
+                            <div class="project-icon">
+                                <i class="fas fa-book-quran"></i>
+                            </div>
+                            <h3>Quran App <span class="source-badge"><i class="fas fa-code"></i> Source Code</span></h3>
+                            <p>Beautiful Quran application with audio recitation, verse highlighting, search, and
+                                bookmarks functionality.</p>
+                            <div class="tags">
+                                <span class="tag-opensource">Open Source</span>
+                                <span>API Integration</span>
+                                <span>Audio Player</span>
+                            </div>
+                            <a href="quran-app/index.html" class="btn-link app-btn">
+                                <i class="fas fa-external-link-alt"></i> Open App
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- App 2: Calculator Vault -->
+                    <article class="project-card reveal" data-category="app">
+                        <div class="project-content">
+                            <div class="project-icon">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <h3>Calculator Vault <span class="source-badge"><i class="fas fa-code"></i> Source
+                                    Code</span></h3>
+                            <p>A sleek calculator that doubles as a secret vault. Enter the magic code to reveal hidden
+                                content.</p>
+                            <div class="tags">
+                                <span class="tag-opensource">Open Source</span>
+                                <span>Security</span>
+                                <span>JavaScript</span>
+                            </div>
+                            <a href="calculator-vault/index.html" class="btn-link app-btn">
+                                <i class="fas fa-external-link-alt"></i> Open App
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- App 3: Quiz App -->
+                    <article class="project-card reveal" data-category="app">
+                        <div class="project-content">
+                            <div class="project-icon">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h3>تطبيق اسألني (Quiz App) <span class="source-badge"><i class="fas fa-code"></i> Source
+                                    Code</span></h3>
+                            <p>اختبر معلوماتك البرمجية مع هذا التطبيق التفاعلي الذي يحتوي على مؤقت زمني ونظام احتساب
+                                نقاط ذكي.</p>
+                            <div class="tags">
+                                <span class="tag-opensource">Open Source</span>
+                                <span>JavaScript</span>
+                                <span>State Management</span>
+                                <span>Educational</span>
+                            </div>
+                            <a href="quiz-app/index.html" class="btn-link app-btn">
+                                <i class="fas fa-play"></i> ابدأ الاختبار
+                            </a>
+                        </div>
+                    </article>
+
+                    <!-- App 4: Personal Portfolio -->
+                    <article class="project-card reveal" data-category="app">
+                        <div class="project-content">
+                            <div class="project-icon">
+                                <i class="fas fa-laptop-code"></i>
+                            </div>
+                            <h3>Personal Portfolio</h3>
+                            <p>Responsive single-page website built with HTML, CSS, and vanilla JavaScript showcasing my
+                                work and skills.</p>
+                            <div class="tags">
+                                <span>Web Dev</span>
+                                <span>Responsive</span>
+                                <span>Modern Design</span>
+                            </div>
+                            <a href="#hero" class="btn-link app-btn">
+                                <i class="fas fa-arrow-up"></i> View Project
+                            </a>
+                        </div>
+                    </article>
+                </div>
+            </div>
+
         </div>
     </section>
 
@@ -399,12 +456,74 @@
     <footer class="footer">
         <div class="container footer-content">
             <p>&copy; 2025 Rashid. All Rights Reserved. <a href="admin/login.html"
-                    style="font-size:0.8rem; opacity:0.5; margin-left:10px;">Admin Login</a></p>
+                    style="font-size:0.8rem; opacity:0.5; margin-left:10px; text-decoration:none; color: inherit;">Admin
+                    Portal</a></p>
             <a href="#hero" class="back-to-top" aria-label="Back to Top">
                 <i class="fas fa-arrow-up"></i>
             </a>
         </div>
     </footer>
+
+    <!-- Voice Assistant Widget -->
+    <div id="voice-widget">
+        <!-- Toggle Button -->
+        <div class="voice-widget-toggle">
+            <i class="fas fa-microphone-alt"></i>
+        </div>
+
+        <!-- Glow Ring Animation -->
+        <div class="voice-glow-ring"></div>
+
+        <!-- Glassmorphism Panel -->
+        <div class="voice-panel" id="voice-panel">
+            <div class="voice-header">
+                <h3>
+                    <span class="voice-status-dot"></span> Rashid AI
+                </h3>
+                <span class="voice-close"><i class="fas fa-times"></i></span>
+            </div>
+
+            <!-- Visualizer -->
+            <div class="visualizer-container">
+                <div id="voice-visualizer">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                </div>
+            </div>
+
+            <!-- Chat Body -->
+            <div class="voice-chat-body" id="voice-chat-body">
+                <div class="chat-msg bot">
+                    Hello! I am Rashid-AI. How can I assist you today?
+                </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="voice-footer">
+                <button id="voice-speaker-toggle" class="footer-btn">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <div class="voice-input-wrapper">
+                    <input type="text" id="voice-input" class="voice-input" placeholder="Ask me anything...">
+                    <button id="voice-mic-btn" class="mic-btn">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+                <button id="voice-send-btn" class="footer-btn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gemini API Configuration -->
+    <script src="js/gemini-config.js"></script>
+
+    <!-- Rashid AI Voice Assistant v2.0 -->
+    <script src="js/rashid-ai-v2.js?v=2.1"></script>
 
     <!-- Google Translate Script -->
     <script type="text/javascript">
@@ -420,6 +539,9 @@
 
     <!-- Custom Script -->
     <script src="js/script.js"></script>
+    <script src="js/admin.js"></script>
+
+    <!-- Three.js Library -->
 
     <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>

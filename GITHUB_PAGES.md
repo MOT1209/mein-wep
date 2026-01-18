@@ -21,11 +21,10 @@ https://mot1209.github.io/fromliten/rust-game/
 - May take 1-2 minutes to reflect changes
 - Clear browser cache to see latest version (Ctrl+F5)
 
-## 🎮 Current Version
-
-**v6.1 - Blueprint Selection & Preview Fix**
+**v7.0 - Tool Cupboard & Territory Control**
 
 Features:
+- **Tool Cupboard System** (Claim Territory)
 - Visual blueprint indicator
 - Dynamic ghost preview
 - Selected item highlighting

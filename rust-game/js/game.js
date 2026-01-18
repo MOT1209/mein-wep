@@ -18,7 +18,8 @@ const CONFIG = {
     JUMP_FORCE: 9.0,
     PLAYER_RADIUS: 0.8,
     DAY_LENGTH: 600,
-    RAD_ZONE_RADIUS: 18
+    RAD_ZONE_RADIUS: 18,
+    TC_RADIUS: 20
 };
 
 // ==================== STATE ====================
@@ -62,7 +63,8 @@ const BUILDING_TYPES = {
     foundation: { name: 'Foundation', geometry: [3, 0.2, 3], offset: [0, 0.1, 0] },
     wall: { name: 'Wall', geometry: [3, 3, 0.2], offset: [0, 1.5, 0] },
     doorway: { name: 'Doorway', geometry: [3, 3, 0.2], offset: [0, 1.5, 0], hasDoor: true },
-    ceiling: { name: 'Ceiling', geometry: [3, 0.2, 3], offset: [0, 3, 0] }
+    ceiling: { name: 'Ceiling', geometry: [3, 0.2, 3], offset: [0, 3, 0] },
+    tool_cupboard: { name: 'Tool Cupboard', geometry: [1, 2, 1], offset: [0, 1, 0] }
 };
 
 const ITEMS_DATA = {
@@ -325,10 +327,30 @@ try {
 
     function canBuildHere(position) {
         // Check Tool Cupboard privilege
-        for (let tc of state.building.toolCupboards) {
-            const dist = Math.sqrt((position.x - tc.pos.x) ** 2 + (position.z - tc.pos.z) ** 2);
-            if (dist < tc.radius) return false; // Building blocked
+        // Simple Logic: If inside ANY TC radius, we assume "Building Privilege" (Authorized)
+        // If we wanted to block strangers, we would check if we are authorized on that specific TC.
+        // For single player, placing a TC just creates a "Safe Zone".
+        // Let's visualize it: If near a TC, show "Building Privilege".
+
+        let hasPrivilege = false;
+        let blocked = false;
+
+        // In a real multiplayer game, we would check:
+        // if (inside_tc_range && !authorized) return false; (Blocked)
+        // if (inside_tc_range && authorized) return true; (Privilege)
+
+        // Current implementation: Just checking distance to prevent overlapping TCs slightly or just logic placeholder
+        // New Logic:
+        // 1. Cannot place TC too close to another TC
+        // 2. Can build anywhere else (unless blocked by map bounds etc)
+
+        if (state.building.selectedBlueprint === 'tool_cupboard') {
+            for (let tc of state.building.toolCupboards) {
+                const dist = Math.sqrt((position.x - tc.pos.x) ** 2 + (position.z - tc.pos.z) ** 2);
+                if (dist < CONFIG.TC_RADIUS) return false; // Cannot place TC inside another TC range
+            }
         }
+
         return true;
     }
 
@@ -373,6 +395,13 @@ try {
                 health: BUILDING_TIERS.twig.health,
                 maxHealth: BUILDING_TIERS.twig.health
             };
+
+            // TC Logic
+            if (blueprint === 'tool_cupboard') {
+                structure.userData.type = 'tool_cupboard';
+                state.building.toolCupboards.push({ pos: { x: snapX, z: snapZ }, radius: CONFIG.TC_RADIUS });
+                console.log("TC Placed! Building Privilege Area Established.");
+            }
 
             scene.add(structure);
             builtStructures.push(structure);
@@ -681,16 +710,11 @@ try {
             while (obj.parent && obj.parent !== scene) obj = obj.parent;
             if (!obj.userData.type) return;
 
-            // Hammer Upgrade logic
+            // Hammer Upgrade logic MOVED TO 'H' KEY
+            // Legacy code removed to prevent conflicts
             if (state.belt[0] === 'hammer' && obj.userData.tier) {
-                if (obj.userData.tier === 1 && getItemCount('stone') >= 300) {
-                    obj.material.color.setHex(0xb0bec5); obj.userData.tier = 2; obj.userData.type = 'wall_stone';
-                    const stone = state.inventory.find(i => i.id === 'stone'); if (stone) stone.count -= 300;
-                } else if (obj.userData.tier === 2 && getItemCount('frag') >= 200) {
-                    obj.material.color.setHex(0x90a4ae); obj.userData.tier = 3; obj.userData.type = 'wall_metal';
-                    const frag = state.inventory.find(i => i.id === 'frag'); if (frag) frag.count -= 200;
-                }
-                updateHUD(); return;
+                // Do nothing on click, use H to upgrade
+                return;
             }
 
             obj.userData.health -= 1;

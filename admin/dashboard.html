@@ -4,195 +4,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <!-- Font Awesome -->
+    <title>Admin Command Center | Rashid</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f172a;
-            --sidebar: #1e293b;
-            --accent: #38bdf8;
-            --text: #f1f5f9;
-            --text-muted: #94a3b8;
+            --bg: #09090b;
+            --sidebar: #18181b;
+            --card: #27272a;
+            --primary: #8b5cf6;
+            /* Violet */
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
         body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
             margin: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: var(--bg);
-            color: var(--text);
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
         /* Sidebar */
-        .sidebar {
-            width: 250px;
+        aside {
+            width: 280px;
             background: var(--sidebar);
             display: flex;
             flex-direction: column;
-            padding: 20px;
-            border-right: 1px solid #334155;
+            border-right: 1px solid #3f3f46;
+            transition: 0.3s;
         }
 
         .brand {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--accent);
-            margin-bottom: 40px;
+            padding: 30px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .menu {
-            list-style: none;
-            padding: 0;
+        .nav-links {
+            flex: 1;
+            padding: 0 15px;
         }
 
-        .menu li {
-            margin-bottom: 10px;
-        }
-
-        .menu a {
-            text-decoration: none;
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
             color: var(--text-muted);
-            padding: 10px 15px;
-            display: block;
-            border-radius: 5px;
-            transition: 0.3s;
             cursor: pointer;
+            border-radius: 12px;
+            transition: 0.2s;
+            margin-bottom: 5px;
+            font-weight: 500;
         }
 
-        .menu a:hover,
-        .menu a.active {
-            background: rgba(56, 189, 248, 0.1);
-            color: var(--accent);
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
         }
 
-        .menu a i {
-            margin-right: 10px;
+        .nav-item i {
             width: 20px;
+            text-align: center;
         }
 
-        .logout {
-            margin-top: auto;
-            color: #ef4444 !important;
+        .user-panel {
+            padding: 20px;
+            border-top: 1px solid #3f3f46;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.2);
         }
 
         /* Main Content */
-        .main {
+        main {
             flex: 1;
             padding: 40px;
             overflow-y: auto;
+            position: relative;
         }
 
-        .header {
+        /* Header */
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
         }
 
-        h2 {
+        h1 {
             margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
         }
 
-        /* Cards */
+        .date-display {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
             margin-bottom: 40px;
         }
 
         .stat-card {
-            background: var(--sidebar);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid #334155;
+            background: var(--card);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #3f3f46;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .stat-card h3 {
-            margin: 0 0 10px;
+        .stat-card .label {
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 0.9rem;
         }
 
         .stat-card .value {
-            font-size: 28px;
-            font-weight: bold;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .stat-card .icon {
+            align-self: flex-end;
+            margin-top: -40px;
+            font-size: 2rem;
+            opacity: 0.2;
         }
 
         /* Sections */
-        .content-section {
+        .dashboard-section {
             display: none;
+            animation: fadeIn 0.4s ease;
         }
 
-        .content-section.active {
+        .dashboard-section.active {
             display: block;
-            animation: fadeIn 0.3s;
-        }
-
-        /* Tables & Lists */
-        .message-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .message-card {
-            background: var(--sidebar);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #334155;
-        }
-
-        .msg-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-
-        .msg-sender {
-            font-weight: bold;
-            color: var(--accent);
-        }
-
-        .msg-time {
-            font-size: 12px;
-            color: var(--text-muted);
-        }
-
-        /* Form Controls */
-        label {
-            display: block;
-            margin: 15px 0 5px;
-            color: var(--text-muted);
-        }
-
-        input,
-        textarea,
-        select {
-            width: 100%;
-            padding: 10px;
-            background: var(--bg);
-            border: 1px solid #334155;
-            color: white;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-
-        .btn:hover {
-            background: #0ea5e9;
         }
 
         @keyframes fadeIn {
@@ -206,196 +189,345 @@
                 transform: translateY(0);
             }
         }
+
+        /* Project Management */
+        .controls-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .control-row {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #3f3f46;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3f3f46;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-save:hover {
+            background: #7c3aed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            aside {
+                position: fixed;
+                left: -280px;
+                height: 100%;
+                z-index: 100;
+            }
+
+            aside.open {
+                left: 0;
+            }
+
+            main {
+                padding: 20px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <aside class="sidebar">
-        <div class="brand">AdminPanel</div>
-        <ul class="menu">
-            <li><a onclick="showSection('dashboard')" class="active" id="nav-dashboard"><i class="fas fa-home"></i>
-                    Home</a></li>
-            <li><a onclick="showSection('messages')" id="nav-messages"><i class="fas fa-envelope"></i> Messages <span
-                        id="msg-badge"
-                        style="background:#ef4444; color:white; padding:2px 6px; border-radius:10px; font-size:10px; display:none;">New</span></a>
-            </li>
-            <li><a onclick="showSection('content')" id="nav-content"><i class="fas fa-pen"></i> Edit Content</a></li>
-            <li><a onclick="showSection('settings')" id="nav-settings"><i class="fas fa-cog"></i> Settings</a></li>
-            <li><a href="login.html" onclick="logout()" class="logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
-            </li>
-        </ul>
+
+    <aside id="sidebar">
+        <div class="brand">
+            <i class="fas fa-layer-group"></i> Rashid Admin
+        </div>
+        <nav class="nav-links">
+            <div class="nav-item active" onclick="showSection('overview', this)">
+                <i class="fas fa-chart-pie"></i> Overview
+            </div>
+            <div class="nav-item" onclick="showSection('projects', this)">
+                <i class="fas fa-cube"></i> Project Manager
+            </div>
+            <div class="nav-item" onclick="showSection('content', this)">
+                <i class="fas fa-pen-nib"></i> Content Editor
+            </div>
+            <div class="nav-item" onclick="showSection('settings', this)">
+                <i class="fas fa-cog"></i> System Settings
+            </div>
+        </nav>
+        <div class="user-panel">
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+            <a href="../index.html"
+                style="display:block; text-align:center; margin-top:15px; color:#fff; text-decoration:none; font-size:0.8rem; opacity:0.5;">
+                <i class="fas fa-external-link-alt"></i> Go to Live Site
+            </a>
+        </div>
     </aside>
 
-    <main class="main">
-        <!-- Dashboard Home -->
-        <section id="dashboard" class="content-section active">
-            <div class="header">
-                <h2>Overview</h2>
-                <span>Welcome, Admin</span>
-            </div>
+    <main>
+        <header>
+            <h1 id="page-title">Dashboard Overview</h1>
+            <div class="date-display" id="date-display">...</div>
+        </header>
+
+        <!-- Overview Section -->
+        <div id="overview" class="dashboard-section active">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <h3>Total Views</h3>
-                    <div class="value">1,234</div>
+                    <span class="label">Total Visitors</span>
+                    <span class="value" id="stat-visitors">0</span>
+                    <i class="fas fa-users icon"></i>
                 </div>
                 <div class="stat-card">
-                    <h3>Messages</h3>
-                    <div class="value" id="total-msgs">0</div>
+                    <span class="label">Projects Active</span>
+                    <span class="value" id="stat-projects">4</span>
+                    <i class="fas fa-project-diagram icon"></i>
                 </div>
                 <div class="stat-card">
-                    <h3>Projects</h3>
-                    <div class="value">3</div>
+                    <span class="label">System Status</span>
+                    <span class="value" style="color:var(--success); font-size:1.5rem;">Operational</span>
+                    <i class="fas fa-check-circle icon"></i>
                 </div>
             </div>
-        </section>
+        </div>
 
-        <!-- Messages Section -->
-        <section id="messages" class="content-section">
-            <div class="header">
-                <h2>Messages</h2>
-                <button class="btn" style="background:#ef4444; margin:0;" onclick="clearMessages()">Clear All</button>
+        <!-- Project Controls Section -->
+        <div id="projects" class="dashboard-section">
+            <div class="controls-grid">
+                <!-- Project 1: Farm Game -->
+                <div class="control-row">
+                    <div>
+                        <h3>Farm Game 3D</h3>
+                        <p style="color:var(--text-muted); font-size:0.8rem;">Main Project</p>
+                    </div>
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <span style="font-size:0.8rem;">Visibility:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked
+                                onchange="updateProjectState('farm', 'visible', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Project 2: Quran -->
+                <div class="control-row">
+                    <div>
+                        <h3>Quran App</h3>
+                        <p style="color:var(--text-muted); font-size:0.8rem;">Religious / Tools</p>
+                    </div>
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <span style="font-size:0.8rem;">Visibility:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked
+                                onchange="updateProjectState('quran', 'visible', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Project 3: Calculator -->
+                <div class="control-row">
+                    <div>
+                        <h3>Calculator Vault</h3>
+                        <p style="color:var(--text-muted); font-size:0.8rem;">Utility</p>
+                    </div>
+                    <div style="display:flex; gap:20px; align-items:center;">
+                        <span style="font-size:0.8rem;">Visibility:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" checked
+                                onchange="updateProjectState('calc', 'visible', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
             </div>
-            <div id="messages-container" class="message-list">
-                <p style="color:var(--text-muted)">No messages yet.</p>
-            </div>
-        </section>
+        </div>
 
-        <!-- Edit Content Section -->
-        <section id="content" class="content-section">
-            <div class="header">
-                <h2>Edit Website Content</h2>
+        <!-- Content Editor Section -->
+        <div id="content" class="dashboard-section">
+            <div class="form-group">
+                <label>Main Hero Title</label>
+                <input type="text" id="hero-title-input" placeholder="e.g. Creative Developer & Designer">
             </div>
 
-            <div class="stat-card">
-                <h3>Personal Info</h3>
-                <label>Intro Title</label>
-                <input type="text" id="edit-title" placeholder="Junior Software Developer">
-
-                <label>About Description</label>
-                <textarea id="edit-about" rows="4"></textarea>
-
-                <button class="btn" onclick="saveContent()">Save Changes</button>
+            <div class="form-group">
+                <label>About Me Text</label>
+                <textarea id="about-text-input" rows="6"
+                    placeholder="Write something amazing about yourself..."></textarea>
             </div>
-        </section>
+
+            <button class="btn-save" onclick="saveContent()">Publish Changes</button>
+            <p id="save-msg" style="color:var(--success); margin-top:10px; display:none;">Changes saved successfully!
+            </p>
+        </div>
 
         <!-- Settings -->
-        <section id="settings" class="content-section">
-            <div class="header">
-                <h2>Site Settings</h2>
+        <div id="settings" class="dashboard-section">
+            <div class="control-row">
+                <div>
+                    <h3>Maintenance Mode</h3>
+                    <p style="color:var(--text-muted);">Disables the entire site for visitors.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="maintenance-toggle" onchange="toggleMaintenance(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <div class="stat-card">
-                <h3>General Settings</h3>
-                <label>Contact Email (Visible on Site)</label>
-                <input type="email" id="settings-email" placeholder="zwnt45602@gmail.com">
 
-                <label>Location</label>
-                <input type="text" id="settings-location" placeholder="Germany">
-
-                <label>Admin Password Update</label>
-                <input type="password" id="settings-pass" placeholder="Enter new password">
-                <p style="font-size: 12px; color: var(--text-muted); margin-top: 5px;">* This will update the local
-                    login check.</p>
-
-                <button class="btn" onclick="saveSettings()">Apply Settings</button>
+            <div
+                style="margin-top:20px; padding:20px; background:var(--card); border-radius:12px; border:1px solid #ef4444;">
+                <h3 style="color:#ef4444; margin-top:0;">Danger Zone</h3>
+                <button onclick="localStorage.clear(); alert('Storage Cleared!'); location.reload();"
+                    style="background:#ef4444; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Reset
+                    All Data</button>
             </div>
-        </section>
+        </div>
+
     </main>
 
     <script>
-        // Check Auth
-        if (!localStorage.getItem('isAdmin')) {
+        // INIT
+        document.addEventListener('DOMContentLoaded', () => {
+            // Security Check
+            if (localStorage.getItem('isAdmin') !== 'true') {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Set Date
+            document.getElementById('date-display').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+            // Load Visitor Count
+            document.getElementById('stat-visitors').innerText = localStorage.getItem('visitorCount') || '0';
+
+            // Load Content Data
+            const content = JSON.parse(localStorage.getItem('siteContent') || '{}');
+            if (content.title) document.getElementById('hero-title-input').value = content.title;
+            if (content.about) document.getElementById('about-text-input').value = content.about;
+        });
+
+        // Navigation
+        function showSection(id, btn) {
+            document.querySelectorAll('.dashboard-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            btn.classList.add('active');
+
+            // Update Header
+            const titles = {
+                'overview': 'Dashboard Overview',
+                'projects': 'Project Management',
+                'content': 'Content Editor',
+                'settings': 'System Settings'
+            };
+            document.getElementById('page-title').innerText = titles[id];
+        }
+
+        // Logic
+        function logout() {
+            localStorage.removeItem('isAdmin');
             window.location.href = 'login.html';
         }
 
-        function logout() {
-            localStorage.removeItem('isAdmin');
-        }
-
-        // Navigation simulation
-        function showSection(id) {
-            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-
-            document.querySelectorAll('.menu a').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-' + id).classList.add('active');
-        }
-
-        // Load Messages Simulation
-        function loadMessages() {
-            const msgs = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-            const container = document.getElementById('messages-container');
-            document.getElementById('total-msgs').innerText = msgs.length;
-
-            if (msgs.length > 0) {
-                container.innerHTML = '';
-                msgs.reverse().forEach(msg => {
-                    const card = document.createElement('div');
-                    card.className = 'message-card';
-                    card.innerHTML = `
-                        <div class="msg-header">
-                            <span class="msg-sender">${msg.name || 'Anonymous'} <span style="font-weight:normal; font-size:0.9rem;">(${msg.email})</span></span>
-                            <span class="msg-time">${msg.date}</span>
-                        </div>
-                        <p>${msg.message}</p>
-                    `;
-                    container.appendChild(card);
-                });
-                document.getElementById('msg-badge').style.display = 'inline-block';
-            } else {
-                container.innerHTML = '<p style="color:var(--text-muted)">No messages yet.</p>';
-            }
-        }
-
-        function clearMessages() {
-            if (confirm('Delete all messages?')) {
-                localStorage.removeItem('contactMessages');
-                loadMessages();
-            }
-        }
-
-        // Content Management Simulation
-        function loadContent() {
-            const savedData = JSON.parse(localStorage.getItem('siteContent') || '{}');
-            if (savedData.title) document.getElementById('edit-title').value = savedData.title;
-            if (savedData.about) document.getElementById('edit-about').value = savedData.about;
+        function updateProjectState(pid, key, value) {
+            const states = JSON.parse(localStorage.getItem('projectStates') || '{}');
+            if (!states[pid]) states[pid] = {};
+            states[pid][key] = value;
+            localStorage.setItem('projectStates', JSON.stringify(states));
         }
 
         function saveContent() {
-            const data = {
-                title: document.getElementById('edit-title').value,
-                about: document.getElementById('edit-about').value
-            };
-            localStorage.setItem('siteContent', JSON.stringify(data));
-            alert('Changes Saved! Go check the main website.');
+            const title = document.getElementById('hero-title-input').value;
+            const about = document.getElementById('about-text-input').value;
+
+            localStorage.setItem('siteContent', JSON.stringify({ title, about }));
+
+            const msg = document.getElementById('save-msg');
+            msg.style.display = 'block';
+            setTimeout(() => msg.style.display = 'none', 3000);
         }
 
-        function loadSettings() {
-            const settings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-            if (settings.email) document.getElementById('settings-email').value = settings.email;
-            if (settings.location) document.getElementById('settings-location').value = settings.location;
+        function toggleMaintenance(active) {
+            localStorage.setItem('maintenanceMode', active);
         }
-
-        function saveSettings() {
-            const email = document.getElementById('settings-email').value;
-            const location = document.getElementById('settings-location').value;
-            const newPass = document.getElementById('settings-pass').value;
-
-            const settings = { email, location };
-            localStorage.setItem('siteSettings', JSON.stringify(settings));
-
-            if (newPass) {
-                localStorage.setItem('adminPassword', newPass);
-                alert('Settings and Password updated! Next login will require the new password.');
-            } else {
-                alert('Settings updated successfully!');
-            }
-        }
-
-        // Init
-        loadMessages();
-        loadContent();
-        loadSettings();
-
     </script>
 </body>
 

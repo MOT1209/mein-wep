@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Center | Rashid</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            padding-top: 80px;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--backdrop-blur));
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .course-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .course-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-family: var(--font-secondary);
+        }
+
+        .course-desc {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .course-progress {
+            background: var(--bg-alt);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Nav -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Rashid<span class="accent-dot">.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="#" class="active" style="color:var(--accent)">Learning Center</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container section">
+        <div class="section-title-wrapper" style="text-align: center; margin-bottom: 50px;">
+            <h1 style="font-size: 3rem; margin-bottom: 20px;">Learning Center</h1>
+            <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+                Welcome to my personal knowledge hub. Here I share tutorials, resources, and guides on the technologies
+                I work with.
+            </p>
+        </div>
+
+        <div class="course-grid">
+            <!-- Course 1 -->
+            <div class="course-card">
+                <i class="fab fa-python course-icon"></i>
+                <h2 class="course-title">Python Basics</h2>
+                <div class="course-progress">
+                    <div class="progress-bar" style="width: 80%"></div>
+                </div>
+                <p class="course-desc">
+                    Master the fundamentals of Python programming, from variables and loops to object-oriented
+                    programming. Perfect for beginners starting their coding journey.
+                </p>
+                <div class="tags">
+                    <span>Syntax</span>
+                    <span>OOP</span>
+                    <span>Scripting</span>
+                </div>
+                <button class="btn btn-primary" onclick="alert('Coming Soon!')">Start Reading</button>
+            </div>
+
+            <!-- Course 2 -->
+            <div class="course-card">
+                <i class="fab fa-html5 course-icon"></i>
+                <h2 class="course-title">Modern Web Development</h2>
+                <div class="course-progress">
+                    <div class="progress-bar" style="width: 65%"></div>
+                </div>
+                <p class="course-desc">
+                    Learn how to build responsive websites using HTML5, CSS3, and modern JavaScript. Includes guides on
+                    Flexbox, Grid, and DOM manipulation.
+                </p>
+                <div class="tags">
+                    <span>HTML/CSS</span>
+                    <span>Frontend</span>
+                    <span>Responsive</span>
+                </div>
+                <button class="btn btn-primary" onclick="alert('Coming Soon!')">Start Reading</button>
+            </div>
+
+            <!-- Course 3 -->
+            <div class="course-card">
+                <i class="fas fa-gamepad course-icon"></i>
+                <h2 class="course-title">Game Dev with Three.js</h2>
+                <div class="course-progress">
+                    <div class="progress-bar" style="width: 40%"></div>
+                </div>
+                <p class="course-desc">
+                    Dive into 3D web graphics. Learn how to create immersive scenes, handle lighting, and implement
+                    physics for browser-based games.
+                </p>
+                <div class="tags">
+                    <span>WebGL</span>
+                    <span>3D Math</span>
+                    <span>Physics</span>
+                </div>
+                <button class="btn btn-primary" onclick="alert('Coming Soon!')">Start Reading</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Rashid. Learning Center Module.</p>
+        </div>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
