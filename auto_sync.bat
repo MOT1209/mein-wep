@@ -23,3 +23,4 @@ if not "!CHANGES!"=="" (
 REM Wait for 10 seconds before next check
 timeout /t 10 /nobreak > nul
 goto loop
+ 

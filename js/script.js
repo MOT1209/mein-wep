@@ -166,6 +166,10 @@
         // 5. DYNAMIC CONTENT & VISITORS (SUPABASE)
         // ============================================================
 
+        // ============================================================
+        // 5. DYNAMIC CONTENT & VISITORS (SUPABASE)
+        // ============================================================
+
         async function loadSiteData() {
             if (typeof supabaseClient === 'undefined') {
                 console.log("Supabase client missing.");
@@ -195,7 +199,12 @@
                     .select('*')
                     .eq('status', 'Public');
 
-                if (projects) console.log(`Loaded ${projects.length} projects from DB.`);
+                if (projects && projects.length > 0) {
+                    console.log(`Loaded ${projects.length} projects from DB.`);
+                    renderProjects(projects);
+                } else {
+                    console.log("No public projects found.");
+                }
 
             } else {
                 console.error("❌ Connection Failed:", error.message);
@@ -204,6 +213,68 @@
                     adminLink.title = "Check Console for Errors";
                 }
             }
+        }
+
+        function renderProjects(projects) {
+            const gamingGrid = document.getElementById('gaming-grid');
+            const appsGrid = document.getElementById('apps-grid');
+
+            if (gamingGrid) gamingGrid.innerHTML = '';
+            if (appsGrid) appsGrid.innerHTML = '';
+
+            projects.forEach(project => {
+                const cardHTML = createProjectCard(project);
+                if (project.category === 'game') {
+                    if (gamingGrid) gamingGrid.insertAdjacentHTML('beforeend', cardHTML);
+                } else {
+                    if (appsGrid) appsGrid.insertAdjacentHTML('beforeend', cardHTML);
+                }
+            });
+
+            // Re-observe for animations
+            document.querySelectorAll('.project-card.reveal').forEach(el => {
+                if (typeof observer !== 'undefined') observer.observe(el);
+            });
+        }
+
+        function createProjectCard(p) {
+            // Parse tags
+            let tagsArray = [];
+            if (typeof p.tags === 'string') {
+                tagsArray = p.tags.split(',').map(t => t.trim());
+            } else if (Array.isArray(p.tags)) {
+                tagsArray = p.tags;
+            }
+
+            const tagsHTML = tagsArray.map(tag => `<span>${tag}</span>`).join('');
+
+            // Icon logic: if image_url starts with 'fa', treat as icon class, else img
+            let iconHTML = '';
+            if (p.image_url && p.image_url.startsWith('fa')) {
+                iconHTML = `<i class="${p.image_url}"></i>`;
+            } else if (p.image_url) {
+                iconHTML = `<img src="${p.image_url}" alt="${p.title}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+            } else {
+                iconHTML = `<i class="fas fa-cube"></i>`; // Fallback
+            }
+
+            return `
+            <article class="project-card reveal" data-category="${p.category}">
+                <div class="project-content">
+                    <div class="project-icon" ${p.image_url && !p.image_url.startsWith('fa') ? 'style="padding:0; overflow:hidden;"' : ''}>
+                        ${iconHTML}
+                    </div>
+                    <h3>${p.title}</h3>
+                    <p>${p.description}</p>
+                    <div class="tags">
+                        ${tagsHTML}
+                    </div>
+                    <a href="${p.project_link}" class="btn-link ${p.category === 'game' ? 'game-btn' : 'app-btn'}">
+                        <i class="fas fa-external-link-alt"></i> View Project
+                    </a>
+                </div>
+            </article>
+            `;
         }
 
         loadSiteData();

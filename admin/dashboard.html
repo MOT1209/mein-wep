@@ -369,54 +369,16 @@
 
         <!-- Project Controls Section -->
         <div id="projects" class="dashboard-section">
-            <div class="controls-grid">
-                <!-- Project 1: Farm Game -->
-                <div class="control-row">
-                    <div>
-                        <h3>Farm Game 3D</h3>
-                        <p style="color:var(--text-muted); font-size:0.8rem;">Main Project</p>
-                    </div>
-                    <div style="display:flex; gap:20px; align-items:center;">
-                        <span style="font-size:0.8rem;">Visibility:</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked
-                                onchange="updateProjectState('farm', 'visible', this.checked)">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Managed Projects</h2>
+                <button class="btn-save" onclick="openProjectModal()">
+                    <i class="fas fa-plus"></i> Add Project
+                </button>
+            </div>
 
-                <!-- Project 2: Quran -->
-                <div class="control-row">
-                    <div>
-                        <h3>Quran App</h3>
-                        <p style="color:var(--text-muted); font-size:0.8rem;">Religious / Tools</p>
-                    </div>
-                    <div style="display:flex; gap:20px; align-items:center;">
-                        <span style="font-size:0.8rem;">Visibility:</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked
-                                onchange="updateProjectState('quran', 'visible', this.checked)">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Project 3: Calculator -->
-                <div class="control-row">
-                    <div>
-                        <h3>Calculator Vault</h3>
-                        <p style="color:var(--text-muted); font-size:0.8rem;">Utility</p>
-                    </div>
-                    <div style="display:flex; gap:20px; align-items:center;">
-                        <span style="font-size:0.8rem;">Visibility:</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" checked
-                                onchange="updateProjectState('calc', 'visible', this.checked)">
-                            <span class="slider"></span>
-                        </label>
-                    </div>
-                </div>
+            <div class="controls-grid" id="projects-list-container">
+                <!-- Projects will be injected here via JS -->
+                <p style="text-align:center; color:var(--text-muted);">Loading projects...</p>
             </div>
         </div>
 
@@ -461,6 +423,53 @@
         </div>
 
     </main>
+
+    <!-- Project Modal -->
+    <div id="project-modal" class="modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div
+            style="background:var(--card); padding:30px; border-radius:12px; width:90%; max-width:500px; border:1px solid #3f3f46;">
+            <h2 id="modal-title" style="margin-top:0;">Add New Project</h2>
+            <form id="project-form">
+                <input type="hidden" id="p-id">
+                <div class="form-group">
+                    <label>Project Title</label>
+                    <input type="text" id="p-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="p-desc" rows="3" style="width:100%; background:#18181b; color:white; padding:10px;"
+                        required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="p-category"
+                        style="width:100%; padding:10px; background:#18181b; color:white; border:1px solid #3f3f46; border-radius:8px;">
+                        <option value="game">Game (3D Universe)</option>
+                        <option value="app">App (Pro Tools)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Image URL (or FontAwesome Icon Class)</label>
+                    <input type="text" id="p-image" placeholder="e.g. images/game1.jpg OR fas fa-gamepad">
+                </div>
+                <div class="form-group">
+                    <label>Project Link</label>
+                    <input type="text" id="p-link" placeholder="Folder path or URL">
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="p-tags" placeholder="e.g. 3D, WebGL, React">
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" onclick="closeProjectModal()"
+                        style="background:transparent; color:white; border:1px solid #ccc; padding:10px 20px; border-radius:6px; cursor:pointer;">Cancel</button>
+                    <button type="submit" class="btn-save">Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // INIT

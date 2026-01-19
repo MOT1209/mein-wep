@@ -25,6 +25,10 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css?v=2.2">
     <link rel="stylesheet" href="css/admin.css">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090b">
 </head>
 
 <body class="dark-mode">
@@ -58,6 +62,21 @@
             </div>
         </div>
     </nav>
+    <!-- ... (skipping unchanged content for brevity in prompt instruction, but tool handles precise context) ... -->
+    <!-- Custom Script -->
+    <script src="js/script.js"></script>
+    <script src="js/admin.js"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker registered!', reg))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
 
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu">
@@ -171,47 +190,8 @@
                     <p>Immersive gaming experiences built with cutting-edge web technologies</p>
                 </div>
 
-                <div class="projects-grid">
-                    <!-- Game 1: Farm Game -->
-                    <article class="project-card reveal" data-category="game">
-                        <div class="project-content">
-                            <div class="project-icon">
-                                <i class="fas fa-tractor"></i>
-                            </div>
-                            <h3>3D Farm Game</h3>
-                            <p>A comprehensive 3D farming simulation with full farm management features, planting, and
-                                harvesting mechanics.</p>
-                            <div class="tags">
-                                <span class="tag-personal">Personal Project</span>
-                                <span>3D Game Dev</span>
-                                <span>Simulation</span>
-                            </div>
-                            <a href="farm-game/index.html" class="btn-link game-btn">
-                                <i class="fas fa-play"></i> Play Game
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- Game 2: Rust 3D -->
-                    <article class="project-card reveal" data-category="game">
-                        <div class="project-content">
-                            <div class="project-icon rust-icon">
-                                <i class="fas fa-mountain"></i>
-                            </div>
-                            <h3 class="rust-title">Rust Survival 3D</h3>
-                            <p>A hardcore 3D survival game inspired by Rust. Harvest wood/stone, mine iron, and build
-                                your base in a procedurally generated world.</p>
-                            <div class="tags">
-                                <span class="tag-personal">Personal Project</span>
-                                <span>Three.js</span>
-                                <span>3D WebGL</span>
-                                <span>Game Systems</span>
-                            </div>
-                            <a href="rust-game/index.html" class="btn-link game-btn rust-btn">
-                                <i class="fas fa-hammer"></i> Play Rust 3D
-                            </a>
-                        </div>
-                    </article>
+                <div class="projects-grid" id="gaming-grid">
+                    <!-- Dynamic Content Injected Here -->
                 </div>
             </div>
 
@@ -222,89 +202,8 @@
                     <p>Professional applications designed for productivity and utility</p>
                 </div>
 
-                <div class="projects-grid">
-                    <!-- App 1: Quran App -->
-                    <article class="project-card reveal" data-category="app">
-                        <div class="project-content">
-                            <div class="project-icon">
-                                <i class="fas fa-book-quran"></i>
-                            </div>
-                            <h3>Quran App <span class="source-badge"><i class="fas fa-code"></i> Source Code</span></h3>
-                            <p>Beautiful Quran application with audio recitation, verse highlighting, search, and
-                                bookmarks functionality.</p>
-                            <div class="tags">
-                                <span class="tag-opensource">Open Source</span>
-                                <span>API Integration</span>
-                                <span>Audio Player</span>
-                            </div>
-                            <a href="quran-app/index.html" class="btn-link app-btn">
-                                <i class="fas fa-external-link-alt"></i> Open App
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- App 2: Calculator Vault -->
-                    <article class="project-card reveal" data-category="app">
-                        <div class="project-content">
-                            <div class="project-icon">
-                                <i class="fas fa-calculator"></i>
-                            </div>
-                            <h3>Calculator Vault <span class="source-badge"><i class="fas fa-code"></i> Source
-                                    Code</span></h3>
-                            <p>A sleek calculator that doubles as a secret vault. Enter the magic code to reveal hidden
-                                content.</p>
-                            <div class="tags">
-                                <span class="tag-opensource">Open Source</span>
-                                <span>Security</span>
-                                <span>JavaScript</span>
-                            </div>
-                            <a href="calculator-vault/index.html" class="btn-link app-btn">
-                                <i class="fas fa-external-link-alt"></i> Open App
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- App 3: Quiz App -->
-                    <article class="project-card reveal" data-category="app">
-                        <div class="project-content">
-                            <div class="project-icon">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                            <h3>تطبيق اسألني (Quiz App) <span class="source-badge"><i class="fas fa-code"></i> Source
-                                    Code</span></h3>
-                            <p>اختبر معلوماتك البرمجية مع هذا التطبيق التفاعلي الذي يحتوي على مؤقت زمني ونظام احتساب
-                                نقاط ذكي.</p>
-                            <div class="tags">
-                                <span class="tag-opensource">Open Source</span>
-                                <span>JavaScript</span>
-                                <span>State Management</span>
-                                <span>Educational</span>
-                            </div>
-                            <a href="quiz-app/index.html" class="btn-link app-btn">
-                                <i class="fas fa-play"></i> ابدأ الاختبار
-                            </a>
-                        </div>
-                    </article>
-
-                    <!-- App 4: Personal Portfolio -->
-                    <article class="project-card reveal" data-category="app">
-                        <div class="project-content">
-                            <div class="project-icon">
-                                <i class="fas fa-laptop-code"></i>
-                            </div>
-                            <h3>Personal Portfolio</h3>
-                            <p>Responsive single-page website built with HTML, CSS, and vanilla JavaScript showcasing my
-                                work and skills.</p>
-                            <div class="tags">
-                                <span>Web Dev</span>
-                                <span>Responsive</span>
-                                <span>Modern Design</span>
-                            </div>
-                            <a href="#hero" class="btn-link app-btn">
-                                <i class="fas fa-arrow-up"></i> View Project
-                            </a>
-                        </div>
-                    </article>
+                <div class="projects-grid" id="apps-grid">
+                    <!-- Dynamic Content Injected Here -->
                 </div>
             </div>
 
