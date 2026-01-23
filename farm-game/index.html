@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -255,26 +255,71 @@
     <div id="interaction-msg">PRESS 'E' TO OPEN SHOP</div>
 
     <!-- Minecraft Hotbar -->
-    <div id="hotbar-container">
-        <!-- Slot 1: Plow -->
-        <div class="slot active" id="slot-0"><span class="slot-key">P</span><span class="slot-icon">🚜</span></div>
-        <!-- Slot 2: Water -->
-        <div class="slot" id="slot-1"><span class="slot-key">L</span><span class="slot-icon">💧</span></div>
-        <!-- Slot 3: Wheat Seed -->
-        <div class="slot" id="slot-2">
-            <span class="slot-key">K</span><span class="slot-icon">🌾</span>
-            <span class="slot-count" id="seed-wheat-count">0</span>
+    <!-- Mobile Controls Overlay -->
+    <div id="mobile-controls"
+        style="display:none; position:fixed; bottom:0; left:0; width:100%; height:100%; pointer-events:none; z-index:2000;">
+        <div id="joystick-zone"
+            style="position:absolute; bottom:40px; left:40px; width:150px; height:150px; pointer-events:all; background:rgba(255,255,255,0.1); border-radius:50%; border:2px solid rgba(255,255,255,0.2);">
+            <div id="joystick-stick"
+                style="position:absolute; top:50%; left:50%; width:60px; height:60px; background:#e67e22; border-radius:50%; transform:translate(-50%,-50%); border:3px solid #d35400;">
+            </div>
         </div>
-        <!-- Slot 4: Tomato Seed -->
-        <div class="slot" id="slot-3">
-            <span class="slot-key">J</span><span class="slot-icon">🍅</span>
-            <span class="slot-count" id="seed-tomato-count">0</span>
+        <div id="action-buttons"
+            style="position:absolute; bottom:40px; right:40px; display:flex; flex-direction:column; gap:15px; pointer-events:all;">
+            <button id="btn-farm" class="mobile-btn"
+                style="width:70px; height:70px; border-radius:50%; background:rgba(230,126,34,0.8); border:3px solid #d35400; color:white; font-size:30px; cursor:pointer;">🚜</button>
+            <button id="btn-interact" class="mobile-btn"
+                style="width:70px; height:70px; border-radius:50%; background:rgba(255,215,0,0.8); border:3px solid #daa520; color:white; font-size:30px; cursor:pointer;">👋</button>
         </div>
-        <!-- Slot 5: Harvest -->
-        <div class="slot" id="slot-4"><span class="slot-key">H</span><span class="slot-icon">👋</span></div>
     </div>
 
     <script>
+        // ... (existing code remains above)
+
+        // Mobile Controls Support
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+        if (isMobile) {
+            document.getElementById('mobile-controls').style.display = 'block';
+
+            // Joystick
+            const joystickZone = document.getElementById('joystick-zone');
+            const stick = document.getElementById('joystick-stick');
+            let stickActive = false;
+            let startX, startY;
+
+            joystickZone.addEventListener('touchstart', (e) => {
+                stickActive = true;
+                const touch = e.touches[0];
+                startX = touch.clientX; startY = touch.clientY;
+            });
+
+            joystickZone.addEventListener('touchmove', (e) => {
+                if (!stickActive) return;
+                const touch = e.touches[0];
+                const dx = touch.clientX - startX;
+                const dy = touch.clientY - startY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                const max = 50;
+                const angle = Math.atan2(dy, dx);
+                const moveX = Math.cos(angle) * Math.min(dist, max);
+                const moveY = Math.sin(angle) * Math.min(dist, max);
+                stick.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+
+                keys.w = moveY < -10; keys.s = moveY > 10;
+                keys.a = moveX < -10; keys.d = moveX > 10;
+            });
+
+            joystickZone.addEventListener('touchend', () => {
+                stickActive = false;
+                stick.style.transform = `translate(-50%, -50%)`;
+                keys.w = keys.s = keys.a = keys.d = false;
+            });
+
+            // Buttons
+            document.getElementById('btn-farm').ontouchstart = performAction;
+            document.getElementById('btn-interact').ontouchstart = checkInteractions;
+        }
+
         // --- GAME STATE ---
         const gameState = {
             menuOpen: true, // Start with menu open

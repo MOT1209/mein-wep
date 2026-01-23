@@ -873,6 +873,11 @@ try {
             console.log('❌ Blueprint cancelled');
         }
         if (e.code === 'KeyH') {
+            const currentItem = state.belt[state.selectedBeltSlot || 0];
+            if (currentItem !== 'hammer') {
+                showNotification("Requires Hammer");
+                return;
+            }
             if (state.building.lookingAtStructure) {
                 if (state.building.lookingAtStructure.userData.health < state.building.lookingAtStructure.userData.maxHealth) {
                     repairStructure(state.building.lookingAtStructure);
@@ -915,6 +920,71 @@ try {
         }
         if (e.button === 2) { state.buildMode = !state.buildMode; const hint = document.getElementById('build-mode-hint'); if (hint) hint.style.display = state.buildMode ? 'block' : 'none'; }
     });
+
+    // ==================== MOBILE CONTROLS LOGIC ====================
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
+    if (isMobile) {
+        document.getElementById('mobile-controls').style.display = 'block';
+
+        // Joystick Logic
+        const joystickZone = document.getElementById('joystick-zone');
+        const stick = document.getElementById('joystick-stick');
+        let stickActive = false;
+        let startX, startY;
+
+        joystickZone.addEventListener('touchstart', (e) => {
+            stickActive = true;
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        });
+
+        joystickZone.addEventListener('touchmove', (e) => {
+            if (!stickActive) return;
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+            const dx = x - startX;
+            const dy = y - startY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const maxDist = 50;
+            const angle = Math.atan2(dy, dx);
+
+            const limitedDist = Math.min(dist, maxDist);
+            const moveX = Math.cos(angle) * limitedDist;
+            const moveY = Math.sin(angle) * limitedDist;
+
+            stick.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+
+            // Map to movement
+            state.controls.forward = moveY < -10;
+            state.controls.backward = moveY > 10;
+            state.controls.left = moveX < -10;
+            state.controls.right = moveX > 10;
+        });
+
+        joystickZone.addEventListener('touchend', () => {
+            stickActive = false;
+            stick.style.transform = `translate(-50%, -50%)`;
+            state.controls.forward = false;
+            state.controls.backward = false;
+            state.controls.left = false;
+            state.controls.right = false;
+        });
+
+        // Action Buttons
+        document.getElementById('btn-jump').ontouchstart = () => {
+            if (state.controls.canJump) { velocity.y += CONFIG.JUMP_FORCE; state.controls.canJump = false; }
+        };
+
+        document.getElementById('btn-interact').ontouchstart = () => {
+            if (state.building.selectedBlueprint) placeStructure();
+            else performAction();
+        };
+
+        document.getElementById('btn-build').ontouchstart = () => {
+            state.building.blueprintOpen = !state.building.blueprintOpen;
+            document.getElementById('blueprint-selector').style.display = state.building.blueprintOpen ? 'block' : 'none';
+        };
+    }
 
     const startBtn = document.getElementById('start-button');
     if (startBtn) startBtn.onclick = () => pointerControls.lock();
@@ -1022,7 +1092,147 @@ try {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
+    // ==================== PERSISTENCE SYSTEM ====================
+    function saveGame() {
+        const saveData = {
+            version: 1.0,
+            timestamp: Date.now(),
+            player: {
+                position: { x: camera.position.x, y: camera.position.y, z: camera.position.z },
+                rotation: { y: camera.rotation.y }, // Camera rotation for yaw
+                stats: state.stats,
+                inventory: state.inventory,
+                belt: state.belt
+            },
+            time: state.time,
+            structures: builtStructures.map(s => ({
+                type: s.userData.buildType || 'structure', // Use buildType for structures
+                pos: { x: s.position.x, y: s.position.y, z: s.position.z },
+                tier: s.userData.tier,
+                health: s.userData.health,
+                maxHealth: s.userData.maxHealth,
+                isTC: s.userData.type === 'tool_cupboard'
+            }))
+        };
+
+        localStorage.setItem('rust_survival_save', JSON.stringify(saveData));
+        showNotification("Game Saved");
+        console.log("💾 Game Saved!", saveData);
+    }
+
+    function loadGame() {
+        const json = localStorage.getItem('rust_survival_save');
+        if (!json) return;
+
+        try {
+            const data = JSON.parse(json);
+            console.log("📂 Loading Game...", data);
+
+            // Restore Player
+            camera.position.set(data.player.position.x, data.player.position.y, data.player.position.z);
+            if (playerMesh) playerMesh.position.set(data.player.position.x, data.player.position.y - 1.6, data.player.position.z);
+
+            // Restore State
+            state.stats = data.player.stats;
+            state.inventory = data.player.inventory;
+            state.belt = data.player.belt || state.belt;
+            state.time = data.time;
+
+            // Restore Structures
+            data.structures.forEach(s => {
+                let layout = BUILDING_TYPES[s.type];
+                if (!layout && s.isTC) layout = BUILDING_TYPES.tool_cupboard;
+                if (!layout) layout = BUILDING_TYPES.foundation; // Fallback
+
+                const geometry = new THREE.BoxGeometry(...layout.geometry);
+                const tierData = BUILDING_TIERS[s.tier || 'twig'];
+                const material = new THREE.MeshStandardMaterial({
+                    color: tierData.color,
+                    roughness: 0.8
+                });
+
+                const structure = new THREE.Mesh(geometry, material);
+                structure.position.set(s.pos.x, s.pos.y, s.pos.z);
+                structure.castShadow = true;
+                structure.receiveShadow = true;
+
+                structure.userData = {
+                    type: s.isTC ? 'tool_cupboard' : 'structure',
+                    buildType: s.type,
+                    tier: s.tier || 'twig',
+                    health: s.health,
+                    maxHealth: s.maxHealth
+                };
+
+                // Re-register TC
+                if (s.isTC) {
+                    state.building.toolCupboards.push({ pos: { x: s.pos.x, z: s.pos.z }, radius: CONFIG.TC_RADIUS });
+                }
+
+                scene.add(structure);
+                builtStructures.push(structure);
+                collisionObjects.push(structure);
+            });
+
+            updateHUD();
+            console.log("✅ Game Loaded Successfully");
+
+        } catch (e) {
+            console.error("Failed to load save:", e);
+        }
+    }
+
+    function showNotification(msg) {
+        let note = document.getElementById('game-notification');
+        if (!note) {
+            note = document.createElement('div');
+            note.id = 'game-notification';
+            note.style.cssText = "position:fixed; top:20px; right:20px; background:rgba(0,0,0,0.7); color:#4caf50; padding:10px 20px; border-radius:5px; font-weight:bold; z-index:1000; display:none;";
+            document.body.appendChild(note);
+        }
+        note.textContent = msg;
+        note.style.display = 'block';
+        setTimeout(() => note.style.display = 'none', 2000);
+    }
+
+    function updateBuildingPrivilegeUI() {
+        let indicator = document.getElementById('privilege-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'privilege-indicator';
+            indicator.style.cssText = "position:fixed; bottom:120px; right:20px; background:rgba(46, 204, 113, 0.2); color:#2ecc71; padding:8px 15px; border-radius:4px; font-weight:bold; font-size:0.9rem; border-left: 3px solid #2ecc71; display:none; pointer-events:none;";
+            indicator.innerHTML = '<i class="fas fa-hammer"></i> BUILDING PRIVILEGE';
+            document.body.appendChild(indicator);
+        }
+
+        let hasPrivilege = false;
+        // Check if inside any TC range
+        state.building.toolCupboards.forEach(tc => {
+            const dist = Math.sqrt((camera.position.x - tc.pos.x) ** 2 + (camera.position.z - tc.pos.z) ** 2);
+            if (dist < CONFIG.TC_RADIUS) {
+                hasPrivilege = true;
+            }
+        });
+
+        if (hasPrivilege) {
+            indicator.style.display = 'block';
+        } else {
+            indicator.style.display = 'none';
+        }
+    }
+
+    // Auto-Save every 60 seconds
+    setInterval(saveGame, 60000);
+
+    // Initial Load
+    loadGame();
+
     animate();
+    // Hook into animate loop without rewriting the whole function
+    // We overwrite the existing animate function reference? No, that's messy.
+    // Better to insert the call inside existing animate loop if possible, OR just use setInterval for UI check (cheaper).
+    setInterval(updateBuildingPrivilegeUI, 500); // Check every 500ms is enough
+
     initInventoryTabs();
     setTimeout(() => {
         const loader = document.getElementById('loading-screen');

@@ -122,7 +122,10 @@ using ( true );
 -- ==============================================================================
 -- SEED DATA (Optional)
 -- ==============================================================================
-insert into public.projects (title, category, status, description, link)
+insert into public.projects (title, category, status, description, link, image_url, tags)
 values 
-('Farmer Game', 'Game', 'Public', 'A 3D farming simulation.', 'farm-game/index.html'),
-('Quran App', 'App', 'Public', 'Beautiful Quran recitation app.', 'quran-app/index.html');
+('Farmer Game', 'Game', 'Public', 'A 3D farming simulation.', 'farm-game/index.html', 'fas fa-tractor', ARRAY['3D', 'WebGL']),
+('Quran App', 'App', 'Public', 'Beautiful Quran recitation app.', 'quran-app/index.html', 'fas fa-book-open', ARRAY['Audio', 'PWA']),
+('Rust Game', 'Game', 'Public', 'Experimental Rust + WASM game.', 'rust-game/index.html', 'fab fa-rust', ARRAY['Rust', 'WASM']),
+('Calculator Vault', 'App', 'Public', 'Privacy-focused calculator vault.', 'calculator-vault/index.html', 'fas fa-user-secret', ARRAY['Security', 'Utility']),
+('Quiz App', 'App', 'Public', 'Interactive quiz application.', 'quiz-app/index.html', 'fas fa-question', ARRAY['Education', 'JS']);

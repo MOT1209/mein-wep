@@ -32,6 +32,10 @@
 </head>
 
 <body class="dark-mode">
+    <div style="background: red; color: white; text-align: center; padding: 10px; font-weight: bold; position: fixed; top: 0; left: 0; width: 100%; z-index: 99999;"
+        id="debug-banner">
+        VERSION 2.3 - IF YOU SEE THIS, UPDATE IS WORKING
+    </div>
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container nav-container">
@@ -64,8 +68,8 @@
     </nav>
     <!-- ... (skipping unchanged content for brevity in prompt instruction, but tool handles precise context) ... -->
     <!-- Custom Script -->
-    <script src="js/script.js"></script>
-    <script src="js/admin.js"></script>
+    <script src="js/script.js?v=2.2"></script>
+    <script src="js/admin.js?v=2.2"></script>
 
     <!-- PWA Service Worker Registration -->
     <script>
@@ -94,7 +98,7 @@
         <div class="container hero-content">
             <div class="hero-text">
                 <span class="greeting fade-in">willkommen</span>
-                <h1 class="fade-in delay-1">Rashid.</h1>
+                <h1 class="fade-in delay-1">Rashid. <span style="font-size: 0.8rem; opacity: 0.5;">v2.2</span></h1>
                 <h2 class="fade-in delay-2">Software and Web Developer | Software Developer | Game and Website
                     Programmer
                 </h2>
@@ -191,7 +195,7 @@
                 </div>
 
                 <div class="projects-grid" id="gaming-grid">
-                    <!-- Dynamic Content Injected Here -->
+                    <p class="loading-status">Loading 3D Universe...</p>
                 </div>
             </div>
 
@@ -203,7 +207,7 @@
                 </div>
 
                 <div class="projects-grid" id="apps-grid">
-                    <!-- Dynamic Content Injected Here -->
+                    <p class="loading-status">Loading Pro Apps...</p>
                 </div>
             </div>
 

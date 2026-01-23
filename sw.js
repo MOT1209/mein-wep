@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rashid-portfolio-v1';
+const CACHE_NAME = 'rashid-portfolio-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -13,10 +13,11 @@ const ASSETS_TO_CACHE = [
 
 // Install Event - Cache Files
 self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Force activation
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('[Service Worker] Caching all: app shell and content');
+                console.log('[Service Worker] Caching updated assets');
                 return cache.addAll(ASSETS_TO_CACHE);
             })
     );
@@ -28,19 +29,18 @@ self.addEventListener('activate', (event) => {
         caches.keys().then((keyList) => {
             return Promise.all(keyList.map((key) => {
                 if (key !== CACHE_NAME) {
+                    console.log('[Service Worker] Removing old cache', key);
                     return caches.delete(key);
                 }
             }));
-        })
+        }).then(() => self.clients.claim())
     );
 });
 
-// Fetch Event - Serve from Cache, Fallback to Network
+// Fetch Event - Network First, then Cache
 self.addEventListener('fetch', (event) => {
     event.respondWith(
-        caches.match(event.request)
-            .then((response) => {
-                return response || fetch(event.request);
-            })
+        fetch(event.request)
+            .catch(() => caches.match(event.request))
     );
 });

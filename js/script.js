@@ -133,28 +133,7 @@
             if (aboutP) aboutP.innerText = savedContent.about;
         }
 
-        // 3. Project Visibility Sync
-        const projectStates = JSON.parse(localStorage.getItem('projectStates') || '{}');
-        const projectCards = document.querySelectorAll('.project-card');
-
-        function applyVisibility(titleKeyword, keyInStorage) {
-            projectCards.forEach(card => {
-                if (card.innerText.toLowerCase().includes(titleKeyword)) {
-                    const state = projectStates[keyInStorage];
-                    if (state && state.visible === false) {
-                        card.style.display = 'none';
-                    } else {
-                        card.style.display = 'block';
-                    }
-                }
-            });
-        }
-
-        if (projectCards.length > 0) {
-            applyVisibility('farm', 'farm');
-            applyVisibility('quran', 'quran');
-            applyVisibility('calculator', 'calc');
-        }
+        // Note: Legacy project visibility logic removed as we migrated to Supabase.
 
         const savedSettings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
         const contactSpans = document.querySelectorAll('.contact-info span');
@@ -166,51 +145,127 @@
         // 5. DYNAMIC CONTENT & VISITORS (SUPABASE)
         // ============================================================
 
-        // ============================================================
-        // 5. DYNAMIC CONTENT & VISITORS (SUPABASE)
-        // ============================================================
+        const translations = {
+            ar: {
+                viewProject: "عرض المشروع",
+                sourceCode: "الكود المصدري"
+            },
+            en: {
+                viewProject: "View Project",
+                sourceCode: "Source Code"
+            }
+        };
 
         async function loadSiteData() {
+            const gamingGrid = document.getElementById('gaming-grid');
+            const appsGrid = document.getElementById('apps-grid');
+            
+            // Show connecting status
+            if (gamingGrid) gamingGrid.innerHTML = '<p style="color:var(--accent); text-align:center; grid-column:1/-1;">Checking connection... (v2.2)</p>';
+
+            // Fallback Data (Local Projects)
+            const localProjects = [
+                 {
+                    title: 'Farmer Game',
+                    category: 'Game',
+                    status: 'Public',
+                    description: 'A 3D farming simulation game.',
+                    project_link: 'farm-game/index.html',
+                    image_url: 'fas fa-tractor',
+                    tags: ['3D', 'WebGL', 'Simulation']
+                },
+                {
+                    title: 'Quran App',
+                    category: 'App',
+                    status: 'Public',
+                    description: 'Beautiful Quran recitation and reading application.',
+                    project_link: 'quran-app/index.html',
+                    image_url: 'fas fa-book-open',
+                    tags: ['Audio', 'PWA']
+                },
+                {
+                    title: 'Rust Game',
+                    category: 'Game',
+                    status: 'Public',
+                    description: 'An experimental game built with Rust and WebAssembly.',
+                    project_link: 'rust-game/index.html',
+                    image_url: 'fab fa-rust',
+                    tags: ['Rust', 'WASM']
+                },
+                {
+                    title: 'Calculator Vault',
+                    category: 'App',
+                    status: 'Public',
+                    description: 'A privacy-focused calculator that hides secret files.',
+                    project_link: 'calculator-vault/index.html',
+                    image_url: 'fas fa-user-secret',
+                    tags: ['Security', 'Utility']
+                },
+                 {
+                    title: 'Quiz App',
+                    category: 'App',
+                    status: 'Public',
+                    description: 'Interactive quiz application to test your skills.',
+                    project_link: 'quiz-app/index.html',
+                    image_url: 'fas fa-question',
+                    tags: ['Education', 'JS']
+                }
+            ];
+
+            let useFallback = false;
+
             if (typeof supabaseClient === 'undefined') {
-                console.log("Supabase client missing.");
-                return;
+                console.warn("Supabase client missing. Using local fallback.");
+                useFallback = true;
+            } else {
+                try {
+                    // 1. Test Fetch (Counting)
+                    const { count, error: connError } = await supabaseClient
+                        .from('projects')
+                        .select('id', { count: 'exact', head: true });
+
+                    if (connError) throw connError;
+
+                    console.log("✅ Connected to Supabase! Projects count:", count);
+
+                    const adminLink = document.querySelector('.footer a[href*="admin"]');
+                    if (adminLink) {
+                        adminLink.innerHTML = 'Portal <span style="color:#2ecc71;">● Online</span>';
+                    }
+
+                    // 2. Fetch Projects
+                    const { data: projects, error: fetchError } = await supabaseClient
+                        .from('projects')
+                        .select('*')
+                        .eq('status', 'Public')
+                        .order('created_at', { ascending: false });
+
+                    if (fetchError) throw fetchError;
+
+                    if (projects && projects.length > 0) {
+                        console.log(`Successfully rendered ${projects.length} projects.`);
+                        renderProjects(projects);
+                    } else {
+                        console.warn("No public projects found in DB. Using fallback.");
+                        useFallback = true;
+                    }
+
+                } catch (err) {
+                    console.error("Error loading projects from DB:", err);
+                    useFallback = true;
+                }
             }
 
-            // Test Connection by fetching count (lightweight)
-            const { count, error } = await supabaseClient
-                .from('projects')
-                .select('*', { count: 'exact', head: true });
-
-            const adminLink = document.querySelector('.footer a[href*="admin"]');
-
-            if (!error) {
-                console.log("✅ Connected to Supabase!");
-                if (adminLink) {
-                    adminLink.innerHTML = 'Admin Portal <span style="color:#2ecc71; font-weight:bold;">● Online</span>';
-                    adminLink.title = "Connected to Database";
-                }
-
-                // 1. Increment Visitor Count
-                await supabaseClient.rpc('increment_visitor_count');
-
-                // 2. Fetch Projects logic...
-                const { data: projects } = await supabaseClient
-                    .from('projects')
-                    .select('*')
-                    .eq('status', 'Public');
-
-                if (projects && projects.length > 0) {
-                    console.log(`Loaded ${projects.length} projects from DB.`);
-                    renderProjects(projects);
-                } else {
-                    console.log("No public projects found.");
-                }
-
-            } else {
-                console.error("❌ Connection Failed:", error.message);
-                if (adminLink) {
-                    adminLink.innerHTML = 'Admin Portal <span style="color:#e74c3c;">● Offline</span>';
-                    adminLink.title = "Check Console for Errors";
+            if (useFallback) {
+                console.log("Rendering local fallback projects.");
+                renderProjects(localProjects);
+                
+                // Optional: visual indicator that we are in offline/local mode
+                if (gamingGrid) {
+                     const status = document.createElement('div');
+                     status.style.cssText = "grid-column: 1/-1; text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 1rem; width: 100%;";
+                     status.innerText = "Loaded from Local System (Offline Mode)";
+                     gamingGrid.prepend(status);
                 }
             }
         }
@@ -222,22 +277,24 @@
             if (gamingGrid) gamingGrid.innerHTML = '';
             if (appsGrid) appsGrid.innerHTML = '';
 
+            const lang = localStorage.getItem('lastLang') || 'en';
+
             projects.forEach(project => {
-                const cardHTML = createProjectCard(project);
-                if (project.category === 'game') {
-                    if (gamingGrid) gamingGrid.insertAdjacentHTML('beforeend', cardHTML);
-                } else {
-                    if (appsGrid) appsGrid.insertAdjacentHTML('beforeend', cardHTML);
-                }
+                const cardHTML = createProjectCard(project, lang);
+                const targetGrid = project.category === 'game' ? gamingGrid : appsGrid;
+                if (targetGrid) targetGrid.insertAdjacentHTML('beforeend', cardHTML);
             });
 
-            // Re-observe for animations
+            // Re-trigger reveal animation for new elements
             document.querySelectorAll('.project-card.reveal').forEach(el => {
+                el.classList.add('active'); // Force visibility if observer fails
                 if (typeof observer !== 'undefined') observer.observe(el);
             });
         }
 
-        function createProjectCard(p) {
+        function createProjectCard(p, lang = 'en') {
+            const t = translations[lang] || translations['en'];
+
             // Parse tags
             let tagsArray = [];
             if (typeof p.tags === 'string') {
@@ -270,7 +327,7 @@
                         ${tagsHTML}
                     </div>
                     <a href="${p.project_link}" class="btn-link ${p.category === 'game' ? 'game-btn' : 'app-btn'}">
-                        <i class="fas fa-external-link-alt"></i> View Project
+                        <i class="fas fa-external-link-alt"></i> ${t.viewProject}
                     </a>
                 </div>
             </article>
