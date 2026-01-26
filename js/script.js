@@ -159,13 +159,13 @@
         async function loadSiteData() {
             const gamingGrid = document.getElementById('gaming-grid');
             const appsGrid = document.getElementById('apps-grid');
-            
+
             // Show connecting status
             if (gamingGrid) gamingGrid.innerHTML = '<p style="color:var(--accent); text-align:center; grid-column:1/-1;">Checking connection... (v2.2)</p>';
 
             // Fallback Data (Local Projects)
             const localProjects = [
-                 {
+                {
                     title: 'Farmer Game',
                     category: 'Game',
                     status: 'Public',
@@ -201,7 +201,7 @@
                     image_url: 'fas fa-user-secret',
                     tags: ['Security', 'Utility']
                 },
-                 {
+                {
                     title: 'Quiz App',
                     category: 'App',
                     status: 'Public',
@@ -259,13 +259,13 @@
             if (useFallback) {
                 console.log("Rendering local fallback projects.");
                 renderProjects(localProjects);
-                
+
                 // Optional: visual indicator that we are in offline/local mode
                 if (gamingGrid) {
-                     const status = document.createElement('div');
-                     status.style.cssText = "grid-column: 1/-1; text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 1rem; width: 100%;";
-                     status.innerText = "Loaded from Local System (Offline Mode)";
-                     gamingGrid.prepend(status);
+                    const status = document.createElement('div');
+                    status.style.cssText = "grid-column: 1/-1; text-align: center; font-size: 0.8rem; opacity: 0.6; margin-bottom: 1rem; width: 100%;";
+                    status.innerText = "Loaded from Local System (Offline Mode)";
+                    gamingGrid.prepend(status);
                 }
             }
         }
@@ -283,11 +283,11 @@
                 const cardHTML = createProjectCard(project, lang);
                 // Normalize category to lowercase for comparison
                 const cat = (project.category || '').toLowerCase().trim();
-                
+
                 // Flexible check: matches 'game', 'games', 'gaming'
                 const isGame = cat.includes('game') || cat.includes('gaming');
                 const targetGrid = isGame ? gamingGrid : appsGrid;
-                
+
                 if (targetGrid) {
                     targetGrid.insertAdjacentHTML('beforeend', cardHTML);
                 } else {
@@ -299,6 +299,13 @@
             document.querySelectorAll('.project-card.reveal').forEach(el => {
                 el.classList.add('active'); // Force visibility if observer fails
                 if (typeof observer !== 'undefined') observer.observe(el);
+            });
+
+            // Ensure links are interactive
+            document.querySelectorAll('.btn-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    console.log("Opening project:", link.href);
+                });
             });
         }
 
