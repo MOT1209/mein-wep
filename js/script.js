@@ -281,7 +281,9 @@
 
             projects.forEach(project => {
                 const cardHTML = createProjectCard(project, lang);
-                const targetGrid = project.category === 'game' ? gamingGrid : appsGrid;
+                // Normalize category to lowercase for comparison
+                const categoryLower = (project.category || '').toLowerCase();
+                const targetGrid = (categoryLower === 'game' || categoryLower === 'games') ? gamingGrid : appsGrid;
                 if (targetGrid) targetGrid.insertAdjacentHTML('beforeend', cardHTML);
             });
 
@@ -315,8 +317,12 @@
                 iconHTML = `<i class="fas fa-cube"></i>`; // Fallback
             }
 
+            // Normalize category for data attribute
+            const categoryLower = (p.category || 'app').toLowerCase();
+            const categoryAttr = (categoryLower === 'game' || categoryLower === 'games') ? 'games' : 'apps';
+
             return `
-            <article class="project-card reveal" data-category="${p.category}">
+            <article class="project-card reveal" data-category="${categoryAttr}">
                 <div class="project-content">
                     <div class="project-icon" ${p.image_url && !p.image_url.startsWith('fa') ? 'style="padding:0; overflow:hidden;"' : ''}>
                         ${iconHTML}
