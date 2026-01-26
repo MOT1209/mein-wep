@@ -243,7 +243,7 @@
                     if (fetchError) throw fetchError;
 
                     if (projects && projects.length > 0) {
-                        console.log(`Successfully rendered ${projects.length} projects.`);
+                        console.log("Projects loaded from DB:", projects.map(p => `${p.title} (${p.category})`));
                         renderProjects(projects);
                     } else {
                         console.warn("No public projects found in DB. Using fallback.");
@@ -282,9 +282,17 @@
             projects.forEach(project => {
                 const cardHTML = createProjectCard(project, lang);
                 // Normalize category to lowercase for comparison
-                const categoryLower = (project.category || '').toLowerCase();
-                const targetGrid = (categoryLower === 'game' || categoryLower === 'games') ? gamingGrid : appsGrid;
-                if (targetGrid) targetGrid.insertAdjacentHTML('beforeend', cardHTML);
+                const cat = (project.category || '').toLowerCase().trim();
+                
+                // Flexible check: matches 'game', 'games', 'gaming'
+                const isGame = cat.includes('game') || cat.includes('gaming');
+                const targetGrid = isGame ? gamingGrid : appsGrid;
+                
+                if (targetGrid) {
+                    targetGrid.insertAdjacentHTML('beforeend', cardHTML);
+                } else {
+                    console.error("Target grid not found for category:", cat);
+                }
             });
 
             // Re-trigger reveal animation for new elements
@@ -318,8 +326,9 @@
             }
 
             // Normalize category for data attribute
-            const categoryLower = (p.category || 'app').toLowerCase();
-            const categoryAttr = (categoryLower === 'game' || categoryLower === 'games') ? 'games' : 'apps';
+            const cat = (p.category || 'app').toLowerCase().trim();
+            const isGame = cat.includes('game') || cat.includes('gaming');
+            const categoryAttr = isGame ? 'games' : 'apps';
 
             return `
             <article class="project-card reveal" data-category="${categoryAttr}">
@@ -332,7 +341,7 @@
                     <div class="tags">
                         ${tagsHTML}
                     </div>
-                    <a href="${p.project_link}" class="btn-link ${p.category === 'game' ? 'game-btn' : 'app-btn'}">
+                    <a href="${p.project_link}" target="_blank" class="btn-link ${isGame ? 'game-btn' : 'app-btn'}">
                         <i class="fas fa-external-link-alt"></i> ${t.viewProject}
                     </a>
                 </div>
