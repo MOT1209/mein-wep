@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/building.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Game Controls System -->
+    <script src="../js/game-controls.js"></script>
     <script type="importmap">
         {
             "imports": {
@@ -109,19 +111,7 @@
             <div class="hotbar-slot" id="slot-3"><i class="fas fa-hammer"></i></div>
         </div>
 
-        <!-- Mobile Controls Overlay -->
-        <div id="mobile-controls" style="display:none;">
-            <div id="joystick-zone">
-                <div id="joystick-base">
-                    <div id="joystick-stick"></div>
-                </div>
-            </div>
-            <div id="action-buttons">
-                <button id="btn-jump" class="mobile-btn"><i class="fas fa-arrow-up"></i></button>
-                <button id="btn-interact" class="mobile-btn"><i class="fas fa-hand-pointer"></i></button>
-                <button id="btn-build" class="mobile-btn"><i class="fas fa-hammer"></i></button>
-            </div>
-        </div>
+        <!-- Mobile Controls are now handled by game-controls.js -->
     </div>
 
     <!-- Rust Style Inventory -->

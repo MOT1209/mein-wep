@@ -99,7 +99,36 @@
     </div>
 
     <!-- Scripts -->
+    <script src="../js/app-controls.js"></script>
     <script src="js/script.js"></script>
+    <script>
+        // Initialize App Controls for PWA mode
+        if (typeof AppControls !== 'undefined') {
+            AppControls.init({
+                appName: 'اسألني',
+                primaryColor: '#6366f1',
+                showBackButton: true,
+                onBack: () => {
+                    // Go back to start screen or home
+                    const startScreen = document.getElementById('start-screen');
+                    const quizScreen = document.getElementById('quiz-screen');
+                    const resultScreen = document.getElementById('result-screen');
+
+                    if (quizScreen.classList.contains('active')) {
+                        if (confirm('هل تريد الخروج من الاختبار؟')) {
+                            quizScreen.classList.remove('active');
+                            startScreen.classList.add('active');
+                        }
+                    } else if (resultScreen.classList.contains('active')) {
+                        resultScreen.classList.remove('active');
+                        startScreen.classList.add('active');
+                    } else {
+                        window.history.back();
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

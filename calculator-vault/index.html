@@ -123,7 +123,29 @@
     <!-- Global Notification -->
     <div id="notif" class="notif hidden"></div>
 
+    <!-- App Controls System -->
+    <script src="../js/app-controls.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        // Initialize App Controls for PWA mode
+        if (typeof AppControls !== 'undefined') {
+            AppControls.init({
+                appName: 'الخزنة الذكية',
+                primaryColor: '#7c3aed', // Purple for vault app
+                showBackButton: true,
+                onBack: () => {
+                    // If vault is open, go back to calculator
+                    const vaultUI = document.getElementById('vault-ui');
+                    if (vaultUI && !vaultUI.classList.contains('hidden')) {
+                        vaultUI.classList.add('hidden');
+                        document.getElementById('calc-wrapper').style.display = 'flex';
+                    } else {
+                        window.history.back();
+                    }
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

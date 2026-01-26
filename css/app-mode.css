@@ -1,0 +1,53 @@
+/* Default: Hide app-specific controls in browser mode */
+.app-controls {
+    display: none;
+}
+
+/* Standalone Mode (Installed App) Overrides */
+@media all and (display-mode: standalone) {
+    /* Hide the main website navigation/header if desired in app mode */
+    /* You can uncomment these if you want a purely full-screen app experience without the site nav */
+    /* 
+    .navbar, .footer {
+        display: none;
+    } 
+    */
+
+    /* Example: Add extra padding or specific background for app mode */
+    body {
+        background-color: #000;
+        /* Darker background for app feel */
+    }
+
+    /* Show app-specific controls */
+    .app-controls {
+        display: block;
+        position: fixed;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(20, 20, 20, 0.9);
+        padding: 10px 20px;
+        border-radius: 30px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+        display: flex;
+        gap: 15px;
+        backdrop-filter: blur(10px);
+    }
+
+    .app-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        padding: 10px;
+        border-radius: 50%;
+        transition: background 0.2s;
+    }
+
+    .app-btn:active {
+        background: rgba(255, 255, 255, 0.2);
+    }
+}

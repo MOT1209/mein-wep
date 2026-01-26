@@ -230,8 +230,34 @@
     <!-- Audio Element -->
     <audio id="audio-element" preload="metadata"></audio>
 
+    <!-- App Controls System -->
+    <script src="../js/app-controls.js"></script>
     <!-- Custom Script -->
     <script src="js/app.js"></script>
+    <script>
+        // Initialize App Controls for PWA mode
+        if (typeof AppControls !== 'undefined') {
+            AppControls.init({
+                appName: 'القرآن الكريم',
+                primaryColor: '#059669', // Emerald green for Quran app
+                showBackButton: true,
+                showMenuButton: true,
+                onBack: () => {
+                    // If sidebar is open on mobile, close it first
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar && sidebar.classList.contains('active')) {
+                        sidebar.classList.remove('active');
+                    } else {
+                        window.history.back();
+                    }
+                },
+                onMenu: () => {
+                    const sidebar = document.getElementById('sidebar');
+                    if (sidebar) sidebar.classList.toggle('active');
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
