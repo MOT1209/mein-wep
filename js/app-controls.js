@@ -14,7 +14,8 @@ const AppControls = (() => {
         onBack: null,  // Callback when back button is pressed
         onMenu: null,  // Callback when menu button is pressed
         showBackButton: true,
-        showMenuButton: false
+        showMenuButton: false,
+        hideElements: [] // Selectors to hide in standalone mode
     };
 
     let headerEl, isStandalone = false;
@@ -87,6 +88,10 @@ const AppControls = (() => {
                 body.is-standalone .container {
                     padding-top: 0;
                 }
+                /* Safe area padding for newer phones */
+                body.is-standalone {
+                    padding-bottom: env(safe-area-inset-bottom) !important;
+                }
             </style>
             <div class="header-left">
                 ${config.showBackButton ? `<button class="header-btn" id="app-back-btn"><i class="fas fa-arrow-left"></i></button>` : ''}
@@ -97,6 +102,14 @@ const AppControls = (() => {
             </div>
         `;
         document.body.insertBefore(headerEl, document.body.firstChild);
+
+        // Hide specific elements if requested
+        if (config.hideElements && config.hideElements.length > 0) {
+            config.hideElements.forEach(selector => {
+                const els = document.querySelectorAll(selector);
+                els.forEach(el => el.style.display = 'none');
+            });
+        }
 
         // Event Listeners
         const backBtn = document.getElementById('app-back-btn');

@@ -133,6 +133,7 @@
                 appName: 'الخزنة الذكية',
                 primaryColor: '#7c3aed', // Purple for vault app
                 showBackButton: true,
+                hideElements: ['.calc-header'],
                 onBack: () => {
                     // If vault is open, go back to calculator
                     const vaultUI = document.getElementById('vault-ui');
