@@ -25,13 +25,15 @@ const CONFIG = {
 // ==================== STATE ====================
 const state = {
     inventory: [
-        { id: 'wood', count: 1000 },
-        { id: 'stone', count: 500 },
-        { id: 'frag', count: 300 },
-        { id: 'hqm', count: 100 }
+        { id: 'wood', count: 2000 },
+        { id: 'stone', count: 1000 },
+        { id: 'frag', count: 500 },
+        { id: 'hqm', count: 100 },
+        { id: 'building_plan', count: 1 },
+        { id: 'hammer', count: 1 }
     ],
     gear: { head: null, chest: null, legs: null, feet: null },
-    belt: Array(6).fill(null),
+    belt: ['building_plan', 'hammer', null, null, null, null],
     stats: { health: 100, hunger: 100, thirst: 100, radiation: 0 },
     buildMode: false,
     viewMode: 'first',
@@ -56,15 +58,17 @@ const BUILDING_TIERS = {
     wood: { name: 'Wood', health: 250, color: 0x8d6e63, cost: { wood: 300 } },
     stone: { name: 'Stone', health: 500, color: 0xb0bec5, cost: { stone: 300 } },
     metal: { name: 'Sheet Metal', health: 1000, color: 0x90a4ae, cost: { frag: 200 } },
-    hqm: { name: 'Armored', health: 2000, color: 0xeceff1, cost: { hqm: 50 } }
+    hqm: { name: 'Armored', health: 2000, color: 0xeceff1, cost: { hqm: 50 } },
+    door: { name: 'Wooden Door', health: 200, color: 0x5d4037, cost: { wood: 300 } }
 };
 
 const BUILDING_TYPES = {
-    foundation: { name: 'Foundation', geometry: [3, 0.2, 3], offset: [0, 0.1, 0] },
-    wall: { name: 'Wall', geometry: [3, 3, 0.2], offset: [0, 1.5, 0] },
-    doorway: { name: 'Doorway', geometry: [3, 3, 0.2], offset: [0, 1.5, 0], hasDoor: true },
-    ceiling: { name: 'Ceiling', geometry: [3, 0.2, 3], offset: [0, 3, 0] },
-    tool_cupboard: { name: 'Tool Cupboard', geometry: [1, 2, 1], offset: [0, 1, 0] }
+    foundation: { name: 'Foundation', geometry: [3, 0.2, 3], offset: [0, 0.1, 0], requiresSupport: false },
+    wall: { name: 'Wall', geometry: [3, 3, 0.2], offset: [0, 1.5, 0], requiresSupport: true },
+    doorway: { name: 'Doorway', geometry: [3, 3, 0.2], offset: [0, 1.5, 0], requiresSupport: true },
+    ceiling: { name: 'Ceiling', geometry: [3, 0.2, 3], offset: [0, 3, 0], requiresSupport: true },
+    tool_cupboard: { name: 'Tool Cupboard', geometry: [1, 1.8, 0.8], offset: [0, 0.9, 0], requiresSupport: true },
+    wooden_door: { name: 'Door', geometry: [0.9, 2.1, 0.1], offset: [0, 1.05, 0], isDoor: true }
 };
 
 const ITEMS_DATA = {
@@ -99,20 +103,39 @@ const ITEMS_DATA = {
     'machete': { name: 'Machete', category: 'weapons', icon: 'fa-knife', color: '#90a4ae', rarity: 'rare', recipe: { iron: 100 }, desc: 'Standard industrial blade.' },
     'bow': { name: 'Hunting Bow', category: 'weapons', icon: 'fa-bow-arrow', color: '#8d6e63', rarity: 'common', recipe: { wood: 200, cloth: 50 }, desc: 'Silent and deadly ranged tool.' },
     'pistol': { name: 'Semi-Pistol', category: 'weapons', icon: 'fa-gun', color: '#546e7a', rarity: 'rare', recipe: { iron: 150, pipe: 1 }, desc: 'P250 clone. Fast firing sidearm.' },
-    'ak47': { name: 'Assault Rifle', category: 'weapons', icon: 'fa-jet-fighter', color: '#6d4c41', rarity: 'elite', recipe: { hqm: 50, wood: 200, spring: 2, pipe: 1 }, desc: 'The king of Rust weapons. High recoil, high reward.' },
+    'ak47': { name: 'Assault Rifle', category: 'weapons', icon: 'fa-gun', color: '#6d4c41', rarity: 'elite', recipe: { hqm: 50, wood: 200, scrap: 50, pipe: 1 }, desc: 'The king of Rust weapons. High recoil, high reward.' },
+
+    // Industrial
+    'furnace': { name: 'Furnace', category: 'items', icon: 'fa-fire-burner', color: '#ff7043', rarity: 'rare', recipe: { stone: 200, wood: 100, lgf: 10 }, desc: 'Smelts ores into metal/sulfur using wood.' },
+    'campfire': { name: 'Campfire', category: 'items', icon: 'fa-fire', color: '#ffab40', rarity: 'common', recipe: { wood: 100 }, desc: 'Useful for light and cooking meat.' },
 
     // Construction
-    'foundation': { name: 'Foundation', category: 'construction', icon: 'fa-square', color: '#8d6e63', rarity: 'common', recipe: { wood: 200 }, desc: 'The heart of your sanctuary.' },
-    'wall': { name: 'Wall', category: 'construction', icon: 'fa-border-all', color: '#8d6e63', rarity: 'common', recipe: { wood: 100 }, desc: 'Standard structural blockade.' },
-    'stone_wall': { name: 'Stone Wall', category: 'construction', icon: 'fa-border-none', color: '#b0bec5', rarity: 'rare', recipe: { stone: 300 }, desc: 'Higher durability stone structure.' },
-    'metal_wall': { name: 'Sheet Metal Wall', category: 'construction', icon: 'fa-shield-halved', color: '#90a4ae', rarity: 'rare', recipe: { frag: 200 }, desc: 'Heavy industrial protection.' },
+    'building_plan': { name: 'Building Plan', category: 'tools', icon: 'fa-scroll', color: '#64b5f6', rarity: 'common', recipe: { wood: 20 }, desc: 'Select building pieces to place.' },
+    'hammer': { name: 'Building Hammer', category: 'tools', icon: 'fa-hammer', color: '#1e88e5', rarity: 'common', recipe: { wood: 100 }, desc: 'Construct and upgrade your base.' },
     'door': { name: 'Wood Door', category: 'construction', icon: 'fa-door-closed', color: '#8d6e63', rarity: 'common', recipe: { wood: 300 }, desc: 'Access point with minimal security.' },
     'lock': { name: 'Key Lock', category: 'construction', icon: 'fa-lock', color: '#546e7a', rarity: 'common', recipe: { iron: 100 }, desc: 'Basic protection for your base.' },
 
     // Medical
     'bandage': { name: 'Bandage', category: 'medical', icon: 'fa-band-aid', color: '#e57373', rarity: 'common', recipe: { cloth: 2 }, desc: 'Stops bleeding immediately.' },
-    'syringe': { name: 'Medical Syringe', category: 'medical', icon: 'fa-syringe', color: '#ef5350', rarity: 'rare', recipe: { iron: 20, scrap: 5, cloth: 10 }, desc: 'Instant adrenaline-boosted recovery.' }
+    'syringe': { name: 'Medical Syringe', category: 'medical', icon: 'fa-syringe', color: '#ef5350', rarity: 'rare', recipe: { iron: 20, scrap: 5, cloth: 10 }, desc: 'Instant adrenaline-boosted recovery.' },
+    'wooden_door': { name: 'Wooden Door', category: 'construction', icon: 'fa-door-closed', color: '#5d4037', rarity: 'common', recipe: { wood: 300 }, desc: 'Fits into doorways.' },
+    'codelock': { name: 'Code Lock', category: 'items', icon: 'fa-calculator', color: '#78909c', rarity: 'rare', recipe: { frag: 100 }, desc: 'Secure your doors with a 4-digit code.' }
 };
+
+// ==================== GLOBAL HELPERS ====================
+function showNotification(msg, color = '#4caf50') {
+    let note = document.getElementById('game-notification');
+    if (!note) {
+        note = document.createElement('div');
+        note.id = 'game-notification';
+        note.style.cssText = "position:fixed; top:20px; right:20px; background:rgba(0,0,0,0.7); color:#4caf50; padding:10px 20px; border-radius:5px; font-weight:bold; z-index:2000; display:none;";
+        document.body.appendChild(note);
+    }
+    note.textContent = msg;
+    note.style.color = color;
+    note.style.display = 'block';
+    setTimeout(() => note.style.display = 'none', 2000);
+}
 
 
 
@@ -154,17 +177,37 @@ function updateHUD() {
 }
 
 function updateHUDSimulation() {
-    const healthFill = document.getElementById('health-fill');
-    const hungerFill = document.getElementById('hunger-fill');
-    const thirstFill = document.getElementById('thirst-fill');
-    const radFill = document.getElementById('rad-fill');
-    const radOverlay = document.getElementById('rad-overlay');
+    document.getElementById('health-fill').style.width = `${state.stats.health}%`;
+    document.getElementById('hunger-fill').style.width = `${state.stats.hunger}%`;
+    document.getElementById('thirst-fill').style.width = `${state.stats.thirst}%`;
+    document.getElementById('rad-fill').style.width = `${state.stats.radiation}%`;
 
-    if (healthFill) healthFill.style.width = state.stats.health + '%';
-    if (hungerFill) hungerFill.style.width = state.stats.hunger + '%';
-    if (thirstFill) thirstFill.style.width = state.stats.thirst + '%';
-    if (radFill) radFill.style.width = state.stats.radiation + '%';
-    if (radOverlay) radOverlay.style.opacity = state.stats.radiation / 100;
+    const overlay = document.getElementById('rad-overlay');
+    if (overlay) overlay.style.opacity = state.stats.radiation / 200;
+
+    // HitMarker fade
+    const hm = document.getElementById('hitmarker');
+    if (hm && parseFloat(hm.style.opacity) > 0) {
+        hm.style.opacity = parseFloat(hm.style.opacity) - 0.05;
+    }
+}
+
+function showHitMarker() {
+    let hm = document.getElementById('hitmarker');
+    if (!hm) {
+        hm = document.createElement('div');
+        hm.id = 'hitmarker';
+        hm.style.cssText = 'position:fixed; top:50%; left:50%; width:20px; height:20px; border:2px solid #fff; transform:translate(-50%,-50%) rotate(45deg); pointer-events:none; z-index:100; opacity:0; transition:none;';
+        document.body.appendChild(hm);
+    }
+    hm.style.opacity = '1';
+}
+
+function screenFlash(color = 'rgba(255,0,0,0.3)') {
+    const flash = document.createElement('div');
+    flash.style.cssText = `position:fixed; top:0; left:0; width:100%; height:100%; background:${color}; pointer-events:none; z-index:1000; animation: fadeOut 0.3s forwards;`;
+    document.body.appendChild(flash);
+    setTimeout(() => flash.remove(), 300);
 }
 
 function createPlayer(scene) {
@@ -286,24 +329,55 @@ try {
         const blueprintItems = document.querySelectorAll('.blueprint-item');
         blueprintItems.forEach(item => {
             item.onclick = () => {
-                // Remove active class from all items
-                blueprintItems.forEach(i => i.classList.remove('selected'));
-
-                const type = item.dataset.type;
-                state.building.selectedBlueprint = type;
-                state.building.blueprintOpen = false;
-
-                // Add active class to selected item
-                item.classList.add('selected');
-
-                // Hide blueprint selector
-                document.getElementById('blueprint-selector').style.display = 'none';
-
-                // Show selected blueprint indicator
-                updateBlueprintIndicator();
-
-                console.log(`✅ Blueprint selected: ${type}`);
+                selectBlueprintPiece(item.dataset.type);
             };
+        });
+        initRadialMenu();
+    }
+
+    function selectBlueprintPiece(type) {
+        state.building.selectedBlueprint = type;
+        state.building.blueprintOpen = false;
+        document.getElementById('blueprint-selector').style.display = 'none';
+        document.getElementById('radial-menu').style.display = 'none';
+
+        updateBlueprintIndicator();
+        console.log(`✅ Blueprint selected: ${type}`);
+
+        // Lock controls back if we came from radial/blueprint menu
+        pointerControls.lock();
+    }
+
+    function initRadialMenu() {
+        const container = document.getElementById('radial-pieces-container');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const pieces = [
+            { type: 'foundation', icon: 'fa-square' },
+            { type: 'wall', icon: 'fa-border-all' },
+            { type: 'doorway', icon: 'fa-door-open' },
+            { type: 'ceiling', icon: 'fa-th-large' },
+            { type: 'tool_cupboard', icon: 'fa-box-archive' },
+            { type: 'wooden_door', icon: 'fa-door-closed' }
+        ];
+
+        const radius = 160;
+        pieces.forEach((p, i) => {
+            const angle = (i / pieces.length) * Math.PI * 2 - Math.PI / 2;
+            const x = Math.cos(angle) * radius;
+            const y = Math.sin(angle) * radius;
+
+            const el = document.createElement('div');
+            el.className = 'radial-piece';
+            el.style.left = `calc(50% + ${x}px - 42px)`;
+            el.style.top = `calc(50% + ${y}px - 42px)`;
+            el.innerHTML = `<i class="fas ${p.icon}"></i><span>${p.type.replace('_', ' ')}</span>`;
+            el.onclick = (e) => {
+                e.stopPropagation();
+                selectBlueprintPiece(p.type);
+            };
+            container.appendChild(el);
         });
     }
 
@@ -325,30 +399,41 @@ try {
         }
     }
 
-    function canBuildHere(position) {
-        // Check Tool Cupboard privilege
-        // Simple Logic: If inside ANY TC radius, we assume "Building Privilege" (Authorized)
-        // If we wanted to block strangers, we would check if we are authorized on that specific TC.
-        // For single player, placing a TC just creates a "Safe Zone".
-        // Let's visualize it: If near a TC, show "Building Privilege".
+    function canBuildHere(position, type) {
+        const buildData = BUILDING_TYPES[type];
 
-        let hasPrivilege = false;
-        let blocked = false;
-
-        // In a real multiplayer game, we would check:
-        // if (inside_tc_range && !authorized) return false; (Blocked)
-        // if (inside_tc_range && authorized) return true; (Privilege)
-
-        // Current implementation: Just checking distance to prevent overlapping TCs slightly or just logic placeholder
-        // New Logic:
-        // 1. Cannot place TC too close to another TC
-        // 2. Can build anywhere else (unless blocked by map bounds etc)
-
-        if (state.building.selectedBlueprint === 'tool_cupboard') {
+        // 1. TC Overlap Check
+        if (type === 'tool_cupboard') {
             for (let tc of state.building.toolCupboards) {
                 const dist = Math.sqrt((position.x - tc.pos.x) ** 2 + (position.z - tc.pos.z) ** 2);
-                if (dist < CONFIG.TC_RADIUS) return false; // Cannot place TC inside another TC range
+                if (dist < CONFIG.TC_RADIUS) return false;
             }
+        }
+
+        // 2. Stability / Support Check
+        if (buildData.requiresSupport) {
+            let hasFoundation = false;
+            for (let s of builtStructures) {
+                const dist = s.position.distanceTo(new THREE.Vector3(position.x, s.position.y, position.z));
+                if (dist < 0.5 && (s.userData.buildType === 'foundation' || s.userData.buildType === 'ceiling')) {
+                    hasFoundation = true;
+                    break;
+                }
+            }
+            if (!hasFoundation && type !== 'foundation') return false;
+        }
+
+        // 3. Door placement check
+        if (type === 'wooden_door') {
+            let onDoorway = false;
+            for (let s of builtStructures) {
+                const dist = s.position.distanceTo(new THREE.Vector3(position.x, s.position.y, position.z));
+                if (dist < 0.5 && s.userData.buildType === 'doorway') {
+                    onDoorway = true;
+                    break;
+                }
+            }
+            if (!onDoorway) return false;
         }
 
         return true;
@@ -366,48 +451,66 @@ try {
         if (hits.length > 0 && hits[0].distance < 10) {
             const point = hits[0].point;
 
-            // Snap to grid
             const snapX = Math.round(point.x / 3) * 3;
             const snapY = buildData.offset[1];
             const snapZ = Math.round(point.z / 3) * 3;
 
-            if (!canBuildHere({ x: snapX, z: snapZ })) {
-                document.getElementById('tc-status').style.display = 'block';
-                setTimeout(() => document.getElementById('tc-status').style.display = 'none', 2000);
+            // Offset for ceiling/walls if placing on existing structures
+            let targetY = snapY;
+            if (hits[0].object.userData.type === 'structure') {
+                if (blueprint === 'ceiling') targetY = hits[0].object.position.y + 3;
+                if (blueprint === 'wall' || blueprint === 'doorway') targetY = hits[0].object.position.y;
+            }
+
+            if (!canBuildHere({ x: snapX, z: snapZ }, blueprint)) {
+                showNotification("Cannot build here: Invalid Support");
                 return;
             }
 
-            // Create structure (starts as Twig)
             const geometry = new THREE.BoxGeometry(...buildData.geometry);
             const material = new THREE.MeshStandardMaterial({
                 color: BUILDING_TIERS.twig.color,
                 roughness: 0.8
             });
             const structure = new THREE.Mesh(geometry, material);
-            structure.position.set(snapX, snapY, snapZ);
+            structure.position.set(snapX, targetY, snapZ);
             structure.castShadow = true;
             structure.receiveShadow = true;
 
             structure.userData = {
-                type: 'structure',
+                type: buildData.isDoor ? 'door' : 'structure',
                 buildType: blueprint,
                 tier: 'twig',
                 health: BUILDING_TIERS.twig.health,
-                maxHealth: BUILDING_TIERS.twig.health
+                maxHealth: BUILDING_TIERS.twig.health,
+                isOpen: false,
+                isDoor: buildData.isDoor
             };
 
-            // TC Logic
             if (blueprint === 'tool_cupboard') {
                 structure.userData.type = 'tool_cupboard';
                 state.building.toolCupboards.push({ pos: { x: snapX, z: snapZ }, radius: CONFIG.TC_RADIUS });
-                console.log("TC Placed! Building Privilege Area Established.");
             }
 
             scene.add(structure);
             builtStructures.push(structure);
             collisionObjects.push(structure);
 
-            console.log(`Placed ${blueprint} at (${snapX}, ${snapY}, ${snapZ})`);
+            // Build Animation
+            structure.scale.set(0.1, 0.1, 0.1);
+            let sc = 0.1;
+            const ani = setInterval(() => {
+                sc += 0.2;
+                structure.scale.set(sc, sc, sc);
+                if (sc >= 1) {
+                    structure.scale.set(1, 1, 1);
+                    clearInterval(ani);
+                }
+            }, 20);
+
+            // Build Sound/VFX
+            screenFlash('rgba(255,255,255,0.1)');
+            console.log(`Placed ${blueprint}`);
         }
     }
 
@@ -495,7 +598,7 @@ try {
 
     function updateBuildInfo(structure) {
         const panel = document.getElementById('build-info');
-        if (!structure || structure.userData.type !== 'structure') {
+        if (!structure || (structure.userData.type !== 'structure' && structure.userData.type !== 'door')) {
             panel.style.display = 'none';
             return;
         }
@@ -505,13 +608,17 @@ try {
         const currentIndex = tierOrder.indexOf(tier);
         const nextTier = currentIndex < tierOrder.length - 1 ? tierOrder[currentIndex + 1] : null;
 
-        document.getElementById('build-tier').textContent = BUILDING_TIERS[tier].name;
+        // Calculate simple stability based on height (Y)
+        // Foundations (Y=0.1) have 100%, higher levels reduce stability
+        const stability = Math.max(20, 100 - Math.floor((structure.position.y - 0.1) * 10));
+
+        document.getElementById('build-tier').innerHTML = `<i class="fas fa-layer-group"></i> ${BUILDING_TIERS[tier].name} (${stability}%)`;
         document.getElementById('build-health').textContent = `${Math.round(structure.userData.health)}/${structure.userData.maxHealth}`;
 
         if (nextTier) {
             const cost = BUILDING_TIERS[nextTier].cost;
             const costStr = Object.entries(cost).map(([res, amt]) => `${res} (${amt})`).join(', ');
-            document.getElementById('build-upgrade').textContent = `${BUILDING_TIERS[nextTier].name}: ${costStr}`;
+            document.getElementById('build-upgrade').innerHTML = `<i class="fas fa-arrow-up"></i> ${BUILDING_TIERS[nextTier].name}: ${costStr}`;
         } else {
             document.getElementById('build-upgrade').textContent = 'MAX TIER';
         }
@@ -615,23 +722,11 @@ try {
     let ghostMesh = null;
 
     function updateGhost() {
-        // Remove old ghost if blueprint changed
-        if (ghostMesh && state.building.selectedBlueprint) {
-            const currentType = state.building.selectedBlueprint;
-            const currentGeo = BUILDING_TYPES[currentType].geometry;
-            const currentGeoStr = currentGeo.join(',');
-            const ghostGeoStr = [ghostMesh.geometry.parameters.width, ghostMesh.geometry.parameters.height, ghostMesh.geometry.parameters.depth].join(',');
+        const activeTool = state.belt[state.selectedBeltSlot || 0];
 
-            if (currentGeoStr !== ghostGeoStr) {
-                scene.remove(ghostMesh);
-                ghostMesh = null;
-            }
-        }
-
-        if (!state.building.selectedBlueprint) {
-            if (ghostMesh) {
-                ghostMesh.visible = false;
-            }
+        // Only show ghost if Building Plan is active
+        if (activeTool !== 'building_plan' || !state.building.selectedBlueprint) {
+            if (ghostMesh) ghostMesh.visible = false;
             return;
         }
 
@@ -663,11 +758,16 @@ try {
             const snapY = buildData.offset[1];
             const snapZ = Math.round(p.z / 3) * 3;
 
-            ghostMesh.position.set(snapX, snapY, snapZ);
+            let targetY = snapY;
+            if (hit[0].object.userData.type === 'structure') {
+                if (blueprint === 'ceiling') targetY = hit[0].object.position.y + 3;
+                if (blueprint === 'wall' || blueprint === 'doorway') targetY = hit[0].object.position.y;
+            }
+
+            ghostMesh.position.set(snapX, targetY, snapZ);
             ghostMesh.visible = true;
 
-            // Check if can build here
-            const canBuild = canBuildHere({ x: snapX, z: snapZ });
+            const canBuild = canBuildHere({ x: snapX, z: snapZ }, blueprint);
             ghostMesh.material.color.setHex(canBuild ? 0x00ff00 : 0xff0000);
         } else {
             if (ghostMesh) ghostMesh.visible = false;
@@ -692,30 +792,53 @@ try {
 
     const raycaster = new THREE.Raycaster();
     function performAction() {
-        if (state.buildMode) {
-            if (ghost.visible && getItemCount('wood') >= 200) {
-                const b = new THREE.Mesh(buildGeo, new THREE.MeshStandardMaterial({ color: 0x8d6e63 }));
-                b.position.copy(ghost.position); b.castShadow = true; b.receiveShadow = true;
-                b.userData = { type: 'wall_wood', health: 10, tier: 1 };
-                scene.add(b); builtObjects.push(b);
-                const wood = state.inventory.find(i => i.id === 'wood'); if (wood) wood.count -= 200;
-                updateHUD();
+        // Rust Tools Logic
+        const activeToolId = state.belt[state.selectedBeltSlot || 0];
+
+        // 1. Building Plan (Paper)
+        if (activeToolId === 'building_plan') {
+            if (state.building.selectedBlueprint) {
+                placeStructure();
+            } else {
+                showNotification("Right Click to select piece", "#ffa000");
             }
             return;
         }
+
         raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-        const hits = raycaster.intersectObjects([...interactables, ...builtObjects], true);
+        const hits = raycaster.intersectObjects([...interactables, ...builtStructures], true);
+
         if (hits.length > 0 && hits[0].distance < CONFIG.INTERACT_DISTANCE) {
             let obj = hits[0].object;
             while (obj.parent && obj.parent !== scene) obj = obj.parent;
-            if (!obj.userData.type) return;
 
-            // Hammer Upgrade logic MOVED TO 'H' KEY
-            // Legacy code removed to prevent conflicts
-            if (state.belt[0] === 'hammer' && obj.userData.tier) {
-                // Do nothing on click, use H to upgrade
+            // Door Logic
+            if (obj.userData.type === 'door') {
+                obj.userData.isOpen = !obj.userData.isOpen;
+                obj.rotation.y = obj.userData.isOpen ? Math.PI / 2 : 0;
+                showHitMarker();
                 return;
             }
+
+            // Hammer Upgrade (H is fallback, but LMB also works if tool is active)
+            if (activeToolId === 'hammer' && obj.userData.tier) {
+                if (obj.userData.health < obj.userData.maxHealth) {
+                    repairStructure(obj);
+                } else {
+                    upgradeStructure(obj);
+                }
+                showHitMarker();
+                return;
+            }
+
+            if (!obj.userData.type) return;
+
+            // Combat / Gathering
+            showHitMarker();
+            screenFlash('rgba(255,255,255,0.05)');
+
+            camera.position.x += (Math.random() - 0.5) * 0.05;
+            camera.position.z += (Math.random() - 0.5) * 0.05;
 
             obj.userData.health -= 1;
             obj.position.y += 0.05; setTimeout(() => obj.position.y -= 0.05, 50);
@@ -726,12 +849,12 @@ try {
             else if (type === 'iron') addItem('iron', 8);
             else if (type === 'sulfur') addItem('sulfur', 8);
             else if (type === 'barrel') { addItem('scrap', 3); addItem('lgf', 2); }
-            else if (type === 'crate') { addItem('scrap', 15); addItem('frag', 80); if (Math.random() > 0.6) addItem('pistol', 1); }
 
             if (obj.userData.health <= 0) {
                 scene.remove(obj);
                 if (interactables.includes(obj)) interactables.splice(interactables.indexOf(obj), 1);
-                if (builtObjects.includes(obj)) builtObjects.splice(builtObjects.indexOf(obj), 1);
+                if (builtStructures.includes(obj)) builtStructures.splice(builtStructures.indexOf(obj), 1);
+                if (collisionObjects.includes(obj)) collisionObjects.splice(collisionObjects.indexOf(obj), 1);
             }
             updateHUD();
         }
@@ -844,11 +967,40 @@ try {
         if (!beltGrid) return;
         beltGrid.innerHTML = '';
         for (let i = 0; i < 6; i++) {
-            const slot = document.createElement('div'); slot.className = 'inv-slot';
-            if (i === 0) slot.innerHTML = `<i class="fas fa-hand-fist"></i>`;
-            if (i === 1) slot.innerHTML = `<i class="fas fa-axe"></i>`;
+            const slot = document.createElement('div');
+            slot.className = `inv-slot ${state.selectedBeltSlot === i ? 'active' : ''}`;
+            const itemId = state.belt[i];
+
+            if (itemId) {
+                const item = ITEMS_DATA[itemId];
+                slot.innerHTML = `<i class="fas ${item.icon}" style="color:${item.color}"></i>`;
+            } else {
+                // Default placeholders
+                if (i === 0) slot.innerHTML = `<i class="fas fa-hand-fist" style="opacity:0.2"></i>`;
+                if (i === 1) slot.innerHTML = `<i class="fas fa-axe" style="opacity:0.2"></i>`;
+            }
+
+            slot.onclick = () => {
+                state.selectedBeltSlot = i;
+                renderBelt();
+                updateHotbarUI();
+            };
             beltGrid.appendChild(slot);
         }
+    }
+
+    function updateHotbarUI() {
+        const slots = document.querySelectorAll('.hotbar-slot');
+        slots.forEach((s, idx) => {
+            s.classList.toggle('active', state.selectedBeltSlot === idx);
+            const itemId = state.belt[idx];
+            if (itemId) {
+                const item = ITEMS_DATA[itemId];
+                s.innerHTML = `<i class="fas ${item.icon}"></i>`;
+            } else {
+                s.innerHTML = idx === 0 ? '<i class="fas fa-hand-fist"></i>' : (idx === 1 ? '<i class="fas fa-axe"></i>' : (idx === 2 ? '<i class="fas fa-hammer"></i>' : ''));
+            }
+        });
     }
 
 
@@ -863,26 +1015,43 @@ try {
         if (e.code === 'KeyV') { state.viewMode = state.viewMode === 'first' ? 'third' : 'first'; if (playerMesh) playerMesh.visible = (state.viewMode === 'third'); }
 
         if (e.code === 'KeyQ') {
-            state.building.blueprintOpen = !state.building.blueprintOpen;
-            document.getElementById('blueprint-selector').style.display = state.building.blueprintOpen ? 'block' : 'none';
+            const activeTool = state.belt[state.selectedBeltSlot || 0];
+            if (activeTool === 'building_plan') {
+                const menu = document.getElementById('radial-menu');
+                const isOpen = menu.style.display === 'flex';
+                menu.style.display = isOpen ? 'none' : 'flex';
+                if (!isOpen) pointerControls.unlock();
+                else pointerControls.lock();
+            } else {
+                showNotification("Equip Building Plan (Paper) first", "#e74c3c");
+            }
         }
+
+        if (e.code.startsWith('Digit')) {
+            const slot = parseInt(e.code.replace('Digit', '')) - 1;
+            if (slot >= 0 && slot < 6) {
+                state.selectedBeltSlot = slot;
+                updateHotbarUI();
+            }
+        }
+
         if (e.code === 'KeyG') {
             state.building.selectedBlueprint = null;
-            document.getElementById('build-info').style.display = 'none';
-            updateBlueprintIndicator(); // Update indicator
-            console.log('❌ Blueprint cancelled');
+            updateBlueprintIndicator();
         }
-        if (e.code === 'KeyH') {
+
+        if (e.code === 'KeyH' || (activeTool === 'hammer' && e.code === 'KeyE')) {
             const currentItem = state.belt[state.selectedBeltSlot || 0];
             if (currentItem !== 'hammer') {
-                showNotification("Requires Hammer");
+                showNotification("Requires Hammer", "#e74c3c");
                 return;
             }
             if (state.building.lookingAtStructure) {
-                if (state.building.lookingAtStructure.userData.health < state.building.lookingAtStructure.userData.maxHealth) {
-                    repairStructure(state.building.lookingAtStructure);
+                const s = state.building.lookingAtStructure;
+                if (s.userData.health < s.userData.maxHealth) {
+                    repairStructure(s);
                 } else {
-                    upgradeStructure(state.building.lookingAtStructure);
+                    upgradeStructure(s);
                 }
             }
         }
@@ -910,15 +1079,20 @@ try {
 
     window.addEventListener('mousedown', (e) => {
         if (!pointerControls.isLocked) return;
-        if (e.button === 0) {
-            // Left Click: Place structure or perform action
-            if (state.building.selectedBlueprint) {
-                placeStructure();
-            } else {
-                performAction();
+
+        const activeTool = state.belt[state.selectedBeltSlot || 0];
+
+        if (e.button === 0) { // LMB
+            performAction();
+        }
+
+        if (e.button === 2) { // RMB
+            if (activeTool === 'building_plan') {
+                const menu = document.getElementById('radial-menu');
+                menu.style.display = 'flex';
+                pointerControls.unlock();
             }
         }
-        if (e.button === 2) { state.buildMode = !state.buildMode; const hint = document.getElementById('build-mode-hint'); if (hint) hint.style.display = state.buildMode ? 'block' : 'none'; }
     });
 
     // ==================== MOBILE CONTROLS LOGIC ====================

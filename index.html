@@ -64,21 +64,6 @@
             </div>
         </div>
     </nav>
-    <!-- ... (skipping unchanged content for brevity in prompt instruction, but tool handles precise context) ... -->
-    <!-- Custom Script -->
-    <script src="js/script.js?v=2.3"></script>
-    <script src="js/admin.js?v=2.3"></script>
-
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('Service Worker registered!', reg))
-                    .catch(err => console.log('Service Worker registration failed:', err));
-            });
-        }
-    </script>
 
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu">
@@ -349,7 +334,7 @@
         </div>
 
         <div class="settings-footer">
-            <p>Rashid Portfolio v2.0</p>
+            <p>Rashid Portfolio v3.0</p>
         </div>
     </div>
 
@@ -365,7 +350,7 @@
         </div>
     </footer>
 
-    <!-- Voice Assistant Widget -->
+    <!-- Unified Rashid-AI Widget Space -->
     <div id="voice-widget">
         <!-- Toggle Button -->
         <div class="voice-widget-toggle">
@@ -379,13 +364,14 @@
         <div class="voice-panel" id="voice-panel">
             <div class="voice-header">
                 <h3>
-                    <span class="voice-status-dot"></span> Rashid AI
+                    <span class="voice-status-dot"></span> Rashid-AI v3.0
                 </h3>
                 <span class="voice-close"><i class="fas fa-times"></i></span>
             </div>
 
-            <!-- Visualizer -->
-            <div class="visualizer-container">
+            <!-- Avatar & Visualizer Mixed Area -->
+            <div class="visualizer-container" id="avatar-viewport">
+                <!-- 3D Avatar will be injected here -->
                 <div id="voice-visualizer">
                     <div class="wave-bar"></div>
                     <div class="wave-bar"></div>
@@ -398,7 +384,7 @@
             <!-- Chat Body -->
             <div class="voice-chat-body" id="voice-chat-body">
                 <div class="chat-msg bot">
-                    Hello! I am Rashid-AI. How can I assist you today?
+                    Hello! I am your unified AI assistant. How can I help you today?
                 </div>
             </div>
 
@@ -408,7 +394,7 @@
                     <i class="fas fa-volume-up"></i>
                 </button>
                 <div class="voice-input-wrapper">
-                    <input type="text" id="voice-input" class="voice-input" placeholder="Ask me anything...">
+                    <input type="text" id="voice-input" class="voice-input" placeholder="Ask me anything about code...">
                     <button id="voice-mic-btn" class="mic-btn">
                         <i class="fas fa-microphone"></i>
                     </button>
@@ -420,11 +406,10 @@
         </div>
     </div>
 
-    <!-- Gemini API Configuration -->
+    <!-- Libraries & Configuration -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="js/gemini-config.js"></script>
-
-    <!-- Rashid AI Voice Assistant v2.0 -->
-    <script src="js/rashid-ai-v2.js?v=2.1"></script>
+    <script src="js/supabase-config.js"></script>
 
     <!-- Google Translate Script -->
     <script type="text/javascript">
@@ -438,16 +423,12 @@
     <script type="text/javascript"
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-    <!-- Custom Script -->
+    <!-- Unified Rashid-AI Logic -->
+    <script src="js/rashid-ai-v2.js?v=3.0"></script>
+
+    <!-- Core App Scripts -->
     <script src="js/script.js?v=2.4"></script>
     <script src="js/admin.js?v=2.4"></script>
-
-    <!-- Three.js Library -->
-
-    <!-- Three.js Library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Avatar Script -->
-    <script src="js/avatar.js"></script>
 </body>
 
 </html>

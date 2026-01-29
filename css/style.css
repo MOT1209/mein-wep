@@ -90,15 +90,22 @@ body::before {
     width: 100%;
     height: 100%;
     background: radial-gradient(circle at 0% 0%, rgba(var(--accent-rgb), 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(var(--accent-rgb), 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
+        radial-gradient(circle at 100% 100%, rgba(var(--accent-rgb), 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(102, 126, 234, 0.05) 0%, transparent 50%);
     z-index: -1;
     animation: gradientShift 20s ease infinite;
 }
 
 @keyframes gradientShift {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 a {
@@ -643,7 +650,8 @@ body.light-mode .navbar {
     background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
     opacity: 0;
     transition: opacity 0.3s ease;
-    pointer-events: none; /* Prevent blocking clicks */
+    pointer-events: none;
+    /* Prevent blocking clicks */
 }
 
 .gaming-category .project-card:hover::before {
@@ -1802,14 +1810,15 @@ body {
     color: var(--accent);
 }
 
-/* Visualizer Area */
+/* Visualizer Area (Avatar Viewport) */
 .visualizer-container {
-    height: 80px;
+    height: 200px;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    background: linear-gradient(180deg, rgba(56, 189, 248, 0.05) 0%, transparent 100%);
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.1) 0%, transparent 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 #voice-visualizer {

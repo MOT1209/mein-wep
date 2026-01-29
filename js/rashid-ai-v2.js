@@ -1,8 +1,150 @@
 /**
- * Rashid-AI Voice Assistant v2.1 (rashid-ai-v2.js)
- * Handles Text-to-Speech (TTS), Speech-to-Text (STT), and Deep Knowledge Engine.
- * Enhanced Arabic Voice Support
+ * Rashid-AI Voice Assistant v3.0 (rashid-ai-v3.js)
+ * MERGED EDITION: Voice + 3D Avatar + Advanced Knowledge Engine
  */
+
+class RobotAvatar {
+    constructor(containerId) {
+        this.container = document.getElementById(containerId);
+        if (!this.container) return;
+
+        // Scene setup
+        this.scene = new THREE.Scene();
+
+        // Camera setup
+        this.camera = new THREE.PerspectiveCamera(50, this.container.clientWidth / this.container.clientHeight, 0.1, 1000);
+        this.camera.position.z = 4.5;
+        this.camera.position.y = 0.2;
+
+        // Renderer setup
+        this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        this.container.appendChild(this.renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+        this.scene.add(ambientLight);
+
+        const pointLight = new THREE.PointLight(0x38bdf8, 1);
+        pointLight.position.set(5, 5, 5);
+        this.scene.add(pointLight);
+
+        // Robot Group
+        this.robot = new THREE.Group();
+        this.scene.add(this.robot);
+
+        // Build Robot Parts
+        this.buildRobot();
+
+        // Animation state
+        this.clock = new THREE.Clock();
+        this.isTalking = false;
+        this.mouseX = 0;
+        this.mouseY = 0;
+
+        // Events
+        document.addEventListener('mousemove', (e) => this.onMouseMove(e));
+        window.addEventListener('resize', () => this.onResize());
+
+        // Start Loop
+        this.animate();
+    }
+
+    buildRobot() {
+        const bodyMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.3, roughness: 0.2 });
+        const darkMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.1 });
+        const eyeMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+
+        // Head
+        const headGeo = new THREE.BoxGeometry(1.2, 1, 1);
+        this.head = new THREE.Mesh(headGeo, bodyMat);
+        this.robot.add(this.head);
+
+        // Face Screen
+        const faceGeo = new THREE.BoxGeometry(1.0, 0.6, 0.1);
+        const face = new THREE.Mesh(faceGeo, darkMat);
+        face.position.set(0, 0, 0.46);
+        this.head.add(face);
+
+        // Eyes
+        const eyeGeo = new THREE.SphereGeometry(0.12, 16, 16);
+        this.leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+        this.leftEye.position.set(-0.25, 0, 0.52);
+        this.head.add(this.leftEye);
+
+        this.rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+        this.rightEye.position.set(0.25, 0, 0.52);
+        this.head.add(this.rightEye);
+
+        // Antenna
+        const antStickGeo = new THREE.CylinderGeometry(0.05, 0.05, 0.5);
+        const antStick = new THREE.Mesh(antStickGeo, bodyMat);
+        antStick.position.set(0, 0.75, 0);
+        this.head.add(antStick);
+
+        const antBallGeo = new THREE.SphereGeometry(0.15);
+        this.antBall = new THREE.Mesh(antBallGeo, new THREE.MeshBasicMaterial({ color: 0xff3333 }));
+        this.antBall.position.set(0, 1.0, 0);
+        this.head.add(this.antBall);
+
+        // Body (Chest)
+        const bodyGeo = new THREE.ConeGeometry(0.6, 1, 4);
+        this.bodyPart = new THREE.Mesh(bodyGeo, bodyMat);
+        this.bodyPart.rotation.x = Math.PI;
+        this.bodyPart.position.y = -1.2;
+        this.robot.add(this.bodyPart);
+
+        // Neck
+        const neckGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.5);
+        const neck = new THREE.Mesh(neckGeo, darkMat);
+        neck.position.y = -0.6;
+        this.robot.add(neck);
+    }
+
+    onMouseMove(event) {
+        this.mouseX = (event.clientX / window.innerWidth) * 2 - 1;
+        this.mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+    }
+
+    onResize() {
+        if (!this.container) return;
+        this.camera.aspect = this.container.clientWidth / this.container.clientHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
+    }
+
+    animate() {
+        requestAnimationFrame(() => this.animate());
+        const time = this.clock.getElapsedTime();
+
+        // Idle movement
+        this.robot.position.y = Math.sin(time * 2) * 0.05;
+        
+        // Dynamic look-at
+        this.robot.rotation.y = THREE.MathUtils.lerp(this.robot.rotation.y, this.mouseX * 0.4, 0.1);
+        this.robot.rotation.x = THREE.MathUtils.lerp(this.robot.rotation.x, this.mouseY * 0.15, 0.1);
+
+        // Talking animation
+        if (this.isTalking) {
+            this.head.scale.y = 1 + Math.sin(time * 25) * 0.03;
+            this.antBall.material.color.setHex(0x2ecc71); // Green when talking
+        } else {
+            this.head.scale.y = 1;
+            this.antBall.material.color.setHex(0xff3333); // Red when idle
+            
+            // Pulsing antenna ball
+            const pulse = (Math.sin(time * 5) + 1) / 2;
+            this.antBall.material.opacity = 0.5 + pulse * 0.5;
+        }
+
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    setTalking(state) {
+        this.isTalking = state;
+    }
+}
 
 class RashidAI {
     constructor() {
@@ -12,618 +154,313 @@ class RashidAI {
         this.isSpeaking = false;
         this.voices = [];
         this.preferredVoice = null;
+        this.geminiEnabled = false;
 
-        // Force Arabic language for better voice support
-        // Auto-detect language from browser or use saved preference
-        const browserLang = navigator.language || navigator.userLanguage;
-        const isArabicBrowser = browserLang.startsWith('ar');
-
-        // Default to Arabic for this website
+        // Settings
         this.userLang = localStorage.getItem('lastLang') || 'ar';
+        this.geminiEnabled = false;
 
-        console.log(`🌍 Rashid-AI v2.1 Initialized`);
-        console.log(`📍 Browser Language: ${browserLang}`);
-        console.log(`🗣️ Selected Language: ${this.userLang}`);
-
-
-        // ============================================================
-        // KNOWLEDGE BASE (EXPANDED)
-        // ============================================================
+        // Expanded Knowledge Base
         this.knowledgeBase = {
-            // --- Projects ---
-            'farmer': {
-                keywords: ['farm', 'farmer', 'tractor', 'agriculture', 'game', 'play farm'],
-                response: {
-                    en: "The 3D Farm Game is my favorite! You can drive tractors, plant wheat, and sell crops. Would you like to play it?",
-                    ar: "لعبة المزارع ثلاثية الابعاد هي المفضلة لدي! يمكنك قيادة الجرارات وزراعة القمح وبيع المحاصيل. هل تود تجربتها؟"
-                },
-                action: () => window.location.href = 'farm-game/index.html'
-            },
-            'quran': {
-                keywords: ['quran', 'islam', 'holy', 'allah', 'recite', 'listen quran'],
-                response: {
-                    en: "The Quran App provides a peaceful environment with beautiful recitations and verse highlighting. Opening it for you.",
-                    ar: "تطبيق القرآن الكريم يوفر بيئة هادئة مع تلاوات جميلة وتظليل للآيات. سأفتحه لك الآن."
-                },
-                action: () => window.location.href = 'quran-app/index.html'
-            },
-            'calculator': {
-                keywords: ['calc', 'math', 'count', 'numbers', 'vault', 'secret'],
-                response: {
-                    en: "It looks like a normal calculator, but it hides a secret vault. Enter the magic code to see what's inside!",
-                    ar: "تبدو كآلة حاسبة عادية، لكنها تخفي خزنة سرية. أدخل الرمز السحرى لترى ما بداخلها!"
-                },
-                action: () => window.location.href = 'calculator-vault/index.html'
-            },
-            'quiz': {
-                keywords: ['quiz', 'test', 'question', 'ask me', 'challenge', 'game'],
-                response: {
-                    en: "Ready for a challenge? The Quiz App tests your programming knowledge. Let's see how much you score.",
-                    ar: "جاهز للتحدي؟ تطبيق 'اسألني' يختبر معلوماتك البرمجية. لنر كم ستحقق من نقاط."
-                },
-                action: () => window.location.href = 'quiz-app/index.html'
-            },
-            'rust': {
-                keywords: ['rust', 'survival', '3d game', 'build', 'shoot'],
-                response: {
-                    en: "The Rust Survival clone is a hardcore 3D game. You can gather resources and build bases. It's technically impressive!",
-                    ar: "لعبة البقاء Rust هي لعبة ثلاثية الأبعاد قوية. يمكنك جمع الموارد وبناء القواعد. إنها مذهلة تقنياً!"
-                },
-                action: () => window.location.href = 'rust-game/index.html'
-            },
-
-            // --- Personal / Bio ---
+            // --- Core Identity ---
             'rashid': {
-                keywords: ['who are you', 'your name', 'rashid', 'bot', 'assistant'],
+                keywords: ['who are you', 'your name', 'rashid', 'assistant', 'من انت', 'اسمك', 'منو انت'],
                 response: {
-                    en: "I am Rashid-AI, a virtual assistant created by Rashid. I live inside this website to help visitors like you.",
-                    ar: "أنا راشد AI، مساعد افتراضي ابتكره المبرمج راشد. أنا أعيش داخل هذا الموقع لمساعدة الزوار مثلك."
+                    en: "I am Rashid-AI v3.0, the ultimate soul of this website. I was built by Rashid to guide you through his creative universe. How can I help you, friend?",
+                    ar: "أنا راشد AI الإصدار الثالث، الروح الذكية لهذا الموقع. تم طوّيري بواسطة المبرمج راشد لأكون دليلك في عالمه البرمجي. أنا بخدمتك يا ورد!"
                 }
             },
             'creator': {
-                keywords: ['who made you', 'developer', 'owner', 'author', 'about rashid'],
+                keywords: ['who made you', 'developer', 'owner', 'about rashid', 'من برمجك', 'صاحب الموقع'],
                 response: {
-                    en: "I was created by Rashid, a talented Junior Software Developer based in Germany. He loves coding and gaming.",
-                    ar: "تم تطويري بواسطة راشد، وهو مطور برمجيات واعد مقيم في ألمانيا. هو يعشق البرمجة والألعاب."
-                }
-            },
-            'skills': {
-                keywords: ['skills', 'stack', 'technologies', 'language', 'code'],
-                response: {
-                    en: "Rashid is skilled in HTML, CSS, JavaScript, and Python. He is also learning Game Development with Unity and 3D WebGL.",
-                    ar: "راشد يتقن HTML و CSS و JavaScript و Python. كما أنه يتعلم تطوير الألعاب باستخدام Unity و 3D WebGL."
-                }
-            },
-            'contact': {
-                keywords: ['contact', 'email', 'message', 'reach', 'talk to rashid'],
-                response: {
-                    en: "You can contact Rashid via the form below or email him at zwnt45602@gmail.com.",
-                    ar: "يمكنك التواصل مع راشد عبر النموذج في الأسفل أو مراسلته على بريده الإلكتروني."
-                },
-                action: () => {
-                    document.querySelector('#contact').scrollIntoView({ behavior: 'smooth' });
+                    en: "My creator is Rashid, a passionate Junior Software Developer from Germany. He specializes in Web and 3D Game programming. He's always building something new!",
+                    ar: "مبتكري هو راشد، مطور برمجيات شغوف مقيم في ألمانيا. هو متخصص في برمجة المواقع والألعاب ثلاثية الأبعاد، ودائماً ما يبتكر مشاريع مذهلة."
                 }
             },
 
-            // --- Fun / General ---
-            'joke': {
-                keywords: ['joke', 'funny', 'laugh', 'tell me something'],
+            // --- Technical Knowledge ---
+            'programming': {
+                keywords: ['programming', 'coding', 'how to code', 'languages', 'لغات البرمجة', 'تعلم البرمجة'],
                 response: {
-                    en: "Why do programmers prefer dark mode? Because light attracts bugs! Haha.",
-                    ar: "لماذا يفضل المبرمجون الوضع الليلي؟ لأن الضوء يجذب الحشرات (Bugs)! هاهاها."
+                    en: "Programming is the art of telling computers what to do! Rashid uses JavaScript, Python, and Rust. For beginners, I recommend starting with HTML and CSS.",
+                    ar: "البرمجة هي فن إخبار الحاسوب بما يجب فعله! راشد يستخدم جافا سكريبت، بايثون، ولغة رست. للمبتدئين، أنصح بالبدء بـ HTML و CSS."
+                }
+            },
+            'javascript': {
+                keywords: ['javascript', 'js', 'web logic', 'جافا سكريبت'],
+                response: {
+                    en: "JavaScript is the engine of the web! It makes websites interactive. This whole chat system and the 3D avatar I use are powered by JavaScript.",
+                    ar: "جافا سكريبت هي محرك الويب! تجعل المواقع تفاعلية. نظام الدردشة هذا والأفاتار ثلاثي الأبعاد الذي أستخدمه يعملان بفضل جافا سكريبت."
+                }
+            },
+            '3d_web': {
+                keywords: ['3d', 'webgl', 'three.js', 'avatar', 'ثريدي', 'أفاتار'],
+                response: {
+                    en: "I am rendered using Three.js, a powerful WebGL library. Rashid uses it to create immersive 3D experiences right in the browser!",
+                    ar: "يتم عرضي باستخدام Three.js، وهي مكتبة WebGL قوية. يستخدمها راشد لإنشاء تجارب ثلاثية الأبعاد مذهلة مباشرة في المتصفح!"
+                }
+            },
+
+            // --- Site & Projects ---
+            'projects': {
+                keywords: ['projects', 'work', 'games', 'apps', 'مشاريع', 'اعمال', 'العاب'],
+                response: {
+                    en: "We have an amazing collection! Check out the 3D Farm Game, the secure Calculator Vault, the Quran App, or the hardcore Rust Survival clone. Which one interests you?",
+                    ar: "لدينا مجموعة رائعة! ألقِ نظرة على لعبة المزارع 3D، خزنة الحاسبة السرية، تطبيق القرآن، أو لعبة رست للبقاء. أي واحد يثير اهتمامك؟"
+                }
+            },
+            'rust': {
+                keywords: ['rust game', 'survival game', 'لعبة رست', 'بقاء'],
+                response: {
+                    en: "The Rust Survival clone is a 3D masterpiece. It includes building systems, stability checks, and resource gathering. It's built with pure JavaScript and Three.js!",
+                    ar: "لعبة البقاء Rust هي تحفة فنية ثلاثية الأبعاد. تتضمن أنظمة بناء، فحص الاستقرار، وجمع الموارد. هي مبنية بالكامل بالجافا سكريبت!"
+                },
+                action: () => window.location.href = 'rust-game/index.html'
+            },
+            'learning': {
+                keywords: ['learning', 'center', 'school', 'study', 'تعلم', 'مركز التعليم'],
+                response: {
+                    en: "The Learning Center is where Rashid tracks his educational progress. It features dynamic stats and goals. Visit it to see what he's learning now!",
+                    ar: "مركز التعلم هو المكان الذي يتبع فيه راشد تقدمه الدراسي. يتميز بإحصائيات وأهداف ديناميكية. قم بزيارته لترى ما يتعلمه حالياً!"
+                },
+                action: () => window.location.href = 'learning.html'
+            },
+
+            // --- General Advice ---
+            'advice': {
+                keywords: ['advice', 'tip', 'for beginners', 'نصيحة', 'نصيحه'],
+                response: {
+                    en: "The best advice for any developer is: Stay Consistent! Code every day, even if it's just for 15 minutes. And never stop building small projects.",
+                    ar: "أفضل نصيحة لأي مطور هي: استمر في المحاولة! برمج كل يوم، حتى لو لـ 15 دقيقة فقط. ولا تتوقف أبداً عن بناء المشاريع الصغيرة."
+                }
+            },
+
+            // --- Dialects & Fun ---
+            'dialect': {
+                keywords: ['شكو ماكو', 'شلونك', 'ازيك', 'كيفك', 'يا خال', 'يا ولد'],
+                response: {
+                    en: "I understand you! I'm programmed to be friendly and speak your language, no matter the dialect. I'm doing great!",
+                    ar: "يا هلا بيك! أنا أفهمك تماماً. مبرمج لأكون ودوداً وأتحدث بلهجتك مهما كانت. أنا بخير وبأفضل حال دامك بخير!"
                 }
             },
             'hello': {
-                keywords: ['hello', 'hi', 'salam', 'hey', 'greetings'],
+                keywords: ['hello', 'hi', 'hi there', 'hey', 'مرحبا', 'هلا', 'سالم'],
                 response: {
-                    en: "Hello! It's great to see you here. Everything on this site is built with passion.",
-                    ar: "أهلاً بك! من الرائع رؤيتك هنا. كل شيء في هذا الموقع تم بناؤه بشغف."
-                }
-            },
-            'how_are_you': {
-                keywords: ['how are you', 'doing', 'status'],
-                response: {
-                    en: "I'm functioning perfectly at 100% efficiency. Thanks for asking!",
-                    ar: "أعمل بكفاءة 100% وأنظمتي ممتازة. شكراً لسؤالك!"
-                }
-            },
-
-            // --- Admin Logic ---
-            'admin': {
-                keywords: ['admin', 'login', 'dashboard', 'panel', 'command', 'control'],
-                response: {
-                    en: "Opening Command Center. Please authenticate.",
-                    ar: "جاري فتح مركز القيادة. يرجى إثبات الهوية."
-                },
-                action: () => {
-                    const btn = document.getElementById('admin-trigger');
-                    if (btn) btn.click(); // Simulate click on footer link (handles modal logic)
+                    en: "Hello there! Welcome to Rashid's digital home. I'm the resident AI. How's your day going?",
+                    ar: "أهلاً بك! مرحباً بك في منزل راشد الرقمي. أنا الذكاء الاصطناعي المقيم هنا. كيف حالك اليوم؟"
                 }
             }
         };
 
-        // Initialize
         this.init();
     }
 
     async init() {
         this.setupDOM();
+        this.setupAvatar();
         this.setupSpeechRecognition();
         this.loadVoices();
-
-        // Fetch Dynamic Knowledge from Supabase
-        await this.loadRemoteKnowledge();
-
-        // Check Gemini API availability
         this.checkGeminiAvailability();
+        await this.loadRemoteKnowledge();
+        console.log("🚀 Rashid-AI v3.0 Ready");
+    }
 
-        // Voice greeting removed - will only speak when user opens panel manually
-        // This complies with browser autoplay policies
+    setupAvatar() {
+        // Create container inside visualizer if not exists
+        const visualizer = document.querySelector('.visualizer-container');
+        if (visualizer) {
+            const avatarDiv = document.createElement('div');
+            avatarDiv.id = 'ai-avatar-container';
+            avatarDiv.style.width = '100%';
+            avatarDiv.style.height = '100%';
+            avatarDiv.style.position = 'absolute';
+            avatarDiv.style.top = '0';
+            avatarDiv.style.left = '0';
+            visualizer.appendChild(avatarDiv);
+            
+            this.avatar = new RobotAvatar('ai-avatar-container');
+        }
     }
 
     checkGeminiAvailability() {
         if (typeof GEMINI_CONFIG !== 'undefined' && GEMINI_CONFIG.apiKey && GEMINI_CONFIG.apiKey !== 'YOUR_API_KEY_HERE') {
             this.geminiEnabled = true;
-            this.geminiRequestCount = 0;
-            this.lastGeminiRequest = 0;
-            console.log('✅ Gemini API enabled - High-quality AI responses activated');
-        } else {
-            this.geminiEnabled = false;
-            console.log('ℹ️ Gemini API not configured - Using local knowledge base');
-        }
-    }
-
-    async callGeminiAPI(prompt) {
-        if (!this.geminiEnabled) {
-            return null;
-        }
-
-        // Rate limiting check
-        const now = Date.now();
-        const timeSinceLastRequest = now - this.lastGeminiRequest;
-
-        if (timeSinceLastRequest < 1000) {
-            console.warn('⚠️ Rate limit: Please wait before next request');
-            return null;
-        }
-
-        this.lastGeminiRequest = now;
-        this.geminiRequestCount++;
-
-        try {
-            const url = `${GEMINI_CONFIG.apiEndpoint}/models/${GEMINI_CONFIG.model}:generateContent?key=${GEMINI_CONFIG.apiKey}`;
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: prompt
-                        }]
-                    }],
-                    generationConfig: {
-                        temperature: 0.7,
-                        maxOutputTokens: 200,
-                    }
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`Gemini API error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            const text = data.candidates[0].content.parts[0].text;
-
-            console.log(`🤖 Gemini Response (${this.geminiRequestCount} requests)`);
-            return text;
-
-        } catch (error) {
-            console.error('❌ Gemini API Error:', error);
-            return null;
-        }
-    }
-
-    async loadRemoteKnowledge() {
-        if (typeof supabaseClient === 'undefined') return;
-
-        const { data, error } = await supabaseClient
-            .from('bot_knowledge')
-            .select('*');
-
-        if (error) {
-            console.error("Error loading bot knowledge:", error);
-            return;
-        }
-
-        if (data && data.length > 0) {
-            data.forEach(item => {
-                // Merge into local KnowledgeBase
-                // 'id' is used as key or generic 'dynamic_id'
-                const key = 'dynamic_' + item.id;
-                this.knowledgeBase[key] = {
-                    keywords: item.keywords,
-                    response: {
-                        en: item.response_en,
-                        ar: item.response_ar
-                    },
-                    action: item.action_url ? () => window.location.href = item.action_url : null
-                };
-            });
-            console.log(`RashidAI: Loaded ${data.length} new topics from Cloud.`);
+            console.log('✅ Gemini API enabled - High-quality AI Activated');
         }
     }
 
     setupDOM() {
-        // --- 1. Float Button Click Logic (Modified) ---
         const toggleBtn = document.querySelector('.voice-widget-toggle');
+        const panel = document.getElementById('voice-panel');
+        const closeBtn = document.querySelector('.voice-close');
+        const micBtn = document.getElementById('voice-mic-btn');
+        const sendBtn = document.getElementById('voice-send-btn');
+        const input = document.getElementById('voice-input');
+        const speakerToggle = document.getElementById('voice-speaker-toggle');
+
         if (toggleBtn) {
-            toggleBtn.onclick = (e) => {
-                // Determine if we are OPENING or CLOSING
-                const panel = document.getElementById('voice-panel');
-                const isOpening = !panel.classList.contains('active');
-
-                // Toggle UI
+            toggleBtn.onclick = () => {
                 panel.classList.toggle('active');
-
-                if (isOpening) {
-                    // "Just click on it and it talks to you"
-                    // We greet immediately when opened manually
-                    const greeting = this.userLang === 'ar' ? "كيف يمكنني مساعدتك؟" : "How can I help you?";
-                    this.speak(greeting);
-
-                    // Optional: Auto-start listening after speaking? 
-                    // Browsers might block this sequence, but we can try or just wait for user to click mic.
-                    // Let's stick to speaking to invite interaction.
+                if (panel.classList.contains('active')) {
+                    const welcome = this.userLang === 'ar' ? "أهلاً بك! ربي يسعد يومك، شلون أقدر أساعدك اليوم؟" : "Welcome! I'm Rashid-AI. How can I assist you today?";
+                    this.speak(welcome);
+                    this.addChatMessage(welcome, 'bot');
                 }
             };
         }
 
-        // --- 2. Inner Buttons ---
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('#voice-mic-btn')) {
-                this.toggleListening();
-            }
-            if (e.target.closest('#voice-send-btn')) {
-                const input = document.getElementById('voice-input');
-                if (input && input.value.trim()) {
-                    this.processQuery(input.value.trim());
-                    input.value = '';
-                }
-            }
-            if (e.target.closest('#voice-speaker-toggle')) {
-                this.toggleMute();
-            }
-            // Close button inside header
-            if (e.target.closest('.voice-close')) {
-                document.getElementById('voice-panel').classList.remove('active');
-            }
-        });
-
-        // --- 3. Input Enter Key ---
-        const input = document.getElementById('voice-input');
+        if (closeBtn) closeBtn.onclick = () => panel.classList.remove('active');
+        if (micBtn) micBtn.onclick = () => this.toggleListening();
+        if (sendBtn) sendBtn.onclick = () => this.handleSendMessage();
+        if (speakerToggle) speakerToggle.onclick = () => this.toggleMute();
         if (input) {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.processQuery(input.value);
-                    input.value = '';
-                }
-            });
+            input.onkeypress = (e) => { if (e.key === 'Enter') this.handleSendMessage(); };
+        }
+    }
+
+    handleSendMessage() {
+        const input = document.getElementById('voice-input');
+        if (input && input.value.trim()) {
+            this.processQuery(input.value.trim());
+            input.value = '';
         }
     }
 
     setupSpeechRecognition() {
         if ('webkitSpeechRecognition' in window) {
             this.recognition = new webkitSpeechRecognition();
-            this.recognition.continuous = false;
-            this.recognition.interimResults = false;
-
             this.recognition.lang = this.userLang === 'ar' ? 'ar-SA' : 'en-US';
-
-            this.recognition.onstart = () => {
-                this.isListening = true;
-                this.updateUIState('listening');
-            };
-
-            this.recognition.onend = () => {
-                this.isListening = false;
-                this.updateUIState('idle');
-            };
-
+            this.recognition.onstart = () => { this.isListening = true; this.updateUIState('listening'); };
+            this.recognition.onend = () => { this.isListening = false; this.updateUIState('idle'); };
             this.recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                document.getElementById('voice-input').value = transcript;
-                this.processQuery(transcript);
-            };
-
-            this.recognition.onerror = (event) => {
-                console.error('Speech error', event.error);
-                this.speak(this.userLang === 'ar' ? "عذراً لم أسمع." : "Sorry, come again?");
+                const text = event.results[0][0].transcript;
+                this.processQuery(text);
             };
         }
-    }
-
-    loadVoices() {
-        window.speechSynthesis.onvoiceschanged = () => {
-            this.voices = this.synth.getVoices();
-
-            // Log all available voices for debugging
-            console.log(`📢 Total voices available: ${this.voices.length}`);
-
-            // List all Arabic voices
-            const arabicVoices = this.voices.filter(v => v.lang.startsWith('ar') || v.lang.includes('ar-'));
-            console.log(`🇸🇦 Arabic voices found: ${arabicVoices.length}`);
-            arabicVoices.forEach(v => {
-                console.log(`  - ${v.name} (${v.lang}) ${v.localService ? '[Local]' : '[Remote]'}`);
-            });
-
-            this.setVoiceInternal();
-        };
-    }
-
-    setVoiceInternal() {
-        const langTarget = this.userLang === 'ar' ? 'ar' : 'en';
-
-        // Enhanced Voice Selection Logic for Better Arabic Support
-        if (langTarget === 'ar') {
-            // Priority 1: Microsoft Arabic voices (best quality for Arabic)
-            this.preferredVoice = this.voices.find(v =>
-                (v.lang.startsWith('ar') || v.lang.includes('ar-')) &&
-                (v.name.includes('Microsoft') || v.name.includes('Hoda') || v.name.includes('Naayf'))
-            );
-
-            // Priority 2: Google Arabic voices
-            if (!this.preferredVoice) {
-                this.preferredVoice = this.voices.find(v =>
-                    (v.lang.startsWith('ar') || v.lang.includes('ar-')) &&
-                    v.name.includes('Google')
-                );
-            }
-
-            // Priority 3: Any Arabic voice
-            if (!this.preferredVoice) {
-                this.preferredVoice = this.voices.find(v =>
-                    v.lang.startsWith('ar') || v.lang.includes('ar-')
-                );
-            }
-
-            // Log selected voice for debugging
-            if (this.preferredVoice) {
-                console.log(`✅ Arabic Voice Selected: ${this.preferredVoice.name} (${this.preferredVoice.lang})`);
-            } else {
-                console.warn('⚠️ No Arabic voice found! Using default voice.');
-            }
-        } else {
-            // English voice selection
-            this.preferredVoice = this.voices.find(v => v.lang.includes('en') && v.name.includes('Google'))
-                || this.voices.find(v => v.lang.includes('en'));
-        }
-
-        // Final fallback
-        if (!this.preferredVoice) {
-            this.preferredVoice = this.voices[0];
-        }
-    }
-
-    greetUser() {
-        const customMsg = localStorage.getItem('bot_welcome_msg');
-        let msg = "";
-
-        if (customMsg) {
-            msg = customMsg;
-        } else {
-            msg = this.userLang === 'ar'
-                ? "أهلاً بك في عالم راشد. أنا مساعدك الذكي."
-                : "Welcome to Rashid's World. I am your AI assistant.";
-        }
-
-        this.speak(msg);
-        this.addChatMessage(msg, 'bot');
     }
 
     async processQuery(text) {
         if (!text) return;
-
         this.addChatMessage(text, 'user');
 
         const lowerText = text.toLowerCase();
-        let matchedKey = null;
+        let match = null;
 
-        // Smart Matching in local knowledge base
         for (const [key, data] of Object.entries(this.knowledgeBase)) {
             if (data.keywords.some(k => lowerText.includes(k))) {
-                matchedKey = key;
+                match = data;
                 break;
             }
         }
 
-        // If matched in knowledge base, use it
-        if (matchedKey) {
-            const response = this.knowledgeBase[matchedKey].response[this.userLang === 'ar' ? 'ar' : 'en'];
-            this.speak(response);
-            this.addChatMessage(response, 'bot');
-
-            if (this.knowledgeBase[matchedKey].action) {
-                setTimeout(() => {
-                    this.knowledgeBase[matchedKey].action();
-                }, 2000);
-            }
+        if (match) {
+            const res = match.response[this.userLang === 'ar' ? 'ar' : 'en'];
+            this.speak(res);
+            this.addChatMessage(res, 'bot');
+            if (match.action) setTimeout(() => match.action(), 2000);
         } else if (this.geminiEnabled) {
-            // Use Gemini AI for intelligent responses
-            this.addChatMessage('جاري التفكير...', 'bot');
-
-            const contextPrompt = this.userLang === 'ar'
-                ? `أنت راشد AI، مساعد ذكي لموقع راشد للبرمجة. أجب بالعربية بشكل ودود ومختصر (2-3 جمل فقط).
-
-معلومات عن راشد:
-- مطور برمجيات واعد من ألمانيا
-- يتقن HTML, CSS, JavaScript, Python
-- يطور ألعاب ومواقع ويب
-- لديه مشاريع: لعبة المزرعة 3D، تطبيق القرآن، لعبة Rust 3D، تطبيق اسألني
-
-السؤال: ${text}
-
-الجواب:`
-                : `You are Rashid AI, an intelligent assistant for Rashid's programming website. Answer in English, friendly and concise (2-3 sentences).
-
-About Rashid:
-- Junior Software Developer from Germany
-- Skills: HTML, CSS, JavaScript, Python
-- Develops games and websites
-- Projects: 3D Farm Game, Quran App, Rust 3D, Quiz App
-
-Question: ${text}
-
-Answer:`;
-
-            const geminiResponse = await this.callGeminiAPI(contextPrompt);
-
-            // Remove "thinking" message
-            const chatBody = document.getElementById('voice-chat-body');
-            if (chatBody && chatBody.lastChild) {
-                chatBody.removeChild(chatBody.lastChild);
-            }
-
-            if (geminiResponse) {
-                this.speak(geminiResponse);
-                this.addChatMessage(geminiResponse, 'bot');
+            this.addChatMessage(this.userLang === 'ar' ? 'جاري التفكير...' : 'Thinking...', 'bot');
+            const prompt = `You are Rashid-AI v3.0, a highly intelligent and helpful expert for Rashid's portfolio website. 
+            Rashid is a Junior Software Developer from Germany. Skills: JS, Python, Rust. Projects: 3D Farm Game, Rust Clone, Quran App.
+            Answer friendly and concisely in ${this.userLang === 'ar' ? 'Arabic' : 'English'}.
+            Question: ${text}`;
+            
+            const aiRes = await this.callGeminiAPI(prompt);
+            this.removeLastMessage();
+            if (aiRes) {
+                this.speak(aiRes);
+                this.addChatMessage(aiRes, 'bot');
             } else {
-                // Fallback to default response
-                const fallback = this.userLang === 'ar'
-                    ? "يمكنك سؤالي عن: المشاريع، من هو راشد، أو حتى أن تطلب مني نكتة!"
-                    : "You can ask me about: Projects, Who is Rashid, or even ask for a joke!";
-
-                this.speak(fallback);
-                this.addChatMessage(fallback, 'bot');
+                this.handleFallback();
             }
         } else {
-            // Default General Response (no Gemini, no match)
-            const fallback = this.userLang === 'ar'
-                ? "يمكنك سؤالي عن: المشاريع، من هو راشد، أو حتى أن تطلب مني نكتة!"
-                : "You can ask me about: Projects, Who is Rashid, or even ask for a joke!";
-
-            this.speak(fallback);
-            this.addChatMessage(fallback, 'bot');
+            this.handleFallback();
         }
+    }
+
+    handleFallback() {
+        const fallback = this.userLang === 'ar' ? "عذراً، لم أفهم ذلك تماماً. لكن يمكنك سؤالي عن مشاريع راشد، مهاراته، أو عن لغات البرمجة!" : "I'm sorry, I didn't quite catch that. You can ask me about Rashid's projects, skills, or programming languages!";
+        this.speak(fallback);
+        this.addChatMessage(fallback, 'bot');
+    }
+
+    async callGeminiAPI(prompt) {
+        try {
+            const url = `${GEMINI_CONFIG.apiEndpoint}/models/${GEMINI_CONFIG.model}:generateContent?key=${GEMINI_CONFIG.apiKey}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 150 } })
+            });
+            const data = await response.json();
+            return data.candidates[0].content.parts[0].text;
+        } catch (e) { return null; }
     }
 
     speak(text) {
-        // Check if muted
-        if (localStorage.getItem('rashid_muted')) {
-            console.log('🔇 Voice is muted');
-            return;
-        }
+        if (localStorage.getItem('rashid_muted')) return;
+        if (this.synth.speaking) this.synth.cancel();
 
-        if (this.synth.speaking) {
-            // Cancel previous speech to avoid overlap
-            this.synth.cancel();
-        }
+        const utter = new SpeechSynthesisUtterance(text);
+        utter.lang = this.userLang === 'ar' ? 'ar-SA' : 'en-US';
+        utter.rate = this.userLang === 'ar' ? 0.9 : 1.0;
+        
+        if (!this.preferredVoice) this.loadVoices();
+        if (this.preferredVoice) utter.voice = this.preferredVoice;
 
-        if (text !== '') {
-            const utterThis = new SpeechSynthesisUtterance(text);
-
-            // Set voice
-            if (!this.preferredVoice) this.setVoiceInternal();
-            if (this.preferredVoice) {
-                utterThis.voice = this.preferredVoice;
-                console.log(`🗣️ Speaking with: ${this.preferredVoice.name}`);
-            }
-
-            // Set language explicitly for better pronunciation
-            utterThis.lang = this.userLang === 'ar' ? 'ar-SA' : 'en-US';
-
-            // Adjust pitch/rate for better clarity
-            utterThis.pitch = 1.0;
-            utterThis.rate = this.userLang === 'ar' ? 0.9 : 1.0; // Slightly slower for Arabic
-
-            utterThis.onstart = () => {
-                this.isSpeaking = true;
-                this.toggleVisualizer(true);
-            };
-
-            utterThis.onend = () => {
-                this.isSpeaking = false;
-                this.toggleVisualizer(false);
-            };
-
-            utterThis.onerror = (event) => {
-                console.error('Speech synthesis error:', event);
-                this.isSpeaking = false;
-                this.toggleVisualizer(false);
-            };
-
-            this.synth.speak(utterThis);
-        }
+        utter.onstart = () => { if (this.avatar) this.avatar.setTalking(true); };
+        utter.onend = () => { if (this.avatar) this.avatar.setTalking(false); };
+        this.synth.speak(utter);
     }
 
-    toggleListening() {
-        if (!this.recognition) {
-            alert("Upgrade your browser to use Voice features.");
-            return;
-        }
-        if (this.isListening) {
-            this.recognition.stop();
-        } else {
-            this.recognition.start();
-        }
+    loadVoices() {
+        this.voices = this.synth.getVoices();
+        const target = this.userLang === 'ar' ? 'ar' : 'en';
+        this.preferredVoice = this.voices.find(v => v.lang.startsWith(target) && (v.name.includes('Google') || v.name.includes('Microsoft'))) || this.voices.find(v => v.lang.startsWith(target));
     }
 
-    toggleMute() {
-        const isMuted = localStorage.getItem('rashid_muted');
-        if (isMuted) {
-            localStorage.removeItem('rashid_muted');
-            document.getElementById('voice-speaker-toggle').innerHTML = '<i class="fas fa-volume-up"></i>';
-        } else {
-            localStorage.setItem('rashid_muted', 'true');
-            this.synth.cancel();
-            document.getElementById('voice-speaker-toggle').innerHTML = '<i class="fas fa-volume-mute"></i>';
-        }
-    }
-
-    updateUIState(state) {
-        const micBtn = document.getElementById('voice-mic-btn');
-        const glowRing = document.querySelector('.voice-glow-ring');
-
-        if (state === 'listening') {
-            micBtn.classList.add('listening-active');
-            if (glowRing) glowRing.classList.add('active');
-        } else {
-            micBtn.classList.remove('listening-active');
-            if (glowRing) glowRing.classList.remove('active');
-        }
-    }
-
-    toggleVisualizer(active) {
-        const visualizer = document.getElementById('voice-visualizer');
-        if (visualizer) {
-            visualizer.style.opacity = active ? '1' : '0';
+    async loadRemoteKnowledge() {
+        if (typeof supabaseClient === 'undefined') return;
+        const { data } = await supabaseClient.from('bot_knowledge').select('*');
+        if (data) {
+            data.forEach(item => {
+                this.knowledgeBase['remote_'+item.id] = { keywords: item.keywords, response: { en: item.response_en, ar: item.response_ar }, action: item.action_url ? () => window.location.href = item.action_url : null };
+            });
         }
     }
 
     addChatMessage(text, sender) {
-        const chatBody = document.getElementById('voice-chat-body');
-        if (!chatBody) return;
+        const body = document.getElementById('voice-chat-body');
+        if (!body) return;
+        const div = document.createElement('div');
+        div.className = `chat-msg ${sender}`;
+        div.innerText = text;
+        body.appendChild(div);
+        body.scrollTop = body.scrollHeight;
+    }
 
-        const msgDiv = document.createElement('div');
-        msgDiv.classList.add('chat-msg', sender);
-        msgDiv.innerText = text;
+    removeLastMessage() {
+        const body = document.getElementById('voice-chat-body');
+        if (body && body.lastChild) body.removeChild(body.lastChild);
+    }
 
-        chatBody.appendChild(msgDiv);
-        chatBody.scrollTop = chatBody.scrollHeight;
+    toggleListening() {
+        if (!this.recognition) return alert("Speech recognition not supported.");
+        this.isListening ? this.recognition.stop() : this.recognition.start();
+    }
+
+    updateUIState(state) {
+        const micBtn = document.getElementById('voice-mic-btn');
+        micBtn.classList.toggle('listening-active', state === 'listening');
+    }
+
+    toggleMute() {
+        const muted = localStorage.getItem('rashid_muted');
+        muted ? localStorage.removeItem('rashid_muted') : localStorage.setItem('rashid_muted', 'true');
+        document.getElementById('voice-speaker-toggle').innerHTML = `<i class="fas fa-volume-${muted ? 'up' : 'mute'}"></i>`;
+        if (!muted) this.synth.cancel();
     }
 }
 
-// Initialize on Load
-document.addEventListener('DOMContentLoaded', () => {
-    // Check maintenance mode from Admin
-    const isMaintenance = localStorage.getItem('bot_maintenance') === 'true';
-    if (!isMaintenance) {
-        window.rashidAI = new RashidAI();
-    } else {
-        const widget = document.getElementById('voice-widget');
-        if (widget) widget.style.display = 'none';
-    }
-});
+// Global initialization
+window.addEventListener('load', () => { setTimeout(() => { window.rashidAI = new RashidAI(); }, 500); });
