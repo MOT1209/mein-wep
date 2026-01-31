@@ -12,7 +12,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
     <!-- Font Awesome -->
@@ -23,9 +23,9 @@
     <script src="js/supabase-config.js"></script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css?v=2.4">
-    <link rel="stylesheet" href="css/admin.css?v=2.4">
-    <link rel="stylesheet" href="css/app-mode.css?v=2.4">
+    <link rel="stylesheet" href="css/style.css?v=3.0">
+    <link rel="stylesheet" href="css/admin.css?v=3.0">
+    <link rel="stylesheet" href="css/app-mode.css?v=3.0">
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
@@ -34,32 +34,31 @@
 
 <body class="dark-mode">
 
+    <!-- Premium Dynamic Background -->
+    <div class="bg-mesh"></div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container nav-container">
             <a href="#hero" class="logo">Rashid<span class="accent-dot">.</span></a>
 
             <ul class="nav-links">
-
                 <li><a href="#skills">Skills</a></li>
-                <li><a href="learning.html">Learning Center</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#experience">Experience</a></li>
-                <li><a href="#services">Services</a></li>
+                <li><a href="learning.html">Learning</a></li>
+                <li><a href="#projects">Work</a></li>
+                <li><a href="#experience">History</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>
 
             <div class="nav-controls">
-                <button id="settings-btn" aria-label="Site Settings">
-                    <i class="fas fa-cog"></i>
+                <button id="settings-btn" class="control-btn" aria-label="Settings">
+                    <i class="fas fa-sliders-h"></i>
                 </button>
-                <button id="theme-toggle" aria-label="Toggle Theme">
+                <button id="theme-toggle" class="control-btn" aria-label="Toggle Theme">
                     <i class="fas fa-sun"></i>
                 </button>
                 <div class="hamburger">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
+                    <span></span><span></span><span></span>
                 </div>
             </div>
         </div>
@@ -67,12 +66,10 @@
 
     <!-- Mobile Menu Overlay -->
     <div class="mobile-menu">
-
         <a href="#skills">Skills</a>
         <a href="learning.html">Learning Center</a>
         <a href="#projects">Projects</a>
         <a href="#experience">Experience</a>
-        <a href="#services">Services</a>
         <a href="#contact">Contact</a>
     </div>
 
@@ -80,21 +77,32 @@
     <header id="hero">
         <div class="container hero-content">
             <div class="hero-text">
-                <span class="greeting fade-in">willkommen</span>
-                <h1 class="fade-in delay-1">Rashid. <span style="font-size: 0.8rem; opacity: 0.5;">v2.2</span></h1>
-                <h2 class="fade-in delay-2">Software and Web Developer | Software Developer | Game and Website
-                    Programmer
-                </h2>
-                <p class="fade-in delay-3">A motivated young programmer passionate about building games and web
-                    applications, with a strong desire to grow into a professional software developer.</p>
-                <div class="cta-buttons fade-in delay-4">
-                    <a href="#projects" class="btn btn-primary">View My Work</a>
-                    <a href="#contact" class="btn btn-outline">Contact Me</a>
+                <div class="badge fade-in">Available for Projects</div>
+                <h1 class="fade-in delay-1">Crafting Digital <span class="text-gradient">Experiences.</span></h1>
+                <p class="fade-in delay-2">I'm Rashid, a Junior Software Developer based in Germany. specializing in
+                    building immersive games and modern web applications with a focus on high-end design.</p>
+                <div class="cta-buttons fade-in delay-3">
+                    <a href="#projects" class="btn btn-primary">Discover My Work <i class="fas fa-arrow-right"></i></a>
+                    <a href="#contact" class="btn btn-glass">Let's Talk</a>
+                </div>
+                <div class="hero-stats fade-in delay-4">
+                    <div class="stat">
+                        <span class="stat-num">50+</span>
+                        <span class="stat-label">Projects</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-num">3+</span>
+                        <span class="stat-label">Years</span>
+                    </div>
                 </div>
             </div>
             <div class="hero-visual fade-in delay-2">
-                <div class="hero-img-container">
-                    <img src="images/logo.png" alt="ALKING RASHID Logo">
+                <div class="hero-img-wrapper">
+                    <div class="glass-card main-visual">
+                        <img src="images/logo.png" alt="Rashid Dev Logo">
+                    </div>
+                    <div class="glass-card decor-1"></div>
+                    <div class="glass-card decor-2"></div>
                 </div>
             </div>
         </div>
@@ -107,45 +115,41 @@
 
 
     <!-- Skills Section -->
-    <section id="skills" class="section alt-bg">
+    <section id="skills" class="section">
         <div class="container">
-            <h2 class="section-title reveal">My Skills</h2>
+            <div class="section-head">
+                <h2 class="reveal">Technical Mastery</h2>
+                <p class="reveal">A glimpse into my ever-evolving toolkit and the technologies I use to bring ideas to life.</p>
+            </div>
+            
             <div class="skills-grid">
-                <!-- Languages -->
-                <div class="skill-category reveal">
-                    <h3>Languages</h3>
-                    <div class="skill-cards">
-                        <div class="skill-card">
-                            <i class="fab fa-html5"></i>
-                            <span>HTML</span>
-                        </div>
-                        <div class="skill-card">
-                            <i class="fab fa-css3-alt"></i>
-                            <span>CSS</span>
-                        </div>
-                        <div class="skill-card">
-                            <i class="fab fa-js"></i>
-                            <span>JavaScript</span>
-                        </div>
-                        <div class="skill-card">
-                            <i class="fab fa-python"></i>
-                            <span>Python</span>
-                        </div>
+                <div class="skill-card reveal">
+                    <div class="skill-icon"><i class="fas fa-layer-group"></i></div>
+                    <h3>Core Development</h3>
+                    <div class="skill-list">
+                        <span class="skill-tag">HTML5 / CSS3</span>
+                        <span class="skill-tag">JavaScript (ES6+)</span>
+                        <span class="skill-tag">Python</span>
                     </div>
                 </div>
 
-                <!-- Tools -->
-                <div class="skill-category reveal">
-                    <h3>Tools</h3>
-                    <div class="skill-cards">
-                        <div class="skill-card">
-                            <i class="fab fa-git-alt"></i>
-                            <span>Git</span>
-                        </div>
-                        <div class="skill-card">
-                            <i class="fas fa-code"></i>
-                            <span>VS Code</span>
-                        </div>
+                <div class="skill-card reveal">
+                    <div class="skill-icon"><i class="fas fa-gamepad"></i></div>
+                    <h3>Game Design</h3>
+                    <div class="skill-list">
+                        <span class="skill-tag">Three.js</span>
+                        <span class="skill-tag">WebGL</span>
+                        <span class="skill-tag">Game Logic</span>
+                    </div>
+                </div>
+
+                <div class="skill-card reveal">
+                    <div class="skill-icon"><i class="fas fa-server"></i></div>
+                    <h3>Backend & Tools</h3>
+                    <div class="skill-list">
+                        <span class="skill-tag">Supabase</span>
+                        <span class="skill-tag">Git / GitHub</span>
+                        <span class="skill-tag">REST APIs</span>
                     </div>
                 </div>
             </div>
@@ -153,143 +157,97 @@
     </section>
 
     <!-- Projects Section -->
-    <section id="projects" class="section">
+    <section id="projects" class="section alt-bg">
         <div class="container">
-            <h2 class="section-title reveal">Projects Showcase</h2>
-
-            <!-- Filter Buttons -->
-            <div class="project-filters reveal">
-                <button class="filter-btn active" data-filter="all">
-                    <i class="fas fa-th"></i> All Projects
-                </button>
-                <button class="filter-btn" data-filter="games">
-                    <i class="fas fa-gamepad"></i> Games
-                </button>
-                <button class="filter-btn" data-filter="apps">
-                    <i class="fas fa-tools"></i> Apps
-                </button>
+            <div class="projects-header reveal">
+                <div class="section-head" style="text-align: left; margin-bottom: 0;">
+                    <h2>Featured Work</h2>
+                    <p>A curated selection of my latest games and web applications.</p>
+                </div>
+                <!-- Premium Filter Buttons -->
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="games">Games</button>
+                    <button class="filter-btn" data-filter="apps">Apps</button>
+                </div>
             </div>
 
-            <!-- Category A: 3D Gaming Universe -->
-            <div class="project-category gaming-category" data-category="games">
-                <div class="category-header reveal">
-                    <h3><i class="fas fa-gamepad"></i> 3D Gaming Universe</h3>
-                    <p>Immersive gaming experiences built with cutting-edge web technologies</p>
-                </div>
-
+            <!-- Gaming Universe -->
+            <div class="project-category gaming-category reveal" data-category="games">
                 <div class="projects-grid" id="gaming-grid">
-                    <p class="loading-status">Loading 3D Universe...</p>
+                    <!-- Dynamic Projects Injected by script.js -->
                 </div>
             </div>
 
-            <!-- Category B: Pro Apps & Tools -->
-            <div class="project-category apps-category" data-category="apps">
-                <div class="category-header reveal">
-                    <h3><i class="fas fa-tools"></i> Pro Apps & Tools</h3>
-                    <p>Professional applications designed for productivity and utility</p>
-                </div>
-
+            <!-- Pro Apps -->
+            <div class="project-category apps-category reveal" data-category="apps">
                 <div class="projects-grid" id="apps-grid">
-                    <p class="loading-status">Loading Pro Apps...</p>
+                    <!-- Dynamic Projects Injected by script.js -->
                 </div>
             </div>
-
         </div>
     </section>
 
-    <!-- Experience Section -->
-    <section id="experience" class="section alt-bg">
+    <!-- Experience & Education -->
+    <section id="experience" class="section">
         <div class="container">
-            <h2 class="section-title reveal">Experience</h2>
+            <div class="section-head">
+                <h2 class="reveal">Growth & Journey</h2>
+                <p class="reveal">Tracing my path from curious learner to aspiring professional.</p>
+            </div>
+            
             <div class="timeline">
                 <div class="timeline-item reveal">
                     <div class="timeline-dot"></div>
-                    <div class="timeline-date">2023 – Present</div>
-                    <div class="timeline-content">
+                    <div class="timeline-content blur-glass">
+                        <span class="period">2023 – Present</span>
                         <h3>Student Developer</h3>
-                        <h4>Self-Learning & School Projects</h4>
-                        <ul>
-                            <li>Built small games and websites</li>
-                            <li>Practiced JavaScript fundamentals</li>
-                            <li>Learned problem-solving through coding</li>
-                        </ul>
+                        <p>Currently focusing on mastering Three.js for 3D immersive web experiences and advanced JavaScript game mechanics.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- Services Section -->
-    <section id="services" class="section">
-        <div class="container">
-            <h2 class="section-title reveal">Services</h2>
-            <div class="services-grid">
-                <div class="service-card reveal">
-                    <i class="fas fa-code"></i>
-                    <h3>Simple Website Development</h3>
-                    <p>Clean and responsive websites for personal or basic needs.</p>
-                </div>
-                <div class="service-card reveal">
-                    <i class="fas fa-gamepad"></i>
-                    <h3>Beginner Game Development</h3>
-                    <p>Creating simple, interactive games for fun and learning.</p>
-                </div>
-                <div class="service-card reveal">
-                    <i class="fas fa-layer-group"></i>
-                    <h3>Frontend Practice Projects</h3>
-                    <p>Turning UI designs into functional HTML/CSS code.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
 
     <!-- Contact Section -->
     <section id="contact" class="section">
         <div class="container">
-            <h2 class="section-title reveal">Get In Touch</h2>
-            <div class="contact-wrapper">
-                <div class="contact-info reveal">
-                    <h3>Let's Connect</h3>
-                    <p>I'm always open to discussing new projects, creative ideas or opportunities to be part of your
-                        visions.</p>
-
-                    <div style="margin: 25px 0;">
-                        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-                            <i class="fas fa-envelope" style="color: var(--accent); font-size: 1.2rem;"></i>
-                            <span>zwnt45602@gmail.com</span>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <i class="fas fa-map-marker-alt" style="color: var(--accent); font-size: 1.2rem;"></i>
-                            <span>Germany</span>
+            <div class="contact-container blur-glass reveal">
+                <div class="contact-info">
+                    <h3>Ready to build something <span class="text-gradient">Epic?</span></h3>
+                    <p>I'm available for freelance projects and full-time opportunities. Let's make it happen.</p>
+                    
+                    <div class="contact-method">
+                        <div class="method-icon"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <span class="label">Email</span>
+                            <p>zwnt45602@gmail.com</p>
                         </div>
                     </div>
-
-                    <div class="social-links">
-                        <a href="https://github.com/" target="_blank" aria-label="GitHub"><i
-                                class="fab fa-github"></i></a>
-                        <a href="https://linkedin.com/" target="_blank" aria-label="LinkedIn"><i
-                                class="fab fa-linkedin"></i></a>
-                        <a href="https://youtube.com/" target="_blank" aria-label="YouTube"><i
-                                class="fab fa-youtube"></i></a>
-                        <a href="https://facebook.com/" target="_blank" aria-label="Facebook"><i
-                                class="fab fa-facebook"></i></a>
-                        <a href="https://t.me/" target="_blank" aria-label="Telegram"><i
-                                class="fab fa-telegram"></i></a>
+                    
+                    <div class="contact-method">
+                        <div class="method-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <span class="label">Location</span>
+                            <p>Germany</p>
+                        </div>
                     </div>
                 </div>
-                <form class="contact-form reveal">
+
+                <form class="contact-form">
                     <div class="form-group">
-                        <input type="text" placeholder="Name" required>
+                        <label>Full Name</label>
+                        <input type="text" class="form-input" placeholder="Your Name" required>
                     </div>
                     <div class="form-group">
-                        <input type="email" placeholder="Email" required>
+                        <label>Email Address</label>
+                        <input type="email" class="form-input" placeholder="name@example.com" required>
                     </div>
                     <div class="form-group">
-                        <textarea placeholder="Message" rows="5" required></textarea>
+                        <label>Your Message</label>
+                        <textarea class="form-input" rows="4" placeholder="Tell me about your project..." required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Send Message</button>
+                    <button type="submit" class="btn btn-primary">Send Message <i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
@@ -297,56 +255,76 @@
 
     <!-- Settings Modal -->
     <div class="settings-overlay" id="settings-overlay"></div>
-    <div class="settings-modal" id="settings-modal">
+    <div class="settings-modal blur-glass" id="settings-modal">
         <div class="settings-header">
-            <h3>Site Settings</h3>
-            <span class="close-settings" id="close-settings">&times;</span>
+            <h3><i class="fas fa-palette"></i> Customize Workspace</h3>
+            <button class="close-settings" id="close-settings"><i class="fas fa-times"></i></button>
         </div>
 
-        <div class="setting-item">
-            <label><i class="fas fa-globe"></i> اختر لغة الموقع</label>
-            <div class="language-picker-container">
-                <div class="language-list">
-                    <div class="lang-option" data-lang="ar">العربية</div>
-                    <div class="lang-option" data-lang="en">English</div>
-                    <div class="lang-option" data-lang="de">Deutsch</div>
-                    <div class="lang-option" data-lang="fr">Français</div>
-                    <div class="lang-option" data-lang="es">Español</div>
-                    <div class="lang-option" data-lang="tr">Türkçe</div>
-                    <div class="lang-option" data-lang="ru">Русский</div>
-                    <div class="lang-option" data-lang="zh-CN">中文</div>
-                    <div class="lang-option" data-lang="ja">日本語</div>
+        <div class="settings-body">
+            <!-- Accent Color Selection -->
+            <div class="setting-item">
+                <label>Accent Color</label>
+                <div class="accent-picker">
+                    <div class="accent-dot active" data-color="#38bdf8" style="background: #38bdf8;"></div>
+                    <div class="accent-dot" data-color="#f472b6" style="background: #f472b6;"></div>
+                    <div class="accent-dot" data-color="#34d399" style="background: #34d399;"></div>
+                    <div class="accent-dot" data-color="#fbbf24" style="background: #fbbf24;"></div>
+                    <div class="accent-dot" data-color="#a78bfa" style="background: #a78bfa;"></div>
                 </div>
             </div>
-            <div id="google_translate_element"></div>
-            <p style="text-align: center; font-size: 11px; opacity: 0.5; margin-top: 10px;">
-                <i class="fas fa-arrows-alt-v"></i> مرر للأسفل لرؤية المزيد
-            </p>
-        </div>
 
-        <div class="setting-item">
-            <label><i class="fas fa-robot"></i> Rashid's Voice</label>
-            <div
-                style="display: flex; align-items: center; justify-content: space-between; background: var(--bg-alt); padding: 10px; border-radius: 8px;">
-                <span>Voice Response</span>
-                <input type="checkbox" id="voice-toggle" checked style="width: auto;">
+            <!-- Language Picker -->
+            <div class="setting-item">
+                <label><i class="fas fa-language"></i> Site Language</label>
+                <div class="lang-grid">
+                    <button class="lang-btn active" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="ar">العربية</button>
+                    <button class="lang-btn" data-lang="de">Deutsch</button>
+                </div>
+                <div id="google_translate_element"></div>
+            </div>
+
+            <!-- Aesthetics Toggle -->
+            <div class="setting-item">
+                <div class="toggle-row">
+                    <span>Performance Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="perf-mode">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <p class="desc">Disable background animations for speed.</p>
             </div>
         </div>
 
         <div class="settings-footer">
-            <p>Rashid Portfolio v3.0</p>
+            <p>Rashid Design System v3.1</p>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container footer-content">
-            <p>&copy; 2025 Rashid. All Rights Reserved. <a href="admin/login.html"
-                    style="font-size:0.8rem; opacity:0.5; margin-left:10px; text-decoration:none; color: inherit;">Admin
-                    Portal</a></p>
-            <a href="#hero" class="back-to-top" aria-label="Back to Top">
-                <i class="fas fa-arrow-up"></i>
-            </a>
+    <footer class="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <a href="#" class="logo">Rashid<span>.</span></a>
+                <p>Pushing the boundaries of game development and web technology.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-github"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-discord"></i></a>
+                </div>
+            </div>
+            <div class="footer-nav">
+                <h4>Navigation</h4>
+                <a href="#projects">Work</a>
+                <a href="#skills">Skills</a>
+                <a href="learning.html">Learning</a>
+            </div>
+            <div class="footer-legal">
+                <p>&copy; 2026 Rashid. Crafted with Passion.</p>
+                <a href="admin/login.html" class="admin-link">Internal Access</a>
+            </div>
         </div>
     </footer>
 
@@ -427,8 +405,8 @@
     <script src="js/rashid-ai-v2.js?v=3.0"></script>
 
     <!-- Core App Scripts -->
-    <script src="js/script.js?v=2.4"></script>
-    <script src="js/admin.js?v=2.4"></script>
+    <script src="js/script.js?v=3.0"></script>
+    <script src="js/admin.js?v=3.0"></script>
 </body>
 
 </html>

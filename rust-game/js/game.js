@@ -5,21 +5,21 @@ console.log("Rust Survival Engine v2.5: Initializing with Collision Physics...")
 
 // ==================== CONFIGURATION ====================
 const CONFIG = {
-    WORLD_SIZE: 300,
-    TREE_COUNT: 55,
-    ROCK_COUNT: 30,
-    SULFUR_COUNT: 20,
-    BARREL_COUNT: 25,
+    WORLD_SIZE: 400,
+    TREE_COUNT: 70,
+    ROCK_COUNT: 40,
+    SULFUR_COUNT: 25,
+    BARREL_COUNT: 30,
     BUILD_DISTANCE: 7,
-    INTERACT_DISTANCE: 4.5,
-    PLAYER_SPEED: 80,
+    INTERACT_DISTANCE: 5.0,
+    PLAYER_SPEED: 95,
     FRICTION: 10.0,
-    GRAVITY: 24.0,
-    JUMP_FORCE: 9.0,
+    GRAVITY: 26.0,
+    JUMP_FORCE: 9.5,
     PLAYER_RADIUS: 0.8,
-    DAY_LENGTH: 600,
-    RAD_ZONE_RADIUS: 18,
-    TC_RADIUS: 20
+    DAY_LENGTH: 800,
+    RAD_ZONE_RADIUS: 25,
+    TC_RADIUS: 25
 };
 
 // ==================== STATE ====================
@@ -283,31 +283,43 @@ function createMonument(scene, x, z) {
 // ==================== ENGINE START ====================
 try {
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xa3d1ff);
-    scene.fog = new THREE.FogExp2(0xa3d1ff, 0.008);
+    scene.background = new THREE.Color(0x87ceeb);
+    scene.fog = new THREE.FogExp2(0x87ceeb, 0.005);
 
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.2;
     document.body.appendChild(renderer.domElement);
 
     const pointerControls = new PointerLockControls(camera, document.body);
     playerMesh = createPlayer(scene);
 
     // Light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
     scene.add(ambientLight);
-    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-    sun.position.set(50, 100, 20);
+
+    const hemiLight = new THREE.HemisphereLight(0x87ceeb, 0x3d5c2e, 0.6);
+    scene.add(hemiLight);
+
+    const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+    sun.position.set(100, 200, 50);
     sun.castShadow = true;
-    sun.shadow.mapSize.set(1024, 1024);
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -200;
+    sun.shadow.camera.right = 200;
+    sun.shadow.camera.top = 200;
+    sun.shadow.camera.bottom = -200;
+    sun.shadow.camera.far = 500;
     scene.add(sun);
 
     // World Detail
-    const groundGeo = new THREE.PlaneGeometry(CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE, 60, 60);
+    const groundGeo = new THREE.PlaneGeometry(CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE, 100, 100);
     groundGeo.rotateX(-Math.PI / 2);
     const groundPos = groundGeo.attributes.position;
     for (let i = 0; i < groundPos.count; i++) {
@@ -316,7 +328,11 @@ try {
         groundPos.setY(i, getTerrainHeight(x, z));
     }
     groundGeo.computeVertexNormals();
-    const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({ color: 0x3d5c2e, roughness: 1.0, metalness: 0.0 }));
+    const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({
+        color: 0x4a7c44,
+        roughness: 0.8,
+        metalness: 0.1
+    }));
     ground.receiveShadow = true;
     scene.add(ground);
 
@@ -1004,29 +1020,12 @@ try {
     }
 
 
-    // Input Listeners
+    // ==================== KEYBOARD/MOUSE OVERRIDES ====================
+    // These handle specific game logic not covered by the generic GameControls layer
     window.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return;
-        if (e.code === 'KeyW') state.controls.forward = true;
-        if (e.code === 'KeyS') state.controls.backward = true;
-        if (e.code === 'KeyA') state.controls.left = true;
-        if (e.code === 'KeyD') state.controls.right = true;
-        if (e.code === 'Space' && state.controls.canJump) { velocity.y += CONFIG.JUMP_FORCE; state.controls.canJump = false; }
-        if (e.code === 'KeyV') { state.viewMode = state.viewMode === 'first' ? 'third' : 'first'; if (playerMesh) playerMesh.visible = (state.viewMode === 'third'); }
 
-        if (e.code === 'KeyQ') {
-            const activeTool = state.belt[state.selectedBeltSlot || 0];
-            if (activeTool === 'building_plan') {
-                const menu = document.getElementById('radial-menu');
-                const isOpen = menu.style.display === 'flex';
-                menu.style.display = isOpen ? 'none' : 'flex';
-                if (!isOpen) pointerControls.unlock();
-                else pointerControls.lock();
-            } else {
-                showNotification("Equip Building Plan (Paper) first", "#e74c3c");
-            }
-        }
-
+        // Hotbar Slots (1-6)
         if (e.code.startsWith('Digit')) {
             const slot = parseInt(e.code.replace('Digit', '')) - 1;
             if (slot >= 0 && slot < 6) {
@@ -1035,133 +1034,92 @@ try {
             }
         }
 
-        if (e.code === 'KeyG') {
-            state.building.selectedBlueprint = null;
-            updateBlueprintIndicator();
-        }
-
-        if (e.code === 'KeyH' || (activeTool === 'hammer' && e.code === 'KeyE')) {
-            const currentItem = state.belt[state.selectedBeltSlot || 0];
-            if (currentItem !== 'hammer') {
+        // Hammer Actions (Upgrade/Repair)
+        if (e.code === 'KeyH') {
+            const activeTool = state.belt[state.selectedBeltSlot || 0];
+            if (activeTool !== 'hammer') {
                 showNotification("Requires Hammer", "#e74c3c");
                 return;
             }
             if (state.building.lookingAtStructure) {
                 const s = state.building.lookingAtStructure;
-                if (s.userData.health < s.userData.maxHealth) {
-                    repairStructure(s);
-                } else {
-                    upgradeStructure(s);
-                }
+                if (s.userData.health < s.userData.maxHealth) repairStructure(s);
+                else upgradeStructure(s);
             }
         }
 
-        if (e.code === 'KeyE' || e.code === 'Escape') {
+        // Escape to force lock/close everything
+        if (e.code === 'Escape') {
             const inv = document.getElementById('inventory');
-            if (inv.style.display === 'flex') { inv.style.display = 'none'; pointerControls.lock(); }
-            else {
-                inv.style.display = 'flex';
-                pointerControls.unlock();
-                renderCraftingGrid();
-                renderInventoryGrid();
-                renderBelt();
-                initPlayerPreview();
-            }
+            const menu = document.getElementById('radial-menu');
+            inv.style.display = 'none';
+            menu.style.display = 'none';
+            pointerControls.lock();
         }
-    });
-
-    window.addEventListener('keyup', (e) => {
-        if (e.code === 'KeyW') state.controls.forward = false;
-        if (e.code === 'KeyS') state.controls.backward = false;
-        if (e.code === 'KeyA') state.controls.left = false;
-        if (e.code === 'KeyD') state.controls.right = false;
     });
 
     window.addEventListener('mousedown', (e) => {
         if (!pointerControls.isLocked) return;
-
-        const activeTool = state.belt[state.selectedBeltSlot || 0];
-
-        if (e.button === 0) { // LMB
-            performAction();
-        }
-
+        if (e.button === 0) performAction();
         if (e.button === 2) { // RMB
+            const activeTool = state.belt[state.selectedBeltSlot || 0];
             if (activeTool === 'building_plan') {
-                const menu = document.getElementById('radial-menu');
-                menu.style.display = 'flex';
+                document.getElementById('radial-menu').style.display = 'flex';
                 pointerControls.unlock();
             }
         }
     });
 
-    // ==================== MOBILE CONTROLS LOGIC ====================
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
-    if (isMobile) {
-        document.getElementById('mobile-controls').style.display = 'block';
-
-        // Joystick Logic
-        const joystickZone = document.getElementById('joystick-zone');
-        const stick = document.getElementById('joystick-stick');
-        let stickActive = false;
-        let startX, startY;
-
-        joystickZone.addEventListener('touchstart', (e) => {
-            stickActive = true;
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
+    // ==================== UNIFIED CONTROLS (v2.0) ====================
+    if (typeof GameControls !== 'undefined') {
+        GameControls.init({
+            onMove: (dx, dy) => {
+                state.controls.left = dx < 0;
+                state.controls.right = dx > 0;
+                state.controls.forward = dy < 0;
+                state.controls.backward = dy > 0;
+            },
+            onJump: () => {
+                if (state.controls.canJump) {
+                    velocity.y += CONFIG.JUMP_FORCE;
+                    state.controls.canJump = false;
+                }
+            },
+            onActionA: () => {
+                if (state.building.selectedBlueprint) placeStructure();
+                else performAction();
+            },
+            onActionB: () => {
+                const inv = document.getElementById('inventory');
+                if (inv.style.display === 'flex') {
+                    inv.style.display = 'none';
+                    if (!('ontouchstart' in window)) pointerControls.lock();
+                } else {
+                    inv.style.display = 'flex';
+                    pointerControls.unlock();
+                    renderCraftingGrid();
+                    renderInventoryGrid();
+                    renderBelt();
+                    initPlayerPreview();
+                }
+            },
+            onSpecial: () => {
+                // Toggle View Mode
+                state.viewMode = state.viewMode === 'first' ? 'third' : 'first';
+                if (playerMesh) playerMesh.visible = (state.viewMode === 'third');
+                showNotification(`View: ${state.viewMode.toUpperCase()}`, "#3498db");
+            }
         });
-
-        joystickZone.addEventListener('touchmove', (e) => {
-            if (!stickActive) return;
-            const x = e.touches[0].clientX;
-            const y = e.touches[0].clientY;
-            const dx = x - startX;
-            const dy = y - startY;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const maxDist = 50;
-            const angle = Math.atan2(dy, dx);
-
-            const limitedDist = Math.min(dist, maxDist);
-            const moveX = Math.cos(angle) * limitedDist;
-            const moveY = Math.sin(angle) * limitedDist;
-
-            stick.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
-
-            // Map to movement
-            state.controls.forward = moveY < -10;
-            state.controls.backward = moveY > 10;
-            state.controls.left = moveX < -10;
-            state.controls.right = moveX > 10;
-        });
-
-        joystickZone.addEventListener('touchend', () => {
-            stickActive = false;
-            stick.style.transform = `translate(-50%, -50%)`;
-            state.controls.forward = false;
-            state.controls.backward = false;
-            state.controls.left = false;
-            state.controls.right = false;
-        });
-
-        // Action Buttons
-        document.getElementById('btn-jump').ontouchstart = () => {
-            if (state.controls.canJump) { velocity.y += CONFIG.JUMP_FORCE; state.controls.canJump = false; }
-        };
-
-        document.getElementById('btn-interact').ontouchstart = () => {
-            if (state.building.selectedBlueprint) placeStructure();
-            else performAction();
-        };
-
-        document.getElementById('btn-build').ontouchstart = () => {
-            state.building.blueprintOpen = !state.building.blueprintOpen;
-            document.getElementById('blueprint-selector').style.display = state.building.blueprintOpen ? 'block' : 'none';
-        };
     }
 
     const startBtn = document.getElementById('start-button');
-    if (startBtn) startBtn.onclick = () => pointerControls.lock();
+    if (startBtn) {
+        startBtn.onclick = () => {
+            const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+            if (!isTouch) pointerControls.lock();
+            else document.getElementById('instructions').style.display = 'none';
+        };
+    }
 
     // Initialize Building System
     initBlueprintSelector();
@@ -1194,7 +1152,8 @@ try {
         ambientLight.intensity = Math.max(0.1, Math.sin(angle) * 0.4);
         scene.fog = new THREE.FogExp2(dayProgress > 0.5 && dayProgress < 0.9 ? 0x050510 : 0x87ceeb, 0.01);
 
-        if (pointerControls.isLocked) {
+        const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+        if (pointerControls.isLocked || isTouch) {
             // Survival Stats logic
             state.stats.hunger = Math.max(0, state.stats.hunger - 0.05 * delta);
             state.stats.thirst = Math.max(0, state.stats.thirst - 0.08 * delta);
@@ -1250,13 +1209,19 @@ try {
                 state.building.lookingAtStructure = null;
             }
         }
-        const originalCamPos = camera.position.clone();
+        // Camera Smoothing Logic
         if (state.viewMode === 'third') {
-            const offset = new THREE.Vector3(0, 1.5, 4).applyQuaternion(camera.quaternion);
-            camera.position.add(offset);
+            const idealCameraOffset = new THREE.Vector3(0, 2, 5).applyQuaternion(camera.quaternion);
+            const targetCamPos = camera.position.clone().add(idealCameraOffset);
+
+            const realPos = camera.position.clone();
+            camera.position.copy(targetCamPos);
+            renderer.render(scene, camera);
+            camera.position.copy(realPos);
+        } else {
+            renderer.render(scene, camera);
         }
-        renderer.render(scene, camera);
-        camera.position.copy(originalCamPos);
+
         lastTime = time;
     }
 

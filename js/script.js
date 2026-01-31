@@ -9,37 +9,144 @@
     document.addEventListener('DOMContentLoaded', () => {
 
         // =========================================
-        // 1. THEME TOGGLE
+        // 1. THEME & ACCENT LOGIC
         // =========================================
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        const icon = themeToggle ? themeToggle.querySelector('i') : null;
 
-        function updateIcon() {
+        function updateThemeIcon() {
+            const icon = themeToggle?.querySelector('i');
             if (!icon) return;
-            if (body.classList.contains('light-mode')) {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-            } else {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
+            icon.className = body.classList.contains('light-mode') ? 'fas fa-moon' : 'fas fa-sun';
+        }
+
+        // Accent Selection
+        const accentDots = document.querySelectorAll('.accent-dot');
+        accentDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const color = dot.dataset.color;
+                document.documentElement.style.setProperty('--accent', color);
+                document.documentElement.style.setProperty('--accent-glow', `${color}33`); // Adding alpha
+                
+                accentDots.forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+                localStorage.setItem('accentColor', color);
+            });
+        });
+
+        // Load saved preferences
+        const savedAccent = localStorage.getItem('accentColor');
+        if (savedAccent) {
+            document.documentElement.style.setProperty('--accent', savedAccent);
+            const activeDot = Array.from(accentDots).find(d => d.dataset.color === savedAccent);
+            if (activeDot) {
+                accentDots.forEach(d => d.classList.remove('active'));
+                activeDot.classList.add('active');
             }
         }
 
-        // Check for saved theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'light') {
+        if (localStorage.getItem('theme') === 'light') {
             body.classList.add('light-mode');
-            updateIcon();
+            updateThemeIcon();
         }
 
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                body.classList.toggle('light-mode');
-                updateIcon();
-                localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
-            });
+        themeToggle?.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            updateThemeIcon();
+            localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+        });
+
+        // =========================================
+        // 2. PREMIUM UI LOGIC
+        // =========================================
+        
+        // Sticky Navbar
+        const navbar = document.querySelector('.navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        });
+
+        // Perf Mode
+        const perfToggle = document.getElementById('perf-mode');
+        const bgMesh = document.querySelector('.bg-mesh');
+        
+        perfToggle?.addEventListener('change', () => {
+            if (perfToggle.checked) bgMesh.style.display = 'none';
+            else bgMesh.style.display = 'block';
+            localStorage.setItem('perfMode', perfToggle.checked);
+        });
+
+        if (localStorage.getItem('perfMode') === 'true' && perfToggle) {
+            perfToggle.checked = true;
+            bgMesh.style.display = 'none';
         }
+
+        // =========================================
+        // 3. SETTINGS MODAL
+        // =========================================
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const settingsOverlay = document.getElementById('settings-overlay');
+        const closeSettings = document.getElementById('close-settings');
+
+        function toggleSettings(show) {
+            settingsModal?.classList.toggle('active', show);
+            settingsOverlay?.classList.toggle('active', show);
+            body.style.overflow = show ? 'hidden' : '';
+        }
+
+        settingsBtn?.addEventListener('click', () => toggleSettings(true));
+        closeSettings?.addEventListener('click', () => toggleSettings(false));
+        settingsOverlay?.addEventListener('click', () => toggleSettings(false));
+
+        // Language Picker Logic (Premium Buttons)
+        const langBtns = document.querySelectorAll('.lang-btn');
+        langBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const langCode = btn.getAttribute('data-lang');
+                document.cookie = `googtrans=/en/${langCode}; path=/`;
+                localStorage.setItem('lastLang', langCode);
+                
+                langBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                setTimeout(() => location.reload(), 300);
+            });
+        });
+
+        // Legacy Language Picker (Select list)
+        const langOptions = document.querySelectorAll('.lang-option');
+        langOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                const langCode = opt.getAttribute('data-lang');
+                document.cookie = `googtrans=/en/${langCode}; path=/`;
+                localStorage.setItem('lastLang', langCode);
+                setTimeout(() => location.reload(), 300);
+            });
+        });
+
+        // =========================================
+        // 4. PROJECT FILTERS
+        // =========================================
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const projectCategories = document.querySelectorAll('.project-category');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.dataset.filter;
+                projectCategories.forEach(cat => {
+                    const isMatch = filter === 'all' || cat.dataset.category === filter;
+                    cat.style.opacity = isMatch ? '1' : '0';
+                    cat.style.transform = isMatch ? 'translateY(0)' : 'translateY(20px)';
+                    setTimeout(() => cat.style.display = isMatch ? 'block' : 'none', isMatch ? 0 : 300);
+                });
+            });
+        });
+
 
         // =========================================
         // 2. MOBILE MENU
@@ -315,41 +422,36 @@
             // Parse tags
             let tagsArray = [];
             if (typeof p.tags === 'string') {
-                tagsArray = p.tags.split(',').map(t => t.trim());
+                tagsArray = p.tags.split(',').map(tag => tag.trim());
             } else if (Array.isArray(p.tags)) {
                 tagsArray = p.tags;
             }
 
-            const tagsHTML = tagsArray.map(tag => `<span>${tag}</span>`).join('');
+            const tagsHTML = tagsArray.map(tag => `<span class="tag">${tag}</span>`).join('');
 
-            // Icon logic: if image_url starts with 'fa', treat as icon class, else img
-            let iconHTML = '';
+            // Icon/Image logic
+            let visualContent = '';
             if (p.image_url && p.image_url.startsWith('fa')) {
-                iconHTML = `<i class="${p.image_url}"></i>`;
+                visualContent = `<i class="${p.image_url}"></i>`;
             } else if (p.image_url) {
-                iconHTML = `<img src="${p.image_url}" alt="${p.title}" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
+                visualContent = `<img src="${p.image_url}" alt="${p.title}" style="width:100%; height:100%; object-fit:cover;">`;
             } else {
-                iconHTML = `<i class="fas fa-cube"></i>`; // Fallback
+                visualContent = `<i class="fas fa-cube"></i>`;
             }
 
-            // Normalize category for data attribute
-            const cat = (p.category || 'app').toLowerCase().trim();
-            const isGame = cat.includes('game') || cat.includes('gaming');
-            const categoryAttr = isGame ? 'games' : 'apps';
-
             return `
-            <article class="project-card reveal" data-category="${categoryAttr}">
-                <div class="project-content">
-                    <div class="project-icon" ${p.image_url && !p.image_url.startsWith('fa') ? 'style="padding:0; overflow:hidden;"' : ''}>
-                        ${iconHTML}
-                    </div>
+            <article class="project-card reveal">
+                <div class="project-visual">
+                    ${visualContent}
+                </div>
+                <div class="project-info">
                     <h3>${p.title}</h3>
                     <p>${p.description}</p>
-                    <div class="tags">
+                    <div class="project-tags">
                         ${tagsHTML}
                     </div>
-                    <a href="${p.project_link}" target="_blank" class="btn-link ${isGame ? 'game-btn' : 'app-btn'}">
-                        <i class="fas fa-external-link-alt"></i> ${t.viewProject}
+                    <a href="${p.project_link}" target="_blank" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                        ${t.viewProject} <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
                     </a>
                 </div>
             </article>
@@ -389,82 +491,6 @@
         if (!sessionStorage.getItem('logged')) {
             localStorage.setItem('visitorCount', (visits + 1).toString());
             sessionStorage.setItem('logged', 'true');
-        }
-
-        // =========================================
-        // 7. SETTINGS MODAL (Main Site)
-        // =========================================
-        const settingsBtn = document.getElementById('settings-btn');
-        const settingsModal = document.getElementById('settings-modal');
-        const settingsOverlay = document.getElementById('settings-overlay');
-        const closeSettings = document.getElementById('close-settings');
-
-        function toggleSettings(show) {
-            if (show) {
-                settingsModal?.classList.add('active');
-                settingsOverlay?.classList.add('active');
-            } else {
-                settingsModal?.classList.remove('active');
-                settingsOverlay?.classList.remove('active');
-            }
-        }
-
-        if (settingsBtn) settingsBtn.addEventListener('click', () => toggleSettings(true));
-        if (closeSettings) closeSettings.addEventListener('click', () => toggleSettings(false));
-        if (settingsOverlay) settingsOverlay.addEventListener('click', () => toggleSettings(false));
-
-        // Language Picker Logic
-        const langOptions = document.querySelectorAll('.lang-option');
-        langOptions.forEach(opt => {
-            opt.addEventListener('click', () => {
-                const langCode = opt.getAttribute('data-lang');
-                document.cookie = `googtrans=/en/${langCode}; path=/`;
-                localStorage.setItem('lastLang', langCode);
-                setTimeout(() => location.reload(), 300);
-            });
-        });
-
-        // =========================================
-        // 8. PROJECT FILTERS
-        // =========================================
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const projectCategories = document.querySelectorAll('.project-category');
-
-        if (filterBtns.length > 0 && projectCategories.length > 0) {
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // Update active state
-                    filterBtns.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-
-                    const filter = btn.dataset.filter;
-
-                    // Show/hide categories with smooth transition
-                    projectCategories.forEach(category => {
-                        const categoryType = category.dataset.category;
-
-                        if (filter === 'all') {
-                            category.style.display = 'block';
-                            setTimeout(() => {
-                                category.style.opacity = '1';
-                                category.style.transform = 'translateY(0)';
-                            }, 10);
-                        } else if (filter === categoryType) {
-                            category.style.display = 'block';
-                            setTimeout(() => {
-                                category.style.opacity = '1';
-                                category.style.transform = 'translateY(0)';
-                            }, 10);
-                        } else {
-                            category.style.opacity = '0';
-                            category.style.transform = 'translateY(20px)';
-                            setTimeout(() => {
-                                category.style.display = 'none';
-                            }, 300);
-                        }
-                    });
-                });
-            });
         }
 
 
