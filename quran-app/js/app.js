@@ -8,13 +8,53 @@ const APP_CONFIG = {
     MIN_FONT_SIZE: 1.5,
     MAX_FONT_SIZE: 4,
     RECITERS: {
+        // القراء العرب (الأكثر شهرة)
         'ar.alafasy': 'مشاري العفاسي',
-        'ar.abdulbasitmurattal': 'عبد الباسط عبد الصمد',
-        'ar.minshawi': 'محمد صديق المنشاوي',
-        'ar.husary': 'محمود خليل الحصري',
+        'ar.abdulbasitmurattal': 'عبد الباسط عبد الصمد - مرتل',
+        'ar.abdulbasitmujawwad': 'عبد الباسط عبد الصمد - مجود',
+        'ar.minshawi': 'محمد صديق المنشاوي - مرتل',
+        'ar.minshawimujawwad': 'محمد صديق المنشاوي - مجود',
+        'ar.husary': 'محمود خليل الحصري - مرتل',
+        'ar.husarymujawwad': 'محمود خليل الحصري - مجود',
         'ar.abdurrahmaansudais': 'عبد الرحمن السديس',
         'ar.mahermuaiqly': 'ماهر المعيقلي',
-        'ar.yasseraldossari': 'ياسر الدوسري'
+        'ar.yasseraldossari': 'ياسر الدوسري',
+        'ar.shaatree': 'أبو بكر الشاطري',
+        'ar.ajamy': 'أحمد بن علي العجمي',
+        'ar.ahmedneana': 'أحمد نعينع',
+        'ar.akhdar': 'إبراهيم الأخضر',
+        'ar.jazza': 'جازا الصويلح',
+        'ar.jeem': 'جيمس بل - James Blvd',
+        'ar.johnabiza': 'جون أبيزا',
+        'ar.haniarrifai': 'هاني الرفاعي',
+        'ar.harthi': 'الحارثي',
+        'ar.khalf': 'خالف',
+        'ar.kanoo': 'الكنو',
+        'ar.qatami': 'قطمي',
+        'ar.leensh': 'لينش',
+        'ar.muammar': 'معمر',
+        'ar.matrod': 'مطرود',
+        'ar.mohsinharthi': 'محسن الحارثي',
+        'ar.muhammadjibreel': 'محمد جبريل',
+        'ar.muhammadayyoub': 'محمد أيوب',
+        'ar.muhammadthubaity': 'محمد الثبيتي',
+        'ar.mustafaismail': 'مصطفى إسماعيل',
+        'ar.nabilrafa': 'نبيل الرفاعي',
+        'ar.nasseralqutami': 'ناصر القطامي',
+        'ar.omarwarsh': 'عمر الورش',
+        'ar.saadbagh': 'سعد بغدادي',
+        'ar.saberabdulhakam': 'صابر عبد الحكم',
+        'ar.sahl': 'سهل ياسين',
+        'ar.salamah': 'سلامة',
+        'ar.salaahbraak': 'صلاح براك',
+        'ar.tawfeeq': 'توفيق الصايغ',
+        'ar.wadee': 'وديع اليمني',
+        'ar.yusufmansur': 'يوسف المنصور',
+        
+        // قراء أجانب
+        'en.walk': 'English - Ibrahim Walk',
+        'fr.leclerc': 'Français - Youssouf Leclerc',
+        'id.ihfazh': 'Bahasa Indonesia - Ihfazh'
     }
 };
 
@@ -366,33 +406,97 @@ function handleVerseClick(index) {
 }
 
 // ==================== Audio Player Functions ====================
+let isLoadingAudio = false;
+
 async function playVerse(verseIndex) {
     if (!state.currentSurah) {
         showToast('اختر سورة أولاً', 'warning');
         return;
     }
     
+    if (isLoadingAudio) {
+        console.log('Already loading audio, please wait...');
+        return;
+    }
+    
+    isLoadingAudio = true;
     state.currentVerseIndex = verseIndex;
-    const reciter = elements['reciter-select']?.value || state.settings.reciter;
+    const reciter = elements['reciter-select']?.value || state.settings.reciter || 'ar.alafasy';
     const ayah = state.currentSurah.ayahs[verseIndex];
+    
+    if (!ayah) {
+        console.error('Invalid verse index:', verseIndex);
+        isLoadingAudio = false;
+        return;
+    }
     
     try {
         // Show loading state
-        elements['player-verse'].textContent = `جاري التحميل...`;
+        if (elements['player-verse']) {
+            elements['player-verse'].textContent = `جاري التحميل...`;
+        }
+        
+        console.log(`Loading audio for verse ${ayah.numberInSurah} with reciter ${reciter}`);
         
         const data = await fetchWithCache(
             `${APP_CONFIG.API_BASE}/ayah/${ayah.number}/${reciter}`,
             `audio_${ayah.number}_${reciter}`
         );
         
-        if (!state.audioElement) {
-            state.audioElement = elements['audio-element'];
+        if (!data.data || !data.data.audio) {
+            throw new Error('No audio URL received');
         }
         
+        // Initialize audio element if needed
+        if (!state.audioElement) {
+            state.audioElement = elements['audio-element'];
+            if (!state.audioElement) {
+                state.audioElement = new Audio();
+                state.audioElement.id = 'audio-element';
+                document.body.appendChild(state.audioElement);
+            }
+            setupAudioListeners();
+        }
+        
+        // Pause current audio
+        if (!state.audioElement.paused) {
+            state.audioElement.pause();
+        }
+        
+        // Set new audio source
         state.audioElement.src = data.data.audio;
-        state.audioElement.load();
+        state.audioElement.preload = 'auto';
         state.audioElement.playbackRate = parseFloat(elements['playback-speed']?.value || 1);
         
+        // Load and play
+        state.audioElement.load();
+        
+        // Wait for audio to be ready
+        await new Promise((resolve, reject) => {
+            const onCanPlay = () => {
+                state.audioElement.removeEventListener('canplay', onCanPlay);
+                state.audioElement.removeEventListener('error', onError);
+                resolve();
+            };
+            
+            const onError = (e) => {
+                state.audioElement.removeEventListener('canplay', onCanPlay);
+                state.audioElement.removeEventListener('error', onError);
+                reject(new Error('Audio load error'));
+            };
+            
+            state.audioElement.addEventListener('canplay', onCanPlay);
+            state.audioElement.addEventListener('error', onError);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                state.audioElement.removeEventListener('canplay', onCanPlay);
+                state.audioElement.removeEventListener('error', onError);
+                reject(new Error('Audio load timeout'));
+            }, 10000);
+        });
+        
+        // Play audio
         await state.audioElement.play();
         state.isPlaying = true;
         
@@ -407,9 +511,24 @@ async function playVerse(verseIndex) {
             verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
         
+        console.log(`Successfully playing verse ${ayah.numberInSurah}`);
+        
     } catch (error) {
         console.error('Error playing verse:', error);
-        showToast('حدث خطأ في تشغيل الصوت', 'error');
+        showToast('حدث خطأ في تشغيل الصوت - سيتم المحاولة مرة أخرى', 'error');
+        
+        // Retry once after 3 seconds
+        setTimeout(async () => {
+            if (state.currentVerseIndex === verseIndex) {
+                console.log('Retrying...');
+                isLoadingAudio = false;
+                await playVerse(verseIndex);
+            }
+        }, 3000);
+    } finally {
+        setTimeout(() => {
+            isLoadingAudio = false;
+        }, 1000);
     }
 }
 
@@ -443,50 +562,147 @@ function highlightCurrentVerse(index) {
 
 // ==================== Audio Event Listeners ====================
 function setupAudioListeners() {
+    if (!state.audioElement) {
+        state.audioElement = elements['audio-element'];
+    }
+    
     if (!state.audioElement) return;
     
-    state.audioElement.addEventListener('timeupdate', () => {
-        const progress = (state.audioElement.currentTime / state.audioElement.duration) * 100;
-        if (elements['progress-bar']) {
-            elements['progress-bar'].value = progress || 0;
-        }
-        if (elements['current-time']) {
-            elements['current-time'].textContent = formatTime(state.audioElement.currentTime);
-        }
-        if (elements['duration']) {
-            elements['duration'].textContent = formatTime(state.audioElement.duration);
-        }
-    });
+    // Remove old listeners to avoid duplicates
+    state.audioElement.removeEventListener('timeupdate', onTimeUpdate);
+    state.audioElement.removeEventListener('ended', onAudioEnded);
+    state.audioElement.removeEventListener('error', onAudioError);
+    state.audioElement.removeEventListener('canplay', onCanPlay);
+    state.audioElement.removeEventListener('waiting', onWaiting);
+    state.audioElement.removeEventListener('playing', onPlaying);
     
-    state.audioElement.addEventListener('ended', async () => {
-        if (state.isRepeatEnabled) {
-            state.audioElement.currentTime = 0;
-            await state.audioElement.play();
-        } else {
-            await playNextVerse();
-        }
-    });
-    
-    state.audioElement.addEventListener('error', () => {
-        showToast('خطأ في تحميل الصوت', 'error');
-    });
+    // Add new listeners
+    state.audioElement.addEventListener('timeupdate', onTimeUpdate);
+    state.audioElement.addEventListener('ended', onAudioEnded);
+    state.audioElement.addEventListener('error', onAudioError);
+    state.audioElement.addEventListener('canplay', onCanPlay);
+    state.audioElement.addEventListener('waiting', onWaiting);
+    state.audioElement.addEventListener('playing', onPlaying);
 }
 
-async function playNextVerse() {
-    if (!state.currentSurah) return;
+function onTimeUpdate() {
+    if (!state.audioElement || !state.audioElement.duration) return;
     
-    if (state.currentVerseIndex < state.currentSurah.ayahs.length - 1) {
-        await playVerse(state.currentVerseIndex + 1);
-    } else if (state.settings.autoNextSurah && state.currentSurah.number < 114) {
-        // Auto-play next surah
-        await loadSurah(state.currentSurah.number + 1);
-        await playVerse(0);
+    const progress = (state.audioElement.currentTime / state.audioElement.duration) * 100;
+    if (elements['progress-bar']) {
+        elements['progress-bar'].value = progress || 0;
+    }
+    if (elements['current-time']) {
+        elements['current-time'].textContent = formatTime(state.audioElement.currentTime);
+    }
+    if (elements['duration'] && state.audioElement.duration) {
+        elements['duration'].textContent = formatTime(state.audioElement.duration);
+    }
+}
+
+async function onAudioEnded() {
+    console.log('Audio ended, repeat:', state.isRepeatEnabled, 'autoPlay:', state.settings.autoPlay);
+    
+    if (state.isRepeatEnabled) {
+        // Repeat current verse
+        if (state.audioElement) {
+            state.audioElement.currentTime = 0;
+            try {
+                await state.audioElement.play();
+                console.log('Repeating verse');
+            } catch (e) {
+                console.error('Error repeating:', e);
+            }
+        }
+    } else if (state.settings.autoPlay || state.settings.autoNextSurah) {
+        // Play next verse with small delay
+        console.log('Playing next verse...');
+        setTimeout(async () => {
+            await playNextVerse();
+        }, 500);
     } else {
+        // Stop playing
         state.isPlaying = false;
         updatePlayPauseButton();
         document.querySelectorAll('.verse-item').forEach(item => {
             item.classList.remove('playing');
         });
+    }
+}
+
+function onAudioError(e) {
+    console.error('Audio error:', e);
+    showToast('خطأ في تحميل الصوت - جاري المحاولة مرة أخرى', 'error');
+    
+    // Retry once after 2 seconds
+    setTimeout(async () => {
+        if (state.currentSurah && state.currentVerseIndex >= 0) {
+            console.log('Retrying audio...');
+            await playVerse(state.currentVerseIndex);
+        }
+    }, 2000);
+}
+
+function onCanPlay() {
+    console.log('Audio ready to play');
+    if (elements['player-verse']) {
+        elements['player-verse'].textContent = `الآية ${state.currentSurah?.ayahs[state.currentVerseIndex]?.numberInSurah || 1}`;
+    }
+}
+
+function onWaiting() {
+    console.log('Audio loading...');
+    if (elements['player-verse']) {
+        elements['player-verse'].textContent = 'جاري التحميل...';
+    }
+}
+
+function onPlaying() {
+    console.log('Audio playing');
+    state.isPlaying = true;
+    updatePlayPauseButton();
+}
+
+async function playNextVerse() {
+    if (!state.currentSurah) {
+        console.log('No current surah');
+        return;
+    }
+    
+    const currentIndex = state.currentVerseIndex;
+    const totalVerses = state.currentSurah.ayahs.length;
+    
+    console.log(`Playing next verse. Current: ${currentIndex + 1}/${totalVerses}`);
+    
+    if (currentIndex < totalVerses - 1) {
+        // Play next verse in current surah
+        await playVerse(currentIndex + 1);
+    } else if (state.settings.autoNextSurah && state.currentSurah.number < 114) {
+        // Auto-play next surah
+        console.log('Loading next surah...');
+        showToast('جاري تحميل السورة التالية...', 'info');
+        
+        try {
+            await loadSurah(state.currentSurah.number + 1);
+            // Wait for surah to load then play first verse
+            setTimeout(async () => {
+                if (state.currentSurah && state.currentSurah.ayahs.length > 0) {
+                    await playVerse(0);
+                }
+            }, 1000);
+        } catch (error) {
+            console.error('Error loading next surah:', error);
+            showToast('حدث خطأ في تحميل السورة التالية', 'error');
+        }
+    } else {
+        // Finished playing
+        console.log('Finished playing');
+        state.isPlaying = false;
+        updatePlayPauseButton();
+        document.querySelectorAll('.verse-item').forEach(item => {
+            item.classList.remove('playing');
+        });
+        showToast('انتهت التلاوة', 'success');
     }
 }
 
