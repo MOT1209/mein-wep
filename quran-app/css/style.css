@@ -1683,6 +1683,479 @@ body {
     }
 }
 
+/* ==================== Enhanced Mobile Styles ==================== */
+
+/* Extra Small Devices (320px - 480px) */
+@media (max-width: 480px) {
+    /* Header improvements */
+    .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    .header-content {
+        padding: 0.5rem;
+        height: 60px;
+    }
+
+    .logo {
+        gap: 0.5rem;
+    }
+
+    .logo-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .logo-text h1 {
+        font-size: 1rem;
+    }
+
+    .header-controls {
+        gap: 0.25rem;
+    }
+
+    .icon-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+    }
+
+    .font-controls {
+        display: none; /* Hide font controls on very small screens */
+    }
+
+    /* Sidebar mobile improvements */
+    .sidebar {
+        top: 60px;
+        height: calc(100vh - 60px);
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .sidebar-header {
+        padding: 1rem;
+    }
+
+    .sidebar-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .filter-tabs {
+        gap: 0.25rem;
+    }
+
+    .tab-btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .sidebar-search input {
+        padding: 0.6rem 2rem 0.6rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .surah-item {
+        padding: 0.75rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .surah-number {
+        width: 36px;
+        height: 36px;
+        font-size: 0.85rem;
+    }
+
+    .surah-name-ar {
+        font-size: 1.1rem;
+    }
+
+    .surah-meta {
+        font-size: 0.7rem;
+        gap: 0.5rem;
+    }
+
+    /* Content area */
+    .content {
+        padding: 0.75rem;
+        margin-top: 60px;
+    }
+
+    .content-header {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .surah-badge {
+        width: 40px;
+        height: 40px;
+    }
+
+    .surah-title h2 {
+        font-size: 1.3rem;
+    }
+
+    .content-controls {
+        gap: 0.5rem;
+    }
+
+    .control-btn,
+    .save-surah-btn-header {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+    }
+
+    .reciter-select {
+        min-width: 140px;
+        font-size: 0.8rem;
+        padding: 0.5rem;
+    }
+
+    /* Verses display */
+    .verses-wrapper {
+        padding: 1rem;
+        font-size: 1.4rem;
+        line-height: 2.2;
+    }
+
+    .surah-header-mushaf {
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .side-text {
+        font-size: 0.8rem;
+    }
+
+    .bismillah {
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .verse-number {
+        width: 26px;
+        height: 26px;
+        font-size: 0.7rem;
+        margin: 0 0.15rem;
+    }
+
+    /* Audio player mobile */
+    .audio-player {
+        bottom: -100px;
+        padding: 0.75rem 1rem;
+        width: 95%;
+    }
+
+    .audio-player.active {
+        bottom: 10px;
+    }
+
+    .player-content {
+        gap: 0.75rem;
+    }
+
+    .player-info {
+        min-width: auto;
+        gap: 0.5rem;
+    }
+
+    .player-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .player-text span:first-child {
+        font-size: 0.95rem;
+    }
+
+    .player-text span:last-child {
+        font-size: 0.75rem;
+    }
+
+    .player-controls {
+        gap: 0.5rem;
+    }
+
+    .control-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 0.9rem;
+    }
+
+    .play-btn {
+        width: 48px;
+        height: 48px;
+        font-size: 1.2rem;
+    }
+
+    .player-progress {
+        gap: 0.5rem;
+    }
+
+    .player-progress span {
+        font-size: 0.75rem;
+    }
+
+    /* Modals mobile */
+    .modal-content {
+        margin: 0.5rem;
+        max-height: 90vh;
+        border-radius: 16px;
+    }
+
+    .modal-header {
+        padding: 1rem;
+    }
+
+    .modal-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .modal-body {
+        padding: 1rem;
+    }
+
+    .search-box input {
+        padding: 0.75rem 2.5rem 0.75rem 0.75rem;
+        font-size: 1rem;
+    }
+
+    .search-shortcut {
+        display: none;
+    }
+
+    .search-filters {
+        gap: 0.4rem;
+    }
+
+    .filter-chip {
+        padding: 0.3rem 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    /* Welcome message */
+    .welcome-message {
+        padding: 2rem 1rem;
+    }
+
+    .welcome-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+
+    .welcome-message h3 {
+        font-size: 1.4rem;
+    }
+
+    .welcome-message p {
+        font-size: 0.95rem;
+    }
+
+    .quick-stats {
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .stat-card {
+        padding: 0.75rem;
+        min-width: 80px;
+    }
+
+    .stat-card i {
+        font-size: 1.5rem;
+    }
+
+    .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    /* Toast notifications */
+    #toast-container {
+        top: 70px;
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%);
+        width: 90%;
+    }
+
+    .toast {
+        min-width: auto;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    /* Loading screen */
+    .loader-text {
+        font-size: 1.8rem;
+    }
+
+    .loader-subtext {
+        font-size: 0.9rem;
+    }
+
+    .islamic-pattern {
+        width: 80px;
+        height: 80px;
+    }
+
+    .islamic-pattern::before {
+        font-size: 2rem;
+    }
+}
+
+/* Very Small Devices (less than 360px) */
+@media (max-width: 360px) {
+    .logo-text h1 {
+        font-size: 0.9rem;
+    }
+
+    .icon-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .verses-wrapper {
+        font-size: 1.3rem;
+        padding: 0.75rem;
+    }
+
+    .verse-number {
+        width: 24px;
+        height: 24px;
+        font-size: 0.65rem;
+    }
+
+    .control-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .play-btn {
+        width: 44px;
+        height: 44px;
+    }
+
+    .reciter-select {
+        min-width: 120px;
+        font-size: 0.75rem;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .icon-btn:hover {
+        transform: none;
+    }
+
+    .surah-item:hover {
+        transform: none;
+    }
+
+    .control-btn:hover {
+        transform: none;
+    }
+
+    .verse-item:hover {
+        background: transparent;
+    }
+
+    /* Larger touch targets */
+    .icon-btn,
+    .control-btn,
+    .verse-number,
+    .surah-item,
+    .tab-btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Landscape Mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header {
+        position: relative;
+    }
+
+    .content {
+        margin-top: 0;
+    }
+
+    .sidebar {
+        top: 70px;
+        height: calc(100vh - 70px);
+    }
+
+    .verses-wrapper {
+        font-size: 1.4rem;
+        padding: 1rem;
+    }
+
+    .audio-player {
+        bottom: -80px;
+    }
+
+    .audio-player.active {
+        bottom: 5px;
+    }
+}
+
+/* iOS Safe Area Support */
+@supports (padding-top: env(safe-area-inset-top)) {
+    .header {
+        padding-top: env(safe-area-inset-top);
+    }
+
+    .sidebar {
+        top: calc(70px + env(safe-area-inset-top));
+        height: calc(100vh - 70px - env(safe-area-inset-top));
+    }
+
+    .content {
+        margin-top: calc(70px + env(safe-area-inset-top));
+    }
+
+    .audio-player.active {
+        bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .verse-number {
+        border: 2px solid currentColor;
+    }
+
+    .surah-item {
+        border: 2px solid var(--border-color);
+    }
+
+    .icon-btn,
+    .control-btn {
+        border: 2px solid currentColor;
+    }
+}
+
 /* Focus styles for accessibility */
 button:focus-visible,
 input:focus-visible,
