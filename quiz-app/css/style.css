@@ -354,3 +354,143 @@ p {
         font-size: 1.8rem;
     }
 }
+
+/* ==================== Mobile Navigation & Controls ==================== */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(180deg, transparent, rgba(10, 10, 10, 0.95));
+    padding: 15px 20px;
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.mobile-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 8px;
+    border: 1px solid var(--border);
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 20px;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    font-size: 11px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.mobile-nav-item i {
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover {
+    color: var(--primary);
+    background: rgba(124, 58, 237, 0.15);
+}
+
+.mobile-nav-item.active i {
+    transform: translateY(-2px);
+    filter: drop-shadow(0 4px 8px rgba(124, 58, 237, 0.4));
+}
+
+/* Quick Actions Bar */
+.quick-actions {
+    display: none;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999;
+    gap: 10px;
+}
+
+.quick-action-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    color: var(--text-white);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.quick-action-btn:active {
+    transform: scale(0.9);
+    background: var(--primary);
+}
+
+/* Touch-friendly options */
+@media (hover: none) and (pointer: coarse) {
+    .option {
+        min-height: 60px;
+        font-size: 1.1rem;
+        padding: 18px 25px;
+    }
+    
+    .category-card {
+        min-height: 150px;
+    }
+    
+    .btn {
+        min-height: 55px;
+        font-size: 1.1rem;
+    }
+}
+
+/* Mobile Layout */
+@media (max-width: 768px) {
+    .mobile-nav {
+        display: block;
+    }
+    
+    .quick-actions {
+        display: flex;
+    }
+    
+    .container {
+        padding: 20px;
+        padding-bottom: 120px;
+    }
+    
+    .card {
+        padding: 25px 20px;
+    }
+    
+    .category-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quiz-info {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .option {
+        font-size: 1rem;
+        padding: 18px 20px;
+    }
+}

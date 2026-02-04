@@ -1070,47 +1070,93 @@ try {
         }
     });
 
-    // ==================== UNIFIED CONTROLS (v2.0) ====================
-    if (typeof GameControls !== 'undefined') {
-        GameControls.init({
-            onMove: (dx, dy) => {
-                state.controls.left = dx < 0;
-                state.controls.right = dx > 0;
-                state.controls.forward = dy < 0;
-                state.controls.backward = dy > 0;
-            },
-            onJump: () => {
-                if (state.controls.canJump) {
-                    velocity.y += CONFIG.JUMP_FORCE;
-                    state.controls.canJump = false;
-                }
-            },
-            onActionA: () => {
-                if (state.building.selectedBlueprint) placeStructure();
-                else performAction();
-            },
-            onActionB: () => {
-                const inv = document.getElementById('inventory');
-                if (inv.style.display === 'flex') {
-                    inv.style.display = 'none';
-                    if (!('ontouchstart' in window)) pointerControls.lock();
-                } else {
-                    inv.style.display = 'flex';
-                    pointerControls.unlock();
-                    renderCraftingGrid();
-                    renderInventoryGrid();
-                    renderBelt();
-                    initPlayerPreview();
-                }
-            },
-            onSpecial: () => {
-                // Toggle View Mode
-                state.viewMode = state.viewMode === 'first' ? 'third' : 'first';
-                if (playerMesh) playerMesh.visible = (state.viewMode === 'third');
-                showNotification(`View: ${state.viewMode.toUpperCase()}`, "#3498db");
+    // ==================== ADVANCED UNIFIED CONTROLS (v3.0) ====================
+    const gameControls = new UnifiedGameControls({
+        requireLandscape: true,
+        showCameraControls: true, // Rust needs camera control
+        mouseSensitivity: 0.002,
+        actionButtons: [
+            { id: 'attack', label: '⚔️', action: 'attack', key: 'KeyF', color: '#e74c3c' },
+            { id: 'build', label: '🏗️', action: 'build', key: 'KeyB', color: '#f39c12' },
+            { id: 'jump', label: '⬆️', action: 'jump', key: 'Space', color: '#3498db' },
+            { id: 'inventory', label: '🎒', action: 'inventory', key: 'KeyE', color: '#9b59b6' },
+            { id: 'crouch', label: '🔽', action: 'crouch', key: 'ControlLeft', color: '#34495e' },
+            { id: 'view', label: '👁️', action: 'view', key: 'KeyV', color: '#1abc9c' }
+        ],
+        onMove: (dx, dy) => {
+            state.controls.left = dx < -0.1;
+            state.controls.right = dx > 0.1;
+            state.controls.forward = dy < -0.1;
+            state.controls.backward = dy > 0.1;
+        },
+        onCamera: (dx, dy) => {
+            // Camera look control for touch/gamepad
+            const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+            euler.setFromQuaternion(camera.quaternion);
+            euler.y -= dx * 0.05;
+            euler.x -= dy * 0.05;
+            euler.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, euler.x));
+            camera.quaternion.setFromEuler(euler);
+        },
+        onAction: (action) => {
+            switch(action) {
+                case 'attack':
+                    if (state.building.selectedBlueprint) placeStructure();
+                    else performAction();
+                    break;
+                case 'build':
+                    // Toggle building mode
+                    const bpMenu = document.getElementById('blueprint-menu');
+                    if (bpMenu.style.display === 'flex') {
+                        bpMenu.style.display = 'none';
+                        state.building.selectedBlueprint = null;
+                        if (previewMesh) { scene.remove(previewMesh); previewMesh = null; }
+                        if (!isTouchDevice) pointerControls.lock();
+                    } else {
+                        bpMenu.style.display = 'flex';
+                        pointerControls.unlock();
+                        renderBlueprintList();
+                    }
+                    break;
+                case 'jump':
+                    if (state.controls.canJump) {
+                        velocity.y += CONFIG.JUMP_FORCE;
+                        state.controls.canJump = false;
+                    }
+                    break;
+                case 'inventory':
+                    const inv = document.getElementById('inventory');
+                    if (inv.style.display === 'flex') {
+                        inv.style.display = 'none';
+                        if (!isTouchDevice) pointerControls.lock();
+                    } else {
+                        inv.style.display = 'flex';
+                        pointerControls.unlock();
+                        renderCraftingGrid();
+                        renderInventoryGrid();
+                        renderBelt();
+                        initPlayerPreview();
+                    }
+                    break;
+                case 'crouch':
+                    state.controls.crouch = !state.controls.crouch;
+                    camera.position.y = state.controls.crouch ? 1.2 : 1.8;
+                    showNotification(state.controls.crouch ? 'Crouch ON' : 'Crouch OFF', '#34495e');
+                    break;
+                case 'view':
+                    state.viewMode = state.viewMode === 'first' ? 'third' : 'first';
+                    if (playerMesh) playerMesh.visible = (state.viewMode === 'third');
+                    showNotification(`View: ${state.viewMode.toUpperCase()}`, '#3498db');
+                    break;
+                case 'sprint':
+                    // Sprint is handled in movement logic
+                    break;
             }
-        });
-    }
+        },
+        debug: false
+    });
+    
+    gameControls.init();
 
     const startBtn = document.getElementById('start-button');
     if (startBtn) {

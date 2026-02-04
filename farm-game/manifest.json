@@ -1,0 +1,30 @@
+{
+  "name": "3D Farm Simulator",
+  "short_name": "Farm Sim",
+  "description": "لعبة محاكاة مزرعة ثلاثية الأبعاد",
+  "start_url": "/farm-game/",
+  "display": "standalone",
+  "background_color": "#87CEEB",
+  "theme_color": "#228B22",
+  "orientation": "landscape-primary",
+  "scope": "/farm-game/",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "screenshots": [
+    {
+      "src": "screenshots/gameplay.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}

@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10b981">
+    <link rel="manifest" href="manifest.json">
     <title>الخزنة الذكية | Smart Vault</title>
     <!-- Google Fonts -->
     <link
@@ -123,6 +125,33 @@
     <!-- Global Notification -->
     <div id="notif" class="notif hidden"></div>
 
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-items">
+            <button class="mobile-nav-item active" onclick="switchTab('home')">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchTab('files')">
+                <i class="fas fa-folder"></i>
+                <span>الملفات</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchTab('passwords')">
+                <i class="fas fa-key"></i>
+                <span>كلمات المرور</span>
+            </button>
+            <button class="mobile-nav-item" onclick="toggleVault()">
+                <i class="fas fa-lock"></i>
+                <span>قفل</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Floating Action Button -->
+    <button class="fab" onclick="addNewFile()" title="إضافة ملف جديد">
+        <i class="fas fa-plus"></i>
+    </button>
+
     <!-- App Controls System -->
     <script src="../js/app-controls.js"></script>
     <script src="js/app.js"></script>
@@ -145,6 +174,51 @@
                     }
                 }
             });
+        }
+    </script>
+    
+    <!-- Mobile Navigation Functions -->
+    <script>
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.mobile-nav-item').classList.add('active');
+            
+            // Show notification
+            showNotification(`تم التبديل إلى: ${tab}`, 'info');
+        }
+        
+        // Toggle vault lock
+        function toggleVault() {
+            const vaultUI = document.getElementById('vault-ui');
+            if (vaultUI && !vaultUI.classList.contains('hidden')) {
+                vaultUI.classList.add('hidden');
+                document.getElementById('calc-wrapper').style.display = 'flex';
+                showNotification('تم قفل الخزنة', 'success');
+            }
+        }
+        
+        // Add new file
+        function addNewFile() {
+            const vaultUI = document.getElementById('vault-ui');
+            if (vaultUI && vaultUI.classList.contains('hidden')) {
+                showNotification('افتح الخزنة أولاً', 'error');
+                return;
+            }
+            showNotification('اختر ملفاً للإضافة', 'info');
+            // Trigger file input
+            document.querySelector('.add-btn')?.click();
+        }
+    </script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('[Vault] SW registered:', reg))
+                .catch(err => console.log('[Vault] SW registration failed:', err));
         }
     </script>
 </body>

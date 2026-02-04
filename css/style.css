@@ -2027,3 +2027,61 @@ body {
         border-radius: 0;
     }
 }
+
+/* =========================================
+   PWA INSTALL BUTTON STYLES
+   ========================================= */
+.pwa-tag {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
+}
+
+.pwa-tag i {
+    margin-left: 4px;
+    font-size: 0.65rem;
+}
+
+.install-btn {
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+}
+
+.install-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4) !important;
+}
+
+.install-btn:disabled {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    cursor: default !important;
+    opacity: 0.9;
+}
+
+.install-btn i {
+    font-size: 0.9rem;
+}
+
+.project-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+/* PWA Standalone Mode (when app is installed) */
+body.pwa-standalone {
+    /* Hide browser-specific UI elements */
+}
+
+body.pwa-standalone .navbar {
+    padding-top: env(safe-area-inset-top, 0);
+}

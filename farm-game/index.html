@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#228B22">
+    <link rel="manifest" href="manifest.json">
     <title>3D Farm Simulator - Enhanced</title>
     <style>
         body {
@@ -213,7 +215,7 @@
     <!-- Three.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <!-- Game Controls System -->
-    <script src="../js/game-controls.js"></script>
+    <script src="../js/unified-game-controls.js"></script>
 </head>
 
 <body>
@@ -257,29 +259,59 @@
     <div id="interaction-msg">PRESS 'E' TO OPEN SHOP</div>
 
     <!-- Minecraft Hotbar -->
-    <!-- Mobile Controls are now handled by game-controls.js -->
+    <!-- Mobile Controls are now handled by unified-game-controls.js -->
 
     <script>
-        // Initialize Game Controls System
-        GameControls.init({
-            requireLandscape: true, // Show rotate prompt on portrait
+        // Initialize Advanced Game Controls System v3.0
+        const gameControls = new UnifiedGameControls({
+            requireLandscape: true,
+            showCameraControls: false, // Farm game doesn't need camera control
+            actionButtons: [
+                { id: 'farm', label: '🌾', action: 'farm', key: 'KeyF', color: '#2ecc71' },
+                { id: 'shop', label: '🏪', action: 'shop', key: 'KeyE', color: '#e74c3c' },
+                { id: 'seed', label: '🌱', action: 'seed', key: 'KeyQ', color: '#f39c12' },
+                { id: 'harvest', label: '✂️', action: 'harvest', key: 'KeyR', color: '#9b59b6' }
+            ],
             onMove: (dx, dy) => {
-                // dx: -1 (left), 0 (none), 1 (right)
-                // dy: -1 (up/forward), 0 (none), 1 (down/backward)
-                keys.a = dx < 0;
-                keys.d = dx > 0;
-                keys.w = dy < 0;
-                keys.s = dy > 0;
+                // Movement: dx (left/right), dy (forward/backward)
+                const speed = keys.shift ? 0.15 : 0.08;
+                const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
+                const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
+                
+                player.position.add(forward.multiplyScalar(-dy * speed));
+                player.position.add(right.multiplyScalar(dx * speed));
+                
+                // Boundary check
+                player.position.x = Math.max(-49, Math.min(49, player.position.x));
+                player.position.z = Math.max(-49, Math.min(49, player.position.z));
             },
-            onActionA: () => {
-                // Primary action: Farm/Interact
-                performAction();
+            onAction: (action) => {
+                switch(action) {
+                    case 'farm':
+                    case 'harvest':
+                        performAction();
+                        break;
+                    case 'shop':
+                        checkInteractions();
+                        break;
+                    case 'seed':
+                        // Switch seed type
+                        gameState.selectedTool = (gameState.selectedTool + 1) % 2;
+                        updateUI();
+                        break;
+                    case 'sprint':
+                        keys.shift = true;
+                        setTimeout(() => keys.shift = false, 200);
+                        break;
+                    case 'crouch':
+                        player.position.y = player.position.y > 0.5 ? 0.5 : 0;
+                        break;
+                }
             },
-            onActionB: () => {
-                // Secondary action: Shop/Menu
-                checkInteractions();
-            }
+            debug: false
         });
+        
+        gameControls.init();
 
         // --- GAME STATE ---
         const gameState = {
@@ -663,6 +695,15 @@
         // Init UI
         updateUI();
         animate();
+    </script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('[Farm Game] SW registered:', reg))
+                .catch(err => console.log('[Farm Game] SW registration failed:', err));
+        }
     </script>
 </body>
 

@@ -1,0 +1,36 @@
+{
+  "name": "اسألني | تطبيق الاختبارات",
+  "short_name": "اسألني",
+  "description": "اختبر معلوماتك في البرمجة والثقافة العامة",
+  "start_url": "/quiz-app/",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "scope": "/quiz-app/",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["education", "games"],
+  "shortcuts": [
+    {
+      "name": "أسئلة البرمجة",
+      "short_name": "برمجة",
+      "description": "بدء اختبار البرمجة",
+      "url": "/quiz-app/?category=programming"
+    },
+    {
+      "name": "ثقافة عامة",
+      "short_name": "ثقافة",
+      "description": "بدء اختبار الثقافة العامة",
+      "url": "/quiz-app/?category=general"
+    }
+  ]
+}

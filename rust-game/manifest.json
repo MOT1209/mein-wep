@@ -1,0 +1,30 @@
+{
+  "name": "Rust Survival 3D",
+  "short_name": "Rust Survival",
+  "description": "لعبة بقاء ثلاثية الأبعاد في عالم ما بعد الكارثة",
+  "start_url": "/rust-game/",
+  "display": "standalone",
+  "background_color": "#1a1a1a",
+  "theme_color": "#ff4444",
+  "orientation": "landscape-primary",
+  "scope": "/rust-game/",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "action"],
+  "screenshots": [
+    {
+      "src": "screenshots/gameplay.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}

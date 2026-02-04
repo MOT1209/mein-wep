@@ -4,12 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff4444">
+    <link rel="manifest" href="manifest.json">
     <title>Rust Survival 3D - Ultra</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/building.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Game Controls System -->
-    <script src="../js/game-controls.js"></script>
+    <script src="../js/unified-game-controls.js"></script>
     <script type="importmap">
         {
             "imports": {
@@ -123,7 +125,7 @@
             <div class="hotbar-slot" id="slot-3"><i class="fas fa-hammer"></i></div>
         </div>
 
-        <!-- Mobile Controls are now handled by game-controls.js -->
+        <!-- Mobile Controls are now handled by unified-game-controls.js -->
     </div>
 
     <!-- Rust Style Inventory -->
@@ -225,17 +227,15 @@
     <script type="module">
         import './js/game.js?v=6.1';
     </script>
-
-
-
-
-
-
-
-
-
-
-
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('[Rust Game] SW registered:', reg))
+                .catch(err => console.log('[Rust Game] SW registration failed:', err));
+        }
+    </script>
 </body>
 
 </html>

@@ -1,0 +1,30 @@
+{
+  "name": "الخزنة الذكية | Smart Vault",
+  "short_name": "الخزنة الذكية",
+  "description": "آلة حاسبة تخفي ملفاتك السرية",
+  "start_url": "/calculator-vault/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#10b981",
+  "orientation": "portrait-primary",
+  "scope": "/calculator-vault/",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["utilities", "security"],
+  "shortcuts": [
+    {
+      "name": "فتح الخزنة",
+      "short_name": "الخزنة",
+      "description": "فتح الخزنة السرية مباشرة",
+      "url": "/calculator-vault/?action=vault"
+    }
+  ]
+}

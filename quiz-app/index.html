@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="manifest" href="manifest.json">
     <title>اسألني | تطبيق الاختبارات الذكي</title>
     <!-- Google Fonts: Cairo and Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
@@ -127,6 +129,100 @@
                     }
                 }
             });
+        }
+    </script>
+    
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <button class="quick-action-btn" onclick="toggleSound()" title="تشغيل/إيقاف الصوت">
+            <i class="fas fa-volume-up" id="sound-icon"></i>
+        </button>
+        <button class="quick-action-btn" onclick="showHelp()" title="مساعدة">
+            <i class="fas fa-question"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-items">
+            <button class="mobile-nav-item active" onclick="navigateTo('start')">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </button>
+            <button class="mobile-nav-item" onclick="navigateTo('category')">
+                <i class="fas fa-layer-group"></i>
+                <span>التصنيفات</span>
+            </button>
+            <button class="mobile-nav-item" onclick="navigateTo('progress')">
+                <i class="fas fa-chart-line"></i>
+                <span>التقدم</span>
+            </button>
+            <button class="mobile-nav-item" onclick="navigateTo('settings')">
+                <i class="fas fa-cog"></i>
+                <span>الإعدادات</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Navigation Functions -->
+    <script>
+        let soundEnabled = true;
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            icon.className = soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute';
+            // Add haptic feedback if available
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+        
+        function showHelp() {
+            alert('📱 التحكم:\n\n• اضغط على الفئة لبدء الاختبار\n• اختر الإجابة الصحيحة\n• 7/10 للنجاح\n• Good luck! 🎯');
+        }
+        
+        function navigateTo(screen) {
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.mobile-nav-item').classList.add('active');
+            
+            switch(screen) {
+                case 'start':
+                    showScreen('start-screen');
+                    break;
+                case 'category':
+                    showScreen('start-screen');
+                    break;
+                case 'progress':
+                    alert('📊 تقدمك:\n\nالمستوى الحالي: 1\nالنقاط: 0\nالألقاب: مبتدئ 🌟');
+                    break;
+                case 'settings':
+                    alert('⚙️ الإعدادات:\n\n• الصوت: ' + (soundEnabled ? 'مفعل' : 'مكتوم') + '\n• اللغة: العربية\n• الوضع: ' + (document.body.classList.contains('dark') ? 'داكن' : 'فاتح'));
+                    break;
+            }
+        }
+        
+        function showScreen(screenId) {
+            document.querySelectorAll('.card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.getElementById(screenId)?.classList.add('active');
+        }
+        
+        // Haptic feedback for buttons
+        document.querySelectorAll('.btn, .option, .category-card').forEach(btn => {
+            btn.addEventListener('click', () => {
+                if (navigator.vibrate) navigator.vibrate(30);
+            });
+        });
+    </script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('[Quiz] SW registered:', reg))
+                .catch(err => console.log('[Quiz] SW registration failed:', err));
         }
     </script>
 </body>

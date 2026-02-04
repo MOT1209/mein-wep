@@ -439,6 +439,19 @@
                 visualContent = `<i class="fas fa-cube"></i>`;
             }
 
+            // Check if project supports PWA install
+            const pwaProjects = ['quran-app', 'farm-game', 'rust-game', 'calculator-vault', 'quiz-app'];
+            const isPWA = pwaProjects.some(proj => p.project_link.includes(proj));
+            
+            const installBtn = isPWA ? `
+                <button class="btn btn-secondary install-btn" 
+                        data-project="${p.project_link}" 
+                        style="padding: 10px 15px; font-size: 0.85rem; margin-right: 10px;"
+                        title="تثبيت كتطبيق">
+                    <i class="fas fa-mobile-alt"></i> <span class="btn-text">تثبيت</span>
+                </button>
+            ` : '';
+
             return `
             <article class="project-card reveal">
                 <div class="project-visual">
@@ -449,10 +462,14 @@
                     <p>${p.description}</p>
                     <div class="project-tags">
                         ${tagsHTML}
+                        ${isPWA ? '<span class="tag pwa-tag"><i class="fas fa-download"></i> PWA</span>' : ''}
                     </div>
-                    <a href="${p.project_link}" target="_blank" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
-                        ${t.viewProject} <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
-                    </a>
+                    <div class="project-actions" style="margin-top: 15px;">
+                        ${installBtn}
+                        <a href="${p.project_link}" target="_blank" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                            ${t.viewProject} <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
+                        </a>
+                    </div>
                 </div>
             </article>
             `;
