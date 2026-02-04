@@ -1,60 +1,128 @@
-// ==================== Quran App - Enhanced Version ====================
-// Features: Offline Support, Caching, Auto-play, Advanced Search, Beautiful UI
+// ==================== Quran App - Complete Surah Audio System ====================
+// Features: Full Surah MP3 Playback, Smooth Audio, No Loading Stops
 
 const APP_CONFIG = {
     API_BASE: 'https://api.alquran.cloud/v1',
-    CACHE_DURATION: 30 * 24 * 60 * 60 * 1000, // 30 days
+    CACHE_DURATION: 30 * 24 * 60 * 60 * 1000,
     DEFAULT_FONT_SIZE: 2.2,
     MIN_FONT_SIZE: 1.5,
     MAX_FONT_SIZE: 4,
-    RECITERS: {
-        // القراء العرب (الأكثر شهرة)
+    
+    // روابط MP3 كاملة للسور من مصادر موثوقة
+    FULL_SURAH_AUDIO: {
+        // mp3quran.net - مصدر موثوق بملفات MP3 كاملة
+        'alafasy': {
+            name: 'مشاري العفاسي',
+            baseUrl: 'https://server8.mp3quran.net/afs',
+            type: 'full_surah'
+        },
+        'abdulbasit': {
+            name: 'عبد الباسط عبد الصمد - مرتل',
+            baseUrl: 'https://server7.mp3quran.net/basit',
+            type: 'full_surah'
+        },
+        'abdulbasit_mujawwad': {
+            name: 'عبد الباسط عبد الصمد - مجود',
+            baseUrl: 'https://server7.mp3quran.net/basit_mjwd',
+            type: 'full_surah'
+        },
+        'minshawi': {
+            name: 'محمد صديق المنشاوي - مرتل',
+            baseUrl: 'https://server10.mp3quran.net/minsh',
+            type: 'full_surah'
+        },
+        'minshawi_mujawwad': {
+            name: 'محمد صديق المنشاوي - مجود',
+            baseUrl: 'https://server10.mp3quran.net/minsh_mjwd',
+            type: 'full_surah'
+        },
+        'husary': {
+            name: 'محمود خليل الحصري - مرتل',
+            baseUrl: 'https://server13.mp3quran.net/husr',
+            type: 'full_surah'
+        },
+        'husary_mujawwad': {
+            name: 'محمود خليل الحصري - مجود',
+            baseUrl: 'https://server13.mp3quran.net/husr_mjwd',
+            type: 'full_surah'
+        },
+        'sudais': {
+            name: 'عبد الرحمن السديس',
+            baseUrl: 'https://server7.mp3quran.net/sds',
+            type: 'full_surah'
+        },
+        'maher': {
+            name: 'ماهر المعيقلي',
+            baseUrl: 'https://server12.mp3quran.net/maher',
+            type: 'full_surah'
+        },
+        'yasser': {
+            name: 'ياسر الدوسري',
+            baseUrl: 'https://server11.mp3quran.net/yasser',
+            type: 'full_surah'
+        },
+        'shatri': {
+            name: 'أبو بكر الشاطري',
+            baseUrl: 'https://server11.mp3quran.net/shatri',
+            type: 'full_surah'
+        },
+        'ajamy': {
+            name: 'أحمد بن علي العجمي',
+            baseUrl: 'https://server10.mp3quran.net/ajm',
+            type: 'full_surah'
+        },
+        'ayyoub': {
+            name: 'محمد أيوب',
+            baseUrl: 'httpsserver8.mp3quran.net/ayyub',
+            type: 'full_surah'
+        },
+        'jibreel': {
+            name: 'محمد جبريل',
+            baseUrl: 'https://server8.mp3quran.net/jbrl',
+            type: 'full_surah'
+        },
+        'rifai': {
+            name: 'هاني الرفاعي',
+            baseUrl: 'https://server8.mp3quran.net/rifai',
+            type: 'full_surah'
+        },
+        'qatami': {
+            name: 'ناصر القطامي',
+            baseUrl: 'https://server6.mp3quran.net/qtm',
+            type: 'full_surah'
+        },
+        'thubaity': {
+            name: 'محمد الثبيتي',
+            baseUrl: 'https://server6.mp3quran.net/thubti',
+            type: 'full_surah'
+        },
+        'tawfeeq': {
+            name: 'توفيق الصايغ',
+            baseUrl: 'https://server6.mp3quran.net/twfeeq',
+            type: 'full_surah'
+        },
+        'wadee': {
+            name: 'وديع اليمني',
+            baseUrl: 'https://server6.mp3quran.net/wdee',
+            type: 'full_surah'
+        },
+        'islam': {
+            name: 'إسلام صبحي',
+            baseUrl: 'https://server11.mp3quran.net/islam',
+            type: 'full_surah'
+        }
+    },
+    
+    // للآيات الفردية (API القديم)
+    VERSE_BY_VERSE: {
         'ar.alafasy': 'مشاري العفاسي',
-        'ar.abdulbasitmurattal': 'عبد الباسط عبد الصمد - مرتل',
-        'ar.abdulbasitmujawwad': 'عبد الباسط عبد الصمد - مجود',
-        'ar.minshawi': 'محمد صديق المنشاوي - مرتل',
-        'ar.minshawimujawwad': 'محمد صديق المنشاوي - مجود',
-        'ar.husary': 'محمود خليل الحصري - مرتل',
-        'ar.husarymujawwad': 'محمود خليل الحصري - مجود',
+        'ar.abdulbasitmurattal': 'عبد الباسط عبد الصمد',
+        'ar.minshawi': 'محمد صديق المنشاوي',
+        'ar.husary': 'محمود خليل الحصري',
         'ar.abdurrahmaansudais': 'عبد الرحمن السديس',
         'ar.mahermuaiqly': 'ماهر المعيقلي',
         'ar.yasseraldossari': 'ياسر الدوسري',
-        'ar.shaatree': 'أبو بكر الشاطري',
-        'ar.ajamy': 'أحمد بن علي العجمي',
-        'ar.ahmedneana': 'أحمد نعينع',
-        'ar.akhdar': 'إبراهيم الأخضر',
-        'ar.jazza': 'جازا الصويلح',
-        'ar.jeem': 'جيمس بل - James Blvd',
-        'ar.johnabiza': 'جون أبيزا',
-        'ar.haniarrifai': 'هاني الرفاعي',
-        'ar.harthi': 'الحارثي',
-        'ar.khalf': 'خالف',
-        'ar.kanoo': 'الكنو',
-        'ar.qatami': 'قطمي',
-        'ar.leensh': 'لينش',
-        'ar.muammar': 'معمر',
-        'ar.matrod': 'مطرود',
-        'ar.mohsinharthi': 'محسن الحارثي',
-        'ar.muhammadjibreel': 'محمد جبريل',
-        'ar.muhammadayyoub': 'محمد أيوب',
-        'ar.muhammadthubaity': 'محمد الثبيتي',
-        'ar.mustafaismail': 'مصطفى إسماعيل',
-        'ar.nabilrafa': 'نبيل الرفاعي',
-        'ar.nasseralqutami': 'ناصر القطامي',
-        'ar.omarwarsh': 'عمر الورش',
-        'ar.saadbagh': 'سعد بغدادي',
-        'ar.saberabdulhakam': 'صابر عبد الحكم',
-        'ar.sahl': 'سهل ياسين',
-        'ar.salamah': 'سلامة',
-        'ar.salaahbraak': 'صلاح براك',
-        'ar.tawfeeq': 'توفيق الصايغ',
-        'ar.wadee': 'وديع اليمني',
-        'ar.yusufmansur': 'يوسف المنصور',
-        
-        // قراء أجانب
-        'en.walk': 'English - Ibrahim Walk',
-        'fr.leclerc': 'Français - Youssouf Leclerc',
-        'id.ihfazh': 'Bahasa Indonesia - Ihfazh'
+        'ar.shaatree': 'أبو بكر الشاطري'
     }
 };
 
@@ -70,15 +138,17 @@ const state = {
         theme: 'dark',
         autoPlay: false,
         autoNextSurah: true,
-        reciter: 'ar.alafasy',
+        reciter: 'alafasy',
+        audioMode: 'full_surah', // 'full_surah' أو 'verse_by_verse'
         showTranslation: false
     },
     isPlaying: false,
     isRepeatEnabled: false,
-    isAutoPlayEnabled: false,
     audioElement: null,
     searchDebounceTimer: null,
-    cache: new Map()
+    cache: new Map(),
+    verseTimings: [], // توقيت كل آية في الملف الكامل
+    currentReciter: 'alafasy'
 };
 
 // ==================== DOM Elements ====================
@@ -94,7 +164,8 @@ function initializeElements() {
         'search-modal', 'bookmark-modal', 'tafsir-modal', 'search-input', 'search-results',
         'bookmarks-list', 'reciter-select', 'increase-font', 'decrease-font',
         'save-surah-main', 'last-read-btn', 'tafsir-btn', 'tafsir-select', 'tafsir-content',
-        'surah-search', 'auto-play-btn', 'toast-container', 'reading-progress', 'progress-text'
+        'surah-search', 'auto-play-btn', 'toast-container', 'reading-progress', 'progress-text',
+        'audio-mode-toggle'
     ];
     
     ids.forEach(id => {
@@ -134,7 +205,6 @@ function showToast(message, type = 'success', duration = 3000) {
 // ==================== Caching System ====================
 const cacheManager = {
     async get(key) {
-        // Check memory cache first
         if (state.cache.has(key)) {
             const cached = state.cache.get(key);
             if (Date.now() - cached.timestamp < APP_CONFIG.CACHE_DURATION) {
@@ -143,7 +213,6 @@ const cacheManager = {
             state.cache.delete(key);
         }
         
-        // Check localStorage
         try {
             const stored = localStorage.getItem(`cache_${key}`);
             if (stored) {
@@ -162,52 +231,31 @@ const cacheManager = {
     },
     
     set(key, data) {
-        const cacheEntry = {
-            data,
-            timestamp: Date.now()
-        };
-        
+        const cacheEntry = { data, timestamp: Date.now() };
         state.cache.set(key, cacheEntry);
         
-        // Also store in localStorage for persistence
         try {
             localStorage.setItem(`cache_${key}`, JSON.stringify(cacheEntry));
         } catch (e) {
-            // localStorage might be full, that's okay
             console.warn('Cache write error:', e);
         }
-    },
-    
-    clear() {
-        state.cache.clear();
-        // Clear localStorage cache entries
-        Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('cache_')) {
-                localStorage.removeItem(key);
-            }
-        });
     }
 };
 
 // ==================== API Functions with Caching ====================
 async function fetchWithCache(url, cacheKey) {
-    // Try cache first
     const cached = await cacheManager.get(cacheKey);
     if (cached) {
         console.log('Serving from cache:', cacheKey);
         return cached;
     }
     
-    // Fetch from network
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         
         const data = await response.json();
-        
-        // Store in cache
         cacheManager.set(cacheKey, data);
-        
         return data;
     } catch (error) {
         console.error('Fetch error:', error);
@@ -279,6 +327,12 @@ async function loadSurah(surahNumber) {
             </div>
         `;
         
+        // إيقاف الصوت الحالي
+        if (state.audioElement) {
+            state.audioElement.pause();
+            state.isPlaying = false;
+        }
+        
         const data = await fetchWithCache(
             `${APP_CONFIG.API_BASE}/surah/${surahNumber}`,
             `surah_${surahNumber}`
@@ -286,8 +340,8 @@ async function loadSurah(surahNumber) {
         
         state.currentSurah = data.data;
         state.currentVerseIndex = 0;
+        state.verseTimings = []; // إعادة تعيين التوقيتات
         
-        // Update reading progress
         state.readingProgress[surahNumber] = {
             lastRead: Date.now(),
             percentage: 0
@@ -299,7 +353,13 @@ async function loadSurah(surahNumber) {
         highlightActiveSurah(surahNumber);
         updateProgressBar();
         
-        // Close sidebar on mobile
+        // تحميل الصوت الكامل تلقائياً إذا كان وضع التشغيل التلقائي مفعل
+        if (state.settings.autoPlay) {
+            setTimeout(() => {
+                playFullSurah();
+            }, 1000);
+        }
+        
         if (window.innerWidth <= 992) {
             elements['sidebar'].classList.remove('active');
         }
@@ -309,13 +369,6 @@ async function loadSurah(surahNumber) {
     } catch (error) {
         console.error('Error loading surah:', error);
         showToast('حدث خطأ في تحميل السورة', 'error');
-        elements['verses-container'].innerHTML = `
-            <div class="welcome-message">
-                <i class="fas fa-exclamation-circle" style="color: var(--error);"></i>
-                <h3>خطأ في التحميل</h3>
-                <p>تعذر تحميل السورة. تحقق من اتصالك بالإنترنت.</p>
-            </div>
-        `;
     }
 }
 
@@ -327,13 +380,11 @@ function updateSurahHeader() {
     elements['surah-name'].textContent = surah.name;
     elements['surah-details'].textContent = `${surah.englishName} • ${surah.numberOfAyahs} آية • ${surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}`;
     
-    // Update badge
     const badge = document.getElementById('surah-badge');
     if (badge) {
         badge.innerHTML = `<span class="surah-number-badge">${surah.number}</span>`;
     }
     
-    // Update save button
     const isBookmarked = state.bookmarks.some(b => b.type === 'surah' && b.surah === surah.number);
     updateSaveButton(isBookmarked);
 }
@@ -357,11 +408,13 @@ function displayVerses() {
         const isBookmarked = state.bookmarks.some(b => 
             b.type === 'verse' && b.surah === state.currentSurah.number && b.verse === ayah.numberInSurah
         );
+        const isPlaying = state.currentVerseIndex === index && state.isPlaying;
         
         return `
-            <span class="verse-item ${isBookmarked ? 'bookmarked' : ''}" 
+            <span class="verse-item ${isBookmarked ? 'bookmarked' : ''} ${isPlaying ? 'playing' : ''}" 
                   id="verse-${index}" 
                   data-verse-index="${index}" 
+                  data-verse-number="${ayah.numberInSurah}"
                   onclick="handleVerseClick(${index})">
                 ${ayah.text}
                 <span class="verse-number" 
@@ -397,57 +450,41 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ==================== Handle Verse Click ====================
-function handleVerseClick(index) {
-    playVerse(index);
-    if (document.getElementById('tafsir-modal')?.classList.contains('active')) {
-        loadTafsir(index);
-    }
+// ==================== NEW: Full Surah Audio System ====================
+
+// تحويل رقم السورة إلى تنسق ثلاثي الأرقام (001, 002, ...)
+function getSurahFileName(surahNumber) {
+    return surahNumber.toString().padStart(3, '0');
 }
 
-// ==================== Audio Player Functions ====================
-let isLoadingAudio = false;
-
-async function playVerse(verseIndex) {
+// تشغيل السورة كاملة مع MP3
+async function playFullSurah(startVerseIndex = 0) {
     if (!state.currentSurah) {
         showToast('اختر سورة أولاً', 'warning');
         return;
     }
     
-    if (isLoadingAudio) {
-        console.log('Already loading audio, please wait...');
+    const reciterKey = state.currentReciter;
+    const reciter = APP_CONFIG.FULL_SURAH_AUDIO[reciterKey];
+    
+    if (!reciter) {
+        showToast('القارئ غير متوفر في وضع السورة الكاملة', 'error');
         return;
     }
     
-    isLoadingAudio = true;
-    state.currentVerseIndex = verseIndex;
-    const reciter = elements['reciter-select']?.value || state.settings.reciter || 'ar.alafasy';
-    const ayah = state.currentSurah.ayahs[verseIndex];
+    // بناء رابط الملف
+    const surahFileName = getSurahFileName(state.currentSurah.number);
+    const audioUrl = `${reciter.baseUrl}/${surahFileName}.mp3`;
     
-    if (!ayah) {
-        console.error('Invalid verse index:', verseIndex);
-        isLoadingAudio = false;
-        return;
-    }
+    console.log('Loading full surah audio:', audioUrl);
     
     try {
-        // Show loading state
+        // إظهار حالة التحميل
         if (elements['player-verse']) {
-            elements['player-verse'].textContent = `جاري التحميل...`;
+            elements['player-verse'].textContent = 'جاري تحميل السورة...';
         }
         
-        console.log(`Loading audio for verse ${ayah.numberInSurah} with reciter ${reciter}`);
-        
-        const data = await fetchWithCache(
-            `${APP_CONFIG.API_BASE}/ayah/${ayah.number}/${reciter}`,
-            `audio_${ayah.number}_${reciter}`
-        );
-        
-        if (!data.data || !data.data.audio) {
-            throw new Error('No audio URL received');
-        }
-        
-        // Initialize audio element if needed
+        // إعداد عنصر الصوت
         if (!state.audioElement) {
             state.audioElement = elements['audio-element'];
             if (!state.audioElement) {
@@ -455,48 +492,189 @@ async function playVerse(verseIndex) {
                 state.audioElement.id = 'audio-element';
                 document.body.appendChild(state.audioElement);
             }
-            setupAudioListeners();
         }
         
-        // Pause current audio
-        if (!state.audioElement.paused) {
-            state.audioElement.pause();
-        }
+        // إيقاف الصوت الحالي
+        state.audioElement.pause();
+        state.audioElement.currentTime = 0;
         
-        // Set new audio source
-        state.audioElement.src = data.data.audio;
+        // إعداد المصدر الجديد
+        state.audioElement.src = audioUrl;
         state.audioElement.preload = 'auto';
         state.audioElement.playbackRate = parseFloat(elements['playback-speed']?.value || 1);
         
-        // Load and play
-        state.audioElement.load();
+        // إضافة event listeners
+        setupFullSurahAudioListeners();
         
-        // Wait for audio to be ready
+        // تحميل وتشغيل
         await new Promise((resolve, reject) => {
-            const onCanPlay = () => {
-                state.audioElement.removeEventListener('canplay', onCanPlay);
-                state.audioElement.removeEventListener('error', onError);
-                resolve();
-            };
+            state.audioElement.addEventListener('canplaythrough', resolve, { once: true });
+            state.audioElement.addEventListener('error', reject, { once: true });
+            state.audioElement.load();
             
-            const onError = (e) => {
-                state.audioElement.removeEventListener('canplay', onCanPlay);
-                state.audioElement.removeEventListener('error', onError);
-                reject(new Error('Audio load error'));
-            };
-            
-            state.audioElement.addEventListener('canplay', onCanPlay);
-            state.audioElement.addEventListener('error', onError);
-            
-            // Timeout after 10 seconds
-            setTimeout(() => {
-                state.audioElement.removeEventListener('canplay', onCanPlay);
-                state.audioElement.removeEventListener('error', onError);
-                reject(new Error('Audio load timeout'));
-            }, 10000);
+            // timeout بعد 30 ثانية
+            setTimeout(() => reject(new Error('Timeout')), 30000);
         });
         
-        // Play audio
+        await state.audioElement.play();
+        state.isPlaying = true;
+        state.currentVerseIndex = startVerseIndex;
+        
+        // تحديث واجهة المستخدم
+        updatePlayerUI();
+        elements['audio-player'].classList.add('active');
+        updatePlayPauseButton();
+        highlightCurrentVerse(startVerseIndex);
+        
+        showToast(`جاري تشغيل سورة ${state.currentSurah.name} - ${reciter.name}`, 'success');
+        
+    } catch (error) {
+        console.error('Error playing full surah:', error);
+        showToast('حدث خطأ في تحميل الصوت. جاري المحاولة بآلية بديلة...', 'warning');
+        
+        // محاولة استخدام API القديم كبديل
+        setTimeout(() => {
+            playVerseOld(startVerseIndex);
+        }, 2000);
+    }
+}
+
+// إعداد مستمعي أحداث الصوت للسورة الكاملة
+function setupFullSurahAudioListeners() {
+    if (!state.audioElement) return;
+    
+    // إزالة المستمعين القدامى
+    const events = ['timeupdate', 'ended', 'error', 'waiting', 'playing', 'pause'];
+    events.forEach(event => {
+        state.audioElement.removeEventListener(event, handleAudioEvent);
+    });
+    
+    // إضافة مستمع جديد
+    events.forEach(event => {
+        state.audioElement.addEventListener(event, handleAudioEvent);
+    });
+}
+
+function handleAudioEvent(event) {
+    if (!state.audioElement || !state.currentSurah) return;
+    
+    switch(event.type) {
+        case 'timeupdate':
+            updateProgressFromTime();
+            break;
+        case 'ended':
+            handleAudioEnded();
+            break;
+        case 'error':
+            console.error('Audio error:', event);
+            break;
+        case 'waiting':
+            if (elements['player-verse']) {
+                elements['player-verse'].textContent = 'جاري التحميل...';
+            }
+            break;
+        case 'playing':
+            state.isPlaying = true;
+            updatePlayPauseButton();
+            break;
+        case 'pause':
+            state.isPlaying = false;
+            updatePlayPauseButton();
+            break;
+    }
+}
+
+// تحديث التقدم من الوقت الحالي
+function updateProgressFromTime() {
+    if (!state.audioElement || !state.audioElement.duration) return;
+    
+    const currentTime = state.audioElement.currentTime;
+    const duration = state.audioElement.duration;
+    const progress = (currentTime / duration) * 100;
+    
+    // تحديث شريط التقدم
+    if (elements['progress-bar']) {
+        elements['progress-bar'].value = progress || 0;
+    }
+    
+    // تحديث الوقت
+    if (elements['current-time']) {
+        elements['current-time'].textContent = formatTime(currentTime);
+    }
+    if (elements['duration'] && duration) {
+        elements['duration'].textContent = formatTime(duration);
+    }
+    
+    // تحديد الآية الحالية بناءً على الوقت (تقريبي)
+    updateCurrentVerseFromTime(currentTime, duration);
+}
+
+// تحديث الآية الحالية بناءً على الوقت
+function updateCurrentVerseFromTime(currentTime, duration) {
+    if (!state.currentSurah) return;
+    
+    // حساب تقريبي: قسمة الوقت على عدد الآيات
+    const totalVerses = state.currentSurah.ayahs.length;
+    const progressRatio = currentTime / duration;
+    const estimatedVerseIndex = Math.floor(progressRatio * totalVerses);
+    
+    // التأكد من الحدود
+    const newIndex = Math.min(estimatedVerseIndex, totalVerses - 1);
+    
+    if (newIndex !== state.currentVerseIndex) {
+        state.currentVerseIndex = newIndex;
+        highlightCurrentVerse(newIndex);
+        
+        // التمرير إلى الآية
+        const verseElement = document.getElementById(`verse-${newIndex}`);
+        if (verseElement) {
+            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        // تحديث نص المشغل
+        if (elements['player-verse']) {
+            const ayah = state.currentSurah.ayahs[newIndex];
+            elements['player-verse'].textContent = `الآية ${ayah?.numberInSurah || 1}`;
+        }
+    }
+}
+
+function handleAudioEnded() {
+    console.log('Audio ended');
+    state.isPlaying = false;
+    updatePlayPauseButton();
+    
+    if (state.settings.autoNextSurah && state.currentSurah.number < 114) {
+        showToast('جاري الانتقال للسورة التالية...', 'info');
+        setTimeout(() => {
+            loadSurah(state.currentSurah.number + 1);
+        }, 2000);
+    } else {
+        showToast('انتهت التلاوة', 'success');
+    }
+}
+
+// التشغيل القديم بالآية (كبديل)
+async function playVerseOld(verseIndex) {
+    if (!state.currentSurah) return;
+    
+    state.currentVerseIndex = verseIndex;
+    const reciter = Object.keys(APP_CONFIG.VERSE_BY_VERSE)[0]; // alafasy
+    const ayah = state.currentSurah.ayahs[verseIndex];
+    
+    try {
+        const data = await fetchWithCache(
+            `${APP_CONFIG.API_BASE}/ayah/${ayah.number}/${reciter}`,
+            `audio_${ayah.number}_${reciter}`
+        );
+        
+        if (!state.audioElement) {
+            state.audioElement = new Audio();
+        }
+        
+        state.audioElement.src = data.data.audio;
+        state.audioElement.load();
+        
         await state.audioElement.play();
         state.isPlaying = true;
         
@@ -505,38 +683,18 @@ async function playVerse(verseIndex) {
         updatePlayPauseButton();
         highlightCurrentVerse(verseIndex);
         
-        // Scroll to verse
-        const verseElement = document.getElementById(`verse-${verseIndex}`);
-        if (verseElement) {
-            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        
-        console.log(`Successfully playing verse ${ayah.numberInSurah}`);
-        
     } catch (error) {
         console.error('Error playing verse:', error);
-        showToast('حدث خطأ في تشغيل الصوت - سيتم المحاولة مرة أخرى', 'error');
-        
-        // Retry once after 3 seconds
-        setTimeout(async () => {
-            if (state.currentVerseIndex === verseIndex) {
-                console.log('Retrying...');
-                isLoadingAudio = false;
-                await playVerse(verseIndex);
-            }
-        }, 3000);
-    } finally {
-        setTimeout(() => {
-            isLoadingAudio = false;
-        }, 1000);
+        showToast('حدث خطأ في تشغيل الصوت', 'error');
     }
 }
 
+// ==================== Player Controls ====================
 function updatePlayerUI() {
     if (!state.currentSurah) return;
     
-    const ayah = state.currentSurah.ayahs[state.currentVerseIndex];
     elements['player-surah'].textContent = state.currentSurah.name;
+    const ayah = state.currentSurah.ayahs[state.currentVerseIndex];
     elements['player-verse'].textContent = `الآية ${ayah?.numberInSurah || 1}`;
 }
 
@@ -560,154 +718,8 @@ function highlightCurrentVerse(index) {
     }
 }
 
-// ==================== Audio Event Listeners ====================
-function setupAudioListeners() {
-    if (!state.audioElement) {
-        state.audioElement = elements['audio-element'];
-    }
-    
-    if (!state.audioElement) return;
-    
-    // Remove old listeners to avoid duplicates
-    state.audioElement.removeEventListener('timeupdate', onTimeUpdate);
-    state.audioElement.removeEventListener('ended', onAudioEnded);
-    state.audioElement.removeEventListener('error', onAudioError);
-    state.audioElement.removeEventListener('canplay', onCanPlay);
-    state.audioElement.removeEventListener('waiting', onWaiting);
-    state.audioElement.removeEventListener('playing', onPlaying);
-    
-    // Add new listeners
-    state.audioElement.addEventListener('timeupdate', onTimeUpdate);
-    state.audioElement.addEventListener('ended', onAudioEnded);
-    state.audioElement.addEventListener('error', onAudioError);
-    state.audioElement.addEventListener('canplay', onCanPlay);
-    state.audioElement.addEventListener('waiting', onWaiting);
-    state.audioElement.addEventListener('playing', onPlaying);
-}
-
-function onTimeUpdate() {
-    if (!state.audioElement || !state.audioElement.duration) return;
-    
-    const progress = (state.audioElement.currentTime / state.audioElement.duration) * 100;
-    if (elements['progress-bar']) {
-        elements['progress-bar'].value = progress || 0;
-    }
-    if (elements['current-time']) {
-        elements['current-time'].textContent = formatTime(state.audioElement.currentTime);
-    }
-    if (elements['duration'] && state.audioElement.duration) {
-        elements['duration'].textContent = formatTime(state.audioElement.duration);
-    }
-}
-
-async function onAudioEnded() {
-    console.log('Audio ended, repeat:', state.isRepeatEnabled, 'autoPlay:', state.settings.autoPlay);
-    
-    if (state.isRepeatEnabled) {
-        // Repeat current verse
-        if (state.audioElement) {
-            state.audioElement.currentTime = 0;
-            try {
-                await state.audioElement.play();
-                console.log('Repeating verse');
-            } catch (e) {
-                console.error('Error repeating:', e);
-            }
-        }
-    } else if (state.settings.autoPlay || state.settings.autoNextSurah) {
-        // Play next verse with small delay
-        console.log('Playing next verse...');
-        setTimeout(async () => {
-            await playNextVerse();
-        }, 500);
-    } else {
-        // Stop playing
-        state.isPlaying = false;
-        updatePlayPauseButton();
-        document.querySelectorAll('.verse-item').forEach(item => {
-            item.classList.remove('playing');
-        });
-    }
-}
-
-function onAudioError(e) {
-    console.error('Audio error:', e);
-    showToast('خطأ في تحميل الصوت - جاري المحاولة مرة أخرى', 'error');
-    
-    // Retry once after 2 seconds
-    setTimeout(async () => {
-        if (state.currentSurah && state.currentVerseIndex >= 0) {
-            console.log('Retrying audio...');
-            await playVerse(state.currentVerseIndex);
-        }
-    }, 2000);
-}
-
-function onCanPlay() {
-    console.log('Audio ready to play');
-    if (elements['player-verse']) {
-        elements['player-verse'].textContent = `الآية ${state.currentSurah?.ayahs[state.currentVerseIndex]?.numberInSurah || 1}`;
-    }
-}
-
-function onWaiting() {
-    console.log('Audio loading...');
-    if (elements['player-verse']) {
-        elements['player-verse'].textContent = 'جاري التحميل...';
-    }
-}
-
-function onPlaying() {
-    console.log('Audio playing');
-    state.isPlaying = true;
-    updatePlayPauseButton();
-}
-
-async function playNextVerse() {
-    if (!state.currentSurah) {
-        console.log('No current surah');
-        return;
-    }
-    
-    const currentIndex = state.currentVerseIndex;
-    const totalVerses = state.currentSurah.ayahs.length;
-    
-    console.log(`Playing next verse. Current: ${currentIndex + 1}/${totalVerses}`);
-    
-    if (currentIndex < totalVerses - 1) {
-        // Play next verse in current surah
-        await playVerse(currentIndex + 1);
-    } else if (state.settings.autoNextSurah && state.currentSurah.number < 114) {
-        // Auto-play next surah
-        console.log('Loading next surah...');
-        showToast('جاري تحميل السورة التالية...', 'info');
-        
-        try {
-            await loadSurah(state.currentSurah.number + 1);
-            // Wait for surah to load then play first verse
-            setTimeout(async () => {
-                if (state.currentSurah && state.currentSurah.ayahs.length > 0) {
-                    await playVerse(0);
-                }
-            }, 1000);
-        } catch (error) {
-            console.error('Error loading next surah:', error);
-            showToast('حدث خطأ في تحميل السورة التالية', 'error');
-        }
-    } else {
-        // Finished playing
-        console.log('Finished playing');
-        state.isPlaying = false;
-        updatePlayPauseButton();
-        document.querySelectorAll('.verse-item').forEach(item => {
-            item.classList.remove('playing');
-        });
-        showToast('انتهت التلاوة', 'success');
-    }
-}
-
 function formatTime(seconds) {
-    if (isNaN(seconds)) return '0:00';
+    if (isNaN(seconds) || seconds === Infinity) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -762,7 +774,6 @@ function toggleSurahBookmark(surahNumber, surahName) {
     saveBookmarks();
     updateSaveButton(existingIndex === -1);
     
-    // Update sidebar if visible
     const surahItem = document.querySelector(`.surah-item[data-number="${surahNumber}"]`);
     if (surahItem) {
         displaySurahs(state.allSurahs);
@@ -801,7 +812,6 @@ function displayBookmarks(filter = 'all') {
         return;
     }
     
-    // Sort by date (newest first)
     filtered.sort((a, b) => b.date - a.date);
     
     list.innerHTML = filtered.map((item, index) => {
@@ -844,7 +854,6 @@ function deleteBookmark(index) {
     displayBookmarks();
     showToast('تم الحذف بنجاح', 'success');
     
-    // Refresh verses display if needed
     if (state.currentSurah) {
         displayVerses();
     }
@@ -972,7 +981,7 @@ async function loadTafsir(verseIndex) {
     }
 }
 
-// ==================== Theme Toggle ====================
+// ==================== Theme & Settings ====================
 function toggleTheme() {
     const body = document.body;
     const isDark = body.classList.toggle('dark-mode');
@@ -987,7 +996,6 @@ function toggleTheme() {
     showToast(isDark ? 'تم تفعيل الوضع الليلي' : 'تم تفعيل الوضع النهاري', 'info');
 }
 
-// ==================== Font Size Controls ====================
 function changeFontSize(delta) {
     let newSize = state.settings.fontSize + delta;
     newSize = Math.max(APP_CONFIG.MIN_FONT_SIZE, Math.min(APP_CONFIG.MAX_FONT_SIZE, newSize));
@@ -1003,7 +1011,6 @@ function changeFontSize(delta) {
     showToast(`حجم الخط: ${newSize.toFixed(1)}`, 'info');
 }
 
-// ==================== Progress Bar ====================
 function updateProgressBar() {
     const totalSurahs = 114;
     const readSurahs = Object.keys(state.readingProgress).length;
@@ -1020,7 +1027,6 @@ function updateProgressBar() {
     }
 }
 
-// ==================== Auto Play Toggle ====================
 function toggleAutoPlay() {
     state.settings.autoPlay = !state.settings.autoPlay;
     saveSettings();
@@ -1030,7 +1036,7 @@ function toggleAutoPlay() {
         btn.classList.toggle('active', state.settings.autoPlay);
     }
     
-    showToast(state.settings.autoPlay ? 'تم تفعيل التلاوة المتواصلة' : 'تم إيقاف التلاوة المتواصلة', 'info');
+    showToast(state.settings.autoPlay ? 'تم تفعيل التشغيل التلقائي' : 'تم إيقاف التشغيل التلقائي', 'info');
 }
 
 // ==================== Modal Functions ====================
@@ -1111,9 +1117,15 @@ function setupEventListeners() {
     // Auto play
     elements['auto-play-btn']?.addEventListener('click', toggleAutoPlay);
     
-    // Audio controls
+    // Audio controls - NEW
     elements['play-pause']?.addEventListener('click', () => {
-        if (!state.audioElement) return;
+        if (!state.audioElement) {
+            // بدء تشغيل جديد
+            if (state.currentSurah) {
+                playFullSurah(state.currentVerseIndex);
+            }
+            return;
+        }
         
         if (state.isPlaying) {
             state.audioElement.pause();
@@ -1125,13 +1137,20 @@ function setupEventListeners() {
         updatePlayPauseButton();
     });
     
-    elements['prev-verse']?.addEventListener('click', async () => {
-        if (!state.currentSurah || state.currentVerseIndex <= 0) return;
-        await playVerse(state.currentVerseIndex - 1);
+    // Reciter select - NEW
+    elements['reciter-select']?.addEventListener('change', (e) => {
+        state.currentReciter = e.target.value;
+        state.settings.reciter = e.target.value;
+        saveSettings();
+        
+        // إعادة تشغيل إذا كان يعمل
+        if (state.isPlaying && state.currentSurah) {
+            const currentTime = state.audioElement?.currentTime || 0;
+            playFullSurah(state.currentVerseIndex);
+        }
     });
     
-    elements['next-verse']?.addEventListener('click', playNextVerse);
-    
+    // Skip buttons
     elements['skip-forward']?.addEventListener('click', () => {
         if (state.audioElement) state.audioElement.currentTime += 10;
     });
@@ -1140,18 +1159,21 @@ function setupEventListeners() {
         if (state.audioElement) state.audioElement.currentTime -= 10;
     });
     
+    // Repeat
     elements['repeat-verse']?.addEventListener('click', () => {
         state.isRepeatEnabled = !state.isRepeatEnabled;
         elements['repeat-verse'].classList.toggle('active', state.isRepeatEnabled);
         showToast(state.isRepeatEnabled ? 'تم تفعيل التكرار' : 'تم إيقاف التكرار', 'info');
     });
     
+    // Speed control
     elements['playback-speed']?.addEventListener('change', (e) => {
         if (state.audioElement) {
             state.audioElement.playbackRate = parseFloat(e.target.value);
         }
     });
     
+    // Close player
     elements['close-player']?.addEventListener('click', () => {
         if (state.audioElement) {
             state.audioElement.pause();
@@ -1163,8 +1185,9 @@ function setupEventListeners() {
         });
     });
     
+    // Progress bar
     elements['progress-bar']?.addEventListener('input', (e) => {
-        if (state.audioElement) {
+        if (state.audioElement && state.audioElement.duration) {
             const time = (e.target.value / 100) * state.audioElement.duration;
             state.audioElement.currentTime = time;
         }
@@ -1241,20 +1264,14 @@ function setupEventListeners() {
             document.body.style.overflow = '';
         }
         
-        if (e.code === 'Space' && state.isPlaying && document.activeElement.tagName !== 'INPUT') {
+        if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
             e.preventDefault();
             elements['play-pause']?.click();
         }
     });
-    
-    // Reciter select
-    elements['reciter-select']?.addEventListener('change', (e) => {
-        state.settings.reciter = e.target.value;
-        saveSettings();
-    });
 }
 
-// ==================== Share Function ====================
+// ==================== Share & Download ====================
 async function shareCurrentSurah() {
     if (!state.currentSurah) {
         showToast('اختر سورة أولاً', 'warning');
@@ -1275,7 +1292,6 @@ async function shareCurrentSurah() {
             console.log('Share canceled');
         }
     } else {
-        // Fallback: copy to clipboard
         try {
             await navigator.clipboard.writeText(`${shareData.title}\n${shareData.text}`);
             showToast('تم نسخ الرابط', 'success');
@@ -1285,7 +1301,6 @@ async function shareCurrentSurah() {
     }
 }
 
-// ==================== Download Function ====================
 async function downloadCurrentSurah() {
     if (!state.currentSurah) {
         showToast('اختر سورة أولاً', 'warning');
@@ -1294,7 +1309,6 @@ async function downloadCurrentSurah() {
     
     showToast('جاري التحضير للتحميل...', 'info');
     
-    // Create text content
     let content = `سورة ${state.currentSurah.name}\n`;
     content += `عدد الآيات: ${state.currentSurah.numberOfAyahs}\n`;
     content += `${state.currentSurah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}\n\n`;
@@ -1304,7 +1318,6 @@ async function downloadCurrentSurah() {
         content += `${ayah.text} (${ayah.numberInSurah})\n`;
     });
     
-    // Create and download file
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1318,7 +1331,6 @@ async function downloadCurrentSurah() {
     showToast('تم التحميل بنجاح', 'success');
 }
 
-// ==================== Highlight Active Surah ====================
 function highlightActiveSurah(surahNumber) {
     document.querySelectorAll('.surah-item').forEach(item => {
         item.classList.remove('active');
@@ -1331,11 +1343,19 @@ function highlightActiveSurah(surahNumber) {
     }
 }
 
+function handleVerseClick(index) {
+    // تشغيل السورة كاملة من الآية المختارة
+    playFullSurah(index);
+    
+    if (document.getElementById('tafsir-modal')?.classList.contains('active')) {
+        loadTafsir(index);
+    }
+}
+
 // ==================== Initialize App ====================
 function initApp() {
     initializeElements();
     setupEventListeners();
-    setupAudioListeners();
     
     // Load saved settings
     if (state.settings.theme === 'light') {
@@ -1347,6 +1367,7 @@ function initApp() {
     // Set initial reciter
     if (elements['reciter-select'] && state.settings.reciter) {
         elements['reciter-select'].value = state.settings.reciter;
+        state.currentReciter = state.settings.reciter;
     }
     
     // Set auto-play button state
@@ -1354,11 +1375,19 @@ function initApp() {
         elements['auto-play-btn'].classList.add('active');
     }
     
+    // Initialize audio element
+    state.audioElement = elements['audio-element'];
+    if (!state.audioElement) {
+        state.audioElement = new Audio();
+        state.audioElement.id = 'audio-element';
+        document.body.appendChild(state.audioElement);
+    }
+    
     // Load surahs
     loadSurahs();
     
-    console.log('🕌 Quran App Initialized - Enhanced Version');
-    console.log('📖 Features: Offline Support, Caching, Auto-play, Advanced Search');
+    console.log('🕌 Quran App v3.0 - Full Surah Audio System');
+    console.log('📖 Features: Complete Surah MP3, Smooth Playback, 20+ Reciters');
 }
 
 // Start the app when DOM is ready
@@ -1373,3 +1402,4 @@ window.loadSurahAndScroll = loadSurahAndScroll;
 window.shareCurrentSurah = shareCurrentSurah;
 window.downloadCurrentSurah = downloadCurrentSurah;
 window.closeModal = closeModal;
+window.playFullSurah = playFullSurah;
