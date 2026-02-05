@@ -2,12 +2,12 @@
   "name": "القرآن الكريم - Quran App",
   "short_name": "القرآن",
   "description": "تطبيق القرآن الكريم - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة",
-  "start_url": "/quran-app/",
+  "start_url": "/fromliten/quran-app/",
   "display": "standalone",
-  "background_color":="#020617",
-  "theme_color":"#059669",
+  "background_color": "#020617",
+  "theme_color": "#059669",
   "orientation": "portrait-primary",
-  "scope": "/quran-app/",
+  "scope": "/fromliten/quran-app/",
   "lang": "ar",
   "dir": "rtl",
   "icons": [
@@ -61,43 +61,5 @@
     }
   ],
   "categories": ["books", "education", "lifestyle"],
-  "screenshots": [
-    {
-      "src": "screenshots/screenshot1.png",
-      "sizes": "1280x720",
-      "type": "image/png",
-      "form_factor": "wide"
-    },
-    {
-      "src": "screenshots/screenshot2.png",
-      "sizes": "750x1334",
-      "type": "image/png",
-      "form_factor": "narrow"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "المفضلة",
-      "short_name": "المفضلة",
-      "description": "عرض السور والآيات المحفوظة",
-      "url": "/quran-app/?action=bookmarks",
-      "icons": [{ "src": "icons/bookmark-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "آخر قراءة",
-      "short_name": "آخر قراءة",
-      "description": "متابعة آخر سورة تمت قراءتها",
-      "url": "/quran-app/?action=lastread",
-      "icons": [{ "src": "icons/history-96x96.png", "sizes": "96x96" }]
-    },
-    {
-      "name": "البحث",
-      "short_name": "البحث",
-      "description": "البحث في القرآن الكريم",
-      "url": "/quran-app/?action=search",
-      "icons": [{ "src": "icons/search-96x96.png", "sizes": "96x96" }]
-    }
-  ],
-  "related_applications": [],
   "prefer_related_applications": false
 }
