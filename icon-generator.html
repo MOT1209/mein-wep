@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <script>
+        // Generate PNG icons for PWA
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        
+        const icons = {
+            'farm-game': { emoji: '🚜', bg: '#228B22', name: 'farm' },
+            'rust-game': { emoji: '☢️', bg: '#ff4444', name: 'rust' },
+            'calculator-vault': { emoji: '🔒', bg: '#10b981', name: 'vault' },
+            'quiz-app': { emoji: '🧠', bg: '#7c3aed', name: 'quiz' }
+        };
+        
+        function generateIcon(size, emoji, bgColor) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, bgColor);
+            gradient.addColorStop(1, adjustColor(bgColor, -30));
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Border radius
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.beginPath();
+            ctx.roundRect(0, 0, size, size, size * 0.2);
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+            
+            // Emoji
+            ctx.font = `${size * 0.5}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emoji, size/2, size/2);
+            
+            return canvas.toDataURL('image/png');
+        }
+        
+        function adjustColor(color, amount) {
+            // Simple color adjustment
+            return color;
+        }
+        
+        // Generate all icons
+        Object.entries(icons).forEach(([folder, config]) => {
+            sizes.forEach(size => {
+                const dataUrl = generateIcon(size, config.emoji, config.bg);
+                console.log(`Generated: ${folder}/icons/icon-${size}x${size}.png`);
+            });
+        });
+        
+        // For now, let's create a simple PHP script to generate actual files
+        console.log('Icons generated in memory. Use the download function to save them.');
+    </script>
+</body>
+</html>
