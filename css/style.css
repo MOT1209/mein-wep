@@ -86,7 +86,7 @@ body {
     }
 }
 
-/* 
+/*
 =========================================
    RESET & BASE STYLES
 =========================================
@@ -99,14 +99,12 @@ body {
 }
 
 body {
-    font-family: var(--font-primary);
-    background-color: var(--bg-color);
-    background-image: var(--bg-gradient);
-    background-attachment: fixed;
-    color: var(--text-primary);
+    font-family: var(--font-body);
+    background-color: var(--bg-main);
+    color: var(--text-med);
     line-height: 1.6;
     overflow-x: hidden;
-    transition: background-color var(--transition-speed), color var(--transition-speed);
+    transition: var(--transition);
 }
 
 h1,
@@ -115,8 +113,8 @@ h3,
 h4,
 h5,
 h6 {
-    font-family: var(--font-secondary);
-    color: var(--text-primary);
+    font-family: var(--font-heading);
+    color: var(--text-high);
     line-height: 1.2;
 }
 

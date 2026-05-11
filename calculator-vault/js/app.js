@@ -190,3 +190,31 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === '=') calc.handleEquals();
     if (e.key === 'Backspace') calc.delete();
 });
+// --- Secret Note Logic ---
+const noteArea = document.getElementById('vault-note-area');
+const saveNoteBtn = document.getElementById('save-note-btn');
+const noteStatus = document.getElementById('note-status');
+
+// Load note when vault is opened
+function loadSecretNote() {
+    const savedNote = localStorage.getItem('vaultSecretNote') || "";
+    if (noteArea) noteArea.value = savedNote;
+}
+
+if (saveNoteBtn) {
+    saveNoteBtn.addEventListener('click', () => {
+        const note = noteArea.value;
+        localStorage.setItem('vaultSecretNote', note);
+
+        // Show status
+        noteStatus.style.opacity = "1";
+        setTimeout(() => { noteStatus.style.opacity = "0"; }, 2000);
+    });
+}
+
+// Modify openVault to load notes
+const originalOpenVault = openVault;
+window.openVault = function () {
+    originalOpenVault();
+    loadSecretNote();
+}

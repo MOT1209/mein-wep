@@ -27,7 +27,7 @@
                 const color = dot.dataset.color;
                 document.documentElement.style.setProperty('--accent', color);
                 document.documentElement.style.setProperty('--accent-glow', `${color}33`); // Adding alpha
-                
+
                 accentDots.forEach(d => d.classList.remove('active'));
                 dot.classList.add('active');
                 localStorage.setItem('accentColor', color);
@@ -59,7 +59,7 @@
         // =========================================
         // 2. PREMIUM UI LOGIC
         // =========================================
-        
+
         // Sticky Navbar
         const navbar = document.querySelector('.navbar');
         window.addEventListener('scroll', () => {
@@ -70,7 +70,7 @@
         // Perf Mode
         const perfToggle = document.getElementById('perf-mode');
         const bgMesh = document.querySelector('.bg-mesh');
-        
+
         perfToggle?.addEventListener('change', () => {
             if (perfToggle.checked) bgMesh.style.display = 'none';
             else bgMesh.style.display = 'block';
@@ -107,10 +107,10 @@
                 const langCode = btn.getAttribute('data-lang');
                 document.cookie = `googtrans=/en/${langCode}; path=/`;
                 localStorage.setItem('lastLang', langCode);
-                
+
                 langBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                
+
                 setTimeout(() => location.reload(), 300);
             });
         });
@@ -273,49 +273,68 @@
             // Fallback Data (Local Projects)
             const localProjects = [
                 {
+                    title: 'RashidClaw AI',
+                    category: 'App',
+                    status: 'Public',
+                    description: 'Advanced AI Assistant with Chat, Images, Video and more.',
+                    link: 'Rashid-app/index.html',
+                    image_url: 'fas fa-robot',
+                    technologies: ['Gemini', 'Puter.js', 'AI']
+                },
+                {
                     title: 'Farmer Game',
                     category: 'Game',
                     status: 'Public',
                     description: 'A 3D farming simulation game.',
-                    project_link: 'farm-game/index.html',
+                    link: 'farm-game/index.html',
                     image_url: 'fas fa-tractor',
-                    tags: ['3D', 'WebGL', 'Simulation']
+                    technologies: ['3D', 'WebGL', 'Simulation']
                 },
                 {
                     title: 'Quran App',
                     category: 'App',
                     status: 'Public',
                     description: 'Beautiful Quran recitation and reading application.',
-                    project_link: 'quran-app/index.html',
+                    link: 'quran-app/index.html',
                     image_url: 'fas fa-book-open',
-                    tags: ['Audio', 'PWA']
+                    technologies: ['Audio', 'PWA']
                 },
                 {
                     title: 'Rust Game',
                     category: 'Game',
                     status: 'Public',
                     description: 'An experimental game built with Rust and WebAssembly.',
-                    project_link: 'rust-game/index.html',
+                    link: 'rust-game/index.html',
                     image_url: 'fab fa-rust',
-                    tags: ['Rust', 'WASM']
+                    technologies: ['Rust', 'WASM']
                 },
                 {
                     title: 'Calculator Vault',
                     category: 'App',
                     status: 'Public',
                     description: 'A privacy-focused calculator that hides secret files.',
-                    project_link: 'calculator-vault/index.html',
+                    link: 'calculator-vault/index.html',
                     image_url: 'fas fa-user-secret',
-                    tags: ['Security', 'Utility']
+                    technologies: ['Security', 'Utility']
                 },
                 {
                     title: 'Quiz App',
                     category: 'App',
                     status: 'Public',
                     description: 'Interactive quiz application to test your skills.',
-                    project_link: 'quiz-app/index.html',
+                    link: 'quiz-app/index.html',
                     image_url: 'fas fa-question',
-                    tags: ['Education', 'JS']
+                    technologies: ['Education', 'JS']
+                },
+                {
+                    title: 'Smart Trainer Pro',
+                    category: 'Open Source',
+                    status: 'Public',
+                    description: 'AI-powered fitness and nutrition assistant.',
+                    link: 'opencode/Gmy pro/index.html',
+                    github_link: 'https://github.com/Rashid-Dev/SmartTrainerPro',
+                    image_url: 'fas fa-dumbbell',
+                    technologies: ['AI', 'Fitness', 'Open Source']
                 }
             ];
 
@@ -335,9 +354,9 @@
 
                     console.log("✅ Connected to Supabase! Projects count:", count);
 
-                    const adminLink = document.querySelector('.footer a[href*="admin"]');
+                    const adminLink = document.querySelector('.admin-link');
                     if (adminLink) {
-                        adminLink.innerHTML = 'Portal <span style="color:#2ecc71;">● Online</span>';
+                        adminLink.innerHTML = 'Internal Access <span style="color:#2ecc71; margin-left: 5px;">● Online</span>';
                     }
 
                     // 2. Fetch Projects
@@ -393,6 +412,10 @@
 
                 // Flexible check: matches 'game', 'games', 'gaming'
                 const isGame = cat.includes('game') || cat.includes('gaming');
+                const isOpenSource = cat.includes('source') || cat.includes('open');
+
+                // For now, Open Source projects also go to Apps grid unless we create a 3rd one.
+                // But the filter will handle showing/hiding them correctly.
                 const targetGrid = isGame ? gamingGrid : appsGrid;
 
                 if (targetGrid) {
@@ -419,15 +442,16 @@
         function createProjectCard(p, lang = 'en') {
             const t = translations[lang] || translations['en'];
 
-            // Parse tags
-            let tagsArray = [];
-            if (typeof p.tags === 'string') {
-                tagsArray = p.tags.split(',').map(tag => tag.trim());
-            } else if (Array.isArray(p.tags)) {
-                tagsArray = p.tags;
+            // Parse technologies (standardized name from DB)
+            let techArray = [];
+            const rawTech = p.technologies || p.tags; // Fallback for old data
+            if (typeof rawTech === 'string') {
+                techArray = rawTech.split(',').map(tag => tag.trim());
+            } else if (Array.isArray(rawTech)) {
+                techArray = rawTech;
             }
 
-            const tagsHTML = tagsArray.map(tag => `<span class="tag">${tag}</span>`).join('');
+            const tagsHTML = techArray.map(tag => `<span class="tag">${tag}</span>`).join('');
 
             // Icon/Image logic
             let visualContent = '';
@@ -441,11 +465,12 @@
 
             // Check if project supports PWA install
             const pwaProjects = ['quran-app', 'farm-game', 'rust-game', 'calculator-vault', 'quiz-app'];
-            const isPWA = pwaProjects.some(proj => p.project_link.includes(proj));
-            
+            const projectLink = p.link || p.project_link;
+            const isPWA = projectLink && pwaProjects.some(proj => projectLink.includes(proj));
+
             const installBtn = isPWA ? `
                 <button class="btn btn-secondary install-btn" 
-                        data-project="${p.project_link}" 
+                        data-project="${projectLink}" 
                         style="padding: 10px 15px; font-size: 0.85rem; margin-right: 10px;"
                         title="تثبيت كتطبيق">
                     <i class="fas fa-mobile-alt"></i> <span class="btn-text">تثبيت</span>
@@ -466,9 +491,14 @@
                     </div>
                     <div class="project-actions" style="margin-top: 15px;">
                         ${installBtn}
-                        <a href="${p.project_link}" target="_blank" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                        <a href="${projectLink}" target="_blank" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
                             ${t.viewProject} <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i>
                         </a>
+                        ${p.github_link ? `
+                        <a href="${p.github_link}" target="_blank" class="btn btn-glass" style="padding: 10px 20px; font-size: 0.9rem; margin-top: 10px;">
+                            <i class="fab fa-github"></i> ${t.sourceCode}
+                        </a>
+                        ` : ''}
                     </div>
                 </div>
             </article>

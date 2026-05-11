@@ -7,7 +7,7 @@ const APP_CONFIG = {
     DEFAULT_FONT_SIZE: 2.2,
     MIN_FONT_SIZE: 1.5,
     MAX_FONT_SIZE: 4,
-    
+
     // روابط MP3 كاملة للسور من مصادر موثوقة
     FULL_SURAH_AUDIO: {
         // mp3quran.net - مصدر موثوق بملفات MP3 كاملة
@@ -73,7 +73,7 @@ const APP_CONFIG = {
         },
         'ayyoub': {
             name: 'محمد أيوب',
-            baseUrl: 'httpsserver8.mp3quran.net/ayyub',
+            baseUrl: 'https://server8.mp3quran.net/ayyub',
             type: 'full_surah'
         },
         'jibreel': {
@@ -112,7 +112,7 @@ const APP_CONFIG = {
             type: 'full_surah'
         }
     },
-    
+
     // للآيات الفردية (API القديم)
     VERSE_BY_VERSE: {
         'ar.alafasy': 'مشاري العفاسي',
@@ -167,7 +167,7 @@ function initializeElements() {
         'surah-search', 'auto-play-btn', 'toast-container', 'reading-progress', 'progress-text',
         'audio-mode-toggle'
     ];
-    
+
     ids.forEach(id => {
         elements[id] = document.getElementById(id);
     });
@@ -177,24 +177,24 @@ function initializeElements() {
 function showToast(message, type = 'success', duration = 3000) {
     const container = elements['toast-container'];
     if (!container) return;
-    
+
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    
+
     const icons = {
         success: 'fa-check-circle',
         error: 'fa-exclamation-circle',
         info: 'fa-info-circle',
         warning: 'fa-exclamation-triangle'
     };
-    
+
     toast.innerHTML = `
         <i class="fas ${icons[type] || icons.success}"></i>
         <span>${message}</span>
     `;
-    
+
     container.appendChild(toast);
-    
+
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateY(-20px) translateX(-50%)';
@@ -212,7 +212,7 @@ const cacheManager = {
             }
             state.cache.delete(key);
         }
-        
+
         try {
             const stored = localStorage.getItem(`cache_${key}`);
             if (stored) {
@@ -226,14 +226,14 @@ const cacheManager = {
         } catch (e) {
             console.warn('Cache read error:', e);
         }
-        
+
         return null;
     },
-    
+
     set(key, data) {
         const cacheEntry = { data, timestamp: Date.now() };
         state.cache.set(key, cacheEntry);
-        
+
         try {
             localStorage.setItem(`cache_${key}`, JSON.stringify(cacheEntry));
         } catch (e) {
@@ -249,11 +249,11 @@ async function fetchWithCache(url, cacheKey) {
         console.log('Serving from cache:', cacheKey);
         return cached;
     }
-    
+
     try {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        
+
         const data = await response.json();
         cacheManager.set(cacheKey, data);
         return data;
@@ -270,7 +270,7 @@ async function loadSurahs() {
             `${APP_CONFIG.API_BASE}/surah`,
             'all_surahs'
         );
-        
+
         state.allSurahs = data.data;
         displaySurahs(state.allSurahs);
         updateProgressBar();
@@ -290,16 +290,16 @@ async function loadSurahs() {
 function displaySurahs(surahs) {
     const list = elements['surah-list'];
     if (!list) return;
-    
+
     if (surahs.length === 0) {
         list.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>لا توجد نتائج</p></div>';
         return;
     }
-    
+
     list.innerHTML = surahs.map(surah => {
         const isBookmarked = state.bookmarks.some(b => b.type === 'surah' && b.surah === surah.number);
         const isRead = state.readingProgress[surah.number];
-        
+
         return `
             <div class="surah-item ${isRead ? 'read' : ''}" data-number="${surah.number}" onclick="loadSurah(${surah.number})">
                 <div class="surah-number">${surah.number}</div>
@@ -326,46 +326,46 @@ async function loadSurah(surahNumber) {
                 <p>جاري تحميل السورة...</p>
             </div>
         `;
-        
+
         // إيقاف الصوت الحالي
         if (state.audioElement) {
             state.audioElement.pause();
             state.isPlaying = false;
         }
-        
+
         const data = await fetchWithCache(
             `${APP_CONFIG.API_BASE}/surah/${surahNumber}`,
             `surah_${surahNumber}`
         );
-        
+
         state.currentSurah = data.data;
         state.currentVerseIndex = 0;
         state.verseTimings = []; // إعادة تعيين التوقيتات
-        
+
         state.readingProgress[surahNumber] = {
             lastRead: Date.now(),
             percentage: 0
         };
         saveReadingProgress();
-        
+
         updateSurahHeader();
         displayVerses();
         highlightActiveSurah(surahNumber);
         updateProgressBar();
-        
+
         // تحميل الصوت الكامل تلقائياً إذا كان وضع التشغيل التلقائي مفعل
         if (state.settings.autoPlay) {
             setTimeout(() => {
                 playFullSurah();
             }, 1000);
         }
-        
+
         if (window.innerWidth <= 992) {
             elements['sidebar'].classList.remove('active');
         }
-        
+
         showToast(`تم تحميل سورة ${state.currentSurah.name}`, 'success');
-        
+
     } catch (error) {
         console.error('Error loading surah:', error);
         showToast('حدث خطأ في تحميل السورة', 'error');
@@ -376,15 +376,15 @@ async function loadSurah(surahNumber) {
 function updateSurahHeader() {
     const surah = state.currentSurah;
     if (!surah) return;
-    
+
     elements['surah-name'].textContent = surah.name;
     elements['surah-details'].textContent = `${surah.englishName} • ${surah.numberOfAyahs} آية • ${surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}`;
-    
+
     const badge = document.getElementById('surah-badge');
     if (badge) {
         badge.innerHTML = `<span class="surah-number-badge">${surah.number}</span>`;
     }
-    
+
     const isBookmarked = state.bookmarks.some(b => b.type === 'surah' && b.surah === surah.number);
     updateSaveButton(isBookmarked);
 }
@@ -392,24 +392,24 @@ function updateSurahHeader() {
 function updateSaveButton(isBookmarked) {
     const btn = elements['save-surah-main'];
     if (!btn) return;
-    
+
     btn.classList.toggle('saved', isBookmarked);
-    btn.innerHTML = isBookmarked 
-        ? '<i class="fas fa-star"></i> تم الحفظ' 
+    btn.innerHTML = isBookmarked
+        ? '<i class="fas fa-star"></i> تم الحفظ'
         : '<i class="far fa-star"></i> حفظ السورة';
 }
 
 // ==================== Display Verses ====================
 function displayVerses() {
     if (!state.currentSurah) return;
-    
+
     const fontSize = state.settings.fontSize;
     const verses = state.currentSurah.ayahs.map((ayah, index) => {
-        const isBookmarked = state.bookmarks.some(b => 
+        const isBookmarked = state.bookmarks.some(b =>
             b.type === 'verse' && b.surah === state.currentSurah.number && b.verse === ayah.numberInSurah
         );
         const isPlaying = state.currentVerseIndex === index && state.isPlaying;
-        
+
         return `
             <span class="verse-item ${isBookmarked ? 'bookmarked' : ''} ${isPlaying ? 'playing' : ''}" 
                   id="verse-${index}" 
@@ -425,11 +425,11 @@ function displayVerses() {
             </span>
         `;
     }).join('');
-    
-    const bismillah = state.currentSurah.number !== 1 && state.currentSurah.number !== 9 
-        ? '<p class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>' 
+
+    const bismillah = state.currentSurah.number !== 1 && state.currentSurah.number !== 9
+        ? '<p class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>'
         : '';
-    
+
     elements['verses-container'].innerHTML = `
         <div class="verses-wrapper" style="font-size: ${fontSize}rem;">
             <div class="surah-header-mushaf">
@@ -463,27 +463,27 @@ async function playFullSurah(startVerseIndex = 0) {
         showToast('اختر سورة أولاً', 'warning');
         return;
     }
-    
+
     const reciterKey = state.currentReciter;
     const reciter = APP_CONFIG.FULL_SURAH_AUDIO[reciterKey];
-    
+
     if (!reciter) {
         showToast('القارئ غير متوفر في وضع السورة الكاملة', 'error');
         return;
     }
-    
+
     // بناء رابط الملف
     const surahFileName = getSurahFileName(state.currentSurah.number);
     const audioUrl = `${reciter.baseUrl}/${surahFileName}.mp3`;
-    
+
     console.log('Loading full surah audio:', audioUrl);
-    
+
     try {
         // إظهار حالة التحميل
         if (elements['player-verse']) {
             elements['player-verse'].textContent = 'جاري تحميل السورة...';
         }
-        
+
         // إعداد عنصر الصوت
         if (!state.audioElement) {
             state.audioElement = elements['audio-element'];
@@ -493,45 +493,45 @@ async function playFullSurah(startVerseIndex = 0) {
                 document.body.appendChild(state.audioElement);
             }
         }
-        
+
         // إيقاف الصوت الحالي
         state.audioElement.pause();
         state.audioElement.currentTime = 0;
-        
+
         // إعداد المصدر الجديد
         state.audioElement.src = audioUrl;
         state.audioElement.preload = 'auto';
         state.audioElement.playbackRate = parseFloat(elements['playback-speed']?.value || 1);
-        
+
         // إضافة event listeners
         setupFullSurahAudioListeners();
-        
+
         // تحميل وتشغيل
         await new Promise((resolve, reject) => {
             state.audioElement.addEventListener('canplaythrough', resolve, { once: true });
             state.audioElement.addEventListener('error', reject, { once: true });
             state.audioElement.load();
-            
+
             // timeout بعد 30 ثانية
             setTimeout(() => reject(new Error('Timeout')), 30000);
         });
-        
+
         await state.audioElement.play();
         state.isPlaying = true;
         state.currentVerseIndex = startVerseIndex;
-        
+
         // تحديث واجهة المستخدم
         updatePlayerUI();
         elements['audio-player'].classList.add('active');
         updatePlayPauseButton();
         highlightCurrentVerse(startVerseIndex);
-        
+
         showToast(`جاري تشغيل سورة ${state.currentSurah.name} - ${reciter.name}`, 'success');
-        
+
     } catch (error) {
         console.error('Error playing full surah:', error);
         showToast('حدث خطأ في تحميل الصوت. جاري المحاولة بآلية بديلة...', 'warning');
-        
+
         // محاولة استخدام API القديم كبديل
         setTimeout(() => {
             playVerseOld(startVerseIndex);
@@ -542,13 +542,13 @@ async function playFullSurah(startVerseIndex = 0) {
 // إعداد مستمعي أحداث الصوت للسورة الكاملة
 function setupFullSurahAudioListeners() {
     if (!state.audioElement) return;
-    
+
     // إزالة المستمعين القدامى
     const events = ['timeupdate', 'ended', 'error', 'waiting', 'playing', 'pause'];
     events.forEach(event => {
         state.audioElement.removeEventListener(event, handleAudioEvent);
     });
-    
+
     // إضافة مستمع جديد
     events.forEach(event => {
         state.audioElement.addEventListener(event, handleAudioEvent);
@@ -557,8 +557,8 @@ function setupFullSurahAudioListeners() {
 
 function handleAudioEvent(event) {
     if (!state.audioElement || !state.currentSurah) return;
-    
-    switch(event.type) {
+
+    switch (event.type) {
         case 'timeupdate':
             updateProgressFromTime();
             break;
@@ -587,16 +587,16 @@ function handleAudioEvent(event) {
 // تحديث التقدم من الوقت الحالي
 function updateProgressFromTime() {
     if (!state.audioElement || !state.audioElement.duration) return;
-    
+
     const currentTime = state.audioElement.currentTime;
     const duration = state.audioElement.duration;
     const progress = (currentTime / duration) * 100;
-    
+
     // تحديث شريط التقدم
     if (elements['progress-bar']) {
         elements['progress-bar'].value = progress || 0;
     }
-    
+
     // تحديث الوقت
     if (elements['current-time']) {
         elements['current-time'].textContent = formatTime(currentTime);
@@ -604,7 +604,7 @@ function updateProgressFromTime() {
     if (elements['duration'] && duration) {
         elements['duration'].textContent = formatTime(duration);
     }
-    
+
     // تحديد الآية الحالية بناءً على الوقت (تقريبي)
     updateCurrentVerseFromTime(currentTime, duration);
 }
@@ -612,25 +612,25 @@ function updateProgressFromTime() {
 // تحديث الآية الحالية بناءً على الوقت
 function updateCurrentVerseFromTime(currentTime, duration) {
     if (!state.currentSurah) return;
-    
+
     // حساب تقريبي: قسمة الوقت على عدد الآيات
     const totalVerses = state.currentSurah.ayahs.length;
     const progressRatio = currentTime / duration;
     const estimatedVerseIndex = Math.floor(progressRatio * totalVerses);
-    
+
     // التأكد من الحدود
     const newIndex = Math.min(estimatedVerseIndex, totalVerses - 1);
-    
+
     if (newIndex !== state.currentVerseIndex) {
         state.currentVerseIndex = newIndex;
         highlightCurrentVerse(newIndex);
-        
+
         // التمرير إلى الآية
         const verseElement = document.getElementById(`verse-${newIndex}`);
         if (verseElement) {
             verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-        
+
         // تحديث نص المشغل
         if (elements['player-verse']) {
             const ayah = state.currentSurah.ayahs[newIndex];
@@ -643,7 +643,7 @@ function handleAudioEnded() {
     console.log('Audio ended');
     state.isPlaying = false;
     updatePlayPauseButton();
-    
+
     if (state.settings.autoNextSurah && state.currentSurah.number < 114) {
         showToast('جاري الانتقال للسورة التالية...', 'info');
         setTimeout(() => {
@@ -657,32 +657,32 @@ function handleAudioEnded() {
 // التشغيل القديم بالآية (كبديل)
 async function playVerseOld(verseIndex) {
     if (!state.currentSurah) return;
-    
+
     state.currentVerseIndex = verseIndex;
     const reciter = Object.keys(APP_CONFIG.VERSE_BY_VERSE)[0]; // alafasy
     const ayah = state.currentSurah.ayahs[verseIndex];
-    
+
     try {
         const data = await fetchWithCache(
             `${APP_CONFIG.API_BASE}/ayah/${ayah.number}/${reciter}`,
             `audio_${ayah.number}_${reciter}`
         );
-        
+
         if (!state.audioElement) {
             state.audioElement = new Audio();
         }
-        
+
         state.audioElement.src = data.data.audio;
         state.audioElement.load();
-        
+
         await state.audioElement.play();
         state.isPlaying = true;
-        
+
         updatePlayerUI();
         elements['audio-player'].classList.add('active');
         updatePlayPauseButton();
         highlightCurrentVerse(verseIndex);
-        
+
     } catch (error) {
         console.error('Error playing verse:', error);
         showToast('حدث خطأ في تشغيل الصوت', 'error');
@@ -692,7 +692,7 @@ async function playVerseOld(verseIndex) {
 // ==================== Player Controls ====================
 function updatePlayerUI() {
     if (!state.currentSurah) return;
-    
+
     elements['player-surah'].textContent = state.currentSurah.name;
     const ayah = state.currentSurah.ayahs[state.currentVerseIndex];
     elements['player-verse'].textContent = `الآية ${ayah?.numberInSurah || 1}`;
@@ -701,9 +701,9 @@ function updatePlayerUI() {
 function updatePlayPauseButton() {
     const btn = elements['play-pause'];
     if (!btn) return;
-    
-    btn.innerHTML = state.isPlaying 
-        ? '<i class="fas fa-pause"></i>' 
+
+    btn.innerHTML = state.isPlaying
+        ? '<i class="fas fa-pause"></i>'
         : '<i class="fas fa-play"></i>';
 }
 
@@ -711,7 +711,7 @@ function highlightCurrentVerse(index) {
     document.querySelectorAll('.verse-item').forEach(item => {
         item.classList.remove('playing');
     });
-    
+
     const currentVerse = document.getElementById(`verse-${index}`);
     if (currentVerse) {
         currentVerse.classList.add('playing');
@@ -727,10 +727,10 @@ function formatTime(seconds) {
 
 // ==================== Bookmarks System ====================
 function toggleBookmark(surahNumber, verseNumber, verseText, surahName) {
-    const existingIndex = state.bookmarks.findIndex(b => 
+    const existingIndex = state.bookmarks.findIndex(b =>
         b.type === 'verse' && b.surah === surahNumber && b.verse === verseNumber
     );
-    
+
     if (existingIndex > -1) {
         state.bookmarks.splice(existingIndex, 1);
         showToast('تم إزالة الآية من المفضلة', 'info');
@@ -745,19 +745,19 @@ function toggleBookmark(surahNumber, verseNumber, verseText, surahName) {
         });
         showToast('تم إضافة الآية للمفضلة', 'success');
     }
-    
+
     saveBookmarks();
-    
+
     if (state.currentSurah && state.currentSurah.number === surahNumber) {
         displayVerses();
     }
 }
 
 function toggleSurahBookmark(surahNumber, surahName) {
-    const existingIndex = state.bookmarks.findIndex(b => 
+    const existingIndex = state.bookmarks.findIndex(b =>
         b.type === 'surah' && b.surah === surahNumber
     );
-    
+
     if (existingIndex > -1) {
         state.bookmarks.splice(existingIndex, 1);
         showToast('تم إزالة السورة من المفضلة', 'info');
@@ -770,10 +770,10 @@ function toggleSurahBookmark(surahNumber, surahName) {
         });
         showToast('تم إضافة السورة للمفضلة', 'success');
     }
-    
+
     saveBookmarks();
     updateSaveButton(existingIndex === -1);
-    
+
     const surahItem = document.querySelector(`.surah-item[data-number="${surahNumber}"]`);
     if (surahItem) {
         displaySurahs(state.allSurahs);
@@ -796,12 +796,12 @@ function saveSettings() {
 function displayBookmarks(filter = 'all') {
     const list = elements['bookmarks-list'];
     if (!list) return;
-    
+
     let filtered = state.bookmarks;
     if (filter !== 'all') {
         filtered = state.bookmarks.filter(b => b.type === filter);
     }
-    
+
     if (filtered.length === 0) {
         list.innerHTML = `
             <div class="empty-state">
@@ -811,9 +811,9 @@ function displayBookmarks(filter = 'all') {
         `;
         return;
     }
-    
+
     filtered.sort((a, b) => b.date - a.date);
-    
+
     list.innerHTML = filtered.map((item, index) => {
         if (item.type === 'surah') {
             return `
@@ -853,7 +853,7 @@ function deleteBookmark(index) {
     saveBookmarks();
     displayBookmarks();
     showToast('تم الحذف بنجاح', 'success');
-    
+
     if (state.currentSurah) {
         displayVerses();
     }
@@ -862,7 +862,7 @@ function deleteBookmark(index) {
 async function loadSurahAndScroll(surahNumber, verseNumber) {
     await loadSurah(surahNumber);
     elements['bookmark-modal'].classList.remove('active');
-    
+
     const verseIndex = state.currentSurah.ayahs.findIndex(a => a.numberInSurah === verseNumber);
     if (verseIndex > -1) {
         setTimeout(() => {
@@ -880,11 +880,11 @@ async function loadSurahAndScroll(surahNumber, verseNumber) {
 function setupSearch() {
     const searchInput = elements['search-input'];
     if (!searchInput) return;
-    
+
     searchInput.addEventListener('input', (e) => {
         clearTimeout(state.searchDebounceTimer);
         const query = e.target.value.trim();
-        
+
         if (query.length < 2) {
             elements['search-results'].innerHTML = `
                 <div class="search-hint">
@@ -894,7 +894,7 @@ function setupSearch() {
             `;
             return;
         }
-        
+
         state.searchDebounceTimer = setTimeout(() => searchQuran(query), 500);
     });
 }
@@ -902,13 +902,13 @@ function setupSearch() {
 async function searchQuran(query) {
     const resultsContainer = elements['search-results'];
     resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-    
+
     try {
         const data = await fetchWithCache(
             `${APP_CONFIG.API_BASE}/search/${encodeURIComponent(query)}/all/ar`,
             `search_${query}`
         );
-        
+
         if (data.data.matches.length === 0) {
             resultsContainer.innerHTML = `
                 <div class="search-hint">
@@ -918,7 +918,7 @@ async function searchQuran(query) {
             `;
             return;
         }
-        
+
         const results = data.data.matches.slice(0, 20);
         resultsContainer.innerHTML = results.map(match => `
             <div class="search-result-item" onclick="loadSurah(${match.surah.number}); closeModal('search-modal')">
@@ -929,7 +929,7 @@ async function searchQuran(query) {
                 <div class="result-text">${match.text}</div>
             </div>
         `).join('');
-        
+
     } catch (error) {
         console.error('Search error:', error);
         resultsContainer.innerHTML = `
@@ -944,23 +944,23 @@ async function searchQuran(query) {
 // ==================== Tafsir Function ====================
 async function loadTafsir(verseIndex) {
     if (!state.currentSurah) return;
-    
+
     const ayah = state.currentSurah.ayahs[verseIndex];
     const edition = elements['tafsir-select']?.value || 'ar.jalalayn';
-    
+
     elements['tafsir-content'].innerHTML = `
         <div class="loading">
             <div class="spinner"></div>
             <p>جاري تحميل التفسير...</p>
         </div>
     `;
-    
+
     try {
         const data = await fetchWithCache(
             `${APP_CONFIG.API_BASE}/ayah/${ayah.number}/${edition}`,
             `tafsir_${ayah.number}_${edition}`
         );
-        
+
         elements['tafsir-content'].innerHTML = `
             <div class="tafsir-header">
                 <div class="tafsir-verse-text">${ayah.text}</div>
@@ -986,12 +986,12 @@ function toggleTheme() {
     const body = document.body;
     const isDark = body.classList.toggle('dark-mode');
     state.settings.theme = isDark ? 'dark' : 'light';
-    
+
     const icon = elements['theme-toggle']?.querySelector('i');
     if (icon) {
         icon.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
     }
-    
+
     saveSettings();
     showToast(isDark ? 'تم تفعيل الوضع الليلي' : 'تم تفعيل الوضع النهاري', 'info');
 }
@@ -999,15 +999,15 @@ function toggleTheme() {
 function changeFontSize(delta) {
     let newSize = state.settings.fontSize + delta;
     newSize = Math.max(APP_CONFIG.MIN_FONT_SIZE, Math.min(APP_CONFIG.MAX_FONT_SIZE, newSize));
-    
+
     state.settings.fontSize = newSize;
     saveSettings();
-    
+
     const wrapper = document.querySelector('.verses-wrapper');
     if (wrapper) {
         wrapper.style.fontSize = `${newSize}rem`;
     }
-    
+
     showToast(`حجم الخط: ${newSize.toFixed(1)}`, 'info');
 }
 
@@ -1015,10 +1015,10 @@ function updateProgressBar() {
     const totalSurahs = 114;
     const readSurahs = Object.keys(state.readingProgress).length;
     const percentage = Math.round((readSurahs / totalSurahs) * 100);
-    
+
     const progressFill = elements['reading-progress'];
     const progressText = elements['progress-text'];
-    
+
     if (progressFill) {
         progressFill.style.width = `${percentage}%`;
     }
@@ -1030,12 +1030,12 @@ function updateProgressBar() {
 function toggleAutoPlay() {
     state.settings.autoPlay = !state.settings.autoPlay;
     saveSettings();
-    
+
     const btn = elements['auto-play-btn'];
     if (btn) {
         btn.classList.toggle('active', state.settings.autoPlay);
     }
-    
+
     showToast(state.settings.autoPlay ? 'تم تفعيل التشغيل التلقائي' : 'تم إيقاف التشغيل التلقائي', 'info');
 }
 
@@ -1060,22 +1060,22 @@ function closeModal(modalId) {
 function setupEventListeners() {
     // Theme toggle
     elements['theme-toggle']?.addEventListener('click', toggleTheme);
-    
+
     // Menu toggle
     elements['menu-toggle']?.addEventListener('click', () => {
         elements['sidebar'].classList.toggle('active');
     });
-    
+
     // Search
     elements['search-btn']?.addEventListener('click', () => openModal('search-modal'));
     setupSearch();
-    
+
     // Bookmarks
     elements['bookmark-btn']?.addEventListener('click', () => {
         displayBookmarks();
         openModal('bookmark-modal');
     });
-    
+
     // Tafsir
     elements['tafsir-btn']?.addEventListener('click', () => {
         if (state.currentSurah) {
@@ -1083,29 +1083,29 @@ function setupEventListeners() {
         }
         openModal('tafsir-modal');
     });
-    
+
     elements['tafsir-select']?.addEventListener('change', () => {
         if (state.currentSurah) {
             loadTafsir(state.currentVerseIndex);
         }
     });
-    
+
     // Font controls
     elements['increase-font']?.addEventListener('click', () => changeFontSize(0.1));
     elements['decrease-font']?.addEventListener('click', () => changeFontSize(-0.1));
-    
+
     // Save surah
     elements['save-surah-main']?.addEventListener('click', () => {
         if (state.currentSurah) {
             toggleSurahBookmark(state.currentSurah.number, state.currentSurah.name);
         }
     });
-    
+
     // Last read
     elements['last-read-btn']?.addEventListener('click', () => {
         const lastRead = Object.entries(state.readingProgress)
             .sort((a, b) => b[1].lastRead - a[1].lastRead)[0];
-        
+
         if (lastRead) {
             loadSurah(parseInt(lastRead[0]));
             showToast('تم تحميل آخر قراءة', 'success');
@@ -1113,10 +1113,10 @@ function setupEventListeners() {
             showToast('لا توجد قراءة سابقة', 'warning');
         }
     });
-    
+
     // Auto play
     elements['auto-play-btn']?.addEventListener('click', toggleAutoPlay);
-    
+
     // Audio controls - NEW
     elements['play-pause']?.addEventListener('click', () => {
         if (!state.audioElement) {
@@ -1126,7 +1126,7 @@ function setupEventListeners() {
             }
             return;
         }
-        
+
         if (state.isPlaying) {
             state.audioElement.pause();
             state.isPlaying = false;
@@ -1136,43 +1136,43 @@ function setupEventListeners() {
         }
         updatePlayPauseButton();
     });
-    
+
     // Reciter select - NEW
     elements['reciter-select']?.addEventListener('change', (e) => {
         state.currentReciter = e.target.value;
         state.settings.reciter = e.target.value;
         saveSettings();
-        
+
         // إعادة تشغيل إذا كان يعمل
         if (state.isPlaying && state.currentSurah) {
             const currentTime = state.audioElement?.currentTime || 0;
             playFullSurah(state.currentVerseIndex);
         }
     });
-    
+
     // Skip buttons
     elements['skip-forward']?.addEventListener('click', () => {
         if (state.audioElement) state.audioElement.currentTime += 10;
     });
-    
+
     elements['skip-back']?.addEventListener('click', () => {
         if (state.audioElement) state.audioElement.currentTime -= 10;
     });
-    
+
     // Repeat
     elements['repeat-verse']?.addEventListener('click', () => {
         state.isRepeatEnabled = !state.isRepeatEnabled;
         elements['repeat-verse'].classList.toggle('active', state.isRepeatEnabled);
         showToast(state.isRepeatEnabled ? 'تم تفعيل التكرار' : 'تم إيقاف التكرار', 'info');
     });
-    
+
     // Speed control
     elements['playback-speed']?.addEventListener('change', (e) => {
         if (state.audioElement) {
             state.audioElement.playbackRate = parseFloat(e.target.value);
         }
     });
-    
+
     // Close player
     elements['close-player']?.addEventListener('click', () => {
         if (state.audioElement) {
@@ -1184,7 +1184,7 @@ function setupEventListeners() {
             item.classList.remove('playing');
         });
     });
-    
+
     // Progress bar
     elements['progress-bar']?.addEventListener('input', (e) => {
         if (state.audioElement && state.audioElement.duration) {
@@ -1192,13 +1192,13 @@ function setupEventListeners() {
             state.audioElement.currentTime = time;
         }
     });
-    
+
     // Filter tabs
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
-            
+
             const filter = e.target.dataset.filter;
             if (filter === 'all') {
                 displaySurahs(state.allSurahs);
@@ -1210,7 +1210,7 @@ function setupEventListeners() {
             }
         });
     });
-    
+
     // Bookmark tabs
     document.querySelectorAll('.bookmark-tab').forEach(tab => {
         tab.addEventListener('click', (e) => {
@@ -1219,7 +1219,7 @@ function setupEventListeners() {
             displayBookmarks(e.target.dataset.tab);
         });
     });
-    
+
     // Close modals
     document.querySelectorAll('.close-modal').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1227,7 +1227,7 @@ function setupEventListeners() {
             closeModal(modalId);
         });
     });
-    
+
     // Close modal on outside click
     document.querySelectorAll('.modal').forEach(modal => {
         modal.addEventListener('click', (e) => {
@@ -1237,7 +1237,7 @@ function setupEventListeners() {
             }
         });
     });
-    
+
     // Surah search
     elements['surah-search']?.addEventListener('input', (e) => {
         const query = e.target.value.toLowerCase();
@@ -1248,7 +1248,7 @@ function setupEventListeners() {
         );
         displaySurahs(filtered);
     });
-    
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'k') {
@@ -1256,14 +1256,14 @@ function setupEventListeners() {
             openModal('search-modal');
             elements['search-input']?.focus();
         }
-        
+
         if (e.key === 'Escape') {
             document.querySelectorAll('.modal.active').forEach(modal => {
                 modal.classList.remove('active');
             });
             document.body.style.overflow = '';
         }
-        
+
         if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT') {
             e.preventDefault();
             elements['play-pause']?.click();
@@ -1277,13 +1277,13 @@ async function shareCurrentSurah() {
         showToast('اختر سورة أولاً', 'warning');
         return;
     }
-    
+
     const shareData = {
         title: `سورة ${state.currentSurah.name}`,
         text: `اقرأ سورة ${state.currentSurah.name} في تطبيق القرآن الكريم`,
         url: window.location.href
     };
-    
+
     if (navigator.share) {
         try {
             await navigator.share(shareData);
@@ -1306,18 +1306,18 @@ async function downloadCurrentSurah() {
         showToast('اختر سورة أولاً', 'warning');
         return;
     }
-    
+
     showToast('جاري التحضير للتحميل...', 'info');
-    
+
     let content = `سورة ${state.currentSurah.name}\n`;
     content += `عدد الآيات: ${state.currentSurah.numberOfAyahs}\n`;
     content += `${state.currentSurah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}\n\n`;
     content += `بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\n\n`;
-    
+
     state.currentSurah.ayahs.forEach(ayah => {
         content += `${ayah.text} (${ayah.numberInSurah})\n`;
     });
-    
+
     const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1327,7 +1327,7 @@ async function downloadCurrentSurah() {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     showToast('تم التحميل بنجاح', 'success');
 }
 
@@ -1335,7 +1335,7 @@ function highlightActiveSurah(surahNumber) {
     document.querySelectorAll('.surah-item').forEach(item => {
         item.classList.remove('active');
     });
-    
+
     const activeItem = document.querySelector(`.surah-item[data-number="${surahNumber}"]`);
     if (activeItem) {
         activeItem.classList.add('active');
@@ -1346,7 +1346,7 @@ function highlightActiveSurah(surahNumber) {
 function handleVerseClick(index) {
     // تشغيل السورة كاملة من الآية المختارة
     playFullSurah(index);
-    
+
     if (document.getElementById('tafsir-modal')?.classList.contains('active')) {
         loadTafsir(index);
     }
@@ -1356,25 +1356,25 @@ function handleVerseClick(index) {
 function initApp() {
     initializeElements();
     setupEventListeners();
-    
+
     // Load saved settings
     if (state.settings.theme === 'light') {
         document.body.classList.remove('dark-mode');
         const icon = elements['theme-toggle']?.querySelector('i');
         if (icon) icon.className = 'fas fa-moon';
     }
-    
+
     // Set initial reciter
     if (elements['reciter-select'] && state.settings.reciter) {
         elements['reciter-select'].value = state.settings.reciter;
         state.currentReciter = state.settings.reciter;
     }
-    
+
     // Set auto-play button state
     if (elements['auto-play-btn'] && state.settings.autoPlay) {
         elements['auto-play-btn'].classList.add('active');
     }
-    
+
     // Initialize audio element
     state.audioElement = elements['audio-element'];
     if (!state.audioElement) {
@@ -1382,10 +1382,10 @@ function initApp() {
         state.audioElement.id = 'audio-element';
         document.body.appendChild(state.audioElement);
     }
-    
+
     // Load surahs
     loadSurahs();
-    
+
     console.log('🕌 Quran App v3.0 - Full Surah Audio System');
     console.log('📖 Features: Complete Surah MP3, Smooth Playback, 20+ Reciters');
 }

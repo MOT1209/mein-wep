@@ -11,3 +11,8 @@ js/gemini-config.js
 # Ignore API keys
 **/api-keys/
 **/*-key.json
+
+# Ignore temporary and workspace files
+temp_db_check.js
+package-lock.json
+*.code-workspace

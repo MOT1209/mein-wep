@@ -1,7 +1,7 @@
 /* ==================== Design System ==================== */
 :root {
     --bg-dark: #05070a;
-    --card-bg: #0f172a;
+    --card-bg: rgba(15, 23, 42, 0.7);
     --sidebar-bg: #0a0f1e;
     --accent: #00d2ff;
     --accent-glow: rgba(0, 210, 255, 0.4);
@@ -362,6 +362,7 @@ body {
         transform: translateY(0);
     }
 }
+
 /* ==================== Mobile Navigation ==================== */
 .mobile-nav {
     display: none;
@@ -444,15 +445,19 @@ body {
 
 /* Touch-friendly buttons */
 @media (hover: none) and (pointer: coarse) {
-    .btn, .nav-btn, .add-btn, .exit-btn {
+
+    .btn,
+    .nav-btn,
+    .add-btn,
+    .exit-btn {
         min-height: 48px;
         min-width: 48px;
     }
-    
+
     .buttons {
         gap: 12px;
     }
-    
+
     .btn {
         font-size: 1.4rem;
     }
@@ -505,4 +510,80 @@ body {
         gap: 20px;
         text-align: center;
     }
+}
+
+/* ==================== Note Manager Styling ==================== */
+.note-manager {
+    background: var(--glass);
+    backdrop-filter: blur(var(--backdrop-blur));
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    padding: 30px;
+    margin-top: 30px;
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.note-input-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#vault-note-area {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 20px;
+    color: var(--text-main);
+    font-size: 1.1rem;
+    min-height: 200px;
+    resize: vertical;
+    outline: none;
+    transition: 0.3s;
+}
+
+#vault-note-area:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
+}
+
+.save-note-btn {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 50px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+}
+
+.save-note-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px var(--accent-glow);
+}
+
+/* Glass Enhancement for Calculator */
+.calculator {
+    backdrop-filter: blur(var(--backdrop-blur));
+}
+
+.btn {
+    background: rgba(30, 41, 59, 0.4);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.btn:hover {
+    background: rgba(51, 65, 85, 0.6);
 }

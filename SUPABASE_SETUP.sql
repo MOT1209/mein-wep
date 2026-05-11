@@ -129,3 +129,36 @@ values
 ('Rust Game', 'Game', 'Public', 'Experimental Rust + WASM game.', 'rust-game/index.html', 'fab fa-rust', ARRAY['Rust', 'WASM']),
 ('Calculator Vault', 'App', 'Public', 'Privacy-focused calculator vault.', 'calculator-vault/index.html', 'fas fa-user-secret', ARRAY['Security', 'Utility']),
 ('Quiz App', 'App', 'Public', 'Interactive quiz application.', 'quiz-app/index.html', 'fas fa-question', ARRAY['Education', 'JS']);
+-- ==============================================================================
+-- TABLE: lessons
+-- Stores content for the Learning Center
+-- ==============================================================================
+create table public.lessons (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  title text not null,
+  description text,
+  icon_class text default 'fas fa-book',
+  progress int default 0,
+  tags text[],
+  content_url text, -- Link to the full lesson/article
+  category text check (category in ('Programming', 'Web', 'Game Dev', 'Other'))
+);
+
+alter table public.lessons enable row level security;
+
+create policy "Everyone can view lessons"
+on public.lessons for select
+using ( true );
+
+create policy "Admins can manage lessons"
+on public.lessons for all
+to authenticated
+using ( true );
+
+-- Seed lessons
+insert into public.lessons (title, description, icon_class, progress, tags, category)
+values 
+('Python Basics', 'Master the fundamentals of Python programming, from variables to OOP.', 'fab fa-python', 80, ARRAY['Syntax', 'OOP', 'Scripting'], 'Programming'),
+('Modern Web Development', 'Learn how to build responsive websites using HTML5, CSS3, and JS.', 'fab fa-html5', 65, ARRAY['HTML/CSS', 'Frontend', 'Responsive'], 'Web'),
+('Game Dev with Three.js', 'Dive into 3D web graphics and immersive scenes.', 'fas fa-gamepad', 40, ARRAY['WebGL', '3D Math', 'Physics'], 'Game Dev');

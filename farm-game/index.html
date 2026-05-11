@@ -233,7 +233,33 @@
         <div id="time-display" style="font-size: 18px; color: #caf0f8;">Time: Day</div>
     </div>
 
-    <!-- ... (Keep existing UI elements) ... -->
+    <div id="hotbar-container">
+        <div class="slot active" id="slot-0">
+            <span class="slot-key">1</span>
+            <div class="slot-icon">🚜</div>
+            <span class="slot-count">Plow</span>
+        </div>
+        <div class="slot" id="slot-1">
+            <span class="slot-key">2</span>
+            <div class="slot-icon">💧</div>
+            <span class="slot-count">Water</span>
+        </div>
+        <div class="slot" id="slot-2">
+            <span class="slot-key">3</span>
+            <div class="slot-icon">🌾</div>
+            <span class="slot-count" id="seed-wheat-count">5</span>
+        </div>
+        <div class="slot" id="slot-3">
+            <span class="slot-key">4</span>
+            <div class="slot-icon">🍅</div>
+            <span class="slot-count" id="seed-tomato-count">2</span>
+        </div>
+        <div class="slot" id="slot-4">
+            <span class="slot-key">5</span>
+            <div class="slot-icon">🧺</div>
+            <span class="slot-count">Harv</span>
+        </div>
+    </div>
     <div id="controls-overlay">
         [WASD] Move <br>
         [F] / [Space] Action/Sleep<br>
@@ -277,16 +303,16 @@
                 const speed = keys.shift ? 0.15 : 0.08;
                 const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
                 const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
-                
+
                 player.position.add(forward.multiplyScalar(-dy * speed));
                 player.position.add(right.multiplyScalar(dx * speed));
-                
+
                 // Boundary check
                 player.position.x = Math.max(-49, Math.min(49, player.position.x));
                 player.position.z = Math.max(-49, Math.min(49, player.position.z));
             },
             onAction: (action) => {
-                switch(action) {
+                switch (action) {
                     case 'farm':
                     case 'harvest':
                         performAction();
@@ -310,7 +336,7 @@
             },
             debug: false
         });
-        
+
         gameControls.init();
 
         // --- GAME STATE ---
@@ -696,7 +722,7 @@
         updateUI();
         animate();
     </script>
-    
+
     <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {

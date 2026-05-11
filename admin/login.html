@@ -180,12 +180,12 @@
             <h2>System Access</h2>
         </div>
 
-        <form id="loginForm">
+        <form id="admin-login-form">
             <div class="form-group">
                 <label>Identifier</label>
                 <div class="input-wrapper">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="username" placeholder="Email or Username" required>
+                    <input type="text" id="admin-username" placeholder="Email (as Identifier)" required>
                 </div>
             </div>
 
@@ -193,12 +193,12 @@
                 <label>Security Key</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
-                    <input type="password" id="password" placeholder="Password" required>
+                    <input type="password" id="admin-password" placeholder="Password" required>
                 </div>
             </div>
 
             <button type="submit" class="btn-login">Authenticate</button>
-            <div class="error-msg" id="errorMsg">
+            <div class="error-msg" id="admin-login-error">
                 <i class="fas fa-circle-exclamation"></i> Invalid Credentials
             </div>
         </form>
@@ -208,42 +208,16 @@
         </div>
     </div>
 
+    <!-- Admin Logic -->
+    <script src="../js/admin.js?v=4.0"></script>
+
     <script>
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const user = document.getElementById('username').value.trim().toLowerCase();
-            const pass = document.getElementById('password').value.trim();
-            const errorMsg = document.getElementById('errorMsg');
-            const btn = document.querySelector('.btn-login');
-
-            // Hardcoded Credentials
-            // User: admin OR zwnt45602@gmail.com
-            // Pass: RASHID2010 OR 1234
-            const validUsers = ['admin', 'zwnt45602@gmail.com'];
-            const validPass = ['RASHID2010', '1234']; // 1234 fallback for debug
-
-            btn.innerText = 'Verifying...';
-            btn.style.opacity = '0.7';
-
-            setTimeout(() => {
-                if (validUsers.includes(user) && validPass.includes(pass)) {
-                    // Success
-                    localStorage.setItem('isAdmin', 'true');
-                    window.location.href = 'dashboard.html';
-                } else {
-                    // Error
-                    errorMsg.style.display = 'block';
-                    btn.innerText = 'Authenticate';
-                    btn.style.opacity = '1';
-
-                    // Shake animation
-                    const card = document.querySelector('.login-card');
-                    card.style.animation = 'none';
-                    card.offsetHeight; /* trigger reflow */
-                    card.style.animation = 'shake 0.4s';
-                }
-            }, 800); // Fake delay for realism
-        });
+        // Custom Dashboard redirect logic if needed
+        // The admin.js handles SIGNED_IN by calling openDashboard()
+        // We can override openDashboard for the login page specifically.
+        window.openDashboard = function () {
+            window.location.href = 'dashboard.html';
+        };
 
         // Add CSS for shake inline for convenience
         const style = document.createElement('style');
@@ -253,6 +227,7 @@
                 10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
                 20%, 40%, 60%, 80% { transform: translateX(5px); }
             }
+            .shake { animation: shake 0.4s; }
         `;
         document.head.appendChild(style);
     </script>

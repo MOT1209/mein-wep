@@ -27,36 +27,22 @@ const quizDatabase = {
             { question: "أي مكتبة JS تستخدم لبناء واجهات مستخدم بأسلوب المكونات؟", options: ["jQuery", "React", "Django", "Laravel"], answer: 1 },
             { question: "كيف نكتب تعليقاً في CSS؟", options: ["// comment", "<!-- comment -->", "/* comment */", "# comment"], answer: 2 }
         ]
-        // Add more levels here up to 100+ to reach 1000 questions
-    ],
-    general: [
-        // LEVEL 1
+        // LEVEL 3 (Intermediate)
         [
-            { question: "ما هي أكبر قارة في العالم؟", options: ["أفريقيا", "أوروبا", "آسيا", "أمريكا الشمالية"], answer: 2 },
-            { question: "من هو مخترع المصباح الكهربائي؟", options: ["نيوتن", "توماس إديسون", "أينشتاين", "تسلا"], answer: 1 },
-            { question: "ما هي عاصمة ألمانيا؟", options: ["باريس", "برلين", "لندن", "مدريد"], answer: 1 },
-            { question: "كم عدد كواكب المجموعة الشمسية؟", options: ["7", "8", "9", "10"], answer: 1 },
-            { question: "ما هو أسرع حيوان بري في العالم؟", options: ["الأسد", "النمر", "الفهد", "الغزال"], answer: 2 },
-            { question: "ما هو الرمز الكيميائي للماء؟", options: ["CO2", "H2O", "O2", "NaCl"], answer: 1 },
-            { question: "في أي مدينة توجد الأهرامات؟", options: ["القاهرة", "الجيزة", "الأقصر", "أسوان"], answer: 1 },
-            { question: "ما هو طول نهر النيل تقريباً؟", options: ["4000 كم", "6650 كم", "8000 كم", "5500 كم"], answer: 1 },
-            { question: "كم عدد أسنان الإنسان البالغ؟", options: ["28", "30", "32", "34"], answer: 2 },
-            { question: "ما هي عاصمة اليابان؟", options: ["بكين", "سيول", "طوكيو", "هانوي"], answer: 2 }
-        ],
-        // LEVEL 2
-        [
-            { question: "ما هو أكبر محيط في العالم؟", options: ["الأطلسي", "الهندي", "الهادئ", "المجمّد الشمالي"], answer: 2 },
-            { question: "من هو مؤلف كتاب 'مقدمة ابن خلدون'؟", options: ["ابن سينا", "ابن خلدون", "الغزالي", "الفارابي"], answer: 1 },
-            { question: "ما هي العملة المستخدمة في دول الاتحاد الأوروبي؟", options: ["الدولار", "اليورو", "الجنيه", "الفرنك"], answer: 1 },
-            { question: "كم عدد القلوب لدى الأخطبوط؟", options: ["1", "2", "3", "4"], answer: 2 },
-            { question: "ما هو أصغر كوكب في المجموعة الشمسية؟", options: ["عطارد", "المريخ", "الزهرة", "نبتون"], answer: 0 },
-            { question: "أين تقع الغابة الاستوائية الأكبر في العالم؟", options: ["أفريقيا", "الأمازون", "إندونيسيا", "أستراليا"], answer: 1 },
-            { question: "من هو أول إنسان صعد إلى القمر؟", options: ["يوري غاغارين", "نيل آرمسترونغ", "بايز ألدرين", "مايكل كولينز"], answer: 1 },
-            { question: "ما هي أصلب مادة في الطبيعة؟", options: ["الحديد", "الألماس", "الذهب", "النحاس"], answer: 1 },
-            { question: "كم عدد ألوان قوس قزح؟", options: ["5", "6", "7", "8"], answer: 2 },
-            { question: "ما هو الطائر الذي يضع أكبر بيضة؟", options: ["النسر", "النعامة", "البوم", "الصقر"], answer: 1 }
+        { question: "ما هي الطريقة الصحيحة لمنع تصرف النموذج (Form) الافتراضي؟", options: ["stop()", "end()", "preventDefault()", "halt()"], answer: 2 },
+        { question: "أي محرك قواعد بيانات يستخدم 'Collection' بدلاً من 'Table'؟", options: ["MySQL", "PostgreSQL", "MongoDB", "Oracle"], answer: 2 },
+        { question: "ما هو الـ 'Hoisting' في JavaScript؟", options: ["ضغط الكود", "رفع تعريفات المتغيرات للأعلى", "حذف الذاكرة غير المستخدمة", "دمج الملفات"], answer: 1 },
+        { question: "أي جزء من الـ Box Model هو الأقرب للمحتوى؟", options: ["Border", "Margin", "Padding", "Outline"], answer: 2 },
+        { question: "ما هي نتيجة: typeof []؟", options: ["array", "list", "object", "undefined"], answer: 2 },
+        { question: "أي كلمة مفتاحية تستخدم لوراثة كلاس في JS؟", options: ["inherits", "extends", "implements", "from"], answer: 1 },
+        { question: "ماذا يرمز اختصار JSON؟", options: ["JavaScript Object Notation", "Java Serialized Object Node", "Joint System Online Network", "Just Standard Object Name"], answer: 0 },
+        { question: "أي دالة تستخدم لتحويل JSON إلى Object؟", options: ["JSON.parse()", "JSON.stringify()", "JSON.toObject()", "JSON.convert()"], answer: 0 },
+        { question: "ما هي الوحدة التي تسمى: Viewport Width؟", options: ["vpw", "vw", "%", "px"], answer: 1 },
+        { question: "أي دالة تستخدم للانتظار في Promise؟", options: ["wait", "delay", "await", "hold"], answer: 2 }
         ]
-    ]
+    ],
+    // Existing categories...
+    general: quizDatabase.general
 };
 
 // State Variables
@@ -84,7 +70,6 @@ const totalQDisplay = document.getElementById('total-q');
 const finalScoreDisplay = document.getElementById('final-score');
 const maxScoreDisplay = document.getElementById('max-score');
 const resultMessage = document.getElementById('result-message');
-const resultIcon = document.getElementById('result-icon');
 
 // Global Function for selection
 window.selectCategory = function (category) {
@@ -117,7 +102,6 @@ function startQuiz() {
     resultScreen.classList.remove('active');
     quizScreen.classList.add('active');
 
-    // Total for this level (always 10)
     totalQDisplay.textContent = quizDatabase[currentCategory][currentLevel].length;
     showQuestion();
 }
@@ -134,7 +118,6 @@ function showQuestion() {
     questionText.textContent = q.question;
     currentQDisplay.textContent = currentQuestionIndex + 1;
 
-    // Update Progress
     const progress = ((currentQuestionIndex + 1) / qBatch.length) * 100;
     progressBar.style.width = `${progress}%`;
 
@@ -193,21 +176,27 @@ function autoHandleTimeout() {
     nextBtn.disabled = false;
 }
 
-function showLevelComplete() {
+async function showLevelComplete() {
     quizScreen.classList.remove('active');
     resultScreen.classList.add('active');
     finalScoreDisplay.textContent = score;
     maxScoreDisplay.textContent = `/ 10`;
+
+    // Save to Leaderboard (Simple Prompter for name)
+    if (score >= 5) {
+        const playerName = prompt("رائع! ادخل اسمك للوحة المتصدرين:") || "لاعب مجهول";
+        saveHighScore(playerName, score, currentCategory, currentLevel + 1);
+    }
 
     if (score >= 7) {
         resultMessage.innerHTML = `مستوى رائع! لقد أكملت <b>المستوى ${currentLevel + 1}</b> بنجاح. هل أنت جاهز للمستوى التالي؟`;
         restartBtn.textContent = "المستوى التالي";
         restartBtn.onclick = () => {
             currentLevel++;
-            // Wrap around or check if level exists
             if (currentLevel >= quizDatabase[currentCategory].length) {
                 alert("تهانينا! لقد أنهيت جميع المستويات المتوفرة حالياً.");
                 currentLevel = 0;
+                window.location.reload(); // Reset to start
             }
             startQuiz();
         };
@@ -215,5 +204,18 @@ function showLevelComplete() {
         resultMessage.innerHTML = "نقاطك غير كافية للمرور للمستوى التالي. حاول مرة أخرى!";
         restartBtn.textContent = "إعادة المحاولة";
         restartBtn.onclick = () => startQuiz();
+    }
+}
+
+async function saveHighScore(name, score, cat, lvl) {
+    try {
+        if (typeof supabaseClient !== 'undefined') {
+            await supabaseClient.from('quiz_leaderboard').insert([
+                { player_name: name, score: score, category: cat, level: lvl }
+            ]);
+            console.log("Score saved to Supabase");
+        }
+    } catch (e) {
+        console.warn("Failed to save score:", e);
     }
 }

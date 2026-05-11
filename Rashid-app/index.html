@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RashidClaw - مساعد الذكاء الاصطناعي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap');
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-tertiary: #1a1a25;
+            --bg-card: #15151f;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --gradient-main: linear-gradient(135deg, #00d4ff 0%, #8b5cf6 50%, #ec4899 100%);
+            --gradient-card: linear-gradient(145deg, #1a1a25 0%, #12121a 100%);
+            --border-subtle: rgba(255, 255, 255, 0.06);
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.3);
+            --glow-purple: 0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        body.light {
+            --bg-primary: #e8eaed;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f5f6f8;
+            --bg-card: #ffffff;
+            --text-primary: #1a1a2e;
+            --text-secondary: #4a4a5a;
+            --text-muted: #8a8a9a;
+            --border-subtle: rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', 'Cairo', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(236, 72, 153, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar - Futuristic */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-subtle);
+            padding: 25px 15px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+            z-index: 100;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 1px;
+            height: 100%;
+            background: linear-gradient(to bottom, var(--accent-cyan), var(--accent-purple), transparent);
+            opacity: 0.5;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 40px;
+            padding: 0 10px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-main);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: var(--glow-cyan);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+            }
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .nav-btn {
+            width: 100%;
+            padding: 14px 18px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            text-align: right;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-btn::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--gradient-main);
+            border-radius: 3px;
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-primary);
+            transform: translateX(-5px);
+        }
+
+        .nav-btn:hover::before {
+            transform: scaleY(1);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(90deg, rgba(0, 212, 255, 0.1) 0%, transparent 100%);
+            color: var(--accent-cyan);
+            border-right: 3px solid var(--accent-cyan);
+        }
+
+        .nav-btn i {
+            width: 22px;
+            text-align: center;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+            box-shadow: var(--glow-purple);
+        }
+
+        .theme-toggle i {
+            color: var(--accent-orange);
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-btn {
+            display: none;
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            z-index: 1000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-subtle);
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Main Content */
+        .main {
+            flex: 1;
+            margin-right: 260px;
+            padding: 40px;
+            min-height: 100vh;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        h1 i {
+            -webkit-text-fill-color: var(--accent-cyan);
+            margin-left: 12px;
+        }
+
+        p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        /* Cards - Futuristic */
+        .feature-box,
+        .chat-box {
+            background: var(--gradient-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-box::before,
+        .chat-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+            opacity: 0.5;
+        }
+
+        /* Chat */
+        .chat-box {
+            height: 540px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-purple) var(--bg-tertiary);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--accent-purple);
+            border-radius: 3px;
+        }
+
+        .message {
+            margin-bottom: 18px;
+            display: flex;
+            gap: 12px;
+            max-width: 82%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .message.bot {
+            align-self: flex-start;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .msg-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .bot .msg-icon {
+            background: var(--gradient-main);
+        }
+
+        .user .msg-icon {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .msg-content {
+            background: var(--bg-tertiary);
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 15px;
+            line-height: 1.7;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border-subtle);
+        }
+
+        .user .msg-content {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2) 0%, rgba(139, 92, 246, 0.2) 100%);
+            border-color: rgba(0, 212, 255, 0.3);
+        }
+
+        .chat-input-area {
+            padding: 18px;
+            background: var(--bg-tertiary);
+            display: flex;
+            gap: 12px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 16px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            color: var(--text-primary);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+        }
+
+        .chat-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            padding: 16px 28px;
+            background: var(--gradient-main);
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .send-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        #micBtn {
+            padding: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            color: var(--accent-red);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        #micBtn:hover {
+            background: var(--accent-red);
+            color: #fff;
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .input-group input,
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 15px 18px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Tajawal', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group textarea {
+            height: 120px;
+            resize: none;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+        }
+
+        .input-group select {
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 15px 30px;
+            background: var(--gradient-main);
+            border: none;
+            border-radius: 12px;
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        /* Image Result */
+        .image-result {
+            margin-top: 25px;
+            text-align: center;
+            min-height: 240px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-tertiary);
+            border-radius: 18px;
+            border: 2px dashed var(--border-subtle);
+            position: relative;
+        }
+
+        .image-result img {
+            max-width: 100%;
+            max-height: 440px;
+            border-radius: 16px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            animation: imgLoad 0.5s ease;
+        }
+
+        @keyframes imgLoad {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Chart */
+        .chart-box {
+            height: 440px;
+            background: var(--bg-tertiary);
+            border-radius: 18px;
+            padding: 22px;
+            border: 1px solid var(--border-subtle);
+        }
+
+        /* Grids */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 18px;
+        }
+
+        .grid-4 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 12px;
+        }
+
+        /* Range Slider */
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--gradient-main);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: var(--glow-cyan);
+        }
+
+        /* Memory Game */
+        .memory-card {
+            background: var(--bg-tertiary) !important;
+            border: 1px solid var(--border-subtle) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .memory-card:hover {
+            transform: scale(1.08) !important;
+            border-color: var(--accent-cyan) !important;
+            box-shadow: var(--glow-cyan) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-right: 0;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .grid-2,
+            .grid-3,
+            .grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .main {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-toggle" onclick="toggleTheme()" title="تبديل الوضع"><i class="fas fa-moon"></i></div>
+    <div class="mobile-menu-btn" onclick="toggleMenu()"><i class="fas fa-bars"></i></div>
+    <div class="overlay" id="overlay"></div>
+    <div class="container">
+        <aside class="sidebar" id="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-robot"></i></div>
+                <span class="logo-text">RashidClaw</span>
+            </div>
+            <button class="nav-btn active" data-page="home"><i class="fas fa-home"></i> الرئيسية</button>
+            <button class="nav-btn" data-page="chat"><i class="fas fa-comments"></i> المحادثة</button>
+            <button class="nav-btn" data-page="image"><i class="fas fa-image"></i> توليد الصور</button>
+            <button class="nav-btn" data-page="video"><i class="fas fa-video"></i> الفيديو</button>
+            <button class="nav-btn" data-page="summarize"><i class="fas fa-list-alt"></i> تلخيص النصوص</button>
+            <button class="nav-btn" data-page="chart"><i class="fas fa-chart-bar"></i> الرسوم البيانية</button>
+            <button class="nav-btn" data-page="tts"><i class="fas fa-microphone"></i> النص لكلام</button>
+            <button class="nav-btn" data-page="translate"><i class="fas fa-language"></i> المترجم</button>
+            <button class="nav-btn" data-page="notes"><i class="fas fa-sticky-note"></i> الملاحظات</button>
+            <button class="nav-btn" data-page="code"><i class="fas fa-code"></i> الأكواد</button>
+            <button class="nav-btn" data-page="creator"><i class="fas fa-magic"></i> صانع المحتوى</button>
+        </aside>
+
+        <main class="main">
+            <!-- Home -->
+            <section class="section active" id="home-page">
+                <div style="text-align:center;padding:40px 0 20px;">
+                    <div
+                        style="display:inline-block;width:80px;height:80px;background:var(--gradient-main);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 20px;box-shadow:var(--glow-cyan);animation:pulse 3s ease-in-out infinite;">
+                        🤖</div>
+                    <h1 style="font-size:38px;margin-bottom:5px;">مرحباً بك في RashidClaw!</h1>
+                    <p style="font-size:17px;color:var(--text-secondary);max-width:500px;margin:0 auto;">مساعدك الذكي
+                        الشامل - محادثة ذكية، توليد صور وفيديو، ترجمة، وأكثر!</p>
+                    <div
+                        style="margin-top:15px;display:inline-flex;gap:8px;align-items:center;padding:8px 16px;background:rgba(0,212,255,0.1);border:1px solid rgba(0,212,255,0.2);border-radius:20px;">
+                        <span
+                            style="width:8px;height:8px;background:#10b981;border-radius:50%;animation:pulse 2s ease-in-out infinite;"></span>
+                        <span style="font-size:13px;color:var(--accent-cyan);">مدعوم بالذكاء الاصطناعي - Gemini AI</span>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-top:30px;">
+                    <div class="feature-box" style="cursor:pointer;transition:all 0.3s;"
+                        onclick="document.querySelector('[data-page=chat]').click()"
+                        onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 12px 40px rgba(0,212,255,0.2)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow=''">
+                        <div
+                            style="width:50px;height:50px;background:linear-gradient(135deg,#00d4ff,#0099cc);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;">
+                            💬</div>
+                        <h3>المحادثة الذكية</h3>
+                        <p style="font-size:13px;">دردش مع AI ذكي يفهم ويساعدك في كل شيء</p>
+                    </div>
+                    <div class="feature-box" style="cursor:pointer;transition:all 0.3s;"
+                        onclick="document.querySelector('[data-page=image]').click()"
+                        onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 12px 40px rgba(139,92,246,0.2)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow=''">
+                        <div
+                            style="width:50px;height:50px;background:linear-gradient(135deg,#8b5cf6,#6d28d9);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;">
+                            🎨</div>
+                        <h3>توليد الصور</h3>
+                        <p style="font-size:13px;">أنشئ صور مذهلة من وصف نصي بالذكاء الاصطناعي</p>
+                    </div>
+                    <div class="feature-box" style="cursor:pointer;transition:all 0.3s;"
+                        onclick="document.querySelector('[data-page=video]').click()"
+                        onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 12px 40px rgba(236,72,153,0.2)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow=''">
+                        <div
+                            style="width:50px;height:50px;background:linear-gradient(135deg,#ec4899,#be185d);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;">
+                            🎬</div>
+                        <h3>توليد الفيديو</h3>
+                        <p style="font-size:13px;">أنشئ فيديوهات قصيرة بالذكاء الاصطناعي</p>
+                    </div>
+                    <div class="feature-box" style="cursor:pointer;transition:all 0.3s;"
+                        onclick="document.querySelector('[data-page=translate]').click()"
+                        onmouseover="this.style.transform='translateY(-5px)';this.style.boxShadow='0 12px 40px rgba(16,185,129,0.2)'"
+                        onmouseout="this.style.transform='';this.style.boxShadow=''">
+                        <div
+                            style="width:50px;height:50px;background:linear-gradient(135deg,#10b981,#047857);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px;">
+                            🌍</div>
+                        <h3>المترجم</h3>
+                        <p style="font-size:13px;">ترجم بين 40+ لغة بسهولة وسرعة</p>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-top:20px;">
+                    <div class="feature-box" style="cursor:pointer;text-align:center;transition:all 0.3s;"
+                        onclick="document.querySelector('[data-page=summarize]').click()"
+                        onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <span style="font-size:28px;">📝</span>
+                        <h3 style="font-size:14px;margin-top:8px;">تلخيص النصوص</h3>
+                    </div>
+                    <div class="feature-box" style="cursor:pointer;text-align:center;transition:all 0.3s;"
+                        onclick="document.querySelector('[data-page=creator]').click()"
+                        onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform=''">
+                        <span style="font-size:28px;">✨</span>
+                        <h3 style="font-size:14px;margin-top:8px;">صانع المحتوى</h3>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chat -->
+            <section class="section" id="chat-page" style="position:relative;overflow:hidden;">
+                <!-- Pexels Video Background -->
+                <div id="chatPexelsBg"
+                    style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0;opacity:0.07;pointer-events:none;border-radius:24px;overflow:hidden;">
+                </div>
+
+                <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;">
+                    <h1><i class="fas fa-comments"></i> المحادثة</h1>
+                    <div class="chat-box" style="flex:1;background:rgba(30, 30, 45, 0.7);backdrop-filter:blur(10px);">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot">
+                                <div class="msg-icon"><i class="fas fa-robot"></i></div>
+                                <div class="msg-content">أهلاً! 👋 أنا RashidClaw، كيف حالك؟</div>
+                            </div>
+                        </div>
+                        <div class="chat-input-area">
+                            <button id="micBtn" onclick="toggleSpeechToText()"
+                                style="padding:14px;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;border-radius:12px;color:#fff;cursor:pointer;"><i
+                                    class="fas fa-microphone"></i></button>
+                            <input type="text" id="chatInput" class="chat-input" placeholder="اكتب رسالتك...">
+                            <button class="send-btn" id="sendBtn">إرسال</button>
+                        </div>
+                    </div>
+            </section>
+
+            <!-- Image -->
+            <section class="section" id="image-page">
+                <h1><i class="fas fa-image"></i> معمل الصور بالذكاء الاصطناعي</h1>
+                <p>أنشئ صور مذهلة بالنصوص فقط!</p>
+                <div class="feature-box">
+                    <div class="input-group">
+                        <label>📝 وصف الصورة</label>
+                        <textarea id="imagePrompt"
+                            placeholder="اكتب وصفاً للصورة التي تريدها... مثال: قطة صغيرة بيضاء شعر طويل عيون زرقاء"></textarea>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>🎨 نوع الصورة</label>
+                            <select id="imageStyle">
+                                <option value="">اختر النوع...</option>
+                                <option value="realistic, photography, detailed">📸 واقعي</option>
+                                <option value="anime, manga style">🎌 أنمي</option>
+                                <option value="3d render, cgi, blender">🎬 3D</option>
+                                <option value="digital art, illustration">🎨 فن رقمي</option>
+                                <option value="oil painting, canvas">🖼️ رسم زيتي</option>
+                                <option value="watercolor painting">💧 رسم مائي</option>
+                                <option value="pixel art, 8-bit">👾 بيكسل آرت</option>
+                                <option value="sci-fi, futuristic">🚀 خيال علمي</option>
+                                <option value="portrait, professional photo">👤 بورتريه</option>
+                                <option value="landscape, nature photography">🏔️ منظر طبيعي</option>
+                                <option value="abstract art">🔮 تجريدي</option>
+                                <option value="fantasy art, magical">🧙 خيالي</option>
+                                <option value="cyberpunk, neon lights">🌃 سايبر بانك</option>
+                                <option value="cartoon, cartoon style">📺 كرتون</option>
+                                <option value="comic book style">📚 كوميكس</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>📐 الأبعاد</label>
+                            <select id="imageSize">
+                                <option value="1920:1080" selected>16:9 YouTube (1920×1080)</option>
+                                <option value="1080:1920">9:16 Instagram (1080×1920)</option>
+                                <option value="1280:720">720p (1280×720)</option>
+                                <option value="1024:1024">مربع (1024×1024)</option>
+                                <option value="768:512">أفقي (768×512)</option>
+                                <option value="512:768">عمودي (512×768)</option>
+                                <option value="1792:1024">عريض Panoramic</option>
+                                <option value="2560:1440">2K (2560×1440)</option>
+                                <option value="3840:2160">4K (3840×2160)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Prompts السريعة -->
+                    <div style="margin: 15px 0;">
+                        <label style="display:block;margin-bottom:8px;font-weight:600;">💡 برومتات سريعة (اضغط
+                            للنسخ)</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                            <span onclick="copyPrompt('قطة صغيرة بيضاء شعر طويل عيون زرقاء جالسة على نافذة', event)"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;">🐱
+                                قطة</span>
+                            <span onclick="copyPrompt('تنين اخضر يطير فوق قلعة في السماء', event)"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;">🐉
+                                تنين</span>
+                            <span onclick="copyPrompt('مدينة في المستقبل مليئة بالأضواء البراقة', event)"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;">🌆
+                                مدينة</span>
+                            <span onclick="copyPrompt('رجل يرتدي بذلة رسمية يشرب قهوة', event)"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;">☕
+                                رجل</span>
+                            <span onclick="copyPrompt('فتاة أنمي بشعر أزرق طويل', event)"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;">👧
+                                أنمي</span>
+                            <span onclick="copyPrompt('منظر طبيعي جبال ثلج شروق الشمس', event)"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;">🏔️
+                                جبل</span>
+                        </div>
+                    </div>
+
+                    <button class="btn" id="generateBtn" style="width:100%;font-size:18px;padding:18px;"><i
+                            class="fas fa-magic"></i> 🎨 توليد الصورة</button>
+
+                    <div class="image-result" id="imageResult" style="min-height:300px;">
+                        <p style="color:var(--text-muted);">🎯 اكتب وصفاً واختر نوع الصورة ثم اضغط "توليد"</p>
+                    </div>
+
+                    <!-- معرض الصور المحفوظة -->
+                    <div id="imageGalleryContainer" style="margin-top:25px;">
+                        <h3 style="color:var(--accent-cyan);margin-bottom:15px;"><i class="fas fa-images"></i> معرض صورك المحفوظة</h3>
+                        <div id="imageGallery" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+                            <p style="color:var(--text-muted);grid-column:span 4;">لم تقم بحفظ أي صور بعد</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Video -->
+            <section class="section" id="video-page">
+                <h1><i class="fas fa-video"></i> توليد الفيديو بالذكاء الاصطناعي</h1>
+                <p>أنشئ فيديوهات قصيرة من وصف نصي!</p>
+                <div class="feature-box">
+                    <div class="input-group">
+                        <label>📝 وصف الفيديو (بالإنجليزية للأفضل)</label>
+                        <textarea id="videoPrompt"
+                            placeholder="Example: A cat walking on the moon, cinematic lighting, 4K quality"></textarea>
+                    </div>
+
+                    <div style="margin:15px 0;">
+                        <label style="display:block;margin-bottom:8px;font-weight:600;">💡 أفكار سريعة (اضغط
+                            للنسخ)</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                            <span
+                                onclick="document.getElementById('videoPrompt').value='A beautiful sunset over the ocean with waves crashing on the shore'"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border-subtle);">🌅
+                                غروب الشمس</span>
+                            <span
+                                onclick="document.getElementById('videoPrompt').value='A cute cat playing with a ball of yarn, adorable and fluffy'"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border-subtle);">🐱
+                                قطة تلعب</span>
+                            <span
+                                onclick="document.getElementById('videoPrompt').value='A futuristic city at night with neon lights and flying cars'"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border-subtle);">🌃
+                                مدينة مستقبلية</span>
+                            <span
+                                onclick="document.getElementById('videoPrompt').value='A waterfall in a tropical forest with birds flying around'"
+                                style="background:var(--bg-tertiary);padding:8px 12px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--border-subtle);">🌊
+                                شلال</span>
+                        </div>
+                    </div>
+
+                    <button class="btn" id="generateVideoBtn" style="width:100%;font-size:18px;padding:18px;"
+                        onclick="generateVideo()"><i class="fas fa-film"></i> 🎬 توليد الفيديو</button>
+
+                    <div id="videoResult"
+                        style="margin-top:25px;text-align:center;min-height:200px;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);border-radius:18px;border:2px dashed var(--border-subtle);">
+                        <p style="color:var(--text-muted);">🎬 اكتب وصفاً ثم اضغط "توليد الفيديو"</p>
+                    </div>
+
+                    <div
+                        style="margin-top:15px;padding:12px;background:rgba(245,158,11,0.1);border-radius:10px;border:1px solid rgba(245,158,11,0.3);">
+                        <p style="color:#f59e0b;font-size:13px;margin:0;">⚡ تنبيه: توليد الفيديو قد يستغرق 30-60 ثانية.
+                            اكتب الوصف بالإنجليزية للحصول على نتائج أفضل.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Summarize -->
+            <section class="section" id="summarize-page">
+                <h1><i class="fas fa-list-alt"></i> تلخيص النصوص</h1>
+                <div class="feature-box">
+                    <div class="input-group">
+                        <label>النص المراد تلخيصه</label>
+                        <textarea id="summarizeText" placeholder="الصق النص الطويل هنا..."
+                            style="height:150px;"></textarea>
+                    </div>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>طول الملخص</label>
+                            <select id="summarizeLength">
+                                <option value="short">قصير (جملة واحدة)</option>
+                                <option value="medium" selected>متوسط (3-5 جمل)</option>
+                                <option value="long">طويل (فقرات)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn" onclick="summarizeText()"><i class="fas fa-magic"></i> تلخيص</button>
+                    <div class="input-group" style="margin-top:20px;">
+                        <label>الملخص:</label>
+                        <div id="summarizeResult"
+                            style="background:var(--bg-input);padding:15px;border-radius:12px;min-height:80px;color:var(--text-main);">
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chart -->
+            <section class="section" id="chart-page">
+                <h1><i class="fas fa-chart-bar"></i> الرسوم البيانية</h1>
+                <div class="feature-box">
+                    <div class="grid-2">
+                        <div>
+                            <div class="input-group">
+                                <label>نوع الرسم</label>
+                                <select id="chartType">
+                                    <option value="bar">شريطي</option>
+                                    <option value="line">خطي</option>
+                                    <option value="pie">دائري</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label>البيانات (اسم:قيمة)</label>
+                                <textarea id="chartData" placeholder="يناير:30&#10;فبراير:45&#10;مارس:25"></textarea>
+                            </div>
+                            <div class="input-group">
+                                <label>العنوان</label>
+                                <input type="text" id="chartTitle" placeholder="عنوان الرسم">
+                            </div>
+                            <button class="btn" id="createChartBtn">إنشاء</button>
+                        </div>
+                        <div class="chart-box">
+                            <canvas id="myChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TTS -->
+            <section class="section" id="tts-page">
+                <h1><i class="fas fa-microphone"></i> النص لكلام (TTS)</h1>
+                <div class="feature-box">
+                    <div class="input-group">
+                        <label>النص المراد تحويله لصوت</label>
+                        <textarea id="ttsText" placeholder="اكتب النص هنا... (مثال: مرحباً، كيف حالك؟)"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <button onclick="loadVoices()"
+                            style="padding:8px 15px;background:#333;border:none;border-radius:6px;color:#fff;cursor:pointer;margin-bottom:10px;"><i
+                                class="fas fa-sync"></i> تحديث الأصوات</button>
+                        <label>اختر الصوت</label>
+                        <select id="voiceSelect">
+                            <option value="">جاري تحميل الأصوات...</option>
+                        </select>
+                    </div>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>السرعة: <span id="speedVal">1</span></label>
+                            <input type="range" id="speedSelect" min="0.5" max="2" step="0.1" value="1"
+                                style="width:100%;">
+                        </div>
+                        <div class="input-group">
+                            <label>طبقة الصوت: <span id="pitchVal">1</span></label>
+                            <input type="range" id="pitchSelect" min="0.5" max="2" step="0.1" value="1"
+                                style="width:100%;">
+                        </div>
+                    </div>
+
+                    <div class="grid-4">
+                        <button class="btn" id="playBtn"
+                            style="background: linear-gradient(135deg, #10b981, #059669);"><i class="fas fa-play"></i>
+                            تشغيل</button>
+                        <button class="btn" id="pauseBtn"
+                            style="background: linear-gradient(135deg, #f59e0b, #d97706);"><i class="fas fa-pause"></i>
+                            إيقاف مؤقت</button>
+                        <button class="btn" id="stopBtn"
+                            style="background: linear-gradient(135deg, #ef4444, #dc2626);"><i class="fas fa-stop"></i>
+                            إيقاف</button>
+                        <button class="btn" id="downloadBtn"
+                            style="background: linear-gradient(135deg, #6366f1, #8b5cf6);"><i
+                                class="fas fa-download"></i> تحميل</button>
+                    </div>
+                    <div id="ttsResult" style="margin-top:15px;"></div>
+                </div>
+            </section>
+
+            <!-- Translate -->
+            <section class="section" id="translate-page">
+                <h1><i class="fas fa-language"></i> المترجم</h1>
+                <div class="feature-box">
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>من</label>
+                            <select id="fromLang">
+                                <option value="ar">العربية</option>
+                                <option value="en">الإنجليزية</option>
+                                <option value="fr">الفرنسية</option>
+                                <option value="es">الإسبانية</option>
+                                <option value="de">الألمانية</option>
+                                <option value="it">الإيطالية</option>
+                                <option value="pt">البرتغالية</option>
+                                <option value="ru">الروسية</option>
+                                <option value="zh">الصينية</option>
+                                <option value="ja">اليابانية</option>
+                                <option value="ko">الكورية</option>
+                                <option value="tr">التركية</option>
+                                <option value="hi">الهندية</option>
+                                <option value="th">التايلاندية</option>
+                                <option value="vi">الفيتنامية</option>
+                                <option value="id">الإندونيسية</option>
+                                <option value="ms">الملايو</option>
+                                <option value="fa">الفارسية</option>
+                                <option value="ur">الأوردية</option>
+                                <option value="bn">البنغالية</option>
+                                <option value="ta">التاميلية</option>
+                                <option value="te">التيلوغو</option>
+                                <option value="mr">الماراثية</option>
+                                <option value="gu">الغوجاراتية</option>
+                                <option value="pl">البولندية</option>
+                                <option value="nl">الهولندية</option>
+                                <option value="sv">السويدية</option>
+                                <option value="da">الدانماركية</option>
+                                <option value="no">النرويجية</option>
+                                <option value="fi">الفنلندية</option>
+                                <option value="el">اليونانية</option>
+                                <option value="he">العبرية</option>
+                                <option value="cs">التشيكية</option>
+                                <option value="hu">المجرية</option>
+                                <option value="ro">الرومانية</option>
+                                <option value="uk">الأوكرانية</option>
+                                <option value="th">التايلاندية</option>
+                                <option value="sw">السواحيلية</option>
+                                <option value="af">الأفريكانية</option>
+                            </select>
+                            <textarea id="fromText" style="margin-top:10px;"
+                                placeholder="اكتب النص للترجمة..."></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>إلى</label>
+                            <select id="toLang">
+                                <option value="en">الإنجليزية</option>
+                                <option value="ar" selected>العربية</option>
+                                <option value="fr">الفرنسية</option>
+                                <option value="es">الإسبانية</option>
+                                <option value="de">الألمانية</option>
+                                <option value="it">الإيطالية</option>
+                                <option value="pt">البرتغالية</option>
+                                <option value="ru">الروسية</option>
+                                <option value="zh">الصينية</option>
+                                <option value="ja">اليابانية</option>
+                                <option value="ko">الكورية</option>
+                                <option value="tr">التركية</option>
+                                <option value="hi">الهندية</option>
+                                <option value="th">التايلاندية</option>
+                                <option value="vi">الفيتنامية</option>
+                                <option value="id">الإندونيسية</option>
+                                <option value="ms">الملايو</option>
+                                <option value="fa">الفارسية</option>
+                                <option value="ur">الأوردية</option>
+                                <option value="bn">البنغالية</option>
+                                <option value="ta">التاميلية</option>
+                                <option value="te">التيلوغو</option>
+                                <option value="mr">الماراثية</option>
+                                <option value="gu">الغوجاراتية</option>
+                                <option value="pl">البولندية</option>
+                                <option value="nl">الهولندية</option>
+                                <option value="sv">السويدية</option>
+                                <option value="da">الدانماركية</option>
+                                <option value="no">النرويجية</option>
+                                <option value="fi">الفنلندية</option>
+                                <option value="el">اليونانية</option>
+                                <option value="he">العبرية</option>
+                                <option value="cs">التشيكية</option>
+                                <option value="hu">المجرية</option>
+                                <option value="ro">الرومانية</option>
+                                <option value="uk">الأوكرانية</option>
+                                <option value="th">التايلاندية</option>
+                                <option value="sw">السواحيلية</option>
+                                <option value="af">الأفريكانية</option>
+                            </select>
+                            <textarea id="toText" style="margin-top:10px;" readonly
+                                placeholder="ستظهر الترجمة هنا..."></textarea>
+                        </div>
+                    </div>
+                    <button class="btn" id="translateBtn" style="width:100%;margin-top:15px;"><i
+                            class="fas fa-globe"></i> ترجمة</button>
+                </div>
+            </section>
+
+            <!-- Notes -->
+            <section class="section" id="notes-page">
+                <h1><i class="fas fa-sticky-note"></i> الملاحظات المتقدمة</h1>
+                <div class="feature-box">
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>الملاحظة</label>
+                            <textarea id="noteText" placeholder="اكتب ملاحظتك..."></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>التصنيف</label>
+                            <select id="noteCategory">
+                                <option value="عام">عام</option>
+                                <option value="دراسة">دراسة</option>
+                                <option value="عمل">عمل</option>
+                                <option value="شخصي">شخصي</option>
+                                <option value="أفكار">أفكار</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid-4">
+                        <button class="btn" id="saveNoteBtn"><i class="fas fa-save"></i> حفظ</button>
+                        <button class="btn" onclick="exportNotes()"
+                            style="background:linear-gradient(135deg,#10b981,#059669);"><i
+                                class="fas fa-file-export"></i> تصدير</button>
+                        <button class="btn" onclick="clearAllNotes()"
+                            style="background:linear-gradient(135deg,#ef4444,#dc2626);"><i class="fas fa-trash"></i> مسح
+                            الكل</button>
+                    </div>
+                    <div class="input-group" style="margin-top:15px;">
+                        <input type="text" id="noteSearch" placeholder="🔍 بحث في الملاحظات..." onkeyup="searchNotes()">
+                    </div>
+                    <div id="notesList" style="margin-top:20px;"></div>
+                </div>
+            </section>
+
+            <!-- Code Snippets -->
+            <section class="section" id="code-page">
+                <h1><i class="fas fa-code"></i> المقتطفات البرمجية</h1>
+                <div class="feature-box">
+                    <div class="input-group">
+                        <label>الكود</label>
+                        <textarea id="codeText" placeholder="// اكتب الكود هنا..."
+                            style="font-family:monospace;height:150px;"></textarea>
+                    </div>
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label>اللغة</label>
+                            <select id="codeLang">
+                                <option value="javascript">JavaScript</option>
+                                <option value="python">Python</option>
+                                <option value="html">HTML</option>
+                                <option value="css">CSS</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                                <option value="csharp">C#</option>
+                                <option value="sql">SQL</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>الوصف</label>
+                            <input type="text" id="codeDesc" placeholder="وصف قصير...">
+                        </div>
+                    </div>
+                    <button class="btn" onclick="saveCode()"><i class="fas fa-save"></i> حفظ</button>
+                    <div class="grid-2" style="margin-top:20px;">
+                        <div class="input-group">
+                            <input type="text" id="codeSearch" placeholder="🔍 بحث..." onkeyup="searchCode()">
+                        </div>
+                    </div>
+                    <div id="codeList" style="margin-top:15px;"></div>
+                </div>
+            </section>
+            <!-- Content Creator -->
+            <section class="section" id="creator-page">
+                <h1><i class="fas fa-magic"></i> صانع المحتوى الذكي</h1>
+                <p>أنشئ محتوى احترافي جاهز للنشر بالذكاء الاصطناعي</p>
+
+                <div class="feature-box">
+                    <!-- Platform Selection -->
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;margin-bottom:10px;font-weight:600;">📱 اختر المنصة</label>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;" id="platformBtns">
+                            <button onclick="selectPlatform(this,'tiktok')" class="platform-btn"
+                                style="padding:12px 24px;border-radius:12px;border:2px solid #333;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:Tajawal;font-size:15px;font-weight:600;transition:all 0.3s;display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:20px;">🎵</span> تيك توك
+                            </button>
+                            <button onclick="selectPlatform(this,'youtube')" class="platform-btn"
+                                style="padding:12px 24px;border-radius:12px;border:2px solid #333;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:Tajawal;font-size:15px;font-weight:600;transition:all 0.3s;display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:20px;">▶️</span> يوتيوب
+                            </button>
+                            <button onclick="selectPlatform(this,'instagram')" class="platform-btn"
+                                style="padding:12px 24px;border-radius:12px;border:2px solid #333;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:Tajawal;font-size:15px;font-weight:600;transition:all 0.3s;display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:20px;">📸</span> انستغرام
+                            </button>
+                            <button onclick="selectPlatform(this,'x')" class="platform-btn"
+                                style="padding:12px 24px;border-radius:12px;border:2px solid #333;background:var(--bg-tertiary);color:var(--text-primary);cursor:pointer;font-family:Tajawal;font-size:15px;font-weight:600;transition:all 0.3s;display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:20px;">𝕏</span> إكس (تويتر)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" id="creatorOptionsRow">
+                        <!-- Content Type -->
+                        <div class="input-group">
+                            <label>🎬 نوع المحتوى</label>
+                            <select id="contentType">
+                                <option value="">اختر نوع المحتوى...</option>
+                                <option value="فيديو قصير (ريلز/شورتس)">فيديو قصير (ريلز/شورتس)</option>
+                                <option value="فيديو طويل">فيديو طويل</option>
+                                <option value="بوست/منشور">بوست/منشور</option>
+                                <option value="ستوري">ستوري</option>
+                                <option value="كاروسيل (سلايدات)">كاروسيل (سلايدات)</option>
+                                <option value="بودكاست">بودكاست</option>
+                                <option value="لايف/بث مباشر">لايف/بث مباشر</option>
+                                <option value="ثريد (سلسلة تغريدات)">ثريد (سلسلة)</option>
+                            </select>
+                        </div>
+
+                        <!-- Target Audience -->
+                        <div class="input-group">
+                            <label>👥 الجمهور المستهدف</label>
+                            <select id="targetAudience">
+                                <option value="">اختر الجمهور...</option>
+                                <option value="شباب عرب 18-25">شباب عرب (18-25)</option>
+                                <option value="رواد أعمال ومهتمين بالتجارة">رواد أعمال</option>
+                                <option value="صناع محتوى ومبدعين">صناع محتوى</option>
+                                <option value="طلاب ومتعلمين">طلاب ومتعلمين</option>
+                                <option value="أمهات وآباء">أمهات وآباء</option>
+                                <option value="مهتمين بالتقنية والذكاء الاصطناعي">مهتمين بالتقنية</option>
+                                <option value="مهتمين باللياقة والصحة">لياقة وصحة</option>
+                                <option value="مهتمين بالطبخ والمطبخ العربي">طبخ ومطبخ</option>
+                                <option value="جمهور عام متنوع">جمهور عام</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Topic -->
+                    <div class="input-group">
+                        <label>📌 الموضوع أو الفكرة</label>
+                        <textarea id="contentTopic"
+                            placeholder="اكتب موضوع المحتوى بالتفصيل... مثال: كيف تبدأ مشروعك الأول بدون رأس مال"></textarea>
+                    </div>
+
+                    <!-- Extended Tools (Optional) -->
+                    <div id="extendedToolsGroup"
+                        style="margin-bottom:20px;background:var(--bg-tertiary);padding:15px;border-radius:12px;border:1px solid var(--border-subtle);">
+                        <label style="display:block;margin-bottom:10px;font-weight:600;font-size:14px;">🛠️ أدوات إضافية
+                            (اختياري)</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:15px;">
+                            <label
+                                style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-primary);">
+                                <input type="checkbox" id="extScript"
+                                    style="width:18px;height:18px;accent-color:var(--accent-cyan);"> سكربت الفيديو
+                                الكامل
+                            </label>
+                            <label
+                                style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-primary);">
+                                <input type="checkbox" id="extArticle"
+                                    style="width:18px;height:18px;accent-color:var(--accent-purple);"> مقال جاهز للنشر
+                            </label>
+                            <label
+                                style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;color:var(--text-primary);">
+                                <input type="checkbox" id="extPrompt"
+                                    style="width:18px;height:18px;accent-color:var(--accent-pink);"> برومت لـ AI
+                                (صور/فيديو)
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Quick Ideas -->
+                    <div style="margin-bottom:20px;">
+                        <label style="display:block;margin-bottom:8px;font-weight:600;font-size:14px;">💡 أفكار
+                            سريعة</label>
+                        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                            <span
+                                onclick="document.getElementById('contentTopic').value='أسرار خوارزمية المنصة وكيف تزيد وصولك'"
+                                style="background:var(--bg-tertiary);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border-subtle);transition:all 0.3s;"
+                                onmouseover="this.style.borderColor='var(--accent-cyan)'"
+                                onmouseout="this.style.borderColor='var(--border-subtle)'">📈 أسرار الخوارزمية</span>
+                            <span
+                                onclick="document.getElementById('contentTopic').value='أخطاء يقع فيها المبتدئين في صناعة المحتوى'"
+                                style="background:var(--bg-tertiary);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border-subtle);transition:all 0.3s;"
+                                onmouseover="this.style.borderColor='var(--accent-cyan)'"
+                                onmouseout="this.style.borderColor='var(--border-subtle)'">❌ أخطاء المبتدئين</span>
+                            <span
+                                onclick="document.getElementById('contentTopic').value='كيف تبدأ مشروعك الأول أونلاين بدون رأس مال'"
+                                style="background:var(--bg-tertiary);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border-subtle);transition:all 0.3s;"
+                                onmouseover="this.style.borderColor='var(--accent-cyan)'"
+                                onmouseout="this.style.borderColor='var(--border-subtle)'">💰 مشروع بدون رأس مال</span>
+                            <span
+                                onclick="document.getElementById('contentTopic').value='أدوات ذكاء اصطناعي مجانية ستغير حياتك'"
+                                style="background:var(--bg-tertiary);padding:7px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border-subtle);transition:all 0.3s;"
+                                onmouseover="this.style.borderColor='var(--accent-cyan)'"
+                                onmouseout="this.style.borderColor='var(--border-subtle)'">🤖 أدوات ذكاء اصطناعي</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+<script>
+// نظام التنقل الفوري - يعمل دون انتظار تحميل ملفات خارجية
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    const sections = document.querySelectorAll('.section');
+    const navBtns = document.querySelectorAll('.nav-btn');
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const overlay = document.getElementById('overlay');
+
+    // التنقل بين الأقسام
+    navBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const page = this.dataset.page;
+            
+            // تحديث الأزرار النشطة
+            navBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // عرض القسم المطلوب
+            sections.forEach(sec => {
+                sec.classList.remove('active');
+                if (sec.id === page + '-page') {
+                    sec.classList.add('active');
+                }
+            });
+            
+            // إغلاق القائمة الجانبية في الشاشات الصغيرة
+            if (window.innerWidth <= 900 && sidebar) {
+                sidebar.classList.remove('open');
+                if (overlay) overlay.classList.remove('active');
+            }
+        });
+    });
+
+    // زر القائمة للجوال
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', function() {
+            if (sidebar) sidebar.classList.toggle('open');
+            if (overlay) overlay.classList.toggle('active');
+        });
+    }
+
+    // إغلاق القائمة عند الضغط خارجها
+    if (overlay) {
+        overlay.addEventListener('click', function() {
+            if (sidebar) sidebar.classList.remove('open');
+            this.classList.remove('active');
+        });
+    }
+});
+</script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

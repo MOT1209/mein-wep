@@ -447,6 +447,7 @@
                         style="width:100%; padding:10px; background:#18181b; color:white; border:1px solid #3f3f46; border-radius:8px;">
                         <option value="game">Game (3D Universe)</option>
                         <option value="app">App (Pro Tools)</option>
+                        <option value="open source">Open Source (Code)</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -454,8 +455,12 @@
                     <input type="text" id="p-image" placeholder="e.g. images/game1.jpg OR fas fa-gamepad">
                 </div>
                 <div class="form-group">
-                    <label>Project Link</label>
+                    <label>Project Link (Demo)</label>
                     <input type="text" id="p-link" placeholder="Folder path or URL">
+                </div>
+                <div class="form-group">
+                    <label>Source Code Link (GitHub/OpenCode)</label>
+                    <input type="text" id="p-github" placeholder="URL to source code">
                 </div>
                 <div class="form-group">
                     <label>Tags (comma separated)</label>
@@ -471,72 +476,47 @@
         </div>
     </div>
 
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+
+    <!-- Admin Logic -->
+    <script src="../js/admin.js?v=4.0"></script>
+
     <script>
-        // INIT
+        // INIT & Dashboard specifics
         document.addEventListener('DOMContentLoaded', () => {
-            // Security Check
-            if (localStorage.getItem('isAdmin') !== 'true') {
-                window.location.href = 'login.html';
-                return;
-            }
-
             // Set Date
-            document.getElementById('date-display').innerText = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-            // Load Visitor Count
-            document.getElementById('stat-visitors').innerText = localStorage.getItem('visitorCount') || '0';
-
-            // Load Content Data
-            const content = JSON.parse(localStorage.getItem('siteContent') || '{}');
-            if (content.title) document.getElementById('hero-title-input').value = content.title;
-            if (content.about) document.getElementById('about-text-input').value = content.about;
+            const dateDisplay = document.getElementById('date-display');
+            if (dateDisplay) {
+                dateDisplay.innerText = new Date().toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            }
         });
 
-        // Navigation
+        // Wrapper for the switchTab function in admin.js
         function showSection(id, btn) {
-            document.querySelectorAll('.dashboard-section').forEach(el => el.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            btn.classList.add('active');
-
-            // Update Header
-            const titles = {
-                'overview': 'Dashboard Overview',
-                'projects': 'Project Management',
-                'content': 'Content Editor',
-                'settings': 'System Settings'
-            };
-            document.getElementById('page-title').innerText = titles[id];
+            if (typeof switchTab === 'function') {
+                switchTab(id);
+            }
         }
 
-        // Logic
+        // Wrapper for logout
         function logout() {
-            localStorage.removeItem('isAdmin');
-            window.location.href = 'login.html';
+            if (typeof adminLogout === 'function') {
+                adminLogout();
+            }
         }
 
-        function updateProjectState(pid, key, value) {
-            const states = JSON.parse(localStorage.getItem('projectStates') || '{}');
-            if (!states[pid]) states[pid] = {};
-            states[pid][key] = value;
-            localStorage.setItem('projectStates', JSON.stringify(states));
-        }
-
-        function saveContent() {
-            const title = document.getElementById('hero-title-input').value;
-            const about = document.getElementById('about-text-input').value;
-
-            localStorage.setItem('siteContent', JSON.stringify({ title, about }));
-
-            const msg = document.getElementById('save-msg');
-            msg.style.display = 'block';
-            setTimeout(() => msg.style.display = 'none', 3000);
-        }
-
-        function toggleMaintenance(active) {
-            localStorage.setItem('maintenanceMode', active);
-        }
+        // Ensure some UI compatibility
+        window.addEventListener('load', () => {
+            const dashboard = document.querySelector('main');
+            if (dashboard) dashboard.id = 'admin-dashboard';
+        });
     </script>
 </body>
 

@@ -93,62 +93,11 @@
             </p>
         </div>
 
-        <div class="course-grid">
-            <!-- Course 1 -->
-            <div class="course-card">
-                <i class="fab fa-python course-icon"></i>
-                <h2 class="course-title">Python Basics</h2>
-                <div class="course-progress">
-                    <div class="progress-bar" style="width: 80%"></div>
-                </div>
-                <p class="course-desc">
-                    Master the fundamentals of Python programming, from variables and loops to object-oriented
-                    programming. Perfect for beginners starting their coding journey.
-                </p>
-                <div class="tags">
-                    <span>Syntax</span>
-                    <span>OOP</span>
-                    <span>Scripting</span>
-                </div>
-                <button class="btn btn-primary" onclick="alert('Coming Soon!')">Start Reading</button>
-            </div>
-
-            <!-- Course 2 -->
-            <div class="course-card">
-                <i class="fab fa-html5 course-icon"></i>
-                <h2 class="course-title">Modern Web Development</h2>
-                <div class="course-progress">
-                    <div class="progress-bar" style="width: 65%"></div>
-                </div>
-                <p class="course-desc">
-                    Learn how to build responsive websites using HTML5, CSS3, and modern JavaScript. Includes guides on
-                    Flexbox, Grid, and DOM manipulation.
-                </p>
-                <div class="tags">
-                    <span>HTML/CSS</span>
-                    <span>Frontend</span>
-                    <span>Responsive</span>
-                </div>
-                <button class="btn btn-primary" onclick="alert('Coming Soon!')">Start Reading</button>
-            </div>
-
-            <!-- Course 3 -->
-            <div class="course-card">
-                <i class="fas fa-gamepad course-icon"></i>
-                <h2 class="course-title">Game Dev with Three.js</h2>
-                <div class="course-progress">
-                    <div class="progress-bar" style="width: 40%"></div>
-                </div>
-                <p class="course-desc">
-                    Dive into 3D web graphics. Learn how to create immersive scenes, handle lighting, and implement
-                    physics for browser-based games.
-                </p>
-                <div class="tags">
-                    <span>WebGL</span>
-                    <span>3D Math</span>
-                    <span>Physics</span>
-                </div>
-                <button class="btn btn-primary" onclick="alert('Coming Soon!')">Start Reading</button>
+        <div class="course-grid" id="lessons-container">
+            <!-- Dynamic content will be injected here -->
+            <div class="loading-state" style="text-align: center; grid-column: 1/-1; padding: 50px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--accent);"></i>
+                <p style="margin-top: 15px;">Loading knowledge...</p>
             </div>
         </div>
     </div>
@@ -160,7 +109,8 @@
         </div>
     </footer>
 
-    <script src="js/script.js"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/learning.js"></script>
 </body>
 
 </html>

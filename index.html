@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="description"
         content="Portfolio of Rashid, a Junior Software Developer and Aspiring Game & Web Programmer based in Germany.">
     <title>Rashid | Junior Software Developer</title>
@@ -59,7 +60,9 @@
                     <i class="fas fa-sun"></i>
                 </button>
                 <div class="hamburger">
-                    <span></span><span></span><span></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
                 </div>
             </div>
         </div>
@@ -120,9 +123,10 @@
         <div class="container">
             <div class="section-head">
                 <h2 class="reveal">Technical Mastery</h2>
-                <p class="reveal">A glimpse into my ever-evolving toolkit and the technologies I use to bring ideas to life.</p>
+                <p class="reveal">A glimpse into my ever-evolving toolkit and the technologies I use to bring ideas to
+                    life.</p>
             </div>
-            
+
             <div class="skills-grid">
                 <div class="skill-card reveal">
                     <div class="skill-icon"><i class="fas fa-layer-group"></i></div>
@@ -170,6 +174,7 @@
                     <button class="filter-btn active" data-filter="all">All</button>
                     <button class="filter-btn" data-filter="games">Games</button>
                     <button class="filter-btn" data-filter="apps">Apps</button>
+                    <button class="filter-btn" data-filter="open source">Open Source</button>
                 </div>
             </div>
 
@@ -196,14 +201,15 @@
                 <h2 class="reveal">Growth & Journey</h2>
                 <p class="reveal">Tracing my path from curious learner to aspiring professional.</p>
             </div>
-            
+
             <div class="timeline">
                 <div class="timeline-item reveal">
                     <div class="timeline-dot"></div>
                     <div class="timeline-content blur-glass">
                         <span class="period">2023 – Present</span>
                         <h3>Student Developer</h3>
-                        <p>Currently focusing on mastering Three.js for 3D immersive web experiences and advanced JavaScript game mechanics.</p>
+                        <p>Currently focusing on mastering Three.js for 3D immersive web experiences and advanced
+                            JavaScript game mechanics.</p>
                     </div>
                 </div>
             </div>
@@ -217,7 +223,7 @@
                 <div class="contact-info">
                     <h3>Ready to build something <span class="text-gradient">Epic?</span></h3>
                     <p>I'm available for freelance projects and full-time opportunities. Let's make it happen.</p>
-                    
+
                     <div class="contact-method">
                         <div class="method-icon"><i class="fas fa-envelope"></i></div>
                         <div>
@@ -225,7 +231,7 @@
                             <p>zwnt45602@gmail.com</p>
                         </div>
                     </div>
-                    
+
                     <div class="contact-method">
                         <div class="method-icon"><i class="fas fa-map-marker-alt"></i></div>
                         <div>
@@ -246,9 +252,11 @@
                     </div>
                     <div class="form-group">
                         <label>Your Message</label>
-                        <textarea class="form-input" rows="4" placeholder="Tell me about your project..." required></textarea>
+                        <textarea class="form-input" rows="4" placeholder="Tell me about your project..."
+                            required></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary">Send Message <i class="fas fa-paper-plane"></i></button>
+                    <button type="submit" class="btn btn-primary">Send Message <i
+                            class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
@@ -388,13 +396,12 @@
     <!-- Libraries & Configuration -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="js/gemini-config.js"></script>
-    <script src="js/supabase-config.js"></script>
 
     <!-- Google Translate Script -->
     <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
-                pageLanguage: 'en',
+                pageLanguage: 'ar',
                 layout: google.translate.TranslateElement.InlineLayout.SIMPLE
             }, 'google_translate_element');
         }
@@ -408,7 +415,7 @@
     <!-- Core App Scripts -->
     <script src="js/script.js?v=3.0"></script>
     <script src="js/admin.js?v=3.0"></script>
-    
+
     <!-- PWA Install Manager -->
     <script src="js/pwa-installer.js"></script>
 </body>

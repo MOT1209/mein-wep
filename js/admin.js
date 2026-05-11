@@ -186,6 +186,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 4. PROJECT MANAGEMENT (CRUD)
     // ============================================================
 
+    let allProjects = [];
+
     async function fetchProjects() {
         const container = document.getElementById('projects-list-container');
         if (!container) return;
@@ -202,7 +204,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        renderProjectsList(projects);
+        if (projects) {
+            allProjects = projects;
+            renderProjectsList(projects);
+        }
     }
 
     function renderProjectsList(projects) {
@@ -248,16 +253,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         form.reset();
 
         if (id) {
-            // Edit Mode - Fetch details (or pass obj) - here forcing simple method
-            // In a real app we might pass the full object to avoid refetch
-            // For now let's just clear and show empty for 'Add' or we need to fetch specific
-            // Since we didn't store local array globally, let's fetch single or find from DOM.
-            // Simplified: We will implement full "Edit" flow if requested.
-            // For now, let's assuming 'Add' works.
-            document.getElementById('p-id').value = id;
-            title.innerText = 'Edit Project';
-            // Need to populate fields... (Skipping complex populate for brevity in this step, user can add logic)
-            alert("Edit mode needs population logic (impl. in next step if needed). For now adding new only.");
+            const p = allProjects.find(item => item.id === id);
+            if (p) {
+                document.getElementById('p-id').value = p.id;
+                document.getElementById('p-title').value = p.title || '';
+                document.getElementById('p-desc').value = p.description || '';
+                document.getElementById('p-category').value = (p.category || 'app').toLowerCase();
+                document.getElementById('p-image').value = p.image_url || '';
+                document.getElementById('p-link').value = p.link || p.project_link || ''; // Handle both
+                document.getElementById('p-github').value = p.github_link || '';
+
+                // Handle technologies/tags (ensure it's a string for the input)
+                const techs = p.technologies || p.tags || '';
+                document.getElementById('p-tags').value = Array.isArray(techs) ? techs.join(', ') : techs;
+
+                title.innerText = 'Edit Project';
+            }
         } else {
             document.getElementById('p-id').value = '';
             title.innerText = 'Add New Project';
@@ -278,6 +289,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const category = document.getElementById('p-category').value;
         const image_url = document.getElementById('p-image').value;
         const project_link = document.getElementById('p-link').value;
+        const github_link = document.getElementById('p-github').value;
         const tags = document.getElementById('p-tags').value; // Keep as string or split
 
         const payload = {
@@ -285,8 +297,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             description,
             category,
             image_url,
-            project_link,
-            tags,
+            link: project_link, // Standardized name
+            github_link,
+            technologies: tags.split(',').map(t => t.trim()).filter(t => t !== ''), // Standardized name
             status: 'Public' // Default
         };
 

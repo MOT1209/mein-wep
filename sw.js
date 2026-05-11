@@ -1,14 +1,20 @@
-const CACHE_NAME = 'rashid-portfolio-v4';
+const CACHE_NAME = 'rashid-portfolio-v5';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './css/style.css',
     './css/admin.css',
+    './css/app-mode.css',
+    './css/mobile-improvements.css',
     './js/script.js',
+    './js/rashid-ai-v2.js',
     './js/supabase-config.js',
+    './Rashid-app/index.html',
+    './Rashid-app/style.css',
+    './Rashid-app/script.js',
     './images/logo.png',
     'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap'
+    'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
 ];
 
 // Install Event - Cache Files
