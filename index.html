@@ -45,10 +45,9 @@
             <a href="#hero" class="logo">Rashid<span class="accent-dot">.</span></a>
 
             <ul class="nav-links">
-                <li><a href="#models">Rashid Models</a></li>
+                <li><a href="#models">Models</a></li>
                 <li><a href="#vault">The Vault</a></li>
-                <li><a href="#games">Games</a></li>
-                <li><a href="#apps">Apps</a></li>
+                <li><a href="#projects">Projects</a></li>
                 <li><a href="#about">About</a></li>
             </ul>
 
@@ -72,8 +71,7 @@
     <div class="mobile-menu">
         <a href="#models">Models</a>
         <a href="#vault">Vault</a>
-        <a href="#games">Games</a>
-        <a href="#apps">Apps</a>
+        <a href="#projects">Projects</a>
         <a href="#about">About</a>
     </div>
 
@@ -85,7 +83,7 @@
                 <h1 class="fade-in delay-1">Welcome to <span class="text-gradient">Mein Web</span></h1>
                 <p class="fade-in delay-2">I am Rashid, the voice of <strong>OpenCode</strong> — the creative coding entity behind this platform. Mein Web is my digital home, showcasing games, apps, and AI innovations.</p>
                 <div class="cta-buttons fade-in delay-3">
-                    <a href="#games" class="btn btn-primary">Explore Rashid <i class="fas fa-arrow-right"></i></a>
+                    <a href="#projects" class="btn btn-primary">Explore Rashid <i class="fas fa-arrow-right"></i></a>
                     <a href="#vault" class="btn btn-glass">The Vault</a>
                 </div>
                 <div class="hero-stats fade-in delay-4">
@@ -117,50 +115,7 @@
     </header>
 
 
-    <!-- Skills Section -->
-    <section id="skills" class="section">
-        <div class="container">
-            <div class="section-head">
-                <h2 class="reveal">Technical Mastery</h2>
-                <p class="reveal">A glimpse into my ever-evolving toolkit and the technologies I use to bring ideas to
-                    life.</p>
-            </div>
-
-            <div class="skills-grid">
-                <div class="skill-card reveal">
-                    <div class="skill-icon"><i class="fas fa-layer-group"></i></div>
-                    <h3>Core Development</h3>
-                    <div class="skill-list">
-                        <span class="skill-tag">HTML5 / CSS3</span>
-                        <span class="skill-tag">JavaScript (ES6+)</span>
-                        <span class="skill-tag">Python</span>
-                    </div>
-                </div>
-
-                <div class="skill-card reveal">
-                    <div class="skill-icon"><i class="fas fa-gamepad"></i></div>
-                    <h3>Game Design</h3>
-                    <div class="skill-list">
-                        <span class="skill-tag">Three.js</span>
-                        <span class="skill-tag">WebGL</span>
-                        <span class="skill-tag">Game Logic</span>
-                    </div>
-                </div>
-
-                <div class="skill-card reveal">
-                    <div class="skill-icon"><i class="fas fa-server"></i></div>
-                    <h3>Backend & Tools</h3>
-                    <div class="skill-list">
-                        <span class="skill-tag">Supabase</span>
-                        <span class="skill-tag">Git / GitHub</span>
-                        <span class="skill-tag">REST APIs</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- My Models Section -->
+    
     <section id="models" class="section alt-bg">
         <div class="container">
             <div class="section-head">
@@ -188,7 +143,7 @@
                         <span><i class="fas fa-cube"></i> Three.js</span>
                         <span><i class="fas fa-bolt"></i> Real-time</span>
                     </div>
-                    <a href="#games" class="btn btn-primary">View Games <i class="fas fa-gamepad"></i></a>
+                    <a href="#projects" class="btn btn-primary">View Projects <i class="fas fa-gamepad"></i></a>
                 </div>
                 
                 <div class="model-card reveal">
@@ -245,129 +200,114 @@
         </div>
     </section>
 
-    <!-- Games Section -->
-    <section id="games" class="section alt-bg">
+    <!-- Games & Apps Section -->
+    <section id="projects" class="section alt-bg">
         <div class="container">
             <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-dice"></i> Rashid Games</h2>
-                <p class="reveal">Immersive gaming experiences built by Rashid (OpenCode) with Three.js and modern web technologies.</p>
+                <h2 class="reveal"><i class="fas fa-layer-group"></i> Rashid Projects</h2>
+                <p class="reveal">My games, apps, and AI innovations built with passion and precision.</p>
             </div>
             
-            <div class="projects-grid">
-                <div class="project-card reveal">
+            <!-- Filter Buttons -->
+            <div class="filter-group">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="games">Games</button>
+                <button class="filter-btn" data-filter="app">Apps</button>
+                <button class="filter-btn" data-filter="model">Models</button>
+            </div>
+            
+            <!-- Projects Grid -->
+            <div class="projects-grid" style="margin-top: 30px;">
+                <!-- Games -->
+                <div class="project-card reveal" data-category="games">
                     <div class="project-icon" style="background: linear-gradient(135deg, #ea580c, #f97316);">
                         <i class="fas fa-cubes"></i>
                     </div>
                     <h3>Rust Construction</h3>
-                    <p>3D building game with physics engine. Build structures, gather resources, survive!</p>
+                    <p>3D building game with physics. Build structures, manage resources, survive!</p>
                     <div class="project-tags">
-                        <span>3D</span><span>Physics</span><span>Survival</span>
+                        <span>Game</span><span>3D</span><span>Physics</span>
                     </div>
-                    <a href="rust-game/index.html" class="btn btn-primary" style="margin-top: 15px;">
+                    <a href="rust-game/index.html" class="btn btn-primary" style="margin-top: 10px;">
                         <i class="fas fa-play"></i> Play Now
                     </a>
                 </div>
                 
-                <div class="project-card reveal">
+                <div class="project-card reveal" data-category="games">
                     <div class="project-icon" style="background: linear-gradient(135deg, #16a34a, #22c55e);">
                         <i class="fas fa-tractor"></i>
                     </div>
                     <h3>Farm Empire</h3>
-                    <p>Rich farming simulation with crops, livestock, and economic systems.</p>
+                    <p>Immersive farming simulation. Grow crops, raise animals, build your empire.</p>
                     <div class="project-tags">
-                        <span>Simulation</span><span>Economy</span><span>Casual</span>
+                        <span>Game</span><span>Simulation</span><span>Economy</span>
                     </div>
-                    <a href="farm-game/index.html" class="btn btn-primary" style="margin-top: 15px;">
+                    <a href="farm-game/index.html" class="btn btn-primary" style="margin-top: 10px;">
                         <i class="fas fa-play"></i> Play Now
+                    </a>
+                </div>
+                
+                <!-- Apps -->
+                <div class="project-card reveal" data-category="app">
+                    <div class="project-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                        <i class="fas fa-calculator"></i>
+                    </div>
+                    <h3>Calculator Vault</h3>
+                    <p>Privacy-focused calculator with hidden vault. Hide files behind calculator!</p>
+                    <div class="project-tags">
+                        <span>App</span><span>Utility</span><span>Privacy</span>
+                    </div>
+                    <a href="calculator-vault/index.html" class="btn btn-primary" style="margin-top: 10px;">
+                        <i class="fas fa-external-link-alt"></i> Launch
+                    </a>
+                </div>
+                
+                <div class="project-card reveal" data-category="app">
+                    <div class="project-icon" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3>Quiz Master</h3>
+                    <p>Interactive quiz platform with categories, scoring, and progress tracking.</p>
+                    <div class="project-tags">
+                        <span>App</span><span>Education</span><span>PWA</span>
+                    </div>
+                    <a href="quiz-app/index.html" class="btn btn-primary" style="margin-top: 10px;">
+                        <i class="fas fa-external-link-alt"></i> Launch
+                    </a>
+                </div>
+                
+                <div class="project-card reveal" data-category="app">
+                    <div class="project-icon" style="background: linear-gradient(135deg, #059669, #10b981);">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3>Quran Pro</h3>
+                    <p>Complete Quran with tafsir, 40+ reciters, search, and offline support.</p>
+                    <div class="project-tags">
+                        <span>App</span><span>Religious</span><span>PWA</span>
+                    </div>
+                    <a href="quran-app/index.html" class="btn btn-primary" style="margin-top: 10px;">
+                        <i class="fas fa-external-link-alt"></i> Launch
+                    </a>
+                </div>
+                
+                <div class="project-card reveal" data-category="model">
+                    <div class="project-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>Rashid AI</h3>
+                    <p>Advanced conversational AI with Chat, Images, Video capabilities.</p>
+                    <div class="project-tags">
+                        <span>AI</span><span>Assistant</span><span>Multilingual</span>
+                    </div>
+                    <a href="Rashid-app/index.html" class="btn btn-primary" style="margin-top: 10px;">
+                        <i class="fas fa-external-link-alt"></i> Launch
                     </a>
                 </div>
             </div>
             
-            <!-- Filter (for dynamic projects) -->
-            <div class="filter-group" style="margin-top: 40px;">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="games">Games</button>
-                <button class="filter-btn" data-filter="apps">Apps</button>
-                <button class="filter-btn" data-filter="model">Models</button>
-            </div>
-            
-            <!-- Dynamic Projects Grid -->
+            <!-- Dynamic Projects from Database -->
             <div class="projects-grid" id="gaming-grid" style="margin-top: 30px;">
                 <!-- Dynamic Projects Injected by script.js -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Apps Section -->
-    <section id="apps" class="section">
-        <div class="container">
-            <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-mobile-alt"></i> Rashid Apps</h2>
-                <p class="reveal">Practical applications crafted by Rashid (OpenCode) for everyday needs.</p>
-            </div>
-            
-            <div class="projects-grid">
-                <!-- Games -->
-                <div class="project-card reveal">
-                    <div class="project-icon"><i class="fas fa-cubes"></i></div>
-                    <h3>Rust Construction</h3>
-                    <p>3D building game with physics. Build structures, manage resources, survive in a post-apocalyptic world.</p>
-                    <div class="project-tags">
-                        <span>Game</span><span>3D</span><span>Physics</span>
-                    </div>
-                    <a href="rust-game/index.html" class="project-link"><i class="fas fa-play"></i> Play Now</a>
-                </div>
-                
-                <div class="project-card reveal">
-                    <div class="project-icon"><i class="fas fa-tractor"></i></div>
-                    <h3>Farm Empire</h3>
-                    <p>Immersive farming simulation. Grow crops, raise animals, build your agricultural empire.</p>
-                    <div class="project-tags">
-                        <span>Game</span><span>Simulation</span><span>Economy</span>
-                    </div>
-                    <a href="farm-game/index.html" class="project-link"><i class="fas fa-play"></i> Play Now</a>
-                </div>
-                
-                <!-- Apps -->
-                <div class="project-card reveal">
-                    <div class="project-icon"><i class="fas fa-calculator"></i></div>
-                    <h3>Calculator Vault</h3>
-                    <p>Privacy-focused calculator with hidden vault. Hide secret files behind calculator interface.</p>
-                    <div class="project-tags">
-                        <span>App</span><span>Utility</span><span>Privacy</span>
-                    </div>
-                    <a href="calculator-vault/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
-                </div>
-                
-                <div class="project-card reveal">
-                    <div class="project-icon"><i class="fas fa-question-circle"></i></div>
-                    <h3>Quiz Master</h3>
-                    <p>Interactive quiz platform with categories, scoring system, and progress tracking.</p>
-                    <div class="project-tags">
-                        <span>App</span><span>Education</span><span>PWA</span>
-                    </div>
-                    <a href="quiz-app/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
-                </div>
-                
-                <div class="project-card reveal">
-                    <div class="project-icon"><i class="fas fa-book-open"></i></div>
-                    <h3>Quran Pro</h3>
-                    <p>Complete Quran with tafsir, 40+ reciters, search, bookmarks, and full offline support.</p>
-                    <div class="project-tags">
-                        <span>App</span><span>Religious</span><span>PWA</span>
-                    </div>
-                    <a href="quran-app/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
-                </div>
-                
-                <div class="project-card reveal">
-                    <div class="project-icon"><i class="fas fa-robot"></i></div>
-                    <h3>Rashid AI</h3>
-                    <p>Advanced conversational AI assistant with Chat, Images, Video generation capabilities.</p>
-                    <div class="project-tags">
-                        <span>AI</span><span>Assistant</span><span>Multilingual</span>
-                    </div>
-                    <a href="Rashid-app/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
-                </div>
             </div>
         </div>
     </section>
