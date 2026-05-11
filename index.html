@@ -172,34 +172,34 @@
                 <div class="model-card reveal">
                     <div class="model-icon"><i class="fas fa-brain"></i></div>
                     <h3>Rashid AI v2.0</h3>
-                    <p>Advanced conversational AI with multilingual support, powered by Gemini & OpenRouter integration.</p>
+                    <p>Flagship conversational AI powered by Gemini & OpenRouter. Multilingual support (Arabic, English, German, +8 more).</p>
                     <div class="model-specs">
                         <span><i class="fas fa-microchip"></i> Gemini API</span>
                         <span><i class="fas fa-language"></i> 10+ Languages</span>
                     </div>
-                    <a href="Rashid-app/index.html" class="btn btn-primary">Launch Model</a>
+                    <a href="Rashid-app/index.html" class="btn btn-primary">Launch Model <i class="fas fa-external-link-alt"></i></a>
                 </div>
                 
                 <div class="model-card reveal">
-                    <div class="model-icon"><i class="fas fa-game"></i></div>
+                    <div class="model-icon"><i class="fas fa-cubes"></i></div>
                     <h3>Game Engine Core</h3>
-                    <p>Proprietary 3D game engine built with Three.js, featuring physics, AI behaviors, and procedural generation.</p>
+                    <p>Proprietary 3D engine built with Three.js. Features: physics simulation, AI behaviors, procedural generation.</p>
                     <div class="model-specs">
                         <span><i class="fas fa-cube"></i> Three.js</span>
                         <span><i class="fas fa-bolt"></i> Real-time</span>
                     </div>
-                    <a href="#games" class="btn btn-primary">View Games</a>
+                    <a href="#games" class="btn btn-primary">View Games <i class="fas fa-gamepad"></i></a>
                 </div>
                 
                 <div class="model-card reveal">
-                    <div class="model-icon"><i class="fas fa-language"></i></div>
-                    <h3>Translation Engine</h3>
-                    <p>Neural machine translation system supporting Arabic, English, German with context-aware processing.</p>
+                    <div class="model-icon"><i class="fas fa-server"></i></div>
+                    <h3>Backend Infrastructure</h3>
+                    <p>Supabase-powered backend with authentication, real-time database, and PWA capabilities.</p>
                     <div class="model-specs">
-                        <span><i class="fas fa-network-wired"></i> OpenRouter</span>
-                        <span><i class="fas fa-clock"></i> < 100ms</span>
+                        <span><i class="fas fa-database"></i> Supabase</span>
+                        <span><i class="fas fa-bolt"></i> Real-time</span>
                     </div>
-                    <button class="btn btn-glass">Coming Soon</button>
+                    <a href="#" class="btn btn-glass">Coming Soon</a>
                 </div>
             </div>
         </div>
@@ -214,33 +214,33 @@
             </div>
             
             <div class="vault-grid">
-                <a href="#" class="vault-item reveal">
+                <div class="vault-item reveal">
                     <div class="vault-icon"><i class="fas fa-terminal"></i></div>
                     <h3>Prompts</h3>
-                    <p>Polished command templates</p>
-                    <span class="vault-count">12+ Prompts</span>
-                </a>
+                    <p>Polished command templates and AI prompts curated by OpenCode</p>
+                    <span class="vault-count">Coming Soon</span>
+                </div>
                 
-                <a href="#" class="vault-item reveal">
+                <div class="vault-item reveal">
                     <div class="vault-icon"><i class="fas fa-code"></i></div>
                     <h3>Code Library</h3>
-                    <p>Clean, reusable snippets</p>
-                    <span class="vault-count">50+ Snippets</span>
-                </a>
+                    <p>Clean, reusable code snippets and modules from OpenCode projects</p>
+                    <span class="vault-count">Coming Soon</span>
+                </div>
                 
-                <a href="#" class="vault-item reveal">
+                <div class="vault-item reveal">
                     <div class="vault-icon"><i class="fas fa-images"></i></div>
                     <h3>Archive</h3>
-                    <p>Visual assets & designs</p>
-                    <span class="vault-count">100+ Assets</span>
-                </a>
+                    <p>Visual assets, icons, and design resources</p>
+                    <span class="vault-count">Coming Soon</span>
+                </div>
                 
-                <a href="#" class="vault-item reveal">
+                <div class="vault-item reveal">
                     <div class="vault-icon"><i class="fas fa-video"></i></div>
                     <h3>Media</h3>
-                    <p>Tutorials & showcases</p>
-                    <span class="vault-count">25+ Videos</span>
-                </a>
+                    <p>Tutorials, showcases, and project demonstrations</p>
+                    <span class="vault-count">Coming Soon</span>
+                </div>
             </div>
         </div>
     </section>
@@ -248,32 +248,52 @@
     <!-- Games Section -->
     <section id="games" class="section alt-bg">
         <div class="container">
-            <div class="projects-header reveal">
-                <div class="section-head" style="text-align: left; margin-bottom: 0;">
-                    <h2><i class="fas fa-dice"></i> OpenCode Games</h2>
-                    <p>Immersive gaming experiences built with precision and passion.</p>
+            <div class="section-head">
+                <h2 class="reveal"><i class="fas fa-dice"></i> OpenCode Games</h2>
+                <p class="reveal">Immersive gaming experiences built with Three.js and modern web technologies.</p>
+            </div>
+            
+            <div class="projects-grid">
+                <div class="project-card reveal">
+                    <div class="project-icon" style="background: linear-gradient(135deg, #ea580c, #f97316);">
+                        <i class="fas fa-cubes"></i>
+                    </div>
+                    <h3>Rust Construction</h3>
+                    <p>3D building game with physics engine. Build structures, gather resources, survive!</p>
+                    <div class="project-tags">
+                        <span>3D</span><span>Physics</span><span>Survival</span>
+                    </div>
+                    <a href="rust-game/index.html" class="btn btn-primary" style="margin-top: 15px;">
+                        <i class="fas fa-play"></i> Play Now
+                    </a>
                 </div>
-                <!-- Premium Filter Buttons -->
-                <div class="filter-group">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="games">Games</button>
-                    <button class="filter-btn" data-filter="apps">Apps</button>
-                    <button class="filter-btn" data-filter="open source">Open Source</button>
+                
+                <div class="project-card reveal">
+                    <div class="project-icon" style="background: linear-gradient(135deg, #16a34a, #22c55e);">
+                        <i class="fas fa-tractor"></i>
+                    </div>
+                    <h3>Farm Empire</h3>
+                    <p>Rich farming simulation with crops, livestock, and economic systems.</p>
+                    <div class="project-tags">
+                        <span>Simulation</span><span>Economy</span><span>Casual</span>
+                    </div>
+                    <a href="farm-game/index.html" class="btn btn-primary" style="margin-top: 15px;">
+                        <i class="fas fa-play"></i> Play Now
+                    </a>
                 </div>
             </div>
-
-            <!-- Gaming Universe -->
-            <div class="project-category gaming-category reveal" data-category="games">
-                <div class="projects-grid" id="gaming-grid">
-                    <!-- Dynamic Projects Injected by script.js -->
-                </div>
+            
+            <!-- Filter (for dynamic projects) -->
+            <div class="filter-group" style="margin-top: 40px;">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="games">Games</button>
+                <button class="filter-btn" data-filter="apps">Apps</button>
+                <button class="filter-btn" data-filter="model">Models</button>
             </div>
-
-            <!-- Pro Apps -->
-            <div class="project-category apps-category reveal" data-category="apps">
-                <div class="projects-grid" id="apps-grid">
-                    <!-- Dynamic Projects Injected by script.js -->
-                </div>
+            
+            <!-- Dynamic Projects Grid -->
+            <div class="projects-grid" id="gaming-grid" style="margin-top: 30px;">
+                <!-- Dynamic Projects Injected by script.js -->
             </div>
         </div>
     </section>
@@ -287,34 +307,66 @@
             </div>
             
             <div class="projects-grid">
+                <!-- Games -->
+                <div class="project-card reveal">
+                    <div class="project-icon"><i class="fas fa-cubes"></i></div>
+                    <h3>Rust Construction</h3>
+                    <p>3D building game with physics. Build structures, manage resources, survive in a post-apocalyptic world.</p>
+                    <div class="project-tags">
+                        <span>Game</span><span>3D</span><span>Physics</span>
+                    </div>
+                    <a href="rust-game/index.html" class="project-link"><i class="fas fa-play"></i> Play Now</a>
+                </div>
+                
+                <div class="project-card reveal">
+                    <div class="project-icon"><i class="fas fa-tractor"></i></div>
+                    <h3>Farm Empire</h3>
+                    <p>Immersive farming simulation. Grow crops, raise animals, build your agricultural empire.</p>
+                    <div class="project-tags">
+                        <span>Game</span><span>Simulation</span><span>Economy</span>
+                    </div>
+                    <a href="farm-game/index.html" class="project-link"><i class="fas fa-play"></i> Play Now</a>
+                </div>
+                
+                <!-- Apps -->
                 <div class="project-card reveal">
                     <div class="project-icon"><i class="fas fa-calculator"></i></div>
                     <h3>Calculator Vault</h3>
-                    <p>Advanced calculator with history, scientific functions, and secure storage.</p>
+                    <p>Privacy-focused calculator with hidden vault. Hide secret files behind calculator interface.</p>
                     <div class="project-tags">
-                        <span>Utility</span><span>PWA</span>
+                        <span>App</span><span>Utility</span><span>Privacy</span>
                     </div>
-                    <a href="calculator-vault/" class="project-link">Launch</a>
+                    <a href="calculator-vault/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
                 </div>
                 
                 <div class="project-card reveal">
                     <div class="project-icon"><i class="fas fa-question-circle"></i></div>
                     <h3>Quiz Master</h3>
-                    <p>Interactive quiz platform with categories, scoring, and progress tracking.</p>
+                    <p>Interactive quiz platform with categories, scoring system, and progress tracking.</p>
                     <div class="project-tags">
-                        <span>Education</span><span>PWA</span>
+                        <span>App</span><span>Education</span><span>PWA</span>
                     </div>
-                    <a href="quiz-app/" class="project-link">Launch</a>
+                    <a href="quiz-app/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
                 </div>
                 
                 <div class="project-card reveal">
-                    <div class="project-icon"><i class="fas fa-quran"></i></div>
-                    <h3>Quran App</h3>
-                    <p>Complete Quran with tafsir, audio recitation, and search functionality.</p>
+                    <div class="project-icon"><i class="fas fa-book-open"></i></div>
+                    <h3>Quran Pro</h3>
+                    <p>Complete Quran with tafsir, 40+ reciters, search, bookmarks, and full offline support.</p>
                     <div class="project-tags">
-                        <span>Religious</span><span>PWA</span>
+                        <span>App</span><span>Religious</span><span>PWA</span>
                     </div>
-                    <a href="quran-app/" class="project-link">Launch</a>
+                    <a href="quran-app/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
+                </div>
+                
+                <div class="project-card reveal">
+                    <div class="project-icon"><i class="fas fa-robot"></i></div>
+                    <h3>Rashid AI</h3>
+                    <p>Advanced conversational AI assistant with Chat, Images, Video generation capabilities.</p>
+                    <div class="project-tags">
+                        <span>AI</span><span>Assistant</span><span>Multilingual</span>
+                    </div>
+                    <a href="Rashid-app/index.html" class="project-link"><i class="fas fa-external-link-alt"></i> Launch</a>
                 </div>
             </div>
         </div>

@@ -272,69 +272,80 @@
 
             // Fallback Data (Local Projects)
             const localProjects = [
+                // === GAMES ===
                 {
-                    title: 'RashidClaw AI',
-                    category: 'App',
-                    status: 'Public',
-                    description: 'Advanced AI Assistant with Chat, Images, Video and more.',
-                    link: 'Rashid-app/index.html',
-                    image_url: 'fas fa-robot',
-                    technologies: ['Gemini', 'Puter.js', 'AI']
-                },
-                {
-                    title: 'Farmer Game',
+                    title: 'Rust Construction',
                     category: 'Game',
                     status: 'Public',
-                    description: 'A 3D farming simulation game.',
+                    description: '3D building game with physics and resource management. Build structures, manage resources, survive!',
+                    link: 'rust-game/index.html',
+                    image_url: 'fas fa-cubes',
+                    technologies: ['Three.js', '3D', 'Physics']
+                },
+                {
+                    title: 'Farm Empire',
+                    category: 'Game',
+                    status: 'Public',
+                    description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!',
                     link: 'farm-game/index.html',
                     image_url: 'fas fa-tractor',
-                    technologies: ['3D', 'WebGL', 'Simulation']
+                    technologies: ['WebGL', 'Simulation', 'Economy']
                 },
+                // === APPS ===
                 {
-                    title: 'Quran App',
+                    title: 'Rashid AI',
                     category: 'App',
                     status: 'Public',
-                    description: 'Beautiful Quran recitation and reading application.',
-                    link: 'quran-app/index.html',
-                    image_url: 'fas fa-book-open',
-                    technologies: ['Audio', 'PWA']
+                    description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support.',
+                    link: 'Rashid-app/index.html',
+                    image_url: 'fas fa-robot',
+                    technologies: ['Gemini', 'OpenRouter', 'AI']
                 },
                 {
-                    title: 'Rust Game',
-                    category: 'Game',
+                    title: 'Quran Pro',
+                    category: 'App',
                     status: 'Public',
-                    description: 'An experimental game built with Rust and WebAssembly.',
-                    link: 'rust-game/index.html',
-                    image_url: 'fab fa-rust',
-                    technologies: ['Rust', 'WASM']
+                    description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.',
+                    link: 'quran-app/index.html',
+                    image_url: 'fas fa-book-open',
+                    technologies: ['Audio', 'PWA', 'Offline']
                 },
                 {
                     title: 'Calculator Vault',
                     category: 'App',
                     status: 'Public',
-                    description: 'A privacy-focused calculator that hides secret files.',
+                    description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!',
                     link: 'calculator-vault/index.html',
-                    image_url: 'fas fa-user-secret',
-                    technologies: ['Security', 'Utility']
+                    image_url: 'fas fa-calculator',
+                    technologies: ['Security', 'PWA', 'Privacy']
                 },
                 {
-                    title: 'Quiz App',
+                    title: 'Quiz Master',
                     category: 'App',
                     status: 'Public',
-                    description: 'Interactive quiz application to test your skills.',
+                    description: 'Interactive quiz platform with multiple categories, scoring, and progress tracking.',
                     link: 'quiz-app/index.html',
-                    image_url: 'fas fa-question',
-                    technologies: ['Education', 'JS']
+                    image_url: 'fas fa-question-circle',
+                    technologies: ['Education', 'PWA', 'Gamification']
+                },
+                // === MODELS ===
+                {
+                    title: 'Rashid AI v2.0',
+                    category: 'Model',
+                    status: 'Public',
+                    description: 'The flagship AI model of OpenCode. Multilingual conversational AI with advanced capabilities.',
+                    link: 'Rashid-app/index.html',
+                    image_url: 'fas fa-brain',
+                    technologies: ['Gemini API', 'OpenRouter', '10+ Languages']
                 },
                 {
-                    title: 'Smart Trainer Pro',
-                    category: 'Open Source',
+                    title: 'Game Engine Core',
+                    category: 'Model',
                     status: 'Public',
-                    description: 'AI-powered fitness and nutrition assistant.',
-                    link: 'opencode/Gmy pro/index.html',
-                    github_link: 'https://github.com/Rashid-Dev/SmartTrainerPro',
-                    image_url: 'fas fa-dumbbell',
-                    technologies: ['AI', 'Fitness', 'Open Source']
+                    description: 'Proprietary 3D game engine built with Three.js. Physics, AI behaviors, procedural generation.',
+                    link: '#games',
+                    image_url: 'fas fa-cog',
+                    technologies: ['Three.js', 'Real-time', '3D']
                 }
             ];
 
