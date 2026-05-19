@@ -162,3 +162,108 @@ values
 ('Python Basics', 'Master the fundamentals of Python programming, from variables to OOP.', 'fab fa-python', 80, ARRAY['Syntax', 'OOP', 'Scripting'], 'Programming'),
 ('Modern Web Development', 'Learn how to build responsive websites using HTML5, CSS3, and JS.', 'fab fa-html5', 65, ARRAY['HTML/CSS', 'Frontend', 'Responsive'], 'Web'),
 ('Game Dev with Three.js', 'Dive into 3D web graphics and immersive scenes.', 'fas fa-gamepad', 40, ARRAY['WebGL', '3D Math', 'Physics'], 'Game Dev');
+
+-- ==============================================================================
+-- TABLE: models
+-- Dynamic Rashid Models content shown on the homepage.
+-- ==============================================================================
+create table public.models (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  title text not null,
+  description text,
+  icon_class text default 'fas fa-cube',
+  link text,
+  specs text[] default '{}',
+  status text default 'Public' check (status in ('Public', 'Private')),
+  sort_order int default 100
+);
+
+alter table public.models enable row level security;
+
+create policy "Public models are viewable by everyone"
+on public.models for select
+using (status = 'Public');
+
+create policy "Admins can view all models"
+on public.models for select
+to authenticated
+using (true);
+
+create policy "Admins can insert models"
+on public.models for insert
+to authenticated
+with check (true);
+
+create policy "Admins can update models"
+on public.models for update
+to authenticated
+using (true)
+with check (true);
+
+create policy "Admins can delete models"
+on public.models for delete
+to authenticated
+using (true);
+
+insert into public.models (title, description, icon_class, link, specs, status, sort_order)
+values
+('Rashid AI v2.0', 'Flagship conversational AI powered by Gemini & OpenRouter. Multilingual support.', 'fas fa-brain', 'Rashid-app/index.html', ARRAY['Gemini API', '10+ Languages'], 'Public', 10),
+('Game Engine Core', 'Proprietary 3D engine built with Three.js, physics, AI behaviors, and procedural generation.', 'fas fa-cubes', '#projects', ARRAY['Three.js', 'Real-time'], 'Public', 20),
+('Backend Infrastructure', 'Supabase-powered backend with authentication, realtime database, and PWA capabilities.', 'fas fa-server', null, ARRAY['Supabase', 'Realtime'], 'Public', 30);
+
+alter publication supabase_realtime add table public.models;
+
+-- ==============================================================================
+-- TABLE: vault_items
+-- Dynamic Vault categories shown on the homepage.
+-- ==============================================================================
+create table public.vault_items (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  title text not null,
+  description text,
+  icon_class text default 'fas fa-folder',
+  link text,
+  count_label text default 'New',
+  status text default 'Public' check (status in ('Public', 'Private')),
+  sort_order int default 100
+);
+
+alter table public.vault_items enable row level security;
+
+create policy "Public vault items are viewable by everyone"
+on public.vault_items for select
+using (status = 'Public');
+
+create policy "Admins can view all vault items"
+on public.vault_items for select
+to authenticated
+using (true);
+
+create policy "Admins can insert vault items"
+on public.vault_items for insert
+to authenticated
+with check (true);
+
+create policy "Admins can update vault items"
+on public.vault_items for update
+to authenticated
+using (true)
+with check (true);
+
+create policy "Admins can delete vault items"
+on public.vault_items for delete
+to authenticated
+using (true);
+
+insert into public.vault_items (title, description, icon_class, link, count_label, status, sort_order)
+values
+('Prompts', 'Polished command templates and AI prompts', 'fas fa-terminal', 'vault/prompts/index.html', '12+ Prompts', 'Public', 10),
+('Code Library', 'Clean, reusable code snippets', 'fas fa-code', 'vault/code/index.html', '50+ Snippets', 'Public', 20),
+('Archive', 'Visual assets and design resources', 'fas fa-images', 'vault/archive/index.html', '100+ Assets', 'Public', 30),
+('Media', 'Tutorials, demos and showcases', 'fas fa-video', 'vault/media/index.html', '25+ Videos', 'Public', 40),
+('Documentation', 'Project docs and technical guides', 'fas fa-book', 'vault/docs/index.html', '8+ Docs', 'Public', 50),
+('API Reference', 'API endpoints and integrations', 'fas fa-plug', 'vault/api/index.html', '5+ APIs', 'Public', 60);
+
+alter publication supabase_realtime add table public.vault_items;

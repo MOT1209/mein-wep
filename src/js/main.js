@@ -1,11 +1,11 @@
 import { initAnimations, initSmoothScroll } from './modules/animations.js?v=1.1';
-import { initAdminContentControls } from './modules/admin-content.js?v=1.0';
+import { initAdminContentControls } from './modules/admin-content.js?v=1.1';
 import { initMobileMenu } from './modules/mobile.js?v=1.1';
 import { initNavbar } from './modules/navbar.js?v=1.1';
 import { initProjectFilters, initProjects } from './modules/projects.js?v=1.5';
 import { initSettings } from './modules/settings.js?v=1.1';
 import { initTheme } from './modules/theme.js?v=1.1';
-import { incrementVisitorCount } from './services/supabase.js?v=1.3';
+import { incrementVisitorCount } from './services/supabase.js?v=1.4';
 import { qs, qsa, on } from './utils/dom.js?v=1.1';
 
 function initLegacyLocalSettings() {
