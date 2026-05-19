@@ -2206,6 +2206,60 @@ body.pwa-standalone .navbar {
     gap: 6px;
 }
 
+.admin-section-toolbar,
+.admin-delete-btn {
+    display: none;
+}
+
+body.admin-section-editing .admin-section-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 18px;
+}
+
+.admin-section-btn,
+.admin-delete-btn {
+    align-items: center;
+    border: 1px solid rgba(56, 189, 248, 0.45);
+    cursor: pointer;
+    display: inline-flex;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.admin-section-btn {
+    background: var(--accent);
+    border-radius: 10px;
+    color: #020617;
+    font-weight: 800;
+    padding: 10px 16px;
+}
+
+body.admin-section-editing .admin-delete-btn {
+    background: rgba(239, 68, 68, 0.95);
+    border-color: rgba(248, 113, 113, 0.8);
+    border-radius: 999px;
+    color: #fff;
+    display: inline-flex;
+    height: 36px;
+    justify-content: center;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    width: 36px;
+    z-index: 5;
+}
+
+body.admin-section-editing .model-card,
+body.admin-section-editing .vault-item {
+    position: relative;
+}
+
+.admin-section-btn:hover,
+.admin-delete-btn:hover {
+    transform: translateY(-2px);
+}
+
 /* ============================================
    THE VAULT SECTION
    ============================================ */

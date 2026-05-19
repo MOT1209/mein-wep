@@ -11,6 +11,7 @@ const ASSETS_TO_CACHE = [
     './js/rashid-ai-v2.js',
     './js/supabase-config.js',
     './src/js/main.js',
+    './src/js/modules/admin-content.js',
     './src/js/utils/dom.js',
     './src/js/services/supabase.js',
     './src/js/modules/animations.js',

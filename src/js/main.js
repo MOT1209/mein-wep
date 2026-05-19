@@ -1,4 +1,5 @@
 import { initAnimations, initSmoothScroll } from './modules/animations.js?v=1.1';
+import { initAdminContentControls } from './modules/admin-content.js?v=1.0';
 import { initMobileMenu } from './modules/mobile.js?v=1.1';
 import { initNavbar } from './modules/navbar.js?v=1.1';
 import { initProjectFilters, initProjects } from './modules/projects.js?v=1.5';
@@ -63,6 +64,7 @@ async function boot() {
     initMobileMenu();
     initAnimations();
     initSmoothScroll();
+    initAdminContentControls();
 
     if (!initLegacyLocalSettings()) return;
 
