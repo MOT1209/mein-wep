@@ -1,6 +1,6 @@
 {
-    "name": "FROMLITEN",
-    "short_name": "FROMLITEN",
+    "name": "Rashid",
+    "short_name": "Rashid",
     "description": "Rashid's AI workspace for models, vault resources, apps, and games.",
     "start_url": "./",
     "display": "standalone",

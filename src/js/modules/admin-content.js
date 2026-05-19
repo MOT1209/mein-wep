@@ -150,7 +150,7 @@ function renderSection(section, items) {
 
     qsa(`${config.itemSelector}.reveal`, config.grid).forEach(el => {
         el.classList.add('active');
-        window.fromlitenRevealObserver?.observe(el);
+        window.RashidRevealObserver?.observe(el);
     });
 }
 

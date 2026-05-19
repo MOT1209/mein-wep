@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fromliten-v7';
+const CACHE_NAME = 'Rashid-v7';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',

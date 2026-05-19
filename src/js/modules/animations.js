@@ -16,7 +16,7 @@ export function initAnimations() {
     }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
 
     qsa('.reveal').forEach(el => observer.observe(el));
-    window.fromlitenRevealObserver = observer;
+    window.RashidRevealObserver = observer;
 }
 
 export function initSmoothScroll() {

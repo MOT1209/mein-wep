@@ -1,5 +1,5 @@
 -- ==============================================================================
--- SUPABASE SETUP SCRIPT FOR FROMLITEN
+-- SUPABASE SETUP SCRIPT FOR Rashid
 -- Run this in your Supabase SQL Editor to create all necessary tables and policies.
 -- ==============================================================================
 

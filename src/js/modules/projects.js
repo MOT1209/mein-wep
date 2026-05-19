@@ -9,7 +9,7 @@ const fallbackProjects = [
     { title: 'Quran Pro', category: 'App', description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.', link: 'quran-app/index.html', image_url: 'fas fa-book-open', technologies: ['Audio', 'PWA', 'Offline'] },
     { title: 'Calculator Vault', category: 'App', description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!', link: 'calculator-vault/index.html', image_url: 'fas fa-calculator', technologies: ['Security', 'PWA', 'Privacy'] },
     { title: 'Quiz Master', category: 'App', description: 'Interactive quiz platform with multiple categories, scoring, and progress tracking.', link: 'quiz-app/index.html', image_url: 'fas fa-question-circle', technologies: ['Education', 'PWA', 'Gamification'] },
-    { title: 'Rashid AI v2.0', category: 'Model', description: 'The flagship AI model of OpenCode. Multilingual conversational AI with advanced capabilities.', link: 'Rashid-app/index.html', image_url: 'fas fa-brain', technologies: ['Gemini API', 'OpenRouter', '10+ Languages'] },
+    { title: 'Rashid AI v2.0', category: 'Model', description: 'The flagship AI model of Rashid. Multilingual conversational AI with advanced capabilities.', link: 'Rashid-app/index.html', image_url: 'fas fa-brain', technologies: ['Gemini API', 'OpenRouter', '10+ Languages'] },
     { title: 'Game Engine Core', category: 'Model', description: 'Proprietary 3D game engine built with Three.js. Physics, AI behaviors, procedural generation.', link: '#projects', image_url: 'fas fa-cog', technologies: ['Three.js', 'Real-time', '3D'] }
 ];
 
@@ -94,7 +94,7 @@ function renderProjects(projects) {
 
     qsa('.project-card.reveal').forEach(el => {
         el.classList.add('active');
-        window.fromlitenRevealObserver?.observe(el);
+        window.RashidRevealObserver?.observe(el);
     });
 }
 

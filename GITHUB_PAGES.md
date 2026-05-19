@@ -2,7 +2,7 @@
 
 ## 🌐 Enable GitHub Pages
 
-1. Go to: https://github.com/MOT1209/fromliten/settings/pages
+1. Go to: https://github.com/MOT1209/settings/pages
 2. Under "Source", select: **main** branch
 3. Folder: **/ (root)**
 4. Click **Save**
@@ -12,7 +12,7 @@
 
 After enabling, your game will be available at:
 ```
-https://mot1209.github.io/fromliten/rust-game/
+https://mot1209.github.io/rust-game/
 ```
 
 ## 📝 Notes
