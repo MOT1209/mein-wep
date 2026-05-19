@@ -267,3 +267,129 @@ values
 ('API Reference', 'API endpoints and integrations', 'fas fa-plug', 'vault/api/index.html', '5+ APIs', 'Public', 60);
 
 alter publication supabase_realtime add table public.vault_items;
+
+-- ==============================================================================
+-- TABLE: admin_users
+-- Restricts content management to selected Supabase Auth users only.
+-- ==============================================================================
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  email text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.admin_users enable row level security;
+
+create policy "Admins can read own admin status"
+on public.admin_users for select
+to authenticated
+using ((select auth.uid()) = user_id);
+
+insert into public.admin_users (user_id, email)
+select id, email from auth.users
+where email in ('zwnt45602@gmail.com', 'zwnt45602@gamil.com')
+on conflict (user_id) do update set email = excluded.email;
+
+revoke all on table public.admin_users from anon;
+grant select on table public.admin_users to authenticated;
+
+drop policy if exists "Public models are viewable by everyone" on public.models;
+drop policy if exists "Admins can view all models" on public.models;
+drop policy if exists "Admins can insert models" on public.models;
+drop policy if exists "Admins can update models" on public.models;
+drop policy if exists "Admins can delete models" on public.models;
+
+create policy "Models read access"
+on public.models for select
+using (
+  status = 'Public'
+  or exists (select 1 from public.admin_users where user_id = (select auth.uid()))
+);
+
+create policy "Models admin insert"
+on public.models for insert
+to authenticated
+with check (exists (select 1 from public.admin_users where user_id = (select auth.uid())));
+
+create policy "Models admin update"
+on public.models for update
+to authenticated
+using (exists (select 1 from public.admin_users where user_id = (select auth.uid())))
+with check (exists (select 1 from public.admin_users where user_id = (select auth.uid())));
+
+create policy "Models admin delete"
+on public.models for delete
+to authenticated
+using (exists (select 1 from public.admin_users where user_id = (select auth.uid())));
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users
+    where user_id = (select auth.uid())
+  );
+$$;
+
+revoke all on function public.is_admin() from public;
+revoke execute on function public.is_admin() from anon;
+grant execute on function public.is_admin() to authenticated;
+revoke all on table public.admin_users from anon;
+revoke all on table public.admin_users from authenticated;
+
+drop policy if exists "Admins can read own admin status" on public.admin_users;
+
+drop policy if exists "Models read access" on public.models;
+drop policy if exists "Models admin insert" on public.models;
+drop policy if exists "Models admin update" on public.models;
+drop policy if exists "Models admin delete" on public.models;
+
+create policy "Models read access"
+on public.models for select
+using (status = 'Public' or public.is_admin());
+
+create policy "Models admin insert"
+on public.models for insert
+to authenticated
+with check (public.is_admin());
+
+create policy "Models admin update"
+on public.models for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "Models admin delete"
+on public.models for delete
+to authenticated
+using (public.is_admin());
+
+drop policy if exists "Vault items read access" on public.vault_items;
+drop policy if exists "Vault items admin insert" on public.vault_items;
+drop policy if exists "Vault items admin update" on public.vault_items;
+drop policy if exists "Vault items admin delete" on public.vault_items;
+
+create policy "Vault items read access"
+on public.vault_items for select
+using (status = 'Public' or public.is_admin());
+
+create policy "Vault items admin insert"
+on public.vault_items for insert
+to authenticated
+with check (public.is_admin());
+
+create policy "Vault items admin update"
+on public.vault_items for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "Vault items admin delete"
+on public.vault_items for delete
+to authenticated
+using (public.is_admin());

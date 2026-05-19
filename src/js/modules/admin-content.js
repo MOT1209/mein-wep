@@ -5,8 +5,9 @@ import {
     fetchPublicModels,
     fetchPublicVaultItems,
     getSupabaseClient,
+    isCurrentUserAdmin,
     subscribeToContent
-} from '../services/supabase.js?v=1.4';
+} from '../services/supabase.js?v=1.5';
 
 const TABLES = {
     models: 'models',
@@ -58,11 +59,10 @@ export async function initAdminContentControls() {
     const client = getSupabaseClient();
     if (!client?.auth) return;
 
-    const { data } = await client.auth.getSession();
-    setAdminMode(Boolean(data?.session));
+    setAdminMode(await isCurrentUserAdmin());
 
-    client.auth.onAuthStateChange((_event, session) => {
-        setAdminMode(Boolean(session));
+    client.auth.onAuthStateChange(async () => {
+        setAdminMode(await isCurrentUserAdmin());
     });
 
     initRealtime();

@@ -67,6 +67,28 @@ export async function deleteContentItem(table, id) {
     return { error };
 }
 
+export async function isCurrentUserAdmin() {
+    const client = getSupabaseClient();
+    if (!client?.auth) return false;
+
+    const { data: sessionData } = await client.auth.getSession();
+    const userId = sessionData?.session?.user?.id;
+    if (!userId) return false;
+
+    const { data, error } = await withTimeout(
+        client.rpc('is_admin'),
+        'Supabase admin check',
+        2500
+    );
+
+    if (error) {
+        console.warn('Admin check failed:', error.message);
+        return false;
+    }
+
+    return Boolean(data);
+}
+
 export function subscribeToContent(table, callback) {
     const client = getSupabaseClient();
     if (!client?.channel) return null;
