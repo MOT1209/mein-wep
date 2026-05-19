@@ -2396,3 +2396,325 @@ body.admin-section-editing .vault-item {
     color: var(--text-muted);
     font-size: 0.9rem;
 }
+
+/* ============================================
+   FROMLITEN COMMAND CENTER REDESIGN
+   ============================================ */
+:root {
+    --command-bg: #06080d;
+    --command-panel: rgba(11, 18, 32, 0.88);
+    --command-panel-soft: rgba(15, 23, 42, 0.72);
+    --command-line: rgba(148, 163, 184, 0.18);
+    --command-green: #34d399;
+}
+
+body {
+    background:
+        radial-gradient(circle at 18% 14%, rgba(34, 211, 238, 0.12), transparent 34%),
+        radial-gradient(circle at 84% 22%, rgba(52, 211, 153, 0.1), transparent 30%),
+        linear-gradient(180deg, #06080d 0%, #0b1220 48%, #09090b 100%);
+}
+
+.bg-mesh {
+    background:
+        linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px),
+        var(--command-bg);
+    background-size: 64px 64px;
+}
+
+.bg-mesh::after {
+    opacity: 0.42;
+}
+
+.navbar {
+    max-width: min(1240px, calc(100% - 40px));
+    background: rgba(6, 8, 13, 0.84);
+    border-color: rgba(148, 163, 184, 0.16);
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+}
+
+.logo {
+    font-size: 1.18rem;
+    letter-spacing: 0.08em;
+}
+
+.nav-links a {
+    color: #cbd5e1;
+}
+
+#hero {
+    min-height: 94vh;
+    padding: 150px 0 70px;
+}
+
+.hero-content {
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr);
+    gap: 58px;
+}
+
+.badge {
+    background: rgba(34, 211, 238, 0.08);
+    border-color: rgba(34, 211, 238, 0.34);
+    color: #67e8f9;
+    letter-spacing: 0;
+}
+
+#hero h1 {
+    font-size: clamp(3.25rem, 7vw, 6.7rem);
+    letter-spacing: 0;
+    max-width: 820px;
+}
+
+.hero-text > p.fade-in.delay-2:not(.command-copy) {
+    display: none;
+}
+
+#hero .command-copy {
+    color: #cbd5e1;
+    max-width: 720px;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #67e8f9 0%, #34d399 54%, #e0f2fe 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+}
+
+.btn {
+    border-radius: 12px;
+    min-height: 48px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #67e8f9, #34d399);
+    color: #061018;
+}
+
+.btn-glass {
+    background: rgba(15, 23, 42, 0.74);
+    border-color: rgba(148, 163, 184, 0.2);
+}
+
+.hero-stats {
+    background: rgba(11, 18, 32, 0.56);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 18px;
+    display: grid;
+    gap: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin-top: 24px;
+    max-width: 640px;
+    overflow: hidden;
+}
+
+.hero-stats .stat {
+    padding: 20px 22px;
+}
+
+.hero-stats .stat + .stat {
+    border-left: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.stat-num {
+    font-size: clamp(1.35rem, 2.4vw, 2.15rem);
+}
+
+.hero-visual {
+    align-self: stretch;
+}
+
+.hero-visual .hero-img-wrapper {
+    display: none;
+}
+
+.command-panel {
+    background:
+        linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(6, 8, 13, 0.92)),
+        linear-gradient(90deg, rgba(34, 211, 238, 0.16), rgba(52, 211, 153, 0.08));
+    border: 1px solid rgba(148, 163, 184, 0.18);
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+    min-height: 520px;
+    overflow: hidden;
+    padding: 28px;
+    position: relative;
+}
+
+.command-panel::before {
+    content: "";
+    inset: 0;
+    pointer-events: none;
+    position: absolute;
+    background:
+        linear-gradient(rgba(148, 163, 184, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148, 163, 184, 0.04) 1px, transparent 1px);
+    background-size: 42px 42px;
+}
+
+.command-panel-header,
+.command-grid,
+.command-feed {
+    position: relative;
+    z-index: 1;
+}
+
+.command-panel-header {
+    align-items: center;
+    color: #94a3b8;
+    display: flex;
+    font-size: 0.84rem;
+    justify-content: space-between;
+    text-transform: uppercase;
+}
+
+.command-panel-header div {
+    align-items: center;
+    display: flex;
+    gap: 9px;
+}
+
+.system-dot {
+    background: var(--command-green);
+    border-radius: 999px;
+    box-shadow: 0 0 18px rgba(52, 211, 153, 0.8);
+    display: inline-block;
+    height: 9px;
+    width: 9px;
+}
+
+.command-grid {
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-top: 92px;
+}
+
+.command-metric {
+    background: rgba(15, 23, 42, 0.76);
+    border: 1px solid rgba(148, 163, 184, 0.16);
+    border-radius: 16px;
+    padding: 22px;
+}
+
+.command-metric span,
+.command-feed span {
+    color: #94a3b8;
+    display: block;
+    font-size: 0.86rem;
+}
+
+.command-metric strong {
+    color: #f8fafc;
+    display: block;
+    font-size: 2rem;
+    margin-top: 8px;
+}
+
+.command-feed {
+    border-top: 1px solid rgba(148, 163, 184, 0.14);
+    display: grid;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+}
+
+.command-feed span::before {
+    color: #34d399;
+    content: ">";
+    margin-right: 10px;
+}
+
+.section {
+    padding: 96px 0;
+}
+
+.section-head {
+    margin-bottom: 44px;
+    text-align: left;
+}
+
+.section-head h2 {
+    font-size: clamp(2rem, 4vw, 3.5rem);
+}
+
+.section-head p {
+    margin: 0;
+    max-width: 720px;
+}
+
+.models-grid,
+.vault-grid,
+.projects-grid {
+    gap: 18px;
+}
+
+.model-card,
+.vault-item,
+.project-card {
+    background: var(--command-panel-soft);
+    border-color: rgba(148, 163, 184, 0.16);
+    border-radius: 14px;
+    box-shadow: none;
+}
+
+.model-card:hover,
+.vault-item:hover,
+.project-card:hover {
+    border-color: rgba(103, 232, 249, 0.44);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+    transform: translateY(-4px);
+}
+
+.model-card .model-icon,
+.vault-item .vault-icon,
+.projects-grid .project-card .project-icon {
+    background: rgba(34, 211, 238, 0.12);
+    color: #67e8f9;
+}
+
+.filter-group {
+    justify-content: flex-start;
+}
+
+.filter-btn {
+    border-color: rgba(148, 163, 184, 0.22);
+    border-radius: 999px;
+    color: #cbd5e1;
+}
+
+.filter-btn.active {
+    background: #67e8f9;
+    color: #061018;
+}
+
+@media (max-width: 920px) {
+    .hero-content {
+        grid-template-columns: 1fr;
+    }
+
+    .command-panel {
+        min-height: auto;
+    }
+}
+
+@media (max-width: 640px) {
+    #hero {
+        padding-top: 120px;
+    }
+
+    .hero-stats,
+    .command-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-stats .stat + .stat {
+        border-left: 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.14);
+    }
+
+    .section-head {
+        text-align: center;
+    }
+}
