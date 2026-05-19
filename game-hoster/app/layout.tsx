@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { CommandPalette } from "@/components/ui/CommandPalette";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -30,6 +31,7 @@ export default function RootLayout({
         <main className="flex-grow">
           {children}
         </main>
+        <CommandPalette />
       </body>
     </html>
   );

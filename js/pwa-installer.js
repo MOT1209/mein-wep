@@ -22,18 +22,19 @@
         e.preventDefault();
         
         // Store the event for later use
-        const projectPath = getProjectPathFromManifest(e);
+        const projectPath = getProjectPathFromManifest();
         if (projectPath) {
             deferredPrompts[projectPath] = e;
             showInstallButton(projectPath);
         }
     });
 
-    // Get project path from manifest or URL
-    function getProjectPathFromManifest(event) {
-        // Try to determine which project this prompt is for
-        // This is a simplified version - in production, you'd parse the manifest
-        return null; // We'll handle this differently
+    // Get a stable key for the current page so we can store its deferred prompt.
+    function getProjectPathFromManifest() {
+        // Use the pathname (e.g. '/quiz-app/index.html') as the key.
+        // Fall back to '/' for the root site.
+        const path = window.location.pathname;
+        return path && path !== '/' ? path : 'root';
     }
 
     // Show install button for a project
@@ -46,30 +47,34 @@
 
     // Global install function
     window.installPWA = async function(projectPath, btn) {
-        const prompt = deferredPrompts[projectPath];
-        
-        if (!prompt) {
-            // If no prompt, open the project in new tab
-            window.open(projectPath, '_blank');
+        const storedPrompt = deferredPrompts[projectPath];
+
+        if (!storedPrompt) {
+            // No install prompt available — the app may already be installed,
+            // or the browser hasn't triggered beforeinstallprompt yet.
+            if (projectPath && projectPath !== 'root') {
+                window.open(projectPath, '_blank');
+            }
             return;
         }
 
-        // Show the install prompt
-        prompt.prompt();
-        
-        // Wait for the user to respond to the prompt
-        const { outcome } = await prompt.userChoice;
-        
-        if (outcome === 'accepted') {
-            console.log('User accepted the install prompt');
-            btn.innerHTML = '<i class="fas fa-check"></i> تم التثبيت';
-            btn.disabled = true;
-        } else {
-            console.log('User dismissed the install prompt');
-        }
-        
-        // Clear the deferred prompt
+        // Guard: prompt can only be used once
         delete deferredPrompts[projectPath];
+
+        try {
+            storedPrompt.prompt();
+            const { outcome } = await storedPrompt.userChoice;
+
+            if (outcome === 'accepted') {
+                console.log('[PWA] User accepted the install prompt');
+                btn.innerHTML = '<i class="fas fa-check"></i> تم التثبيت';
+                btn.disabled = true;
+            } else {
+                console.log('[PWA] User dismissed the install prompt');
+            }
+        } catch (err) {
+            console.warn('[PWA] Install prompt error:', err);
+        }
     };
 
     // Check if app is installed

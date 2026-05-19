@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Rashid-v7';
+const CACHE_NAME = 'Rashid-v8';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -33,10 +33,17 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
     self.skipWaiting(); // Force activation
     event.waitUntil(
-        caches.open(CACHE_NAME)
-            .then((cache) => {
-                return cache.addAll(ASSETS_TO_CACHE);
-            })
+        caches.open(CACHE_NAME).then(async (cache) => {
+            // Cache files individually so one missing file won't abort the whole install
+            const results = await Promise.allSettled(
+                ASSETS_TO_CACHE.map(url => cache.add(url))
+            );
+            results.forEach((result, i) => {
+                if (result.status === 'rejected') {
+                    console.warn('[SW] Failed to cache:', ASSETS_TO_CACHE[i], result.reason);
+                }
+            });
+        })
     );
 });
 
@@ -57,27 +64,38 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     if (event.request.method !== 'GET') return;
 
+    // Use ignoreSearch so versioned URLs (?v=1.x) always match their cached entry
+    const cacheOptions = { ignoreSearch: true };
+
     if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request)
                 .then((response) => {
-                    const copy = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                    if (response && response.status === 200) {
+                        const copy = response.clone();
+                        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                    }
                     return response;
                 })
-                .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./offline.html')))
+                .catch(() =>
+                    caches.match(event.request, cacheOptions)
+                        .then((cached) => cached || caches.match('./offline.html', cacheOptions))
+                )
         );
         return;
     }
 
     event.respondWith(
-        caches.match(event.request).then((cached) => {
+        caches.match(event.request, cacheOptions).then((cached) => {
             if (cached) return cached;
             return fetch(event.request).then((response) => {
                 if (!response || response.status !== 200 || response.type === 'opaque') return response;
                 const copy = response.clone();
                 caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
                 return response;
+            }).catch(() => {
+                // Return nothing gracefully if network fails and no cache
+                return new Response('', { status: 408, statusText: 'Network timeout' });
             });
         })
     );

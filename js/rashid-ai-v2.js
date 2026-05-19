@@ -84,7 +84,7 @@ class RobotAvatar {
         this.head.add(antStick);
 
         const antBallGeo = new THREE.SphereGeometry(0.15);
-        this.antBall = new THREE.Mesh(antBallGeo, new THREE.MeshBasicMaterial({ color: 0xff3333 }));
+        this.antBall = new THREE.Mesh(antBallGeo, new THREE.MeshBasicMaterial({ color: 0xff3333, transparent: true, opacity: 1.0 }));
         this.antBall.position.set(0, 1.0, 0);
         this.head.add(this.antBall);
 
@@ -154,7 +154,6 @@ class RashidAI {
         this.isSpeaking = false;
         this.voices = [];
         this.preferredVoice = null;
-        this.geminiEnabled = false;
 
         // Settings
         this.userLang = localStorage.getItem('lastLang') || 'ar';
@@ -414,9 +413,21 @@ class RashidAI {
     }
 
     loadVoices() {
-        this.voices = this.synth.getVoices();
-        const target = this.userLang === 'ar' ? 'ar' : 'en';
-        this.preferredVoice = this.voices.find(v => v.lang.startsWith(target) && (v.name.includes('Google') || v.name.includes('Microsoft'))) || this.voices.find(v => v.lang.startsWith(target));
+        const setVoice = () => {
+            this.voices = this.synth.getVoices();
+            if (!this.voices.length) return;
+            const target = this.userLang === 'ar' ? 'ar' : 'en';
+            this.preferredVoice =
+                this.voices.find(v => v.lang.startsWith(target) && (v.name.includes('Google') || v.name.includes('Microsoft'))) ||
+                this.voices.find(v => v.lang.startsWith(target));
+        };
+
+        // Chrome loads voices asynchronously — register the event
+        if (typeof this.synth.onvoiceschanged !== 'undefined') {
+            this.synth.onvoiceschanged = setVoice;
+        }
+        // Also try immediately (works in Firefox & Safari)
+        setVoice();
     }
 
     async loadRemoteKnowledge() {
