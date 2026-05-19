@@ -7,6 +7,17 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="description"
         content="Rashid | Mein Web - The official platform of OpenCode. Rashid AI, the intelligent spokesperson for a creative coding entity building immersive games, apps, and innovative solutions.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://fromliten.com/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rashid | Mein Web - OpenCode Platform">
+    <meta property="og:description" content="Games, apps, AI models, and creative coding projects by Rashid and OpenCode.">
+    <meta property="og:image" content="images/logo.png">
+    <meta property="og:url" content="https://fromliten.com/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rashid | Mein Web - OpenCode Platform">
+    <meta name="twitter:description" content="Games, apps, AI models, and creative coding projects by Rashid and OpenCode.">
+    <meta name="twitter:image" content="images/logo.png">
     <title>Rashid | Mein Web - OpenCode Platform</title>
 
     <!-- Google Fonts -->
@@ -58,17 +69,17 @@
                 <button id="theme-toggle" class="control-btn" aria-label="Toggle Theme">
                     <i class="fas fa-sun"></i>
                 </button>
-                <div class="hamburger">
+                <button class="hamburger" aria-label="Open navigation menu" aria-controls="mobile-menu" aria-expanded="false">
                     <span class="bar"></span>
                     <span class="bar"></span>
                     <span class="bar"></span>
-                </div>
+                </button>
             </div>
         </div>
     </nav>
 
     <!-- Mobile Menu Overlay -->
-    <div class="mobile-menu">
+    <div class="mobile-menu" id="mobile-menu">
         <a href="#models">Models</a>
         <a href="#vault">Vault</a>
         <a href="#projects">Projects</a>
@@ -100,7 +111,7 @@
             <div class="hero-visual fade-in delay-2">
                 <div class="hero-img-wrapper">
                     <div class="glass-card main-visual">
-                        <img src="images/logo.png" alt="Rashid Dev Logo">
+                        <img src="images/logo.png" alt="Rashid Dev Logo" width="512" height="512" loading="eager" fetchpriority="high">
                     </div>
                     <div class="glass-card decor-1"></div>
                     <div class="glass-card decor-2"></div>
@@ -526,7 +537,7 @@
             <div class="footer-nav">
                 <h4>Navigation</h4>
                 <a href="#projects">Work</a>
-                <a href="#skills">Skills</a>
+                <a href="#models">Models</a>
                 <a href="learning.html">Learning</a>
             </div>
             <div class="footer-legal">
@@ -612,11 +623,20 @@
     <script src="js/rashid-ai-v2.js?v=3.0"></script>
 
     <!-- Core App Scripts -->
-    <script src="js/script.js?v=3.0"></script>
-    <script src="js/admin.js?v=3.0"></script>
+    <script src="js/script.js?v=3.4"></script>
+    <script src="js/admin.js?v=3.1"></script>
 
     <!-- PWA Install Manager -->
-    <script src="js/pwa-installer.js"></script>
+    <script src="js/pwa-installer.js?v=1.1"></script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Rashid | Mein Web",
+            "url": "https://fromliten.com/",
+            "description": "OpenCode platform for games, apps, AI models, and creative coding projects."
+        }
+    </script>
 </body>
 
 </html>

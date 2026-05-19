@@ -122,7 +122,7 @@ using ( true );
 -- ==============================================================================
 -- SEED DATA (Optional)
 -- ==============================================================================
-insert into public.projects (title, category, status, description, link, image_url, tags)
+insert into public.projects (title, category, status, description, link, image_url, technologies)
 values 
 ('Farmer Game', 'Game', 'Public', 'A 3D farming simulation.', 'farm-game/index.html', 'fas fa-tractor', ARRAY['3D', 'WebGL']),
 ('Quran App', 'App', 'Public', 'Beautiful Quran recitation app.', 'quran-app/index.html', 'fas fa-book-open', ARRAY['Audio', 'PWA']),

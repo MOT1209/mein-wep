@@ -1,7 +1,8 @@
-const CACHE_NAME = 'rashid-portfolio-v5';
+const CACHE_NAME = 'rashid-portfolio-v6';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
+    './offline.html',
     './css/style.css',
     './css/admin.css',
     './css/app-mode.css',
@@ -9,12 +10,20 @@ const ASSETS_TO_CACHE = [
     './js/script.js',
     './js/rashid-ai-v2.js',
     './js/supabase-config.js',
+    './src/js/main.js',
+    './src/js/utils/dom.js',
+    './src/js/services/supabase.js',
+    './src/js/modules/animations.js',
+    './src/js/modules/mobile.js',
+    './src/js/modules/navbar.js',
+    './src/js/modules/projects.js',
+    './src/js/modules/settings.js',
+    './src/js/modules/theme.js',
+    './src/js/modules/translations.js',
     './Rashid-app/index.html',
     './Rashid-app/style.css',
     './Rashid-app/script.js',
-    './images/logo.png',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
-    'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'
+    './images/logo.png'
 ];
 
 // Install Event - Cache Files
@@ -23,7 +32,6 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('[Service Worker] Caching updated assets');
                 return cache.addAll(ASSETS_TO_CACHE);
             })
     );
@@ -43,10 +51,31 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch Event - Network First, then Cache
 self.addEventListener('fetch', (event) => {
+    if (event.request.method !== 'GET') return;
+
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                    return response;
+                })
+                .catch(() => caches.match(event.request).then((cached) => cached || caches.match('./offline.html')))
+        );
+        return;
+    }
+
     event.respondWith(
-        fetch(event.request)
-            .catch(() => caches.match(event.request))
+        caches.match(event.request).then((cached) => {
+            if (cached) return cached;
+            return fetch(event.request).then((response) => {
+                if (!response || response.status !== 200 || response.type === 'opaque') return response;
+                const copy = response.clone();
+                caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                return response;
+            });
+        })
     );
 });

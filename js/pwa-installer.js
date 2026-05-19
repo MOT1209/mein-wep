@@ -9,6 +9,13 @@
     // Store deferred prompts for each project
     const deferredPrompts = {};
 
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .catch(err => console.warn('Service Worker registration failed:', err));
+        });
+    }
+
     // Listen for beforeinstallprompt events
     window.addEventListener('beforeinstallprompt', (e) => {
         // Prevent the mini-infobar from appearing on mobile
@@ -81,19 +88,17 @@
         document.body.classList.add('pwa-standalone');
     }
 
-    // Initialize install buttons on page load
-    document.addEventListener('DOMContentLoaded', () => {
-        // Add click handlers to all install buttons
-        document.querySelectorAll('.install-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                const projectPath = btn.dataset.project;
-                if (projectPath) {
-                    installPWA(projectPath, btn);
-                }
-            });
-        });
+    // Install buttons are rendered dynamically, so use one delegated listener.
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.install-btn');
+        if (!btn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+        const projectPath = btn.dataset.project;
+        if (projectPath) {
+            installPWA(projectPath, btn);
+        }
     });
 
 })();

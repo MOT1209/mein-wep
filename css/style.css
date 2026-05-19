@@ -7,15 +7,21 @@
     /* Fonts */
     --font-heading: 'Outfit', sans-serif;
     --font-body: 'Plus Jakarta Sans', sans-serif;
+    --font-primary: var(--font-body);
 
     /* Theme - Dark (Standard) */
     --bg-main: #09090b;
     --bg-secondary: #121217;
+    --bg-alt: var(--bg-secondary);
     --bg-glass: rgba(18, 18, 23, 0.7);
     --text-high: #ffffff;
     --text-med: #a1a1aa;
     --text-low: #71717a;
+    --text-primary: var(--text-high);
+    --text-secondary: var(--text-med);
+    --text-muted: var(--text-low);
     --accent: #38bdf8;
+    --accent-rgb: 56, 189, 248;
     --accent-glow: rgba(56, 189, 248, 0.3);
     --accent-dark: #0284c7;
     --border: rgba(255, 255, 255, 0.08);
@@ -24,8 +30,11 @@
 
     /* Global Settings */
     --section-gap: 120px;
+    --section-padding: 120px 0;
+    --container-width: 1200px;
     --radius-lg: 24px;
     --radius-md: 16px;
+    --transition-speed: 0.3s;
     --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -36,7 +45,11 @@ body.light-mode {
     --text-high: #0f172a;
     --text-med: #475569;
     --text-low: #94a3b8;
+    --text-primary: var(--text-high);
+    --text-secondary: var(--text-med);
+    --text-muted: var(--text-low);
     --accent: #0284c7;
+    --accent-rgb: 2, 132, 199;
     --accent-glow: rgba(2, 132, 199, 0.2);
     --border: rgba(0, 0, 0, 0.08);
     --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.1);
@@ -266,6 +279,29 @@ img {
 .nav-controls {
     display: flex;
     gap: 12px;
+}
+
+.hamburger {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    min-height: 44px;
+    min-width: 44px;
+    justify-content: center;
+    padding: 0;
+}
+
+.bar {
+    background: var(--text-high);
+    border-radius: 999px;
+    display: block;
+    height: 2px;
+    transition: var(--transition);
+    width: 24px;
 }
 
 .control-btn {
@@ -682,9 +718,27 @@ body.light-mode .skill-tag {
     background-clip: text;
     filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
 }
-    background: var(--bg-main);
-    color: var(--accent);
-    box-shadow: var(--shadow-sm);
+
+:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}
+
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+    .bg-mesh::after,
+    body::before {
+        animation: none !important;
+    }
+
+    .glass-card,
+    .navbar,
+    .settings-modal,
+    .voice-panel,
+    .vault-item,
+    .model-card {
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+    }
 }
 
 .projects-grid {

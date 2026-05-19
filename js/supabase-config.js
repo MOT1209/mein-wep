@@ -1,18 +1,21 @@
 
 /**
- * Supabase Configuration
- * Initialize the Supabase client for authentication and database access.
+ * Supabase public browser configuration.
+ *
+ * Keep only the anon publishable key here. Never place service_role keys,
+ * private API keys, or database secrets in client-side JavaScript.
  */
+const FROMLITEN_SUPABASE = Object.freeze({
+    url: 'https://mspxwccbczhtaexwyhya.supabase.co',
+    anonKey: 'sb_publishable_IvhF2CRGL0FTorPACmzh6g_-t94bItu'
+});
 
-// Supabase Project Configuration
-const SUPABASE_URL = 'https://mspxwccbczhtaexwyhya.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_IvhF2CRGL0FTorPACmzh6g_-t94bItu';
-
-// Check if Supabase library is loaded
 if (typeof supabase !== 'undefined') {
-    // Initialize Supabase client
-    window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    console.log("✅ Supabase Client Initialized Successfully");
+    window.supabaseClient = supabase.createClient(
+        FROMLITEN_SUPABASE.url,
+        FROMLITEN_SUPABASE.anonKey
+    );
+    console.log('Supabase client initialized with anon key');
 } else {
-    console.error("❌ Supabase library not found! Make sure to include the CDN in your HTML.");
+    console.error('Supabase library not found. Make sure to include the CDN in your HTML.');
 }

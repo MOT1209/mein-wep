@@ -188,6 +188,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let allProjects = [];
 
+    function normalizeCategory(category) {
+        const value = String(category || 'App').toLowerCase();
+        if (value === 'game') return 'Game';
+        if (value === 'open source') return 'Open Source';
+        if (value === 'web') return 'Web';
+        return 'App';
+    }
+
+    function escapeHTML(value) {
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
+    }
+
     async function fetchProjects() {
         const container = document.getElementById('projects-list-container');
         if (!container) return;
@@ -225,8 +239,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             div.className = 'control-row';
             div.innerHTML = `
                 <div>
-                    <h3>${p.title}</h3>
-                    <p style="color:var(--text-muted); font-size:0.8rem;">${p.category} | ${p.status}</p>
+                    <h3>${escapeHTML(p.title)}</h3>
+                    <p style="color:var(--text-muted); font-size:0.8rem;">${escapeHTML(p.category)} | ${escapeHTML(p.status)}</p>
                 </div>
                 <div style="display:flex; gap:10px; align-items:center;">
                     <button onclick="editProject('${p.id}')" style="background:var(--primary); border:none; color:white; padding:5px 10px; border-radius:4px; cursor:pointer;"><i class="fas fa-edit"></i></button>
@@ -258,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('p-id').value = p.id;
                 document.getElementById('p-title').value = p.title || '';
                 document.getElementById('p-desc').value = p.description || '';
-                document.getElementById('p-category').value = (p.category || 'app').toLowerCase();
+                document.getElementById('p-category').value = normalizeCategory(p.category);
                 document.getElementById('p-image').value = p.image_url || '';
                 document.getElementById('p-link').value = p.link || p.project_link || ''; // Handle both
                 document.getElementById('p-github').value = p.github_link || '';
@@ -286,7 +300,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const id = document.getElementById('p-id').value;
         const title = document.getElementById('p-title').value;
         const description = document.getElementById('p-desc').value;
-        const category = document.getElementById('p-category').value;
+        const category = normalizeCategory(document.getElementById('p-category').value);
         const image_url = document.getElementById('p-image').value;
         const project_link = document.getElementById('p-link').value;
         const github_link = document.getElementById('p-github').value;
@@ -332,8 +346,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     window.toggleProjectStatus = async function (id, isChecked) {
-        const status = isChecked ? 'Public' : 'Hidden';
-        await supabaseClient.from('projects').update({ status }).eq('id', id);
+        const status = isChecked ? 'Public' : 'Private';
+        const { error } = await supabaseClient.from('projects').update({ status }).eq('id', id);
+        if (error) alert(error.message);
     };
 
 

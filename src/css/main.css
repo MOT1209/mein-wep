@@ -1,0 +1,4 @@
+@import url('./base/variables.css');
+@import url('./base/responsive.css');
+
+/* New CSS modules should be imported here as legacy css/style.css is retired. */

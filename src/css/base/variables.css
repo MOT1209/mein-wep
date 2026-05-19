@@ -1,0 +1,6 @@
+:root {
+    --accent-rgb: 56, 189, 248;
+    --container-width: 1200px;
+    --section-padding: 120px 0;
+    --transition-speed: 0.3s;
+}
