@@ -1,11 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://fromliten.com/</loc>
+        <loc>https://rashid-wep.vercel.app/</loc>
         <priority>1.0</priority>
     </url>
     <url>
-        <loc>https://fromliten.com/learning.html</loc>
+        <loc>https://rashid-wep.vercel.app/learning.html</loc>
         <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/vault/prompts/</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/vault/code/</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/vault/archive/</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/vault/media/</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/vault/docs/</loc>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/vault/api/</loc>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/Rashid-app/</loc>
+        <priority>0.7</priority>
     </url>
 </urlset>

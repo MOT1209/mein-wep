@@ -1,8 +1,8 @@
 {
-    "name": "Rashid Portfolio",
-    "short_name": "Rashid",
-    "description": "Portfolio of Rashid - Software Developer",
-    "start_url": "./index.html",
+    "name": "FROMLITEN",
+    "short_name": "FROMLITEN",
+    "description": "Rashid's AI workspace for models, vault resources, apps, and games.",
+    "start_url": "./",
     "display": "standalone",
     "background_color": "#09090b",
     "theme_color": "#09090b",

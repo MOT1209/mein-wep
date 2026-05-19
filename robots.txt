@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fromliten.com/sitemap.xml
+Sitemap: https://rashid-wep.vercel.app/sitemap.xml

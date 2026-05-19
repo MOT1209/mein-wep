@@ -1,8 +1,10 @@
-const CACHE_NAME = 'rashid-portfolio-v6';
+const CACHE_NAME = 'fromliten-v7';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './offline.html',
+    './vault/docs/index.html',
+    './vault/api/index.html',
     './css/style.css',
     './css/admin.css',
     './css/app-mode.css',

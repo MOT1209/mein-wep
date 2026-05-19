@@ -2471,6 +2471,27 @@ body {
     display: none;
 }
 
+.disabled-link {
+    cursor: not-allowed;
+    opacity: 0.62;
+    pointer-events: none;
+}
+
+.social-links span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.legacy-projects-grid[hidden] {
+    display: none !important;
+}
+
 #hero .command-copy {
     color: #cbd5e1;
     max-width: 720px;

@@ -6,19 +6,19 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="description"
-        content="Rashid | Mein Web - The official platform of OpenCode. Rashid AI, the intelligent spokesperson for a creative coding entity building immersive games, apps, and innovative solutions.">
+        content="FROMLITEN is Rashid's command center for AI models, vault resources, apps, games, and creative coding projects.">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://fromliten.com/">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Rashid | Mein Web - OpenCode Platform">
-    <meta property="og:description" content="Games, apps, AI models, and creative coding projects by Rashid and OpenCode.">
+    <meta property="og:title" content="FROMLITEN - AI Workspace by Rashid">
+    <meta property="og:description" content="AI models, vault resources, apps, games, and creative coding projects by Rashid.">
     <meta property="og:image" content="images/logo.png">
-    <meta property="og:url" content="https://fromliten.com/">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Rashid | Mein Web - OpenCode Platform">
-    <meta name="twitter:description" content="Games, apps, AI models, and creative coding projects by Rashid and OpenCode.">
+    <meta name="twitter:title" content="FROMLITEN - AI Workspace by Rashid">
+    <meta name="twitter:description" content="AI models, vault resources, apps, games, and creative coding projects by Rashid.">
     <meta name="twitter:image" content="images/logo.png">
-    <title>Rashid | Mein Web - OpenCode Platform</title>
+    <title>FROMLITEN - AI Workspace by Rashid</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,7 +41,7 @@
     <link rel="stylesheet" href="css/mobile-improvements.css?v=1.0">
 
     <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json?v=2">
     <meta name="theme-color" content="#09090b">
 </head>
 
@@ -183,7 +183,7 @@
                         <span><i class="fas fa-database"></i> Supabase</span>
                         <span><i class="fas fa-bolt"></i> Real-time</span>
                     </div>
-                    <a href="#" class="btn btn-glass">Coming Soon</a>
+                    <span class="btn btn-glass disabled-link" aria-disabled="true">Planned</span>
                 </div>
             </div>
         </div>
@@ -234,7 +234,7 @@
                     <span class="vault-count">25+ Videos</span>
                 </a>
                 
-                <a href="#" class="vault-item reveal">
+                <a href="vault/docs/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
                         <i class="fas fa-book"></i>
                     </div>
@@ -243,7 +243,7 @@
                     <span class="vault-count">8+ Docs</span>
                 </a>
                 
-                <a href="#" class="vault-item reveal">
+                <a href="vault/api/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);">
                         <i class="fas fa-plug"></i>
                     </div>
@@ -272,7 +272,7 @@
             </div>
             
             <!-- Projects Grid -->
-            <div class="projects-grid" style="margin-top: 30px;">
+            <div class="projects-grid legacy-projects-grid" style="margin-top: 30px;" hidden aria-hidden="true">
                 <!-- Games -->
                 <div class="project-card reveal" data-category="games">
                     <div class="project-icon" style="background: linear-gradient(135deg, #ea580c, #f97316);">
@@ -544,12 +544,12 @@
     <footer class="main-footer">
         <div class="container footer-grid">
             <div class="footer-brand">
-                <a href="#" class="logo">Rashid<span>.</span></a>
-                <p>Pushing the boundaries of game development and web technology.</p>
+                <a href="#hero" class="logo">FROMLITEN<span>.</span></a>
+                <p>AI workspace, vault, apps, and games by Rashid.</p>
                 <div class="social-links">
-                    <a href="#"><i class="fab fa-github"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                    <a href="#"><i class="fab fa-discord"></i></a>
+                    <span aria-label="GitHub profile not configured"><i class="fab fa-github"></i></span>
+                    <span aria-label="LinkedIn profile not configured"><i class="fab fa-linkedin"></i></span>
+                    <span aria-label="Discord profile not configured"><i class="fab fa-discord"></i></span>
                 </div>
             </div>
             <div class="footer-nav">
@@ -559,7 +559,7 @@
                 <a href="learning.html">Learning</a>
             </div>
             <div class="footer-legal">
-                <p>&copy; 2026 Rashid. Crafted with Passion.</p>
+                <p>&copy; 2026 FROMLITEN by Rashid.</p>
                 <a href="admin/login.html" class="admin-link">Internal Access</a>
             </div>
         </div>
@@ -650,9 +650,9 @@
         {
             "@context": "https://schema.org",
             "@type": "WebSite",
-            "name": "Rashid | Mein Web",
-            "url": "https://fromliten.com/",
-            "description": "OpenCode platform for games, apps, AI models, and creative coding projects."
+            "name": "FROMLITEN",
+            "url": "https://rashid-wep.vercel.app/",
+            "description": "Rashid's AI workspace for models, vault resources, apps, games, and creative coding projects."
         }
     </script>
 </body>
