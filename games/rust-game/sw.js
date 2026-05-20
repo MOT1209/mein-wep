@@ -1,28 +1,30 @@
-// Farm Game Service Worker
-const CACHE_NAME = 'farm-game-v1';
+// Rust Game Service Worker
+const CACHE_NAME = 'rust-game-v1';
 const STATIC_ASSETS = [
-    '/farm-game/',
-    '/farm-game/index.html',
-    '/farm-game/manifest.json'
+    '/games/rust-game/',
+    '/games/rust-game/index.html',
+    '/games/rust-game/css/style.css',
+    '/games/rust-game/css/building.css',
+    '/games/rust-game/manifest.json'
 ];
 
 // Install Event
 self.addEventListener('install', (event) => {
-    console.log('[Farm Game SW] Installing...');
+    console.log('[Rust Game SW] Installing...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[Farm Game SW] Caching assets');
+                console.log('[Rust Game SW] Caching assets');
                 return cache.addAll(STATIC_ASSETS);
             })
-            .catch(err => console.error('[Farm Game SW] Cache failed:', err))
+            .catch(err => console.error('[Rust Game SW] Cache failed:', err))
     );
     self.skipWaiting();
 });
 
 // Activate Event
 self.addEventListener('activate', (event) => {
-    console.log('[Farm Game SW] Activating...');
+    console.log('[Rust Game SW] Activating...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -35,7 +37,7 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch Event - Cache first for static, network for API
+// Fetch Event
 self.addEventListener('fetch', (event) => {
     event.respondWith(
         caches.match(event.request).then(response => {
@@ -54,14 +56,13 @@ self.addEventListener('fetch', (event) => {
                     return networkResponse;
                 })
                 .catch(() => {
-                    // Return offline message for navigation requests
                     if (event.request.mode === 'navigate') {
                         return new Response(
                             `<!DOCTYPE html>
                             <html>
-                            <head><title>Offline - Farm Game</title></head>
-                            <body style="text-align:center;font-family:sans-serif;padding:50px;background:#87CEEB;">
-                                <h1>🚜 أنت في وضع عدم الاتصال</h1>
+                            <head><title>Offline - Rust Survival</title></head>
+                            <body style="text-align:center;font-family:sans-serif;padding:50px;background:#1a1a1a;color:#fff;">
+                                <h1>☢️ أنت في وضع عدم الاتصال</h1>
                                 <p>Offline Mode - Please check your connection</p>
                             </body>
                             </html>`,

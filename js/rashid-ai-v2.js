@@ -214,7 +214,7 @@ class RashidAI {
                     en: "The Rust Survival clone is a 3D masterpiece. It includes building systems, stability checks, and resource gathering. It's built with pure JavaScript and Three.js!",
                     ar: "لعبة البقاء Rust هي تحفة فنية ثلاثية الأبعاد. تتضمن أنظمة بناء، فحص الاستقرار، وجمع الموارد. هي مبنية بالكامل بالجافا سكريبت!"
                 },
-                action: () => window.location.href = 'rust-game/index.html'
+                action: () => window.location.href = 'games/rust-game/index.html'
             },
             'learning': {
                 keywords: ['learning', 'center', 'school', 'study', 'تعلم', 'مركز التعليم'],

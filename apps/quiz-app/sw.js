@@ -1,11 +1,11 @@
 // Quiz App Service Worker
 const CACHE_NAME = 'quiz-app-v1';
 const STATIC_ASSETS = [
-    '/quiz-app/',
-    '/quiz-app/index.html',
-    '/quiz-app/css/style.css',
-    '/quiz-app/js/script.js',
-    '/quiz-app/manifest.json'
+    '/apps/quiz-app/',
+    '/apps/quiz-app/index.html',
+    '/apps/quiz-app/css/style.css',
+    '/apps/quiz-app/js/script.js',
+    '/apps/quiz-app/manifest.json'
 ];
 
 // Install Event

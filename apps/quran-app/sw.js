@@ -1,11 +1,11 @@
 // Quran App Service Worker - Offline Support
 const CACHE_NAME = 'quran-app-v2';
 const STATIC_ASSETS = [
-    '/quran-app/',
-    '/quran-app/index.html',
-    '/quran-app/css/style.css',
-    '/quran-app/js/app.js',
-    '/quran-app/js/quran-data.js'
+    '/apps/quran-app/',
+    '/apps/quran-app/index.html',
+    '/apps/quran-app/css/style.css',
+    '/apps/quran-app/js/app.js',
+    '/apps/quran-app/js/quran-data.js'
 ];
 
 // API Cache Configuration
@@ -140,11 +140,11 @@ async function syncBookmarks() {
 self.addEventListener('push', (event) => {
     const options = {
         body: event.data?.text() || 'Notification from Quran App',
-        icon: '/quran-app/images/icon-192x192.png',
-        badge: '/quran-app/images/badge-72x72.png',
+        icon: '/apps/quran-app/images/icon-192x192.png',
+        badge: '/apps/quran-app/images/badge-72x72.png',
         vibrate: [100, 50, 100],
         data: {
-            url: '/quran-app/'
+            url: '/apps/quran-app/'
         }
     };
     

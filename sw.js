@@ -23,9 +23,9 @@ const ASSETS_TO_CACHE = [
     './src/js/modules/settings.js',
     './src/js/modules/theme.js',
     './src/js/modules/translations.js',
-    './Rashid-app/index.html',
-    './Rashid-app/style.css',
-    './Rashid-app/script.js',
+    './models/Rashid-app/index.html',
+    './models/Rashid-app/style.css',
+    './models/Rashid-app/script.js',
     './images/logo.png'
 ];
 

@@ -124,11 +124,11 @@ using ( true );
 -- ==============================================================================
 insert into public.projects (title, category, status, description, link, image_url, technologies)
 values 
-('Farmer Game', 'Game', 'Public', 'A 3D farming simulation.', 'farm-game/index.html', 'fas fa-tractor', ARRAY['3D', 'WebGL']),
-('Quran App', 'App', 'Public', 'Beautiful Quran recitation app.', 'quran-app/index.html', 'fas fa-book-open', ARRAY['Audio', 'PWA']),
-('Rust Game', 'Game', 'Public', 'Experimental Rust + WASM game.', 'rust-game/index.html', 'fab fa-rust', ARRAY['Rust', 'WASM']),
-('Calculator Vault', 'App', 'Public', 'Privacy-focused calculator vault.', 'calculator-vault/index.html', 'fas fa-user-secret', ARRAY['Security', 'Utility']),
-('Quiz App', 'App', 'Public', 'Interactive quiz application.', 'quiz-app/index.html', 'fas fa-question', ARRAY['Education', 'JS']);
+('Farmer Game', 'Game', 'Public', 'A 3D farming simulation.', 'games/farm-game/index.html', 'fas fa-tractor', ARRAY['3D', 'WebGL']),
+('Quran App', 'App', 'Public', 'Beautiful Quran recitation app.', 'apps/quran-app/index.html', 'fas fa-book-open', ARRAY['Audio', 'PWA']),
+('Rust Game', 'Game', 'Public', 'Experimental Rust + WASM game.', 'games/rust-game/index.html', 'fab fa-rust', ARRAY['Rust', 'WASM']),
+('Calculator Vault', 'App', 'Public', 'Privacy-focused calculator vault.', 'apps/calculator-vault/index.html', 'fas fa-user-secret', ARRAY['Security', 'Utility']),
+('Quiz App', 'App', 'Public', 'Interactive quiz application.', 'apps/quiz-app/index.html', 'fas fa-question', ARRAY['Education', 'JS']);
 -- ==============================================================================
 -- TABLE: lessons
 -- Stores content for the Learning Center
@@ -208,7 +208,7 @@ using (true);
 
 insert into public.models (title, description, icon_class, link, specs, status, sort_order)
 values
-('Rashid AI v2.0', 'Flagship conversational AI powered by Gemini & OpenRouter. Multilingual support.', 'fas fa-brain', 'Rashid-app/index.html', ARRAY['Gemini API', '10+ Languages'], 'Public', 10),
+('Rashid AI v2.0', 'Flagship conversational AI powered by Gemini & OpenRouter. Multilingual support.', 'fas fa-brain', 'models/Rashid-app/index.html', ARRAY['Gemini API', '10+ Languages'], 'Public', 10),
 ('Game Engine Core', 'Proprietary 3D engine built with Three.js, physics, AI behaviors, and procedural generation.', 'fas fa-cubes', '#projects', ARRAY['Three.js', 'Real-time'], 'Public', 20),
 ('Backend Infrastructure', 'Supabase-powered backend with authentication, realtime database, and PWA capabilities.', 'fas fa-server', null, ARRAY['Supabase', 'Realtime'], 'Public', 30);
 
