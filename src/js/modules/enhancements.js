@@ -1,5 +1,5 @@
-import { qs, qsa, on, escapeHTML, safeIconClass, safeUrl } from '../utils/dom.js?v=1.1';
-import { getVisitorCount } from '../services/supabase.js?v=1.3';
+import { qs, qsa, on, escapeHTML } from '../utils/dom.js?v=1.1';
+import { getSupabaseClient } from '../services/supabase.js?v=1.5';
 
 // ----------------------------------------------------
 // 1. Toast Notifications Utility
@@ -185,9 +185,12 @@ export async function initLiveStats() {
     // Try reading Supabase visitor stats
     let totalVisits = 1420; // Default nice mock number
     try {
-        const countData = await getVisitorCount();
-        if (countData && countData.visitor_count) {
-            totalVisits = countData.visitor_count;
+        const client = getSupabaseClient();
+        if (client) {
+            const { data } = await client.from('site_stats').select('visitor_count').eq('id', 1).single();
+            if (data && data.visitor_count) {
+                totalVisits = data.visitor_count;
+            }
         }
     } catch (e) {
         console.warn('Could not read real-time visitor counts, fallback enabled.', e);
