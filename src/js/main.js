@@ -7,6 +7,14 @@ import { initSettings } from './modules/settings.js?v=1.1';
 import { initTheme } from './modules/theme.js?v=1.1';
 import { incrementVisitorCount } from './services/supabase.js?v=1.5';
 import { qs, qsa, on } from './utils/dom.js?v=1.1';
+import {
+    initTypewriter,
+    initTechStackMarquee,
+    initLiveStats,
+    initTestimonials,
+    initProjectModal,
+    initCustomPwaInstall
+} from './modules/enhancements.js?v=1.0';
 
 function initLegacyLocalSettings() {
     if (localStorage.getItem('maintenanceMode') === 'true') {
@@ -65,6 +73,14 @@ async function boot() {
     initAnimations();
     initSmoothScroll();
     initAdminContentControls();
+    
+    // Rashid Web v4.0 Enhancements
+    initTypewriter();
+    initTechStackMarquee();
+    initLiveStats();
+    initTestimonials();
+    initProjectModal();
+    initCustomPwaInstall();
 
     if (!initLegacyLocalSettings()) return;
 

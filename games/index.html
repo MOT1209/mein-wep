@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Rashid Arcade - Premium browser-based games crafted with cutting edge web technology.">
+    <title>Rashid Arcade - Play Games</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- CSS (relative to subdirectory) -->
+    <link rel="stylesheet" href="../css/style.css?v=4.1">
+    <link rel="stylesheet" href="../css/enhancements.css?v=1.0">
+    
+    <style>
+        :root {
+            --gaming-glow: 0 0 30px rgba(56, 189, 248, 0.25);
+            --arcade-accent: #ea580c;
+        }
+
+        body {
+            background-color: #050508;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(234, 88, 12, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%);
+            min-height: 100vh;
+        }
+
+        .arcade-header {
+            text-align: center;
+            padding: 80px 0 40px;
+            position: relative;
+        }
+
+        .arcade-badge {
+            background: rgba(234, 88, 12, 0.1);
+            color: var(--arcade-accent);
+            border: 1px solid rgba(234, 88, 12, 0.2);
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .arcade-title {
+            font-size: 3rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #fff 30%, rgba(255,255,255,0.7));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .arcade-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
+            padding: 40px 0;
+        }
+
+        .arcade-card {
+            background: rgba(15, 15, 25, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        .arcade-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(56, 189, 248, 0.3);
+            box-shadow: 0 20px 40px rgba(56, 189, 248, 0.12), var(--gaming-glow);
+        }
+
+        .arcade-banner {
+            height: 200px;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .arcade-banner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, transparent 30%, rgba(5, 5, 8, 0.95));
+        }
+
+        .arcade-banner i {
+            font-size: 4rem;
+            opacity: 0.15;
+            transition: all 0.5s ease;
+            color: #fff;
+        }
+
+        .arcade-card:hover .arcade-banner i {
+            transform: scale(1.2) rotate(5deg);
+            opacity: 0.4;
+        }
+
+        .arcade-info {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .arcade-tags {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .arcade-tags span {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 30px;
+            text-transform: uppercase;
+        }
+
+        .tag-3d { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+        .tag-sim { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+        .tag-surv { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+
+        .arcade-info h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+
+        .arcade-info p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            flex-grow: 1;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 40px;
+            left: 5%;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 20px;
+            border-radius: 50px;
+        }
+
+        .back-btn:hover {
+            color: #fff;
+            border-color: rgba(255,255,255,0.2);
+            transform: translateX(-4px);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .arcade-visual-overlay {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(56,189,248,0.15) 0%, transparent 70%);
+            opacity: 0;
+            transition: all 0.4s ease;
+            pointer-events: none;
+        }
+
+        .arcade-card:hover .arcade-visual-overlay {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <!-- Glowing Background grids -->
+    <div class="bg-mesh"></div>
+
+    <a href="../index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Home Center</a>
+
+    <header class="arcade-header">
+        <div class="container">
+            <div class="arcade-badge"><i class="fas fa-gamepad"></i> Rashid Arcade</div>
+            <h1 class="arcade-title">Interactive Gaming Zone</h1>
+            <p style="color: rgba(255,255,255,0.5); font-size: 1.1rem; max-width: 600px; margin: 0 auto;">
+                Experience state-of-the-art browser games. Powered by WebGL, WASM, and Three.js physics engine.
+            </p>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="arcade-grid">
+            
+            <!-- Farm Empire -->
+            <article class="arcade-card">
+                <div class="arcade-visual-overlay"></div>
+                <div class="arcade-banner" style="background: linear-gradient(135deg, #1e3a1e, #14532d);">
+                    <i class="fas fa-tractor"></i>
+                </div>
+                <div class="arcade-info">
+                    <div class="arcade-tags">
+                        <span class="tag-sim">Simulation</span>
+                        <span class="tag-3d">WebGL</span>
+                    </div>
+                    <h3>Farm Empire</h3>
+                    <p>Build and expand your dream farming empire. Crop growth simulations, real-time weather effects, animals management, and market trading.</p>
+                    <a href="farm-game/index.html" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center; padding: 12px 0;">
+                        <i class="fas fa-play"></i> Launch Simulation
+                    </a>
+                </div>
+            </article>
+
+            <!-- Rust Construction -->
+            <article class="arcade-card">
+                <div class="arcade-visual-overlay"></div>
+                <div class="arcade-banner" style="background: linear-gradient(135deg, #431407, #782e08);">
+                    <i class="fab fa-rust"></i>
+                </div>
+                <div class="arcade-info">
+                    <div class="arcade-tags">
+                        <span class="tag-3d">Three.js</span>
+                        <span class="tag-sim">WASM</span>
+                    </div>
+                    <h3>Rust Construction</h3>
+                    <p>Physics-driven 3D sandbox survival game. Mine resources, craft tools, build sturdy structures, and defend against environmental hazards.</p>
+                    <a href="rust-game/index.html" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center; padding: 12px 0;">
+                        <i class="fas fa-play"></i> Play Sandbox
+                    </a>
+                </div>
+            </article>
+
+            <!-- Survival Island -->
+            <article class="arcade-card">
+                <div class="arcade-visual-overlay"></div>
+                <div class="arcade-banner" style="background: linear-gradient(135deg, #172554, #1e3a8a);">
+                    <i class="fas fa-skull-crossbones"></i>
+                </div>
+                <div class="arcade-info">
+                    <div class="arcade-tags">
+                        <span class="tag-surv">Survival</span>
+                        <span class="tag-3d">Adventure</span>
+                    </div>
+                    <h3>Survival Island</h3>
+                    <p>Lost on a mysterious island. Forage for food, craft campfire lights, unlock mysterious ruins, and survive dangerous night creature raids.</p>
+                    <a href="survival-game/index.html" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center; padding: 12px 0;">
+                        <i class="fas fa-play"></i> Start Survival
+                    </a>
+                </div>
+            </article>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer" style="margin-top: 80px;">
+        <div class="container" style="text-align: center; opacity: 0.5;">
+            <p>&copy; 2026 Rashid Arcade. Designed and built with ❤️ by Rashid.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
