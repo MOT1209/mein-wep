@@ -9,7 +9,7 @@
 -- TABLE: projects
 -- Stores your portfolio projects (Games, Apps, etc.)
 -- ==============================================================================
-create table public.projects (
+create table if not exists public.projects (
   id uuid default gen_random_uuid() primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   title text not null,
@@ -58,7 +58,7 @@ using ( true );
 -- TABLE: site_stats
 -- Stores visitor counters and other global metrics
 -- ==============================================================================
-create table public.site_stats (
+create table if not exists public.site_stats (
   id int primary key, -- We'll just use id=1 for the main counter
   visitor_count bigint default 0,
   updated_at timestamp with time zone default timezone('utc'::text, now())
@@ -97,7 +97,7 @@ $$ language plpgsql security definer;
 -- TABLE: bot_knowledge
 -- Stores dynamic Q&A for Rashid-AI
 -- ==============================================================================
-create table public.bot_knowledge (
+create table if not exists public.bot_knowledge (
   id uuid default gen_random_uuid() primary key,
   keywords text[] not null, -- e.g. ['price', 'cost']
   response_en text,
@@ -133,24 +133,12 @@ values
 -- TABLE: lessons
 -- Stores content for the Learning Center
 -- ==============================================================================
-create table public.lessons (
+create table if not exists public.lessons (
   id uuid default gen_random_uuid() primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   title text not null,
   description text,
   icon_class text default 'fas fa-book',
-  progress int default 0,
-  tags text[],
-  content_url text, -- Link to the full lesson/article
-  category text check (category in ('Programming', 'Web', 'Game Dev', 'Other'))
-);
-
-alter table public.lessons enable row level security;
-
-create policy "Everyone can view lessons"
-on public.lessons for select
-using ( true );
-
 create policy "Admins can manage lessons"
 on public.lessons for all
 to authenticated
@@ -167,7 +155,7 @@ values
 -- TABLE: models
 -- Dynamic Rashid Models content shown on the homepage.
 -- ==============================================================================
-create table public.models (
+create table if not exists public.models (
   id uuid default gen_random_uuid() primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   title text not null,
@@ -218,7 +206,7 @@ alter publication supabase_realtime add table public.models;
 -- TABLE: vault_items
 -- Dynamic Vault categories shown on the homepage.
 -- ==============================================================================
-create table public.vault_items (
+create table if not exists public.vault_items (
   id uuid default gen_random_uuid() primary key,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   title text not null,
