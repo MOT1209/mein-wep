@@ -18,16 +18,24 @@
     <meta name="twitter:title" content="Rashid - AI Workspace">
     <meta name="twitter:description" content="Rashid (MOT1209) — Full-Stack Developer. Next.js 14, Python, Supabase, Three.js. Building Alking & FromLiten.">
     <meta name="twitter:image" content="images/logo.png">
+    <meta name="google-site-verification" content="VERIFICATION_CODE">
     <title>Rashid - AI Workspace</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+    <link rel="preload" href="images/logo.png" as="image" fetchpriority="high">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+        rel="stylesheet" media="print" onload="this.media='all'">
 
     <!-- Font Awesome -->
+    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Supabase JS -->
@@ -46,15 +54,89 @@
     <meta name="theme-color" content="#09090b">
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <style>
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(6, 8, 13, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 16px 24px;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cookie-banner.visible { transform: translateY(0); }
+.cookie-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.cookie-text {
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 280px;
+}
+.cookie-text a { color: var(--accent, #38bdf8); text-decoration: underline; }
+.cookie-actions { display: flex; gap: 12px; flex-shrink: 0; }
+.cookie-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+.cookie-accept {
+  background: linear-gradient(135deg, #67e8f9, #34d399);
+  color: #061018;
+}
+.cookie-accept:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3); }
+.cookie-decline {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+.cookie-decline:hover { background: rgba(148, 163, 184, 0.2); }
+@media (max-width: 640px) {
+  .cookie-content { flex-direction: column; text-align: center; }
+  .cookie-btn { width: 100%; justify-content: center; }
+}
+</style>
+<!-- Google tag (gtag.js) - GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX', {
+    'anonymize_ip': true,
+    'cookie_flags': 'SameSite=None;Secure'
+  });
+</script>
 </head>
 
 <body class="dark-mode">
+
+    <a href="#main-content" class="skip-link" tabindex="1">Skip to main content</a>
 
     <!-- Premium Dynamic Background -->
     <div class="bg-mesh"></div>
 
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav class="navbar" role="navigation">
         <div class="container nav-container">
             <a href="#hero" class="logo">Rashid<span class="accent-dot">.</span></a>
 
@@ -90,10 +172,10 @@
     </div>
 
     <!-- Hero Section -->
-    <header id="hero">
-        <div class="container hero-content">
+    <header id="hero" role="banner">
+        <div class="container hero-content" id="main-content">
             <div class="hero-text">
-                <div class="badge fade-in"><i class="fas fa-terminal"></i> Rashid Command Center</div>
+                <div class="badge fade-in"><i class="fas fa-terminal" aria-hidden="true"></i> Rashid Command Center</div>
                 <h1 class="fade-in delay-1">Build, store, and launch from one <span class="text-gradient">AI workspace</span></h1>
                 <p class="command-copy fade-in delay-2"><strong>Rashid</strong> is a Full-Stack Developer passionate about Next.js 14, Python, and Supabase.</p>
                 <p class="fade-in delay-2">Building Alking, FromLiten & 3D simulation worlds with Three.js. This is my digital command center.</p>
@@ -148,10 +230,10 @@
 
 
     
-    <section id="models" class="section alt-bg">
+    <section id="models" class="section alt-bg" aria-label="Rashid AI Models">
         <div class="container">
             <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-shapes"></i> Rashid Models</h2>
+                <h2 class="reveal"><i class="fas fa-shapes" aria-hidden="true"></i> Rashid Models</h2>
                 <p class="reveal">AI models and neural architectures crafted by Rashid, focused on quality, precision, and useful innovation.</p>
             </div>
             
@@ -193,10 +275,10 @@
     </section>
 
     <!-- The Vault Section -->
-    <section id="vault" class="section">
+    <section id="vault" class="section" aria-label="Knowledge Vault">
         <div class="container">
             <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-vault"></i> The Vault</h2>
+                <h2 class="reveal"><i class="fas fa-vault" aria-hidden="true"></i> The Vault</h2>
                 <p class="reveal">Rashid's knowledge repository for prompts, code, media, documentation, and archives.</p>
             </div>
             
@@ -259,10 +341,10 @@
     </section>
 
     <!-- Games & Apps Section -->
-    <section id="projects" class="section alt-bg">
+    <section id="projects" class="section alt-bg" aria-label="Projects Showcase">
         <div class="container">
             <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-layer-group"></i> Project Matrix</h2>
+                <h2 class="reveal"><i class="fas fa-layer-group" aria-hidden="true"></i> Project Matrix</h2>
                 <p class="reveal">Games, apps, models, and tools organized for scanning, launching, and expanding.</p>
             </div>
             
@@ -371,10 +453,10 @@
     </section>
 
     <!-- About Section -->
-    <section id="about" class="section alt-bg">
+    <section id="about" class="section alt-bg" aria-label="About Rashid">
         <div class="container">
             <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-info-circle"></i> About Rashid</h2>
+                <h2 class="reveal"><i class="fas fa-info-circle" aria-hidden="true"></i> About Rashid</h2>
                 <p class="reveal">The story behind Rashid and his creative coding journey.</p>
             </div>
             
@@ -409,7 +491,7 @@
     </section>
 
     <!-- Experience & Education -->
-    <section id="experience" class="section">
+    <section id="experience" class="section" aria-label="Experience Timeline">
         <div class="container">
             <div class="section-head">
                 <h2 class="reveal">Rashid Timeline</h2>
@@ -448,7 +530,7 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="section">
+    <section id="contact" class="section" aria-label="Contact Section">
         <div class="container">
             <div class="contact-container blur-glass reveal">
                 <div class="contact-info">
@@ -495,7 +577,7 @@
 
     <!-- Settings Modal -->
     <div class="settings-overlay" id="settings-overlay"></div>
-    <div class="settings-modal blur-glass" id="settings-modal">
+    <div class="settings-modal blur-glass" id="settings-modal" tabindex="0" role="dialog" aria-label="Settings">
         <div class="settings-header">
             <h3><i class="fas fa-palette"></i> Customize Workspace</h3>
             <button class="close-settings" id="close-settings"><i class="fas fa-times"></i></button>
@@ -544,13 +626,13 @@
     </div>
 
     <!-- Footer -->
-    <footer class="main-footer">
+    <footer class="main-footer" role="contentinfo">
         <div class="container footer-grid">
             <div class="footer-brand">
                 <a href="#hero" class="logo">Rashid<span>.</span></a>
                 <p>Full-Stack Developer — Next.js 14, Python, Supabase & Three.js.</p>
                 <div class="social-links">
-                    <a href="https://github.com/MOT1209" target="_blank" aria-label="GitHub Profile"><i class="fab fa-github"></i></a>
+                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener" aria-label="GitHub Profile"><i class="fab fa-github"></i></a>
                     <span aria-label="LinkedIn profile not configured"><i class="fab fa-linkedin"></i></span>
                     <span aria-label="Discord profile not configured"><i class="fab fa-discord"></i></span>
                 </div>
@@ -566,6 +648,7 @@
             <div class="footer-nav">
                 <h4>Legal</h4>
                 <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
             </div>
             <div class="footer-legal">
                 <p>&copy; 2026 Rashid by Rashid.</p>
@@ -643,7 +726,7 @@
             }, 'google_translate_element');
         }
     </script>
-    <script type="text/javascript"
+    <script type="text/javascript" defer
         src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <!-- Unified Rashid-AI Logic -->
@@ -664,6 +747,64 @@
             "description": "Rashid (MOT1209) — Full-Stack Developer passionate about Next.js 14, Python, and Supabase. Building Alking, FromLiten & 3D simulation worlds with Three.js."
         }
     </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Rashid",
+  "alternateName": "MOT1209",
+  "url": "https://rashid-wep.vercel.app/",
+  "jobTitle": "Full-Stack Developer",
+  "knowsAbout": ["Next.js", "Python", "Supabase", "Three.js", "AI"],
+  "sameAs": [
+    "https://github.com/MOT1209"
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Rashid - AI Workspace",
+  "url": "https://rashid-wep.vercel.app/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://rashid-wep.vercel.app/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+  <div class="cookie-content">
+    <div class="cookie-text">
+      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
+      <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+    </div>
+    <div class="cookie-actions">
+      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const banner = document.getElementById('cookie-consent');
+  if (localStorage.getItem('cookieConsent')) { return; }
+  setTimeout(() => banner.classList.add('visible'), 500);
+  document.getElementById('cookie-accept').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
+  });
+  document.getElementById('cookie-decline').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'declined');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
+  });
+})();
+</script>
 </body>
 
 </html>

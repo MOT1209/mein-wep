@@ -28,6 +28,67 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <style>
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(6, 8, 13, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 16px 24px;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cookie-banner.visible { transform: translateY(0); }
+.cookie-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.cookie-text {
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 280px;
+}
+.cookie-text a { color: var(--accent, #38bdf8); text-decoration: underline; }
+.cookie-actions { display: flex; gap: 12px; flex-shrink: 0; }
+.cookie-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+.cookie-accept {
+  background: linear-gradient(135deg, #67e8f9, #34d399);
+  color: #061018;
+}
+.cookie-accept:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3); }
+.cookie-decline {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+.cookie-decline:hover { background: rgba(148, 163, 184, 0.2); }
+@media (max-width: 640px) {
+  .cookie-content { flex-direction: column; text-align: center; }
+  .cookie-btn { width: 100%; justify-content: center; }
+}
+</style>
+    <style>
         body { padding-top: 100px; background: #09090b; }
         .contact-page { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
         .contact-page h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
@@ -85,10 +146,13 @@
         <div id="form-feedback"></div>
 
         <div class="contact-card">
-            <form id="contact-form">
+            <form id="contact-form" action="https://formsubmit.co/zwnt45602@gmail.com" method="POST">
+                <input type="hidden" name="_captcha" value="true">
+                <input type="hidden" name="_template" value="box">
+                <input type="hidden" name="_next" value="https://rashid-wep.vercel.app/contact.html?success=true">
                 <div class="form-group">
                     <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" placeholder="Your name" required>
+                    <input type="text" id="name" name="name" placeholder="Your name" required minlength="2">
                 </div>
                 <div class="form-group">
                     <label for="email">Email Address</label>
@@ -96,14 +160,15 @@
                 </div>
                 <div class="form-group">
                     <label for="subject">Subject</label>
-                    <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required>
+                    <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required minlength="3">
                 </div>
                 <div class="form-group">
                     <label for="message">Message</label>
-                    <textarea id="message" name="message" placeholder="Tell me about your project or inquiry..." required></textarea>
+                    <textarea id="message" name="message" placeholder="Tell me about your project or inquiry..." required minlength="10"></textarea>
                 </div>
                 <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Send Message</button>
             </form>
+            <p style="color: #52525b; font-size: 0.8rem; margin-top: 15px; text-align: center;">Your data is protected. View our <a href="privacy.html" style="color: #38bdf8;">Privacy Policy</a>.</p>
         </div>
 
         <div class="contact-methods">
@@ -134,6 +199,7 @@
                 <a href="about.html">About</a>
                 <a href="contact.html">Contact</a>
                 <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
             </div>
             <div class="footer-legal">
                 <p>&copy; 2026 Rashid by Rashid.</p>
@@ -144,42 +210,84 @@
     <script src="js/script.js?v=3.7"></script>
     <script>
         document.getElementById('contact-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const feedback = document.getElementById('form-feedback');
-            const submitBtn = this.querySelector('.btn-submit');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-            const data = {
-                name: document.getElementById('name').value.trim(),
-                email: document.getElementById('email').value.trim(),
-                subject: document.getElementById('subject').value.trim(),
-                message: document.getElementById('message').value.trim()
-            };
-            fetch('https://formsubmit.co/ajax/zwnt45602@gmail.com', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    feedback.className = 'success';
-                    feedback.textContent = 'Message sent successfully! I will get back to you soon.';
-                    this.reset();
-                } else {
-                    throw new Error('Send failed');
-                }
-            })
-            .catch(() => {
-                feedback.className = 'error';
-                feedback.textContent = 'Failed to send message. Please email me directly at zwnt45602@gmail.com.';
-            })
-            .finally(() => {
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-                setTimeout(() => { feedback.className = ''; feedback.textContent = ''; }, 5000);
-            });
+            if (window.fetch) {
+                e.preventDefault();
+                const feedback = document.getElementById('form-feedback');
+                const submitBtn = this.querySelector('.btn-submit');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                const data = {
+                    name: document.getElementById('name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    subject: document.getElementById('subject').value.trim(),
+                    message: document.getElementById('message').value.trim()
+                };
+                fetch('https://formsubmit.co/ajax/zwnt45602@gmail.com', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify(data)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        feedback.className = 'success';
+                        feedback.textContent = 'Message sent successfully! I will get back to you soon.';
+                        this.reset();
+                    } else {
+                        throw new Error('Send failed');
+                    }
+                })
+                .catch(() => {
+                    feedback.className = 'error';
+                    feedback.textContent = 'Failed to send message. Please email me directly at zwnt45602@gmail.com.';
+                })
+                .finally(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                    setTimeout(() => { feedback.className = ''; feedback.textContent = ''; }, 5000);
+                });
+            }
         });
     </script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+  <div class="cookie-content">
+    <div class="cookie-text">
+      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
+      <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+    </div>
+    <div class="cookie-actions">
+      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const banner = document.getElementById('cookie-consent');
+  if (localStorage.getItem('cookieConsent')) { return; }
+  setTimeout(() => banner.classList.add('visible'), 500);
+  document.getElementById('cookie-accept').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
+  });
+  document.getElementById('cookie-decline').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'declined');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
+  });
+})();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact Rashid",
+  "url": "https://rashid-wep.vercel.app/contact.html",
+  "description": "Contact page for Rashid - Full-Stack Developer"
+}
+</script>
 </body>
 </html>

@@ -1,0 +1,68 @@
+/* Hero Section Components */
+#hero { 
+  min-height: 94vh; 
+  display: flex; 
+  align-items: center; 
+  padding: 150px 0 70px; 
+}
+.hero-content { 
+  display: grid; 
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr); 
+  gap: 58px; 
+  align-items: center; 
+}
+#hero h1 { 
+  font-size: clamp(3.25rem, 7vw, 6.7rem); 
+  font-weight: 800; 
+  line-height: 1; 
+  margin-bottom: 32px; 
+  color: #fff; 
+  max-width: 820px; 
+}
+#hero p { 
+  font-size: clamp(1rem, 2vw, 1.25rem); 
+  color: #a1a1aa; 
+  max-width: 650px; 
+  margin-bottom: 48px; 
+}
+.text-gradient { 
+  background: linear-gradient(135deg, #67e8f9 0%, #34d399 54%, #e0f2fe 100%); 
+  -webkit-background-clip: text; 
+  background-clip: text; 
+  -webkit-text-fill-color: transparent; 
+}
+.cta-buttons { 
+  display: flex; 
+  gap: 24px; 
+  margin-bottom: 80px; 
+}
+.hero-stats { 
+  background: rgba(11, 18, 32, 0.56); 
+  border: 1px solid rgba(148, 163, 184, 0.16); 
+  border-radius: 18px; 
+  display: grid; 
+  grid-template-columns: repeat(3, minmax(0, 1fr)); 
+  margin-top: 24px; 
+  max-width: 640px; 
+  overflow: hidden; 
+}
+.hero-stats .stat { 
+  padding: 20px 22px; 
+}
+.hero-stats .stat + .stat { 
+  border-left: 1px solid rgba(148, 163, 184, 0.14); 
+}
+.stat-num { 
+  display: block; 
+  font-size: clamp(1.35rem, 2.4vw, 2.15rem); 
+  font-weight: 800; 
+  color: #fff; 
+  font-family: 'Outfit', sans-serif; 
+  line-height: 1; 
+  margin-bottom: 8px; 
+}
+.stat-label { 
+  font-size: 0.95rem; 
+  color: #71717a; 
+  font-weight: 500; 
+}

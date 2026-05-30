@@ -1,4 +1,7 @@
 @import url('./base/variables.css');
 @import url('./base/responsive.css');
+@import url('./components/navbar.css');
+@import url('./components/hero.css');
+@import url('./components/design-system.css');
 
 /* New CSS modules should be imported here as legacy css/style.css is retired. */

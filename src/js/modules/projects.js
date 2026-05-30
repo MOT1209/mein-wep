@@ -1,6 +1,10 @@
+import { trackProjectClick } from '../services/analytics.js?v=1.0';
 import { qs, qsa, on, escapeHTML, safeIconClass, safeUrl } from '../utils/dom.js?v=1.1';
 import { countProjects, fetchPublicProjects } from '../services/supabase.js?v=1.3';
 import { getCurrentLanguage, t } from './translations.js?v=1.1';
+
+let activeFilter = 'all';
+let searchQuery = '';
 
 const fallbackProjects = [
     // ── GitHub Repositories (MOT1209) ──
@@ -26,22 +30,49 @@ export function initProjectFilters() {
         on(btn, 'click', () => {
             qsa('.filter-btn').forEach(item => item.classList.remove('active'));
             btn.classList.add('active');
-            const filter = btn.dataset.filter;
-            qsa('.project-card').forEach(card => {
-                const isMatch = filter === 'all' || card.dataset.category === filter;
-                card.style.opacity = isMatch ? '1' : '0';
-                card.style.transform = isMatch ? 'translateY(0)' : 'translateY(20px)';
-                setTimeout(() => {
-                    card.style.display = isMatch ? 'block' : 'none';
-                }, isMatch ? 0 : 300);
-            });
+            activeFilter = btn.dataset.filter;
+            filterProjects();
         });
+    });
+}
+
+function filterProjects() {
+    qsa('.project-card')?.forEach(card => {
+        const isFilterMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
+        const title = card.querySelector('h3')?.textContent?.toLowerCase() || '';
+        const desc = card.querySelector('p')?.textContent?.toLowerCase() || '';
+        const isSearchMatch = !searchQuery || title.includes(searchQuery) || desc.includes(searchQuery);
+        const isMatch = isFilterMatch && isSearchMatch;
+        card.style.opacity = isMatch ? '1' : '0';
+        card.style.transform = isMatch ? 'translateY(0)' : 'translateY(20px)';
+        clearTimeout(card._filterTimeout);
+        card._filterTimeout = setTimeout(() => {
+            card.style.display = isMatch ? 'block' : 'none';
+        }, isMatch ? 0 : 300);
     });
 }
 
 export async function initProjects() {
     const gamingGrid = qs('#gaming-grid');
     if (!gamingGrid) return;
+
+    const filterGroup = qs('.filter-group');
+    if (filterGroup && !qs('.project-search')) {
+        const searchBar = document.createElement('input');
+        searchBar.type = 'text';
+        searchBar.className = 'project-search';
+        searchBar.placeholder = 'Search projects...';
+        searchBar.setAttribute('aria-label', 'Search projects');
+        const filterBar = document.createElement('div');
+        filterBar.className = 'filter-bar';
+        filterGroup.parentNode?.insertBefore(filterBar, filterGroup);
+        filterBar.appendChild(filterGroup);
+        filterBar.appendChild(searchBar);
+        on(searchBar, 'input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            filterProjects();
+        });
+    }
 
     renderFallback();
     let count = null;
@@ -94,7 +125,30 @@ function renderProjects(projects) {
     if (appsGrid) appsGrid.innerHTML = '';
 
     const lang = getCurrentLanguage();
-    projects.forEach(project => {
+
+    const featured = projects.slice(0, 3);
+    const regular = projects.slice(3);
+
+    const oldFeatured = qs('.featured-projects');
+    if (oldFeatured) oldFeatured.remove();
+
+    if (featured.length > 0) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'featured-projects';
+        featured.forEach(project => {
+            wrapper.insertAdjacentHTML('beforeend', createProjectCard(project, lang));
+        });
+        wrapper.querySelectorAll('.project-card').forEach(card => {
+            const badge = document.createElement('div');
+            badge.className = 'featured-badge';
+            badge.textContent = 'Featured \u2B50';
+            card.querySelector('.project-info')?.prepend(badge);
+        });
+        const ref = qs('.filter-bar') || qs('.filter-group') || gamingGrid?.parentNode;
+        if (ref) ref.after(wrapper);
+    }
+
+    regular.forEach(project => {
         const category = String(project.category || '').toLowerCase();
         const targetGrid = category.includes('game') ? gamingGrid : (appsGrid || gamingGrid);
         targetGrid?.insertAdjacentHTML('beforeend', createProjectCard(project, lang));
@@ -103,6 +157,16 @@ function renderProjects(projects) {
     qsa('.project-card.reveal').forEach(el => {
         el.classList.add('active');
         window.RashidRevealObserver?.observe(el);
+    });
+
+    filterProjects();
+
+    qsa('.project-card .btn-primary').forEach(btn => {
+        on(btn, 'click', () => {
+            const title = btn.closest('.project-card')?.querySelector('h3')?.textContent || 'Unknown';
+            const cat = btn.closest('.project-card')?.dataset?.category || 'unknown';
+            trackProjectClick(title, cat);
+        });
     });
 }
 
@@ -124,6 +188,13 @@ function createProjectCard(project, lang) {
         : project.image_url
             ? `<img src="${safeUrl(project.image_url, '')}" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">`
             : '<i class="fas fa-cube"></i>';
+    const isOpenSource = !!project.github_link;
+    const isLocal = project.link && /^(games|apps|models)\//.test(project.link);
+    const statusBadge = isOpenSource
+        ? '<div class="project-status-badge" style="background:rgba(56,189,248,0.15);color:#38bdf8;border-color:rgba(56,189,248,0.3);">\u25CF Open Source</div>'
+        : isLocal
+            ? '<div class="project-status-badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;border-color:rgba(251,191,36,0.3);">\u25CF Live Demo</div>'
+            : '<div class="project-status-badge" style="background:rgba(52,211,153,0.15);color:#34d399;border-color:rgba(52,211,153,0.3);">\u25CF Active</div>';
     const tagsHTML = techArray.filter(Boolean).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
     const installBtn = isPWA ? `
         <button class="btn btn-secondary install-btn" data-project="${projectLink}" style="padding: 10px 15px; font-size: 0.85rem; margin-right: 10px;" title="${escapeHTML(labels.installTitle)}" aria-label="${escapeHTML(labels.installTitle)}">
@@ -133,7 +204,7 @@ function createProjectCard(project, lang) {
 
     return `
         <article class="project-card reveal" data-category="${categoryKey}">
-            <div class="project-visual">${visualContent}</div>
+            <div class="project-visual" style="position:relative;overflow:hidden;">${visualContent}${statusBadge}</div>
             <div class="project-info">
                 <h3>${title}</h3>
                 <p>${description}</p>

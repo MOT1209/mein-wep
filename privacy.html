@@ -28,6 +28,67 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <style>
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(6, 8, 13, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 16px 24px;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cookie-banner.visible { transform: translateY(0); }
+.cookie-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.cookie-text {
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 280px;
+}
+.cookie-text a { color: var(--accent, #38bdf8); text-decoration: underline; }
+.cookie-actions { display: flex; gap: 12px; flex-shrink: 0; }
+.cookie-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+.cookie-accept {
+  background: linear-gradient(135deg, #67e8f9, #34d399);
+  color: #061018;
+}
+.cookie-accept:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3); }
+.cookie-decline {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+.cookie-decline:hover { background: rgba(148, 163, 184, 0.2); }
+@media (max-width: 640px) {
+  .cookie-content { flex-direction: column; text-align: center; }
+  .cookie-btn { width: 100%; justify-content: center; }
+}
+</style>
+    <style>
         body { padding-top: 100px; background: #09090b; }
         .policy-container { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
         .policy-container h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
@@ -94,7 +155,18 @@
         <h2>5. Cookies</h2>
         <p>Our website uses cookies to improve functionality and serve personalized ads. You can control cookie preferences through your browser settings. Disabling cookies may affect certain features of the site.</p>
 
-        <h2>6. Third-Party Services</h2>
+        <h2>6. Cookie Policy</h2>
+        <p><strong>What Are Cookies?</strong> Cookies are small text files stored on your device by your web browser when you visit a website. They help the website remember your preferences and activity for a better browsing experience.</p>
+        <p><strong>How We Use Cookies:</strong> We use cookies for the following purposes:</p>
+        <ul>
+            <li><strong>Advertising:</strong> Google AdSense uses cookies to serve relevant ads based on your browsing history and interests.</li>
+            <li><strong>Analytics:</strong> We use cookies to track anonymous usage data, such as page views and session duration, to help us improve our content and user experience.</li>
+            <li><strong>Functionality:</strong> Essential cookies ensure basic site features like navigation and form submissions work correctly.</li>
+        </ul>
+        <p><strong>How to Control Cookies:</strong> You can manage or disable cookies through your browser settings. Most browsers allow you to block all cookies, delete existing cookies, or receive a notification before a cookie is stored. Please note that disabling certain cookies may affect the functionality of our site.</p>
+        <p>To learn more about how Google uses cookies for advertising, visit <a href="https://policies.google.com/technologies/cookies" target="_blank" rel="noopener">Google's Cookie Policy</a>. You can also opt out of personalized advertising at <a href="https://adssettings.google.com" target="_blank" rel="noopener">Google Ad Settings</a>.</p>
+
+        <h2>7. Third-Party Services</h2>
         <p>We use the following third-party services:</p>
         <ul>
             <li>Google AdSense (advertising)</li>
@@ -105,10 +177,10 @@
         </ul>
         <p>Each service has its own privacy policy governing data handling.</p>
 
-        <h2>7. Data Security</h2>
+        <h2>8. Data Security</h2>
         <p>We implement appropriate security measures to protect your personal information. However, no method of transmission over the Internet is 100% secure.</p>
 
-        <h2>8. Your Rights</h2>
+        <h2>9. Your Rights</h2>
         <p>Depending on your location, you may have rights to:</p>
         <ul>
             <li>Access your personal data</li>
@@ -117,13 +189,13 @@
             <li>Withdraw consent at any time</li>
         </ul>
 
-        <h2>9. Children's Privacy</h2>
+        <h2>10. Children's Privacy</h2>
         <p>Our services are not directed to children under 13. We do not knowingly collect personal information from children.</p>
 
-        <h2>10. Contact</h2>
+        <h2>11. Contact</h2>
         <p>If you have questions about this Privacy Policy, please contact us at <a href="contact.html">our contact page</a> or email zwnt45602@gmail.com.</p>
 
-        <h2>11. Changes to This Policy</h2>
+        <h2>12. Changes to This Policy</h2>
         <p>We may update this Privacy Policy from time to time. Changes will be posted on this page with an updated revision date.</p>
     </div>
 
@@ -141,6 +213,7 @@
                 <a href="about.html">About</a>
                 <a href="contact.html">Contact</a>
                 <a href="privacy.html">Privacy Policy</a>
+                <a href="terms.html">Terms of Service</a>
             </div>
             <div class="footer-legal">
                 <p>&copy; 2026 Rashid by Rashid.</p>
@@ -149,5 +222,45 @@
     </footer>
 
     <script src="js/script.js?v=3.7"></script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+  <div class="cookie-content">
+    <div class="cookie-text">
+      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
+      <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+    </div>
+    <div class="cookie-actions">
+      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const banner = document.getElementById('cookie-consent');
+  if (localStorage.getItem('cookieConsent')) { return; }
+  setTimeout(() => banner.classList.add('visible'), 500);
+  document.getElementById('cookie-accept').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
+  });
+  document.getElementById('cookie-decline').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'declined');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
+  });
+})();
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  "name": "Privacy Policy",
+  "url": "https://rashid-wep.vercel.app/privacy.html",
+  "description": "Rashid Privacy Policy and data collection practices."
+}
+</script>
 </body>
 </html>

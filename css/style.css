@@ -55,11 +55,17 @@ body.light-mode {
     --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.1);
 }
 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
 body {
     font-family: var(--font-body);
     background-color: var(--bg-main);
     color: var(--text-med);
-    margin: 0;
     line-height: 1.6;
     overflow-x: hidden;
     transition: var(--transition);
@@ -97,27 +103,6 @@ body {
     100% {
         transform: rotate(360deg);
     }
-}
-
-/*
-=========================================
-   RESET & BASE STYLES
-=========================================
-*/
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    scroll-behavior: smooth;
-}
-
-body {
-    font-family: var(--font-body);
-    background-color: var(--bg-main);
-    color: var(--text-med);
-    line-height: 1.6;
-    overflow-x: hidden;
-    transition: var(--transition);
 }
 
 h1,
@@ -179,10 +164,6 @@ img {
     padding: 0 20px;
 }
 
-.section {
-    padding: var(--section-padding);
-}
-
 .alt-bg {
     background-color: var(--bg-alt);
 }
@@ -213,6 +194,22 @@ img {
    NAVIGATION
 =========================================
 */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  padding: 12px 24px;
+  background: var(--accent, #38bdf8);
+  color: #000;
+  border-radius: 0 0 12px 12px;
+  font-weight: 700;
+  z-index: 10000;
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
 .navbar {
     position: fixed;
     top: 20px;
@@ -505,6 +502,11 @@ img {
     padding: var(--section-gap) 0;
 }
 
+#vault, #projects, #about, #experience, #contact, .main-footer {
+  content-visibility: auto;
+  contain: content;
+}
+
 .section-head {
     text-align: center;
     margin-bottom: 80px;
@@ -533,21 +535,6 @@ img {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 32px;
-}
-
-.skill-card {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    padding: 40px;
-    border-radius: var(--radius-lg);
-    transition: var(--transition);
-}
-
-.skill-card:hover {
-    transform: translateY(-8px);
-    border-color: var(--accent);
-    background: var(--bg-main);
-    box-shadow: var(--shadow-lg);
 }
 
 .skill-icon {
@@ -722,6 +709,12 @@ body.light-mode .skill-tag {
 :focus-visible {
     outline: 3px solid var(--accent);
     outline-offset: 3px;
+}
+
+a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 3px solid var(--accent, #38bdf8);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 @media (max-width: 768px), (prefers-reduced-motion: reduce) {
@@ -2649,6 +2642,18 @@ body {
 
 .section {
     padding: 96px 0;
+    scroll-margin-top: 100px;
+}
+
+.section-enter {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.section-enter.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .section-head {
@@ -2738,4 +2743,16 @@ body {
     .section-head {
         text-align: center;
     }
+}
+
+/* ---------- SCROLL PROGRESS ---------- */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 3px;
+    background: var(--accent);
+    z-index: 1001;
+    width: 0%;
+    transition: width 0.1s linear;
 }

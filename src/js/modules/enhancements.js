@@ -432,3 +432,19 @@ export function initCustomPwaInstall() {
         Toast.show('Rashid Workspace installed successfully!', 'success');
     });
 }
+
+// ----------------------------------------------------
+// 8. Scroll Progress Indicator
+// ----------------------------------------------------
+export function initScrollProgress() {
+  const bar = document.createElement('div');
+  bar.className = 'scroll-progress';
+  document.body.prepend(bar);
+
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollPercent = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+    bar.style.width = scrollPercent + '%';
+  }, { passive: true });
+}

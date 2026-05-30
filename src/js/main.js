@@ -5,6 +5,7 @@ import { initNavbar } from './modules/navbar.js?v=1.1';
 import { initProjectFilters, initProjects } from './modules/projects.js?v=1.5';
 import { initSettings } from './modules/settings.js?v=1.1';
 import { initTheme } from './modules/theme.js?v=1.1';
+import { initAnalytics, trackContactFormSubmit } from './services/analytics.js?v=1.0';
 import { incrementVisitorCount } from './services/supabase.js?v=1.5';
 import { qs, qsa, on } from './utils/dom.js?v=1.1';
 import {
@@ -13,8 +14,12 @@ import {
     initLiveStats,
     initTestimonials,
     initProjectModal,
-    initCustomPwaInstall
+    initCustomPwaInstall,
+    initScrollProgress
 } from './modules/enhancements.js?v=1.0';
+import { initLatestUpdates } from './modules/updates.js?v=1.0';
+import { initStatistics } from './modules/statistics.js?v=1.0';
+import { initVaultSearch } from './modules/vault.js?v=1.0';
 
 function initLegacyLocalSettings() {
     if (localStorage.getItem('maintenanceMode') === 'true') {
@@ -52,6 +57,7 @@ function initContactForm() {
         messages.push({ name, email, message: msg, date: new Date().toLocaleString() });
         localStorage.setItem('contactMessages', JSON.stringify(messages));
         alert('Message Sent! (See Admin Dashboard)');
+        trackContactFormSubmit();
         contactForm.reset();
     });
 }
@@ -65,6 +71,7 @@ function initVisitorCounter() {
 }
 
 async function boot() {
+    initAnalytics();
     initTheme();
     initNavbar();
     initSettings();
@@ -81,6 +88,14 @@ async function boot() {
     initTestimonials();
     initProjectModal();
     initCustomPwaInstall();
+    initScrollProgress();
+
+    // Latest Updates & Statistics
+    initLatestUpdates();
+    initStatistics();
+
+    // Vault Search & Filters
+    initVaultSearch();
 
     if (!initLegacyLocalSettings()) return;
 
