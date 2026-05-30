@@ -1,11 +1,23 @@
+@media (max-width: 992px) {
+    :root {
+        --section-padding: 80px 0;
+    }
+}
+
 @media (max-width: 768px) {
     :root {
-        --section-padding: 72px 0;
+        --section-padding: 60px 0;
     }
 
     .bg-mesh::after,
     body::before {
         animation: none !important;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --section-padding: 48px 0;
     }
 }
 

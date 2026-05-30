@@ -2,6 +2,7 @@ import { trackProjectClick } from '../services/analytics.js?v=1.0';
 import { qs, qsa, on, escapeHTML, safeIconClass, safeUrl } from '../utils/dom.js?v=1.1';
 import { countProjects, fetchPublicProjects } from '../services/supabase.js?v=1.3';
 import { getCurrentLanguage, t } from './translations.js?v=1.1';
+import { generateThumbnail, getThumbnailData } from '../utils/thumbnails.js?v=1.0';
 
 let activeFilter = 'all';
 let searchQuery = '';
@@ -161,6 +162,8 @@ function renderProjects(projects) {
 
     filterProjects();
 
+    initThumbnails();
+
     qsa('.project-card .btn-primary').forEach(btn => {
         on(btn, 'click', () => {
             const title = btn.closest('.project-card')?.querySelector('h3')?.textContent || 'Unknown';
@@ -168,6 +171,19 @@ function renderProjects(projects) {
             trackProjectClick(title, cat);
         });
     });
+}
+
+function initThumbnails() {
+    if (typeof generateThumbnail !== 'function') return;
+    requestIdleCallback(() => {
+        qsa('[data-project-thumb]').forEach(img => {
+            const title = img.dataset.projectThumb;
+            if (!title) return;
+            const src = generateThumbnail(title, 600);
+            if (src) img.src = src;
+            img.removeAttribute('data-project-thumb');
+        });
+    }, { timeout: 500 });
 }
 
 function createProjectCard(project, lang) {
@@ -183,11 +199,9 @@ function createProjectCard(project, lang) {
     const description = escapeHTML(project.description || '');
     const pwaProjects = ['quran-app', 'farm-game', 'rust-game', 'calculator-vault', 'quiz-app'];
     const isPWA = pwaProjects.some(slug => projectLink.includes(slug));
-    const visualContent = iconClass
-        ? `<i class="${iconClass}"></i>`
-        : project.image_url
-            ? `<img src="${safeUrl(project.image_url, '')}" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">`
-            : '<i class="fas fa-cube"></i>';
+    const visualContent = project.image_url && !project.image_url.startsWith('fas ')
+        ? `<img src="${safeUrl(project.image_url, '')}" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">`
+        : `<img src="" alt="${title}" data-project-thumb="${escapeHTML(title)}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`;
     const isOpenSource = !!project.github_link;
     const isLocal = project.link && /^(games|apps|models)\//.test(project.link);
     const statusBadge = isOpenSource

@@ -3,6 +3,17 @@
  * MERGED EDITION: Voice + 3D Avatar + Advanced Knowledge Engine
  */
 
+function loadThreeJS() {
+    return new Promise((resolve, reject) => {
+        if (typeof THREE !== 'undefined') return resolve();
+        const s = document.createElement('script');
+        s.src = 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';
+        s.onload = () => resolve();
+        s.onerror = () => reject(new Error('Failed to load Three.js'));
+        document.head.appendChild(s);
+    });
+}
+
 class RobotAvatar {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
@@ -264,8 +275,7 @@ class RashidAI {
         console.log("🚀 Rashid-AI v3.0 Ready");
     }
 
-    setupAvatar() {
-        // Create container inside visualizer if not exists
+    async setupAvatar() {
         const visualizer = document.querySelector('.visualizer-container');
         if (visualizer) {
             const avatarDiv = document.createElement('div');
@@ -276,8 +286,12 @@ class RashidAI {
             avatarDiv.style.top = '0';
             avatarDiv.style.left = '0';
             visualizer.appendChild(avatarDiv);
-            
-            this.avatar = new RobotAvatar('ai-avatar-container');
+            try {
+                await loadThreeJS();
+                this.avatar = new RobotAvatar('ai-avatar-container');
+            } catch (e) {
+                console.warn('3D Avatar disabled:', e.message);
+            }
         }
     }
 

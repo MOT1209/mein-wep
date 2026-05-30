@@ -4,4 +4,9 @@
 @import url('./components/hero.css');
 @import url('./components/design-system.css');
 
-/* New CSS modules should be imported here as legacy css/style.css is retired. */
+/*
+  🏗️ Rashid Design System v4.0
+  Modular CSS Architecture
+  - base/     → Variables, reset, responsive
+  - components/ → Reusable UI components
+*/

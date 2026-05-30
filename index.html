@@ -5,21 +5,28 @@
     <meta charset="UTF-8">
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="description"
-        content="Rashid (MOT1209) — Full-Stack Developer passionate about Next.js 14, Python, and Supabase. Building Alking, FromLiten & 3D simulation worlds with Three.js.">
+    <meta name="description" content="Rashid (MOT1209) — Full-Stack Developer building AI-powered web platforms, 3D games, and PWA apps with Next.js, Supabase, and Three.js. Explore Rashid AI, Quran Pro, Farm Empire, and more.">
     <meta name="robots" content="index, follow">
+    <meta name="keywords" content="Rashid, MOT1209, Full-Stack Developer, Web Developer, Next.js, Supabase, Three.js, AI Workspace, PWA, Portfolio, React, Python, FromLiten, Alking">
+    <meta name="author" content="Rashid (MOT1209)">
     <link rel="canonical" href="https://rashid-wep.vercel.app/">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Rashid - AI Workspace">
-    <meta property="og:description" content="Rashid (MOT1209) — Full-Stack Developer. Next.js 14, Python, Supabase, Three.js. Building Alking & FromLiten.">
-    <meta property="og:image" content="images/logo.png">
+    <meta property="og:title" content="Rashid - AI Workspace | Full-Stack Developer Portfolio">
+    <meta property="og:description" content="AI-powered workspace featuring Rashid AI, 3D games, PWA apps, and a knowledge vault. Built with Next.js, Supabase & Three.js.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/logo.png">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
     <meta property="og:url" content="https://rashid-wep.vercel.app/">
+    <meta property="og:site_name" content="Rashid - AI Workspace">
+    <meta property="og:locale" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Rashid - AI Workspace">
-    <meta name="twitter:description" content="Rashid (MOT1209) — Full-Stack Developer. Next.js 14, Python, Supabase, Three.js. Building Alking & FromLiten.">
-    <meta name="twitter:image" content="images/logo.png">
+    <meta name="twitter:title" content="Rashid - AI Workspace | Full-Stack Developer Portfolio">
+    <meta name="twitter:description" content="AI-powered workspace featuring Rashid AI, 3D games, PWA apps, and a knowledge vault. Built with Next.js, Supabase & Three.js.">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/logo.png">
+    <meta name="twitter:site" content="@MOT1209">
+    <meta name="twitter:creator" content="@MOT1209">
     <meta name="google-site-verification" content="VERIFICATION_CODE">
-    <title>Rashid - AI Workspace</title>
+    <title>Rashid - AI Workspace | Full-Stack Developer Portfolio</title>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,15 +41,16 @@
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
         rel="stylesheet" media="print" onload="this.media='all'">
 
-    <!-- Font Awesome -->
+    <!-- Font Awesome (lazy) -->
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js?v=1.1"></script>
 
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="src/css/main.css?v=1.0">
     <link rel="stylesheet" href="css/style.css?v=4.1">
     <link rel="stylesheet" href="css/admin.css?v=3.0">
     <link rel="stylesheet" href="css/app-mode.css?v=3.0">
@@ -714,10 +722,9 @@
     </div>
 
     <!-- Libraries & Configuration -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="js/gemini-config.js"></script>
 
-    <!-- Google Translate Script -->
+    <!-- Google Translate Script (lazy) -->
     <script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
@@ -725,9 +732,18 @@
                 layout: google.translate.TranslateElement.InlineLayout.SIMPLE
             }, 'google_translate_element');
         }
+        function loadGoogleTranslate() {
+            var s = document.createElement('script');
+            s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+            s.defer = true;
+            document.body.appendChild(s);
+        }
+        if (window.requestIdleCallback) {
+            requestIdleCallback(loadGoogleTranslate, { timeout: 3000 });
+        } else {
+            setTimeout(loadGoogleTranslate, 2000);
+        }
     </script>
-    <script type="text/javascript" defer
-        src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
     <!-- Unified Rashid-AI Logic -->
     <script src="js/rashid-ai-v2.js?v=3.0"></script>
