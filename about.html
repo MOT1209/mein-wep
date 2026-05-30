@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="About Rashid (MOT1209) — Full-Stack Developer passionate about Next.js 14, Python, Supabase, and Three.js. Building Alking, FromLiten & 3D simulation worlds.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/about.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="About | Rashid">
+    <meta property="og:description" content="About Rashid (MOT1209) — Full-Stack Developer passionate about Next.js 14, Python, Supabase, and Three.js.">
+    <meta property="og:image" content="images/logo.png">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/about.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="About | Rashid">
+    <meta name="twitter:description" content="About Rashid (MOT1209) — Full-Stack Developer passionate about Next.js 14, Python, Supabase, and Three.js.">
+    <meta name="twitter:image" content="images/logo.png">
+    <title>About | Rashid</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css?v=4.1">
+    <link rel="stylesheet" href="css/mobile-improvements.css?v=1.0">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <style>
+        body { padding-top: 100px; background: #09090b; }
+        .about-page { max-width: 800px; margin: 0 auto; padding: 40px 20px; }
+        .about-page h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }
+        .about-page .subtitle { color: #a1a1aa; margin-bottom: 50px; font-size: 1.1rem; }
+        .about-section { margin-bottom: 50px; }
+        .about-section h2 { font-size: 1.5rem; color: #38bdf8; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .about-section p { color: #a1a1aa; line-height: 1.8; font-size: 1.05rem; }
+        .skills-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .skill-item { background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; text-align: center; transition: 0.3s; }
+        .skill-item:hover { border-color: #38bdf8; transform: translateY(-3px); }
+        .skill-item i { font-size: 2rem; color: #38bdf8; margin-bottom: 10px; }
+        .skill-item h3 { color: #fff; font-size: 0.95rem; margin-bottom: 5px; }
+        .skill-item p { color: #a1a1aa; font-size: 0.8rem; margin: 0; }
+        .timeline-about { border-left: 2px solid rgba(56, 189, 248, 0.3); padding-left: 30px; margin-top: 30px; }
+        .timeline-about-item { position: relative; margin-bottom: 35px; }
+        .timeline-about-item::before { content: ''; position: absolute; left: -36px; top: 5px; width: 12px; height: 12px; background: #38bdf8; border-radius: 50%; }
+        .timeline-about-item .year { color: #38bdf8; font-weight: 600; font-size: 0.9rem; }
+        .timeline-about-item h3 { color: #fff; margin: 5px 0; font-size: 1.1rem; }
+        .timeline-about-item p { color: #a1a1aa; font-size: 0.9rem; margin: 0; }
+        @media (max-width: 768px) {
+            body { padding-top: 80px; }
+            .about-page h1 { font-size: 1.8rem; }
+            .skills-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="bg-mesh"></div>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Rashid<span class="accent-dot">.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="#" class="active" style="color:var(--accent)">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="nav-controls">
+                <button class="hamburger" aria-label="Open navigation menu" aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="about-page">
+        <h1>About Rashid</h1>
+        <p class="subtitle">Full-Stack Developer | AI Enthusiast | 3D World Builder</p>
+
+        <div class="about-section">
+            <h2><i class="fas fa-user"></i> Who I Am</h2>
+            <p>I am <strong>Rashid</strong> (MOT1209), a Full-Stack Developer specialized in building dynamic and immersive modern web platforms. I combine cutting-edge frameworks with creative design to build applications that are both functional and beautiful.</p>
+        </div>
+
+        <div class="about-section">
+            <h2><i class="fas fa-code"></i> What I Build</h2>
+            <p>I build robust, full-stack applications with <strong>Next.js 14</strong>, <strong>Python</strong>, and <strong>Supabase</strong>, and construct immersive 3D simulation worlds utilizing <strong>Three.js</strong>. My signature active projects include <strong>Alking</strong> and <strong>FromLiten</strong>.</p>
+        </div>
+
+        <div class="about-section">
+            <h2><i class="fas fa-cog"></i> Skills & Technologies</h2>
+            <div class="skills-grid">
+                <div class="skill-item">
+                    <i class="fab fa-js"></i>
+                    <h3>JavaScript</h3>
+                    <p>ES6+, TypeScript</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fab fa-react"></i>
+                    <h3>Next.js 14</h3>
+                    <p>React, SSR, App Router</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fab fa-python"></i>
+                    <h3>Python</h3>
+                    <p>Automation, Scripts</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fas fa-database"></i>
+                    <h3>Supabase</h3>
+                    <p>Auth, Realtime, DB</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fas fa-cube"></i>
+                    <h3>Three.js</h3>
+                    <p>3D, WebGL, Physics</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>PWA</h3>
+                    <p>Offline, Service Workers</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fab fa-github"></i>
+                    <h3>Git & CI/CD</h3>
+                    <p>Version Control, Vercel</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fas fa-robot"></i>
+                    <h3>AI Integration</h3>
+                    <p>Gemini, OpenRouter</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2><i class="fas fa-history"></i> My Journey</h2>
+            <div class="timeline-about">
+                <div class="timeline-about-item">
+                    <span class="year">2024 — Present</span>
+                    <h3>Next-Gen Frameworks & Three.js</h3>
+                    <p>Developing premium full-stack portals like Alking using Next.js 14 and Supabase, alongside interactive 3D simulations with Three.js.</p>
+                </div>
+                <div class="timeline-about-item">
+                    <span class="year">2023 — 2024</span>
+                    <h3>Full-Stack & Backend Integration</h3>
+                    <p>Leveraging Supabase for real-time databases and authentication, building responsive PWAs, and developing automation tools.</p>
+                </div>
+                <div class="timeline-about-item">
+                    <span class="year">2022 — 2023</span>
+                    <h3>GitHub Launch & Open Source</h3>
+                    <p>Established the main MOT1209 GitHub workspace, publishing original utilities and web projects.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-section">
+            <h2><i class="fas fa-globe"></i> This Platform</h2>
+            <p>This is my digital command center representing <strong>FromLiten</strong>, showcasing my live development projects, experiments, and technical archives directly integrated from GitHub. It serves as both a portfolio and a workspace for continuous innovation.</p>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container footer-grid">
+            <div class="footer-brand">
+                <a href="index.html" class="logo">Rashid<span>.</span></a>
+                <p>Full-Stack Developer — Next.js 14, Python, Supabase & Three.js.</p>
+                <div class="social-links">
+                    <a href="https://github.com/MOT1209" target="_blank" aria-label="GitHub Profile"><i class="fab fa-github"></i></a>
+                </div>
+            </div>
+            <div class="footer-nav">
+                <h4>Pages</h4>
+                <a href="about.html">About</a>
+                <a href="contact.html">Contact</a>
+                <a href="privacy.html">Privacy Policy</a>
+            </div>
+            <div class="footer-legal">
+                <p>&copy; 2026 Rashid by Rashid.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/script.js?v=3.7"></script>
+</body>
+</html>

@@ -5,9 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="index, follow">
     <title>Vault Documentation | Rashid</title>
+    <meta name="description" content="Rashid Documentation — Guides, setup notes, and project references for the Rashid workspace.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Vault Documentation | Rashid">
+    <meta property="og:description" content="Rashid Documentation — Guides, setup notes, and project references for the Rashid workspace.">
+    <meta property="og:image" content="../../images/logo.png">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/vault/docs/">
     <link rel="canonical" href="https://rashid-wep.vercel.app/vault/docs/">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="../../css/style.css?v=4.2">
+    <style>
+        .docs-section { margin-top: 40px; }
+        .doc-card { background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 25px; margin-bottom: 20px; transition: 0.3s; }
+        .doc-card:hover { border-color: #f59e0b; }
+        .doc-card h3 { color: #f59e0b; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .doc-card h3 i { font-size: 1.2rem; }
+        .doc-card p { color: #a1a1aa; font-size: 0.9rem; line-height: 1.6; margin-bottom: 10px; }
+        .doc-card ul { color: #a1a1aa; font-size: 0.9rem; line-height: 1.8; padding-left: 20px; }
+        .doc-card li { margin-bottom: 6px; }
+        .doc-card code { background: #0a0a0a; padding: 2px 8px; border-radius: 4px; color: #22c55e; font-size: 0.85rem; }
+        .doc-card pre { background: #0a0a0a; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 0.85rem; color: #22c55e; margin: 10px 0; border: 1px solid rgba(255,255,255,0.05); }
+    </style>
 </head>
 <body class="dark-mode">
     <main class="container" style="padding: 72px 0;">
@@ -17,12 +37,68 @@
             <h1>Documentation</h1>
             <p>Guides, setup notes, and project references for the Rashid workspace.</p>
         </section>
-        <div class="vault-grid" style="margin-top: 30px;">
-            <article class="vault-item">
-                <div class="vault-icon"><i class="fas fa-book"></i></div>
-                <h3>Project Guide</h3>
-                <p>Architecture notes, deployment checklist, and maintenance steps will live here.</p>
-            </article>
+
+        <div class="docs-section">
+            <div class="doc-card">
+                <h3><i class="fas fa-rocket"></i> Getting Started</h3>
+                <p>This documentation covers the architecture, setup, and maintenance of the Rashid platform. The platform is built as a static site deployed on Vercel with dynamic features powered by Supabase.</p>
+                <p><strong>Tech Stack:</strong></p>
+                <ul>
+                    <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JavaScript with Three.js for 3D</li>
+                    <li><strong>Backend:</strong> Supabase (PostgreSQL, Auth, Realtime, Storage)</li>
+                    <li><strong>AI:</strong> Google Gemini API, OpenRouter</li>
+                    <li><strong>Deployment:</strong> Vercel with GitHub CI/CD</li>
+                    <li><strong>PWA:</strong> Service Worker with offline caching</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h3><i class="fas fa-sitemap"></i> Project Structure</h3>
+                <p>The repository is organized as follows:</p>
+                <ul>
+                    <li><code>index.html</code> — Main landing page with hero, models, vault, projects, about, and contact sections</li>
+                    <li><code>css/</code> — Stylesheets (style.css, admin.css, app-mode.css, mobile-improvements.css, enhancements.css)</li>
+                    <li><code>js/</code> — JavaScript modules (script.js, admin.js, rashid-ai-v2.js, supabase-config.js, etc.)</li>
+                    <li><code>games/</code> — Game applications (farm-game, rust-game, arcade hub)</li>
+                    <li><code>apps/</code> — Web applications (quiz-app, calculator-vault, quran-app)</li>
+                    <li><code>models/</code> — AI model interfaces (Rashid-app)</li>
+                    <li><code>vault/</code> — Knowledge repository (prompts, code, archive, media, docs, api)</li>
+                    <li><code>admin/</code> — Admin panel (login, dashboard)</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h3><i class="fas fa-cog"></i> PWA Configuration</h3>
+                <p>The site is configured as a Progressive Web App with offline support.</p>
+                <p><strong>Service Worker:</strong> The <code>sw.js</code> file handles caching strategies for static assets, API responses, and offline fallback. The offline page at <code>offline.html</code> is displayed when the user has no network connection.</p>
+                <p><strong>Manifest:</strong> The <code>manifest.json</code> defines app name, icons, theme color, and display mode for installable PWA experience.</p>
+            </div>
+
+            <div class="doc-card">
+                <h3><i class="fas fa-shield-alt"></i> Deployment Checklist</h3>
+                <p>Before deploying to production, verify the following:</p>
+                <ul>
+                    <li>All environment variables are configured in Vercel (Supabase URL, anon key, Gemini API key)</li>
+                    <li>Supabase RLS policies are active on all tables</li>
+                    <li>Sitemap and robots.txt are present and correctly reference the live domain</li>
+                    <li>Canonical URLs point to <code>https://rashid-wep.vercel.app/</code></li>
+                    <li>All JavaScript files are cache-busted with version query strings</li>
+                    <li>Service worker is registered and caches critical assets</li>
+                    <li>SEO meta tags are present on all public pages</li>
+                </ul>
+            </div>
+
+            <div class="doc-card">
+                <h3><i class="fas fa-wrench"></i> Maintenance</h3>
+                <p>Regular maintenance tasks include:</p>
+                <ul>
+                    <li>Reviewing Supabase database performance and query optimization</li>
+                    <li>Updating dependencies (Three.js, Supabase JS, Font Awesome)</li>
+                    <li>Checking Vercel deployment logs for build errors</li>
+                    <li>Testing PWA offline functionality after changes</li>
+                    <li>Verifying Google AdSense ads are displaying correctly</li>
+                </ul>
+            </div>
         </div>
     </main>
 </body>

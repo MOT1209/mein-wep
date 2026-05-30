@@ -16,3 +16,4 @@ js/gemini-config.js
 temp_db_check.js
 package-lock.json
 *.code-workspace
+.vercel

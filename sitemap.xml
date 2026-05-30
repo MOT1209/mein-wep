@@ -5,8 +5,32 @@
         <priority>1.0</priority>
     </url>
     <url>
+        <loc>https://rashid-wep.vercel.app/about.html</loc>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/contact.html</loc>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/privacy.html</loc>
+        <priority>0.5</priority>
+    </url>
+    <url>
         <loc>https://rashid-wep.vercel.app/learning.html</loc>
         <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/games/</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/games/farm-game/</loc>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/games/rust-game/</loc>
+        <priority>0.7</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/vault/prompts/</loc>
@@ -33,7 +57,19 @@
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/Rashid-app/</loc>
+        <loc>https://rashid-wep.vercel.app/models/Rashid-app/</loc>
         <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/apps/quiz-app/</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/apps/calculator-vault/</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/apps/quran-app/</loc>
+        <priority>0.6</priority>
     </url>
 </urlset>
