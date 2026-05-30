@@ -167,7 +167,7 @@ The application includes extensive mobile improvements:
 ## 📞 Contact & Support
 
 For questions or support:
-- **Email**: rashid@example.com (via contact form)
+- **Email**: zwnt45602@gmail.com (via contact form)
 - **GitHub**: Available through the contact page
 - **About**: More information available on the about page
 
@@ -177,7 +177,7 @@ This project is a personal portfolio website. All content and code are property 
 
 ---
 
-**Last Updated**: December 2024  
+**Last Updated**: 30 May 2026  
 **Version**: 1.0  
 **Author**: Rashid  
 **Platform**: Vercel
