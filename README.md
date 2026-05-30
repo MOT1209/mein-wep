@@ -171,6 +171,58 @@ For questions or support:
 - **GitHub**: Available through the contact page
 - **About**: More information available on the about page
 
+## 🔧 MCP Servers for OpenCode
+
+مجموعة من أفضل MCPs لاستخدامها مع OpenCode لتمكين الـ AI من البحث والتصفح والتحكم الكامل.
+
+### 🌐 Browser Automation MCP
+يجعل الـ AI يفتح المواقع ويضغط ويكتب ويتصفح كأنه إنسان.
+- [Playwright MCP](https://github.com/microsoft/playwright-mcp)
+- [Browser MCP](https://github.com/browsermcp/mcp)
+
+### 🔍 Web Search MCP
+للبحث الحقيقي في الإنترنت.
+- [Brave Search MCP](https://github.com/brave/brave-search-mcp-server)
+- [WET MCP](https://github.com/michaelangeloio/wet-mcp)
+
+### 📁 Filesystem MCP
+قراءة وتعديل الملفات والمجلدات.
+- [Filesystem MCP](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
+
+### 🐙 GitHub MCP
+للتحكم بمشاريع GitHub وقراءة الأكواد.
+- [GitHub MCP](https://github.com/github/github-mcp-server)
+
+### 💻 Terminal MCP
+تشغيل أوامر النظام و npm و git.
+- [DesktopCommander MCP](https://github.com/wonderwhy-er/DesktopCommanderMCP)
+
+### 📋 Clipboard MCP
+نسخ ولصق تلقائي.
+- [Clipboard MCP](https://github.com/mnardit/clipboard-mcp)
+
+### 🧠 Memory MCP
+يجعل الـ AI يتذكر بين الجلسات.
+- [Memory MCP](https://github.com/modelcontextprotocol/servers/tree/main/src/memory)
+
+### 🎭 Puppeteer MCP
+تصفح متقدم وتخطي بعض الحمايات.
+- [Puppeteer MCP](https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer)
+
+### 🦁 Safari MCP (Mac فقط)
+تحكم كامل بمتصفح Safari الحقيقي.
+- [Safari MCP](https://github.com/achiya-automation/safari-mcp)
+
+### 🖥️ GhostDesk MCP
+سطح مكتب Linux كامل للـ AI.
+- [GhostDesk MCP](https://github.com/ghostdesk/ghostdesk)
+
+### 📚 Awesome MCP Servers
+قائمة ضخمة فيها آلاف MCPs جاهزة.
+- [Awesome MCP Servers](https://github.com/TensorBlock/awesome-mcp-servers)
+
+---
+
 ## 📄 License
 
 This project is a personal portfolio website. All content and code are property of the owner.
