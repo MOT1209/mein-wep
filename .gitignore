@@ -1,3 +1,7 @@
+# Claude / local agent settings (contain API keys)
+.claude/
+.claude/sittings.json
+
 # Gemini Configuration Files
 
 # Ignore actual config with API keys
