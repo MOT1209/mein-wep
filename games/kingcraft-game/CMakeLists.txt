@@ -75,6 +75,18 @@ set(GAME_SRC
     src/game/player.cpp
 )
 
+set(ECS_SRC
+    src/ecs/ecs.cpp
+)
+
+set(AI_SRC
+    src/ai/ai_system.cpp
+)
+
+set(ENTITY_SRC
+    src/entities/item_entity.cpp
+)
+
 set(MAIN_SRC
     src/main.cpp
 )
@@ -87,6 +99,9 @@ add_executable(KingCraft
     ${WORLD_SRC}
     ${RENDER_SRC}
     ${GAME_SRC}
+    ${ECS_SRC}
+    ${AI_SRC}
+    ${ENTITY_SRC}
     ${MAIN_SRC}
 )
 

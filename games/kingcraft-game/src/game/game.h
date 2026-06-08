@@ -8,6 +8,8 @@
 #include "world/mesh_gen.h"
 #include "render/renderer.h"
 #include "game/player.h"
+#include "ecs/ecs.h"
+#include "ecs/components.h"
 
 // ============================================================
 // GAME — الحلقة الرئيسية
@@ -26,6 +28,7 @@ public:
     Player* getPlayer() { return &player; }
     ChunkManager* getWorld() { return &world; }
     WorldGenerator* getWorldGen() { return world_gen.get(); }
+    EntityManager* getECS() { return &ecs; }
 
 private:
     std::unique_ptr<Renderer> renderer;
@@ -33,6 +36,10 @@ private:
     ChunkManager world;
     std::unique_ptr<WorldGenerator> world_gen;
     BlockRegistry block_registry;
+    
+    // ECS
+    EntityManager ecs;
+    float mob_spawn_timer = 0.0f;
     
     float time_of_day = 0.0f;  // 0-1
     Weather weather = Weather::CLEAR;
@@ -53,6 +60,9 @@ private:
     void update(float delta_time);
     void render();
     
+    void initECS();
+    void updateECS(float delta_time);
+    void spawnMobs();
     void processInput();
     void updateChunks();
     void rebuildChunkMeshes();
