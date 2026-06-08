@@ -1,119 +1,104 @@
-﻿/* Navbar — Obsidian Studio v5.0 (defers to css/style.css) */
-.navbar {
-    position: fixed;
-    top: 18px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: clamp(320px, 88%, 1180px);
-    height: 64px;
-    background: var(--bg-glass, rgba(13,13,25,0.82));
-    backdrop-filter: blur(20px) saturate(160%);
-    -webkit-backdrop-filter: blur(20px) saturate(160%);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    border: 1px solid var(--border, rgba(255,255,255,0.055));
-    border-radius: 999px;
-    box-shadow: 0 4px 32px -8px rgba(0,0,0,0.5);
-    transition: var(--transition, all 0.28s ease);
+﻿/* Navigation Components */
+.navbar { 
+  position: fixed; 
+  top: 0; 
+  left: 50%; 
+  transform: translateX(-50%); 
+  width: min(1240px, calc(100% - 40px)); 
+  height: 70px; 
+  margin-top: 20px;
+  background: rgba(6, 8, 13, 0.84); 
+  backdrop-filter: blur(16px); 
+  -webkit-backdrop-filter: blur(16px); 
+  z-index: 1000; 
+  display: flex; 
+  align-items: center; 
+  border: 1px solid rgba(148, 163, 184, 0.16); 
+  border-radius: 18px; 
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22); 
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
 }
-
-.navbar.scrolled {
-    top: 0;
-    width: 100%;
-    border-radius: 0;
-    background: rgba(7,7,13,0.96);
-    box-shadow: 0 1px 0 var(--border);
+.navbar.scrolled { 
+  top: 0; 
+  width: 100%; 
+  border-radius: 0; 
+  background: #09090b; 
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08); 
+  margin-top: 0;
 }
-
-.nav-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0 28px;
+.nav-container { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  width: 100%; 
+  padding: 0 30px; 
 }
-
-.logo {
-    font-family: var(--font-heading, 'Sora', sans-serif);
-    font-size: 1.45rem;
-    font-weight: 800;
-    color: var(--text-high, #FFFFFF);
-    letter-spacing: -0.03em;
+.logo { 
+  font-family: 'Outfit', sans-serif; 
+  font-size: 1.18rem; 
+  font-weight: 800; 
+  color: #fff; 
+  letter-spacing: 0.08em; 
 }
-
-.logo span { color: var(--accent, #7B61FF); }
-
-.nav-links {
-    display: flex;
-    gap: 6px;
+.logo .accent-dot { 
+  color: #38bdf8; 
 }
-
-.nav-links a {
-    font-size: 0.88rem;
-    font-weight: 500;
-    font-family: var(--font-heading, 'Sora', sans-serif);
-    color: var(--text-med, rgba(255,255,255,0.52));
-    padding: 7px 14px;
-    border-radius: 6px;
-    transition: var(--transition, all 0.28s ease);
+.nav-links { 
+  display: flex; 
+  gap: 32px; 
 }
-
-.nav-links a:hover {
-    color: var(--text-high, #FFFFFF);
-    background: rgba(255,255,255,0.05);
+.nav-links a { 
+  font-size: 0.95rem; 
+  font-weight: 600; 
+  color: #cbd5e1; 
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
 }
-
-.nav-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+.nav-links a:hover { 
+  color: #38bdf8; 
+  transform: translateY(-1px); 
 }
-
-.control-btn {
-    background: transparent;
-    border: 1px solid var(--border, rgba(255,255,255,0.055));
-    color: var(--text-med, rgba(255,255,255,0.52));
-    width: 40px; height: 40px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    transition: var(--transition, all 0.28s ease);
+.nav-controls { 
+  display: flex; 
+  gap: 12px; 
+  align-items: center; 
 }
-
-.control-btn:hover {
-    border-color: var(--accent, #7B61FF);
-    color: var(--accent, #7B61FF);
-    background: rgba(123,97,255, 0.06);
+.control-btn { 
+  background: #121217; 
+  border: 1px solid rgba(255, 255, 255, 0.08); 
+  color: #fff; 
+  width: 44px; 
+  height: 44px; 
+  border-radius: 14px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
 }
-
-.hamburger {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: transparent;
-    border: 1px solid var(--border, rgba(255,255,255,0.055));
-    border-radius: 6px;
-    cursor: pointer;
-    min-height: 40px;
-    min-width: 40px;
-    justify-content: center;
-    align-items: center;
-    padding: 0;
-    transition: var(--transition, all 0.28s ease);
+.control-btn:hover { 
+  border-color: #38bdf8; 
+  color: #38bdf8; 
+  transform: translateY(-2px); 
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); 
 }
-
-.hamburger:hover { border-color: var(--accent, #7B61FF); }
-
-.bar {
-    background: var(--text-high, #FFFFFF);
-    border-radius: 999px;
-    display: block;
-    height: 1.5px;
-    transition: var(--transition, all 0.28s ease);
-    width: 20px;
+.hamburger { 
+  display: none; 
+  flex-direction: column; 
+  gap: 5px; 
+  background: transparent; 
+  border: 0; 
+  cursor: pointer; 
+  min-height: 44px; 
+  min-width: 44px; 
+  justify-content: center; 
+  align-items: center; 
+  padding: 0; 
 }
-
+.bar { 
+  background: #fff; 
+  border-radius: 999px; 
+  display: block; 
+  height: 2px; 
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+  width: 24px; 
+}

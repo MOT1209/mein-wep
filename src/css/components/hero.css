@@ -1,86 +1,68 @@
-﻿/* Hero — Obsidian Studio v5.0 */
-#hero {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    padding: 140px 0 80px;
-    position: relative;
-    overflow: hidden;
+﻿/* Hero Section Components */
+#hero { 
+  min-height: 94vh; 
+  display: flex; 
+  align-items: center; 
+  padding: 150px 0 70px; 
 }
-
-#hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-        linear-gradient(rgba(123,97,255, 0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(123,97,255, 0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 25%, transparent 70%);
-    pointer-events: none;
+.hero-content { 
+  display: grid; 
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 0.86fr); 
+  gap: 58px; 
+  align-items: center; 
 }
-
-.hero-content {
-    display: grid;
-    grid-template-columns: 1.3fr 0.7fr;
-    gap: 60px;
-    align-items: center;
+#hero h1 { 
+  font-size: clamp(3.25rem, 7vw, 6.7rem); 
+  font-weight: 800; 
+  line-height: 1; 
+  margin-bottom: 32px; 
+  color: #fff; 
+  max-width: 820px; 
 }
-
-#hero h1 {
-    font-size: clamp(3.2rem, 8vw, 5.8rem);
-    font-weight: 800;
-    line-height: 0.98;
-    margin-bottom: 28px;
-    color: var(--text-high, #FFFFFF);
-    letter-spacing: -0.04em;
-    max-width: 820px;
+#hero p { 
+  font-size: clamp(1rem, 2vw, 1.25rem); 
+  color: #a1a1aa; 
+  max-width: 650px; 
+  margin-bottom: 48px; 
 }
-
-#hero p {
-    font-size: clamp(1rem, 1.8vw, 1.15rem);
-    color: var(--text-med, rgba(255,255,255,0.52));
-    max-width: 540px;
-    margin-bottom: 48px;
-    line-height: 1.75;
+.text-gradient { 
+  background: linear-gradient(135deg, #67e8f9 0%, #34d399 54%, #e0f2fe 100%); 
+  -webkit-background-clip: text; 
+  background-clip: text; 
+  -webkit-text-fill-color: transparent; 
 }
-
-.text-gradient {
-    background: linear-gradient(135deg, var(--accent, #7B61FF) 0%, #A78BFA 60%, #F472B6 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+.cta-buttons { 
+  display: flex; 
+  gap: 24px; 
+  margin-bottom: 80px; 
 }
-
-.cta-buttons {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 64px;
-    flex-wrap: wrap;
+.hero-stats { 
+  background: rgba(11, 18, 32, 0.56); 
+  border: 1px solid rgba(148, 163, 184, 0.16); 
+  border-radius: 18px; 
+  display: grid; 
+  grid-template-columns: repeat(3, minmax(0, 1fr)); 
+  margin-top: 24px; 
+  max-width: 640px; 
+  overflow: hidden; 
 }
-
-.hero-stats {
-    display: flex;
-    gap: 48px;
+.hero-stats .stat { 
+  padding: 20px 22px; 
 }
-
-.stat { display: flex; flex-direction: column; gap: 4px; }
-
-.stat-num {
-    display: block;
-    font-size: 2.2rem;
-    font-weight: 800;
-    font-family: var(--font-heading, 'Sora', sans-serif);
-    color: var(--text-high, #FFFFFF);
-    line-height: 1;
+.hero-stats .stat + .stat { 
+  border-left: 1px solid rgba(148, 163, 184, 0.14); 
 }
-
-.stat-label {
-    font-size: 0.78rem;
-    color: var(--text-low, rgba(255,255,255,0.2));
-    font-weight: 500;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    font-family: var(--font-mono, monospace);
+.stat-num { 
+  display: block; 
+  font-size: clamp(1.35rem, 2.4vw, 2.15rem); 
+  font-weight: 800; 
+  color: #fff; 
+  font-family: 'Outfit', sans-serif; 
+  line-height: 1; 
+  margin-bottom: 8px; 
 }
-
+.stat-label { 
+  font-size: 0.95rem; 
+  color: #71717a; 
+  font-weight: 500; 
+}

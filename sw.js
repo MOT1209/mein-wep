@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'Rashid-v10';
+﻿const CACHE_NAME = 'Rashid-v11';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
