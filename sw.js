@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Rashid-v9';
+﻿const CACHE_NAME = 'Rashid-v10';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -118,3 +118,4 @@ self.addEventListener('fetch', (event) => {
         })
     );
 });
+

@@ -1,25 +1,25 @@
-/* Synced with css/style.css — Obsidian Studio v5.0 */
+﻿/* Synced with css/style.css — Obsidian Studio v5.0 */
 :root {
-    --font-heading: 'Syne', sans-serif;
-    --font-body: 'Epilogue', sans-serif;
+    --font-heading: 'Sora', sans-serif;
+    --font-body: 'Plus Jakarta Sans', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --font-primary: var(--font-body);
 
-    --bg-main:      #07070D;
-    --bg-secondary: #0E0E18;
-    --bg-alt:       #0E0E18;
+    --bg-main:      #000000;
+    --bg-secondary: #07070F;
+    --bg-alt:       #07070F;
     --bg-glass:     rgba(13, 13, 25, 0.82);
 
-    --text-high:      #EEEEF5;
-    --text-med:       #7878A0;
-    --text-low:       #40405A;
-    --text-primary:   #EEEEF5;
-    --text-secondary: #7878A0;
-    --text-muted:     #40405A;
+    --text-high:      #FFFFFF;
+    --text-med:       rgba(255,255,255,0.52);
+    --text-low:       rgba(255,255,255,0.2);
+    --text-primary:   #FFFFFF;
+    --text-secondary: rgba(255,255,255,0.52);
+    --text-muted:     rgba(255,255,255,0.2);
 
-    --accent:      #5EEAD4;
+    --accent:      #7B61FF;
     --accent-rgb:  94, 234, 212;
-    --accent-glow: rgba(94, 234, 212, 0.2);
+    --accent-glow: rgba(123,97,255, 0.2);
     --accent-dark: #0D9488;
 
     --border:        rgba(255, 255, 255, 0.055);
@@ -50,3 +50,4 @@ body.light-mode {
     --accent-rgb:   13, 148, 136;
     --accent-glow:  rgba(13, 148, 136, 0.2);
 }
+

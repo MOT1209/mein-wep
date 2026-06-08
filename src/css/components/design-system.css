@@ -1,10 +1,10 @@
-/* Design System — Obsidian Studio v5.0 */
+﻿/* Design System — Obsidian Studio v5.0 */
 
 .btn {
     padding: 14px 30px;
     border-radius: var(--radius-md, 12px);
     font-weight: 600;
-    font-family: var(--font-heading, 'Syne', sans-serif);
+    font-family: var(--font-heading, 'Sora', sans-serif);
     font-size: 0.9rem;
     letter-spacing: 0.01em;
     transition: var(--transition, all 0.28s ease);
@@ -18,26 +18,26 @@
 }
 
 .btn-primary {
-    background: var(--accent, #5EEAD4);
+    background: var(--accent, #7B61FF);
     color: #030B09;
     box-shadow: none;
 }
 
 .btn-primary:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 32px -6px rgba(94, 234, 212, 0.45);
+    box-shadow: 0 8px 32px -6px rgba(123,97,255, 0.45);
 }
 
 .btn-glass {
     background: transparent;
-    border: 1px solid rgba(94, 234, 212, 0.28);
-    color: var(--accent, #5EEAD4);
+    border: 1px solid rgba(123,97,255, 0.28);
+    color: var(--accent, #7B61FF);
     backdrop-filter: blur(8px);
 }
 
 .btn-glass:hover {
-    background: rgba(94, 234, 212, 0.06);
-    border-color: var(--accent, #5EEAD4);
+    background: rgba(123,97,255, 0.06);
+    border-color: var(--accent, #7B61FF);
     transform: translateY(-3px);
 }
 
@@ -55,8 +55,8 @@
     align-items: center;
     gap: 10px;
     padding: 7px 16px;
-    background: rgba(94, 234, 212, 0.06);
-    color: var(--accent, #5EEAD4);
+    background: rgba(123,97,255, 0.06);
+    color: var(--accent, #7B61FF);
     border-radius: 6px;
     font-size: 0.78rem;
     font-weight: 500;
@@ -64,7 +64,7 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     margin-bottom: 28px;
-    border: 1px solid rgba(94, 234, 212, 0.2);
+    border: 1px solid rgba(123,97,255, 0.2);
 }
 
 .section-head {
@@ -75,7 +75,7 @@
 .section-head h2 {
     font-size: clamp(2.2rem, 4.5vw, 3.2rem);
     font-weight: 800;
-    color: var(--text-high, #EEEEF5);
+    color: var(--text-high, #FFFFFF);
     margin-bottom: 14px;
     letter-spacing: -0.02em;
 }
@@ -85,13 +85,13 @@
     display: block;
     width: 40px;
     height: 3px;
-    background: var(--accent, #5EEAD4);
+    background: var(--accent, #7B61FF);
     border-radius: 2px;
     margin: 12px auto 0;
 }
 
 .section-head p {
-    color: var(--text-low, #40405A);
+    color: var(--text-low, rgba(255,255,255,0.2));
     font-size: 1rem;
     max-width: 560px;
     margin: 0 auto;
@@ -110,10 +110,10 @@
     padding: 8px 20px;
     border: 1px solid var(--border, rgba(255,255,255,0.055));
     background: transparent;
-    color: var(--text-med, #7878A0);
+    color: var(--text-med, rgba(255,255,255,0.52));
     border-radius: 6px;
     cursor: pointer;
-    font-family: var(--font-heading, 'Syne', sans-serif);
+    font-family: var(--font-heading, 'Sora', sans-serif);
     font-weight: 600;
     font-size: 0.84rem;
     letter-spacing: 0.02em;
@@ -121,26 +121,27 @@
 }
 
 .filter-btn:hover {
-    border-color: rgba(94, 234, 212, 0.3);
-    color: var(--accent, #5EEAD4);
-    background: rgba(94, 234, 212, 0.04);
+    border-color: rgba(123,97,255, 0.3);
+    color: var(--accent, #7B61FF);
+    background: rgba(123,97,255, 0.04);
 }
 
 .filter-btn.active {
-    background: var(--accent, #5EEAD4);
+    background: var(--accent, #7B61FF);
     color: #030B09;
     border-color: var(--accent);
-    box-shadow: 0 4px 16px -4px rgba(94, 234, 212, 0.4);
+    box-shadow: 0 4px 16px -4px rgba(123,97,255, 0.4);
 }
 
 .tag {
-    background: rgba(94, 234, 212, 0.05);
-    border: 1px solid rgba(94, 234, 212, 0.15);
+    background: rgba(123,97,255, 0.05);
+    border: 1px solid rgba(123,97,255, 0.15);
     padding: 3px 10px;
     border-radius: 4px;
     font-size: 0.72rem;
     font-weight: 600;
     font-family: var(--font-mono, monospace);
-    color: var(--accent, #5EEAD4);
+    color: var(--accent, #7B61FF);
     letter-spacing: 0.02em;
 }
+

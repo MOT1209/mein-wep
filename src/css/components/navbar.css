@@ -1,4 +1,4 @@
-/* Navbar — Obsidian Studio v5.0 (defers to css/style.css) */
+﻿/* Navbar — Obsidian Studio v5.0 (defers to css/style.css) */
 .navbar {
     position: fixed;
     top: 18px;
@@ -35,14 +35,14 @@
 }
 
 .logo {
-    font-family: var(--font-heading, 'Syne', sans-serif);
+    font-family: var(--font-heading, 'Sora', sans-serif);
     font-size: 1.45rem;
     font-weight: 800;
-    color: var(--text-high, #EEEEF5);
+    color: var(--text-high, #FFFFFF);
     letter-spacing: -0.03em;
 }
 
-.logo span { color: var(--accent, #5EEAD4); }
+.logo span { color: var(--accent, #7B61FF); }
 
 .nav-links {
     display: flex;
@@ -52,15 +52,15 @@
 .nav-links a {
     font-size: 0.88rem;
     font-weight: 500;
-    font-family: var(--font-heading, 'Syne', sans-serif);
-    color: var(--text-med, #7878A0);
+    font-family: var(--font-heading, 'Sora', sans-serif);
+    color: var(--text-med, rgba(255,255,255,0.52));
     padding: 7px 14px;
     border-radius: 6px;
     transition: var(--transition, all 0.28s ease);
 }
 
 .nav-links a:hover {
-    color: var(--text-high, #EEEEF5);
+    color: var(--text-high, #FFFFFF);
     background: rgba(255,255,255,0.05);
 }
 
@@ -73,7 +73,7 @@
 .control-btn {
     background: transparent;
     border: 1px solid var(--border, rgba(255,255,255,0.055));
-    color: var(--text-med, #7878A0);
+    color: var(--text-med, rgba(255,255,255,0.52));
     width: 40px; height: 40px;
     border-radius: 6px;
     cursor: pointer;
@@ -85,9 +85,9 @@
 }
 
 .control-btn:hover {
-    border-color: var(--accent, #5EEAD4);
-    color: var(--accent, #5EEAD4);
-    background: rgba(94, 234, 212, 0.06);
+    border-color: var(--accent, #7B61FF);
+    color: var(--accent, #7B61FF);
+    background: rgba(123,97,255, 0.06);
 }
 
 .hamburger {
@@ -106,13 +106,14 @@
     transition: var(--transition, all 0.28s ease);
 }
 
-.hamburger:hover { border-color: var(--accent, #5EEAD4); }
+.hamburger:hover { border-color: var(--accent, #7B61FF); }
 
 .bar {
-    background: var(--text-high, #EEEEF5);
+    background: var(--text-high, #FFFFFF);
     border-radius: 999px;
     display: block;
     height: 1.5px;
     transition: var(--transition, all 0.28s ease);
     width: 20px;
 }
+
