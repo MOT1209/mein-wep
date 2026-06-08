@@ -1,0 +1,70 @@
+{
+  "entity_id": "kingcraft:titan_golem",
+  "type": "boss",
+  "category": "boss",
+  "dimension": "overworld",
+  "health": {
+    "base": 500.0,
+    "difficulty_mult": 2.0
+  },
+  "attributes": {
+    "movement_speed": 0.18,
+    "attack_damage": 20.0,
+    "attack_speed": 0.5,
+    "armor": 20.0,
+    "armor_toughness": 8.0,
+    "knockback_resistance": 1.0,
+    "follow_range": 50.0
+  },
+  "width": 2.5,
+  "height": 4.0,
+  "eye_height": 3.5,
+  "experience": {
+    "min": 100,
+    "max": 200
+  },
+  "drops": [
+    {
+      "item": "kingcraft:titanium_ingot",
+      "min_count": 5,
+      "max_count": 10,
+      "chance": 1.0
+    },
+    {
+      "item": "kingcraft:titanium_sword",
+      "min_count": 1,
+      "max_count": 1,
+      "chance": 0.1
+    },
+    {
+      "item": "kingcraft:god_heart",
+      "min_count": 1,
+      "max_count": 1,
+      "chance": 0.05
+    }
+  ],
+  "spawn": {
+    "structure": "kingcraft:titan_arena",
+    "conditions": [],
+    "weight": 0,
+    "min_group_size": 1,
+    "max_group_size": 1
+  },
+  "behavior": {
+    "ai_tasks": [
+      "phase_1_melee",
+      "phase_2_ground_slam",
+      "phase_3_laser_beam",
+      "phase_4_meteor_shower",
+      "phase_5_enrage"
+    ],
+    "targets": ["player"],
+    "phases": {
+      "phase_1": { "health_threshold": 1.0, "behaviors": ["melee_attack"] },
+      "phase_2": { "health_threshold": 0.75, "behaviors": ["melee_attack", "ground_slam"] },
+      "phase_3": { "health_threshold": 0.5, "behaviors": ["melee_attack", "ground_slam", "laser_beam"] },
+      "phase_4": { "health_threshold": 0.25, "behaviors": ["melee_attack", "ground_slam", "laser_beam", "meteor"] },
+      "phase_5": { "health_threshold": 0.1, "behaviors": ["melee_attack", "ground_slam", "laser_beam", "meteor", "enrage"] }
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "biome_id": "kingcraft:volcanic_highlands",
+  "temperature": 2.0,
+  "downfall": 0.2,
+  "has_precipitation": false,
+  "effects": {
+    "sky_color": "#4a1a1a",
+    "fog_color": "#3a0a0a",
+    "water_color": "#ff6b35",
+    "water_fog_color": "#ff6b35",
+    "grass_color": "#8b4513",
+    "foliage_color": "#8b4513",
+    "ambient_sound": "ambient.volcanic.loop",
+    "mood_sound": {
+      "sound": "ambient.volcanic.mood",
+      "tick_delay": 400,
+      "block_search_extent": 8,
+      "offset": 2.0
+    },
+    "music": {
+      "sound": "music.volcanic",
+      "min_delay": 12000,
+      "max_delay": 24000,
+      "replace_current_music": false
+    },
+    "particle": {
+      "probability": 0.002,
+      "options": {
+        "type": "minecraft:ash",
+        "count": 1
+      }
+    }
+  },
+  "carvers": [
+    {
+      "carver": "cave",
+      "config": "kingcraft:volcanic_cave_config",
+      "step": "air",
+      "probability": 0.1
+    }
+  ],
+  "features": [
+    ["charred_trees"],
+    ["dead_bushes"],
+    ["lava_pools"],
+    ["obsidian_spikes"],
+    ["sulfur_crusts"],
+    ["volcanic_vents"]
+  ],
+  "creature_spawns": {
+    "passive": [],
+    "hostile": [
+      { "entity": "minecraft:magma_cube", "weight": 100, "min_group": 2, "max_group": 5 },
+      { "entity": "minecraft:blaze", "weight": 30, "min_group": 1, "max_group": 2 },
+      { "entity": "kingcraft:fire_elemental", "weight": 5, "min_group": 1, "max_group": 1 }
+    ]
+  },
+  "temperature_modifier": "hot",
+  "radiation_level": 0.3
+}

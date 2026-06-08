@@ -1,0 +1,55 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": {
+        "min": 3,
+        "max": 6
+      },
+      "entries": [
+        {
+          "type": "item",
+          "item": "kingcraft:titanium_ingot",
+          "weight": 10,
+          "count": { "min": 1, "max": 3 }
+        },
+        {
+          "type": "item",
+          "item": "kingcraft:raw_uranium",
+          "weight": 8,
+          "count": { "min": 2, "max": 5 }
+        },
+        {
+          "type": "item",
+          "item": "kingcraft:advanced_circuit",
+          "weight": 5,
+          "count": { "min": 1, "max": 2 }
+        },
+        {
+          "type": "item",
+          "item": "kingcraft:rifle",
+          "weight": 2,
+          "count": 1
+        },
+        {
+          "type": "item",
+          "item": "kingcraft:rocket_launcher",
+          "weight": 1,
+          "count": 1
+        },
+        {
+          "type": "item",
+          "item": "kingcraft:scope_mod",
+          "weight": 3,
+          "count": 1
+        },
+        {
+          "type": "item",
+          "item": "kingcraft:c4_charge",
+          "weight": 4,
+          "count": { "min": 1, "max": 3 }
+        }
+      ]
+    }
+  ]
+}

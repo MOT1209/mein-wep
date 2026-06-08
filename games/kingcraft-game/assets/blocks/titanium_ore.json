@@ -1,0 +1,32 @@
+{
+  "block_id": "kingcraft:titanium_ore",
+  "numeric_id": 65,
+  "hardness": 8.0,
+  "resistance": 8.0,
+  "material": "stone",
+  "tool_type": "pickaxe",
+  "min_tier": 3,
+  "requires_tool": true,
+  "luminance": 0,
+  "opacity": 15,
+  "is_cube": true,
+  "collision_shape": "full_block",
+  "occludes": true,
+  "flammable": false,
+  "drops": {
+    "item": "kingcraft:raw_titanium",
+    "min_count": 1,
+    "max_count": 1
+  },
+  "xp_drop": {
+    "min": 2,
+    "max": 6
+  },
+  "sound_type": "stone",
+  "push_reaction": "normal",
+  "map_color": "#4A6B8C",
+  "states": [],
+  "variants": {
+    "model": "kingcraft:block/titanium_ore"
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "item_id": "kingcraft:titanium_pickaxe",
+  "numeric_id": 224,
+  "max_stack_size": 1,
+  "rarity": "epic",
+  "durability": 4000,
+  "tool": {
+    "tier": 6,
+    "speed": 10.0,
+    "tool_type": "pickaxe",
+    "rules": [
+      {
+        "blocks": "#mineable/pickaxe",
+        "speed": 10.0,
+        "correct_for_drops": true
+      }
+    ]
+  },
+  "components": {
+    "repair": {
+      "ingredient": "kingcraft:titanium_ingot",
+      "repair_amount": 1000
+    },
+    "enchantable": {
+      "value": 8
+    },
+    "attribute_modifiers": {
+      "mainhand": [
+        {
+          "attribute": "attack_damage",
+          "amount": 5.0,
+          "operation": "addition"
+        },
+        {
+          "attribute": "attack_speed",
+          "amount": -2.4,
+          "operation": "addition"
+        }
+      ]
+    }
+  }
+}

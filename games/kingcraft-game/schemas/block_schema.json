@@ -1,0 +1,165 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kingcraft.game/schemas/block_schema.json",
+  "title": "KingCraft Block Definition",
+  "type": "object",
+  "required": [
+    "block_id", "numeric_id", "hardness", "resistance",
+    "material", "tool_type", "min_tier", "drops"
+  ],
+  "properties": {
+    "block_id": {
+      "type": "string",
+      "pattern": "^[a-z_]+:[a-z_]+$",
+      "description": "Namespaced block identifier (e.g., minecraft:stone)"
+    },
+    "numeric_id": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1023,
+      "description": "Numeric ID for network and disk compression"
+    },
+    "hardness": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Time to mine with bare hands (seconds)"
+    },
+    "resistance": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Explosion resistance"
+    },
+    "blast_resistance": {
+      "type": "number",
+      "description": "Alias for resistance, kept for Minecraft compatibility"
+    },
+    "material": {
+      "type": "string",
+      "enum": ["stone", "dirt", "wood", "plant", "metal", "glass", "cloth", "sand", "snow", "ice", "lava", "water", "organic", "crystal", "electric", "composite", "bedrock", "nether", "end"]
+    },
+    "tool_type": {
+      "type": "string",
+      "enum": ["pickaxe", "axe", "shovel", "hoe", "shears", "sword", "none"]
+    },
+    "min_tier": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 8,
+      "default": 0
+    },
+    "requires_tool": {
+      "type": "boolean",
+      "default": false
+    },
+    "luminance": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15,
+      "default": 0
+    },
+    "opacity": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 15,
+      "default": 15
+    },
+    "is_cube": {
+      "type": "boolean",
+      "default": true
+    },
+    "collision_shape": {
+      "type": "string",
+      "enum": ["full_block", "slab", "stair", "fence", "wall", "door", "pane", "none", "custom"],
+      "default": "full_block"
+    },
+    "outline_shape": {
+      "type": "string",
+      "enum": ["full_block", "slab", "stair", "fence", "wall", "door", "pane", "none", "custom"],
+      "default": "full_block"
+    },
+    "occludes": {
+      "type": "boolean",
+      "default": true
+    },
+    "flammable": {
+      "type": "boolean",
+      "default": false
+    },
+    "fire_spread_speed": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 0
+    },
+    "fire_burn_rate": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 0
+    },
+    "drops": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "item": { "type": "string" },
+            "min_count": { "type": "integer", "minimum": 0 },
+            "max_count": { "type": "integer", "minimum": 0 }
+          },
+          "required": ["item"]
+        }
+      ]
+    },
+    "xp_drop": {
+      "type": "object",
+      "properties": {
+        "min": { "type": "integer", "minimum": 0, "default": 0 },
+        "max": { "type": "integer", "minimum": 0, "default": 0 }
+      }
+    },
+    "sound_type": {
+      "type": "string",
+      "default": "stone"
+    },
+    "push_reaction": {
+      "type": "string",
+      "enum": ["normal", "destroy", "block", "push_only", "ignore"],
+      "default": "normal"
+    },
+    "map_color": {
+      "type": "string",
+      "pattern": "^#[0-9a-fA-F]{6}$",
+      "description": "Hexadecimal color for map display"
+    },
+    "max_stack_size": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64,
+      "default": 64
+    },
+    "block_entity": {
+      "type": "boolean",
+      "default": false
+    },
+    "block_entity_type": {
+      "type": "string"
+    },
+    "states": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["bool", "int", "enum"] },
+          "values": { "type": "array" },
+          "default": {}
+        }
+      }
+    },
+    "variants": {
+      "type": "object"
+    }
+  }
+}
