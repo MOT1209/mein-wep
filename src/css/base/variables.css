@@ -1,55 +1,52 @@
+/* Synced with css/style.css — Obsidian Studio v5.0 */
 :root {
-    /* Fonts */
-    --font-heading: 'Outfit', sans-serif;
-    --font-body: 'Plus Jakarta Sans', sans-serif;
+    --font-heading: 'Syne', sans-serif;
+    --font-body: 'Epilogue', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
     --font-primary: var(--font-body);
 
-    /* Theme - Dark */
-    --bg-main: #09090b;
-    --bg-secondary: #121217;
-    --bg-alt: var(--bg-secondary);
-    --bg-glass: rgba(18, 18, 23, 0.7);
-    --text-high: #ffffff;
-    --text-med: #a1a1aa;
-    --text-low: #71717a;
-    --text-primary: var(--text-high);
-    --text-secondary: var(--text-med);
-    --text-muted: var(--text-low);
-    --accent: #38bdf8;
-    --accent-rgb: 56, 189, 248;
-    --accent-glow: rgba(56, 189, 248, 0.3);
-    --accent-dark: #0284c7;
-    --border: rgba(255, 255, 255, 0.08);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
+    --bg-main:      #07070D;
+    --bg-secondary: #0E0E18;
+    --bg-alt:       #0E0E18;
+    --bg-glass:     rgba(13, 13, 25, 0.82);
 
-    /* Spacing */
-    --section-gap: 120px;
-    --section-padding: 120px 0;
-    --container-width: 1200px;
+    --text-high:      #EEEEF5;
+    --text-med:       #7878A0;
+    --text-low:       #40405A;
+    --text-primary:   #EEEEF5;
+    --text-secondary: #7878A0;
+    --text-muted:     #40405A;
 
-    /* Radius */
-    --radius-lg: 24px;
-    --radius-md: 16px;
+    --accent:      #5EEAD4;
+    --accent-rgb:  94, 234, 212;
+    --accent-glow: rgba(94, 234, 212, 0.2);
+    --accent-dark: #0D9488;
 
-    /* Transition */
-    --transition-speed: 0.3s;
-    --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --border:        rgba(255, 255, 255, 0.055);
+    --shadow-sm:     0 2px 8px rgba(0, 0, 0, 0.7);
+    --shadow-lg:     0 24px 64px -12px rgba(0, 0, 0, 0.85);
+
+    --section-gap:       130px;
+    --section-padding:   130px 0;
+    --container-width:   1220px;
+    --radius-lg:  18px;
+    --radius-md:  12px;
+    --transition-speed:  0.28s;
+    --transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 body.light-mode {
-    --bg-main: #f8fafc;
-    --bg-secondary: #f1f5f9;
-    --bg-glass: rgba(255, 255, 255, 0.75);
-    --text-high: #0f172a;
-    --text-med: #475569;
-    --text-low: #94a3b8;
-    --text-primary: var(--text-high);
-    --text-secondary: var(--text-med);
-    --text-muted: var(--text-low);
-    --accent: #0284c7;
-    --accent-rgb: 2, 132, 199;
-    --accent-glow: rgba(2, 132, 199, 0.2);
-    --border: rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.1);
+    --bg-main:      #F5F5F7;
+    --bg-secondary: #EAEAEE;
+    --bg-alt:       #EAEAEE;
+    --bg-glass:     rgba(245, 245, 247, 0.9);
+    --text-high:    #0D0D18;
+    --text-med:     #55556A;
+    --text-low:     #9090A8;
+    --text-primary: #0D0D18;
+    --border:       rgba(0, 0, 0, 0.08);
+    --shadow-lg:    0 16px 48px -12px rgba(0, 0, 0, 0.15);
+    --accent:       #0D9488;
+    --accent-rgb:   13, 148, 136;
+    --accent-glow:  rgba(13, 148, 136, 0.2);
 }

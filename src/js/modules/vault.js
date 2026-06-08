@@ -31,7 +31,6 @@ export function initVaultSearch() {
   let showFavoritesOnly = false;
 
   on(searchBar, 'input', () => {
-    const query = searchBar.value.toLowerCase();
     filterItems();
   });
 

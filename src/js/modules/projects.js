@@ -1,6 +1,6 @@
 import { trackProjectClick } from '../services/analytics.js?v=1.0';
 import { qs, qsa, on, escapeHTML, safeIconClass, safeUrl } from '../utils/dom.js?v=1.1';
-import { countProjects, fetchPublicProjects } from '../services/supabase.js?v=1.3';
+import { countProjects, fetchPublicProjects } from '../services/supabase.js?v=1.5';
 import { getCurrentLanguage, t } from './translations.js?v=1.1';
 import { generateThumbnail, getThumbnailData } from '../utils/thumbnails.js?v=1.0';
 
@@ -175,7 +175,10 @@ function renderProjects(projects) {
 
 function initThumbnails() {
     if (typeof generateThumbnail !== 'function') return;
-    requestIdleCallback(() => {
+    const scheduleIdle = window.requestIdleCallback
+        ? (cb, opts) => window.requestIdleCallback(cb, opts)
+        : (cb) => setTimeout(cb, 1);
+    scheduleIdle(() => {
         qsa('[data-project-thumb]').forEach(img => {
             const title = img.dataset.projectThumb;
             if (!title) return;

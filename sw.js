@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Rashid-v8';
+const CACHE_NAME = 'Rashid-v9';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -22,6 +22,7 @@ const ASSETS_TO_CACHE = [
     './src/js/main.js',
     './src/js/modules/admin-content.js',
     './src/js/utils/dom.js',
+    './src/js/utils/thumbnails.js',
     './src/js/services/supabase.js',
     './src/js/services/analytics.js',
     './src/js/modules/animations.js',
@@ -35,6 +36,9 @@ const ASSETS_TO_CACHE = [
     './src/js/modules/updates.js',
     './src/js/modules/statistics.js',
     './src/js/modules/vault.js',
+    './src/css/components/design-system.css',
+    './src/css/components/navbar.css',
+    './src/css/components/hero.css',
     './models/Rashid-app/index.html',
     './models/Rashid-app/style.css',
     './models/Rashid-app/script.js',

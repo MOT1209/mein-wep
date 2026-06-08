@@ -89,7 +89,21 @@ export function generateThumbnail(title, size = 600) {
   const rectH = canvas.height * 0.5;
   ctx.fillStyle = '#000';
   ctx.beginPath();
-  ctx.roundRect(rectX, rectY, rectW, rectH, 12);
+  if (typeof ctx.roundRect === 'function') {
+    ctx.roundRect(rectX, rectY, rectW, rectH, 12);
+  } else {
+    const r = 12;
+    ctx.moveTo(rectX + r, rectY);
+    ctx.lineTo(rectX + rectW - r, rectY);
+    ctx.quadraticCurveTo(rectX + rectW, rectY, rectX + rectW, rectY + r);
+    ctx.lineTo(rectX + rectW, rectY + rectH - r);
+    ctx.quadraticCurveTo(rectX + rectW, rectY + rectH, rectX + rectW - r, rectY + rectH);
+    ctx.lineTo(rectX + r, rectY + rectH);
+    ctx.quadraticCurveTo(rectX, rectY + rectH, rectX, rectY + rectH - r);
+    ctx.lineTo(rectX, rectY + r);
+    ctx.quadraticCurveTo(rectX, rectY, rectX + r, rectY);
+    ctx.closePath();
+  }
   ctx.fill();
 
   ctx.globalAlpha = 0.9;

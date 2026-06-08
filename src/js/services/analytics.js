@@ -1,7 +1,7 @@
-const GA4_ID = 'G-XXXXXXXXXX';
+const GA4_ID = '';
 
 export function initAnalytics() {
-  if (window.gtag) return;
+  if (!GA4_ID || GA4_ID.includes('X') || window.gtag) return;
 
   const script = document.createElement('script');
   script.async = true;
