@@ -11,15 +11,15 @@ float distance(const Vec3f& a, const Vec3f& b) {
     return std::sqrt(dx*dx + dy*dy + dz*dz);
 }
 
-EntityID findNearestPlayer(EntityManager& ecs, const Vec3f& from_pos, float max_range) {
-    EntityID nearest = INVALID_ENTITY;
+Entity findNearestPlayer(EntityManager& ecs, const Vec3f& from_pos, float max_range) {
+    Entity nearest;
     float nearest_dist = max_range;
     
     ecs.each<Position, PlayerControlled>([&](Entity e, const Position& pos, const PlayerControlled&) {
         float d = distance(from_pos, pos.pos);
         if (d < nearest_dist) {
             nearest_dist = d;
-            nearest = e.id;
+            nearest = e;
         }
     });
     
@@ -35,21 +35,20 @@ void update(EntityManager& ecs, float delta_time) {
         ai.path_recalc_timer += delta_time;
         
         // Find target if none
-        if (ai.target == INVALID_ENTITY || !ecs.isValid({ai.target, 0})) {
+        if (!ai.target.valid() || !ecs.isValid(ai.target)) {
             ai.target = findNearestPlayer(ecs, pos.pos, ai.aggro_range);
         }
         
         // Check if current target is still in range
-        if (ai.target != INVALID_ENTITY) {
-            Entity target_entity = {ai.target, 0};
-            auto* target_pos = ecs.getComponent<Position>(target_entity);
+        if (ai.target.valid()) {
+            auto* target_pos = ecs.getComponent<Position>(ai.target);
             if (!target_pos) {
-                ai.target = INVALID_ENTITY;
+                ai.target = Entity();
             } else {
                 float d = distance(pos.pos, target_pos->pos);
                 
                 if (d > ai.aggro_range * 1.5f) {
-                    ai.target = INVALID_ENTITY;
+                    ai.target = Entity();
                     ai.state = AIComponent::State::WANDER;
                 } else if (d <= ai.attack_range) {
                     ai.state = AIComponent::State::ATTACK;
@@ -102,8 +101,7 @@ void update(EntityManager& ecs, float delta_time) {
             }
             
             case AIComponent::State::CHASE: {
-                Entity target_entity = {ai.target, 0};
-                auto* target_pos = ecs.getComponent<Position>(target_entity);
+                auto* target_pos = ecs.getComponent<Position>(ai.target);
                 if (!target_pos) break;
                 
                 Vec3f dir = target_pos->pos - pos.pos;
@@ -121,8 +119,7 @@ void update(EntityManager& ecs, float delta_time) {
                 vel.vel = {0, vel.vel.y, 0};
                 
                 if (ai.attack_cooldown <= 0) {
-                    Entity target_entity = {ai.target, 0};
-                    auto* target_hp = ecs.getComponent<Health>(target_entity);
+                    auto* target_hp = ecs.getComponent<Health>(ai.target);
                     if (target_hp && target_hp->isAlive()) {
                         target_hp->current = std::max(0.0f, target_hp->current - ai.attack_damage);
                         std::cout << "[AI] Entity " << e.id << " attacked for " << ai.attack_damage << " damage!\n";
@@ -131,8 +128,7 @@ void update(EntityManager& ecs, float delta_time) {
                 }
                 
                 // Face target
-                Entity target_entity = {ai.target, 0};
-                auto* target_pos = ecs.getComponent<Position>(target_entity);
+                auto* target_pos = ecs.getComponent<Position>(ai.target);
                 if (target_pos) {
                     Vec3f dir = target_pos->pos - pos.pos;
                     pos.rot_yaw = std::atan2(dir.x, dir.z) * 180.0f / 3.14159f;

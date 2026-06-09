@@ -1,0 +1,14 @@
+# Build artifacts
+/build/
+*.o
+*.obj
+*.exe
+
+# Vendored dependencies (downloaded by build scripts)
+/deps/
+
+# Editor / IDE
+/.vscode/
+
+# Stray redirect artifact (Windows)
+nul

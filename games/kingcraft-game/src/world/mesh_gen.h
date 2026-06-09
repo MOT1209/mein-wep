@@ -3,6 +3,7 @@
 
 #include "core/types.h"
 #include "world/chunk.h"
+#include "world/block_registry.h"
 
 // ============================================================
 // GREEDY MESHING GENERATOR

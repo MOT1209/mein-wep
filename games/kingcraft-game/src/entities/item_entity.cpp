@@ -1,6 +1,7 @@
 #include "entities/item_entity.h"
 #include <iostream>
 #include <cmath>
+#include <cstdlib>
 
 namespace ItemEntitySystem {
 
@@ -46,16 +47,19 @@ Entity spawnItemDrop(EntityManager& ecs, const Vec3f& position,
     return e;
 }
 
-void update(EntityManager& ecs, EntityManager& player_ecs, float delta_time) {
+void update(EntityManager& ecs, EntityManager& player_ecs, float dt) {
     (void)player_ecs;
     
-    ecs.each<Position, ItemDrop>([delta_time](Entity e, Position& pos, ItemDrop& drop) {
+    ecs.each<Position, ItemDrop>([dt](Entity, Position& pos, ItemDrop& drop) {
         // Floating animation
-        pos.pos.y += std::sin(drop.lifetime * 2.0f) * 0.002f;
+        (void)drop;
+        static float time = 0;
+        time += dt;
+        pos.pos.y += std::sin(time * 2.0f) * 0.002f;
         
         // Enable pickup after timer
         if (!drop.can_pickup) {
-            drop.pickup_timer -= delta_time;
+            drop.pickup_timer -= dt;
             if (drop.pickup_timer <= 0) {
                 drop.can_pickup = true;
             }
@@ -66,11 +70,9 @@ void update(EntityManager& ecs, EntityManager& player_ecs, float delta_time) {
     // (This would be done in the game loop with proper player position)
 }
 
-void pickupItem(EntityManager& ecs, Entity item_entity, Entity player_entity) {
+void pickupItem(EntityManager& ecs, Entity item_entity, Entity) {
     auto* drop = ecs.getComponent<ItemDrop>(item_entity);
-    auto* player_inv = ecs.getComponent<PlayerControlled>(player_entity);
-    
-    if (!drop || !player_inv) return;
+    if (!drop) return;
     
     std::cout << "[Item] Picked up " << drop->count << "x item " << drop->item_id << "\n";
     

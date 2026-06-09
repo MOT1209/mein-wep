@@ -5,7 +5,7 @@
 #include "world/chunk.h"
 
 // ============================================================
-// WORLD GENERATOR — توليد العالم الإجرائي
+// WORLD GENERATOR — توليد العالم الإجرائي مع البيئات
 // ============================================================
 class WorldGenerator {
 public:
@@ -16,15 +16,21 @@ public:
     void generate(Chunk& chunk);
     
     // دوال مساعدة للـ Terrain
-    int getHeightAt(int wx, int wz);         // ارتفاع التضاريس
-    float getTemperature(int wx, int wz);     // درجة الحرارة (0-1)
-    float getHumidity(int wx, int wz);        // الرطوبة (0-1)
+    int getHeightAt(int wx, int wz);                    // ارتفاع التضاريس
+    float getTemperature(int wx, int wz);               // درجة الحرارة (0-1)
+    float getHumidity(int wx, int wz);                  // الرطوبة (0-1)
+    BiomeType getBiome(int wx, int wz);                 // نوع البيئة
+    BiomeType getBiomeWithHeight(int wx, int wz, int height); // بيئة مع مراعاة الارتفاع
     
     // توليد الميزات
+    void decorateChunk(Chunk& chunk);                   // تزيين: أشجار، نباتات، زهور
     void generateTrees(Chunk& chunk);
     void generateFlowers(Chunk& chunk);
+    void generateCacti(Chunk& chunk);
+    void generateDeadBushes(Chunk& chunk);
     void generateCaves(Chunk& chunk);
     void generateOres(Chunk& chunk);
+    void generateStructures(Chunk& chunk);              // هياكل: أكواخ، آبار
     
     // Seed
     uint64_t getSeed() const { return seed; }

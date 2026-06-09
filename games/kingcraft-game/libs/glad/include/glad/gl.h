@@ -1,18 +1,22 @@
 #ifndef GLAD_GL_H_
 #define GLAD_GL_H_
 
+// ============================================================
+// KingCraft GL loader — hybrid approach
+// ============================================================
+// GL 1.0/1.1 functions: linked directly from opengl32.dll
+// GL 1.2+ functions (shaders, VAOs, VBOs): loaded at runtime via gladLoadGL
+// ============================================================
+
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef GLAD_API_CALL
 #define GLAD_API_CALL
-#endif
-
-#ifndef GLAD_API_PTR
 #define GLAD_API_PTR
-#endif
 
-struct GLVersion { int major; int minor; };
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 // OpenGL core types
 typedef unsigned int GLenum;
@@ -33,6 +37,9 @@ typedef void GLvoid;
 typedef int64_t GLint64;
 typedef uint64_t GLuint64;
 typedef struct __GLsync* GLsync;
+typedef ptrdiff_t GLsizeiptr;
+typedef ptrdiff_t GLintptr;
+typedef char GLchar;
 
 // Constants
 #define GL_FALSE 0
@@ -41,7 +48,6 @@ typedef struct __GLsync* GLsync;
 #define GL_ZERO 0
 #define GL_ONE 1
 #define GL_NO_ERROR 0
-#define GL_NONE 0
 #define GL_VERSION 0x1F02
 #define GL_EXTENSIONS 0x1F03
 #define GL_RENDERER 0x1F01
@@ -116,8 +122,6 @@ typedef struct __GLsync* GLsync;
 #define GL_STATIC_DRAW 0x88E4
 #define GL_DYNAMIC_DRAW 0x88E8
 #define GL_STREAM_DRAW 0x88E0
-#define GL_FRAGMENT_SHADER 0x8B30
-#define GL_VERTEX_SHADER 0x8B31
 #define GL_VERTEX_ARRAY_BINDING 0x85B5
 #define GL_RGBA32F 0x8814
 #define GL_RGB32F 0x8815
@@ -158,13 +162,56 @@ typedef struct __GLsync* GLsync;
 #define GL_PACK_ALIGNMENT 0x0D05
 #define GL_UNPACK_ALIGNMENT 0x0CF5
 
-// Function pointer types
+// =============================================
+// GL 1.0/1.1 functions — provided by opengl32.dll
+// Declared as regular functions, linked from -lopengl32
+// =============================================
+void glEnable(GLenum cap);
+void glDisable(GLenum cap);
+void glCullFace(GLenum mode);
+void glFrontFace(GLenum mode);
+void glDepthFunc(GLenum func);
+void glBlendFunc(GLenum sfactor, GLenum dfactor);
+void glClear(GLbitfield mask);
+void glClearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
+void glViewport(GLint x, GLint y, GLsizei width, GLsizei height);
+const GLubyte* glGetString(GLenum name);
+void glGetIntegerv(GLenum pname, GLint *data);
+GLenum glGetError(void);
+void glDrawArrays(GLenum mode, GLint first, GLsizei count);
+void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices);
+void glLineWidth(GLfloat width);
+GLboolean glIsEnabled(GLenum cap);
+
+// Texture functions (GL 1.1)
+void glGenTextures(GLsizei n, GLuint *textures);
+void glDeleteTextures(GLsizei n, const GLuint *textures);
+void glBindTexture(GLenum target, GLuint texture);
+void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels);
+void glTexParameteri(GLenum target, GLenum pname, GLint param);
+void glTexParameterf(GLenum target, GLenum pname, GLfloat param);
+void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width, GLsizei height, GLenum format, GLenum type, const void *pixels);
+
+
+
+// =============================================
+// GL 1.2+ functions — loaded at runtime via gladLoadGL
+// These are declared as function pointers
+// =============================================
+
+// Buffer objects (GL 1.5)
 typedef void (GLAD_API_PTR *GLADglGenBuffers)(GLsizei n, GLuint *buffers);
 typedef void (GLAD_API_PTR *GLADglDeleteBuffers)(GLsizei n, const GLuint *buffers);
 typedef void (GLAD_API_PTR *GLADglBindBuffer)(GLenum target, GLuint buffer);
 typedef void (GLAD_API_PTR *GLADglBufferData)(GLenum target, GLsizeiptr size, const void *data, GLenum usage);
 typedef void (GLAD_API_PTR *GLADglBufferSubData)(GLenum target, GLintptr offset, GLsizeiptr size, const void *data);
+extern GLADglGenBuffers glGenBuffers;
+extern GLADglDeleteBuffers glDeleteBuffers;
+extern GLADglBindBuffer glBindBuffer;
+extern GLADglBufferData glBufferData;
+extern GLADglBufferSubData glBufferSubData;
 
+// Vertex Array Objects (GL 3.0)
 typedef void (GLAD_API_PTR *GLADglGenVertexArrays)(GLsizei n, GLuint *arrays);
 typedef void (GLAD_API_PTR *GLADglDeleteVertexArrays)(GLsizei n, const GLuint *arrays);
 typedef void (GLAD_API_PTR *GLADglBindVertexArray)(GLuint array);
@@ -172,7 +219,15 @@ typedef void (GLAD_API_PTR *GLADglVertexAttribPointer)(GLuint index, GLint size,
 typedef void (GLAD_API_PTR *GLADglVertexAttribIPointer)(GLuint index, GLint size, GLenum type, GLsizei stride, const void *pointer);
 typedef void (GLAD_API_PTR *GLADglEnableVertexAttribArray)(GLuint index);
 typedef void (GLAD_API_PTR *GLADglDisableVertexAttribArray)(GLuint index);
+extern GLADglGenVertexArrays glGenVertexArrays;
+extern GLADglDeleteVertexArrays glDeleteVertexArrays;
+extern GLADglBindVertexArray glBindVertexArray;
+extern GLADglVertexAttribPointer glVertexAttribPointer;
+extern GLADglVertexAttribIPointer glVertexAttribIPointer;
+extern GLADglEnableVertexAttribArray glEnableVertexAttribArray;
+extern GLADglDisableVertexAttribArray glDisableVertexAttribArray;
 
+// Shader functions (GL 2.0)
 typedef GLuint (GLAD_API_PTR *GLADglCreateShader)(GLenum type);
 typedef void (GLAD_API_PTR *GLADglShaderSource)(GLuint shader, GLsizei count, const GLchar *const *string, const GLint *length);
 typedef void (GLAD_API_PTR *GLADglCompileShader)(GLuint shader);
@@ -186,57 +241,6 @@ typedef void (GLAD_API_PTR *GLADglGetProgramiv)(GLuint program, GLenum pname, GL
 typedef void (GLAD_API_PTR *GLADglGetProgramInfoLog)(GLuint program, GLsizei bufSize, GLsizei *length, GLchar *infoLog);
 typedef void (GLAD_API_PTR *GLADglUseProgram)(GLuint program);
 typedef void (GLAD_API_PTR *GLADglDeleteProgram)(GLuint program);
-
-typedef GLint (GLAD_API_PTR *GLADglGetUniformLocation)(GLuint program, const GLchar *name);
-typedef void (GLAD_API_PTR *GLADglUniform1i)(GLint location, GLint v0);
-typedef void (GLAD_API_PTR *GLADglUniform1f)(GLint location, GLfloat v0);
-typedef void (GLAD_API_PTR *GLADglUniform3f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
-typedef void (GLAD_API_PTR *GLADglUniformMatrix4fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
-typedef void (GLAD_API_PTR *GLADglUniform4f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
-
-typedef void (GLAD_API_PTR *GLADglGenTextures)(GLsizei n, GLuint *textures);
-typedef void (GLAD_API_PTR *GLADglDeleteTextures)(GLsizei n, const GLuint *textures);
-typedef void (GLAD_API_PTR *GLADglActiveTexture)(GLenum texture);
-typedef void (GLAD_API_PTR *GLADglBindTexture)(GLenum target, GLuint texture);
-typedef void (GLAD_API_PTR *GLADglTexImage2D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLint border, GLenum format, GLenum type, const void *pixels);
-typedef void (GLAD_API_PTR *GLADglTexImage3D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
-typedef void (GLAD_API_PTR *GLADglTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels);
-typedef void (GLAD_API_PTR *GLADglTexStorage3D)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
-typedef void (GLAD_API_PTR *GLADglTexParameteri)(GLenum target, GLenum pname, GLint param);
-typedef void (GLAD_API_PTR *GLADglTexParameterf)(GLenum target, GLenum pname, GLfloat param);
-typedef void (GLAD_API_PTR *GLADglGenerateMipmap)(GLenum target);
-
-typedef void (GLAD_API_PTR *GLADglEnable)(GLenum cap);
-typedef void (GLAD_API_PTR *GLADglDisable)(GLenum cap);
-typedef void (GLAD_API_PTR *GLADglCullFace)(GLenum mode);
-typedef void (GLAD_API_PTR *GLADglFrontFace)(GLenum mode);
-typedef void (GLAD_API_PTR *GLADglDepthFunc)(GLenum func);
-typedef void (GLAD_API_PTR *GLADglBlendFunc)(GLenum sfactor, GLenum dfactor);
-typedef void (GLAD_API_PTR *GLADglClear)(GLbitfield mask);
-typedef void (GLAD_API_PTR *GLADglClearColor)(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha);
-typedef void (GLAD_API_PTR *GLADglViewport)(GLint x, GLint y, GLsizei width, GLsizei height);
-
-typedef const GLubyte* (GLAD_API_PTR *GLADglGetString)(GLenum name);
-typedef void (GLAD_API_PTR *GLADglGetIntegerv)(GLenum pname, GLint *data);
-typedef GLenum (GLAD_API_PTR *GLADglGetError)(void);
-typedef void (GLAD_API_PTR *GLADglDrawArrays)(GLenum mode, GLint first, GLsizei count);
-typedef void (GLAD_API_PTR *GLADglDrawElements)(GLenum mode, GLsizei count, GLenum type, const void *indices);
-
-// Function pointer declarations
-extern GLADglGenBuffers glGenBuffers;
-extern GLADglDeleteBuffers glDeleteBuffers;
-extern GLADglBindBuffer glBindBuffer;
-extern GLADglBufferData glBufferData;
-extern GLADglBufferSubData glBufferSubData;
-
-extern GLADglGenVertexArrays glGenVertexArrays;
-extern GLADglDeleteVertexArrays glDeleteVertexArrays;
-extern GLADglBindVertexArray glBindVertexArray;
-extern GLADglVertexAttribPointer glVertexAttribPointer;
-extern GLADglVertexAttribIPointer glVertexAttribIPointer;
-extern GLADglEnableVertexAttribArray glEnableVertexAttribArray;
-extern GLADglDisableVertexAttribArray glDisableVertexAttribArray;
-
 extern GLADglCreateShader glCreateShader;
 extern GLADglShaderSource glShaderSource;
 extern GLADglCompileShader glCompileShader;
@@ -251,46 +255,37 @@ extern GLADglGetProgramInfoLog glGetProgramInfoLog;
 extern GLADglUseProgram glUseProgram;
 extern GLADglDeleteProgram glDeleteProgram;
 
+// Uniform functions (GL 2.0)
+typedef GLint (GLAD_API_PTR *GLADglGetUniformLocation)(GLuint program, const GLchar *name);
+typedef void (GLAD_API_PTR *GLADglUniform1i)(GLint location, GLint v0);
+typedef void (GLAD_API_PTR *GLADglUniform1f)(GLint location, GLfloat v0);
+typedef void (GLAD_API_PTR *GLADglUniform3f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);
+typedef void (GLAD_API_PTR *GLADglUniformMatrix4fv)(GLint location, GLsizei count, GLboolean transpose, const GLfloat *value);
+typedef void (GLAD_API_PTR *GLADglUniform4f)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2, GLfloat v3);
 extern GLADglGetUniformLocation glGetUniformLocation;
 extern GLADglUniform1i glUniform1i;
 extern GLADglUniform1f glUniform1f;
 extern GLADglUniform3f glUniform3f;
 extern GLADglUniformMatrix4fv glUniformMatrix4fv;
 
-extern GLADglGenTextures glGenTextures;
-extern GLADglDeleteTextures glDeleteTextures;
+// Texture array / 3D texture (GL 1.2 / 3.0)
+typedef void (GLAD_API_PTR *GLADglActiveTexture)(GLenum texture);
+typedef void (GLAD_API_PTR *GLADglTexImage3D)(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height, GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels);
+typedef void (GLAD_API_PTR *GLADglTexSubImage3D)(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels);
+typedef void (GLAD_API_PTR *GLADglTexStorage3D)(GLenum target, GLsizei levels, GLenum internalformat, GLsizei width, GLsizei height, GLsizei depth);
+typedef void (GLAD_API_PTR *GLADglGenerateMipmap)(GLenum target);
 extern GLADglActiveTexture glActiveTexture;
-extern GLADglBindTexture glBindTexture;
-extern GLADglTexImage2D glTexImage2D;
 extern GLADglTexImage3D glTexImage3D;
 extern GLADglTexSubImage3D glTexSubImage3D;
 extern GLADglTexStorage3D glTexStorage3D;
-extern GLADglTexParameteri glTexParameteri;
 extern GLADglGenerateMipmap glGenerateMipmap;
 
-extern GLADglEnable glEnable;
-extern GLADglDisable glDisable;
-extern GLADglCullFace glCullFace;
-extern GLADglFrontFace glFrontFace;
-extern GLADglDepthFunc glDepthFunc;
-extern GLADglBlendFunc glBlendFunc;
-extern GLADglClear glClear;
-extern GLADglClearColor glClearColor;
-extern GLADglViewport glViewport;
+typedef void (*GLADloadproc)(void);
+typedef GLADloadproc (*GLADgetproc)(const char* name);
+int gladLoadGL(GLADgetproc get_proc_addr);
 
-extern GLADglGetString glGetString;
-extern GLADglGetIntegerv glGetIntegerv;
-extern GLADglGetError glGetError;
-extern GLADglDrawArrays glDrawArrays;
-extern GLADglDrawElements glDrawElements;
-
-// Init function (loads all function pointers from GLFW)
-extern struct GLVersion GLVersion;
-int gladLoadGL(void* (*get_proc_addr)(const char *name));
-
-// Convenience types used in OpenGL functions
-typedef ptrdiff_t GLsizeiptr;
-typedef ptrdiff_t GLintptr;
-typedef char GLchar;
+#ifdef __cplusplus
+}
+#endif
 
 #endif // GLAD_GL_H_

@@ -57,7 +57,7 @@ struct AIComponent {
     float attack_cooldown = 0.0f;
     float attack_damage = 3.0f;
     float move_speed = 3.0f;
-    EntityID target = INVALID_ENTITY;
+    Entity target;  // target entity (with version)
     
     // Pathfinding
     Vec3i move_target{0, 0, 0};

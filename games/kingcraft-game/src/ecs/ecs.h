@@ -212,8 +212,8 @@ public:
     }
     
     // === QUERY ===
-    template<typename... Ts>
-    void each(const std::function<void(Entity, Ts&...)>& callback) {
+    template<typename... Ts, typename F>
+    void each(F&& callback) {
         ComponentMask mask;
         ((mask.set(getComponentTypeID<Ts>()), ...));
         
@@ -231,8 +231,8 @@ public:
         }
     }
     
-    template<typename... Ts>
-    void each(const std::function<void(Entity, const Ts&...)>& callback) const {
+    template<typename... Ts, typename F>
+    void each(F&& callback) const {
         ComponentMask mask;
         ((mask.set(getComponentTypeID<Ts>()), ...));
         
@@ -250,19 +250,14 @@ public:
         }
     }
     
+    void clear();
+    
     size_t entityCount() const { 
         size_t count = 0;
         for (const auto& e : entities) if (e.valid) count++;
         return count;
     }
     
-    void clear() {
-        for (auto& pool : pools) if (pool) pool->clear();
-        for (auto& entry : entities) entry.valid = false;
-        free_list.clear();
-        next_id = 0;
-    }
-
 private:
     static constexpr size_t MAX_ENTITIES = 65536;
     

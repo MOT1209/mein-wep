@@ -1,8 +1,11 @@
 #include "world/block_registry.h"
 #include <fstream>
 #include <iostream>
+
+#ifndef NO_JSON
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
+#endif
 
 void BlockRegistry::init() {
     blocks.clear();
@@ -209,9 +212,213 @@ void BlockRegistry::init() {
     name_to_id["minecraft:snow"] = 11;
     id_to_name[11] = "minecraft:snow";
     
+    // ---- BLOCK 12: ICE ----
+    BlockProperties ice;
+    ice.name_id = "minecraft:ice";
+    ice.numeric_id = 12;
+    ice.hardness = 0.5f;
+    ice.resistance = 0.5f;
+    ice.is_solid = true;
+    ice.is_transparent = true;
+    ice.opacity = 0.6f;
+    ice.tool_type = "pickaxe";
+    ice.sound = "glass";
+    ice.top_tex = 14;
+    ice.side_tex = 14;
+    ice.bottom_tex = 14;
+    blocks.push_back(ice);
+    name_to_id["minecraft:ice"] = 12;
+    id_to_name[12] = "minecraft:ice";
+    
+    // ---- BLOCK 13: SANDSTONE ----
+    BlockProperties sandstone;
+    sandstone.name_id = "minecraft:sandstone";
+    sandstone.numeric_id = 13;
+    sandstone.hardness = 0.8f;
+    sandstone.resistance = 4.0f;
+    sandstone.tool_type = "pickaxe";
+    sandstone.sound = "stone";
+    sandstone.top_tex = 15;
+    sandstone.side_tex = 15;
+    sandstone.bottom_tex = 15;
+    blocks.push_back(sandstone);
+    name_to_id["minecraft:sandstone"] = 13;
+    id_to_name[13] = "minecraft:sandstone";
+    
+    // ---- BLOCK 14: CACTUS ----
+    BlockProperties cactus;
+    cactus.name_id = "minecraft:cactus";
+    cactus.numeric_id = 14;
+    cactus.hardness = 0.4f;
+    cactus.resistance = 0.4f;
+    cactus.is_solid = true;
+    cactus.is_transparent = true;
+    cactus.is_plant = true;
+    cactus.opacity = 0.3f;
+    cactus.tool_type = "axe";
+    cactus.sound = "wood";
+    cactus.top_tex = 16;
+    cactus.side_tex = 16;
+    cactus.bottom_tex = 16;
+    blocks.push_back(cactus);
+    name_to_id["minecraft:cactus"] = 14;
+    id_to_name[14] = "minecraft:cactus";
+    
+    // ---- BLOCK 15: DEAD_BUSH ----
+    BlockProperties dead_bush;
+    dead_bush.name_id = "minecraft:dead_bush";
+    dead_bush.numeric_id = 15;
+    dead_bush.hardness = 0.0f;
+    dead_bush.resistance = 0.0f;
+    dead_bush.is_solid = false;
+    dead_bush.is_transparent = true;
+    dead_bush.is_plant = true;
+    dead_bush.opacity = 0.0f;
+    dead_bush.sound = "grass";
+    dead_bush.top_tex = 18;
+    dead_bush.side_tex = 18;
+    dead_bush.bottom_tex = 18;
+    blocks.push_back(dead_bush);
+    name_to_id["minecraft:dead_bush"] = 15;
+    id_to_name[15] = "minecraft:dead_bush";
+    
+    // ---- BLOCK 16: FLOWER ----
+    BlockProperties flower;
+    flower.name_id = "minecraft:flower";
+    flower.numeric_id = 16;
+    flower.hardness = 0.0f;
+    flower.resistance = 0.0f;
+    flower.is_solid = false;
+    flower.is_transparent = true;
+    flower.is_plant = true;
+    flower.opacity = 0.0f;
+    flower.sound = "grass";
+    flower.top_tex = 19;
+    flower.side_tex = 19;
+    flower.bottom_tex = 19;
+    blocks.push_back(flower);
+    name_to_id["minecraft:flower"] = 16;
+    id_to_name[16] = "minecraft:flower";
+    
+    // ---- BLOCK 17: TALL_GRASS ----
+    BlockProperties tall_grass;
+    tall_grass.name_id = "minecraft:tall_grass";
+    tall_grass.numeric_id = 17;
+    tall_grass.hardness = 0.0f;
+    tall_grass.resistance = 0.0f;
+    tall_grass.is_solid = false;
+    tall_grass.is_transparent = true;
+    tall_grass.is_plant = true;
+    tall_grass.opacity = 0.0f;
+    tall_grass.sound = "grass";
+    tall_grass.top_tex = 20;
+    tall_grass.side_tex = 20;
+    tall_grass.bottom_tex = 20;
+    blocks.push_back(tall_grass);
+    name_to_id["minecraft:tall_grass"] = 17;
+    id_to_name[17] = "minecraft:tall_grass";
+    
+    // ---- BLOCK 18: COARSE_DIRT ----
+    BlockProperties coarse_dirt;
+    coarse_dirt.name_id = "minecraft:coarse_dirt";
+    coarse_dirt.numeric_id = 18;
+    coarse_dirt.hardness = 0.5f;
+    coarse_dirt.resistance = 0.5f;
+    coarse_dirt.tool_type = "shovel";
+    coarse_dirt.sound = "gravel";
+    coarse_dirt.top_tex = 21;
+    coarse_dirt.side_tex = 21;
+    coarse_dirt.bottom_tex = 21;
+    blocks.push_back(coarse_dirt);
+    name_to_id["minecraft:coarse_dirt"] = 18;
+    id_to_name[18] = "minecraft:coarse_dirt";
+    
+    // ---- BLOCK 19: PODZOL ----
+    BlockProperties podzol;
+    podzol.name_id = "minecraft:podzol";
+    podzol.numeric_id = 19;
+    podzol.hardness = 0.5f;
+    podzol.resistance = 0.5f;
+    podzol.tool_type = "shovel";
+    podzol.sound = "gravel";
+    podzol.top_tex = 22;
+    podzol.side_tex = 22;
+    podzol.bottom_tex = 22;
+    blocks.push_back(podzol);
+    name_to_id["minecraft:podzol"] = 19;
+    id_to_name[19] = "minecraft:podzol";
+    
+    // ---- BLOCK 20: SPRUCE_LOG ----
+    BlockProperties spruce_log;
+    spruce_log.name_id = "minecraft:spruce_log";
+    spruce_log.numeric_id = 20;
+    spruce_log.hardness = 2.0f;
+    spruce_log.resistance = 2.0f;
+    spruce_log.tool_type = "axe";
+    spruce_log.sound = "wood";
+    spruce_log.top_tex = 23;
+    spruce_log.side_tex = 24;
+    spruce_log.bottom_tex = 23;
+    blocks.push_back(spruce_log);
+    name_to_id["minecraft:spruce_log"] = 20;
+    id_to_name[20] = "minecraft:spruce_log";
+    
+    // ---- BLOCK 21: SPRUCE_LEAVES ----
+    BlockProperties spruce_leaves;
+    spruce_leaves.name_id = "minecraft:spruce_leaves";
+    spruce_leaves.numeric_id = 21;
+    spruce_leaves.hardness = 0.2f;
+    spruce_leaves.resistance = 0.2f;
+    spruce_leaves.is_solid = true;
+    spruce_leaves.is_transparent = true;
+    spruce_leaves.opacity = 0.5f;
+    spruce_leaves.sound = "grass";
+    spruce_leaves.top_tex = 25;
+    spruce_leaves.side_tex = 25;
+    spruce_leaves.bottom_tex = 25;
+    blocks.push_back(spruce_leaves);
+    name_to_id["minecraft:spruce_leaves"] = 21;
+    id_to_name[21] = "minecraft:spruce_leaves";
+    
+    // ---- BLOCK 26: FARMLAND - الأرض المزروعة ----
+    BlockProperties farmland;
+    farmland.name_id = "minecraft:farmland";
+    farmland.numeric_id = 26;
+    farmland.hardness = 0.6f;
+    farmland.resistance = 0.6f;
+    farmland.is_solid = true;
+    farmland.is_transparent = false;
+    farmland.sound = "grass";
+    farmland.tool_type = "shovel";
+    farmland.top_tex = 2;    // dirt-like
+    farmland.side_tex = 2;
+    farmland.bottom_tex = 2;
+    blocks.push_back(farmland);
+    name_to_id["minecraft:farmland"] = 26;
+    id_to_name[26] = "minecraft:farmland";
+    
+    // ---- BLOCK 27: WHEAT_CROP - محصول القمح ----
+    BlockProperties wheat_crop;
+    wheat_crop.name_id = "minecraft:wheat";
+    wheat_crop.numeric_id = 27;
+    wheat_crop.hardness = 0.0f;
+    wheat_crop.resistance = 0.0f;
+    wheat_crop.is_solid = false;
+    wheat_crop.is_transparent = true;
+    wheat_crop.is_plant = true;
+    wheat_crop.opacity = 0.0f;
+    wheat_crop.sound = "grass";
+    wheat_crop.top_tex = 20;  // use tall grass texture for now
+    wheat_crop.side_tex = 20;
+    wheat_crop.bottom_tex = 20;
+    blocks.push_back(wheat_crop);
+    name_to_id["minecraft:wheat"] = 27;
+    id_to_name[27] = "minecraft:wheat";
+    
     std::cout << "[BlockRegistry] Loaded " << blocks.size() << " blocks\n";
 }
 
+#ifndef NO_JSON
 void BlockRegistry::loadFromJson(const std::string& json_path) {
     std::ifstream file(json_path);
     if (!file.is_open()) {
@@ -258,6 +465,13 @@ void BlockRegistry::loadFromJson(const std::string& json_path) {
     
     std::cout << "[BlockRegistry] Loaded " << blocks.size() << " blocks from " << json_path << "\n";
 }
+#else
+// NO_JSON: stub implementation
+void BlockRegistry::loadFromJson(const std::string& json_path) {
+    (void)json_path;
+    std::cerr << "[BlockRegistry] JSON loading not available, using built-in registry\n";
+}
+#endif
 
 const BlockProperties* BlockRegistry::get(BlockID id) const {
     if (id >= blocks.size()) return nullptr;

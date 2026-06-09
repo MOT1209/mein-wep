@@ -14,8 +14,47 @@ option(KC_USE_VULKAN "Use Vulkan backend" OFF)
 # DEPENDENCIES
 # ============================================================
 
+# Local dependency paths (from setup_and_run.bat)
+set(KC_DEPS_DIR "${CMAKE_SOURCE_DIR}/deps")
+
 # GLFW (window + input)
-find_package(glfw3 REQUIRED)
+if(EXISTS ${KC_DEPS_DIR}/glfw/include/GLFW/glfw3.h)
+    # Use local prebuilt GLFW
+    message(STATUS "Using local GLFW from ${KC_DEPS_DIR}/glfw")
+    set(GLFW_INCLUDE_DIR "${KC_DEPS_DIR}/glfw/include")
+    
+    # Find the GLFW lib
+    file(GLOB GLFW_LIBRARY "${KC_DEPS_DIR}/glfw/lib-mingw-w64/libglfw3dll.a")
+    if(NOT GLFW_LIBRARY)
+        file(GLOB GLFW_LIBRARY "${KC_DEPS_DIR}/glfw/lib/*.a")
+    endif()
+    if(NOT GLFW_LIBRARY)
+        file(GLOB GLFW_LIBRARY "${KC_DEPS_DIR}/glfw/lib-vc2022/glfw3.lib")
+    endif()
+    
+    if(GLFW_LIBRARY)
+        add_library(glfw UNKNOWN IMPORTED)
+        set_target_properties(glfw PROPERTIES
+            IMPORTED_LOCATION "${GLFW_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GLFW_INCLUDE_DIR}"
+        )
+        message(STATUS "GLFW library: ${GLFW_LIBRARY}")
+    else()
+        message(FATAL_ERROR "GLFW library not found in ${KC_DEPS_DIR}/glfw")
+    endif()
+else()
+    # Try system GLFW
+    find_package(glfw3 QUIET)
+    if(NOT glfw3_FOUND)
+        find_package(PkgConfig QUIET)
+        if(PKG_CONFIG_FOUND)
+            pkg_check_modules(GLFW glfw3)
+        endif()
+    endif()
+    if(NOT glfw3_FOUND AND NOT GLFW_FOUND)
+        message(FATAL_ERROR "GLFW not found. Run setup_and_run.bat or install glfw3")
+    endif()
+endif()
 
 # OpenGL
 if(KC_USE_OPENGL)
@@ -23,31 +62,38 @@ if(KC_USE_OPENGL)
     add_compile_definitions(KC_OPENGL)
 endif()
 
-# GLM (math)
-find_package(glm REQUIRED)
-if(NOT glm_FOUND)
-    # Fallback: include glm directly if not found
-    message(STATUS "GLM not found via find_package, checking for local copy...")
-    if(EXISTS ${CMAKE_SOURCE_DIR}/libs/glm/glm.hpp)
-        add_library(glm INTERFACE)
-        target_include_directories(glm INTERFACE ${CMAKE_SOURCE_DIR}/libs)
-    else()
-        message(FATAL_ERROR "GLM not found. Install glm or add it to libs/")
+# GLM (header-only)
+if(EXISTS ${KC_DEPS_DIR}/glm/glm/glm.hpp)
+    message(STATUS "Using local GLM from ${KC_DEPS_DIR}/glm")
+    add_library(glm INTERFACE)
+    target_include_directories(glm INTERFACE ${KC_DEPS_DIR}/glm)
+    set(GLM_FOUND TRUE)
+else()
+    find_package(glm QUIET)
+    if(NOT glm_FOUND)
+        # Fallback: check libs/glm
+        if(EXISTS ${CMAKE_SOURCE_DIR}/libs/glm/glm/glm.hpp)
+            message(STATUS "Using GLM from libs/glm")
+            add_library(glm INTERFACE)
+            target_include_directories(glm INTERFACE ${CMAKE_SOURCE_DIR}/libs)
+        else()
+            message(FATAL_ERROR "GLM not found. Run setup_and_run.bat or install glm")
+        endif()
     endif()
 endif()
 
-# stb_image (not used directly yet, but included for future)
+# stb_image
 add_library(stb_image INTERFACE)
 target_include_directories(stb_image INTERFACE ${CMAKE_SOURCE_DIR}/libs/stb)
 
-# JSON (nlohmann) - optional, only needed for JSON block loading
+# JSON (nlohmann) - optional
 find_package(nlohmann_json QUIET)
 if(NOT nlohmann_json_FOUND)
     message(STATUS "nlohmann_json not found, using built-in block registry")
     add_compile_definitions(NO_JSON)
 endif()
 
-# GLAD (OpenGL loader)
+# GLAD (OpenGL loader — hybrid: system + runtime)
 add_library(glad ${CMAKE_SOURCE_DIR}/libs/glad/src/glad.c)
 target_include_directories(glad PUBLIC ${CMAKE_SOURCE_DIR}/libs/glad/include)
 
@@ -73,6 +119,8 @@ set(RENDER_SRC
 set(GAME_SRC
     src/game/game.cpp
     src/game/player.cpp
+    src/game/items.cpp
+    src/game/crafting.cpp
 )
 
 set(ECS_SRC
@@ -114,10 +162,15 @@ target_include_directories(KingCraft PRIVATE
 target_link_libraries(KingCraft PRIVATE
     glfw
     ${OPENGL_LIBRARIES}
-    glm::glm
+    glm
     stb_image
     glad
+    ${GLFW_EXTRA_LIBS}
 )
+
+if(WIN32 AND MINGW)
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--allow-multiple-definition")
+endif()
 
 if(nlohmann_json_FOUND)
     target_link_libraries(KingCraft PRIVATE nlohmann_json::nlohmann_json)

@@ -3,8 +3,6 @@
 
 #include "ecs/ecs.h"
 #include "ecs/components.h"
-#include "world/chunk.h"
-#include "world/block_registry.h"
 
 // ============================================================
 // ITEM ENTITY — كائنات العناصر على الأرض

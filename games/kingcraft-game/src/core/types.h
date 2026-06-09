@@ -67,6 +67,19 @@ constexpr BlockID BLOCK_PLANKS = 7;
 constexpr BlockID BLOCK_LEAVES = 8;
 constexpr BlockID BLOCK_COBBLESTONE = 9;
 constexpr BlockID BLOCK_BEDROCK = 10;
+constexpr BlockID BLOCK_SNOW = 11;
+constexpr BlockID BLOCK_ICE = 12;
+constexpr BlockID BLOCK_SANDSTONE = 13;
+constexpr BlockID BLOCK_CACTUS = 14;
+constexpr BlockID BLOCK_DEAD_BUSH = 15;
+constexpr BlockID BLOCK_FLOWER = 16;    // poppy/dandelion
+constexpr BlockID BLOCK_TALL_GRASS = 17;
+constexpr BlockID BLOCK_COARSE_DIRT = 18;
+constexpr BlockID BLOCK_PODZOL = 19;
+constexpr BlockID BLOCK_SPRUCE_WOOD = 20;
+constexpr BlockID BLOCK_SPRUCE_LEAVES = 21;
+constexpr BlockID BLOCK_FARMLAND = 26;
+constexpr BlockID BLOCK_WHEAT_CROP = 27;
 constexpr BlockID BLOCK_MAX = 255;
 
 // Block state bit packing
@@ -126,6 +139,25 @@ struct MeshData {
 enum class GameMode { SURVIVAL, CREATIVE, SPECTATOR };
 enum class Weather { CLEAR, RAIN, SNOW, THUNDER };
 enum class Direction { NORTH, SOUTH, EAST, WEST, UP, DOWN };
+
+// ============================================================
+// BIOME TYPE
+// ============================================================
+enum class BiomeType : uint8_t {
+    OCEAN       = 0,
+    PLAINS      = 1,
+    DESERT      = 2,
+    FOREST      = 3,
+    TAIGA       = 4,  // غابة ثلجية
+    SNOWY_TUNDRA = 5,
+    JUNGLE      = 6,
+    SWAMP       = 7,
+    MOUNTAINS   = 8,
+    BEACH       = 9,
+    RIVER       = 10,
+    SAVANNA     = 11,
+    MAX         = 12
+};
 
 // ============================================================
 // RAYCAST RESULT

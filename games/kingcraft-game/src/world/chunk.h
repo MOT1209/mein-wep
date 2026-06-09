@@ -47,6 +47,10 @@ public:
     bool isLoaded() const { return loaded; }
     void setLoaded(bool v) { loaded = v; }
     
+    // حالة التوليد (هل تم توليد التضاريس؟)
+    bool isGenerated() const { return generated; }
+    void setGenerated(bool v) { generated = v; }
+    
     // الإحداثيات
     int getCX() const { return cx; }
     int getCZ() const { return cz; }
@@ -67,6 +71,7 @@ public:
 private:
     int cx = 0, cz = 0;
     bool loaded = false;
+    bool generated = false;
     std::atomic<bool> dirty{true};
     
     // Block data
@@ -99,6 +104,7 @@ public:
     
     // الحصول على بلوك في إحداثيات العالم
     BlockID getWorldBlock(int wx, int wy, int wz);
+    BlockState getWorldBlockState(int wx, int wy, int wz);
     void setWorldBlock(int wx, int wy, int wz, BlockID id, BlockState state = 0);
     
     // تحميل/تفريغ الـ Chunks

@@ -16,7 +16,7 @@ void update(EntityManager& ecs, float delta_time);
 Entity spawnMob(EntityManager& ecs, MobInfo::Type type, const Vec3f& position);
 
 // العثور على أقرب لاعب (أو كيان مع PlayerControlled)
-EntityID findNearestPlayer(EntityManager& ecs, const Vec3f& from_pos, float max_range);
+Entity findNearestPlayer(EntityManager& ecs, const Vec3f& from_pos, float max_range);
 
 // المسافة بين كيانين
 float distance(const Vec3f& a, const Vec3f& b);

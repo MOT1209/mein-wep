@@ -5,7 +5,6 @@
 #include <unordered_map>
 #include <vector>
 #include <string>
-#include <json/json.h>
 
 class BlockRegistry {
 public:

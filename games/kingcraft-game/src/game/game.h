@@ -8,6 +8,8 @@
 #include "world/mesh_gen.h"
 #include "render/renderer.h"
 #include "game/player.h"
+#include "game/items.h"
+#include "game/crafting.h"
 #include "ecs/ecs.h"
 #include "ecs/components.h"
 
@@ -35,8 +37,6 @@ private:
     Player player;
     ChunkManager world;
     std::unique_ptr<WorldGenerator> world_gen;
-    BlockRegistry block_registry;
-    
     // ECS
     EntityManager ecs;
     float mob_spawn_timer = 0.0f;
@@ -65,6 +65,7 @@ private:
     void spawnMobs();
     void processInput();
     void updateChunks();
+    void tickCrops(float dt);
     void rebuildChunkMeshes();
 };
 

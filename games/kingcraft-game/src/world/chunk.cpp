@@ -1,5 +1,6 @@
 #include "world/chunk.h"
 #include <cstring>
+#include <cmath>
 #include <algorithm>
 
 // ============================================================
@@ -123,6 +124,17 @@ BlockID ChunkManager::getWorldBlock(int wx, int wy, int wz) {
     auto* chunk = getChunk(cx, cz);
     if (!chunk) return BLOCK_AIR;
     return chunk->getBlock(bx, wy, bz);
+}
+
+BlockState ChunkManager::getWorldBlockState(int wx, int wy, int wz) {
+    int cx = toChunkPos(wx);
+    int cz = toChunkPos(wz);
+    int bx = toBlockInChunk(wx);
+    int bz = toBlockInChunk(wz);
+    
+    auto* chunk = getChunk(cx, cz);
+    if (!chunk) return 0;
+    return chunk->getState(bx, wy, bz);
 }
 
 void ChunkManager::setWorldBlock(int wx, int wy, int wz, BlockID id, BlockState state) {

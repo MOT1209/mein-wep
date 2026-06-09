@@ -341,8 +341,51 @@ MeshData MeshGenerator::generateSimpleMesh(const Chunk& chunk, const BlockRegist
 }
 
 MeshData MeshGenerator::generateCrossMesh(const Chunk& chunk, const BlockRegistry& registry) {
-    (void)registry;
     MeshData mesh;
-    // For plants/torches: two quads forming a cross, facing camera
+    
+    // يتم رسم النباتات على شكل cross (مربعان متقاطعان)
+    // هذا يعطي مظهر ثلاثي الأبعاد من جميع الزوايا
+    
+    for (int x = 0; x < CHUNK_SIZE_X; x++) {
+        for (int y = 0; y < CHUNK_SIZE_Y; y++) {
+            for (int z = 0; z < CHUNK_SIZE_Z; z++) {
+                BlockID block = chunk.getBlock(x, y, z);
+                const auto* bp = registry.get(block);
+                
+                // نرسم cross فقط للبلوكات الشفافة غير الصلبة (النباتات)
+                if (!bp || bp->is_solid || !bp->is_transparent) continue;
+                if (!bp->is_plant) continue;
+                
+                uint32_t tex = bp->top_tex;  // Use top texture for the cross
+                float hx = (float)x, hy = (float)y, hz = (float)z;
+                uint32_t base = (uint32_t)mesh.vertices.size();
+                
+                // Quad 1:沿着 XZ对角线 (angle 0°)
+                // Vertices: (0,0,0) -> (1,1,1) diagonal
+                Vertex q1[4];
+                q1[0] = {hx+0, hy+1, hz+0, 0,0,1, 0,0, 1.0f, tex};
+                q1[1] = {hx+1, hy+1, hz+1, 0,0,1, 1,0, 1.0f, tex};
+                q1[2] = {hx+1, hy+0, hz+1, 0,0,1, 1,1, 1.0f, tex};
+                q1[3] = {hx+0, hy+0, hz+0, 0,0,1, 0,1, 1.0f, tex};
+                
+                // Quad 2:沿着另一条对角线 (angle 90°)
+                // Vertices: (1,0,0) -> (0,1,1) diagonal
+                Vertex q2[4];
+                q2[0] = {hx+1, hy+1, hz+0, 1,0,0, 0,0, 1.0f, tex};
+                q2[1] = {hx+0, hy+1, hz+1, 1,0,0, 1,0, 1.0f, tex};
+                q2[2] = {hx+0, hy+0, hz+1, 1,0,0, 1,1, 1.0f, tex};
+                q2[3] = {hx+1, hy+0, hz+0, 1,0,0, 0,1, 1.0f, tex};
+                
+                for (int i = 0; i < 4; i++) mesh.vertices.push_back(q1[i]);
+                mesh.indices.push_back(base);   mesh.indices.push_back(base+1); mesh.indices.push_back(base+2);
+                mesh.indices.push_back(base);   mesh.indices.push_back(base+2); mesh.indices.push_back(base+3);
+                
+                for (int i = 0; i < 4; i++) mesh.vertices.push_back(q2[i]);
+                mesh.indices.push_back(base+4); mesh.indices.push_back(base+5); mesh.indices.push_back(base+6);
+                mesh.indices.push_back(base+4); mesh.indices.push_back(base+6); mesh.indices.push_back(base+7);
+            }
+        }
+    }
+    
     return mesh;
 }

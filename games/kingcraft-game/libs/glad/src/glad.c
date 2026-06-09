@@ -1,14 +1,23 @@
 #include "glad/gl.h"
-#include <GLFW/glfw3.h>
 
-// Core OpenGL function pointer definitions
-// (declared extern in glad/gl.h)
+// GLFW function pointer loader forward declaration
+typedef struct GLFWwindow GLFWwindow;
+typedef void (*GLFWglproc)(void);
+extern GLFWglproc glfwGetProcAddress(const char* procname);
+
+// =============================================
+// GL 1.2+ function pointer definitions
+// (GL 1.0/1.1 functions are provided by opengl32.dll directly)
+// =============================================
+
+// Buffer objects (GL 1.5)
 GLADglGenBuffers glGenBuffers = NULL;
 GLADglDeleteBuffers glDeleteBuffers = NULL;
 GLADglBindBuffer glBindBuffer = NULL;
 GLADglBufferData glBufferData = NULL;
 GLADglBufferSubData glBufferSubData = NULL;
 
+// Vertex Array Objects (GL 3.0)
 GLADglGenVertexArrays glGenVertexArrays = NULL;
 GLADglDeleteVertexArrays glDeleteVertexArrays = NULL;
 GLADglBindVertexArray glBindVertexArray = NULL;
@@ -17,6 +26,7 @@ GLADglVertexAttribIPointer glVertexAttribIPointer = NULL;
 GLADglEnableVertexAttribArray glEnableVertexAttribArray = NULL;
 GLADglDisableVertexAttribArray glDisableVertexAttribArray = NULL;
 
+// Shader functions (GL 2.0)
 GLADglCreateShader glCreateShader = NULL;
 GLADglShaderSource glShaderSource = NULL;
 GLADglCompileShader glCompileShader = NULL;
@@ -31,42 +41,21 @@ GLADglGetProgramInfoLog glGetProgramInfoLog = NULL;
 GLADglUseProgram glUseProgram = NULL;
 GLADglDeleteProgram glDeleteProgram = NULL;
 
+// Uniform functions (GL 2.0)
 GLADglGetUniformLocation glGetUniformLocation = NULL;
 GLADglUniform1i glUniform1i = NULL;
 GLADglUniform1f glUniform1f = NULL;
 GLADglUniform3f glUniform3f = NULL;
 GLADglUniformMatrix4fv glUniformMatrix4fv = NULL;
 
-GLADglGenTextures glGenTextures = NULL;
-GLADglDeleteTextures glDeleteTextures = NULL;
+// Texture functions (GL 1.2+)
 GLADglActiveTexture glActiveTexture = NULL;
-GLADglBindTexture glBindTexture = NULL;
-GLADglTexImage2D glTexImage2D = NULL;
 GLADglTexImage3D glTexImage3D = NULL;
 GLADglTexSubImage3D glTexSubImage3D = NULL;
 GLADglTexStorage3D glTexStorage3D = NULL;
-GLADglTexParameteri glTexParameteri = NULL;
 GLADglGenerateMipmap glGenerateMipmap = NULL;
 
-GLADglEnable glEnable = NULL;
-GLADglDisable glDisable = NULL;
-GLADglCullFace glCullFace = NULL;
-GLADglFrontFace glFrontFace = NULL;
-GLADglDepthFunc glDepthFunc = NULL;
-GLADglBlendFunc glBlendFunc = NULL;
-GLADglClear glClear = NULL;
-GLADglClearColor glClearColor = NULL;
-GLADglViewport glViewport = NULL;
-
-GLADglGetString glGetString = NULL;
-GLADglGetIntegerv glGetIntegerv = NULL;
-GLADglGetError glGetError = NULL;
-GLADglDrawArrays glDrawArrays = NULL;
-GLADglDrawElements glDrawElements = NULL;
-
-struct GLVersion GLVersion = {0, 0};
-
-int gladLoadGL(void* (*get_proc_addr)(const char* name)) {
+int gladLoadGL(GLADgetproc get_proc_addr) {
     // Load all function pointers using the provided loader
     glGenBuffers = (GLADglGenBuffers)get_proc_addr("glGenBuffers");
     glDeleteBuffers = (GLADglDeleteBuffers)get_proc_addr("glDeleteBuffers");
@@ -102,47 +91,18 @@ int gladLoadGL(void* (*get_proc_addr)(const char* name)) {
     glUniform3f = (GLADglUniform3f)get_proc_addr("glUniform3f");
     glUniformMatrix4fv = (GLADglUniformMatrix4fv)get_proc_addr("glUniformMatrix4fv");
     
-    glGenTextures = (GLADglGenTextures)get_proc_addr("glGenTextures");
-    glDeleteTextures = (GLADglDeleteTextures)get_proc_addr("glDeleteTextures");
     glActiveTexture = (GLADglActiveTexture)get_proc_addr("glActiveTexture");
-    glBindTexture = (GLADglBindTexture)get_proc_addr("glBindTexture");
-    glTexImage2D = (GLADglTexImage2D)get_proc_addr("glTexImage2D");
     glTexImage3D = (GLADglTexImage3D)get_proc_addr("glTexImage3D");
     glTexSubImage3D = (GLADglTexSubImage3D)get_proc_addr("glTexSubImage3D");
     glTexStorage3D = (GLADglTexStorage3D)get_proc_addr("glTexStorage3D");
-    glTexParameteri = (GLADglTexParameteri)get_proc_addr("glTexParameteri");
     glGenerateMipmap = (GLADglGenerateMipmap)get_proc_addr("glGenerateMipmap");
-    
-    glEnable = (GLADglEnable)get_proc_addr("glEnable");
-    glDisable = (GLADglDisable)get_proc_addr("glDisable");
-    glCullFace = (GLADglCullFace)get_proc_addr("glCullFace");
-    glFrontFace = (GLADglFrontFace)get_proc_addr("glFrontFace");
-    glDepthFunc = (GLADglDepthFunc)get_proc_addr("glDepthFunc");
-    glBlendFunc = (GLADglBlendFunc)get_proc_addr("glBlendFunc");
-    glClear = (GLADglClear)get_proc_addr("glClear");
-    glClearColor = (GLADglClearColor)get_proc_addr("glClearColor");
-    glViewport = (GLADglViewport)get_proc_addr("glViewport");
-    
-    glGetString = (GLADglGetString)get_proc_addr("glGetString");
-    glGetIntegerv = (GLADglGetIntegerv)get_proc_addr("glGetIntegerv");
-    glGetError = (GLADglGetError)get_proc_addr("glGetError");
-    glDrawArrays = (GLADglDrawArrays)get_proc_addr("glDrawArrays");
-    glDrawElements = (GLADglDrawElements)get_proc_addr("glDrawElements");
     
     // Verify critical functions loaded
     if (!glGenBuffers || !glBindBuffer || !glBufferData ||
         !glGenVertexArrays || !glBindVertexArray ||
         !glCreateShader || !glCreateProgram ||
-        !glUseProgram || !glGenTextures ||
-        !glEnable || !glClear || !glDrawElements) {
+        !glUseProgram || !glActiveTexture) {
         return 0;
-    }
-    
-    // Get OpenGL version
-    const char* version_str = (const char*)glGetString(GL_VERSION);
-    if (version_str) {
-        GLVersion.major = version_str[0] - '0';
-        GLVersion.minor = version_str[2] - '0';
     }
     
     return 1;
