@@ -4,10 +4,9 @@ class VaultCalculator {
         this.currElement = document.getElementById('current-operand');
         this.clear();
 
-        // Load System State
         this.secretCode = localStorage.getItem('vaultPassword');
         this.isSetupMode = !this.secretCode;
-        this.setupStep = 0; // 0: initial, 1: first entry, 2: confirm entry
+        this.setupStep = 0;
         this.tempCode = "";
 
         if (this.isSetupMode) {
@@ -77,7 +76,6 @@ class VaultCalculator {
     }
 
     handleEquals() {
-        // --- VAULT LOGIC ---
         if (this.isSetupMode) {
             this.handleSetupProcedure();
             return;
@@ -90,7 +88,6 @@ class VaultCalculator {
             return;
         }
 
-        // --- NORMAL CALC ---
         this.compute();
     }
 
@@ -132,15 +129,13 @@ class VaultCalculator {
 
     updateDisplay() {
         this.currElement.innerText = this.currentOperand;
-        if (this.operation) {
-            this.prevElement.innerText = `${this.previousOperand} ${this.operation}`;
-        } else {
-            this.prevElement.innerText = "";
-        }
+        this.prevElement.innerText = this.operation
+            ? `${this.previousOperand} ${this.operation}`
+            : "";
     }
 }
 
-// --- Initialization ---
+// --- INIT ---
 const calc = new VaultCalculator();
 
 document.querySelectorAll('[data-number]').forEach(btn => {
@@ -155,33 +150,39 @@ document.getElementById('equals-btn').addEventListener('click', () => calc.handl
 document.querySelector('[data-action="clear"]').addEventListener('click', () => { calc.clear(); calc.updateDisplay(); });
 document.querySelector('[data-action="delete"]').addEventListener('click', () => calc.delete());
 
-// --- UI Utilities ---
+// --- VAULT ---
 function openVault() {
-    document.getElementById('calc-wrapper').style.transform = "scale(0.8) translateY(-100px)";
-    document.getElementById('calc-wrapper').style.opacity = "0";
+    const wrapper = document.getElementById('calc-wrapper');
+    wrapper.style.transform = "scale(0.85) translateY(-60px)";
+    wrapper.style.opacity = "0";
     setTimeout(() => {
-        document.getElementById('calc-wrapper').classList.add('hidden');
+        wrapper.classList.add('hidden');
         document.getElementById('vault-ui').classList.remove('hidden');
-    }, 600);
+        loadSecretNote();
+    }, 500);
 }
 
 document.getElementById('lock-vault').addEventListener('click', () => {
-    document.getElementById('vault-ui').classList.add('hidden');
-    document.getElementById('calc-wrapper').classList.remove('hidden');
+    const vaultUI = document.getElementById('vault-ui');
+    vaultUI.classList.add('hidden');
+    const wrapper = document.getElementById('calc-wrapper');
+    wrapper.classList.remove('hidden');
     setTimeout(() => {
-        document.getElementById('calc-wrapper').style.transform = "scale(1) translateY(0)";
-        document.getElementById('calc-wrapper').style.opacity = "1";
+        wrapper.style.transform = "scale(1) translateY(0)";
+        wrapper.style.opacity = "1";
     }, 50);
 });
 
+// --- NOTIFICATION ---
 function showNotif(msg) {
     const n = document.getElementById('notif');
     n.innerText = msg;
     n.classList.remove('hidden');
     setTimeout(() => n.classList.add('hidden'), 3000);
 }
+const showNotification = showNotif;
 
-// Keyboard Support
+// --- KEYBOARD ---
 document.addEventListener('keydown', e => {
     if (calc.isTextMode && e.key !== 'Enter') calc.clear();
     if (e.key >= '0' && e.key <= '9') calc.appendNumber(e.key);
@@ -190,12 +191,12 @@ document.addEventListener('keydown', e => {
     if (e.key === 'Enter' || e.key === '=') calc.handleEquals();
     if (e.key === 'Backspace') calc.delete();
 });
-// --- Secret Note Logic ---
+
+// --- SECRET NOTE ---
 const noteArea = document.getElementById('vault-note-area');
 const saveNoteBtn = document.getElementById('save-note-btn');
 const noteStatus = document.getElementById('note-status');
 
-// Load note when vault is opened
 function loadSecretNote() {
     const savedNote = localStorage.getItem('vaultSecretNote') || "";
     if (noteArea) noteArea.value = savedNote;
@@ -205,16 +206,38 @@ if (saveNoteBtn) {
     saveNoteBtn.addEventListener('click', () => {
         const note = noteArea.value;
         localStorage.setItem('vaultSecretNote', note);
-
-        // Show status
         noteStatus.style.opacity = "1";
         setTimeout(() => { noteStatus.style.opacity = "0"; }, 2000);
     });
 }
 
-// Modify openVault to load notes
-const originalOpenVault = openVault;
-window.openVault = function () {
-    originalOpenVault();
-    loadSecretNote();
-}
+// --- SIDEBAR ---
+document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        showNotification(`قسم "${btn.textContent.trim()}" — قيد التطوير`, 'info');
+    });
+});
+
+// --- ADD FILE ---
+let vaultFileInput = null;
+
+document.querySelector('.add-btn').addEventListener('click', () => {
+    if (!vaultFileInput) {
+        vaultFileInput = document.createElement('input');
+        vaultFileInput.type = 'file';
+        vaultFileInput.multiple = true;
+        vaultFileInput.style.display = 'none';
+        vaultFileInput.accept = 'image/*,video/*,.pdf,.doc,.docx,.txt';
+        document.body.appendChild(vaultFileInput);
+        vaultFileInput.addEventListener('change', () => {
+            const files = vaultFileInput.files;
+            if (files.length > 0) {
+                showNotification(`تمت إضافة ${files.length} ملف(ملفات)`, 'success');
+            }
+            vaultFileInput.value = '';
+        });
+    }
+    vaultFileInput.click();
+});

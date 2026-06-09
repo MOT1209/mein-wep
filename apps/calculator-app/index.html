@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#10b981">
+    <meta name="theme-color" content="#0a0a1a">
     <link rel="manifest" href="manifest.json">
     <title>الخزنة الذكية | Smart Vault</title>
     <meta name="description" content="الخزنة الذكية — آلة حاسبة مع خزنة سرية. إخفاء الملفات والصور والبيانات خلف واجهة حاسبة.">
     <link rel="canonical" href="https://rashid-wep.vercel.app/apps/calculator-vault/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="الخزنة الذكية | Smart Vault">
-    <meta property="og:description" content="الخزنة الذكية — آلة حاسبة مع خزنة سرية. إخفاء الملفات والصور والبيانات خلف واجهة حاسبة.">
+    <meta property="og:description" content="الخزنة الذكية — آلة حاسبة مع خزنة سرية.">
     <meta property="og:image" content="../../images/logo.png">
     <meta property="og:url" content="https://rashid-wep.vercel.app/apps/calculator-vault/">
     <meta name="twitter:card" content="summary_large_image">
@@ -21,19 +20,33 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Orbitron:wght@400;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
+<body>
 
-<body class="dark-mode">
+    <!-- Onboarding -->
+    <div class="onboarding-overlay" id="onboarding">
+        <div class="onboarding-card">
+            <div class="onboarding-icon">🔐</div>
+            <h2>مرحباً بك في الخزنة الذكية</h2>
+            <p>آلة حاسبة تخفي خزنة سرية خلفها. لا أحد يعلم بوجودها غيرك.</p>
+            <ul class="onboarding-steps">
+                <li><i class="fas fa-calculator"></i> استخدم الآلة الحاسبة كالمعتاد</li>
+                <li><i class="fas fa-key"></i> أدخل رمزك السري واضغط = لفتح الخزنة</li>
+                <li><i class="fas fa-shield-alt"></i> أول مرة؟ SET CODE سيظهر — اتبع التعليمات</li>
+            </ul>
+            <button class="onboarding-btn" onclick="dismissOnboarding()">
+                <i class="fas fa-check"></i> فهمت
+            </button>
+        </div>
+    </div>
 
-    <!-- Calculator UI -->
+    <!-- Calculator -->
     <div class="calculator-wrapper" id="calc-wrapper">
-        <div class="calculator reveal-anim">
+        <div class="calculator">
             <div class="calc-header">
                 <i class="fas fa-calculator"></i>
                 <span>آلة حاسبة</span>
@@ -46,22 +59,18 @@
                 <button class="btn col-2 action-btn" data-action="clear">AC</button>
                 <button class="btn action-btn" data-action="delete"><i class="fas fa-backspace"></i></button>
                 <button class="btn operator-btn" data-operator="/">÷</button>
-
                 <button class="btn number-btn" data-number="7">7</button>
                 <button class="btn number-btn" data-number="8">8</button>
                 <button class="btn number-btn" data-number="9">9</button>
                 <button class="btn operator-btn" data-operator="*">×</button>
-
                 <button class="btn number-btn" data-number="4">4</button>
                 <button class="btn number-btn" data-number="5">5</button>
                 <button class="btn number-btn" data-number="6">6</button>
                 <button class="btn operator-btn" data-operator="-">−</button>
-
                 <button class="btn number-btn" data-number="1">1</button>
                 <button class="btn number-btn" data-number="2">2</button>
                 <button class="btn number-btn" data-number="3">3</button>
                 <button class="btn operator-btn" data-operator="+">+</button>
-
                 <button class="btn number-btn col-2" data-number="0">0</button>
                 <button class="btn number-btn" data-number=".">.</button>
                 <button class="btn equals-btn" id="equals-btn">=</button>
@@ -69,7 +78,7 @@
         </div>
     </div>
 
-    <!-- Secret Vault UI (Fullscreen Premium Experience) -->
+    <!-- Vault -->
     <div class="vault-overlay hidden" id="vault-ui">
         <aside class="sidebar">
             <div class="sidebar-brand">
@@ -94,7 +103,7 @@
             <header class="main-header">
                 <div class="header-info">
                     <h1>لوحة المعلومات</h1>
-                    <p>أهلاً بك، جميع ملفاتك مشفرة ببروتوكول AES-256</p>
+                    <p>جميع ملفاتك مشفرة ببروتوكول AES-256</p>
                 </div>
                 <div class="header-actions">
                     <button class="add-btn"><i class="fas fa-plus"></i> إضافة ملف</button>
@@ -126,30 +135,43 @@
             </div>
 
             <section class="recent-files">
-                <h2>الملفات الأخيرة</h2>
+                <h2><i class="fas fa-clock"></i> الملفات الأخيرة</h2>
                 <div class="empty-state">
                     <i class="fas fa-folder-open"></i>
                     <p>لا توجد ملفات حالياً. ابدأ بإضافة ملفاتك الخاصة.</p>
                 </div>
             </section>
+
+            <section class="note-manager">
+                <div class="note-header">
+                    <h2><i class="fas fa-feather-alt"></i> ملاحظات سرية</h2>
+                    <span id="note-status" style="color:var(--green);font-weight:600;opacity:0;transition:0.3s;font-size:0.85rem;">تم الحفظ ✓</span>
+                </div>
+                <div class="note-input-container">
+                    <textarea id="vault-note-area" placeholder="اكتب ملاحظاتك السرية هنا..."></textarea>
+                    <button id="save-note-btn" class="save-note-btn">
+                        <i class="fas fa-save"></i> حفظ الملاحظة
+                    </button>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- Global Notification -->
+    <!-- Notification -->
     <div id="notif" class="notif hidden"></div>
 
-    <!-- Mobile Bottom Navigation -->
+    <!-- Mobile Bottom Nav -->
     <nav class="mobile-nav">
         <div class="mobile-nav-items">
-            <button class="mobile-nav-item active" onclick="switchTab('home')">
+            <button class="mobile-nav-item active" onclick="switchTab('home', event)">
                 <i class="fas fa-home"></i>
                 <span>الرئيسية</span>
             </button>
-            <button class="mobile-nav-item" onclick="switchTab('files')">
+            <button class="mobile-nav-item" onclick="switchTab('files', event)">
                 <i class="fas fa-folder"></i>
                 <span>الملفات</span>
             </button>
-            <button class="mobile-nav-item" onclick="switchTab('passwords')">
+            <button class="mobile-nav-item" onclick="switchTab('passwords', event)">
                 <i class="fas fa-key"></i>
                 <span>كلمات المرور</span>
             </button>
@@ -160,24 +182,22 @@
         </div>
     </nav>
 
-    <!-- Floating Action Button -->
+    <!-- FAB -->
     <button class="fab" onclick="addNewFile()" title="إضافة ملف جديد">
         <i class="fas fa-plus"></i>
     </button>
 
-    <!-- App Controls System -->
-    <script src="../js/app-controls.js"></script>
+    <!-- Scripts -->
+    <script src="../../js/app-controls.js"></script>
     <script src="js/app.js"></script>
     <script>
-        // Initialize App Controls for PWA mode
         if (typeof AppControls !== 'undefined') {
             AppControls.init({
                 appName: 'الخزنة الذكية',
-                primaryColor: '#7c3aed', // Purple for vault app
+                primaryColor: '#7c3aed',
                 showBackButton: true,
                 hideElements: ['.calc-header'],
                 onBack: () => {
-                    // If vault is open, go back to calculator
                     const vaultUI = document.getElementById('vault-ui');
                     if (vaultUI && !vaultUI.classList.contains('hidden')) {
                         vaultUI.classList.add('hidden');
@@ -188,22 +208,13 @@
                 }
             });
         }
-    </script>
-    
-    <!-- Mobile Navigation Functions -->
-    <script>
-        // Tab switching
-        function switchTab(tab) {
-            document.querySelectorAll('.mobile-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
+
+        function switchTab(tab, event) {
+            document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
             event.target.closest('.mobile-nav-item').classList.add('active');
-            
-            // Show notification
             showNotification(`تم التبديل إلى: ${tab}`, 'info');
         }
-        
-        // Toggle vault lock
+
         function toggleVault() {
             const vaultUI = document.getElementById('vault-ui');
             if (vaultUI && !vaultUI.classList.contains('hidden')) {
@@ -212,8 +223,7 @@
                 showNotification('تم قفل الخزنة', 'success');
             }
         }
-        
-        // Add new file
+
         function addNewFile() {
             const vaultUI = document.getElementById('vault-ui');
             if (vaultUI && vaultUI.classList.contains('hidden')) {
@@ -221,12 +231,19 @@
                 return;
             }
             showNotification('اختر ملفاً للإضافة', 'info');
-            // Trigger file input
             document.querySelector('.add-btn')?.click();
+        }
+
+        function dismissOnboarding() {
+            document.getElementById('onboarding').classList.add('hidden');
+            localStorage.setItem('onboardingDone', 'true');
+        }
+
+        if (localStorage.getItem('onboardingDone')) {
+            document.getElementById('onboarding').classList.add('hidden');
         }
     </script>
 
-    <!-- PWA Service Worker Registration -->
     <script>
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
@@ -235,5 +252,4 @@
         }
     </script>
 </body>
-
 </html>
