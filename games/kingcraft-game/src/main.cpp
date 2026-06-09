@@ -8,6 +8,7 @@
 #include "game/game.h"
 #include <iostream>
 #include <cstdlib>
+#include <memory>
 
 int main(int argc, char* argv[]) {
     std::cout << "========================================\n";
@@ -25,9 +26,11 @@ int main(int argc, char* argv[]) {
         std::cout << "[Main] Random seed: " << seed << "\n";
     }
     
-    // Create and run game
-    Game game;
-    if (!game.init(1280, 720, "KingCraft v0.1.0", seed)) {
+    // Create and run game on the heap — the Game object embeds the ECS
+    // (EntityManager ~tens of MB) by value, which overflows the 1 MB Windows
+    // stack if allocated as a local. Heap allocation keeps main's frame tiny.
+    auto game = std::make_unique<Game>();
+    if (!game->init(1280, 720, "KingCraft v0.1.0", seed)) {
         std::cerr << "[Main] Failed to initialize game!\n";
         return 1;
     }
@@ -42,7 +45,7 @@ int main(int argc, char* argv[]) {
     std::cout << "  1-9     - Hotbar selection\n";
     std::cout << "  ESC     - Exit\n\n";
     
-    game.run();
+    game->run();
     
     std::cout << "\n[Main] Goodbye!\n";
     return 0;

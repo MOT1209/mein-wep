@@ -407,8 +407,10 @@ void OpenGLRenderer::drawWireframeBox(const Vec3f& min, const Vec3f& max,
 
 // Simple 2D value noise
 static float texNoise(int x, int y, int seed) {
-    int n = x * 374761393 + y * 668265263 + seed * 1274126177;
-    n = (n ^ (n >> 13)) * 1274126177;
+    // Use unsigned arithmetic: signed integer overflow is undefined behavior
+    // and -O3 (aggressive-loop-optimizations) miscompiles it. Wraparound is the intent.
+    uint32_t n = (uint32_t)x * 374761393u + (uint32_t)y * 668265263u + (uint32_t)seed * 1274126177u;
+    n = (n ^ (n >> 13)) * 1274126177u;
     n = n ^ (n >> 16);
     return (float)(n & 0x7fffffff) / (float)0x7fffffff;
 }
