@@ -80,4 +80,12 @@
         <loc>https://rashid-wep.vercel.app/apps/quran-app/</loc>
         <priority>0.6</priority>
     </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/blog/building-kingcraft-3d-game.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/blog/portfolio-optimization-tips.html</loc>
+        <priority>0.6</priority>
+    </url>
 </urlset>

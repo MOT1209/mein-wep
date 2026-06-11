@@ -29,6 +29,20 @@
     --text-muted: var(--text-low);
     --text-main: var(--text-high); /* legacy alias */
 
+    /* Contribution Graph Colors */
+    --contrib-0: #1b1b2f;
+    --contrib-1: #0e4429;
+    --contrib-2: #006d32;
+    --contrib-3: #26a641;
+    --contrib-4: #39d353;
+
+    /* Contribution Graph Colors */
+    --contrib-0: #1b1b2f;
+    --contrib-1: #0e4429;
+    --contrib-2: #006d32;
+    --contrib-3: #26a641;
+    --contrib-4: #39d353;
+
     /* Accent — JS theme.js writes --accent and --accent-glow */
     --accent: #6366f1;
     --accent-rgb: 99, 102, 241;

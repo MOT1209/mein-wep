@@ -1,18 +1,31 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Rashid Blog</title>
     <link>https://rashid-wep.vercel.app/blog/</link>
-    <description>Articles on web development, AI, game dev, tutorials, and projects by Rashid.</description>
+    <description>Articles on web development, game dev with Three.js, AI integration, and open-source projects.</description>
     <language>en</language>
     <lastBuildDate>Thu, 11 Jun 2026 00:00:00 +0000</lastBuildDate>
     <atom:link href="https://rashid-wep.vercel.app/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    
     <item>
-      <title>Welcome to Rashid Blog</title>
-      <link>https://rashid-wep.vercel.app/blog/</link>
-      <guid>https://rashid-wep.vercel.app/blog/#welcome</guid>
-      <description>Coming soon — stay tuned for articles on web development, AI, game dev, tutorials, and projects from Rashid.</description>
+      <title>Building KingCraft: A 3D Voxel Game in the Browser</title>
+      <link>https://rashid-wep.vercel.app/blog/building-kingcraft-3d-game.html</link>
+      <description>How I built a Minecraft-like voxel game using Three.js with chunk-based rendering, block physics, and keyboard controls.</description>
       <pubDate>Thu, 11 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/building-kingcraft-3d-game.html</guid>
+      <category>Game Dev</category>
+      <category>Three.js</category>
+    </item>
+    
+    <item>
+      <title>Portfolio Optimization: From 72 to 85 in One Day</title>
+      <link>https://rashid-wep.vercel.app/blog/portfolio-optimization-tips.html</link>
+      <description>How I optimized a portfolio site with WebP images, SEO structured data, accessibility fixes, and performance tuning.</description>
+      <pubDate>Thu, 11 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/portfolio-optimization-tips.html</guid>
+      <category>Web Dev</category>
+      <category>SEO</category>
     </item>
   </channel>
 </rss>

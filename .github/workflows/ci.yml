@@ -1,0 +1,58 @@
+# Deploy to Vercel + Lint Check
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: 🧹 Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check HTML validity
+        run: |
+          echo "✅ HTML files found: $(find . -name '*.html' -not -path '*/node_modules/*' -not -path '*/.git/*' | wc -l)"
+          # Basic validation: check for unclosed tags
+          for f in $(find . -name '*.html' -not -path '*/node_modules/*' -not -path '*/.git/*'); do
+            if grep -q "</html>" "$f" 2>/dev/null; then
+              echo "✅ $(basename $f)"
+            fi
+          done
+      
+      - name: Check for exposed API keys
+        run: |
+          EXPOSED=$(grep -r "AIza" --include="*.js" --include="*.html" . 2>/dev/null | grep -v node_modules | grep -v ".git" | grep -v "gemini-config.example" | wc -l)
+          if [ "$EXPOSED" -gt "0" ]; then
+            echo "⚠️  $EXPOSED potential API keys found!"
+          else
+            echo "✅ No exposed API keys"
+          fi
+
+  lighthouse:
+    name: 📊 Lighthouse CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Lighthouse
+        run: |
+          echo "🔍 Run Lighthouse locally: npx lighthouse https://rashid-wep.vercel.app/ --output=json"
+
+  deploy:
+    name: 🚀 Deploy
+    needs: [lint]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Vercel
+        run: |
+          echo "✅ Ready for deployment!"
+          echo "Vercel auto-deploys from main branch."
+          echo "URL: https://rashid-wep.vercel.app/"

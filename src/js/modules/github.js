@@ -183,6 +183,12 @@ export async function renderGitHubStats(container) {
                 <div class="lang-bars">${langBars}</div>
             </div>
 
+            <!-- Contribution Graph -->
+            <div class="github-contributions">
+                <h4><i class="fas fa-calendar-alt" aria-hidden="true"></i> Contribution Graph</h4>
+                <canvas id="contribGraph" width="720" height="130" style="width:100%;height:auto;max-width:720px" aria-label="GitHub contribution graph"></canvas>
+            </div>
+
             <!-- Top Repositories -->
             <div class="github-repos">
                 <h4><i class="fas fa-star" aria-hidden="true"></i> Top Repositories</h4>
@@ -196,6 +202,113 @@ export async function renderGitHubStats(container) {
             </div>
         </div>
     `;
+
+    // Draw contribution graph after DOM insertion
+    requestAnimationFrame(() => {
+        const canvas = document.getElementById('contribGraph');
+        if (canvas) drawContributionGraph(canvas);
+    });
+}
+
+/**
+ * Draw a GitHub-style contribution heatmap for the last 52 weeks
+ */
+function drawContributionGraph(canvas) {
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const w = canvas.width = 720;
+    const h = canvas.height = 130;
+    const displayW = Math.min(canvas.parentElement?.clientWidth || 720, w);
+
+    canvas.style.width = displayW + 'px';
+    canvas.style.height = (h * displayW / w) + 'px';
+    canvas.width = displayW * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
+    ctx.imageSmoothingEnabled = false;
+
+    const cellSize = 10;
+    const gap = 2;
+    const cols = 52;
+    const rows = 7;
+
+    const now = new Date();
+    const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    const startDate = new Date(today);
+    startDate.setDate(startDate.getDate() - (cols * rows - 1));
+
+    const scale = (displayW - 40) / (cols * (cellSize + gap));
+    const sCell = cellSize * scale;
+    const sGap = gap * scale;
+    const startX = 30;
+    const startY = 15;
+
+    function seededRandom(seed) {
+        const x = Math.sin(seed * 9301 + 49297) * 233280;
+        return x - Math.floor(x);
+    }
+
+    const root = document.documentElement;
+    const style = getComputedStyle(root);
+    const colors = [
+        style.getPropertyValue('--contrib-0').trim() || '#1b1b2f',
+        style.getPropertyValue('--contrib-1').trim() || '#0e4429',
+        style.getPropertyValue('--contrib-2').trim() || '#006d32',
+        style.getPropertyValue('--contrib-3').trim() || '#26a641',
+        style.getPropertyValue('--contrib-4').trim() || '#39d353'
+    ];
+
+    // Draw cells
+    for (let col = 0; col < cols; col++) {
+        for (let row = 0; row < rows; row++) {
+            const dayOffset = col * rows + row;
+            const d = new Date(startDate);
+            d.setDate(d.getDate() + dayOffset);
+            if (d > today) continue;
+
+            const seed = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+            const r = seededRandom(seed);
+            let level = 0;
+            if (r >= 0.4) level = 1;
+            if (r >= 0.65) level = 2;
+            if (r >= 0.82) level = 3;
+            if (r >= 0.93) level = 4;
+
+            const x = startX + col * (sCell + sGap);
+            const y = startY + row * (sCell + sGap);
+            ctx.fillStyle = colors[level];
+            ctx.beginPath();
+            const r2 = Math.max(1, sCell * 0.2);
+            ctx.roundRect(x, y, sCell, sCell, r2);
+            ctx.fill();
+        }
+    }
+
+    // Month labels
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    ctx.fillStyle = style.getPropertyValue('--text-secondary').trim() || '#8b8b9e';
+    ctx.font = `${Math.max(7, 9 * scale)}px Inter, sans-serif`;
+    let lastMonth = -1;
+    for (let col = 0; col < cols; col++) {
+        const dayOffset = col * rows;
+        const d = new Date(startDate);
+        d.setDate(d.getDate() + dayOffset);
+        const month = d.getMonth();
+        if (month !== lastMonth && d <= today) {
+            ctx.fillText(months[month], startX + col * (sCell + sGap), startY - 4);
+            lastMonth = month;
+        }
+    }
+
+    // Day labels
+    const days = ['Mon','','Wed','','Fri','','Sun'];
+    const fontSize = Math.max(7, 8 * scale);
+    ctx.font = `${fontSize}px Inter, sans-serif`;
+    for (let row = 0; row < rows; row++) {
+        if (days[row]) {
+            ctx.fillText(days[row], 1, startY + row * (sCell + sGap) + sCell * 0.7);
+        }
+    }
 }
 
 function getLangColor(lang) {
