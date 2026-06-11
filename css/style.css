@@ -87,12 +87,15 @@ body.light-mode {
     --accent-rgb: 79, 70, 229;
     --accent-glow: rgba(79, 70, 229, 0.2);
     --accent-dark: #4338ca;
+    --accent-2: #0891b2;
     --border: rgba(0, 0, 0, 0.07);
     --border-color: rgba(0, 0, 0, 0.07);
     --card-bg: rgba(255, 255, 255, 0.82);
     --shadow-lg: 0 10px 40px -12px rgba(0, 0, 0, 0.1);
     --shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
     --command-panel-soft: rgba(241, 245, 249, 0.85);
+    --command-panel: rgba(241, 245, 249, 0.92);
 }
 
 /* =========================================
@@ -104,7 +107,23 @@ body.light-mode {
     box-sizing: border-box;
 }
 
-html { scroll-behavior: smooth; }
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 100px;
+}
+
+/* Improve text rendering */
+* {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Consistent focus styles for accessibility */
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
 
 body {
     font-family: var(--font-body);
@@ -234,11 +253,36 @@ h1, h2, h3, h4, h5, h6 {
 .section {
     padding: 96px 0;
     scroll-margin-top: 100px;
+    position: relative;
 }
 
+/* Subtle section divider for visual rhythm */
+.section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(80%, 400px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb), 0.1), transparent);
+}
+
+.section:last-of-type::after {
+    display: none;
+}
+
+/* Intrinsic sizing for off-screen sections */
 #vault, #projects, #about, #experience, #contact, .main-footer {
     content-visibility: auto;
-    contain: content;
+    contain-intrinsic-size: 800px;
+}
+
+@media (max-width: 768px) {
+    .section { padding: 64px 0; }
+    #vault, #projects, #about, #experience, #contact, .main-footer {
+        contain-intrinsic-size: 500px;
+    }
 }
 
 /* =========================================
@@ -546,6 +590,38 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 }
 
+/* Performance mode — reduces visual weight */
+body.performance-mode .bg-mesh::before,
+body.performance-mode .bg-mesh::after,
+body.performance-mode body::before {
+    animation: none !important;
+    opacity: 0.3 !important;
+}
+
+body.performance-mode .model-card::after,
+body.performance-mode .vault-item::after,
+body.performance-mode .project-card::after {
+    display: none !important;
+}
+
+body.performance-mode .voice-glow-ring {
+    display: none !important;
+}
+
+body.performance-mode .model-card:hover,
+body.performance-mode .vault-item:hover,
+body.performance-mode .project-card:hover {
+    transform: translateY(-2px) !important;
+}
+
+body.performance-mode .text-gradient {
+    animation: none !important;
+}
+
+body.performance-mode .marquee-track {
+    animation-play-state: paused !important;
+}
+
 .disabled-link {
     cursor: not-allowed;
     opacity: 0.55;
@@ -709,8 +785,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Typewriter */
-.typewriter-wrapper { display: inline-flex; align-items: center; gap: 4px; }
-.typewriter-text { font-family: var(--font-mono); color: var(--accent); }
+/* Typewriter styles defined in enhancements.css */
 
 /* =========================================
    SECTION HEAD
@@ -1982,33 +2057,7 @@ body.admin-section-editing .vault-item { position: relative; }
 .install-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 20px var(--accent-glow) !important; }
 .install-btn:disabled { background: linear-gradient(135deg, #10b981, #059669) !important; cursor: default !important; }
 
-/* =========================================
-   TECH STACK MARQUEE
-   ========================================= */
-.tech-stack-section { overflow: hidden; padding: 40px 0; }
-.marquee-track {
-    display: flex;
-    gap: 28px;
-    animation: marqueeScroll 30s linear infinite;
-    width: max-content;
-}
-.marquee-track:hover { animation-play-state: paused; }
-@keyframes marqueeScroll { to { transform: translateX(-50%); } }
-.tech-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    background: rgba(var(--accent-rgb), 0.05);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text-med);
-    white-space: nowrap;
-    transition: var(--transition);
-}
-.tech-item:hover { border-color: rgba(var(--accent-rgb), 0.3); color: var(--text-high); }
+/* Tech stack marquee styles defined in enhancements.css */
 
 /* =========================================
    SERVICES / CAREER / OBJECTIVES
@@ -2161,14 +2210,28 @@ textarea:focus-visible, select:focus-visible {
 /* IntersectionObserver scroll reveals — JS toggles .active */
 .reveal {
     opacity: 0;
-    transform: translateY(28px);
+    transform: translateY(28px) scale(0.98);
     transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
 }
 
 .reveal.active {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
+
+/* Staggered reveal for grid items */
+.models-grid .reveal:nth-child(2) { transition-delay: 0.08s; }
+.models-grid .reveal:nth-child(3) { transition-delay: 0.16s; }
+.vault-grid .reveal:nth-child(2) { transition-delay: 0.06s; }
+.vault-grid .reveal:nth-child(3) { transition-delay: 0.12s; }
+.vault-grid .reveal:nth-child(4) { transition-delay: 0.18s; }
+.vault-grid .reveal:nth-child(5) { transition-delay: 0.24s; }
+.vault-grid .reveal:nth-child(6) { transition-delay: 0.30s; }
+.projects-grid .reveal:nth-child(2) { transition-delay: 0.06s; }
+.projects-grid .reveal:nth-child(3) { transition-delay: 0.12s; }
+.timeline-item:nth-child(2) .reveal { transition-delay: 0.1s; }
+.timeline-item:nth-child(3) .reveal { transition-delay: 0.2s; }
 
 .section-enter { opacity: 0; transform: translateY(28px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .section-enter.visible { opacity: 1; transform: translateY(0); }

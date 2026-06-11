@@ -26,6 +26,7 @@
     <meta name="twitter:site" content="@MOT1209">
     <meta name="twitter:creator" content="@MOT1209">
     <meta name="google-site-verification" content="VERIFICATION_CODE">
+    <meta name="color-scheme" content="dark light">
     <title>Rashid - AI Workspace | Full-Stack Developer Portfolio</title>
 
     <!-- Google Fonts -->
@@ -45,21 +46,24 @@
     <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
-    <!-- Supabase JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-config.js?v=1.1"></script>
-
-    <!-- Custom CSS -->
+    <!-- Critical CSS (render-blocking) -->
     <link rel="stylesheet" href="src/css/main.css?v=1.0">
     <link rel="stylesheet" href="css/style.css?v=8.0">
-    <link rel="stylesheet" href="css/admin.css?v=3.0">
-    <link rel="stylesheet" href="css/app-mode.css?v=3.0">
-    <link rel="stylesheet" href="css/mobile-improvements.css?v=1.0">
-    <link rel="stylesheet" href="css/enhancements.css?v=1.0">
+
+    <!-- Non-critical CSS (deferred) -->
+    <link rel="stylesheet" href="css/admin.css?v=3.0" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/app-mode.css?v=3.0" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/mobile-improvements.css?v=1.0" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/enhancements.css?v=1.0" media="print" onload="this.media='all'">
+
+    <!-- Supabase JS (deferred) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="js/supabase-config.js?v=1.1" defer></script>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json?v=2">
-    <meta name="theme-color" content="#09090b">
+    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <style>
@@ -364,104 +368,15 @@
                 <button class="filter-btn" data-filter="model">Models</button>
             </div>
             
-            <!-- Projects Grid -->
-            <div class="projects-grid legacy-projects-grid" style="margin-top: 30px;" hidden aria-hidden="true">
-                <!-- Games -->
-                <div class="project-card reveal" data-category="games">
-                    <div class="project-icon" style="background: linear-gradient(135deg, #ea580c, #f97316);">
-                        <i class="fas fa-cubes"></i>
-                    </div>
-                    <h3>Rust Construction</h3>
-                    <p>3D building game with physics. Build structures, manage resources, survive!</p>
-                    <div class="project-tags">
-                        <span>Game</span><span>3D</span><span>Physics</span>
-                    </div>
-                    <a href="games/rust-game/index.html" class="btn btn-primary" style="margin-top: 10px;">
-                        <i class="fas fa-play"></i> Play Now
-                    </a>
-                </div>
-                
-                <div class="project-card reveal" data-category="games">
-                    <div class="project-icon" style="background: linear-gradient(135deg, #16a34a, #22c55e);">
-                        <i class="fas fa-tractor"></i>
-                    </div>
-                    <h3>Farm Empire</h3>
-                    <p>Immersive farming simulation. Grow crops, raise animals, build your empire.</p>
-                    <div class="project-tags">
-                        <span>Game</span><span>Simulation</span><span>Economy</span>
-                    </div>
-                    <a href="games/farm-game/index.html" class="btn btn-primary" style="margin-top: 10px;">
-                        <i class="fas fa-play"></i> Play Now
-                    </a>
-                </div>
-                
-                <!-- Apps -->
-                <div class="project-card reveal" data-category="app">
-                    <div class="project-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
-                        <i class="fas fa-calculator"></i>
-                    </div>
-                    <h3>Calculator Vault</h3>
-                    <p>Privacy-focused calculator with hidden vault. Hide files behind calculator!</p>
-                    <div class="project-tags">
-                        <span>App</span><span>Utility</span><span>Privacy</span>
-                    </div>
-                    <a href="apps/calculator-vault/index.html" class="btn btn-primary" style="margin-top: 10px;">
-                        <i class="fas fa-external-link-alt"></i> Launch
-                    </a>
-                </div>
-                
-                <div class="project-card reveal" data-category="app">
-                    <div class="project-icon" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
-                        <i class="fas fa-question-circle"></i>
-                    </div>
-                    <h3>Quiz Master</h3>
-                    <p>Interactive quiz platform with categories, scoring, and progress tracking.</p>
-                    <div class="project-tags">
-                        <span>App</span><span>Education</span><span>PWA</span>
-                    </div>
-                    <a href="apps/quiz-app/index.html" class="btn btn-primary" style="margin-top: 10px;">
-                        <i class="fas fa-external-link-alt"></i> Launch
-                    </a>
-                </div>
-                
-                <div class="project-card reveal" data-category="app">
-                    <div class="project-icon" style="background: linear-gradient(135deg, #059669, #10b981);">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <h3>Quran Pro</h3>
-                    <p>Complete Quran with tafsir, 40+ reciters, search, and offline support.</p>
-                    <div class="project-tags">
-                        <span>App</span><span>Religious</span><span>PWA</span>
-                    </div>
-                    <a href="apps/quran-app/index.html" class="btn btn-primary" style="margin-top: 10px;">
-                        <i class="fas fa-external-link-alt"></i> Launch
-                    </a>
-                </div>
-                
-                <div class="project-card reveal" data-category="model">
-                    <div class="project-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);">
-                        <i class="fas fa-robot"></i>
-                    </div>
-                    <h3>Rashid AI</h3>
-                    <p>Advanced conversational AI with Chat, Images, Video capabilities.</p>
-                    <div class="project-tags">
-                        <span>AI</span><span>Assistant</span><span>Multilingual</span>
-                    </div>
-                    <a href="models/Rashid-app/index.html" class="btn btn-primary" style="margin-top: 10px;">
-                        <i class="fas fa-external-link-alt"></i> Launch
-                    </a>
-                </div>
-            </div>
+            <!-- Projects are dynamically injected by JS into #gaming-grid -->
             
-            <!-- Dynamic Projects from Database -->
-            <div class="projects-grid" id="gaming-grid" style="margin-top: 30px;">
-                <!-- Dynamic Projects Injected by script.js -->
-            </div>
+            <!-- Dynamic Projects (injected by JS) -->
+            <div class="projects-grid" id="gaming-grid" style="margin-top: 30px;"></div>
         </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="section alt-bg" aria-label="About Rashid">
+    <section id="about" class="section" aria-label="About Rashid">
         <div class="container">
             <div class="section-head">
                 <h2 class="reveal"><i class="fas fa-info-circle" aria-hidden="true"></i> About Rashid</h2>
@@ -755,41 +670,47 @@
     <!-- PWA Install Manager -->
     <script src="js/pwa-installer.js?v=1.1"></script>
     <script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "Rashid",
-            "url": "https://rashid-wep.vercel.app/",
-            "description": "Rashid (MOT1209) — Full-Stack Developer passionate about Next.js 14, Python, and Supabase. Building Alking, FromLiten & 3D simulation worlds with Three.js."
+    [
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Rashid - AI Workspace",
+        "url": "https://rashid-wep.vercel.app/",
+        "description": "Rashid (MOT1209) — Full-Stack Developer building AI-powered web platforms, 3D games, and PWA apps with Next.js, Supabase, and Three.js.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": {
+            "@type": "EntryPoint",
+            "urlTemplate": "https://rashid-wep.vercel.app/?q={search_term_string}"
+          },
+          "query-input": "required name=search_term_string"
         }
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Rashid",
+        "alternateName": "MOT1209",
+        "url": "https://rashid-wep.vercel.app/",
+        "jobTitle": "Full-Stack Developer",
+        "knowsAbout": ["Next.js", "Python", "Supabase", "Three.js", "AI", "PWA"],
+        "sameAs": [
+          "https://github.com/MOT1209"
+        ]
+      }
+    ]
     </script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Rashid",
-  "alternateName": "MOT1209",
-  "url": "https://rashid-wep.vercel.app/",
-  "jobTitle": "Full-Stack Developer",
-  "knowsAbout": ["Next.js", "Python", "Supabase", "Three.js", "AI"],
-  "sameAs": [
-    "https://github.com/MOT1209"
-  ]
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "Rashid - AI Workspace",
-  "url": "https://rashid-wep.vercel.app/",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://rashid-wep.vercel.app/?q={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-</script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://rashid-wep.vercel.app/" },
+        { "@type": "ListItem", "position": 2, "name": "Projects", "item": "https://rashid-wep.vercel.app/#projects" },
+        { "@type": "ListItem", "position": 3, "name": "Vault", "item": "https://rashid-wep.vercel.app/#vault" }
+      ]
+    }
+    </script>
 
 <!-- Cookie Consent Banner -->
 <div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">

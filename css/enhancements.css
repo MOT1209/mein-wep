@@ -180,115 +180,7 @@
 }
 
 /* ---------- 4. PROJECT MODAL PREVIEW ---------- */
-.project-modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.35s ease;
-}
-
-.project-modal-overlay.active {
-    opacity: 1;
-    visibility: visible;
-}
-
-.project-modal {
-    background: rgba(20, 20, 25, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 24px;
-    padding: 40px;
-    max-width: 550px;
-    width: 90%;
-    transform: translateY(30px) scale(0.95);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    position: relative;
-}
-
-.project-modal-overlay.active .project-modal {
-    transform: translateY(0) scale(1);
-}
-
-.project-modal-close {
-    position: absolute;
-    top: 16px;
-    right: 16px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.project-modal-close:hover {
-    background: rgba(239, 68, 68, 0.2);
-    border-color: rgba(239, 68, 68, 0.5);
-}
-
-.project-modal-icon {
-    width: 64px;
-    height: 64px;
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.8rem;
-    color: #fff;
-    margin-bottom: 20px;
-}
-
-.project-modal h3 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: #fff;
-}
-
-.project-modal .modal-desc {
-    color: rgba(255, 255, 255, 0.65);
-    line-height: 1.7;
-    margin-bottom: 20px;
-}
-
-.project-modal .modal-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 24px;
-}
-
-.project-modal .modal-tags span {
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    background: rgba(var(--accent-rgb), 0.1);
-    color: var(--accent);
-    border: 1px solid rgba(var(--accent-rgb), 0.2);
-}
-
-.project-modal .modal-actions {
-    display: flex;
-    gap: 12px;
-}
-
-.project-modal .modal-actions .btn {
-    flex: 1;
-    text-align: center;
-}
+/* Styles defined in style.css */
 
 /* ---------- 5. TOAST NOTIFICATIONS ---------- */
 .toast-container {
@@ -567,17 +459,7 @@
 }
 
 /* ---------- SCROLL PROGRESS ---------- */
-.scroll-progress {
-  position: fixed;
-  top: 0;
-  left: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--accent, #38bdf8), #a78bfa);
-  z-index: 1001;
-  width: 0%;
-  transition: width 0.1s linear;
-  box-shadow: 0 0 12px var(--accent-glow, rgba(56, 189, 248, 0.3));
-}
+/* Scroll progress bar styles defined in style.css */
 
 /* ---------- STATISTICS SECTION ---------- */
 .stats-grid {

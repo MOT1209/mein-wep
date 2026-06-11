@@ -38,14 +38,13 @@ export function initTheme() {
     });
 
     const perfToggle = qs('#perf-mode');
-    const bgMesh = qs('.bg-mesh');
     on(perfToggle, 'change', () => {
-        if (bgMesh) bgMesh.style.display = perfToggle.checked ? 'none' : 'block';
+        document.body.classList.toggle('performance-mode', perfToggle.checked);
         localStorage.setItem('perfMode', String(perfToggle.checked));
     });
 
     if (localStorage.getItem('perfMode') === 'true' && perfToggle) {
         perfToggle.checked = true;
-        if (bgMesh) bgMesh.style.display = 'none';
+        document.body.classList.add('performance-mode');
     }
 }
