@@ -12,7 +12,9 @@ export class World {
   constructor(scene, seed = 20260610) {
     this.scene = scene;
     this.chunks = new Map();
+    this.seed = seed;
     this.gen = new TerrainGen(seed);
+    this.renderDistance = RENDER_DISTANCE;
 
     const atlas = buildAtlas();
     this.material = new THREE.MeshLambertMaterial({
@@ -104,7 +106,7 @@ export class World {
   update(playerPos) {
     const pcx = Math.floor(playerPos.x / S);
     const pcz = Math.floor(playerPos.z / S);
-    const R = RENDER_DISTANCE;
+    const R = this.renderDistance;
 
     // فقط نعيد حساب القطع المطلوبة إذا تغير موضع القطعة
     if (pcx !== this._lastCX || pcz !== this._lastCZ) {

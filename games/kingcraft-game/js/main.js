@@ -5,7 +5,7 @@ import { Player } from "./player/Player.js";
 import { Hotbar } from "./ui/Hotbar.js";
 import { InventoryUI } from "./ui/InventoryUI.js";
 import { raycastVoxel } from "./utils/Raycast.js";
-import { AIR, getBlock, blockDrop } from "./world/BlockData.js";
+import { AIR, getBlock, blockDrop, blockByName } from "./world/BlockData.js";
 import { Inventory } from "./player/Inventory.js";
 import { DropManager } from "./blocks/BlockDrops.js";
 import { FurnaceManager } from "./crafting/Furnace.js";
@@ -13,7 +13,7 @@ import { getItem, isPlaceable, placeBlockId } from "./items/Items.js";
 import { getTool, BLOCK_TOOL } from "./player/Tools.js";
 import { HealthSystem } from "./player/Health.js";
 import { SoundManager } from "./utils/SoundManager.js";
-import { EXHAUSTION_PER_BREAK } from "./utils/Constants.js";
+import { EXHAUSTION_PER_BREAK, WORLD_HEIGHT } from "./utils/Constants.js";
 import { saveGame, loadGame } from "./utils/SaveLoad.js";
 import { EntityManager } from "./entities/EntityManager.js";
 
@@ -299,21 +299,211 @@ function rightClick() {
 // Chat input
 const chatInput = document.getElementById("chat-input");
 
+// ===== أدوات F3 المساعدة =====
+let _f3Held = false;
+let _showHitboxes = false;
+let _showChunkBorders = false;
+let _showAdvancedTooltips = false;
+let _chunkBorderLines = null;
+let _hitboxLines = null;
+let _paused = false;
+
+function showHitboxes(show) {
+  if (_hitboxLines) { scene.remove(_hitboxLines); _hitboxLines.geometry.dispose(); }
+  if (!show) { _hitboxLines = null; return; }
+  const g = new THREE.BufferGeometry();
+  const pos = []; const idx = [];
+  let off = 0;
+  for (const e of entityManager.entities) {
+    if (!e.alive) continue;
+    const hw = 0.3, hh = e.h || 0.9;
+    const [x, y, z] = [e.pos.x, e.pos.y, e.pos.z];
+    const corners = [
+      [x-hw, y, z-hw], [x+hw, y, z-hw], [x+hw, y, z+hw], [x-hw, y, z+hw],
+      [x-hw, y+hh, z-hw], [x+hw, y+hh, z-hw], [x+hw, y+hh, z+hw], [x-hw, y+hh, z+hw],
+    ];
+    for (const c of corners) { pos.push(c[0], c[1], c[2]); }
+    const edges = [0,1, 1,2, 2,3, 3,0, 4,5, 5,6, 6,7, 7,4, 0,4, 1,5, 2,6, 3,7];
+    for (const e of edges) idx.push(off + e);
+    off += 8;
+  }
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  g.setIndex(idx);
+  _hitboxLines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.6 }));
+  _hitboxLines.visible = true;
+  scene.add(_hitboxLines);
+}
+
+function showChunkBorders(show, playerPos) {
+  if (_chunkBorderLines) { scene.remove(_chunkBorderLines); _chunkBorderLines.geometry.dispose(); }
+  if (!show) { _chunkBorderLines = null; return; }
+  const g = new THREE.BufferGeometry();
+  const pos = [];
+  const S = 16;
+  const R = world.renderDistance;
+  const pcx = Math.floor(playerPos.x / S) * S;
+  const pcz = Math.floor(playerPos.z / S) * S;
+  for (let dz = -R; dz <= R; dz++) {
+    for (let dx = -R; dx <= R; dx++) {
+      const x = pcx + dx * S, z = pcz + dz * S;
+      pos.push(x, 0, z, x+S, 0, z);
+      pos.push(x+S, 0, z, x+S, 0, z+S);
+      pos.push(x+S, 0, z+S, x, 0, z+S);
+      pos.push(x, 0, z+S, x, 0, z);
+      pos.push(x, WORLD_HEIGHT, z, x+S, WORLD_HEIGHT, z);
+      pos.push(x+S, WORLD_HEIGHT, z, x+S, WORLD_HEIGHT, z+S);
+      pos.push(x+S, WORLD_HEIGHT, z+S, x, WORLD_HEIGHT, z+S);
+      pos.push(x, WORLD_HEIGHT, z+S, x, WORLD_HEIGHT, z);
+    }
+  }
+  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
+  _chunkBorderLines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.3 }));
+  _chunkBorderLines.visible = true;
+  scene.add(_chunkBorderLines);
+}
+
+function showF3Help() {
+  const lines = [
+    "§e=== F3 Shortcuts ===",
+    "F3        : Toggle debug",
+    "F3 + A    : Reload chunks",
+    "F3 + B    : Toggle hitboxes",
+    "F3 + C    : Copy coordinates",
+    "F3 + D    : Clear chat",
+    "F3 + Esc  : Pause",
+    "F3 + F    : Increase render distance",
+    "F3 + G    : Toggle chunk borders",
+    "F3 + H    : Toggle advanced tooltips",
+    "F3 + Q    : Show this help",
+    "F3 + T    : Rebuild all chunks",
+  ];
+  // Show in chat area
+  const msgEl = chatInput.querySelector(".chat-msgs");
+  msgEl.innerHTML = lines.map(l => `<div style="color:#fff;font:13px monospace;padding:2px 4px">${l}</div>`).join("");
+  setTimeout(() => { if (!chatInput.classList.contains("hidden")) msgEl.innerHTML = ""; }, 5000);
+}
+
+function rebuildAllChunks() {
+  const keys = [...world.chunks.keys()];
+  for (const k of keys) {
+    const c = world.chunks.get(k);
+    if (c) { c.dirty = true; world._inQueue.add(c); world._meshQueue.push(c); }
+  }
+}
+
+function chatSend() {
+  const input = chatInput.querySelector("input");
+  const text = input.value.trim();
+  chatInput.classList.add("hidden");
+  if (text.startsWith("/")) { runCommand(text.slice(1)); }
+  else if (text) { /* normal chat — no server to send to */ }
+  canvas.requestPointerLock().catch(() => {});
+}
+
+function runCommand(cmd) {
+  const parts = cmd.trim().split(/\s+/);
+  const c = parts[0].toLowerCase();
+  const args = parts.slice(1);
+
+  try {
+    switch (c) {
+      case "gamemode": case "gm":
+        const mode = args[0];
+        if (mode === "creative" || mode === "1" || mode === "c") { player.flying = true; gameStarted = true; }
+        else if (mode === "survival" || mode === "0" || mode === "s") { player.flying = false; }
+        else if (mode === "spectator" || mode === "3" || mode === "sp") { player.flying = true; player.thirdPerson = true; }
+        break;
+      case "give":
+        if (args.length < 1) break;
+        const count = parseInt(args[1]) || 1;
+        inventory.addItem(args[0], count);
+        break;
+      case "tp": case "teleport":
+        if (args.length >= 3) { player.pos.set(parseFloat(args[0]) + 0.5, parseFloat(args[1]), parseFloat(args[2]) + 0.5); player.vel.set(0, 0, 0); }
+        break;
+      case "time":
+        if (args[0] === "day") entityManager._time = 0;
+        else if (args[0] === "night") entityManager._time = entityManager._dayLength * 0.6;
+        else if (args[0] === "noon") entityManager._time = entityManager._dayLength * 0.25;
+        else if (args[0] === "midnight") entityManager._time = entityManager._dayLength * 0.85;
+        break;
+      case "weather":
+        if (args[0] === "clear") SKY.setHex(0x7ec0ee);
+        else if (args[0] === "rain") SKY.setHex(0x4a6b8a);
+        else if (args[0] === "thunder") SKY.setHex(0x2a3a4a);
+        break;
+      case "kill":
+        if (args[0] === "@p" || !args[0]) health.takeDamage(100);
+        else if (args[0] === "@e") { for (const e of entityManager.entities) e.alive = false; }
+        break;
+      case "summon":
+        if (args.length >= 1) { entityManager.spawnMob(args[0], player.pos.x, player.pos.y, player.pos.z); }
+        break;
+      case "difficulty": case "diff":
+        const d = args[0];
+        if (d === "peaceful" || d === "0") { /* no hostile mobs */ }
+        else if (d === "easy" || d === "1") { /* lower damage */ }
+        else if (d === "normal" || d === "2") { /* normal */ }
+        else if (d === "hard" || d === "3") { /* higher damage */ }
+        break;
+      case "seed":
+        debug.textContent += "\nSeed: " + world.seed;
+        break;
+      case "save-all": case "save":
+        saveGame(player, inventory, health, world, drops);
+        break;
+      case "fill":
+        if (args.length >= 7) {
+          const [x1, y1, z1, x2, y2, z2, block] = args;
+          const minX = Math.min(parseInt(x1), parseInt(x2));
+          const maxX = Math.max(parseInt(x1), parseInt(x2));
+          const minY = Math.min(parseInt(y1), parseInt(y2));
+          const maxY = Math.max(parseInt(y1), parseInt(y2));
+          const minZ = Math.min(parseInt(z1), parseInt(z2));
+          const maxZ = Math.max(parseInt(z1), parseInt(z2));
+          const id = typeof block === "string" ? (blockByName(block)?.id || parseInt(block)) : parseInt(block);
+          for (let y = minY; y <= maxY; y++)
+            for (let x = minX; x <= maxX; x++)
+              for (let z = minZ; z <= maxZ; z++)
+                world.setBlock(x, y, z, id);
+        }
+        break;
+    }
+  } catch (err) { /* command error — ignore */ }
+}
+
 // ===== لوحة المفاتيح: المخزون + التحكمات =====
 window.addEventListener("keydown", (e) => {
+  // تتبع مفتاح F3 (حتى لو اللعبة ما بدأت)
+  if (e.code === "F3") { _f3Held = true; window._kcF3Held = true; e.preventDefault(); }
   if (!gameStarted) return;
 
   // Chat open — special handling
   if (!chatInput.classList.contains("hidden")) {
-    if (e.code === "Enter") {
-      chatInput.classList.add("hidden");
-      canvas.requestPointerLock().catch(() => {});
-    } else if (e.code === "Escape") {
-      chatInput.classList.add("hidden");
-      canvas.requestPointerLock().catch(() => {});
-    }
+    if (e.code === "Enter") { chatSend(); return; }
+    if (e.code === "Escape") { chatInput.classList.add("hidden"); canvas.requestPointerLock().catch(() => {}); return; }
     return;
   }
+
+  // ===== F3 + ? — اختصارات التصحيح (تسبق التحكمات العادية) =====
+  if (_f3Held) {
+    e.preventDefault();
+    if (e.code === "KeyA") { world.update(player.pos); }
+    else if (e.code === "KeyB") { _showHitboxes = !_showHitboxes; showHitboxes(_showHitboxes); }
+    else if (e.code === "KeyC") { navigator.clipboard.writeText(`XYZ: ${player.pos.x.toFixed(2)} / ${player.pos.y.toFixed(2)} / ${player.pos.z.toFixed(2)}`).catch(() => {}); }
+    else if (e.code === "KeyF" && !ui.isOpen) { world.renderDistance = Math.min(world.renderDistance + 1, 12); }
+    else if (e.code === "KeyG") { _showChunkBorders = !_showChunkBorders; showChunkBorders(_showChunkBorders, player.pos); }
+    else if (e.code === "KeyH") { _showAdvancedTooltips = !_showAdvancedTooltips; }
+    else if (e.code === "KeyD") { document.querySelector(".chat-msgs").innerHTML = ""; }
+    else if (e.code === "KeyQ") { showF3Help(); }
+    else if (e.code === "KeyT") { rebuildAllChunks(); }
+    else if (e.code === "Escape") { _paused = !_paused; }
+    else if (e.code === "F3") { if (!e.repeat) debug.classList.toggle("hidden"); }
+    return; // أي مفتاح مع F3 لا ينفّذ التحكمات العادية
+  }
+
+  // ===== التحكمات العادية =====
+  if (e.code === "F3" && !e.repeat) { e.preventDefault(); debug.classList.toggle("hidden"); return; }
 
   if (e.code === "KeyE") {
     if (ui.isOpen) ui.close();
@@ -364,18 +554,21 @@ window.addEventListener("keydown", (e) => {
     link.click();
   }
 
-  // F3 — تبديل معلومات التصحيح
-  if (e.code === "F3") {
-    e.preventDefault();
-    debug.classList.toggle("hidden");
-  }
-
   // F5 — تبديل المنظور
   if (e.code === "F5") {
     e.preventDefault();
     player.thirdPerson = !player.thirdPerson;
   }
 });
+
+window.addEventListener("keyup", (e) => {
+  if (e.code === "F3") { _f3Held = false; window._kcF3Held = false; }
+});
+
+let _f3Held = false;
+let _showHitboxes = false;
+let _showChunkBorders = false;
+let _showAdvancedTooltips = false;
 
 // ===== إعادة الحياة =====
 document.getElementById("btn-respawn").addEventListener("click", () => {
@@ -508,7 +701,7 @@ function loop(now) {
     autoSave(dt);
   }
 
-  if (menuHidden()) {
+  if (menuHidden() && !_paused) {
     const playing = !ui.isOpen && !health.dead;
     if (playing) {
       player.update(dt, yaw);
@@ -524,6 +717,10 @@ function loop(now) {
     }
     world.update(player.pos);
 
+    // تحديث حدود الأراضي وصناديق الاصطدام إن كانت ظاهرة
+    if (_showChunkBorders && _chunkBorderLines) showChunkBorders(true, player.pos);
+    if (_showHitboxes && _hitboxLines) showHitboxes(true);
+
     const hit = playing ? raycastVoxel(world, eyeOrigin(), lastDir) : null;
     if (hit) {
       highlight.visible = true;
@@ -536,13 +733,17 @@ function loop(now) {
     if (debugTimer >= 0.5) {
       fps = Math.round(frames / debugTimer);
       frames = 0; debugTimer = 0;
+      const tooltipId = hit ? getBlock(hit.block[0], hit.block[1], hit.block[2]) : 0;
+      const tooltipName = tooltipId ? (getItem(tooltipId)?.name || `ID:${tooltipId}`) : "";
       debug.textContent =
         `KingCraft v0.4\n` +
         `FPS: ${fps}\n` +
         `XYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\n` +
         `chunks: ${world.chunks.size} • drops: ${drops.entities.length} • mobs: ${entityManager.entities.length}` +
         (player.flying ? "\n[طيران]" : "") +
-        (player.sneaking ? "\n[زحف]" : "");
+        (player.sneaking ? "\n[زحف]" : "") +
+        (_paused ? "\n§c⏸ PAUSED" : "") +
+        (_showAdvancedTooltips && tooltipName ? `\n[${tooltipName}]` : "");
     }
   }
 

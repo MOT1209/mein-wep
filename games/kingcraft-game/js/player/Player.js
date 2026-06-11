@@ -32,6 +32,7 @@ export class Player {
 
   _bindInput() {
     window.addEventListener("keydown", (e) => {
+      if (window._kcF3Held) return; // F3 combos تمنع الحركة
       const k = e.code;
       this.keys[k] = true;
       if (k === "KeyV") this.thirdPerson = !this.thirdPerson;
