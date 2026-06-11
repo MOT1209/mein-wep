@@ -1,235 +1,182 @@
-# Rashid Web App - Personal Portfolio & Utility Hub
+# Rashid — AI Workspace & Developer Portfolio
+
+> A full-stack developer portfolio, AI workspace, game hub, and PWA app center — all in one platform.
+
+Deployed at: **https://rashid-wep.vercel.app**  
+GitHub: **https://github.com/MOT1209/mein-wep**
+
+---
 
 ## Overview
 
-Welcome to Rashid's comprehensive web application - a modern portfolio showcasing web development skills, utility tools, and interactive games. This project is built with vanilla HTML, CSS, and JavaScript, designed to be a complete demonstration of frontend capabilities and Google AdSense integration.
+A comprehensive personal platform built with vanilla HTML/CSS/JS, featuring:
 
-## 🚀 Features
+- **3D Browser Games** — Three.js sandbox worlds (KingCraft, Rust Construction, Farm Empire)
+- **AI Assistant** — Rashid AI, powered by Google Gemini API
+- **PWA Applications** — Quran, Calculator Vault, Quiz Master
+- **Knowledge Vault** — Prompts, code, docs, media, archives, API references
+- **Admin Dashboard** — Login-secured management interface
+- **AdSense Monetization** — across 21 pages with full SEO optimization
 
-### Core Pages
-- **Home Page** (`index.html`) - Professional landing page with animated hero section
-- **Learning Center** (`learning.html`) - Comprehensive educational resources
-- **Games Hub** (`games/`) - Interactive arcade games (Farm Game, Rust Survival Game)
-- **Vault System** (`vault/`) - Organized collection of code snippets, documentation, and resources
-- **AI Models** (`models/`) - Rashid AI chat interface and utilities
-- **Applications** (`apps/`) - Practical tools including Quiz, Calculator, and Quran apps
-
-### Utility Tools
-- **Icon Generator** (`icon-generator.html`) - PWA icon creation tool with advanced features
-- **Voice Test** (`test-voice.html`) - Web Speech API testing interface
-- **Offline Mode** (`offline.html`) - PWA fallback page
-
-### Admin Dashboard
-- **Admin Panel** (`admin/`) - Login-secured management interface
-
-## 📱 Mobile Responsive Design
-
-The entire application features comprehensive mobile optimization:
-- **Mobile-first CSS** (`mobile-improvements.css`) - Tailored for mobile devices
-- **Enhanced accessibility** with zoom support (`maximum-scale=5.0`)
-- **Touch-friendly navigation** and responsive layouts
-- **Cross-browser compatibility** (Chrome, Firefox, Safari, Edge)
-
-## 🎯 Google AdSense Integration
-
-The application is fully optimized for Google AdSense monetization:
-
-- **Verification script** deployed on all 21 editable pages
-- **Comprehensive SEO** with meta descriptions, canonical URLs, Open Graph tags
-- **Privacy Policy**, About, and Contact pages for compliance
-- **Optimized sitemap** with 18 public URLs
-- **Mobile-responsive design** for better ad performance
-
-## 🗂️ Project Structure
-
-```
-📁 root/
-├── 📁 games/
-│   ├── 📁 farm-game/
-│   ├── 📁 rust-game/
-│   └── index.html
-├── 📁 vault/
-│   ├── 📁 api/
-│   ├── 📁 code/
-│   ├── 📁 docs/
-│   ├── 📁 media/
-│   ├── 📁 archive/
-│   └── 📁 prompts/
-├── 📁 models/
-│   └── 📁 Rashid-app/
-├── 📁 apps/
-│   ├── 📁 quiz-app/
-│   ├── 📁 calculator-vault/
-│   └── 📁 quran-app/
-├── 📁 admin/
-│   ├── dashboard.html
-│   └── login.html
-├── index.html
-├── learning.html
-├── offline.html
-├── test-voice.html
-├── icon-generator.html
-├── about.html
-├── contact.html
-├── privacy.html
-├── robots.txt
-├── sitemap.xml
-└── ADSENSE_REPORT.md
-```
-
-## 📊 Technical Specifications
-
-### Technologies Used
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Design**: Custom CSS framework with mobile-first approach
-- **PWA**: Service Worker implementation for offline functionality
-- **SEO**: Comprehensive meta tags, Open Graph, Twitter Cards
-- **Monetization**: Google AdSense integration ready
-
-### Key CSS Files
-- `style.css` - Main stylesheet with animations and responsive design
-- `mobile-improvements.css` - Mobile-specific optimizations
-- `icon-generator.css` - Icon generator tool styling
-
-## 🔧 Development Notes
-
-### AdSense Integration
-- **Verification script** inserted before `</head>` in all pages
-- **Auto Ads** ready - no code changes needed after approval
-- **Admin pages** marked `noindex, nofollow` to prevent crawling
-- **All public pages** optimized for ad placement
-
-### SEO Features
-- **Meta descriptions** for all pages (unique and descriptive)
-- **Canonical URLs** pointing to `https://rashid-wep.vercel.app/`
-- **Open Graph tags** for social media sharing
-- **Twitter Card tags** for enhanced Twitter sharing
-- **Robots.txt** configured for full crawling
-- **Sitemap.xml** with 18 public URLs
-
-### Performance Optimizations
-- **Async loading** for scripts and resources
-- **Optimized images** and assets
-- **Minimal HTTP requests** with efficient CSS organization
-- **Cross-origin** support for AdSense integration
-
-## 🚀 Getting Started
-
-1. **Clone the repository** to your local machine
-2. **Open `index.html`** in a web browser to view the application
-3. **Explore different sections** using the navigation menu
-4. **Test mobile responsiveness** by resizing the browser window
-5. **Verify AdSense integration** by checking the source code
-
-## 📈 Deployment
-
-The application is deployed on **Vercel** at `https://rashid-wep.vercel.app/`
-
-### Deployment Checklist
-- ✅ All HTML files validated
-- ✅ CSS files properly referenced
-- ✅ JavaScript functionality tested
-- ✅ AdSense script deployed
-- ✅ SEO tags configured
-- ✅ Sitemap submitted to search engines
-- ✅ Mobile responsiveness verified
-
-## 🔐 Security Features
-
-- **Admin authentication** with login protection
-- **Input validation** for forms and user interactions
-- **Secure AdSense integration** with proper crossorigin attributes
-- **Privacy Policy** implemented for data protection
-
-## 📱 Mobile Optimization
-
-The application includes extensive mobile improvements:
-- **Enhanced zoom support** for better accessibility
-- **Touch-optimized navigation** and interactions
-- **Responsive layouts** for all screen sizes
-- **Mobile-specific CSS fixes** for browser compatibility
-
-## 🎨 Design Features
-
-- **Modern animations** with CSS transitions and transforms
-- **Professional color scheme** with accessibility in mind
-- **Clean typography** for better readability
-- **Intuitive navigation** with clear visual hierarchy
-
-## 📋 Maintenance Notes
-
-- **Regularly update** the sitemap with new pages
-- **Monitor AdSense performance** after approval
-- **Keep SEO tags** updated for new content
-- **Test mobile responsiveness** on new additions
-- **Validate HTML/CSS** for ongoing compliance
-
-## 📞 Contact & Support
-
-For questions or support:
-- **Email**: zwnt45602@gmail.com (via contact form)
-- **GitHub**: Available through the contact page
-- **About**: More information available on the about page
-
-## 🔧 MCP Servers for OpenCode
-
-مجموعة من أفضل MCPs لاستخدامها مع OpenCode لتمكين الـ AI من البحث والتصفح والتحكم الكامل.
-
-### 🌐 Browser Automation MCP
-يجعل الـ AI يفتح المواقع ويضغط ويكتب ويتصفح كأنه إنسان.
-- [Playwright MCP](https://github.com/microsoft/playwright-mcp)
-- [Browser MCP](https://github.com/browsermcp/mcp)
-
-### 🔍 Web Search MCP
-للبحث الحقيقي في الإنترنت.
-- [Brave Search MCP](https://github.com/brave/brave-search-mcp-server)
-- [WET MCP](https://github.com/michaelangeloio/wet-mcp)
-
-### 📁 Filesystem MCP
-قراءة وتعديل الملفات والمجلدات.
-- [Filesystem MCP](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)
-
-### 🐙 GitHub MCP
-للتحكم بمشاريع GitHub وقراءة الأكواد.
-- [GitHub MCP](https://github.com/github/github-mcp-server)
-
-### 💻 Terminal MCP
-تشغيل أوامر النظام و npm و git.
-- [DesktopCommander MCP](https://github.com/wonderwhy-er/DesktopCommanderMCP)
-
-### 📋 Clipboard MCP
-نسخ ولصق تلقائي.
-- [Clipboard MCP](https://github.com/mnardit/clipboard-mcp)
-
-### 🧠 Memory MCP
-يجعل الـ AI يتذكر بين الجلسات.
-- [Memory MCP](https://github.com/modelcontextprotocol/servers/tree/main/src/memory)
-
-### 🎭 Puppeteer MCP
-تصفح متقدم وتخطي بعض الحمايات.
-- [Puppeteer MCP](https://github.com/modelcontextprotocol/servers/tree/main/src/puppeteer)
-
-### 🦁 Safari MCP (Mac فقط)
-تحكم كامل بمتصفح Safari الحقيقي.
-- [Safari MCP](https://github.com/achiya-automation/safari-mcp)
-
-### 🖥️ GhostDesk MCP
-سطح مكتب Linux كامل للـ AI.
-- [GhostDesk MCP](https://github.com/ghostdesk/ghostdesk)
-
-### 📚 Awesome MCP Servers
-قائمة ضخمة فيها آلاف MCPs جاهزة.
-- [Awesome MCP Servers](https://github.com/TensorBlock/awesome-mcp-servers)
+All games and apps are **Progressive Web Apps** — installable, offline-capable, with Service Workers.
 
 ---
 
-## 📄 License
+## Projects
 
-This project is a personal portfolio website. All content and code are property of the owner.
+### Games
+
+| Game | Tech | Type |
+|---|---|---|
+| [KingCraft](games/kingcraft-game/) | Three.js, Voxel | 3D Sandbox Survival — mine, craft, fight mobs, build |
+| [Rust Construction](games/rust-game/) | Three.js, WASM | 3D Physics Sandbox — resource management, building |
+| [Farm Empire](games/farm-game/) | WebGL | Farming Simulation — crops, animals, economy |
+
+### Apps
+
+- **Quran Pro** — Full Quran with 40+ reciters, tafsir, bookmarks, offline
+- **Calculator Vault** — Privacy-first calculator that hides a secret vault
+- **Quiz Master** — Multi-category quiz platform with progress tracking
+
+### AI Models
+
+- **Rashid AI v2.0** — Conversational AI with Gemini API, multilingual, voice
+
+### Knowledge Vault
+
+- Prompts | Code Library | Documentation | Media | Archive | API Reference
 
 ---
 
-**Last Updated**: 30 May 2026  
-**Version**: 1.0  
-**Author**: Rashid  
-**Platform**: Vercel
+## Architecture
+
+```
+root/
+├── index.html              # Homepage — hero, models, vault, projects, contact
+├── about.html / contact.html
+├── privacy.html / terms.html  # Legal pages
+├── offline.html               # PWA offline fallback
+
+├── games/                     # Browser games (each with manifest.json + sw.js)
+│   ├── kingcraft-game/        # 3D voxel sandbox (Three.js)
+│   ├── rust-game/             # 3D physics sandbox (Three.js WASM)
+│   ├── farm-game/             # Farming simulation (WebGL)
+│   └── index.html             # Arcade hub
+
+├── apps/                      # PWA applications
+│   ├── quran-app/             # Quran with offline recitation
+│   ├── calculator-vault/      # Hidden vault behind calculator
+│   └── quiz-app/              # Interactive quiz platform
+
+├── models/Rashid-Model/       # AI chat interface (Gemini API)
+
+├── vault/                     # Knowledge vault (6 categories)
+├── admin/                     # Admin login + dashboard
+├── src/                       # Modular source code
+│   ├── css/                   # variables, responsive, design-system, components
+│   └── js/modules/            # 12 feature modules (projects, vault, theme, etc.)
+│
+├── game-hoster/               # Next.js 16 sub-project (game hosting platform)
+├── game-vault/                # Static export of game-hoster
+│
+├── css/                       # Root stylesheets
+├── js/                        # Root scripts
+├── images/                    # Logo, avatar, profile
+└── design-concepts/           # SVG mockups
+```
+
+---
+
+## Tech Stack
+
+### Main Site (Vanilla)
+- **HTML5** — Semantic markup, ARIA, JSON-LD structured data
+- **CSS3** — Custom properties, glassmorphism, dark/light mode, animations
+- **JavaScript** — ES6+ modular architecture (12 modules)
+- **Fonts** — Google Fonts (Bricolage Grotesque, Space Grotesk, JetBrains Mono)
+- **Icons** — Font Awesome 6.4
+
+### Backend & AI
+- **Supabase** — Real-time database, authentication, CDN client
+- **Google Gemini API** — AI assistant (gemini-1.5-flash)
+
+### PWA
+- Service Worker with offline caching
+- Web App Manifest for installability
+- All games/apps individually installable
+
+### Sub-project: game-hoster
+- **Next.js 16** + **React 19** + **TypeScript**
+- **Tailwind CSS v4** + **Framer Motion**
+- Static export (`output: 'export'`) served under `/game-vault/`
+
+### Deployment
+- **Vercel** (primary) — auto-deploys from `main` branch
+- **GitHub Pages** (secondary) — via `.nojekyll`
+
+---
+
+## Development
+
+This is a **static site** — no build step required for the main platform:
+
+```bash
+# Clone
+git clone https://github.com/MOT1209/mein-wep.git
+
+# Serve locally (any static server)
+python -m http.server 8080
+# or
+npx serve .
+```
+
+To build the Next.js sub-project:
+
+```bash
+cd game-hoster
+npm install
+npm run build   # outputs to out/ → game-vault/
+```
+
+---
+
+## Deployment
+
+The platform auto-deploys via **Vercel** on every push to `main`:
+
+```
+git add .
+git commit -m "..."
+git push origin main
+# → Vercel deploys to https://rashid-wep.vercel.app
+```
+
+GitHub Pages is also configured: `https://mot1209.github.io/mein-wep/`
+
+---
+
+## Game Development Notes
+
+### KingCraft (active development)
+- **Phase 1+2**: World generation, player movement, health/hunger, crafting, furnaces
+- **Phase 3** (current): Mobs (zombie, skeleton, creeper, spider, cow, sheep, chicken, pig), combat, armor system
+- Phase 4 planned: Caves, biomes, redstone, enchantments
+
+### Rust Construction
+- Three.js physics engine, WASM compilation
+- Resource mining, structural integrity simulation
+
+### Farm Empire
+- WebGL rendering, crop growth simulation, animal management
+
+---
+
+## Contact
+
+- **Email**: zwnt45602@gmail.com
+- **GitHub**: [MOT1209](https://github.com/MOT1209)
+- **Platform**: [rashid-wep.vercel.app](https://rashid-wep.vercel.app)
+
+---
+
+*Built with ❤️ by Rashid.*
