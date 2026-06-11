@@ -20,6 +20,7 @@ import {
 import { initLatestUpdates } from './modules/updates.js?v=1.0';
 import { initStatistics } from './modules/statistics.js?v=1.0';
 import { initVaultSearch } from './modules/vault.js?v=1.0';
+import { renderGitHubStats } from './modules/github.js?v=1.0';
 
 function initLegacyLocalSettings() {
     if (localStorage.getItem('maintenanceMode') === 'true') {
@@ -96,6 +97,17 @@ async function boot() {
 
     // Vault Search & Filters
     initVaultSearch();
+
+    // GitHub Stats Section
+    const githubContainer = qs('#github-stats');
+    if (githubContainer) {
+        // Use requestIdleCallback or setTimeout for non-blocking load
+        if (window.requestIdleCallback) {
+            requestIdleCallback(() => renderGitHubStats(githubContainer), { timeout: 3000 });
+        } else {
+            setTimeout(() => renderGitHubStats(githubContainer), 1000);
+        }
+    }
 
     if (!initLegacyLocalSettings()) return;
 
