@@ -58,7 +58,12 @@ export function isLiquid(id) { return _liquid[id] === true; }
 export function blockDrop(id) {
   const b = getBlock(id);
   if (b.drops) return b.drops;
-  if (b.name === "leaves") return Math.random() < 0.05 ? "apple" : null;
+  if (b.name === "leaves") {
+    const r = Math.random();
+    if (r < 0.05) return "apple";
+    if (r < 0.15) return "stick";
+    return null;
+  }
   return b.name;
 }
 
@@ -75,5 +80,4 @@ export function tileForFace(id, face) {
   return "stone";
 }
 
-// البلوكات المتاحة افتراضياً في الهاتبار (وضع البناء/الاختبار)
-export const HOTBAR_BLOCKS = [1, 2, 3, 4, 5, 7, 8, 16, 17];
+

@@ -1,5 +1,5 @@
 // شريط الأدوات: يعرض أول 9 خانات من المخزون. اختيار بالأرقام أو عجلة الفأرة.
-import { itemIcon, getItem } from "../items/Items.js";
+import { itemIcon } from "../items/Items.js";
 
 export class Hotbar {
   constructor(el, inventory) {

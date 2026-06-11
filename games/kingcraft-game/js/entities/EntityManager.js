@@ -56,7 +56,6 @@ export class EntityManager {
       const sx = playerPos.x + Math.sin(angle) * dist;
       const sz = playerPos.z + Math.cos(angle) * dist;
       const sy = this.world.spawnHeight(Math.floor(sx), Math.floor(sz));
-      if (sy === -1) continue;
       if (this.isNight && hostileCount < MAX_HOSTILE) {
         const type = HOSTILE_TYPES[Math.floor(Math.random() * HOSTILE_TYPES.length)];
         this.spawnMob(type, sx, sy + 0.1, sz);
@@ -70,7 +69,7 @@ export class EntityManager {
     }
   }
 
-  update(dt, playerPos, yaw) {
+  update(dt, playerPos) {
     this._time = (this._time + dt) % (this._dayLength * 2);
 
     this._spawnTimer += dt;

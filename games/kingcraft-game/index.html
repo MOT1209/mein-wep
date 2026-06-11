@@ -54,14 +54,59 @@
   </script>
 </head>
 <body>
-  <!-- Loading / Main menu -->
+  <!-- Loading / Main menu (Minecraft style) -->
   <div id="menu" class="menu">
+    <div class="menu-panorama">
+      <div class="menu-cloud"></div>
+      <div class="menu-cloud"></div>
+      <div class="menu-cloud"></div>
+    </div>
     <div class="menu-panel">
       <h1 class="logo">KingCraft</h1>
-      <p class="subtitle">عالم المكعبات</p>
-      <button id="btn-start" class="mc-btn">ابدأ اللعب</button>
-      <p class="hint">WASD للحركة • مسافة للقفز (نقرتان = طيران) • Shift زحف • Ctrl جري • أيسر لكسر • أيمن لوضع • 1-9 اختيار • V منظور</p>
-      <p class="version">v0.4 — المرحلة 3: الغوغاء</p>
+      <span class="logo-sub">عالم المكعبات</span>
+      <button id="btn-play" class="btn-mc">▶ Play</button>
+      <button id="btn-settings" class="btn-mc">⚙ Settings</button>
+      <button id="btn-marketplace" class="btn-mc">🛒 Marketplace</button>
+      <button id="btn-exit" class="btn-mc">✕ Exit</button>
+      <p class="hint">WASD للحركة • مسافة للقفز • Shift زحف • Ctrl جري • V منظور</p>
+      <p class="version">v0.4 — Minecraft UI</p>
+    </div>
+  </div>
+
+  <!-- Settings panel -->
+  <div id="settings-panel" class="settings-panel">
+    <div class="settings-box">
+      <h2>⚙ Settings</h2>
+      <div class="settings-row">
+        <span>🔊 Volume</span>
+        <input type="range" id="vol-slider" min="0" max="100" value="30" />
+      </div>
+      <div class="settings-row">
+        <span>🖱 Sensitivity</span>
+        <input type="range" id="sens-slider" min="1" max="20" value="10" />
+      </div>
+      <button id="btn-back-menu" class="btn-back">← Back</button>
+    </div>
+  </div>
+
+  <!-- Coming soon modal -->
+  <div id="modal-coming">
+    <div class="modal-box">
+      <h2>🚧 قريباً</h2>
+      <p>Coming Soon — تحت التطوير</p>
+      <button id="btn-close-coming" class="btn-back">OK</button>
+    </div>
+  </div>
+
+  <!-- Exit confirm modal -->
+  <div id="modal-exit">
+    <div class="modal-box">
+      <h2>✕ Exit Game?</h2>
+      <p>Are you sure you want to leave?</p>
+      <div class="modal-btns">
+        <button id="btn-confirm-exit" class="btn-mc">✔ Yes</button>
+        <button id="btn-cancel-exit" class="btn-mc">✖ No</button>
+      </div>
     </div>
   </div>
 
@@ -76,7 +121,7 @@
 
   <div id="death-screen" class="hidden">
     <h2>💀 لقد مت</h2>
-    <button id="btn-respawn" class="mc-btn">إعادة الحياة</button>
+    <button id="btn-respawn" class="btn-mc">إعادة الحياة</button>
   </div>
 
   <div id="debug" class="debug hidden"></div>

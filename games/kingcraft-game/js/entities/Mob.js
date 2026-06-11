@@ -98,7 +98,7 @@ export class Mob extends Entity {
       this.yaw = Math.atan2(-tdx, -tdz);
 
       if (tDist > this.attackRange) {
-        const norm = this.speed / Math.max(tDist, 0.01);
+        const norm = this.speed / Math.max(tDist, 0.5);
         this.vel.x = tdx * norm;
         this.vel.z = tdz * norm;
 

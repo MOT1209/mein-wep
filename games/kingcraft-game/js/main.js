@@ -13,6 +13,7 @@ import { getItem, isPlaceable, placeBlockId } from "./items/Items.js";
 import { getTool, BLOCK_TOOL } from "./player/Tools.js";
 import { HealthSystem } from "./player/Health.js";
 import { SoundManager } from "./utils/SoundManager.js";
+import { EXHAUSTION_PER_BREAK } from "./utils/Constants.js";
 import { saveGame, loadGame } from "./utils/SaveLoad.js";
 import { EntityManager } from "./entities/EntityManager.js";
 
@@ -73,7 +74,7 @@ function renderStatBar(el, value, max, fullChar, emptyChar) {
 
 function updateHUD() {
   renderStatBar(document.getElementById("health-bar"), health.health, 20, "❤️", "🖤");
-  renderStatBar(document.getElementById("food-bar"), health.food, 20, "🍗", "🫗");
+  renderStatBar(document.getElementById("food-bar"), health.food, 20, "🍗", "💧");
 }
 
 health.onChange = updateHUD;
@@ -122,7 +123,7 @@ scene.add(crackBox);
 
 // ===== التحكم بالنظر =====
 let yaw = 0, pitch = 0, started = false, gameStarted = false;
-const SENS = 0.0022;
+let SENS = 0.0022;
 
 document.addEventListener("mousemove", (e) => {
   if (!started) return;
@@ -209,7 +210,7 @@ function updateMining(dt) {
     if (getBlock(id).name === "furnace") dropFurnace(hit.block);
     world.setBlock(hit.block[0], hit.block[1], hit.block[2], AIR);
     damageTool();
-    health.addExhaustion(0.1);
+    health.addExhaustion(EXHAUSTION_PER_BREAK);
     sound.playBreak();
     resetMining();
     return;
@@ -303,6 +304,12 @@ window.addEventListener("keydown", (e) => {
     else openUI("inventory");
   } else if (e.code === "Escape" && ui.isOpen) {
     ui.close();
+  } else if (e.code === "Escape" && settingsPanel.classList.contains("open")) {
+    settingsPanel.classList.remove("open");
+  } else if (e.code === "Escape" && modalComing.classList.contains("open")) {
+    modalComing.classList.remove("open");
+  } else if (e.code === "Escape" && modalExit.classList.contains("open")) {
+    modalExit.classList.remove("open");
   }
 });
 
@@ -311,12 +318,14 @@ document.getElementById("btn-respawn").addEventListener("click", () => {
   health.reset();
   player.spawn();
   entityManager.clear();
+  highlight.visible = false;
+  crackBox.visible = false;
+  crackMat.opacity = 0;
   document.getElementById("death-screen").classList.add("hidden");
   updateHUD();
 });
 
-// ===== البدء =====
-document.getElementById("btn-start").addEventListener("click", () => {
+function startGame() {
   try {
     world.update(new THREE.Vector3(0, 0, 0));
     updateHUD();
@@ -360,6 +369,58 @@ document.getElementById("btn-start").addEventListener("click", () => {
     if (window.kcError) window.kcError("فشل بدء اللعبة: " + (err && err.stack ? err.stack : err));
     else alert("خطأ: " + err);
   }
+}
+
+// ===== زر اللعب =====
+document.getElementById("btn-play").addEventListener("click", startGame);
+
+// ===== الإعدادات =====
+const settingsPanel = document.getElementById("settings-panel");
+const volSlider = document.getElementById("vol-slider");
+const sensSlider = document.getElementById("sens-slider");
+
+document.getElementById("btn-settings").addEventListener("click", () => {
+  volSlider.value = Math.round(sound._volume * 100);
+  sensSlider.value = Math.round((SENS / 0.0022) * 10);
+  settingsPanel.classList.add("open");
+});
+
+function closeSettings() {
+  sound._volume = parseInt(volSlider.value) / 100;
+  SENS = 0.0022 * (parseInt(sensSlider.value) / 10);
+  settingsPanel.classList.remove("open");
+}
+
+document.getElementById("btn-back-menu").addEventListener("click", closeSettings);
+settingsPanel.addEventListener("click", (e) => {
+  if (e.target === settingsPanel) closeSettings();
+});
+
+// ===== ماركت بليس (قريباً) =====
+const modalComing = document.getElementById("modal-coming");
+document.getElementById("btn-marketplace").addEventListener("click", () => {
+  modalComing.classList.add("open");
+});
+document.getElementById("btn-close-coming").addEventListener("click", () => {
+  modalComing.classList.remove("open");
+});
+modalComing.addEventListener("click", (e) => {
+  if (e.target === modalComing) modalComing.classList.remove("open");
+});
+
+// ===== خروج =====
+const modalExit = document.getElementById("modal-exit");
+document.getElementById("btn-exit").addEventListener("click", () => {
+  modalExit.classList.add("open");
+});
+document.getElementById("btn-confirm-exit").addEventListener("click", () => {
+  window.close();
+});
+document.getElementById("btn-cancel-exit").addEventListener("click", () => {
+  modalExit.classList.remove("open");
+});
+modalExit.addEventListener("click", (e) => {
+  if (e.target === modalExit) modalExit.classList.remove("open");
 });
 
 canvas.addEventListener("click", () => {
@@ -391,7 +452,7 @@ function loop(now) {
       window._kcPitch = pitch;
       updateMining(dt);
       drops.update(dt, player, inventory);
-      entityManager.update(dt, player.pos, yaw);
+      entityManager.update(dt, player.pos);
     } else {
       lastDir = player.applyCamera(yaw, pitch);
       ui.tickFurnace();

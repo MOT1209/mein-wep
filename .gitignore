@@ -21,3 +21,6 @@ temp_db_check.js
 package-lock.json
 *.code-workspace
 .vercel
+.playwright-mcp/
+console-errors.log
+*.log

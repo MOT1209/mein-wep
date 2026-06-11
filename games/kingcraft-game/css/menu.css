@@ -6,66 +6,288 @@
   align-items: center;
   justify-content: center;
   background:
-    linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.55)),
-    repeating-linear-gradient(45deg, #5a8f3c 0 32px, #538735 32px 64px);
+    linear-gradient(180deg,
+      #87ceeb 0%, #9aceeb 30%, #b8d4a8 55%, #7cb342 56%, #7cb342 58%,
+      #8d6e3f 59%, #8d6e3f 65%, #6b5b3e 66%, #6b5b3e 100%);
+  overflow: hidden;
+}
+
+.menu::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 64px, rgba(0,0,0,0.03) 64px 65px),
+    repeating-linear-gradient(0deg, transparent 0 64px, rgba(0,0,0,0.03) 64px 65px);
+  pointer-events: none;
+}
+
+.menu::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 35%;
+  background:
+    repeating-linear-gradient(90deg,
+      #6b5b3e 0 4px, #5d4f35 4px 8px,
+      #6b5b3e 8px 12px, #5d4f35 12px 16px);
+  background-size: 16px 4px;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.menu-panorama {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.menu-cloud {
+  position: absolute;
+  background: rgba(255,255,255,0.6);
+  border-radius: 50%;
+  animation: cloudFloat linear infinite;
+}
+
+.menu-cloud:nth-child(1) {
+  width: 120px; height: 30px;
+  top: 8%; left: -10%;
+  animation-duration: 60s;
+}
+
+.menu-cloud:nth-child(2) {
+  width: 90px; height: 24px;
+  top: 15%; left: -5%;
+  animation-duration: 80s;
+  animation-delay: -20s;
+}
+
+.menu-cloud:nth-child(3) {
+  width: 150px; height: 36px;
+  top: 5%; left: -15%;
+  animation-duration: 70s;
+  animation-delay: -40s;
+}
+
+@keyframes cloudFloat {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(100vw + 200px)); }
 }
 
 .menu-panel {
+  position: relative;
+  z-index: 2;
   text-align: center;
-  padding: 32px 40px;
-  background: rgba(0, 0, 0, 0.55);
-  border: 3px solid rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  max-width: 480px;
+  padding: 48px 60px 40px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 3px solid rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  backdrop-filter: blur(2px);
+  min-width: 320px;
 }
 
 .logo {
-  font-size: 56px;
-  letter-spacing: 2px;
+  font-size: 64px;
+  letter-spacing: 4px;
   color: #fff;
-  text-shadow: 4px 4px 0 #3a3a3a, 6px 6px 0 rgba(0, 0, 0, 0.4);
-  margin-bottom: 4px;
+  text-shadow:
+    3px 3px 0 #3a3a3a,
+    5px 5px 0 #2a2a2a,
+    7px 7px 0 rgba(0,0,0,0.3);
+  margin-bottom: 32px;
+  font-weight: bold;
+  line-height: 1;
 }
 
-.subtitle {
-  font-size: 18px;
+.logo-sub {
+  display: block;
+  font-size: 14px;
   color: #ffd95e;
   text-shadow: 2px 2px 0 #000;
-  margin-bottom: 24px;
+  letter-spacing: 6px;
+  margin-top: -8px;
+  margin-bottom: 28px;
+  font-weight: normal;
 }
 
-.mc-btn {
+.btn-mc {
+  display: block;
+  width: 260px;
+  margin: 8px auto;
   font-family: inherit;
-  font-size: 20px;
+  font-size: 18px;
   color: #fff;
-  padding: 12px 36px;
-  background: #6a9c43;
-  border: 2px solid #2c2c2c;
-  border-bottom-width: 4px;
-  border-radius: 3px;
+  padding: 10px 0;
+  background: linear-gradient(180deg, #8b8b8b 0%, #6b6b6b 50%, #5a5a5a 100%);
+  border: 2px solid #3a3a3a;
+  border-top-color: #aaa;
+  border-left-color: #999;
+  border-right-color: #444;
+  border-bottom-color: #222;
   cursor: pointer;
-  text-shadow: 2px 2px 0 #000;
-  transition: background 0.1s, transform 0.05s;
+  text-shadow: 2px 2px 0 #1a1a1a;
+  transition: none;
+  image-rendering: pixelated;
+  outline: none;
 }
 
-.mc-btn:hover {
-  background: #7cb34f;
+.btn-mc:hover {
+  background: linear-gradient(180deg, #9a9a9a 0%, #7a7a7a 50%, #6a6a6a 100%);
+  border-top-color: #bbb;
+  border-left-color: #aaa;
 }
 
-.mc-btn:active {
-  transform: translateY(2px);
-  border-bottom-width: 2px;
+.btn-mc:active {
+  border-top-width: 1px;
+  border-bottom-width: 3px;
+  transform: translateY(1px);
+  background: linear-gradient(180deg, #5a5a5a 0%, #6b6b6b 50%, #8b8b8b 100%);
+}
+
+
+.btn-mc.disabled {
+  opacity: 0.5;
+  cursor: default;
+  pointer-events: none;
 }
 
 .hint {
   margin-top: 24px;
-  font-size: 12px;
-  color: #cfcfcf;
+  font-size: 11px;
+  color: #bbb;
   line-height: 1.8;
+  text-shadow: 1px 1px 0 #000;
 }
 
 .version {
-  margin-top: 12px;
+  margin-top: 16px;
   font-size: 11px;
   color: #888;
+  text-shadow: 1px 1px 0 #000;
+}
+
+/* Settings panel */
+.settings-panel {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(0,0,0,0.7);
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-panel.open {
+  display: flex;
+}
+
+.settings-box {
+  background: rgba(30,30,30,0.95);
+  border: 3px solid #555;
+  border-radius: 2px;
+  padding: 32px 48px;
+  min-width: 300px;
+  text-align: center;
+}
+
+.settings-box h2 {
+  color: #fff;
+  font-size: 24px;
+  margin-bottom: 24px;
+  text-shadow: 2px 2px 0 #000;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #ddd;
+  font-size: 16px;
+  margin: 12px 0;
+  padding: 8px 0;
+}
+
+.settings-row input[type="range"] {
+  width: 140px;
+  accent-color: #7cb342;
+}
+
+.btn-back {
+  margin-top: 20px;
+  background: linear-gradient(180deg, #6b6b6b 0%, #4a4a4a 100%);
+  border: 2px solid #3a3a3a;
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  padding: 8px 32px;
+  cursor: pointer;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.btn-back:hover {
+  background: linear-gradient(180deg, #7a7a7a 0%, #5a5a5a 100%);
+}
+
+/* Coming soon modal */
+#modal-coming {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(0,0,0,0.7);
+  align-items: center;
+  justify-content: center;
+}
+
+#modal-coming.open {
+  display: flex;
+}
+
+.modal-box {
+  background: rgba(30,30,30,0.95);
+  border: 3px solid #555;
+  border-radius: 2px;
+  padding: 40px 48px;
+  text-align: center;
+}
+
+.modal-box h2 {
+  color: #ffd95e;
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.modal-box p {
+  color: #ccc;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+/* Exit confirm */
+#modal-exit {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  background: rgba(0,0,0,0.7);
+  align-items: center;
+  justify-content: center;
+}
+
+#modal-exit.open {
+  display: flex;
+}
+
+.modal-btns {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 16px;
+}
+
+.modal-btns .btn-mc {
+  width: 120px;
 }

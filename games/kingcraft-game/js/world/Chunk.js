@@ -1,7 +1,7 @@
 // قطعة العالم (Chunk): تخزّن الكتل وتبني الميش بحذف الأوجه المخفية (face culling).
 import * as THREE from "three";
 import { CHUNK_SIZE, WORLD_HEIGHT } from "../utils/Constants.js";
-import { AIR, isTransparent, isSolid, tileForFace } from "./BlockData.js";
+import { AIR, isTransparent, tileForFace } from "./BlockData.js";
 import { getUV } from "../blocks/BlockTexture.js";
 
 const S = CHUNK_SIZE;

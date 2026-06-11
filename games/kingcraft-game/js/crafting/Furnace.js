@@ -2,7 +2,7 @@
 import { smeltResult, fuelValue } from "./Smelting.js";
 
 function newState() {
-  return { input: null, fuel: null, output: null, burn: 0, burnMax: 0, cook: 0 };
+  return { input: null, fuel: null, output: null, burn: 0, burnMax: 0, cook: 0, cookMax: 0 };
 }
 
 export class FurnaceManager {
@@ -42,10 +42,11 @@ export class FurnaceManager {
       }
     }
 
+    const res = s.input ? smeltResult(s.input.id) : null;
     if (s.burn > 0) {
       s.burn -= dt;
-      if (can) {
-        const res = smeltResult(s.input.id);
+      if (can && res) {
+        s.cookMax = res.time;
         s.cook += dt;
         if (s.cook >= res.time) {
           s.cook = 0;
@@ -56,9 +57,11 @@ export class FurnaceManager {
         }
       } else {
         s.cook = 0;
+        s.cookMax = 0;
       }
     } else {
       s.cook = Math.max(0, s.cook - dt * 2);
+      s.cookMax = 0;
     }
   }
 

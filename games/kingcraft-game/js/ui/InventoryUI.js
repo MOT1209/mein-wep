@@ -309,7 +309,7 @@ export class InventoryUI {
 
     if (this.mode === "furnace" && this.furnace) {
       const f = this.furnace;
-      const ratio = f.cook > 0 && f.input ? Math.min(1, f.cook / 10) : 0;
+      const ratio = f.cook > 0 && f.input ? Math.min(1, f.cook / (f.cookMax || 10)) : 0;
       if (this.progBar) this.progBar.style.width = (ratio * 100) + "%";
       if (this.flameEl) this.flameEl.classList.toggle("on", f.burn > 0);
     }

@@ -32,7 +32,9 @@ export function loadGame() {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const data = JSON.parse(raw);
+    if (!data || data.version < 1 || !data.player || !data.inventory) return null;
+    return data;
   } catch (e) {
     return null;
   }
