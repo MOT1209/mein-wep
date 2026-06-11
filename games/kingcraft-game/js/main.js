@@ -296,20 +296,84 @@ function rightClick() {
   }
 }
 
-// ===== لوحة المفاتيح: المخزون =====
+// Chat input
+const chatInput = document.getElementById("chat-input");
+
+// ===== لوحة المفاتيح: المخزون + التحكمات =====
 window.addEventListener("keydown", (e) => {
   if (!gameStarted) return;
+
+  // Chat open — special handling
+  if (!chatInput.classList.contains("hidden")) {
+    if (e.code === "Enter") {
+      chatInput.classList.add("hidden");
+      canvas.requestPointerLock().catch(() => {});
+    } else if (e.code === "Escape") {
+      chatInput.classList.add("hidden");
+      canvas.requestPointerLock().catch(() => {});
+    }
+    return;
+  }
+
   if (e.code === "KeyE") {
     if (ui.isOpen) ui.close();
     else openUI("inventory");
   } else if (e.code === "Escape" && ui.isOpen) {
     ui.close();
   } else if (e.code === "Escape" && settingsPanel.classList.contains("open")) {
-    settingsPanel.classList.remove("open");
+    closeSettings();
   } else if (e.code === "Escape" && modalComing.classList.contains("open")) {
     modalComing.classList.remove("open");
   } else if (e.code === "Escape" && modalExit.classList.contains("open")) {
     modalExit.classList.remove("open");
+  }
+
+  // Q — إسقاط العنصر
+  if (e.code === "KeyQ" && !ui.isOpen) {
+    const sel = inventory.selectedStack;
+    if (sel && sel.count > 0) {
+      const pp = player.pos;
+      drops.spawn(Math.floor(pp.x), Math.floor(pp.y), Math.floor(pp.z), sel.id, 1);
+      inventory.consumeSelected(1);
+    }
+  }
+
+  // F — تبديل اليد الثانية
+  if (e.code === "KeyF" && !ui.isOpen && !e.repeat) {
+    const h = inventory.selectedHotbar;
+    const main = inventory.slots[h];
+    inventory.slots[h] = inventory.offhand ? { id: inventory.offhand.id, count: inventory.offhand.count, dur: inventory.offhand.dur } : null;
+    inventory.offhand = main ? { id: main.id, count: main.count, dur: main.dur } : null;
+    inventory._changed();
+  }
+
+  // T — شات
+  if (e.code === "KeyT" && !ui.isOpen) {
+    document.exitPointerLock();
+    chatInput.classList.remove("hidden");
+    chatInput.querySelector("input").value = "";
+    chatInput.querySelector("input").focus();
+  }
+
+  // F2 — تصوير
+  if (e.code === "F2") {
+    e.preventDefault();
+    const link = document.createElement("a");
+    link.download = "kingcraft-" + Date.now() + ".png";
+    link.href = renderer.domElement.toDataURL("image/png");
+    link.click();
+  }
+
+  // F3 — تبديل معلومات التصحيح
+  if (e.code === "F3") {
+    e.preventDefault();
+    debug.classList.toggle("hidden");
+  }
+
+  // F5 — تبديل المنظور
+  if (e.code === "F5") {
+    e.preventDefault();
+    player.thirdPerson = !player.thirdPerson;
   }
 });
 
@@ -347,6 +411,7 @@ function startGame() {
           }
         }
         inventory.selectedHotbar = saveData.selectedHotbar || 0;
+        inventory.offhand = saveData.offhand ? { id: saveData.offhand.id, count: saveData.offhand.count, dur: saveData.offhand.dur } : null;
       }
       health.health = saveData.player.health ?? 20;
       health.food = saveData.player.food ?? 20;

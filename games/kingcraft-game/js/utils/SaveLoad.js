@@ -19,6 +19,7 @@ export function saveGame(player, inventory, health, world, drops) {
       },
       inventory: inventory.slots.map(s => s ? { id: s.id, count: s.count, dur: s.dur } : null),
       armor: inventory.armor.map(s => s ? { id: s.id, count: s.count, dur: s.dur } : null),
+      offhand: inventory.offhand ? { id: inventory.offhand.id, count: inventory.offhand.count, dur: inventory.offhand.dur } : null,
       selectedHotbar: inventory.selectedHotbar,
     };
     localStorage.setItem(KEY, JSON.stringify(data));

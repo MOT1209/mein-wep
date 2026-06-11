@@ -5,6 +5,7 @@ export class Inventory {
   constructor() {
     this.slots = new Array(36).fill(null); // {id, count} | null
     this.armor = [null, null, null, null]; // خوذة، صدر، بنطال، حذاء
+    this.offhand = null; // اليد الثانية (F)
     this.selectedHotbar = 0;
     this.hotbarSize = 9;
     this.onChange = null; // callback لتحديث الواجهة
