@@ -126,7 +126,7 @@ class RobotAvatar {
     }
 
     animate() {
-        requestAnimationFrame(() => this.animate());
+        this._rafId = requestAnimationFrame(() => this.animate());
         const time = this.clock.getElapsedTime();
 
         // Idle movement
@@ -150,6 +150,22 @@ class RobotAvatar {
         }
 
         this.renderer.render(this.scene, this.camera);
+    }
+
+    /** إيقاف حلقة الرسوم المتحركة لتوفير طاقة المعالج */
+    stop() {
+        if (this._rafId) {
+            cancelAnimationFrame(this._rafId);
+            this._rafId = null;
+        }
+    }
+
+    /** استئناف حلقة الرسوم المتحركة */
+    resume() {
+        if (!this._rafId) {
+            this.clock = new THREE.Clock();
+            this.animate();
+        }
     }
 
     setTalking(state) {
@@ -289,6 +305,7 @@ class RashidAI {
             try {
                 await loadThreeJS();
                 this.avatar = new RobotAvatar('ai-avatar-container');
+                window.__rashidAvatar = this.avatar; // expose for performance-mode control
             } catch (e) {
                 console.warn('3D Avatar disabled:', e.message);
             }

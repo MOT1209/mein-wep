@@ -38,13 +38,29 @@ export function initTheme() {
     });
 
     const perfToggle = qs('#perf-mode');
+
+    /** إيقاف / استئناف محرك Three.js لتوفير طاقة المعالج */
+    function toggleThreeJs(enabled) {
+        const avatar = window.__rashidAvatar;
+        if (avatar) {
+            if (enabled) {
+                avatar.resume();
+            } else {
+                avatar.stop();
+            }
+        }
+    }
+
     on(perfToggle, 'change', () => {
-        document.body.classList.toggle('performance-mode', perfToggle.checked);
-        localStorage.setItem('perfMode', String(perfToggle.checked));
+        const isPerf = perfToggle.checked;
+        document.body.classList.toggle('performance-mode', isPerf);
+        toggleThreeJs(!isPerf); // أوقف Three.js عند تشغيل وضع الأداء
+        localStorage.setItem('perfMode', String(isPerf));
     });
 
     if (localStorage.getItem('perfMode') === 'true' && perfToggle) {
         perfToggle.checked = true;
         document.body.classList.add('performance-mode');
+        toggleThreeJs(false);
     }
 }
