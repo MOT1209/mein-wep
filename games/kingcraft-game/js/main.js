@@ -565,11 +565,6 @@ window.addEventListener("keyup", (e) => {
   if (e.code === "F3") { _f3Held = false; window._kcF3Held = false; }
 });
 
-let _f3Held = false;
-let _showHitboxes = false;
-let _showChunkBorders = false;
-let _showAdvancedTooltips = false;
-
 // ===== إعادة الحياة =====
 document.getElementById("btn-respawn").addEventListener("click", () => {
   health.reset();
