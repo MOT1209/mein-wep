@@ -2,8 +2,21 @@
 
 > A full-stack developer portfolio, AI workspace, game hub, and PWA app center — all in one platform.
 
-Deployed at: **https://rashid-wep.vercel.app**  
-GitHub: **https://github.com/MOT1209/mein-wep**
+<div align="center">
+  <img src="https://github-readme-stats.vercel.app/api?username=MOT1209&show_icons=true&theme=midnight-purple&hide_border=true&include_all_commits=true&count_private=true" alt="GitHub Stats" />
+  <img src="https://github-readme-streak-stats.herokuapp.com/?user=MOT1209&theme=midnight-purple&hide_border=true" alt="GitHub Streak" />
+  <br/>
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=MOT1209&layout=compact&theme=midnight-purple&hide_border=true&langs_count=8" alt="Top Languages" />
+  <br/>
+  <img src="https://github-profile-trophy.vercel.app/?username=MOT1209&theme=midnight-purple&no-bg=true&no-frame=true&row=2&column=4" alt="Trophies" />
+</div>
+
+<p align="center">
+  <a href="https://rashid-wep.vercel.app"><img src="https://img.shields.io/badge/Portfolio-rashid--wep.vercel.app-8b5cf6?style=for-the-badge&logo=vercel&logoColor=white" alt="Portfolio" /></a>
+  <a href="https://github.com/MOT1209"><img src="https://img.shields.io/badge/GitHub-MOT1209-8b5cf6?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" /></a>
+  <a href="https://www.youtube.com/@مختبرالبرمجه"><img src="https://img.shields.io/badge/YouTube-مختبرالبرمجه-ff0000?style=for-the-badge&logo=youtube&logoColor=white" alt="YouTube" /></a>
+  <a href="https://www.tiktok.com/@programmierlabor"><img src="https://img.shields.io/badge/TikTok-@programmierlabor-000000?style=for-the-badge&logo=tiktok&logoColor=white" alt="TikTok" /></a>
+</p>
 
 ---
 

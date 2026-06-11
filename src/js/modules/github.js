@@ -215,6 +215,24 @@ export async function renderGitHubStats(container) {
  */
 function drawContributionGraph(canvas) {
     const ctx = canvas.getContext('2d');
+    // roundRect polyfill for older browsers
+    if (!ctx.roundRect) {
+        ctx.roundRect = function(x, y, w, h, r) {
+            if (r > w / 2) r = w / 2;
+            if (r > h / 2) r = h / 2;
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
+            this.closePath();
+            return this;
+        };
+    }
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.width = 720;
     const h = canvas.height = 130;
@@ -341,13 +359,4 @@ function getEventIcon(type) {
         'Issues': 'fas fa-exclamation-circle',
         'IssueComment': 'fas fa-comment',
         'PullRequest': 'fas fa-code-pull-request',
-        'Watch': 'fas fa-star',
-        'Fork': 'fas fa-code-fork',
-        'Release': 'fas fa-tag'
-    };
-    return icons[type] || 'fas fa-git-commit';
-}
-
-function formatEventType(type) {
-    return type.replace(/([A-Z])/g, ' $1').trim() || 'Push';
-}
+        'Watch': 'f

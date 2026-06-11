@@ -384,6 +384,11 @@ export function initProjectModal() {
 // 7. PWA Custom Install Button
 // ----------------------------------------------------
 export function initCustomPwaInstall() {
+    // Check if already installed (standalone mode)
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+        return; // Already installed as PWA
+    }
+
     // Add custom install button to navbar nav-controls
     const navControls = qs('.nav-controls');
     if (!navControls) return;

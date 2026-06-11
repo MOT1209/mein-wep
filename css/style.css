@@ -36,13 +36,6 @@
     --contrib-3: #26a641;
     --contrib-4: #39d353;
 
-    /* Contribution Graph Colors */
-    --contrib-0: #1b1b2f;
-    --contrib-1: #0e4429;
-    --contrib-2: #006d32;
-    --contrib-3: #26a641;
-    --contrib-4: #39d353;
-
     /* Accent — JS theme.js writes --accent and --accent-glow */
     --accent: #6366f1;
     --accent-rgb: 99, 102, 241;
@@ -2597,6 +2590,27 @@ body.pwa-standalone .navbar { padding-top: env(safe-area-inset-top, 0); }
     text-align: right;
     font-family: var(--font-mono);
     flex-shrink: 0;
+}
+
+/* GitHub Contribution Graph */
+.github-contributions {
+    background: var(--bg-glass);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    padding: 24px;
+}
+.github-contributions h4 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--text-high);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.github-contributions canvas {
+    display: block;
+    margin: 0 auto;
 }
 
 .github-repos-grid {
