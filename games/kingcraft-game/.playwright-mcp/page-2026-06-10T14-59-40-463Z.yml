@@ -1,0 +1,6 @@
+- generic [ref=e3]:
+  - heading "KingCraft" [level=1] [ref=e4]
+  - paragraph [ref=e5]: عالم المكعبات
+  - button "ابدأ اللعب" [ref=e6] [cursor=pointer]
+  - paragraph [ref=e7]: WASD للحركة • مسافة للقفز (نقرتان = طيران) • Shift زحف • Ctrl جري • أيسر لكسر • أيمن لوضع • 1-9 اختيار • V منظور
+  - paragraph [ref=e8]: "v0.1 — المرحلة 1: عالم المكعبات"

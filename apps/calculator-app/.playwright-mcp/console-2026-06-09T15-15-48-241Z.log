@@ -1,0 +1,2 @@
+[    2608ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://example.com/favicon.ico:0
+[   92525ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://127.0.0.1:8765/index.html:0

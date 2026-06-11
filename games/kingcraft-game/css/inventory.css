@@ -1,0 +1,72 @@
+.inv-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  font-family: "Trebuchet MS", monospace;
+}
+
+.inv-panel {
+  background: #c6c6c6;
+  border: 4px solid #fff;
+  border-right-color: #555;
+  border-bottom-color: #555;
+  padding: 14px;
+  border-radius: 4px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+.inv-title {
+  font-size: 16px;
+  color: #3a3a3a;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.inv-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+.inv-grid { display: grid; gap: 2px; }
+
+.inv-slot {
+  width: 44px;
+  height: 44px;
+  background: #8b8b8b;
+  border: 2px solid #373737;
+  border-right-color: #fff;
+  border-bottom-color: #fff;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.inv-slot:hover { background: #a0a0a0; }
+.inv-slot canvas { width: 34px; height: 34px; image-rendering: pixelated; pointer-events: none; }
+.inv-slot .cnt {
+  position: absolute; bottom: 0; right: 2px;
+  font-size: 13px; color: #fff; font-weight: bold;
+  text-shadow: 1px 1px 0 #000; pointer-events: none;
+}
+
+.inv-result { background: #6f6f6f; }
+.inv-arrow { font-size: 26px; color: #555; padding: 0 6px; }
+
+.inv-held {
+  position: fixed; width: 36px; height: 36px;
+  pointer-events: none; z-index: 300;
+  transform: translate(-50%, -50%);
+}
+.inv-held canvas { width: 36px; height: 36px; image-rendering: pixelated; }
+.inv-held .cnt { position: absolute; bottom: -2px; right: 0; font-size: 13px; color: #fff; font-weight: bold; text-shadow: 1px 1px 0 #000; }
+
+.furnace-mid { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0 10px; }
+.furnace-progress {
+  width: 60px; height: 10px; background: #555; border: 1px solid #333; overflow: hidden;
+}
+.furnace-progress > div { height: 100%; width: 0; background: #6cc24a; }
+.furnace-flame { font-size: 20px; opacity: 0.3; }
+.furnace-flame.on { opacity: 1; }
+
+.inv-hint { font-size: 11px; color: #555; margin-top: 8px; text-align: center; }

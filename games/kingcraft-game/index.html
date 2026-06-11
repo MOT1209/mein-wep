@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#7ec0ee" />
+  <title>KingCraft</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/hud.css" />
+  <link rel="stylesheet" href="css/menu.css" />
+  <link rel="stylesheet" href="css/inventory.css" />
+  <link rel="icon" href="icons/icon-48.png" />
+
+  <!-- شاشة تشخيص الأخطاء: تُظهر أي خطأ بدل الصمت -->
+  <script>
+    function kcError(msg) {
+      var d = document.getElementById("kc-error");
+      if (!d) {
+        d = document.createElement("div");
+        d.id = "kc-error";
+        d.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(120,0,0,0.95);color:#fff;font:14px/1.6 monospace;padding:24px;overflow:auto;white-space:pre-wrap;direction:ltr;text-align:left";
+        document.body.appendChild(d);
+        d.textContent = "⚠️ KingCraft — خطأ في التحميل:\n\n";
+      }
+      d.textContent += msg + "\n";
+    }
+    window.addEventListener("error", function (e) {
+      kcError((e.message || e.error || "script error") + (e.filename ? "\n  @ " + e.filename + ":" + e.lineno : ""));
+    });
+    window.addEventListener("unhandledrejection", function (e) {
+      kcError("Promise rejected: " + (e.reason && e.reason.message ? e.reason.message : e.reason));
+    });
+    if (location.protocol === "file:") {
+      kcError("فتحت اللعبة عبر file:// — وحدات JavaScript لا تعمل بهذا الشكل.\nشغّل خادمًا محليًا وافتح:  http://127.0.0.1:8099/index.html");
+    }
+  </script>
+
+  <!-- Three.js r160 via importmap (static, CDN) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <!-- Loading / Main menu -->
+  <div id="menu" class="menu">
+    <div class="menu-panel">
+      <h1 class="logo">KingCraft</h1>
+      <p class="subtitle">عالم المكعبات</p>
+      <button id="btn-start" class="mc-btn">ابدأ اللعب</button>
+      <p class="hint">WASD للحركة • مسافة للقفز (نقرتان = طيران) • Shift زحف • Ctrl جري • أيسر لكسر • أيمن لوضع • 1-9 اختيار • V منظور</p>
+      <p class="version">v0.1 — المرحلة 1: عالم المكعبات</p>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="crosshair" class="crosshair hidden">+</div>
+
+  <div id="hud" class="hud hidden">
+    <div id="hotbar" class="hotbar"></div>
+  </div>
+
+  <div id="debug" class="debug hidden"></div>
+
+  <canvas id="game"></canvas>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

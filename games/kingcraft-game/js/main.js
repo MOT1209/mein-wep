@@ -1,0 +1,303 @@
+// نقطة الدخول: تهيئة Three.js، العالم، اللاعب، المخزون، التصنيع، الأفران، وحلقة اللعبة.
+import * as THREE from "three";
+import { World } from "./world/World.js";
+import { Player } from "./player/Player.js";
+import { Hotbar } from "./ui/Hotbar.js";
+import { InventoryUI } from "./ui/InventoryUI.js";
+import { raycastVoxel } from "./utils/Raycast.js";
+import { AIR, getBlock, blockDrop } from "./world/BlockData.js";
+import { Inventory } from "./player/Inventory.js";
+import { DropManager } from "./blocks/BlockDrops.js";
+import { FurnaceManager } from "./crafting/Furnace.js";
+import { getItem, isPlaceable, placeBlockId } from "./items/Items.js";
+import { getTool, BLOCK_TOOL } from "./player/Tools.js";
+
+const canvas = document.getElementById("game");
+const menu = document.getElementById("menu");
+const crosshair = document.getElementById("crosshair");
+const hud = document.getElementById("hud");
+const debug = document.getElementById("debug");
+const menuHidden = () => menu.classList.contains("hidden");
+
+// ===== Three.js =====
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+renderer.setPixelRatio(1);
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+const scene = new THREE.Scene();
+const SKY = new THREE.Color(0x7ec0ee);
+scene.background = SKY;
+scene.fog = new THREE.Fog(SKY, 40, 90);
+
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.1);
+sun.position.set(0.6, 1, 0.4);
+scene.add(sun);
+scene.add(new THREE.AmbientLight(0xb8d0e8, 0.7));
+
+// ===== العالم واللاعب والأنظمة =====
+const world = new World(scene);
+const player = new Player(world, camera);
+const inventory = new Inventory();
+const drops = new DropManager(scene, world);
+const furnaces = new FurnaceManager();
+const hotbar = new Hotbar(document.getElementById("hotbar"), inventory);
+const ui = new InventoryUI(inventory);
+ui.onClose = () => {
+  crosshair.classList.remove("hidden");
+  if (menuHidden()) { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); }
+};
+
+// ===== صندوق التحديد + تراكب التكسير =====
+const highlight = new THREE.LineSegments(
+  new THREE.EdgesGeometry(new THREE.BoxGeometry(1.001, 1.001, 1.001)),
+  new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4 })
+);
+highlight.visible = false;
+scene.add(highlight);
+
+const crackMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0, depthWrite: false });
+const crackBox = new THREE.Mesh(new THREE.BoxGeometry(1.03, 1.03, 1.03), crackMat);
+crackBox.visible = false;
+scene.add(crackBox);
+
+// ===== التحكم بالنظر =====
+let yaw = 0, pitch = 0, started = false, gameStarted = false;
+const SENS = 0.0022;
+
+document.addEventListener("mousemove", (e) => {
+  if (!started) return;
+  yaw -= e.movementX * SENS;
+  pitch -= e.movementY * SENS;
+  const lim = Math.PI / 2 - 0.01;
+  pitch = Math.max(-lim, Math.min(lim, pitch));
+});
+document.addEventListener("pointerlockchange", () => { started = document.pointerLockElement === canvas; });
+
+// ===== أدوات مساعدة =====
+let lastDir = new THREE.Vector3(0, 0, 1);
+const _eyeOrigin = new THREE.Vector3();
+function eyeOrigin() { return _eyeOrigin.set(player.pos.x, player.pos.y + player.eye, player.pos.z); }
+
+function intersectsPlayer(bx, by, bz) {
+  const minX = player.pos.x - 0.3, maxX = player.pos.x + 0.3;
+  const minZ = player.pos.z - 0.3, maxZ = player.pos.z + 0.3;
+  const minY = player.pos.y, maxY = player.pos.y + player.height;
+  return (bx + 1 > minX && bx < maxX && by + 1 > minY && by < maxY && bz + 1 > minZ && bz < maxZ);
+}
+
+function heldTool() {
+  const s = inventory.selectedStack;
+  if (s) { const it = getItem(s.id); if (it && it.tool) return getTool(it.tool); }
+  return getTool("fist");
+}
+
+function breakTime(id, tool) {
+  const b = getBlock(id);
+  const info = BLOCK_TOOL[b.name];
+  const correct = !info || info.kind === "any" || tool.kind === info.kind;
+  const speed = correct ? tool.speed : 1;
+  const mult = correct ? 1.5 : 5;
+  return Math.max(0.05, (b.hardness || 1) * mult / speed);
+}
+
+function canDrop(id, tool) {
+  const b = getBlock(id);
+  const info = BLOCK_TOOL[b.name];
+  if (!info || info.kind === "any") return true;
+  if (tool.kind !== info.kind) return false;
+  return tool.tier >= (info.minTier || 0);
+}
+
+function damageTool() {
+  const s = inventory.selectedStack;
+  if (!s) return;
+  const it = getItem(s.id);
+  if (!it || !it.tool) return;
+  const t = getTool(it.tool);
+  if (t.durability === Infinity) return;
+  s.dur = (s.dur == null ? t.durability : s.dur) - 1;
+  if (s.dur <= 0) inventory.consumeSelected(1);
+  inventory._changed();
+}
+
+// ===== التعدين (كسر مستمر بالضغط) =====
+let mineDown = false, miningKey = null, miningProgress = 0;
+
+function resetMining() {
+  miningKey = null; miningProgress = 0;
+  crackBox.visible = false; crackMat.opacity = 0;
+}
+
+function updateMining(dt) {
+  if (!mineDown) { resetMining(); return; }
+  const hit = raycastVoxel(world, eyeOrigin(), lastDir);
+  if (!hit) { resetMining(); return; }
+  const id = world.getBlock(hit.block[0], hit.block[1], hit.block[2]);
+  if (id === AIR || getBlock(id).liquid) { resetMining(); return; }
+
+  const key = hit.block.join(",");
+  if (key !== miningKey) { miningKey = key; miningProgress = 0; }
+
+  const tool = heldTool();
+  miningProgress += dt / breakTime(id, tool);
+
+  if (miningProgress >= 1) {
+    if (canDrop(id, tool)) {
+      const d = blockDrop(id);
+      if (d) drops.spawn(hit.block[0], hit.block[1], hit.block[2], d, 1);
+    }
+    if (getBlock(id).name === "furnace") dropFurnace(hit.block);
+    world.setBlock(hit.block[0], hit.block[1], hit.block[2], AIR);
+    damageTool();
+    resetMining();
+    return;
+  }
+
+  crackBox.position.set(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5);
+  crackBox.visible = true;
+  crackMat.opacity = 0.15 + miningProgress * 0.55;
+}
+
+function dropFurnace(pos) {
+  const s = furnaces.get(pos[0], pos[1], pos[2]);
+  for (const stack of [s.input, s.fuel, s.output]) {
+    if (stack) drops.spawn(pos[0], pos[1], pos[2], stack.id, stack.count);
+  }
+  furnaces.remove(pos[0], pos[1], pos[2]);
+}
+
+// ===== فتح/إغلاق الواجهات =====
+function openUI(mode, furnaceState = null) {
+  resetMining(); mineDown = false;
+  crosshair.classList.add("hidden");
+  document.exitPointerLock();
+  ui.open(mode, furnaceState);
+}
+
+// ===== الفأرة =====
+canvas.addEventListener("mousedown", (e) => {
+  if (!started || ui.isOpen) return;
+  if (e.button === 0) { mineDown = true; return; }
+  if (e.button === 2) rightClick();
+});
+canvas.addEventListener("mouseup", (e) => { if (e.button === 0) { mineDown = false; resetMining(); } });
+canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+window.addEventListener("blur", () => { mineDown = false; resetMining(); });
+
+function rightClick() {
+  const hit = raycastVoxel(world, eyeOrigin(), lastDir);
+  if (!hit) return;
+  const id = world.getBlock(hit.block[0], hit.block[1], hit.block[2]);
+  const name = getBlock(id).name;
+
+  if (name === "crafting_table") { openUI("table"); return; }
+  if (name === "furnace") { openUI("furnace", furnaces.get(hit.block[0], hit.block[1], hit.block[2])); return; }
+
+  const sel = inventory.selectedStack;
+  if (sel && isPlaceable(sel.id)) {
+    const [px, py, pz] = hit.place;
+    if (!intersectsPlayer(px, py, pz)) {
+      world.setBlock(px, py, pz, placeBlockId(sel.id));
+      inventory.consumeSelected(1);
+    }
+  }
+}
+
+// ===== لوحة المفاتيح: المخزون =====
+window.addEventListener("keydown", (e) => {
+  if (!gameStarted) return;
+  if (e.code === "KeyE") {
+    if (ui.isOpen) ui.close();
+    else openUI("inventory");
+  } else if (e.code === "Escape" && ui.isOpen) {
+    ui.close();
+  }
+});
+
+// ===== البدء =====
+document.getElementById("btn-start").addEventListener("click", () => {
+  try {
+    world.update(new THREE.Vector3(0, 0, 0));
+    player.spawn();
+    inventory.giveStarter();
+    gameStarted = true;
+    menu.classList.add("hidden");
+    crosshair.classList.remove("hidden");
+    hud.classList.remove("hidden");
+    debug.classList.remove("hidden");
+    const p = canvas.requestPointerLock();
+    if (p && p.catch) p.catch(() => {});
+  } catch (err) {
+    if (window.kcError) window.kcError("فشل بدء اللعبة: " + (err && err.stack ? err.stack : err));
+    else alert("خطأ: " + err);
+  }
+});
+
+canvas.addEventListener("click", () => {
+  if (!started && menuHidden() && !ui.isOpen) canvas.requestPointerLock();
+});
+
+// ===== حلقة اللعبة =====
+let last = performance.now();
+let frames = 0, fpsTime = 0, fps = 0;
+let debugTimer = 0;
+
+function loop(now) {
+  const dt = Math.min((now - last) / 1000, 0.05);
+  last = now;
+
+  if (gameStarted) furnaces.tick(dt);
+
+  if (menuHidden()) {
+    const playing = !ui.isOpen;
+    if (playing) {
+      player.update(dt, yaw);
+      lastDir = player.applyCamera(yaw, pitch);
+      updateMining(dt);
+      drops.update(dt, player, inventory);
+    } else {
+      lastDir = player.applyCamera(yaw, pitch);
+      ui.tickFurnace();
+    }
+    world.update(player.pos);
+
+    const hit = playing ? raycastVoxel(world, eyeOrigin(), lastDir) : null;
+    if (hit) {
+      highlight.visible = true;
+      highlight.position.set(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5);
+    } else {
+      highlight.visible = false;
+    }
+
+    frames++; debugTimer += dt;
+    if (debugTimer >= 0.5) {
+      fps = Math.round(frames / debugTimer);
+      frames = 0; debugTimer = 0;
+      debug.textContent =
+        `KingCraft v0.2\n` +
+        `FPS: ${fps}\n` +
+        `XYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\n` +
+        `chunks: ${world.chunks.size} • drops: ${drops.entities.length}` +
+        (player.flying ? "\n[طيران]" : "") +
+        (player.sneaking ? "\n[زحف]" : "");
+    }
+  }
+
+  renderer.render(scene, camera);
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ===== تغيير الحجم =====
+window.addEventListener("resize", () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ===== PWA =====
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
