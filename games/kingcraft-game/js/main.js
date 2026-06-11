@@ -104,7 +104,7 @@ function autoSave(dt) {
 const ui = new InventoryUI(inventory);
 ui.onClose = () => {
   crosshair.classList.remove("hidden");
-  if (menuHidden()) { const p = canvas.requestPointerLock(); if (p && p.catch) p.catch(() => {}); }
+  if (menuHidden()) requestAnimationFrame(() => { canvas.requestPointerLock().catch(() => {}); });
 };
 
 // ===== صندوق التحديد + تراكب التكسير =====
@@ -363,7 +363,7 @@ document.getElementById("btn-start").addEventListener("click", () => {
 });
 
 canvas.addEventListener("click", () => {
-  if (!started && menuHidden() && !ui.isOpen) canvas.requestPointerLock();
+  if (!started && menuHidden() && !ui.isOpen) canvas.requestPointerLock().catch(() => {});
 });
 
 // ===== حلقة اللعبة =====
