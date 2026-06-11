@@ -100,8 +100,7 @@ export class TerrainGen {
           if (dx === 0 && dz === 0 && dy < 1) continue;
           if (Math.abs(dx) === r && Math.abs(dz) === r && dy > -1) continue;
           const x = lx + dx, z = lz + dz, y = topY + dy;
-          // نضع الأوراق فقط داخل القطعة (تبسيط الحدود)
-          if (x >= 0 && x < size && z >= 0 && z < size && y < WORLD_HEIGHT) {
+          if (y < WORLD_HEIGHT) {
             setBlock(x, y, z, LEAVES);
           }
         }

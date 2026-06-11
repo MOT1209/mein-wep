@@ -3,6 +3,7 @@ import * as THREE from "three";
 import {
   GRAVITY, JUMP_SPEED, WALK_SPEED, RUN_SPEED, FLY_SPEED,
   PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_EYE, WORLD_HEIGHT,
+  EXHAUSTION_PER_JUMP, EXHAUSTION_PER_SPRINT,
 } from "../utils/Constants.js";
 
 const HALF = PLAYER_WIDTH / 2;
@@ -16,6 +17,7 @@ export class Player {
     this.pos = new THREE.Vector3(0, WORLD_HEIGHT, 0);
     this.vel = new THREE.Vector3();
     this.onGround = false;
+    this._fallDist = 0;
     this.flying = false;
     this.sneaking = false;
     this.thirdPerson = false;
@@ -50,6 +52,7 @@ export class Player {
     this.vel.set(0, 0, 0);
     this._height = PLAYER_HEIGHT;
     this._eye = PLAYER_EYE;
+    this._fallDist = 0;
   }
 
   _collides(px, py, pz, h) {
@@ -65,13 +68,17 @@ export class Player {
 
   update(dt, yaw) {
     dt = Math.min(dt, 0.05);
+    const startY = this.pos.y;
 
     this.sneaking = this.keys["ShiftLeft"] && !this.flying && this.onGround;
 
-    // ارتفاع اللاعب حسب الانحناء
     const targetH = this.sneaking ? SNEAK_HEIGHT : PLAYER_HEIGHT;
-    this._height = targetH;
-    this._eye = Math.min(targetH - 0.08, PLAYER_EYE);
+    if (targetH > this._height && this._collides(this.pos.x, this.pos.y, this.pos.z, targetH)) {
+      // عائق بالأعلى — ابق منحنياً
+    } else {
+      this._height = targetH;
+    }
+    this._eye = Math.min(this._height - 0.08, PLAYER_EYE);
 
     const run = this.keys["ControlLeft"] && !this.sneaking;
     const baseSpeed = this.flying ? FLY_SPEED : (this.sneaking ? SNEAK_SPEED : (run ? RUN_SPEED : WALK_SPEED));
@@ -101,6 +108,7 @@ export class Player {
       if (this.keys["Space"] && this.onGround) {
         this.vel.y = JUMP_SPEED;
         this.onGround = false;
+        if (this.health) this.health.addExhaustion(EXHAUSTION_PER_JUMP);
       }
     }
 
@@ -108,7 +116,28 @@ export class Player {
     this._moveAxis("z", this.vel.z * dt);
     this._moveAxis("y", this.vel.y * dt);
 
-    if (this.pos.y < -10) this.spawn();
+    if (!this.flying) {
+      const dy = startY - this.pos.y;
+      if (dy > 0 && !this.onGround) {
+        this._fallDist += dy;
+      }
+      if (this.onGround && this._fallDist > 0 && this.vel.y >= 0) {
+        if (this.health) this.health.fallDamage(this._fallDist);
+        this._fallDist = 0;
+      }
+    } else {
+      this._fallDist = 0;
+    }
+
+    if (this.onGround && run && (Math.abs(this.vel.x) > 0.1 || Math.abs(this.vel.z) > 0.1)) {
+      if (this.health) this.health.addExhaustion(EXHAUSTION_PER_SPRINT * (Math.abs(this.vel.x) + Math.abs(this.vel.z)) * dt);
+    }
+
+    if (this.pos.y < -10) {
+      if (this.health) this.health.takeDamage(20);
+      if (!this.health || this.health.dead) this.spawn();
+    }
+
   }
 
   _moveAxis(axis, amount) {
@@ -120,7 +149,7 @@ export class Player {
     if (this._collides(p.x, p.y, p.z)) {
       p[axis] = old;
       if (axis === "y") {
-        if (amount < 0) this.onGround = true;
+        if (amount < 0 && this.world.isSolidAt(p.x, p.y - 0.001, p.z)) this.onGround = true;
         this.vel.y = 0;
       }
     } else if (axis === "y" && amount < 0) {

@@ -58,11 +58,3 @@ export function matchRecipe(flat, size) {
   }
   return null;
 }
-
-// يستهلك مادة واحدة من كل خانة غير فارغة (بعد تصنيع ناجح)
-export function consumeGrid(flat) {
-  for (const s of flat) {
-    if (s) { s.count -= 1; }
-  }
-  // تفريغ الخانات المنتهية يتم في الواجهة
-}

@@ -11,6 +11,9 @@ import { DropManager } from "./blocks/BlockDrops.js";
 import { FurnaceManager } from "./crafting/Furnace.js";
 import { getItem, isPlaceable, placeBlockId } from "./items/Items.js";
 import { getTool, BLOCK_TOOL } from "./player/Tools.js";
+import { HealthSystem } from "./player/Health.js";
+import { SoundManager } from "./utils/SoundManager.js";
+import { saveGame, loadGame } from "./utils/SaveLoad.js";
 
 const canvas = document.getElementById("game");
 const menu = document.getElementById("menu");
@@ -41,8 +44,54 @@ const world = new World(scene);
 const player = new Player(world, camera);
 const inventory = new Inventory();
 const drops = new DropManager(scene, world);
+drops.onPickup = () => sound.playPickup();
 const furnaces = new FurnaceManager();
 const hotbar = new Hotbar(document.getElementById("hotbar"), inventory);
+const health = new HealthSystem();
+const sound = new SoundManager();
+
+function renderStatBar(el, value, max, fullChar, emptyChar) {
+  el.innerHTML = "";
+  for (let i = 0; i < max; i += 2) {
+    const n = Math.min(2, max - i);
+    const filled = Math.min(n, value - i);
+    const s = document.createElement("span");
+    s.className = "stat-icon";
+    s.textContent = filled >= 2 ? fullChar : filled >= 1 ? fullChar.slice(0, 1) + emptyChar.slice(1) : emptyChar;
+    el.appendChild(s);
+  }
+}
+
+function updateHUD() {
+  renderStatBar(document.getElementById("health-bar"), health.health, 20, "❤️", "🖤");
+  renderStatBar(document.getElementById("food-bar"), health.food, 20, "🍗", "🫗");
+}
+
+health.onChange = updateHUD;
+health.onDeath = () => {
+  document.getElementById("death-screen").classList.remove("hidden");
+  sound.playDeath();
+  document.exitPointerLock();
+};
+
+const saveData = loadGame();
+
+player.health = health;
+window._kcYaw = 0;
+window._kcPitch = 0;
+
+// حفظ تلقائي كل 30 ثانية
+let _saveTimer = 0;
+
+function autoSave(dt) {
+  if (!gameStarted) return;
+  _saveTimer += dt;
+  if (_saveTimer >= 30) {
+    _saveTimer = 0;
+    saveGame(player, inventory, health, world, drops);
+  }
+}
+
 const ui = new InventoryUI(inventory);
 ui.onClose = () => {
   crosshair.classList.remove("hidden");
@@ -76,7 +125,7 @@ document.addEventListener("mousemove", (e) => {
 document.addEventListener("pointerlockchange", () => { started = document.pointerLockElement === canvas; });
 
 // ===== أدوات مساعدة =====
-let lastDir = new THREE.Vector3(0, 0, 1);
+let lastDir = new THREE.Vector3();
 const _eyeOrigin = new THREE.Vector3();
 function eyeOrigin() { return _eyeOrigin.set(player.pos.x, player.pos.y + player.eye, player.pos.z); }
 
@@ -151,6 +200,8 @@ function updateMining(dt) {
     if (getBlock(id).name === "furnace") dropFurnace(hit.block);
     world.setBlock(hit.block[0], hit.block[1], hit.block[2], AIR);
     damageTool();
+    health.addExhaustion(0.1);
+    sound.playBreak();
     resetMining();
     return;
   }
@@ -196,11 +247,24 @@ function rightClick() {
   if (name === "furnace") { openUI("furnace", furnaces.get(hit.block[0], hit.block[1], hit.block[2])); return; }
 
   const sel = inventory.selectedStack;
-  if (sel && isPlaceable(sel.id)) {
+  if (!sel) return;
+
+  // أكل الطعام
+  const it = getItem(sel.id);
+  if (it && it.food != null && health.food < 20) {
+    health.eat(it.food, it.saturation);
+    inventory.consumeSelected(1);
+    sound.playEat();
+    updateHUD();
+    return;
+  }
+
+  if (isPlaceable(sel.id)) {
     const [px, py, pz] = hit.place;
     if (!intersectsPlayer(px, py, pz)) {
       world.setBlock(px, py, pz, placeBlockId(sel.id));
       inventory.consumeSelected(1);
+      sound.playPlace();
     }
   }
 }
@@ -216,12 +280,42 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+// ===== إعادة الحياة =====
+document.getElementById("btn-respawn").addEventListener("click", () => {
+  health.reset();
+  player.spawn();
+  document.getElementById("death-screen").classList.add("hidden");
+  updateHUD();
+});
+
 // ===== البدء =====
 document.getElementById("btn-start").addEventListener("click", () => {
   try {
     world.update(new THREE.Vector3(0, 0, 0));
-    player.spawn();
-    inventory.giveStarter();
+    updateHUD();
+
+    if (saveData) {
+      player.pos.set(saveData.player.x, saveData.player.y, saveData.player.z);
+      player.vel.set(0, 0, 0);
+      yaw = saveData.player.yaw || 0;
+      pitch = saveData.player.pitch || 0;
+      player.flying = saveData.player.flying || false;
+      player.thirdPerson = saveData.player.thirdPerson || false;
+      if (saveData.inventory) {
+        for (let i = 0; i < saveData.inventory.length && i < inventory.slots.length; i++) {
+          inventory.slots[i] = saveData.inventory[i] ? { id: saveData.inventory[i].id, count: saveData.inventory[i].count, dur: saveData.inventory[i].dur } : null;
+        }
+        inventory.selectedHotbar = saveData.selectedHotbar || 0;
+      }
+      health.health = saveData.player.health ?? 20;
+      health.food = saveData.player.food ?? 20;
+      health.saturation = saveData.player.saturation ?? 20;
+      updateHUD();
+    } else {
+      player.spawn();
+      inventory.giveStarter();
+    }
+    lastDir = player.applyCamera(yaw, pitch);
     gameStarted = true;
     menu.classList.add("hidden");
     crosshair.classList.remove("hidden");
@@ -248,13 +342,19 @@ function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
 
-  if (gameStarted) furnaces.tick(dt);
+  if (gameStarted) {
+    furnaces.tick(dt);
+    health.tick(dt);
+    autoSave(dt);
+  }
 
   if (menuHidden()) {
-    const playing = !ui.isOpen;
+    const playing = !ui.isOpen && !health.dead;
     if (playing) {
       player.update(dt, yaw);
       lastDir = player.applyCamera(yaw, pitch);
+      window._kcYaw = yaw;
+      window._kcPitch = pitch;
       updateMining(dt);
       drops.update(dt, player, inventory);
     } else {
@@ -276,7 +376,7 @@ function loop(now) {
       fps = Math.round(frames / debugTimer);
       frames = 0; debugTimer = 0;
       debug.textContent =
-        `KingCraft v0.2\n` +
+        `KingCraft v0.3\n` +
         `FPS: ${fps}\n` +
         `XYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\n` +
         `chunks: ${world.chunks.size} • drops: ${drops.entities.length}` +

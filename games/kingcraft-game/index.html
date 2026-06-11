@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/hud.css" />
   <link rel="stylesheet" href="css/menu.css" />
   <link rel="stylesheet" href="css/inventory.css" />
+  <link rel="stylesheet" href="css/health.css" />
   <link rel="icon" href="icons/icon-48.png" />
 
   <!-- شاشة تشخيص الأخطاء: تُظهر أي خطأ بدل الصمت -->
@@ -54,7 +55,7 @@
       <p class="subtitle">عالم المكعبات</p>
       <button id="btn-start" class="mc-btn">ابدأ اللعب</button>
       <p class="hint">WASD للحركة • مسافة للقفز (نقرتان = طيران) • Shift زحف • Ctrl جري • أيسر لكسر • أيمن لوضع • 1-9 اختيار • V منظور</p>
-      <p class="version">v0.1 — المرحلة 1: عالم المكعبات</p>
+      <p class="version">v0.3 — المرحلة 2: البقاء</p>
     </div>
   </div>
 
@@ -63,6 +64,13 @@
 
   <div id="hud" class="hud hidden">
     <div id="hotbar" class="hotbar"></div>
+    <div id="health-bar" class="stat-bar"></div>
+    <div id="food-bar" class="stat-bar"></div>
+  </div>
+
+  <div id="death-screen" class="hidden">
+    <h2>💀 لقد مت</h2>
+    <button id="btn-respawn" class="mc-btn">إعادة الحياة</button>
   </div>
 
   <div id="debug" class="debug hidden"></div>

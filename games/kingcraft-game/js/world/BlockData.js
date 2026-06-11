@@ -58,6 +58,7 @@ export function isLiquid(id) { return _liquid[id] === true; }
 export function blockDrop(id) {
   const b = getBlock(id);
   if (b.drops) return b.drops;
+  if (b.name === "leaves") return Math.random() < 0.05 ? "apple" : null;
   return b.name;
 }
 

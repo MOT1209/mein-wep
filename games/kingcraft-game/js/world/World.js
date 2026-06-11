@@ -39,7 +39,19 @@ export class World {
     if (!c) {
       c = new Chunk(cx, cz);
       this.gen.generateChunk(cx, cz, S, (lx, ly, lz, id) => {
-        if (c.inBounds(lx, ly, lz)) c.blocks[Chunk.idx(lx, ly, lz)] = id;
+        if (ly < 0 || ly >= WORLD_HEIGHT) return;
+        if (c.inBounds(lx, ly, lz)) {
+          c.blocks[Chunk.idx(lx, ly, lz)] = id;
+          return;
+        }
+        const wx = cx * S + lx;
+        const wz = cz * S + lz;
+        const ncx = Math.floor(wx / S);
+        const ncz = Math.floor(wz / S);
+        const nc = this.ensureChunk(ncx, ncz);
+        const nlx = wx - ncx * S;
+        const nlz = wz - ncz * S;
+        if (nc.inBounds(nlx, ly, nlz)) nc.blocks[Chunk.idx(nlx, ly, nlz)] = id;
       });
       c.generated = true;
       this.chunks.set(k, c);

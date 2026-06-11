@@ -62,6 +62,7 @@ export class DropManager {
     this.scene = scene;
     this.world = world;
     this.entities = [];
+    this.onPickup = null;
   }
 
   spawn(x, y, z, id, count = 1) {
@@ -81,11 +82,11 @@ export class DropManager {
       // التقاط
       if (e.pickupDelay <= 0) {
         const dx = e.pos.x - px, dy = e.pos.y - py, dz = e.pos.z - pz;
-        if (dx * dx + dy * dy + dz * dz < PICKUP_DIST * PICKUP_DIST) {
-          const remainder = inventory.addItem(e.id, e.count);
-          if (remainder === 0) remove = true;
-          else e.count = remainder;
-        }
+          if (dx * dx + dy * dy + dz * dz < PICKUP_DIST * PICKUP_DIST) {
+            const remainder = inventory.addItem(e.id, e.count);
+            if (remainder === 0) { remove = true; if (this.onPickup) this.onPickup(); }
+            else e.count = remainder;
+          }
       }
       if (e.age > DESPAWN) remove = true;
 

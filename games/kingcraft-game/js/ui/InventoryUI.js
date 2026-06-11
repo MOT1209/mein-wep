@@ -224,10 +224,9 @@ export class InventoryUI {
     } else {
       this.held = { id: out.id, count: out.count };
     }
-    // استهلك مادة من كل خانة تصنيع غير فارغة
     for (let i = 0; i < this.craft.length; i++) {
       const s = this.craft[i];
-      if (s) { s.count -= 1; if (s.count <= 0) this.craft[i] = null; }
+      if (s && s.count > 0) { s.count -= 1; if (s.count <= 0) this.craft[i] = null; }
     }
   }
 

@@ -51,6 +51,20 @@ const materials = [
   ["stick", "عصا"], ["coal", "فحم"], ["charcoal", "فحم نباتي"],
   ["iron_ingot", "سبيكة حديد"], ["gold_ingot", "سبيكة ذهب"], ["diamond", "ألماس"],
 ];
+
+// أطعمة
+const FOOD_ICONS = {
+  apple: (ctx, s) => { px(ctx, s*0.2, s*0.3, s*0.6, s*0.5, "#e03030"); px(ctx, s*0.25, s*0.25, s*0.12, s*0.12, "#5a3a10"); px(ctx, s*0.4, s*0.5, s*0.15, s*0.08, "#7a2a1a"); },
+  bread: (ctx, s) => { px(ctx, s*0.15, s*0.35, s*0.7, s*0.5, "#dba54b"); px(ctx, s*0.2, s*0.4, s*0.6, s*0.15, "#c4923a"); },
+  cooked_beef: (ctx, s) => { px(ctx, s*0.2, s*0.3, s*0.6, s*0.45, "#7a5230"); px(ctx, s*0.25, s*0.35, s*0.5, s*0.2, "#9a6a3a"); },
+};
+
+const foods = [
+  ["apple", "تفاحة"], ["bread", "خبز"], ["cooked_beef", "لحم مشوي"],
+];
+for (const [id, label] of foods) {
+  register({ id, label, maxStack: 64, placeable: false, draw: FOOD_ICONS[id], food: id === "apple" ? 4 : id === "bread" ? 5 : 8, saturation: id === "apple" ? 2.4 : id === "bread" ? 6 : 12.8 });
+}
 for (const [id, label] of materials) {
   register({ id, label, maxStack: 64, placeable: false, draw: MATERIAL_ICONS[id] });
 }

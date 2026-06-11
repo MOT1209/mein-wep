@@ -24,6 +24,8 @@ export const RECIPES = [
   { out: { id: "iron_ingot", count: 9 }, shapeless: ["iron_block"] },
   { out: { id: "gold_ingot", count: 9 }, shapeless: ["gold_block"] },
   { out: { id: "diamond", count: 9 },    shapeless: ["diamond_block"] },
+
+  { out: { id: "bread", count: 2 }, shapeless: ["apple", "apple", "apple"] },
 ];
 
 // أشكال الأدوات لكل مادة
