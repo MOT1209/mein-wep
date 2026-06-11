@@ -728,7 +728,7 @@ function loop(now) {
     if (debugTimer >= 0.5) {
       fps = Math.round(frames / debugTimer);
       frames = 0; debugTimer = 0;
-      const tooltipId = hit ? getBlock(hit.block[0], hit.block[1], hit.block[2]) : 0;
+      const tooltipId = hit ? world.getBlock(hit.block[0], hit.block[1], hit.block[2]) : 0;
       const tooltipName = tooltipId ? (getItem(tooltipId)?.name || `ID:${tooltipId}`) : "";
       debug.textContent =
         `KingCraft v0.4\n` +
