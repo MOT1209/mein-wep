@@ -7,24 +7,30 @@ import { generateThumbnail, getThumbnailData } from '../utils/thumbnails.js?v=1.
 let activeFilter = 'all';
 let searchQuery = '';
 
+// Project screenshots (SVG placeholder images for projects without real screenshots)
+const projectScreenshots = {
+    'game': '../images/screenshots/default.svg',
+    'app': '../images/screenshots/default.svg',
+    'model': '../images/screenshots/default.svg',
+    'KingCraft': '../images/screenshots/kingcraft.svg'
+};
+
 const fallbackProjects = [
     // ── GitHub Repositories (MOT1209) ──
-    { title: 'Alking', category: 'App', description: 'Full-stack community-driven application built with Next.js 15 and Supabase. A free-to-use platform to connect and help others.', link: 'https://github.com/MOT1209/Alking', github_link: 'https://github.com/MOT1209/Alking', image_url: 'fas fa-users', technologies: ['Next.js', 'Supabase', 'Full-Stack'] },
-    { title: 'FromLiten', category: 'App', description: 'Personal AI workspace and command center — the operating hub for all Rashid projects, vault, games, and creative systems.', link: 'https://github.com/MOT1209/fromliten', github_link: 'https://github.com/MOT1209/fromliten', image_url: 'fas fa-terminal', technologies: ['JavaScript', 'PWA', 'Supabase'] },
-    { title: 'Gem-PRO', category: 'App', description: 'AI-powered productivity tool leveraging the Gemini API for intelligent automation and creative assistance.', link: 'https://github.com/MOT1209/Gem-PRO', github_link: 'https://github.com/MOT1209/Gem-PRO', image_url: 'fas fa-gem', technologies: ['JavaScript', 'Gemini API', 'AI'] },
-    { title: 'islams-wep', category: 'App', description: 'Islamic web platform featuring Quran, prayers, and educational resources with a clean modern interface.', link: 'https://github.com/MOT1209/islams-wep', github_link: 'https://github.com/MOT1209/islams-wep', image_url: 'fas fa-mosque', technologies: ['HTML', 'CSS', 'JavaScript'] },
-    { title: 'BOTTIKTOK2', category: 'App', description: 'Social media automation bot for TikTok — streamlining content workflows and engagement.', link: 'https://github.com/MOT1209/BOTTIKTOK2', github_link: 'https://github.com/MOT1209/BOTTIKTOK2', image_url: 'fas fa-robot', technologies: ['JavaScript', 'Automation', 'Bot'] },
-    { title: 'nicht-projekt-vergessen', category: 'App', description: 'Task management & reminder app in TypeScript — never forget a project again! Organize and track all your work.', link: 'https://github.com/MOT1209/nicht-projekt-vergessen', github_link: 'https://github.com/MOT1209/nicht-projekt-vergessen', image_url: 'fas fa-tasks', technologies: ['TypeScript', 'Productivity', 'PWA'] },
-    { title: 'RashidClaw', category: 'App', description: 'Utility toolkit by Rashid — a collection of developer tools and CLI helpers for rapid prototyping.', link: 'https://github.com/MOT1209/RashidClaw', github_link: 'https://github.com/MOT1209/RashidClaw', image_url: 'fas fa-toolbox', technologies: ['Utility', 'CLI', 'Tools'] },
-    { title: 'bara-Alsalfhe', category: 'App', description: 'Creative web project featuring cultural content and interactive experiences built with JavaScript.', link: 'https://github.com/MOT1209/bara-Alsalfhe', github_link: 'https://github.com/MOT1209/bara-Alsalfhe', image_url: 'fas fa-palette', technologies: ['JavaScript', 'Creative', 'Web'] },
+    { title: 'Alking', category: 'App', description: 'Full-stack community-driven application built with Next.js 15 and Supabase. A free-to-use platform to connect and help others.', link: 'https://github.com/MOT1209/Alking', github_link: 'https://github.com/MOT1209/Alking', image_url: '../images/screenshots/default.svg', technologies: ['Next.js', 'Supabase', 'Full-Stack'] },
+    { title: 'Gem-PRO', category: 'App', description: 'AI-powered productivity tool leveraging the Gemini API for intelligent automation and creative assistance.', link: 'https://github.com/MOT1209/Gem-PRO', github_link: 'https://github.com/MOT1209/Gem-PRO', image_url: '../images/screenshots/default.svg', technologies: ['JavaScript', 'Gemini API', 'AI'] },
+    { title: 'islams-wep', category: 'App', description: 'Islamic web platform featuring Quran, prayers, and educational resources with a clean modern interface.', link: 'https://github.com/MOT1209/islams-wep', github_link: 'https://github.com/MOT1209/islams-wep', image_url: '../images/screenshots/default.svg', technologies: ['HTML', 'CSS', 'JavaScript'] },
+    { title: 'BOTTIKTOK2', category: 'App', description: 'Social media automation bot for TikTok — streamlining content workflows and engagement.', link: 'https://github.com/MOT1209/BOTTIKTOK2', github_link: 'https://github.com/MOT1209/BOTTIKTOK2', image_url: '../images/screenshots/default.svg', technologies: ['JavaScript', 'Automation', 'Bot'] },
+    { title: 'nicht-projekt-vergessen', category: 'App', description: 'Task management & reminder app in TypeScript — never forget a project again! Organize and track all your work.', link: 'https://github.com/MOT1209/nicht-projekt-vergessen', github_link: 'https://github.com/MOT1209/nicht-projekt-vergessen', image_url: '../images/screenshots/default.svg', technologies: ['TypeScript', 'Productivity', 'PWA'] },
+    { title: 'RashidClaw', category: 'App', description: 'Utility toolkit by Rashid — a collection of developer tools and CLI helpers for rapid prototyping.', link: 'https://github.com/MOT1209/RashidClaw', github_link: 'https://github.com/MOT1209/RashidClaw', image_url: '../images/screenshots/default.svg', technologies: ['Utility', 'CLI', 'Tools'] },
     // ── Local Workspace Projects ──
-    { title: 'Rust Construction', category: 'Game', description: '3D building game with physics and resource management. Build structures, manage resources, survive!', link: 'games/rust-game/index.html', image_url: 'fas fa-cubes', technologies: ['Three.js', '3D', 'Physics'] },
-    { title: 'Farm Empire', category: 'Game', description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!', link: 'games/farm-game/index.html', image_url: 'fas fa-tractor', technologies: ['WebGL', 'Simulation', 'Economy'] },
-    { title: 'KingCraft', category: 'Game', description: '3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive in an immersive Three.js world.', link: 'games/kingcraft-game/index.html', image_url: 'fas fa-crown', technologies: ['Three.js', '3D', 'Sandbox'] },
-    { title: 'Rashid AI', category: 'Model', description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support with 10+ languages.', link: 'models/Rashid-Model/index.html', image_url: 'fas fa-brain', technologies: ['Gemini API', 'OpenRouter', 'AI'] },
-    { title: 'Quran Pro', category: 'App', description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.', link: 'apps/quran-app/index.html', image_url: 'fas fa-book-open', technologies: ['Audio', 'PWA', 'Offline'] },
-    { title: 'Calculator App', category: 'App', description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!', link: 'apps/calculator-app/index.html', image_url: 'fas fa-calculator', technologies: ['Security', 'PWA', 'Privacy'] },
-    { title: 'Quiz Master', category: 'App', description: 'Interactive quiz platform with multiple categories, scoring, and progress tracking.', link: 'apps/quiz-app/index.html', image_url: 'fas fa-question-circle', technologies: ['Education', 'PWA', 'Gamification'] }
+    { title: 'KingCraft', category: 'Game', description: '3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive! Built with Three.js chunk-based rendering.', link: 'games/kingcraft-game/showcase.html', image_url: '../images/screenshots/kingcraft.svg', technologies: ['Three.js', '3D', 'Sandbox'] },
+    { title: 'Rust Construction', category: 'Game', description: '3D building game with physics and resource management. Build structures, manage resources, survive!', link: 'games/rust-game/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Three.js', '3D', 'Physics'] },
+    { title: 'Farm Empire', category: 'Game', description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!', link: 'games/farm-game/index.html', image_url: '../images/screenshots/default.svg', technologies: ['WebGL', 'Simulation', 'Economy'] },
+    { title: 'Rashid AI', category: 'Model', description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support with 10+ languages.', link: 'models/Rashid-Model/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Gemini API', 'OpenRouter', 'AI'] },
+    { title: 'Quran Pro', category: 'App', description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.', link: 'apps/quran-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Audio', 'PWA', 'Offline'] },
+    { title: 'Calculator App', category: 'App', description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!', link: 'apps/calculator-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Security', 'PWA', 'Privacy'] },
+    { title: 'Quiz Master', category: 'App', description: 'Interactive quiz platform with multiple categories, scoring, and progress tracking.', link: 'apps/quiz-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Education', 'PWA', 'Gamification'] }
 ];
 
 export function initProjectFilters() {
@@ -204,8 +210,8 @@ function createProjectCard(project, lang) {
     const pwaProjects = ['quran-app', 'farm-game', 'rust-game', 'calculator-vault', 'quiz-app', 'kingcraft-game'];
     const isPWA = pwaProjects.some(slug => projectLink.includes(slug));
     const visualContent = project.image_url && !project.image_url.startsWith('fas ')
-        ? `<img src="${safeUrl(project.image_url, '')}" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">`
-        : `<img src="" alt="${title}" data-project-thumb="${escapeHTML(title)}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`;
+        ? `<img src="${safeUrl(project.image_url, '')}" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`
+        : `<img src="../images/screenshots/default.svg" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`;
     const isOpenSource = !!project.github_link;
     const isLocal = project.link && /^(games|apps|models)\//.test(project.link);
     const statusBadge = isOpenSource

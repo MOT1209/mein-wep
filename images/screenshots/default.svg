@@ -1,0 +1,56 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.05"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect width="800" height="300" fill="url(#glow)"/>
+
+  <!-- Grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <rect width="40" height="40" fill="none"/>
+    <rect width="1" height="40" fill="rgba(255,255,255,0.02)"/>
+    <rect width="40" height="1" fill="rgba(255,255,255,0.02)"/>
+  </pattern>
+  <rect width="800" height="600" fill="url(#grid)"/>
+
+  <!-- Terminal window mockup -->
+  <rect x="220" y="160" width="360" height="260" rx="12" fill="rgba(15,23,42,0.8)" stroke="rgba(99,102,241,0.3)" stroke-width="1"/>
+  <!-- Title bar -->
+  <rect x="220" y="160" width="360" height="36" rx="12" fill="rgba(99,102,241,0.15)"/>
+  <rect x="220" y="184" width="360" height="14" fill="rgba(99,102,241,0.15)"/>
+  <!-- Dots -->
+  <circle cx="242" cy="178" r="6" fill="#ef4444"/>
+  <circle cx="260" cy="178" r="6" fill="#f59e0b"/>
+  <circle cx="278" cy="178" r="6" fill="#10b981"/>
+  <!-- Code lines -->
+  <text x="250" y="220" font-family="monospace" font-size="14" fill="#6366f1">~ $ project init</text>
+  <text x="250" y="245" font-family="monospace" font-size="14" fill="#22c55e">✓ Initializing...</text>
+  <text x="250" y="270" font-family="monospace" font-size="14" fill="#38bdf8">✓ Dependencies loaded</text>
+  <text x="250" y="295" font-family="monospace" font-size="14" fill="#22c55e">✓ Building modules</text>
+  <text x="250" y="320" font-family="monospace" font-size="14" fill="#fbbf24">⚠ Configuring...</text>
+  <text x="250" y="345" font-family="monospace" font-size="14" fill="#22c55e">✓ Ready!</text>
+  <text x="250" y="380" font-family="monospace" font-size="14" fill="#6366f1" font-weight="bold">~ $ _</text>
+  <rect x="308" y="374" width="10" height="16" fill="#818cf8">
+    <animate attributeName="opacity" from="1" to="0" dur="1s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Floating code symbols -->
+  <text x="120" y="140" font-family="monospace" font-size="24" fill="rgba(99,102,241,0.12)">{ }</text>
+  <text x="640" y="240" font-family="monospace" font-size="20" fill="rgba(56,189,248,0.12)">&lt;/&gt;</text>
+  <text x="660" y="420" font-family="monospace" font-size="28" fill="rgba(99,102,241,0.1)">#!</text>
+
+  <!-- Binary decoration -->
+  <text x="80" y="480" font-family="monospace" font-size="11" fill="rgba(99,102,241,0.08)">01001101 01001111 01010100</text>
+  <text x="460" y="520" font-family="monospace" font-size="11" fill="rgba(56,189,248,0.06)">01110010 01100001 01110011</text>
+
+  <!-- Center icon -->
+  <circle cx="400" cy="100" r="32" fill="rgba(99,102,241,0.1)" stroke="rgba(99,102,241,0.3)" stroke-width="2"/>
+  <text x="400" y="112" text-anchor="middle" font-family="Arial" font-size="32" fill="#818cf8">⚡</text>
+</svg>
