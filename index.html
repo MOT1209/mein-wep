@@ -10,10 +10,11 @@
     <meta name="keywords" content="Rashid, MOT1209, Full-Stack Developer, Web Developer, Next.js 15, Supabase, Three.js, AI Workspace, PWA, Portfolio, React, Python, FromLiten, Alking">
     <meta name="author" content="Rashid (MOT1209)">
     <link rel="canonical" href="https://rashid-wep.vercel.app/">
+    <link rel="alternate" type="application/rss+xml" title="Rashid Blog" href="blog/rss.xml">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Rashid - AI Workspace | Full-Stack Developer Portfolio">
     <meta property="og:description" content="AI-powered workspace featuring Rashid AI, 3D games, PWA apps, and a knowledge vault. Built with Next.js 15, Supabase & Three.js.">
-    <meta property="og:image" content="https://rashid-wep.vercel.app/images/logo.png">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/logo.webp">
     <meta property="og:image:width" content="512">
     <meta property="og:image:height" content="512">
     <meta property="og:url" content="https://rashid-wep.vercel.app/">
@@ -22,10 +23,15 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Rashid - AI Workspace | Full-Stack Developer Portfolio">
     <meta name="twitter:description" content="AI-powered workspace featuring Rashid AI, 3D games, PWA apps, and a knowledge vault. Built with Next.js 15, Supabase & Three.js.">
-    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/logo.png">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/logo.webp">
     <meta name="twitter:site" content="@MOT1209">
     <meta name="twitter:creator" content="@MOT1209">
     <meta name="google-site-verification" content="VERIFICATION_CODE">
+    <!-- hreflang for multilingual support -->
+    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/">
+    <link rel="alternate" hreflang="ar" href="https://rashid-wep.vercel.app/?lang=ar">
+    <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/?lang=de">
+    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/">
     <meta name="color-scheme" content="dark light">
     <title>Rashid — AI Workspace | Full-Stack Developer Portfolio</title>
 
@@ -36,7 +42,7 @@
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
-    <link rel="preload" href="images/logo.png" as="image" fetchpriority="high">
+    <link rel="preload" href="images/logo.webp" as="image" fetchpriority="high">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
     <link
         href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
@@ -100,10 +106,10 @@
 
             <div class="nav-controls">
                 <button id="settings-btn" class="control-btn" aria-label="Settings">
-                    <i class="fas fa-sliders-h"></i>
+                    <i aria-hidden="true" class="fas fa-sliders-h"></i>
                 </button>
                 <button id="theme-toggle" class="control-btn" aria-label="Toggle Theme">
-                    <i class="fas fa-sun"></i>
+                    <i aria-hidden="true" class="fas fa-sun"></i>
                 </button>
                 <button class="hamburger" aria-label="Open navigation menu" aria-controls="mobile-menu" aria-expanded="false">
                     <span class="bar"></span>
@@ -131,8 +137,8 @@
                 <p class="command-copy fade-in delay-2"><strong>Rashid</strong> is a Full-Stack Developer passionate about Next.js 15, Python, and Supabase.</p>
                 <p class="fade-in delay-2">Building Alking, FromLiten, and 3D simulation worlds with Three.js. This is my digital command center.</p>
                 <div class="cta-buttons fade-in delay-3">
-                    <a href="#projects" class="btn btn-primary">Open Projects <i class="fas fa-arrow-right"></i></a>
-                    <a href="#vault" class="btn btn-glass"><i class="fas fa-vault"></i> Enter Vault</a>
+                    <a href="#projects" class="btn btn-primary">Open Projects <i aria-hidden="true" class="fas fa-arrow-right"></i></a>
+                    <a href="#vault" class="btn btn-glass"><i aria-hidden="true" class="fas fa-vault"></i> Enter Vault</a>
                 </div>
                 <div class="hero-stats fade-in delay-4">
                     <div class="stat">
@@ -165,7 +171,10 @@
                 </div>
                 <div class="hero-img-wrapper">
                     <div class="glass-card main-visual">
-                        <img src="images/logo.png" alt="Rashid Dev Logo" width="512" height="512" loading="eager" fetchpriority="high">
+                        <picture>
+                            <source srcset="images/logo.webp" type="image/webp">
+                            <img src="images/logo.png" alt="Rashid Dev Logo" width="512" height="512" loading="eager" fetchpriority="high">
+                        </picture>
                     </div>
                     <div class="glass-card decor-1"></div>
                     <div class="glass-card decor-2"></div>
@@ -190,36 +199,36 @@
             
             <div class="models-grid">
                 <div class="model-card reveal">
-                    <div class="model-icon"><i class="fas fa-brain"></i></div>
+                    <div class="model-icon"><i aria-hidden="true" class="fas fa-brain"></i></div>
                     <h3>Rashid AI v2.0</h3>
                     <p>Flagship conversational AI powered by Gemini & OpenRouter. Multilingual support (Arabic, English, German, +8 more).</p>
                     <div class="model-specs">
-                        <span><i class="fas fa-microchip"></i> Gemini API</span>
-                        <span><i class="fas fa-language"></i> 10+ Languages</span>
+                        <span><i aria-hidden="true" class="fas fa-microchip"></i> Gemini API</span>
+                        <span><i aria-hidden="true" class="fas fa-language"></i> 10+ Languages</span>
                     </div>
-                    <a href="models/Rashid-Model/index.html" class="btn btn-primary">Launch Model <i class="fas fa-external-link-alt"></i></a>
+                    <a href="models/Rashid-Model/index.html" class="btn btn-primary">Launch Model <i aria-hidden="true" class="fas fa-external-link-alt"></i></a>
                 </div>
                 
                 <div class="model-card reveal">
-                    <div class="model-icon"><i class="fas fa-cubes"></i></div>
+                    <div class="model-icon"><i aria-hidden="true" class="fas fa-cubes"></i></div>
                     <h3>Game Engine Core</h3>
                     <p>Proprietary 3D engine built with Three.js. Features: physics simulation, AI behaviors, procedural generation.</p>
                     <div class="model-specs">
-                        <span><i class="fas fa-cube"></i> Three.js</span>
-                        <span><i class="fas fa-bolt"></i> Real-time</span>
+                        <span><i aria-hidden="true" class="fas fa-cube"></i> Three.js</span>
+                        <span><i aria-hidden="true" class="fas fa-bolt"></i> Real-time</span>
                     </div>
-                    <a href="games/index.html" class="btn btn-primary">Play Games <i class="fas fa-gamepad"></i></a>
+                    <a href="games/index.html" class="btn btn-primary">Play Games <i aria-hidden="true" class="fas fa-gamepad"></i></a>
                 </div>
                 
                 <div class="model-card reveal">
-                    <div class="model-icon"><i class="fas fa-server"></i></div>
+                    <div class="model-icon"><i aria-hidden="true" class="fas fa-server"></i></div>
                     <h3>Backend Infrastructure</h3>
                     <p>Supabase-powered backend with authentication, real-time database, and PWA capabilities.</p>
                     <div class="model-specs">
-                        <span><i class="fas fa-database"></i> Supabase</span>
-                        <span><i class="fas fa-bolt"></i> Real-time</span>
+                        <span><i aria-hidden="true" class="fas fa-database"></i> Supabase</span>
+                        <span><i aria-hidden="true" class="fas fa-bolt"></i> Real-time</span>
                     </div>
-                    <span class="btn btn-glass disabled-link" aria-disabled="true">Planned</span>
+                    <button class="btn btn-glass" disabled aria-disabled="true" style="cursor:not-allowed;">Planned</button>
                 </div>
             </div>
         </div>
@@ -236,7 +245,7 @@
             <div class="vault-grid">
                 <a href="vault/prompts/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
-                        <i class="fas fa-terminal"></i>
+                        <i aria-hidden="true" class="fas fa-terminal"></i>
                     </div>
                     <h3>Prompts</h3>
                     <p>Polished command templates and AI prompts</p>
@@ -245,7 +254,7 @@
                 
                 <a href="vault/code/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #22c55e, #4ade80);">
-                        <i class="fas fa-code"></i>
+                        <i aria-hidden="true" class="fas fa-code"></i>
                     </div>
                     <h3>Code Library</h3>
                     <p>Clean, reusable code snippets</p>
@@ -254,7 +263,7 @@
                 
                 <a href="vault/archive/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
-                        <i class="fas fa-images"></i>
+                        <i aria-hidden="true" class="fas fa-images"></i>
                     </div>
                     <h3>Archive</h3>
                     <p>Visual assets and design resources</p>
@@ -263,7 +272,7 @@
                 
                 <a href="vault/media/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);">
-                        <i class="fas fa-video"></i>
+                        <i aria-hidden="true" class="fas fa-video"></i>
                     </div>
                     <h3>Media</h3>
                     <p>Tutorials, demos and showcases</p>
@@ -272,7 +281,7 @@
                 
                 <a href="vault/docs/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
-                        <i class="fas fa-book"></i>
+                        <i aria-hidden="true" class="fas fa-book"></i>
                     </div>
                     <h3>Documentation</h3>
                     <p>Project docs and technical guides</p>
@@ -281,7 +290,7 @@
                 
                 <a href="vault/api/index.html" class="vault-item reveal">
                     <div class="vault-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);">
-                        <i class="fas fa-plug"></i>
+                        <i aria-hidden="true" class="fas fa-plug"></i>
                     </div>
                     <h3>API Reference</h3>
                     <p>API endpoints and integrations</p>
@@ -400,7 +409,7 @@
                     <p>Interested in collaboration or just want to say hello? Contact me through the platform!</p>
 
                     <div class="contact-method">
-                        <div class="method-icon"><i class="fas fa-envelope"></i></div>
+                        <div class="method-icon"><i aria-hidden="true" class="fas fa-envelope"></i></div>
                         <div>
                             <span class="label">Email</span>
                             <p>zwnt45602@gmail.com</p>
@@ -408,7 +417,7 @@
                     </div>
 
                     <div class="contact-method">
-                        <div class="method-icon"><i class="fas fa-globe"></i></div>
+                        <div class="method-icon"><i aria-hidden="true" class="fas fa-globe"></i></div>
                         <div>
                             <span class="label">Platform</span>
                             <p>Rashid (GitHub Pages)</p>
@@ -441,8 +450,8 @@
     <div class="settings-overlay" id="settings-overlay"></div>
     <div class="settings-modal blur-glass" id="settings-modal" tabindex="0" role="dialog" aria-label="Settings">
         <div class="settings-header">
-            <h3><i class="fas fa-palette"></i> Customize Workspace</h3>
-            <button class="close-settings" id="close-settings"><i class="fas fa-times"></i></button>
+            <h3><i aria-hidden="true" class="fas fa-palette"></i> Customize Workspace</h3>
+            <button class="close-settings" id="close-settings"><i aria-hidden="true" class="fas fa-times"></i></button>
         </div>
 
         <div class="settings-body">
@@ -460,7 +469,7 @@
 
             <!-- Language Picker -->
             <div class="setting-item">
-                <label><i class="fas fa-language"></i> Site Language</label>
+                <label><i aria-hidden="true" class="fas fa-language"></i> Site Language</label>
                 <div class="lang-grid">
                     <button class="lang-btn active" data-lang="en">English</button>
                     <button class="lang-btn" data-lang="ar">العربية</button>
@@ -494,9 +503,8 @@
                 <a href="#hero" class="logo">Rashid<span>.</span></a>
                 <p>Full-Stack Developer — Next.js 15, Python, Supabase & Three.js.</p>
                 <div class="social-links">
-                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener" aria-label="GitHub Profile"><i class="fab fa-github"></i></a>
-                    <span aria-label="LinkedIn profile not configured"><i class="fab fa-linkedin"></i></span>
-                    <span aria-label="Discord profile not configured"><i class="fab fa-discord"></i></span>
+                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener" aria-label="GitHub Profile"><i aria-hidden="true" class="fab fa-github"></i></a>
+                    <!-- LinkedIn و Discord تم إخفاؤهما مؤقتاً ريثما يتم تفعيل الروابط -->
                 </div>
             </div>
             <div class="footer-nav">
@@ -514,7 +522,7 @@
             </div>
             <div class="footer-legal">
                 <p>&copy; 2026 Rashid by Rashid.</p>
-                <a href="admin/login.html" class="admin-link">Internal Access</a>
+                <a href="admin/login.html" class="admin-link" rel="noopener noreferrer">Internal Access</a>
             </div>
         </div>
     </footer>
@@ -523,7 +531,7 @@
     <div id="voice-widget">
         <!-- Toggle Button -->
         <div class="voice-widget-toggle">
-            <i class="fas fa-microphone-alt"></i>
+            <i aria-hidden="true" class="fas fa-microphone-alt"></i>
         </div>
 
         <!-- Glow Ring Animation -->
@@ -535,7 +543,7 @@
                 <h3>
                     <span class="voice-status-dot"></span> Rashid-AI v3.0
                 </h3>
-                <span class="voice-close"><i class="fas fa-times"></i></span>
+                <span class="voice-close"><i aria-hidden="true" class="fas fa-times"></i></span>
             </div>
 
             <!-- Avatar & Visualizer Mixed Area -->
@@ -560,16 +568,16 @@
             <!-- Input Area -->
             <div class="voice-footer">
                 <button id="voice-speaker-toggle" class="footer-btn">
-                    <i class="fas fa-volume-up"></i>
+                    <i aria-hidden="true" class="fas fa-volume-up"></i>
                 </button>
                 <div class="voice-input-wrapper">
                     <input type="text" id="voice-input" class="voice-input" placeholder="Ask me anything about code...">
                     <button id="voice-mic-btn" class="mic-btn">
-                        <i class="fas fa-microphone"></i>
+                        <i aria-hidden="true" class="fas fa-microphone"></i>
                     </button>
                 </div>
                 <button id="voice-send-btn" class="footer-btn">
-                    <i class="fas fa-paper-plane"></i>
+                    <i aria-hidden="true" class="fas fa-paper-plane"></i>
                 </button>
             </div>
         </div>
@@ -602,12 +610,12 @@
     <!-- Unified Rashid-AI Logic -->
     <script src="js/rashid-ai-v2.js?v=3.0"></script>
 
-    <!-- Core App Scripts -->
-    <script src="js/script.js?v=3.7"></script>
-    <script src="js/admin.js?v=3.1"></script>
+    <!-- Core App Scripts (direct import) -->
+    <script type="module" src="src/js/main.js?v=2.0"></script>
+    <script src="js/admin.js?v=3.1" defer></script>
 
     <!-- PWA Install Manager -->
-    <script src="js/pwa-installer.js?v=1.1"></script>
+    <script src="js/pwa-installer.js?v=1.1" defer></script>
     <script type="application/ld+json">
     [
       {

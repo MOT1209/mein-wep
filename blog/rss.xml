@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rashid Blog</title>
+    <link>https://rashid-wep.vercel.app/blog/</link>
+    <description>Articles on web development, AI, game dev, tutorials, and projects by Rashid.</description>
+    <language>en</language>
+    <lastBuildDate>Thu, 11 Jun 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://rashid-wep.vercel.app/blog/rss.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Welcome to Rashid Blog</title>
+      <link>https://rashid-wep.vercel.app/blog/</link>
+      <guid>https://rashid-wep.vercel.app/blog/#welcome</guid>
+      <description>Coming soon — stay tuned for articles on web development, AI, game dev, tutorials, and projects from Rashid.</description>
+      <pubDate>Thu, 11 Jun 2026 00:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>

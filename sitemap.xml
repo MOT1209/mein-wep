@@ -13,12 +13,20 @@
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/privacy.html</loc>
-        <priority>0.5</priority>
+        <loc>https://rashid-wep.vercel.app/blog/</loc>
+        <priority>0.6</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/learning.html</loc>
         <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/privacy.html</loc>
+        <priority>0.5</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/terms.html</loc>
+        <priority>0.5</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/games/</loc>
@@ -57,7 +65,7 @@
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/models/Rashid-app/</loc>
+        <loc>https://rashid-wep.vercel.app/models/Rashid-Model/</loc>
         <priority>0.7</priority>
     </url>
     <url>
@@ -65,19 +73,11 @@
         <priority>0.6</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/apps/calculator-vault/</loc>
+        <loc>https://rashid-wep.vercel.app/apps/calculator-app/</loc>
         <priority>0.6</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/apps/quran-app/</loc>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://rashid-wep.vercel.app/terms.html</loc>
-        <priority>0.5</priority>
-    </url>
-    <url>
-        <loc>https://rashid-wep.vercel.app/blog/</loc>
         <priority>0.6</priority>
     </url>
 </urlset>

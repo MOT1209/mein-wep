@@ -90,7 +90,7 @@
             "name": "Rashid AI",
             "short_name": "AI",
             "description": "Launch AI Assistant",
-            "url": "./models/Rashid-app/index.html"
+            "url": "./models/Rashid-Model/index.html"
         }
     ]
 }

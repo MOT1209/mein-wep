@@ -9,12 +9,12 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Blog | Rashid">
     <meta property="og:description" content="Rashid Blog — Coming soon! Stay tuned for articles on web development, AI, game dev, tutorials, and projects.">
-    <meta property="og:image" content="../images/logo.png">
+    <meta property="og:image" content="../images/logo.webp">
     <meta property="og:url" content="https://rashid-wep.vercel.app/blog/">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Blog | Rashid">
     <meta name="twitter:description" content="Rashid Blog — Coming soon! Stay tuned for articles on web development, AI, game dev, tutorials, and projects.">
-    <meta name="twitter:image" content="../images/logo.png">
+    <meta name="twitter:image" content="../images/logo.webp">
     <title>Blog | Rashid</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,6 +58,16 @@
             .categories-grid { grid-template-columns: repeat(2, 1fr); }
         }
     </style>
+<!-- Google tag (gtag.js) - GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-XXXXXXXXXX', {
+    'anonymize_ip': true
+  });
+</script>
 </head>
 <body class="dark-mode">
     <div class="bg-mesh"></div>
