@@ -20,6 +20,7 @@ const fallbackProjects = [
     // ── Local Workspace Projects ──
     { title: 'Rust Construction', category: 'Game', description: '3D building game with physics and resource management. Build structures, manage resources, survive!', link: 'games/rust-game/index.html', image_url: 'fas fa-cubes', technologies: ['Three.js', '3D', 'Physics'] },
     { title: 'Farm Empire', category: 'Game', description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!', link: 'games/farm-game/index.html', image_url: 'fas fa-tractor', technologies: ['WebGL', 'Simulation', 'Economy'] },
+    { title: 'KingCraft', category: 'Game', description: '3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive in an immersive Three.js world.', link: 'games/kingcraft-game/index.html', image_url: 'fas fa-crown', technologies: ['Three.js', '3D', 'Sandbox'] },
     { title: 'Rashid AI', category: 'Model', description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support with 10+ languages.', link: 'models/Rashid-app/index.html', image_url: 'fas fa-brain', technologies: ['Gemini API', 'OpenRouter', 'AI'] },
     { title: 'Quran Pro', category: 'App', description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.', link: 'apps/quran-app/index.html', image_url: 'fas fa-book-open', technologies: ['Audio', 'PWA', 'Offline'] },
     { title: 'Calculator Vault', category: 'App', description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!', link: 'apps/calculator-vault/index.html', image_url: 'fas fa-calculator', technologies: ['Security', 'PWA', 'Privacy'] },
@@ -200,7 +201,7 @@ function createProjectCard(project, lang) {
     const iconClass = safeIconClass(project.image_url);
     const title = escapeHTML(project.title || 'Untitled Project');
     const description = escapeHTML(project.description || '');
-    const pwaProjects = ['quran-app', 'farm-game', 'rust-game', 'calculator-vault', 'quiz-app'];
+    const pwaProjects = ['quran-app', 'farm-game', 'rust-game', 'calculator-vault', 'quiz-app', 'kingcraft-game'];
     const isPWA = pwaProjects.some(slug => projectLink.includes(slug));
     const visualContent = project.image_url && !project.image_url.startsWith('fas ')
         ? `<img src="${safeUrl(project.image_url, '')}" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover;">`

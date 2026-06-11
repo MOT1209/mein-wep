@@ -70,3 +70,10 @@
 .furnace-flame.on { opacity: 1; }
 
 .inv-hint { font-size: 11px; color: #555; margin-top: 8px; text-align: center; }
+
+.inv-armor .inv-slot { width: 44px; height: 44px; }
+.armor-label {
+  position: absolute; top: 2px; left: 2px;
+  font-size: 9px; color: #555; pointer-events: none;
+  text-shadow: 0 0 2px #fff;
+}

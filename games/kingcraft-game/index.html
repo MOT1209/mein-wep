@@ -37,6 +37,12 @@
     }
   </script>
 
+  <!-- تفريغ Cache الـ Service Worker القديم فوراً قبل تحميل أي موديول -->
+  <script>
+    if ('caches' in window) { caches.keys().then(function(ks) { ks.forEach(function(k) { caches.delete(k); }); }); }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(function(rs) { rs.forEach(function(r) { r.unregister(); }); }); }
+  </script>
+
   <!-- Three.js r160 via importmap (static, CDN) -->
   <script type="importmap">
   {
@@ -55,7 +61,7 @@
       <p class="subtitle">عالم المكعبات</p>
       <button id="btn-start" class="mc-btn">ابدأ اللعب</button>
       <p class="hint">WASD للحركة • مسافة للقفز (نقرتان = طيران) • Shift زحف • Ctrl جري • أيسر لكسر • أيمن لوضع • 1-9 اختيار • V منظور</p>
-      <p class="version">v0.3 — المرحلة 2: البقاء</p>
+      <p class="version">v0.4 — المرحلة 3: الغوغاء</p>
     </div>
   </div>
 

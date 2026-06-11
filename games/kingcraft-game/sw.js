@@ -1,5 +1,5 @@
 // Service Worker — تخزين مؤقت للأصول المحلية (لا يخزّن CDN لتفادي مشاكل التحديث)
-const CACHE = "kingcraft-v3";
+const CACHE = "kingcraft-v4";
 const ASSETS = [
   "./index.html",
   "./manifest.json",

@@ -75,6 +75,26 @@ export class Inventory {
     return true;
   }
 
+  // ===== الدروع =====
+  getArmorValue() {
+    let total = 0;
+    for (const s of this.armor) {
+      if (s) {
+        const it = getItem(s.id);
+        if (it && it.armor) total += it.armor.points;
+      }
+    }
+    return total;
+  }
+
+  // هل العنصر درع يناسب هذه الخانة
+  isArmorFor(id, slotIndex) {
+    const it = getItem(id);
+    if (!it || !it.armor) return false;
+    const parts = ["helmet", "chestplate", "leggings", "boots"];
+    return it.armor.part === parts[slotIndex];
+  }
+
   // عناصر بداية للاختبار/البقاء
   giveStarter() {
     this.addItem("wood", 16);

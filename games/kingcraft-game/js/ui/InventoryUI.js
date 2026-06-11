@@ -12,6 +12,7 @@ export class InventoryUI {
     this.furnace = null;    // حالة الفرن عند الفتح
     this.slotEls = [];
     this.onClose = null;
+    this.onArmorChange = null;
 
     this.overlay = document.createElement("div");
     this.overlay.className = "inv-overlay hidden";
@@ -52,6 +53,7 @@ export class InventoryUI {
   _get(zone, i) {
     if (zone === "inv") return this.inv.slots[i];
     if (zone === "craft") return this.craft[i];
+    if (zone === "armor") return this.inv.armor[i];
     if (zone === "fin") return this.furnace.input;
     if (zone === "ffuel") return this.furnace.fuel;
     if (zone === "fout") return this.furnace.output;
@@ -60,6 +62,7 @@ export class InventoryUI {
   _set(zone, i, stack) {
     if (zone === "inv") this.inv.slots[i] = stack;
     else if (zone === "craft") this.craft[i] = stack;
+    else if (zone === "armor") this.inv.armor[i] = stack;
     else if (zone === "fin") this.furnace.input = stack;
     else if (zone === "ffuel") this.furnace.fuel = stack;
     else if (zone === "fout") this.furnace.output = stack;
@@ -85,21 +88,38 @@ export class InventoryUI {
       panel.appendChild(this._buildCraftTop());
     }
 
-    // المخزون الرئيسي (3 صفوف × 9) — الخانات 9..35
-    const main = document.createElement("div");
-    main.className = "inv-grid";
-    main.style.gridTemplateColumns = "repeat(9, 44px)";
-    main.style.marginTop = "8px";
-    for (let i = 9; i < 36; i++) main.appendChild(this._slot("inv", i));
-    panel.appendChild(main);
+    // فتحات الدروع (على اليسار عند فتح المخزون فقط)
+    if (this.mode !== "furnace") {
+      const invRow = document.createElement("div");
+      invRow.className = "inv-row";
+      invRow.style.alignItems = "flex-start";
 
-    // الهاتبار (الخانات 0..8)
-    const hb = document.createElement("div");
-    hb.className = "inv-grid";
-    hb.style.gridTemplateColumns = "repeat(9, 44px)";
-    hb.style.marginTop = "6px";
-    for (let i = 0; i < 9; i++) hb.appendChild(this._slot("inv", i));
-    panel.appendChild(hb);
+      const armorCol = document.createElement("div");
+      armorCol.className = "inv-armor";
+      armorCol.style.display = "flex";
+      armorCol.style.flexDirection = "column";
+      armorCol.style.gap = "4px";
+      armorCol.style.marginRight = "12px";
+      armorCol.style.marginTop = "8px";
+      const armorParts = ["خوذة", "صندوق", "بنطلون", "حذاء"];
+      for (let i = 0; i < 4; i++) {
+        const slot = this._slot("armor", i);
+        slot.title = armorParts[i];
+        const lbl = document.createElement("div");
+        lbl.className = "armor-label";
+        lbl.textContent = armorParts[i];
+        slot.appendChild(lbl);
+        armorCol.appendChild(slot);
+      }
+      invRow.appendChild(armorCol);
+
+      const mainGrid = document.createElement("div");
+      mainGrid.appendChild(this._buildInventoryGrid());
+      invRow.appendChild(mainGrid);
+      panel.appendChild(invRow);
+    } else {
+      panel.appendChild(this._buildInventoryGrid());
+    }
 
     const hint = document.createElement("div");
     hint.className = "inv-hint";
@@ -107,6 +127,25 @@ export class InventoryUI {
     panel.appendChild(hint);
 
     this.overlay.appendChild(panel);
+  }
+
+  _buildInventoryGrid() {
+    const container = document.createElement("div");
+    const main = document.createElement("div");
+    main.className = "inv-grid";
+    main.style.gridTemplateColumns = "repeat(9, 44px)";
+    main.style.marginTop = "8px";
+    for (let i = 9; i < 36; i++) main.appendChild(this._slot("inv", i));
+    container.appendChild(main);
+
+    const hb = document.createElement("div");
+    hb.className = "inv-grid";
+    hb.style.gridTemplateColumns = "repeat(9, 44px)";
+    hb.style.marginTop = "6px";
+    for (let i = 0; i < 9; i++) hb.appendChild(this._slot("inv", i));
+    container.appendChild(hb);
+
+    return container;
   }
 
   _buildCraftTop() {
@@ -167,6 +206,22 @@ export class InventoryUI {
   // ===== منطق النقر =====
   _click(zone, index, isRight) {
     if (zone === "result") { this._takeResult(isRight); this._after(); return; }
+
+    // معالجة فتحات الدروع
+    if (zone === "armor") {
+      const cur = this.held;
+      if (cur && this.inv.isArmorFor(cur.id, index)) {
+        const old = this._get("armor", index);
+        this._set("armor", index, cur);
+        this.held = old;
+      } else if (!cur) {
+        this.held = this._get("armor", index);
+        this._set("armor", index, null);
+      }
+      this._after();
+      if (this.onArmorChange) this.onArmorChange();
+      return;
+    }
 
     const cur = this._get(zone, index);
 

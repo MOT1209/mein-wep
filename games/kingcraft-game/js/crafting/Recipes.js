@@ -28,6 +28,27 @@ export const RECIPES = [
   { out: { id: "bread", count: 2 }, shapeless: ["apple", "apple", "apple"] },
 ];
 
+// ===== دروع =====
+const ARMOR_RECIPES = [
+  [["leather", "leather", "leather"], ["leather", null, "leather"]],   // helmet (5)
+  [[null, "leather", null], ["leather", "leather", "leather"], ["leather", "leather", "leather"]], // chestplate (8)
+  [["leather", "leather", "leather"], ["leather", null, "leather"], ["leather", null, "leather"]], // leggings (7)
+  [["leather", null, "leather"], ["leather", null, "leather"]], // boots (4)
+];
+const ARMOR_PART_NAMES = ["helmet", "chestplate", "leggings", "boots"];
+const ARMOR_MATERIAL_MAP = [
+  ["leather", "leather"],
+  ["iron_ingot", "iron"],
+  ["gold_ingot", "golden"],
+  ["diamond", "diamond"],
+];
+for (const [mat, prefix] of ARMOR_MATERIAL_MAP) {
+  for (let i = 0; i < ARMOR_PART_NAMES.length; i++) {
+    const shape = ARMOR_RECIPES[i].map(r => r.map(c => c === "leather" ? mat : null));
+    RECIPES.push({ out: { id: prefix + "_" + ARMOR_PART_NAMES[i], count: 1 }, shape });
+  }
+}
+
 // أشكال الأدوات لكل مادة
 const TOOL_MATERIALS = [
   ["planks", "wooden"],

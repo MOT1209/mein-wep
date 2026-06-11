@@ -38,6 +38,7 @@ export class World {
     let c = this.chunks.get(k);
     if (!c) {
       c = new Chunk(cx, cz);
+      this.chunks.set(k, c);
       this.gen.generateChunk(cx, cz, S, (lx, ly, lz, id) => {
         if (ly < 0 || ly >= WORLD_HEIGHT) return;
         if (c.inBounds(lx, ly, lz)) {
@@ -48,14 +49,14 @@ export class World {
         const wz = cz * S + lz;
         const ncx = Math.floor(wx / S);
         const ncz = Math.floor(wz / S);
-        const nc = this.ensureChunk(ncx, ncz);
-        const nlx = wx - ncx * S;
-        const nlz = wz - ncz * S;
-        if (nc.inBounds(nlx, ly, nlz)) nc.blocks[Chunk.idx(nlx, ly, nlz)] = id;
+        const nc = this.chunks.get(this.key(ncx, ncz));
+        if (nc) {
+          const nlx = wx - ncx * S;
+          const nlz = wz - ncz * S;
+          if (nc.inBounds(nlx, ly, nlz)) nc.blocks[Chunk.idx(nlx, ly, nlz)] = id;
+        }
       });
       c.generated = true;
-      this.chunks.set(k, c);
-      // إضافة القطع الجديدة لطابور البناء مباشرة
       if (!this._inQueue.has(c)) {
         this._inQueue.add(c);
         this._meshQueue.push(c);

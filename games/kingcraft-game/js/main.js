@@ -14,6 +14,7 @@ import { getTool, BLOCK_TOOL } from "./player/Tools.js";
 import { HealthSystem } from "./player/Health.js";
 import { SoundManager } from "./utils/SoundManager.js";
 import { saveGame, loadGame } from "./utils/SaveLoad.js";
+import { EntityManager } from "./entities/EntityManager.js";
 
 const canvas = document.getElementById("game");
 const menu = document.getElementById("menu");
@@ -49,6 +50,14 @@ const furnaces = new FurnaceManager();
 const hotbar = new Hotbar(document.getElementById("hotbar"), inventory);
 const health = new HealthSystem();
 const sound = new SoundManager();
+const entityManager = new EntityManager(scene, world);
+entityManager._onAttack = (damage) => {
+  health.takeDamage(damage);
+  updateHUD();
+};
+entityManager._onDrop = (x, y, z, dropList) => {
+  for (const d of dropList) drops.spawn(x, y, z, d.id, d.count);
+};
 
 function renderStatBar(el, value, max, fullChar, emptyChar) {
   el.innerHTML = "";
@@ -230,7 +239,24 @@ function openUI(mode, furnaceState = null) {
 // ===== الفأرة =====
 canvas.addEventListener("mousedown", (e) => {
   if (!started || ui.isOpen) return;
-  if (e.button === 0) { mineDown = true; return; }
+  if (e.button === 0) {
+    const eo = eyeOrigin();
+    const hitEntity = entityManager.getEntityAt(eo.x, eo.y, eo.z, lastDir, 5);
+    if (hitEntity) {
+      const sel = inventory.selectedStack;
+      const it = sel ? getItem(sel.id) : null;
+      const dmg = (it && it.damage) ? it.damage : 1;
+      entityManager.attackEntity(hitEntity, dmg);
+      if (it && it.tool && getTool(it.tool).durability < Infinity) {
+        sel.dur = (sel.dur == null ? getTool(it.tool).durability : sel.dur) - 1;
+        if (sel.dur <= 0) inventory.consumeSelected(1);
+        inventory._changed();
+      }
+      return;
+    }
+    mineDown = true;
+    return;
+  }
   if (e.button === 2) rightClick();
 });
 canvas.addEventListener("mouseup", (e) => { if (e.button === 0) { mineDown = false; resetMining(); } });
@@ -284,6 +310,7 @@ window.addEventListener("keydown", (e) => {
 document.getElementById("btn-respawn").addEventListener("click", () => {
   health.reset();
   player.spawn();
+  entityManager.clear();
   document.getElementById("death-screen").classList.add("hidden");
   updateHUD();
 });
@@ -305,11 +332,17 @@ document.getElementById("btn-start").addEventListener("click", () => {
         for (let i = 0; i < saveData.inventory.length && i < inventory.slots.length; i++) {
           inventory.slots[i] = saveData.inventory[i] ? { id: saveData.inventory[i].id, count: saveData.inventory[i].count, dur: saveData.inventory[i].dur } : null;
         }
+        if (saveData.armor) {
+          for (let i = 0; i < saveData.armor.length && i < inventory.armor.length; i++) {
+            inventory.armor[i] = saveData.armor[i] ? { id: saveData.armor[i].id, count: saveData.armor[i].count, dur: saveData.armor[i].dur } : null;
+          }
+        }
         inventory.selectedHotbar = saveData.selectedHotbar || 0;
       }
       health.health = saveData.player.health ?? 20;
       health.food = saveData.player.food ?? 20;
       health.saturation = saveData.player.saturation ?? 20;
+      health.setArmor(inventory.getArmorValue());
       updateHUD();
     } else {
       player.spawn();
@@ -344,6 +377,7 @@ function loop(now) {
 
   if (gameStarted) {
     furnaces.tick(dt);
+    health.setArmor(inventory.getArmorValue());
     health.tick(dt);
     autoSave(dt);
   }
@@ -357,6 +391,7 @@ function loop(now) {
       window._kcPitch = pitch;
       updateMining(dt);
       drops.update(dt, player, inventory);
+      entityManager.update(dt, player.pos, yaw);
     } else {
       lastDir = player.applyCamera(yaw, pitch);
       ui.tickFurnace();
@@ -376,10 +411,10 @@ function loop(now) {
       fps = Math.round(frames / debugTimer);
       frames = 0; debugTimer = 0;
       debug.textContent =
-        `KingCraft v0.3\n` +
+        `KingCraft v0.4\n` +
         `FPS: ${fps}\n` +
         `XYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\n` +
-        `chunks: ${world.chunks.size} • drops: ${drops.entities.length}` +
+        `chunks: ${world.chunks.size} • drops: ${drops.entities.length} • mobs: ${entityManager.entities.length}` +
         (player.flying ? "\n[طيران]" : "") +
         (player.sneaking ? "\n[زحف]" : "");
     }
@@ -399,5 +434,14 @@ window.addEventListener("resize", () => {
 
 // ===== PWA =====
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+  window.addEventListener("load", async () => {
+    // امسح كل التخزين المؤقت أولاً عشان نتأكد من تحميل أحدث الملفات
+    if ("caches" in window) {
+      const names = await caches.keys();
+      await Promise.all(names.map((n) => caches.delete(n)));
+    }
+    const regs = await navigator.serviceWorker.getRegistrations();
+    await Promise.all(regs.map((r) => r.unregister()));
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
 }

@@ -6,6 +6,8 @@ import {
   EXHAUSTION_PER_JUMP, EXHAUSTION_PER_BREAK, EXHAUSTION_PER_SPRINT,
 } from "../utils/Constants.js";
 
+const ARMOR_REDUCTION = [0, 0.08, 0.16, 0.24, 0.32, 0.40, 0.48, 0.56, 0.64, 0.72, 0.80];
+
 export class HealthSystem {
   constructor() {
     this.health = MAX_HEALTH;
@@ -18,6 +20,11 @@ export class HealthSystem {
     this.dead = false;
     this.onChange = null;
     this.onDeath = null;
+    this.armorValue = 0;
+  }
+
+  setArmor(value) {
+    this.armorValue = Math.max(0, Math.min(20, value));
   }
 
   _changed() { if (this.onChange) this.onChange(); }
@@ -44,7 +51,9 @@ export class HealthSystem {
 
   takeDamage(amount) {
     if (this._invulnerable > 0 || this.dead) return;
-    this.health = Math.max(0, this.health - amount);
+    const reduction = this.armorValue > 0 ? ARMOR_REDUCTION[Math.min(this.armorValue, 10)] : 0;
+    const finalDamage = Math.max(0, Math.round(amount * (1 - reduction)));
+    this.health = Math.max(0, this.health - finalDamage);
     this._invulnerable = 0.5;
     this._changed();
     if (this.health <= 0) {
@@ -97,6 +106,7 @@ export class HealthSystem {
     this._healTimer = 0;
     this._invulnerable = 0;
     this.dead = false;
+    this.armorValue = 0;
     this._changed();
   }
 }

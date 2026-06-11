@@ -18,6 +18,7 @@ export function saveGame(player, inventory, health, world, drops) {
         thirdPerson: player.thirdPerson,
       },
       inventory: inventory.slots.map(s => s ? { id: s.id, count: s.count, dur: s.dur } : null),
+      armor: inventory.armor.map(s => s ? { id: s.id, count: s.count, dur: s.dur } : null),
       selectedHotbar: inventory.selectedHotbar,
     };
     localStorage.setItem(KEY, JSON.stringify(data));
