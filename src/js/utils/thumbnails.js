@@ -1,6 +1,6 @@
 const THUMBNAILS = {
-  'Alking': { bg: ['#6366f1', '#8b5cf6'], emoji: '🌐', pattern: 'dots' },
-  'FromLiten': { bg: ['#0ea5e9', '#38bdf8'], emoji: '💻', pattern: 'grid' },
+  'Rashid AI': { bg: ['#6366f1', '#8b5cf6'], emoji: '🤖', pattern: 'dots' },
+  'Portfolio': { bg: ['#0ea5e9', '#38bdf8'], emoji: '🚀', pattern: 'grid' },
   'Gem-PRO': { bg: ['#ec4899', '#f472b6'], emoji: '💎', pattern: 'circles' },
   'islams-wep': { bg: ['#059669', '#10b981'], emoji: '🕌', pattern: 'waves' },
   'BOTTIKTOK2': { bg: ['#ea580c', '#f97316'], emoji: '🤖', pattern: 'dots' },
