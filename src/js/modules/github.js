@@ -359,4 +359,13 @@ function getEventIcon(type) {
         'Issues': 'fas fa-exclamation-circle',
         'IssueComment': 'fas fa-comment',
         'PullRequest': 'fas fa-code-pull-request',
-        'Watch': 'f
+        'Watch': 'fas fa-star',
+        'Fork': 'fas fa-code-fork',
+        'Release': 'fas fa-tag'
+    };
+    return icons[type] || 'fas fa-git-commit';
+}
+
+function formatEventType(type) {
+    return type.replace(/([A-Z])/g, ' $1').trim() || 'Push';
+}
