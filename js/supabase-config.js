@@ -6,8 +6,8 @@
  * private API keys, or database secrets in client-side JavaScript.
  */
 const Rashid_SUPABASE = Object.freeze({
-    url: 'https://mspxwccbczhtaexwyhya.supabase.co',
-    anonKey: 'sb_publishable_IvhF2CRGL0FTorPACmzh6g_-t94bItu'
+    url: 'https://kcltollasghlvuoxvjqa.supabase.co',
+    anonKey: 'sb_publishable_H6DYBEKQ3UAZp6qoI63K3Q_UhmyNycm'
 });
 
 if (typeof supabase !== 'undefined') {
