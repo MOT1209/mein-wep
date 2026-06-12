@@ -1,13 +1,23 @@
-import { qs, on, scheduleFrame } from '../utils/dom.js?v=1.1';
+/* src/js/modules/navbar.js
+   Toggles .scrolled class on the navbar using a scheduled animation frame
+   to avoid layout thrash.
+*/
+export const initNavbar = (cached) => {
+  const { navbar, qs } = cached;
+  if (!navbar) return;
 
-export function initNavbar() {
-    const navbar = qs('.navbar');
-    if (!navbar) return;
-
-    const updateNavbar = scheduleFrame(() => {
-        navbar.classList.toggle('scrolled', window.scrollY > 50);
-    });
-
-    on(window, 'scroll', updateNavbar, { passive: true });
-    updateNavbar();
-}
+  let ticking = false;
+  const update = () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+    ticking = false;
+  };
+  const onScroll = () => {
+    if (!ticking) {
+      ticking = true;
+      window.requestAnimationFrame(update);
+    }
+  };
+  qs(window, 'scroll', onScroll, { passive: true });
+  // initial state
+  update();
+};

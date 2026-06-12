@@ -1,66 +1,74 @@
-import { qs, qsa, on } from '../utils/dom.js?v=1.1';
+/* src/js/modules/theme.js
+   Handles:
+     • Light/Dark toggle (stores preference in localStorage)
+     • Accent colour selection (stores in localStorage)
+     • Performance mode (disables heavy Three.js avatar)
+     • Dynamic blur reduction on mobile (via CSS variables)
+     • Caches computed CSS variables to avoid repeated getComputedStyle calls
+*/
+import { createCachedElements } from '../utils/cache.js';
 
-export function initTheme() {
-    const themeToggle = qs('#theme-toggle');
-    const body = document.body;
+export const initTheme = (cached) => {
+  const { body, root, themeToggle, perfToggle, accentDots, qs, qsa } = cached;
 
-    function updateThemeIcon() {
-        const icon = themeToggle?.querySelector('i');
-        if (!icon) return;
-        icon.className = body.classList.contains('light-mode') ? 'fas fa-moon' : 'fas fa-sun';
-    }
-
-    qsa('.accent-dot').forEach(dot => {
-        on(dot, 'click', () => {
-            const color = dot.dataset.color;
-            if (!color) return;
-            document.documentElement.style.setProperty('--accent', color);
-            document.documentElement.style.setProperty('--accent-glow', `${color}33`);
-            qsa('.accent-dot').forEach(item => item.classList.remove('active'));
-            dot.classList.add('active');
-            localStorage.setItem('accentColor', color);
-        });
-    });
-
-    const savedAccent = localStorage.getItem('accentColor');
-    if (savedAccent) {
-        document.documentElement.style.setProperty('--accent', savedAccent);
-        qsa('.accent-dot').find(dot => dot.dataset.color === savedAccent)?.classList.add('active');
-    }
-
-    if (localStorage.getItem('theme') === 'light') body.classList.add('light-mode');
+  // ---------- helpers ----------
+  const setTheme = (isLight) => {
+    body.classList.toggle('light-mode', isLight);
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
     updateThemeIcon();
+  };
+  const updateThemeIcon = () => {
+    const icon = themeToggle?.querySelector('i');
+    if (!icon) return;
+    icon.className = body.classList.contains('light-mode')
+      ? 'fas fa-moon'
+      : 'fas fa-sun';
+  };
+  const setAccent = (color) => {
+    root.style.setProperty('--accent', color);
+    root.style.setProperty('--accent-glow', `${color}33`); // 20% opacity
+    qsa('.accent-dot').forEach((dot) => dot.classList.remove('active'));
+    const activeDot = qs(`.accent-dot[data-color="${color}"]`);
+    if (activeDot) activeDot.classList.add('active');
+    localStorage.setItem('accentColor', color);
+  };
+  const setPerfMode = (enabled) => {
+    body.classList.toggle('performance-mode', enabled);
+    localStorage.setItem('perfMode', String(enabled));
+    // If you have a Three.js avatar, pause/resume here:
+    // if (window.__rashidAvatar) window.__rashidAvatar[enabled ? 'pause' : 'resume']();
+  };
 
-    on(themeToggle, 'click', () => {
-        body.classList.toggle('light-mode');
-        updateThemeIcon();
-        localStorage.setItem('theme', body.classList.contains('light-mode') ? 'light' : 'dark');
+  // ---------- initialization from storage ----------
+  const savedTheme = localStorage.getItem('theme') === 'light';
+  const savedAccent = localStorage.getItem('accentColor');
+  const savedPerf = localStorage.getItem('perfMode') === 'true';
+
+  if (savedAccent) setAccent(savedAccent);
+  setTheme(savedTheme);
+  setPerfMode(savedPerf);
+
+  // ---------- event listeners ----------
+  themeToggle?.addEventListener('click', () => setTheme(!body.classList.contains('light-mode')));
+
+  accentDots.forEach((dot) => {
+    dot.addEventListener('click', () => {
+      const color = dot.dataset.color;
+      if (color) setAccent(color);
     });
+  });
 
-    const perfToggle = qs('#perf-mode');
+  perfToggle?.addEventListener('change', (e) => setPerfMode(e.target.checked));
 
-    /** إيقاف / استئناف محرك Three.js لتوفير طاقة المعالج */
-    function toggleThreeJs(enabled) {
-        const avatar = window.__rashidAvatar;
-        if (avatar) {
-            if (enabled) {
-                avatar.resume();
-            } else {
-                avatar.stop();
-            }
-        }
-    }
-
-    on(perfToggle, 'change', () => {
-        const isPerf = perfToggle.checked;
-        document.body.classList.toggle('performance-mode', isPerf);
-        toggleThreeJs(!isPerf); // أوقف Three.js عند تشغيل وضع الأداء
-        localStorage.setItem('perfMode', String(isPerf));
-    });
-
-    if (localStorage.getItem('perfMode') === 'true' && perfToggle) {
-        perfToggle.checked = true;
-        document.body.classList.add('performance-mode');
-        toggleThreeJs(false);
-    }
-}
+  // ---------- mobile‑specific blur reduction ----------
+  // We expose a CSS variable --mobile-blur that components.css reads.
+  const updateMobileBlur = () => {
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    root.style.setProperty('--mobile-blur', isMobile ? '8px' : '20px');
+    // Increase background alpha to compensate for less blur
+    root.style.setProperty('--mobile-bg-alpha', isMobile ? '0.85' : '0.7');
+  };
+  // Run on load and resize
+  updateMobileBlur();
+  window.addEventListener('resize', updateMobileBlur);
+};

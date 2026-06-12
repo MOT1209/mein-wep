@@ -1,33 +1,31 @@
-@media (max-width: 992px) {
-    :root {
-        --section-padding: 80px 0;
-    }
-}
-
+/* src/css/base/responsive.css
+   Applies mobile‑specific tweaks that rely on the CSS variables set in theme.js.
+*/
 @media (max-width: 768px) {
-    :root {
-        --section-padding: 60px 0;
-    }
-
-    .bg-mesh::after,
-    body::before {
-        animation: none !important;
-    }
+  /* Reduce blur on mobile – value comes from theme.js */
+  .backdrop-blur {
+    backdrop-filter: blur(var(--mobile-blur));
+  }
+  /* Increase background alpha to keep depth perception */
+  .bg-translucent {
+    background-color: rgba(var(--accent-rgb), var(--mobile-bg-alpha)) !important;
+  }
+  /* Slightly tighter container padding on small screens */
+  .container {
+    padding-left: calc(var(--section-padding) * 0.5);
+    padding-right: calc(var(--section-padding) * 0.5);
+  }
+  /* Make touch targets larger */
+  .btn, .link {
+    min-height: 44px;
+  }
 }
 
-@media (max-width: 480px) {
-    :root {
-        --section-padding: 48px 0;
-    }
-}
-
+/* Optional: reduce motion for users who asked for it */
 @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        scroll-behavior: auto !important;
-        transition-duration: 0.01ms !important;
-    }
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }

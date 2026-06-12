@@ -1,123 +1,156 @@
-import { initAnimations, initSmoothScroll } from './modules/animations.js?v=1.1';
-import { initAdminContentControls } from './modules/admin-content.js?v=1.1';
-import { initMobileMenu } from './modules/mobile.js?v=1.1';
-import { initNavbar } from './modules/navbar.js?v=1.1';
-import { initProjectFilters, initProjects } from './modules/projects.js?v=1.5';
-import { initSettings } from './modules/settings.js?v=1.1';
-import { initTheme } from './modules/theme.js?v=1.1';
-import { initAnalytics, trackContactFormSubmit } from './services/analytics.js?v=1.0';
-import { incrementVisitorCount } from './services/supabase.js?v=1.5';
-import { qs, qsa, on } from './utils/dom.js?v=1.1';
+/* src/js/main.js
+   Bootstraps the whole application:
+     1. Creates the immutable DOM cache
+     2. Initialises Supabase (client + auth listener)
+     3. Starts theme, navbar, mobile, animations
+     4. Lazy‑loads the four Vault sections
+     5. Handles contact form, visitor counter, etc.
+*/
+import { createCachedElements } from './utils/cache.js';
+import { initSupabase, onAuthStateChange, fetchPublic, subscribe } from './modules/supabase.js';
+import { initTheme } from './modules/theme.js';
+import { initNavbar } from './modules/navbar.js';
+import { initMobileMenu } from './modules/mobile.js';
+import { initAnimations } from './modules/animations.js';
+import { initProjectFilters, initProjects } from './modules/projects.js';
+import { initSettings } from './modules/settings.js';
+import { initAnalytics, trackContactFormSubmit } from './services/analytics.js';
+import { incrementVisitorCount } from './services/supabase.js';
+import { qs, qsa, on } from './utils/dom.js';
 import {
-    initTypewriter,
-    initTechStackMarquee,
-    initLiveStats,
-    initTestimonials,
-    initProjectModal,
-    initCustomPwaInstall,
-    initScrollProgress
-} from './modules/enhancements.js?v=1.0';
-import { initLatestUpdates } from './modules/updates.js?v=1.0';
-import { initStatistics } from './modules/statistics.js?v=1.0';
-import { initVaultSearch } from './modules/vault.js?v=1.0';
-import { renderGitHubStats } from './modules/github.js?v=1.0';
+  initTypewriter,
+  initTechStackMarquee,
+  initLiveStats,
+  initTestimonials,
+  initProjectModal,
+  initCustomPwaInstall,
+  initScrollProgress,
+} from './modules/enhancements.js';
+import { initLatestUpdates } from './modules/updates.js';
+import { initStatistics } from './modules/statistics.js';
+import { initVaultSearch } from './modules/vault.js';
+import { renderGitHubStats } from './modules/github.js';
 
-function initLegacyLocalSettings() {
-    if (localStorage.getItem('maintenanceMode') === 'true') {
-        document.body.innerHTML = '<div style="display:flex;justify-content:center;align-items:center;height:100vh;background:#000;color:#fff;font-family:sans-serif;flex-direction:column;"><h1>System Under Maintenance</h1><p>We will be back shortly.</p></div>';
-        return false;
-    }
+import { initPromptsSection } from '../vault/prompts.js';
+import { initImagesSection } from '../vault/images.js';
+import { initCodesSection } from '../vault/codes.js';
+import { initMediaSection } from '../vault/media.js';
 
-    const savedContent = JSON.parse(localStorage.getItem('siteContent') || '{}');
-    if (savedContent.title) {
-        const heroSubtitle = qs('.hero-subtitle');
-        if (heroSubtitle) heroSubtitle.innerText = savedContent.title;
-    }
-    if (savedContent.about) {
-        const aboutP = qs('#about p') || qs('.about-text p');
-        if (aboutP) aboutP.innerText = savedContent.about;
-    }
+let cached = null; // will be filled once DOM is ready
+let authUnsubscribe = null;
 
-    const savedSettings = JSON.parse(localStorage.getItem('siteSettings') || '{}');
-    const contactSpans = qsa('.contact-info span');
-    if (savedSettings.email && contactSpans[0]) contactSpans[0].innerText = savedSettings.email;
-    if (savedSettings.location && contactSpans[1]) contactSpans[1].innerText = savedSettings.location;
-    return true;
-}
+/** Bootstrap after DOM is ready */
+const boot = async () => {
+  // 1️⃣ Build cache
+  cached = createCachedElements();
 
-function initContactForm() {
-    const contactForm = qs('.contact-form');
-    if (!contactForm) return;
+  // 2️⃣ Supabase (client + auth)
+  initSupabase(); // creates singleton client
+  // expose a lightweight API for vault sections
+  window.__supabase = { fetchPublic, subscribe };
 
-    on(contactForm, 'submit', (event) => {
-        event.preventDefault();
-        const name = contactForm.querySelector('input[type="text"]')?.value || '';
-        const email = contactForm.querySelector('input[type="email"]')?.value || '';
-        const msg = contactForm.querySelector('textarea')?.value || '';
-        const messages = JSON.parse(localStorage.getItem('contactMessages') || '[]');
-        messages.push({ name, email, message: msg, date: new Date().toLocaleString() });
-        localStorage.setItem('contactMessages', JSON.stringify(messages));
-        alert('Message Sent! (See Admin Dashboard)');
-        trackContactFormSubmit();
-        contactForm.reset();
+  authUnsubscribe = onAuthStateChange((session) => {
+    // React to auth state – e.g., show/hide admin UI
+    document.documentElement.classList.toggle('user-logged-in', !!session);
+    // You could also reload private data here if needed
+  });
+
+  // 3️⃣ Core UI
+  initTheme(cached);
+  initNavbar(cached);
+  initMobileMenu(cached);
+  initAnimations(cached);
+
+  // 4️⃣ Optional enhancements (keep existing)
+  initAnalytics();
+  initSettings();
+  initProjectFilters();
+  initProjects(); // fetches & renders projects
+
+  // 5️⃣ Vault – lazy load each section when it enters viewport
+  //    We'll use a simple IntersectionObserver for each container.
+  const vaultContainers = {
+    prompts: qs('#vault-prompts'),
+    images: qs('#vault-images'),
+    codes: qs('#vault-codes'),
+    media: qs('#vault-media'),
+  };
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const section = entry.target.dataset.section; // we set this in HTML
+      if (section && !window[`_${section}Loaded`]) {
+        // Dynamically import the matching init function
+        import(`../vault/${section}.js`)
+          .then((mod) => mod.initSection(cached))
+          .catch((err) => console.error(`Failed to load ${section} section`, err));
+        window[`_${section}Loaded`] = true;
+        observer.unobserve(entry.target);
+      }
     });
-}
+  }, { rootMargin: '0px 0px -100px 0px' });
 
-function initVisitorCounter() {
-    const visits = parseInt(localStorage.getItem('visitorCount') || '0', 10);
-    if (sessionStorage.getItem('logged')) return;
+  Object.values(vaultContainers).forEach((el) => {
+    if (el) {
+      el.dataset.section = el.id.replace('vault-', ''); // e.g., prompts
+      observer.observe(el);
+    }
+  });
+
+  // 6️⃣ Misc
+  initTypewriter();
+  initTechStackMarquee();
+  initLiveStats();
+  initTestimonials();
+  initProjectModal();
+  initCustomPwaInstall();
+  initScrollProgress();
+  initLatestUpdates();
+  initStatistics();
+  initVaultSearch();
+  const githubContainer = qs('#github-stats');
+  if (githubContainer) {
+    (window.requestIdleCallback
+      ? window.requestIdleCallback.bind(window)
+      : (cb) => setTimeout(cb, 1000))(() => renderGitHubStats(githubContainer), {
+      timeout: 3000,
+    });
+  }
+
+  // 7️⃣ Contact form & visitor counter (keep original logic)
+  const contactForm = qs('.contact-form');
+  if (contactForm) {
+    on(contactForm, 'submit', (e) => {
+      e.preventDefault();
+      const name = contactForm.querySelector('input[type="text"]')?.value ?? '';
+      const email = contactForm.querySelector('input[type="email"]')?.value ?? '';
+      const msg = contactForm.querySelector('textarea')?.value ?? '';
+      const messages = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
+      messages.push({ name, email, message: msg, date: new Date().toLocaleString() });
+      localStorage.setItem('contactMessages', JSON.stringify(messages));
+      alert('Message Sent! (See Admin Dashboard)');
+      trackContactFormSubmit();
+      contactForm.reset();
+    });
+  }
+
+  // Visitor counter (unchanged)
+  const visits = parseInt(localStorage.getItem('visitorCount') ?? '0', 10);
+  if (!sessionStorage.getItem('logged')) {
     localStorage.setItem('visitorCount', String(visits + 1));
     sessionStorage.setItem('logged', 'true');
     incrementVisitorCount();
-}
+  }
+};
 
-async function boot() {
-    initAnalytics();
-    initTheme();
-    initNavbar();
-    initSettings();
-    initProjectFilters();
-    initMobileMenu();
-    initAnimations();
-    initSmoothScroll();
-    initAdminContentControls();
-    
-    // Rashid Web v4.0 Enhancements
-    initTypewriter();
-    initTechStackMarquee();
-    initLiveStats();
-    initTestimonials();
-    initProjectModal();
-    initCustomPwaInstall();
-    initScrollProgress();
-
-    // Latest Updates & Statistics
-    initLatestUpdates();
-    initStatistics();
-
-    // Vault Search & Filters
-    initVaultSearch();
-
-    // GitHub Stats Section
-    const githubContainer = qs('#github-stats');
-    if (githubContainer) {
-        // Use requestIdleCallback or setTimeout for non-blocking load
-        if (window.requestIdleCallback) {
-            requestIdleCallback(() => renderGitHubStats(githubContainer), { timeout: 3000 });
-        } else {
-            setTimeout(() => renderGitHubStats(githubContainer), 1000);
-        }
-    }
-
-    if (!initLegacyLocalSettings()) return;
-
-    await initProjects();
-    initContactForm();
-    initVisitorCounter();
-}
-
+/** Run on ready state */
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+  document.addEventListener('DOMContentLoaded', boot);
 } else {
-    boot();
+  boot();
 }
+
+/** Cleanup on page hide (e.g., SPA navigation) */
+window.addEventListener('pagehide', () => {
+  if (authUnsubscribe) authUnsubscribe();
+});

@@ -33,6 +33,8 @@
     <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/?lang=de">
     <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/">
     <meta name="color-scheme" content="dark light">
+    <meta name="supabase-url" content="https://YOUR_PROJECT.supabase.co">
+    <meta name="supabase-anon-key" content="YOUR_PUBLIC_ANON_KEY">
     <title>Rashid — AI Workspace | Full-Stack Developer Portfolio</title>
 
     <!-- JSON-LD Schema -->
@@ -87,6 +89,9 @@
     <!-- Critical CSS (render-blocking) -->
     <link rel="stylesheet" href="src/css/main.css?v=1.0">
     <link rel="stylesheet" href="css/style.css?v=8.0">
+    <link rel="stylesheet" href="src/css/base/variables.css?v=1.0">
+    <link rel="stylesheet" href="src/css/base/responsive.css?v=1.0">
+    <link rel="stylesheet" href="src/css/components.css?v=1.0">
 
     <!-- Non-critical CSS (deferred) -->
     <link rel="stylesheet" href="css/admin.css?v=3.0" media="print" onload="this.media='all'">
@@ -292,59 +297,10 @@
             </div>
             
             <div class="vault-grid">
-                <a href="vault/prompts/index.html" class="vault-item reveal">
-                    <div class="vault-icon" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
-                        <i aria-hidden="true" class="fas fa-terminal"></i>
-                    </div>
-                    <h3>Prompts</h3>
-                    <p>Polished command templates and AI prompts</p>
-                    <span class="vault-count">12+ Prompts</span>
-                </a>
-                
-                <a href="vault/code/index.html" class="vault-item reveal">
-                    <div class="vault-icon" style="background: linear-gradient(135deg, #22c55e, #4ade80);">
-                        <i aria-hidden="true" class="fas fa-code"></i>
-                    </div>
-                    <h3>Code Library</h3>
-                    <p>Clean, reusable code snippets</p>
-                    <span class="vault-count">50+ Snippets</span>
-                </a>
-                
-                <a href="vault/archive/index.html" class="vault-item reveal">
-                    <div class="vault-icon" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
-                        <i aria-hidden="true" class="fas fa-images"></i>
-                    </div>
-                    <h3>Archive</h3>
-                    <p>Visual assets and design resources</p>
-                    <span class="vault-count">100+ Assets</span>
-                </a>
-                
-                <a href="vault/media/index.html" class="vault-item reveal">
-                    <div class="vault-icon" style="background: linear-gradient(135deg, #ec4899, #f472b6);">
-                        <i aria-hidden="true" class="fas fa-video"></i>
-                    </div>
-                    <h3>Media</h3>
-                    <p>Tutorials, demos and showcases</p>
-                    <span class="vault-count">25+ Videos</span>
-                </a>
-                
-                <a href="vault/docs/index.html" class="vault-item reveal">
-                    <div class="vault-icon" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);">
-                        <i aria-hidden="true" class="fas fa-book"></i>
-                    </div>
-                    <h3>Documentation</h3>
-                    <p>Project docs and technical guides</p>
-                    <span class="vault-count">8+ Docs</span>
-                </a>
-                
-                <a href="vault/api/index.html" class="vault-item reveal">
-                    <div class="vault-icon" style="background: linear-gradient(135deg, #ef4444, #f87171);">
-                        <i aria-hidden="true" class="fas fa-plug"></i>
-                    </div>
-                    <h3>API Reference</h3>
-                    <p>API endpoints and integrations</p>
-                    <span class="vault-count">5+ APIs</span>
-                </a>
+                <div id="vault-prompts" data-section="prompts"></div>
+                <div id="vault-images" data-section="images"></div>
+                <div id="vault-codes" data-section="codes"></div>
+                <div id="vault-media" data-section="media"></div>
             </div>
         </div>
     </section>
