@@ -39,11 +39,21 @@ export const initTheme = (cached) => {
     // if (window.__rashidAvatar) window.__rashidAvatar[enabled ? 'pause' : 'resume']();
   };
 
+  // ---------- Nano Banana 2 ----------
+  const bananaToggle = qs('#nano-banana-toggle');
+  const setNanoBanana = (enabled) => {
+    body.classList.toggle('nano-banana', enabled);
+    if (bananaToggle) bananaToggle.checked = enabled;
+    localStorage.setItem('nanoBanana', String(enabled));
+  };
+
   // ---------- initialization from storage ----------
   const savedTheme = localStorage.getItem('theme') === 'light';
   const savedAccent = localStorage.getItem('accentColor');
   const savedPerf = localStorage.getItem('perfMode') === 'true';
+  const savedBanana = localStorage.getItem('nanoBanana') === 'true';
 
+  if (savedBanana) setNanoBanana(true);
   if (savedAccent) setAccent(savedAccent);
   setTheme(savedTheme);
   setPerfMode(savedPerf);
@@ -59,6 +69,7 @@ export const initTheme = (cached) => {
   });
 
   perfToggle?.addEventListener('change', (e) => setPerfMode(e.target.checked));
+  bananaToggle?.addEventListener('change', (e) => setNanoBanana(e.target.checked));
 
   // ---------- mobile‑specific blur reduction ----------
   // We expose a CSS variable --mobile-blur that components.css reads.
