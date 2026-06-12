@@ -3,7 +3,7 @@
    to avoid layout thrash.
 */
 export const initNavbar = (cached) => {
-  const { navbar, qs } = cached;
+  const { navbar, on } = cached;
   if (!navbar) return;
 
   let ticking = false;
@@ -17,7 +17,6 @@ export const initNavbar = (cached) => {
       window.requestAnimationFrame(update);
     }
   };
-  qs(window, 'scroll', onScroll, { passive: true });
-  // initial state
+  on(window, 'scroll', onScroll, { passive: true });
   update();
 };
