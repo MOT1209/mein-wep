@@ -238,7 +238,7 @@ function createModelCard(item) {
     const title = item.title || 'Untitled Model';
     const action = link
         ? `<a href="${link}" class="btn btn-primary">Open <i class="fas fa-external-link-alt"></i></a>`
-        : '<span class="btn btn-glass disabled-link" aria-disabled="true">Planned</span>';
+        : '<span class="btn btn-glass disabled-link" aria-disabled="true" style="opacity:0.6; position:relative;"><i class="fas fa-clock" style="margin-right:6px;"></i> Coming Soon<span style="position:absolute;top:-8px;right:-8px;background:#f59e0b;color:#000;font-size:0.6rem;padding:2px 6px;border-radius:99px;font-weight:700;">DEV</span></span>';
 
     return `
         <div class="model-card reveal active" data-item-id="${escapeHTML(item.id)}">

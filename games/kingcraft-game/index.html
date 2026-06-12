@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="css/inventory.css" />
   <link rel="stylesheet" href="css/health.css" />
   <link rel="icon" href="icons/icon-48.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
 
   <!-- شاشة تشخيص الأخطاء -->
   <script>
@@ -62,8 +63,8 @@
       <span class="logo-sub">عالم المكعبات</span>
       <button id="btn-singleplayer" class="btn-mc">▶ Singleplayer</button>
       <button id="btn-multiplayer" class="btn-mc disabled" disabled>🌐 Multiplayer</button>
-      <button id="btn-settings" class="btn-mc">⚙ Settings</button>
-      <button id="btn-quit" class="btn-mc">✕ Quit</button>
+      <button id="btn-settings" class="btn-mc">⚙ Options...</button>
+      <button id="btn-quit" class="btn-mc">✕ Quit Game</button>
       <p class="version">v0.5 — Real Minecraft UI</p>
     </div>
   </div>
@@ -118,15 +119,13 @@
     </div>
   </div>
 
-  <!-- ===== قائمة الإيقاف المؤقت ===== -->
+  <!-- ===== قائمة الإيقاف المؤقت (مثل ماين كرافت الحقيقي) ===== -->
   <div id="pause-menu" class="pause-overlay hidden">
     <div class="pause-panel">
-      <h2 class="pause-title">⏸ Paused</h2>
-      <button id="btn-resume" class="btn-mc">▶ Resume</button>
-      <button id="btn-save-world" class="btn-mc">💾 Save World</button>
-      <button id="btn-pause-settings" class="btn-mc">⚙ Settings</button>
-      <button id="btn-save-quit" class="btn-mc">🏠 Save &amp; Quit</button>
-      <button id="btn-quit-desktop" class="btn-mc btn-danger">✕ Quit to Desktop</button>
+      <button id="btn-resume" class="btn-mc">▶ Resume Game</button>
+      <button id="btn-pause-settings" class="btn-mc">⚙ Options...</button>
+      <button id="btn-save-quit" class="btn-mc">💾 Save &amp; Quit to Title</button>
+      <button id="btn-quit-game" class="btn-mc">✕ Quit Game</button>
     </div>
   </div>
 
@@ -163,6 +162,16 @@
   </div>
 
   <!-- ===== المودالات ===== -->
+  <div id="modal-quit" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h2>✕ Quit Game</h2>
+      <p>Are you sure you want to quit?</p>
+      <div class="modal-btns">
+        <button id="btn-confirm-quit" class="btn-mc">✔ Yes</button>
+        <button id="btn-cancel-quit" class="btn-mc">✖ No</button>
+      </div>
+    </div>
+  </div>
   <div id="modal-delete" class="modal-overlay hidden">
     <div class="modal-box">
       <h2>🗑 Delete World</h2>

@@ -621,6 +621,10 @@ window.addEventListener("keydown", (e) => {
     saveSettingsFromUI();
     settingsPanel.classList.remove("open");
     settingsPanel.classList.add("hidden");
+  } else if (e.code === "Escape" && !document.getElementById("modal-quit").classList.contains("hidden")) {
+    document.getElementById("modal-quit").classList.add("hidden");
+  } else if (e.code === "Escape" && !document.getElementById("modal-delete").classList.contains("hidden")) {
+    document.getElementById("modal-delete").classList.add("hidden");
   } else if (e.code === "Escape" && pauseMenu.classList.contains("hidden") === false) {
     closePause();
   } else if (e.code === "Escape" && !pauseMenu.classList.contains("hidden") === false) {
@@ -956,14 +960,6 @@ function closePause() {
 
 document.getElementById("btn-resume").addEventListener("click", closePause);
 
-document.getElementById("btn-save-world").addEventListener("click", () => {
-  if (_currentWorldObj) {
-    saveGame(player, inventory, health, world, drops);
-    _currentWorldObj.lastPlayed = Date.now();
-    WM.updateWorld(_currentWorldObj);
-  }
-});
-
 document.getElementById("btn-save-quit").addEventListener("click", () => {
   if (_currentWorldObj) {
     saveGame(player, inventory, health, world, drops);
@@ -975,17 +971,40 @@ document.getElementById("btn-save-quit").addEventListener("click", () => {
   showScreen(menu);
 });
 
-document.getElementById("btn-quit-desktop").addEventListener("click", () => {
+// زر Quit Game في قائمة الإيقاف → يفتح تأكيد
+document.getElementById("btn-quit-game").addEventListener("click", () => {
+  document.getElementById("modal-quit").classList.remove("hidden");
+});
+
+// زر Quit Game في القائمة الرئيسية → يفتح نفس التأكيد
+document.getElementById("btn-quit").addEventListener("click", () => {
+  document.getElementById("modal-quit").classList.remove("hidden");
+});
+
+// تأكيد الخروج
+document.getElementById("btn-confirm-quit").addEventListener("click", () => {
+  document.getElementById("modal-quit").classList.add("hidden");
+  // save before quit if in game
+  if (gameStarted && _currentWorldObj) {
+    saveGame(player, inventory, health, world, drops);
+    _currentWorldObj.lastPlayed = Date.now();
+    WM.updateWorld(_currentWorldObj);
+  }
   gameStarted = false;
   closePause();
   showScreen(menu);
+  window.close();
 });
 
-// ====================================================================
-// خروج من القائمة الرئيسية
-// ====================================================================
-document.getElementById("btn-quit").addEventListener("click", () => {
-  window.close();
+document.getElementById("btn-cancel-quit").addEventListener("click", () => {
+  document.getElementById("modal-quit").classList.add("hidden");
+});
+
+// Close quit modal on backdrop click
+document.getElementById("modal-quit").addEventListener("click", (e) => {
+  if (e.target === document.getElementById("modal-quit")) {
+    document.getElementById("modal-quit").classList.add("hidden");
+  }
 });
 
 // ====================================================================

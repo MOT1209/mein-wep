@@ -316,9 +316,10 @@
     <!-- Footer -->
     <footer class="main-footer" style="margin-top: 80px;">
         <div class="container" style="text-align: center; opacity: 0.5;">
-            <p>&copy; 2026 Rashid Arcade. Designed and built with ❤️ by Rashid.</p>
+            <p>&copy; <span class="copyright-year"></span> Rashid Arcade. Designed and built with ❤️ by Rashid.</p>
         </div>
     </footer>
 
+<script>document.querySelectorAll('.copyright-year').forEach(function(el) { el.textContent = new Date().getFullYear(); });</script>
 </body>
 </html>

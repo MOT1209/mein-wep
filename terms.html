@@ -124,11 +124,12 @@
                 <a href="terms.html">Terms of Service</a>
             </div>
             <div class="footer-legal">
-                <p>&copy; 2026 Rashid by Rashid.</p>
+                <p>&copy; <span class="copyright-year"></span> Rashid by Rashid.</p>
             </div>
         </div>
     </footer>
 
     <script src="js/script.js?v=3.7"></script>
+    <script>document.querySelectorAll('.copyright-year').forEach(function(el) { el.textContent = new Date().getFullYear(); });</script>
 </body>
 </html>

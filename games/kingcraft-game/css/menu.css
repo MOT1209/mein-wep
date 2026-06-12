@@ -1,32 +1,45 @@
-/* ===== القائمة الرئيسية — تصميم واقعي مثل Minecraft ===== */
+/* ===== القائمة الرئيسية — تصميم مثل Minecraft الحقيقي ===== */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-/* الخلفية المتحركة */
+/* الخلفية المتحركة (بانوراما مكعبات) */
 .menu-bg {
   position: fixed; inset: 0;
   background:
-    /* طبقة تراب في الأسفل */
     linear-gradient(to bottom,
-      #87ceeb 0%, #87ceeb 55%,
-      #7ec8e3 55%, #7ec8e3 58%,
-      #5a9c3c 58%, #5a9c3c 62%,
-      #8a5a36 62%, #8a5a36 100%
+      #87ceeb 0%, #87ceeb 40%,
+      #5a9c3c 40%, #5a9c3c 46%,
+      #8a5a36 46%, #8a5a36 100%
     );
   z-index: 0;
 }
 .menu-bg::before {
   content: "";
   position: absolute; inset: 0;
-  background:
-    /* مكعبات تراب متكررة */
-    repeating-linear-gradient(90deg,
-      transparent 0px, transparent 15px,
-      rgba(0,0,0,0.06) 15px, rgba(0,0,0,0.06) 16px
-    ),
-    repeating-linear-gradient(0deg,
-      transparent 0px, transparent 15px,
-      rgba(0,0,0,0.06) 15px, rgba(0,0,0,0.06) 16px
-    );
+  background-image:
+    /* مكعبات تراب صغيرة */
+    linear-gradient(45deg, rgba(0,0,0,0.06) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(0,0,0,0.06) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(0,0,0,0.06) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(0,0,0,0.06) 75%);
+  background-size: 32px 32px;
+  background-position: 0 0, 0 16px, 16px -16px, -16px 0;
   opacity: 0.3;
+}
+/* طبقة إضافية: غيوم متحركة */
+.menu-bg::after {
+  content: "";
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 120px 40px at 10% 15%, rgba(255,255,255,0.3) 0%, transparent 70%),
+    radial-gradient(ellipse 100px 30px at 30% 25%, rgba(255,255,255,0.2) 0%, transparent 70%),
+    radial-gradient(ellipse 150px 50px at 60% 10%, rgba(255,255,255,0.25) 0%, transparent 70%),
+    radial-gradient(ellipse 80px 25px at 80% 20%, rgba(255,255,255,0.2) 0%, transparent 70%);
+  animation: cloudDrift 30s linear infinite;
+  opacity: 0.6;
+}
+@keyframes cloudDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(50px); }
 }
 
 /* ===== حاوية القائمة ===== */
@@ -45,43 +58,45 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 32px 48px 24px;
-  background: rgba(0,0,0,0.5);
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 40px rgba(0,0,0,0.5);
-  min-width: 320px;
+  gap: 6px;
+  padding: 40px 56px 28px;
+  background: rgba(0,0,0,0.45);
+  border: 2px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 60px rgba(0,0,0,0.6);
+  min-width: 340px;
 }
 
-/* ===== الشعار ===== */
+/* ===== الشعار (Minecraft-style) ===== */
 .logo {
-  font-size: 52px;
+  font-size: 36px;
   font-weight: 900;
-  color: #fff;
+  color: #d0d0d0;
   text-shadow:
-    3px 3px 0 #3a3a3a,
+    2px 2px 0 #3a3a3a,
     -1px -1px 0 #3a3a3a,
     1px -1px 0 #3a3a3a,
     -1px 1px 0 #3a3a3a,
-    0 4px 0 #2a2a2a,
-    0 6px 8px rgba(0,0,0,0.5);
+    0 3px 0 #2a2a2a,
+    0 5px 10px rgba(0,0,0,0.6);
   margin: 0;
-  letter-spacing: 2px;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  letter-spacing: 4px;
+  font-family: 'Press Start 2P', monospace;
+  text-transform: uppercase;
+  line-height: 1.4;
 }
 .logo-sub {
-  font-size: 16px;
+  font-size: 11px;
   color: #ffd95e;
   text-shadow: 2px 2px 0 #4a3a1a;
-  margin-bottom: 12px;
-  letter-spacing: 4px;
+  margin-bottom: 16px;
+  letter-spacing: 3px;
+  font-family: 'Press Start 2P', monospace;
 }
 
-/* ===== أزرار Minecraft (أكثر واقعية) ===== */
+/* ===== أزرار Minecraft الأصلية ===== */
 .btn-mc {
-  width: 280px;
+  width: 310px;
   height: 40px;
   border: none;
   border-top: 3px solid #8a8a8a;
@@ -89,25 +104,26 @@
   border-bottom: 3px solid #404040;
   border-right: 3px solid #303030;
   background: linear-gradient(180deg, #7a7a7a 0%, #6a6a6a 50%, #5a5a5a 100%);
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #e8e8e8;
+  font-size: 13px;
+  font-family: 'Press Start 2P', monospace;
   cursor: pointer;
   text-shadow: 2px 2px 0 #2a2a2a;
-  font-family: 'Segoe UI', system-ui, sans-serif;
   outline: none;
   transition: none;
-  position: relative;
   padding: 0 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 .btn-mc:hover {
   background: linear-gradient(180deg, #8a8a8a 0%, #7a7a7a 50%, #6a6a6a 100%);
   border-top-color: #9a9a9a;
   border-left-color: #8a8a8a;
+  color: #fff;
 }
 .btn-mc:active {
   border-top: 3px solid #404040;
@@ -115,31 +131,28 @@
   border-bottom: 3px solid #8a8a8a;
   border-right: 3px solid #7a7a7a;
   background: linear-gradient(180deg, #5a5a5a 0%, #4a4a4a 50%, #3a3a3a 100%);
+  color: #ddd;
 }
 .btn-mc.disabled,
 .btn-mc:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   pointer-events: none;
 }
-.btn-mc.btn-danger {
-  background: linear-gradient(180deg, #8a3030 0%, #7a2020 50%, #6a1010 100%);
-}
-.btn-mc.btn-danger:hover {
-  background: linear-gradient(180deg, #9a4040 0%, #8a3030 50%, #7a2020 100%);
-}
+.btn-mc.btn-danger { background: linear-gradient(180deg, #8a3030 0%, #7a2020 50%, #6a1010 100%); }
+.btn-mc.btn-danger:hover { background: linear-gradient(180deg, #9a4040 0%, #8a3030 50%, #7a2020 100%); }
 
 /* زر الرجوع */
 .btn-back {
-  width: 280px;
+  width: 310px;
   height: 36px;
   border: 2px solid #555;
   background: rgba(0,0,0,0.3);
-  color: #ccc;
-  font-size: 14px;
+  color: #b0b0b0;
+  font-size: 12px;
+  font-family: 'Press Start 2P', monospace;
   cursor: pointer;
   text-shadow: 1px 1px 0 #222;
-  font-family: 'Segoe UI', system-ui, sans-serif;
   outline: none;
   display: flex;
   align-items: center;
@@ -147,57 +160,60 @@
   gap: 6px;
   transition: background 0.15s;
 }
-.btn-back:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.btn-back:hover { background: rgba(255,255,255,0.1); color: #eee; }
 
 .btn-sm {
   width: 36px; height: 36px;
   border: 2px solid #666;
   background: rgba(0,0,0,0.4);
   color: #ddd;
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Press Start 2P', monospace;
 }
 .btn-sm:hover { background: rgba(255,255,255,0.15); }
 
 .version {
-  color: #888;
-  font-size: 11px;
-  margin-top: 12px;
+  color: #666;
+  font-size: 9px;
+  margin-top: 14px;
   margin-bottom: 0;
+  font-family: 'Press Start 2P', monospace;
   text-shadow: 1px 1px 0 #222;
 }
 
-/* ===== شاشة اختيار العالم ===== */
+/* ===== شاشة اختيار العالم (full-screen مثل MC) ===== */
 .world-panel {
   position: relative; z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 24px 32px;
-  background: rgba(0,0,0,0.5);
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 40px rgba(0,0,0,0.5);
-  min-width: 400px;
-  max-height: 80vh;
+  gap: 10px;
+  padding: 28px 36px;
+  background: rgba(0,0,0,0.45);
+  border: 2px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 60px rgba(0,0,0,0.6);
+  min-width: 450px;
+  max-height: 85vh;
 }
 
 .screen-title {
-  color: #fff;
-  font-size: 24px;
-  margin: 0 0 8px;
+  color: #e0e0e0;
+  font-size: 18px;
+  margin: 0 0 10px;
   text-shadow: 2px 2px 0 #3a3a3a;
+  font-family: 'Press Start 2P', monospace;
+  letter-spacing: 2px;
 }
 
 .world-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   width: 100%;
   max-height: 400px;
   overflow-y: auto;
@@ -207,19 +223,19 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: rgba(0,0,0,0.35);
-  border: 2px solid rgba(255,255,255,0.08);
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border: 2px solid rgba(255,255,255,0.06);
   cursor: pointer;
   transition: all 0.12s;
 }
 .world-card:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.15);
 }
 .world-card .world-icon {
-  font-size: 28px;
-  width: 40px; height: 40px;
+  font-size: 24px;
+  width: 36px; height: 36px;
   display: flex; align-items: center; justify-content: center;
   background: rgba(0,0,0,0.3);
   border: 1px solid #555;
@@ -231,28 +247,30 @@
   gap: 2px;
 }
 .world-card .world-name {
-  color: #fff;
-  font-size: 16px;
-  font-weight: bold;
+  color: #e8e8e8;
+  font-size: 13px;
+  font-family: 'Press Start 2P', monospace;
 }
 .world-card .world-meta {
-  color: #999;
-  font-size: 12px;
+  color: #888;
+  font-size: 10px;
+  font-family: 'Press Start 2P', monospace;
 }
 .world-card .world-play {
-  font-size: 20px;
+  font-size: 18px;
   color: #8af;
-  opacity: 0.6;
+  opacity: 0.5;
 }
 .world-card:hover .world-play { opacity: 1; }
 .world-card .world-delete {
-  font-size: 14px;
+  font-size: 12px;
   color: #a44;
   cursor: pointer;
   opacity: 0;
   padding: 4px 8px;
   background: none;
   border: none;
+  font-family: 'Press Start 2P', monospace;
 }
 .world-card:hover .world-delete { opacity: 1; }
 .world-card .world-delete:hover { color: #f66; }
@@ -263,7 +281,7 @@
   gap: 6px;
   width: 100%;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 /* ===== شاشة إنشاء عالم ===== */
@@ -272,27 +290,26 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  padding: 24px 32px;
-  background: rgba(0,0,0,0.5);
-  border: 2px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 0 40px rgba(0,0,0,0.5);
-  min-width: 360px;
+  gap: 8px;
+  padding: 28px 36px;
+  background: rgba(0,0,0,0.45);
+  border: 2px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 60px rgba(0,0,0,0.6);
+  min-width: 380px;
 }
 
 .create-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   width: 100%;
 }
 .create-row label {
-  color: #ccc;
-  font-size: 14px;
-  min-width: 100px;
-  text-align: right;
+  color: #b0b0b0;
+  font-size: 11px;
+  min-width: 110px;
+  font-family: 'Press Start 2P', monospace;
 }
 
 .mc-input {
@@ -300,11 +317,11 @@
   height: 34px;
   background: rgba(0,0,0,0.4);
   border: 2px solid #555;
-  color: #fff;
-  font-size: 14px;
+  color: #ddd;
+  font-size: 12px;
   padding: 0 10px;
   outline: none;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Press Start 2P', monospace;
 }
 .mc-input:focus { border-color: #8af; }
 
@@ -312,16 +329,16 @@
   height: 34px;
   background: rgba(0,0,0,0.4);
   border: 2px solid #555;
-  color: #fff;
-  font-size: 14px;
+  color: #ddd;
+  font-size: 11px;
   padding: 0 8px;
   outline: none;
   flex: 1;
   cursor: pointer;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: 'Press Start 2P', monospace;
 }
 .mc-select:focus { border-color: #8af; }
-.mc-select option { background: #2a2a2a; color: #fff; }
+.mc-select option { background: #2a2a2a; color: #ddd; }
 
 .create-actions {
   display: flex;
@@ -329,17 +346,17 @@
   gap: 6px;
   width: 100%;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
-/* ===== قائمة الإيقاف المؤقت ===== */
+/* ===== قائمة الإيقاف المؤقت (مثل Minecraft بالضبط) ===== */
 .pause-overlay {
   position: fixed; inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
-  background: rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.5);
   backdrop-filter: blur(4px);
 }
 .pause-overlay.hidden { display: none; }
@@ -348,20 +365,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 32px 48px;
-  background: rgba(0,0,0,0.65);
-  border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  box-shadow: 0 0 60px rgba(0,0,0,0.5);
-  min-width: 300px;
+  gap: 6px;
+  padding: 40px 56px;
+  background: rgba(0,0,0,0.5);
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 80px rgba(0,0,0,0.5);
+  min-width: 310px;
 }
-.pause-title {
-  color: #fff;
-  font-size: 28px;
-  margin: 0 0 12px;
-  text-shadow: 2px 2px 0 #3a3a3a;
-}
+.pause-panel .btn-mc { width: 310px; }
 
 /* ===== الإعدادات ===== */
 .settings-panel {
@@ -370,7 +381,7 @@
   align-items: center;
   justify-content: center;
   z-index: 200;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
   backdrop-filter: blur(4px);
 }
 .settings-panel.open { display: flex; }
@@ -380,34 +391,35 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 28px 36px;
-  background: rgba(0,0,0,0.7);
-  border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  box-shadow: 0 0 60px rgba(0,0,0,0.5);
-  min-width: 380px;
+  gap: 10px;
+  padding: 28px 40px;
+  background: rgba(0,0,0,0.55);
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 80px rgba(0,0,0,0.5);
+  min-width: 400px;
   max-height: 85vh;
   overflow-y: auto;
 }
 .settings-box h2 {
-  color: #fff;
-  font-size: 24px;
+  color: #e0e0e0;
+  font-size: 18px;
   margin: 0 0 4px;
   text-shadow: 2px 2px 0 #3a3a3a;
+  font-family: 'Press Start 2P', monospace;
 }
 
 .settings-section {
   width: 100%;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 8px;
 }
 .settings-section h3 {
-  color: #aaa;
-  font-size: 13px;
+  color: #888;
+  font-size: 10px;
   margin: 0 0 8px;
   text-transform: uppercase;
   letter-spacing: 2px;
+  font-family: 'Press Start 2P', monospace;
 }
 
 .settings-row {
@@ -415,84 +427,82 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 4px 0;
+  padding: 3px 0;
 }
 .settings-row span {
-  color: #ddd;
-  font-size: 14px;
-  min-width: 120px;
+  color: #c0c0c0;
+  font-size: 11px;
+  min-width: 130px;
+  font-family: 'Press Start 2P', monospace;
 }
 
-/* Range slider */
 .settings-row input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
   width: 180px;
   height: 6px;
-  background: #444;
-  border-radius: 3px;
+  background: #3a3a3a;
   outline: none;
   cursor: pointer;
 }
 .settings-row input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  background: #aaa;
-  border: 2px solid #ccc;
+  width: 14px;
+  height: 14px;
+  background: #999;
+  border: 2px solid #bbb;
   border-radius: 2px;
   cursor: pointer;
 }
 .settings-row input[type="range"]::-moz-range-thumb {
-  width: 16px; height: 16px;
-  background: #aaa;
-  border: 2px solid #ccc;
+  width: 14px; height: 14px;
+  background: #999;
+  border: 2px solid #bbb;
   border-radius: 2px;
   cursor: pointer;
 }
-.settings-row input[type="range"]:hover { background: #555; }
+.settings-row input[type="range"]:hover { background: #4a4a4a; }
 
-/* Toggle switch */
 .toggle {
   position: relative;
   display: inline-block;
-  width: 42px;
-  height: 22px;
+  width: 40px;
+  height: 20px;
   cursor: pointer;
 }
 .toggle input { opacity: 0; width: 0; height: 0; }
 .toggle-slider {
   position: absolute; inset: 0;
-  background: #444;
+  background: #3a3a3a;
   transition: 0.2s;
-  border: 1px solid #666;
+  border: 1px solid #555;
 }
 .toggle-slider::before {
   content: "";
   position: absolute;
-  width: 16px; height: 16px;
+  width: 14px; height: 14px;
   left: 2px; bottom: 2px;
-  background: #aaa;
+  background: #999;
   transition: 0.2s;
 }
 .toggle input:checked + .toggle-slider { background: #3a7a3a; border-color: #5a9a5a; }
-.toggle input:checked + .toggle-slider::before { transform: translateX(20px); background: #fff; }
+.toggle input:checked + .toggle-slider::before { transform: translateX(20px); background: #eee; }
 
 .settings-actions {
   width: 100%;
   display: flex;
   justify-content: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
-/* ===== المودالات ===== */
+/* ===== المودالات (Minecraft-style) ===== */
 .modal-overlay {
   position: fixed; inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 300;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
 }
 .modal-overlay.hidden { display: none; }
 
@@ -501,43 +511,38 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 28px 36px;
-  background: rgba(0,0,0,0.7);
-  border: 2px solid rgba(255,255,255,0.1);
-  border-radius: 8px;
-  box-shadow: 0 0 60px rgba(0,0,0,0.5);
-  min-width: 300px;
+  padding: 28px 40px;
+  background: rgba(0,0,0,0.5);
+  border: 2px solid rgba(255,255,255,0.08);
+  box-shadow: 0 0 80px rgba(0,0,0,0.5);
+  min-width: 320px;
 }
 .modal-box h2 {
-  color: #ffd95e;
-  font-size: 20px;
+  color: #e0e0e0;
+  font-size: 16px;
   margin: 0;
-  text-shadow: 2px 2px 0 #4a3a1a;
+  text-shadow: 2px 2px 0 #3a3a3a;
+  font-family: 'Press Start 2P', monospace;
 }
 .modal-box p {
-  color: #ccc;
-  font-size: 14px;
+  color: #aaa;
+  font-size: 11px;
   text-align: center;
   margin: 0;
+  font-family: 'Press Start 2P', monospace;
+  line-height: 1.6;
 }
 .modal-btns {
   display: flex;
-  gap: 10px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 6px;
 }
-.modal-btns .btn-mc { width: 130px; }
+.modal-btns .btn-mc { width: 140px; }
 
 /* ===== التمرير ===== */
 .world-list::-webkit-scrollbar,
-.settings-box::-webkit-scrollbar {
-  width: 6px;
-}
+.settings-box::-webkit-scrollbar { width: 6px; }
 .world-list::-webkit-scrollbar-track,
-.settings-box::-webkit-scrollbar-track {
-  background: rgba(0,0,0,0.2);
-}
+.settings-box::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
 .world-list::-webkit-scrollbar-thumb,
-.settings-box::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 3px;
-}
+.settings-box::-webkit-scrollbar-thumb { background: #4a4a4a; }

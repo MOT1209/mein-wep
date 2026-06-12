@@ -107,7 +107,7 @@ export async function initProjects() {
     if (!error && count != null) {
         const adminLink = qs('.admin-link');
         if (adminLink) {
-            adminLink.innerHTML = 'Internal Access <span style="color:#2ecc71; margin-left: 5px;">● Online</span>';
+            adminLink.style.display = 'none';
         }
     }
 
