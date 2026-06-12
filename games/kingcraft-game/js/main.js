@@ -59,6 +59,9 @@ entityManager._onAttack = (damage) => {
 entityManager._onDrop = (x, y, z, dropList) => {
   for (const d of dropList) drops.spawn(x, y, z, d.id, d.count);
 };
+entityManager._onMobHurt = () => sound.playMobHurt();
+entityManager._onMobDeath = () => sound.playMobDeath();
+player.sound = sound;
 
 function renderStatBar(el, value, max, fullChar, emptyChar) {
   el.innerHTML = "";
@@ -92,6 +95,9 @@ window._kcPitch = 0;
 
 // حفظ تلقائي كل 30 ثانية
 let _saveTimer = 0;
+
+// مؤقت صوت الخطوات
+let _stepTimer = 0.3;
 
 function autoSave(dt) {
   if (!gameStarted) return;
@@ -202,6 +208,13 @@ function updateMining(dt) {
   const tool = heldTool();
   miningProgress += dt / breakTime(id, tool);
 
+  // صوت حفر أثناء التقدم (كل 25%)
+  const prevCrack = Math.floor((miningProgress - dt / breakTime(id, tool)) / 0.25);
+  const nowCrack = Math.floor(miningProgress / 0.25);
+  if (nowCrack > prevCrack && nowCrack < 4) {
+    sound.playDig();
+  }
+
   if (miningProgress >= 1) {
     if (canDrop(id, tool)) {
       const d = blockDrop(id);
@@ -244,6 +257,7 @@ canvas.addEventListener("mousedown", (e) => {
     const eo = eyeOrigin();
     const hitEntity = entityManager.getEntityAt(eo.x, eo.y, eo.z, lastDir, 5);
     if (hitEntity) {
+      sound.playSwing();
       const sel = inventory.selectedStack;
       const it = sel ? getItem(sel.id) : null;
       const dmg = (it && it.damage) ? it.damage : 1;
@@ -703,6 +717,24 @@ function loop(now) {
       lastDir = player.applyCamera(yaw, pitch);
       window._kcYaw = yaw;
       window._kcPitch = pitch;
+
+      // صوت الخطوات
+      if (player.onGround && (Math.abs(player.vel.x) > 0.05 || Math.abs(player.vel.z) > 0.05) && !player.flying) {
+        _stepTimer += dt;
+        const stepInterval = player.keys["ControlLeft"] ? 0.35 : 0.5;
+        if (_stepTimer >= stepInterval) {
+          _stepTimer = 0;
+          sound.playStep();
+        }
+      } else {
+        _stepTimer = 0.3;
+      }
+
+      // صوت الهبوط
+      if (player.onGround && !player._prevOnGround && player._fallDist > 0.5) {
+        sound.playLand();
+      }
+
       updateMining(dt);
       drops.update(dt, player, inventory);
       entityManager.update(dt, player.pos);

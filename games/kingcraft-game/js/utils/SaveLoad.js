@@ -1,4 +1,54 @@
 const KEY = "kc-save";
+const DB_NAME = "kc-world";
+const DB_VERSION = 1;
+const STORE = "chunks";
+
+let _db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    if (_db) { resolve(_db); return; }
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains(STORE)) {
+        db.createObjectStore(STORE);
+      }
+    };
+    req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
+    req.onerror = () => { _db = null; reject(req.error); };
+  });
+}
+
+export async function saveChunk(cx, cz, blocks) {
+  try {
+    const db = await openDB();
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).put(blocks, cx + "," + cz);
+    return new Promise((resolve) => { tx.oncomplete = () => resolve(true); tx.onerror = () => resolve(false); });
+  } catch (e) {
+    return false;
+  }
+}
+
+export async function loadChunk(cx, cz) {
+  try {
+    const db = await openDB();
+    return new Promise((resolve) => {
+      const tx = db.transaction(STORE, "readonly");
+      const req = tx.objectStore(STORE).get(cx + "," + cz);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch (e) {
+    return null;
+  }
+}
+
+export async function hasChunk(cx, cz) {
+  const data = await loadChunk(cx, cz);
+  return data !== null;
+}
 
 export function saveGame(player, inventory, health, world, drops) {
   try {

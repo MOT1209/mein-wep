@@ -14,6 +14,14 @@ const TILE_NAMES = [
   "furnace_top", "furnace_side", "furnace_front",
   "table_top", "table_side",
   "iron_block", "gold_block", "diamond_block",
+  // المرحلة 4: بايومز + كهوف
+  "gravel", "granite", "diorite", "andesite",
+  "mud", "podzol_top", "podzol_side", "clay",
+  "sandstone", "ice", "snow_block", "packed_ice",
+  "mossy_cobble", "obsidian", "brick", "bookshelf_side",
+  "sponge", "red_flower", "yellow_flower",
+  "brown_mushroom", "red_mushroom", "dead_bush", "tall_grass",
+  "cactus", "cactus_top", "vine",
 ];
 
 // مولّد عشوائي بسيط ثابت لكل بلاطة (لنمط متّسق)
@@ -134,6 +142,37 @@ const TILE_DRAW = {
     ctx.fillStyle = shade(0x9a7038, 30);
     ctx.fillRect(ox+2, oy+2, 5, 5); ctx.fillRect(ox+9, oy+2, 5, 5);
   },
+
+  // ===== المرحلة 4: بايومز + كهوف =====
+  gravel:  (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x7d7d7d, 38, 301); const r=rng(301); for(let i=0;i<6;i++){ctx.fillStyle=shade(0x4a4a4a,Math.floor((r()-0.5)*40));ctx.fillRect(ox+Math.floor(r()*14),oy+Math.floor(r()*14),2,2);} },
+  granite: (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x8a6a6a, 22, 302); const r=rng(302); for(let i=0;i<4;i++){ctx.fillStyle=shade(0x6a4e4e,Math.floor((r()-0.5)*30));ctx.fillRect(ox+Math.floor(r()*12)+2,oy+Math.floor(r()*12)+2,3,3);} },
+  diorite: (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0xc8c8c8, 16, 303); const r=rng(303); for(let i=0;i<8;i++){ctx.fillStyle=shade(0x2a2a2a,Math.floor((r()-0.5)*30));ctx.fillRect(ox+Math.floor(r()*14),oy+Math.floor(r()*14),1,1);} },
+  andesite:(ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x76767a, 18, 304); const r=rng(304); for(let i=0;i<5;i++){ctx.fillStyle=shade(0x5a5a5e,Math.floor((r()-0.5)*20));ctx.fillRect(ox+Math.floor(r()*12)+2,oy+Math.floor(r()*12)+2,2,2);} },
+  mud:     (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x4a3a2a, 26, 305); const r=rng(305); for(let i=0;i<8;i++){ctx.fillStyle=shade(0x3a2a1a,Math.floor((r()-0.5)*20));ctx.fillRect(ox+Math.floor(r()*14),oy+Math.floor(r()*14),2,2);} },
+  clay:    (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x96a0a0, 14, 306); ctx.fillStyle=shade(0x7a8484,10);ctx.fillRect(ox+2,oy+2,12,12); },
+  sandstone:(ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0xc8b878, 20, 307); ctx.fillStyle="#b0a060";ctx.fillRect(ox+1,oy+1,2,2);ctx.fillRect(ox+10,oy+12,3,3);ctx.fillRect(ox+5,oy+5,1,1); },
+  ice:     (ctx, ox, oy) => { ctx.fillStyle="rgba(150,200,240,0.6)";ctx.fillRect(ox,oy,TILE,TILE); ctx.strokeStyle="rgba(180,220,255,0.3)";ctx.strokeRect(ox+2,oy+2,TILE-4,TILE-4); },
+  snow_block:(ctx, ox, oy) => drawNoisy(ctx, ox, oy, 0xeef2f6, 8, 308),
+  packed_ice:(ctx, ox, oy) => { ctx.fillStyle="rgba(160,210,250,0.7)";ctx.fillRect(ox,oy,TILE,TILE); ctx.fillStyle="rgba(200,235,255,0.3)";ctx.fillRect(ox+4,oy+4,4,4);ctx.fillRect(ox+10,oy+10,3,3); },
+
+  podzol_top: (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x4a6a2a, 24, 309); const r=rng(309); for(let i=0;i<6;i++){ctx.fillStyle=shade(0x3a5a1a,Math.floor((r()-0.5)*20));ctx.fillRect(ox+Math.floor(r()*14),oy+Math.floor(r()*14),2,2);} },
+  podzol_side: (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x6a5a3a, 22, 310); for(let x=0;x<TILE;x++){const h=2+Math.floor(rng(x+310)()*2);ctx.fillStyle=shade(0x4a6a2a,Math.floor((rng(x*3)()-0.5)*20));ctx.fillRect(ox+x,oy,1,h);} },
+
+  mossy_cobble: (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x7d7d7d, 30, 311); const r=rng(311); for(let i=0;i<12;i++){ctx.fillStyle=shade(0x5a9c3c,Math.floor((r()-0.5)*30));ctx.fillRect(ox+Math.floor(r()*14),oy+Math.floor(r()*14),2,2);} },
+  obsidian: (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x1a0a2e, 24, 312); const r=rng(312); for(let i=0;i<4;i++){const x=Math.floor(r()*12)+2;const y=Math.floor(r()*12)+2;ctx.fillStyle=shade(0x3a1a5e,Math.floor((r()-0.5)*20));ctx.fillRect(ox+x,oy+y,2,2);} },
+  brick:    (ctx, ox, oy) => { const r=rng(313); ctx.fillStyle=shade(0xa04020,10);ctx.fillRect(ox,oy,TILE,TILE); ctx.fillStyle=shade(0x7a2a10,-10);for(let x=0;x<TILE;x+=8){ctx.fillRect(ox+x,oy,1,TILE);}for(let y=0;y<TILE;y+=4){const off=(Math.floor(y/4)%2)*4;ctx.fillRect(ox+off,oy+y,TILE-off,1);} },
+  bookshelf_side: (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x8a6a3a, 18, 314); ctx.fillStyle=shade(0x6a4a1a,20);ctx.fillRect(ox+2,oy+2,12,4);ctx.fillRect(ox+2,oy+10,12,4); ctx.fillStyle=shade(0x9a7a4a,10);ctx.fillRect(ox+2,oy+6,12,4); },
+  sponge:   (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0xa0a030, 30, 315); const r=rng(315); for(let i=0;i<20;i++){ctx.fillStyle=shade(0x808020,Math.floor((r()-0.5)*30));ctx.fillRect(ox+Math.floor(r()*14),oy+Math.floor(r()*14),2,2);} },
+
+  red_flower: (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="#30a030";ctx.fillRect(ox+7,oy+10,2,6); for(let i=0;i<4;i++){const a=i*Math.PI/4;ctx.fillStyle="#e03030";ctx.fillRect(ox+7+Math.floor(Math.sin(a)*4),oy+6+Math.floor(Math.cos(a)*4),4,4);} },
+  yellow_flower: (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="#30a030";ctx.fillRect(ox+7,oy+10,2,6); for(let i=0;i<4;i++){const a=i*Math.PI/4;ctx.fillStyle="#f0d020";ctx.fillRect(ox+7+Math.floor(Math.sin(a)*4),oy+6+Math.floor(Math.cos(a)*4),4,4);} },
+  brown_mushroom: (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="#c0a060";ctx.fillRect(ox+7,oy+10,2,5); ctx.fillStyle="#8a6030";ctx.fillRect(ox+4,oy+6,8,5);ctx.fillRect(ox+3,oy+8,10,2); },
+  red_mushroom: (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="#c0a060";ctx.fillRect(ox+7,oy+10,2,5); ctx.fillStyle="#e03030";ctx.fillRect(ox+4,oy+6,8,5);ctx.fillRect(ox+3,oy+8,10,2);ctx.fillStyle="#fff";ctx.fillRect(ox+5,oy+7,2,1);ctx.fillRect(ox+9,oy+8,2,1); },
+  dead_bush: (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="#6a5a30";ctx.fillRect(ox+7,oy+10,2,6); ctx.fillStyle="#8a7a40";ctx.fillRect(ox+5,oy+4,2,8);ctx.fillRect(ox+9,oy+3,2,8);ctx.fillRect(ox+3,oy+6,2,6); },
+  tall_grass: (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="#3a7a20";ctx.fillRect(ox+7,oy+10,2,6); ctx.fillStyle="#4a9a2a";ctx.fillRect(ox+5,oy+2,2,10);ctx.fillRect(ox+9,oy+4,2,8);ctx.fillRect(ox+3,oy+6,2,6);ctx.fillRect(ox+11,oy+8,2,4); },
+  vine:     (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="rgba(40,120,20,0.6)";ctx.fillRect(ox+3,oy,10,TILE); const r=rng(316);for(let i=0;i<6;i++){ctx.fillStyle=shade(0x2a7a1a,Math.floor((r()-0.5)*20));ctx.fillRect(ox+Math.floor(r()*12)+2,oy+Math.floor(r()*14),3,3);} },
+  cactus:   (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x2a7a2a, 22, 317); ctx.fillStyle=shade(0x1a5a1a,10);ctx.fillRect(ox,oy,1,TILE);ctx.fillRect(ox+TILE-1,oy,1,TILE);ctx.fillRect(ox,oy,TILE,1);ctx.fillRect(oy,oy+TILE-1,TILE,1);ctx.fillStyle="#3a9a3a";ctx.fillRect(ox+3,oy+2,2,2);ctx.fillRect(ox+11,oy+6,2,2);ctx.fillRect(ox+5,oy+11,2,2); },
+  cactus_top:(ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x2a7a2a, 22, 318); ctx.fillStyle=shade(0x1a5a1a,10);ctx.fillRect(ox,oy,TILE,1);ctx.fillRect(ox,oy+TILE-1,TILE,1);ctx.fillRect(ox,oy,1,TILE);ctx.fillRect(ox+TILE-1,oy,1,TILE);ctx.fillStyle="#3a9a3a";ctx.fillRect(ox+6,oy+4,4,3); },
 };
 
 let _atlasTexture = null;

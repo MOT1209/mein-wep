@@ -5,6 +5,7 @@ import { AIR, isSolid } from "./BlockData.js";
 import { Chunk } from "./Chunk.js";
 import { TerrainGen } from "./TerrainGen.js";
 import { buildAtlas } from "../blocks/BlockTexture.js";
+import { saveChunk, loadChunk } from "../utils/SaveLoad.js";
 
 const S = CHUNK_SIZE;
 
@@ -41,6 +42,8 @@ export class World {
     if (!c) {
       c = new Chunk(cx, cz);
       this.chunks.set(k, c);
+
+      // توليد التضاريس (حاضر فوراً)
       this.gen.generateChunk(cx, cz, S, (lx, ly, lz, id) => {
         if (ly < 0 || ly >= WORLD_HEIGHT) return;
         if (c.inBounds(lx, ly, lz)) {
@@ -63,6 +66,18 @@ export class World {
         this._inQueue.add(c);
         this._meshQueue.push(c);
       }
+
+      // تحميل من IndexedDB (غير متزامن — يستبدل التضاريس المولّدة لاحقاً)
+      loadChunk(cx, cz).then(saved => {
+        if (saved && this.chunks.has(k)) {
+          c.blocks = saved;
+          c.dirty = true;
+          if (!this._inQueue.has(c)) {
+            this._inQueue.add(c);
+            this._meshQueue.push(c);
+          }
+        }
+      });
     }
     return c;
   }
@@ -130,10 +145,12 @@ export class World {
       }
     }
 
-    // تفريغ تدريجي (قطعتين لكل إطار عشان ما نجمّد)
+    // تفريغ تدريجي مع حفظ القطع في IndexedDB
     let unloadB = 2;
     while (unloadB-- > 0 && this._toUnload.length) {
       const c = this._toUnload.pop();
+      // حفظ القطعة قبل التفريغ
+      saveChunk(c.cx, c.cz, c.blocks);
       if (c.mesh) this.scene.remove(c.mesh);
       if (c.transparentMesh) this.scene.remove(c.transparentMesh);
       c.disposeMesh();

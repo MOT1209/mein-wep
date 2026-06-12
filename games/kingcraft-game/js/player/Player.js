@@ -17,12 +17,14 @@ export class Player {
     this.pos = new THREE.Vector3(0, WORLD_HEIGHT, 0);
     this.vel = new THREE.Vector3();
     this.onGround = false;
+    this._prevOnGround = false;
     this._fallDist = 0;
     this.flying = false;
     this.sneaking = false;
     this.thirdPerson = false;
     this._height = PLAYER_HEIGHT;
     this._eye = PLAYER_EYE;
+    this.sound = null;
 
     this.keys = {};
     this._lastSpace = 0;
@@ -70,6 +72,7 @@ export class Player {
   update(dt, yaw) {
     dt = Math.min(dt, 0.05);
     const startY = this.pos.y;
+    this._prevOnGround = this.onGround;
 
     this.sneaking = this.keys["ShiftLeft"] && !this.flying && this.onGround;
 

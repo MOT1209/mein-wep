@@ -28,6 +28,32 @@ export const BLOCKS = [
   { id: 18, name: "iron_block",    label: "كتلة حديد", hardness: 5.0, tile: "iron_block" },
   { id: 19, name: "gold_block",    label: "كتلة ذهب",  hardness: 3.0, tile: "gold_block" },
   { id: 20, name: "diamond_block", label: "كتلة ألماس", hardness: 5.0, tile: "diamond_block" },
+
+  // ===== بلوكات المرحلة 4: بايومز + كهوف =====
+  { id: 21, name: "gravel",     label: "حصى",    hardness: 0.6, tile: "gravel" },
+  { id: 22, name: "granite",    label: "جرانيت",  hardness: 1.5, tile: "granite" },
+  { id: 23, name: "diorite",    label: "ديوريت",  hardness: 1.5, tile: "diorite" },
+  { id: 24, name: "andesite",   label: "أنديزيت", hardness: 1.5, tile: "andesite" },
+  { id: 25, name: "mud",        label: "طين",     hardness: 0.4, tile: "mud" },
+  { id: 26, name: "podzol",     label: "بودزول",  hardness: 0.6, tiles: { top: "podzol_top", bottom: "dirt", side: "podzol_side" } },
+  { id: 27, name: "clay",       label: "صلصال",   hardness: 0.6, tile: "clay" },
+  { id: 28, name: "sandstone",  label: "حجر رملي", hardness: 0.8, tile: "sandstone" },
+  { id: 29, name: "ice",        label: "جليد",    hardness: 0.5, tile: "ice", transparent: true },
+  { id: 30, name: "snow_block", label: "كتلة ثلج", hardness: 0.4, tile: "snow_block" },
+  { id: 31, name: "packed_ice", label: "جليد مضغوط", hardness: 0.5, tile: "packed_ice" },
+  { id: 32, name: "mossy_cobble", label: "حصى مطحلب", hardness: 2.0, tile: "mossy_cobble" },
+  { id: 33, name: "obsidian",   label: "سبج",     hardness: 50, tile: "obsidian" },
+  { id: 34, name: "brick",      label: "طوب",     hardness: 2.0, tile: "brick" },
+  { id: 35, name: "bookshelf",  label: "مكتبة",   hardness: 1.5, tiles: { top: "planks", bottom: "planks", side: "bookshelf_side" } },
+  { id: 36, name: "sponge",     label: "إسفنجة",  hardness: 0.6, tile: "sponge" },
+  { id: 37, name: "red_flower", label: "زهرة حمراء", hardness: 0, tile: "red_flower", transparent: true, solid: false },
+  { id: 38, name: "yellow_flower", label: "زهرة صفراء", hardness: 0, tile: "yellow_flower", transparent: true, solid: false },
+  { id: 39, name: "brown_mushroom", label: "فطر بني", hardness: 0, tile: "brown_mushroom", transparent: true, solid: false },
+  { id: 40, name: "red_mushroom", label: "فطر أحمر", hardness: 0, tile: "red_mushroom", transparent: true, solid: false },
+  { id: 41, name: "dead_bush",  label: "شجيرة ميتة", hardness: 0, tile: "dead_bush", transparent: true, solid: false },
+  { id: 42, name: "tall_grass", label: "عشب طويل", hardness: 0, tile: "tall_grass", transparent: true, solid: false },
+  { id: 43, name: "cactus",     label: "صبار",    hardness: 0.4, tiles: { top: "cactus_top", bottom: "cactus_top", side: "cactus" }, transparent: true },
+  { id: 44, name: "vine",       label: "نبات متسلق", hardness: 0.2, tile: "vine", transparent: true, solid: false },
 ];
 
 const byId = BLOCKS;

@@ -115,9 +115,16 @@ export class EntityManager {
 
   attackEntity(mob, damage) {
     const drops = mob.getDropTable();
+    const wasAlive = mob.alive;
     mob.takeDamage(damage);
-    if (!mob.alive && drops.length && this._onDrop) {
-      this._onDrop(mob.pos.x, mob.pos.y, mob.pos.z, drops);
+    if (wasAlive && mob.alive && this._onMobHurt) {
+      this._onMobHurt();
+    }
+    if (!mob.alive && wasAlive) {
+      if (this._onMobDeath) this._onMobDeath();
+      if (drops.length && this._onDrop) {
+        this._onDrop(mob.pos.x, mob.pos.y, mob.pos.z, drops);
+      }
     }
   }
 

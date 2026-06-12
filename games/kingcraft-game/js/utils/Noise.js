@@ -27,14 +27,20 @@ export class Noise {
     for (let i = 0; i < 512; i++) this.p[i] = perm[i & 255];
   }
 
-  grad(hash, x, y) {
+  grad2(hash, x, y) {
     const h = hash & 7;
     const u = h < 4 ? x : y;
     const v = h < 4 ? y : x;
     return ((h & 1) ? -u : u) + ((h & 2) ? -2 * v : 2 * v);
   }
 
-  // قيمة بين -1 و 1 تقريباً
+  grad3(hash, x, y, z) {
+    const h = hash & 15;
+    const u = h < 8 ? x : y;
+    const v = h < 4 ? y : (h === 12 || h === 14 ? x : z);
+    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
+  }
+
   perlin2(x, y) {
     const X = Math.floor(x) & 255;
     const Y = Math.floor(y) & 255;
@@ -46,17 +52,55 @@ export class Noise {
     const a = p[X] + Y;
     const b = p[X + 1] + Y;
     return lerp(
-      lerp(this.grad(p[a], x, y),     this.grad(p[b], x - 1, y), u),
-      lerp(this.grad(p[a + 1], x, y - 1), this.grad(p[b + 1], x - 1, y - 1), u),
+      lerp(this.grad2(p[a], x, y),     this.grad2(p[b], x - 1, y), u),
+      lerp(this.grad2(p[a + 1], x, y - 1), this.grad2(p[b + 1], x - 1, y - 1), u),
       v
     ) * 0.5;
   }
 
-  // fractal Brownian motion — يجمع عدة طبقات
+  perlin3(x, y, z) {
+    const X = Math.floor(x) & 255;
+    const Y = Math.floor(y) & 255;
+    const Z = Math.floor(z) & 255;
+    x -= Math.floor(x);
+    y -= Math.floor(y);
+    z -= Math.floor(z);
+    const u = fade(x);
+    const v = fade(y);
+    const w = fade(z);
+    const p = this.p;
+    const A = p[X] + Y;
+    const AA = p[A] + Z;
+    const AB = p[A + 1] + Z;
+    const B = p[X + 1] + Y;
+    const BA = p[B] + Z;
+    const BB = p[B + 1] + Z;
+    return lerp(
+      lerp(
+        lerp(this.grad3(p[AA], x, y, z),     this.grad3(p[BA], x - 1, y, z), u),
+        lerp(this.grad3(p[AB], x, y - 1, z), this.grad3(p[BB], x - 1, y - 1, z), u), v),
+      lerp(
+        lerp(this.grad3(p[AA + 1], x, y, z - 1), this.grad3(p[BA + 1], x - 1, y, z - 1), u),
+        lerp(this.grad3(p[AB + 1], x, y - 1, z - 1), this.grad3(p[BB + 1], x - 1, y - 1, z - 1), u), v), w);
+  }
+
+  // 2D fractal Brownian motion
   fbm(x, y, octaves = 4, lacunarity = 2, gain = 0.5) {
     let amp = 1, freq = 1, sum = 0, norm = 0;
     for (let i = 0; i < octaves; i++) {
       sum += amp * this.perlin2(x * freq, y * freq);
+      norm += amp;
+      amp *= gain;
+      freq *= lacunarity;
+    }
+    return sum / norm;
+  }
+
+  // 3D fractal Brownian motion (للكهوف والتضاريس ثلاثية الأبعاد)
+  fbm3(x, y, z, octaves = 3, lacunarity = 2, gain = 0.5) {
+    let amp = 1, freq = 1, sum = 0, norm = 0;
+    for (let i = 0; i < octaves; i++) {
+      sum += amp * this.perlin3(x * freq, y * freq, z * freq);
       norm += amp;
       amp *= gain;
       freq *= lacunarity;
