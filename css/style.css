@@ -22,8 +22,8 @@
 
     /* Text */
     --text-high: #f1f5f9;
-    --text-med: #94a3b8;
-    --text-low: #64748b;
+    --text-med: #a8b5c9;
+    --text-low: #8596b0;
     --text-primary: var(--text-high);
     --text-secondary: var(--text-med);
     --text-muted: var(--text-low);
@@ -85,7 +85,7 @@ body.light-mode {
     --bg-color: var(--bg-main);
     --text-high: #0f172a;
     --text-med: #475569;
-    --text-low: #94a3b8;
+    --text-low: #6b7c99;
     --text-primary: var(--text-high);
     --text-secondary: var(--text-med);
     --text-muted: var(--text-low);

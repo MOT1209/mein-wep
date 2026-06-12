@@ -12,7 +12,10 @@ const projectScreenshots = {
     'game': '../images/screenshots/default.svg',
     'app': '../images/screenshots/default.svg',
     'model': '../images/screenshots/default.svg',
-    'KingCraft': '../images/screenshots/kingcraft.svg'
+    'KingCraft': '../images/screenshots/kingcraft.svg',
+    'Rust Construction': '../images/screenshots/rust-construction.svg',
+    'Farm Empire': '../images/screenshots/farm-empire.svg',
+    'Rashid AI': '../images/screenshots/rashid-ai.svg'
 };
 
 const fallbackProjects = [
@@ -25,9 +28,9 @@ const fallbackProjects = [
     { title: 'RashidClaw', category: 'App', description: 'Utility toolkit by Rashid — a collection of developer tools and CLI helpers for rapid prototyping.', link: 'https://github.com/MOT1209/RashidClaw', github_link: 'https://github.com/MOT1209/RashidClaw', image_url: '../images/screenshots/default.svg', technologies: ['Utility', 'CLI', 'Tools'] },
     // ── Local Workspace Projects ──
     { title: 'KingCraft', category: 'Game', description: '3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive! Built with Three.js chunk-based rendering.', link: 'games/kingcraft-game/showcase.html', image_url: '../images/screenshots/kingcraft.svg', technologies: ['Three.js', '3D', 'Sandbox'] },
-    { title: 'Rust Construction', category: 'Game', description: '3D building game with physics and resource management. Build structures, manage resources, survive!', link: 'games/rust-game/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Three.js', '3D', 'Physics'] },
-    { title: 'Farm Empire', category: 'Game', description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!', link: 'games/farm-game/index.html', image_url: '../images/screenshots/default.svg', technologies: ['WebGL', 'Simulation', 'Economy'] },
-    { title: 'Rashid AI', category: 'Model', description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support with 10+ languages.', link: 'models/Rashid-Model/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Gemini API', 'OpenRouter', 'AI'] },
+    { title: 'Rust Construction', category: 'Game', description: '3D building game with physics and resource management. Build structures, manage resources, survive!', link: 'games/rust-game/index.html', image_url: '../images/screenshots/rust-construction.svg', technologies: ['Three.js', '3D', 'Physics'] },
+    { title: 'Farm Empire', category: 'Game', description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!', link: 'games/farm-game/index.html', image_url: '../images/screenshots/farm-empire.svg', technologies: ['WebGL', 'Simulation', 'Economy'] },
+    { title: 'Rashid AI', category: 'Model', description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support with 10+ languages.', link: 'models/Rashid-Model/index.html', image_url: '../images/screenshots/rashid-ai.svg', technologies: ['Gemini API', 'OpenRouter', 'AI'] },
     { title: 'Quran Pro', category: 'App', description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.', link: 'apps/quran-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Audio', 'PWA', 'Offline'] },
     { title: 'Calculator App', category: 'App', description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!', link: 'apps/calculator-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Security', 'PWA', 'Privacy'] },
     { title: 'Quiz Master', category: 'App', description: 'Interactive quiz platform with multiple categories, scoring, and progress tracking.', link: 'apps/quiz-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Education', 'PWA', 'Gamification'] }

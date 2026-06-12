@@ -123,6 +123,13 @@ root/
 - **Tailwind CSS v4** + **Framer Motion**
 - Static export (`output: 'export'`) served under `/game-vault/`
 
+### Project Screenshots
+Each project features a custom SVG illustration:
+- **KingCraft** — 3D voxel world with player, trees, isometric blocks, HUD
+- **Rust Construction** — Industrial construction site with crane, scaffold, building
+- **Farm Empire** — Rural farm with barn, silo, windmill, animals, crops
+- **Rashid AI** — Chat interface with AI features panel and stats
+
 ### Deployment
 - **Vercel** (primary) — auto-deploys from `main` branch
 - **GitHub Pages** (secondary) — via `.nojekyll`
