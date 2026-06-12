@@ -130,15 +130,31 @@ scene.add(crackBox);
 // ===== التحكم بالنظر =====
 let yaw = 0, pitch = 0, started = false, gameStarted = false;
 let SENS = 0.0022;
+let _lastMouseX = null, _lastMouseY = null;
 
 document.addEventListener("mousemove", (e) => {
-  if (!started) return;
-  yaw -= e.movementX * SENS;
-  pitch -= e.movementY * SENS;
+  if (document.pointerLockElement === canvas) {
+    if (!started) return;
+    yaw -= e.movementX * SENS;
+    pitch -= e.movementY * SENS;
+  } else if (gameStarted) {
+    if (_lastMouseX === null) { _lastMouseX = e.clientX; _lastMouseY = e.clientY; return; }
+    const dx = e.clientX - _lastMouseX;
+    const dy = e.clientY - _lastMouseY;
+    _lastMouseX = e.clientX;
+    _lastMouseY = e.clientY;
+    yaw -= dx * SENS;
+    pitch -= dy * SENS;
+  } else {
+    return;
+  }
   const lim = Math.PI / 2 - 0.01;
   pitch = Math.max(-lim, Math.min(lim, pitch));
 });
-document.addEventListener("pointerlockchange", () => { started = document.pointerLockElement === canvas; });
+document.addEventListener("pointerlockchange", () => {
+  started = document.pointerLockElement === canvas;
+  if (!started) { _lastMouseX = null; _lastMouseY = null; }
+});
 
 // ===== أدوات مساعدة =====
 let lastDir = new THREE.Vector3();
@@ -252,7 +268,7 @@ function openUI(mode, furnaceState = null) {
 
 // ===== الفأرة =====
 canvas.addEventListener("mousedown", (e) => {
-  if (!started || ui.isOpen) return;
+  if ((!gameStarted && !started) || ui.isOpen) return;
   if (e.button === 0) {
     const eo = eyeOrigin();
     const hitEntity = entityManager.getEntityAt(eo.x, eo.y, eo.z, lastDir, 5);
@@ -631,7 +647,8 @@ function startGame() {
     hud.classList.remove("hidden");
     debug.classList.remove("hidden");
     const p = canvas.requestPointerLock();
-    if (p && p.catch) p.catch(() => {});
+    if (p && p.catch) p.catch(() => { started = true; });
+    if (document.pointerLockElement !== canvas) started = true;
   } catch (err) {
     if (window.kcError) window.kcError("فشل بدء اللعبة: " + (err && err.stack ? err.stack : err));
     else alert("خطأ: " + err);
@@ -691,7 +708,8 @@ modalExit.addEventListener("click", (e) => {
 });
 
 canvas.addEventListener("click", () => {
-  if (!started && menuHidden() && !ui.isOpen) canvas.requestPointerLock().catch(() => {});
+  if (gameStarted && document.pointerLockElement !== canvas) canvas.requestPointerLock().catch(() => {});
+  else if (!started && menuHidden() && !ui.isOpen) canvas.requestPointerLock().catch(() => {});
 });
 
 // ===== حلقة اللعبة =====
