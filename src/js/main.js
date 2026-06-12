@@ -31,11 +31,6 @@ import { initStatistics } from './modules/statistics.js';
 import { initVaultSearch } from './modules/vault.js';
 import { renderGitHubStats } from './modules/github.js';
 
-import { initPromptsSection } from '../vault/prompts.js';
-import { initImagesSection } from '../vault/images.js';
-import { initCodesSection } from '../vault/codes.js';
-import { initMediaSection } from '../vault/media.js';
-
 let cached = null; // will be filled once DOM is ready
 let authUnsubscribe = null;
 
