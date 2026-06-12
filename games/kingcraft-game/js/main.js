@@ -14,16 +14,27 @@ import { getTool, BLOCK_TOOL } from "./player/Tools.js";
 import { HealthSystem } from "./player/Health.js";
 import { SoundManager } from "./utils/SoundManager.js";
 import { EXHAUSTION_PER_BREAK, WORLD_HEIGHT } from "./utils/Constants.js";
-import { saveGame, loadGame } from "./utils/SaveLoad.js";
+import { saveGame, loadGame, setWorldId } from "./utils/SaveLoad.js";
+import * as WM from "./utils/WorldManager.js";
 import { EntityManager } from "./entities/EntityManager.js";
 import { FarmingSystem, isCropSeed, getCropInfo } from "./world/Farming.js";
 
 const canvas = document.getElementById("game");
 const menu = document.getElementById("menu");
+const worldSelect = document.getElementById("world-select");
+const worldCreate = document.getElementById("world-create");
+const pauseMenu = document.getElementById("pause-menu");
 const crosshair = document.getElementById("crosshair");
 const hud = document.getElementById("hud");
 const debug = document.getElementById("debug");
-const menuHidden = () => menu.classList.contains("hidden");
+const menuHidden = () => menu.classList.contains("hidden") && !worldSelect.classList.contains("hidden") === false;
+
+let _currentWorldObj = null;
+let _saveData = null;
+// جميع شاشات القوائم
+const ALL_SCREENS = [menu, worldSelect, worldCreate, pauseMenu];
+function allMenusHidden() { return ALL_SCREENS.every(s => s.classList.contains("hidden")); }
+function hideAllMenus() { ALL_SCREENS.forEach(s => s.classList.add("hidden")); }
 
 // ===== Three.js =====
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
@@ -89,7 +100,23 @@ health.onDeath = () => {
   document.exitPointerLock();
 };
 
-const saveData = loadGame();
+// تهيئة غير متزامنة — نحمل العوالم من IndexedDB
+(async function initWorlds() {
+  const worlds = await WM.listWorlds();
+  if (worlds.length === 0) {
+    // أول تشغيل: إنشاء عالم افتراضي
+    const w = await WM.createWorld("My World");
+    if (w) _currentWorldObj = w;
+  }
+  // إذا في legacy save, نرحله
+  const legacy = localStorage.getItem("kc-save");
+  if (legacy && worlds.length === 0) {
+    const migrated = await WM.migrateLegacySave();
+    if (migrated) _currentWorldObj = migrated;
+  }
+  // نعرض قائمة العوالم
+  renderWorldList();
+})();
 
 player.health = health;
 window._kcYaw = 0;
@@ -102,18 +129,21 @@ let _saveTimer = 0;
 let _stepTimer = 0.3;
 
 function autoSave(dt) {
-  if (!gameStarted) return;
+  if (!gameStarted || !_currentWorldObj) return;
   _saveTimer += dt;
   if (_saveTimer >= 30) {
     _saveTimer = 0;
     saveGame(player, inventory, health, world, drops);
+    _currentWorldObj.lastPlayed = Date.now();
+    _currentWorldObj.playTime += 30;
+    WM.updateWorld(_currentWorldObj);
   }
 }
 
 const ui = new InventoryUI(inventory);
 ui.onClose = () => {
   crosshair.classList.remove("hidden");
-  if (menuHidden()) requestAnimationFrame(() => { canvas.requestPointerLock().catch(() => {}); });
+  if (allMenusHidden()) requestAnimationFrame(() => { canvas.requestPointerLock().catch(() => {}); });
 };
 
 // ===== صندوق التحديد + تراكب التكسير =====
@@ -574,7 +604,7 @@ window.addEventListener("keydown", (e) => {
     else if (e.code === "KeyD") { document.querySelector(".chat-msgs").innerHTML = ""; }
     else if (e.code === "KeyQ") { showF3Help(); }
     else if (e.code === "KeyT") { rebuildAllChunks(); }
-    else if (e.code === "Escape") { _paused = !_paused; }
+    else if (e.code === "Escape") { openPause(); }
     else if (e.code === "F3") { if (!e.repeat) debug.classList.toggle("hidden"); }
     return; // أي مفتاح مع F3 لا ينفّذ التحكمات العادية
   }
@@ -588,11 +618,20 @@ window.addEventListener("keydown", (e) => {
   } else if (e.code === "Escape" && ui.isOpen) {
     ui.close();
   } else if (e.code === "Escape" && settingsPanel.classList.contains("open")) {
-    closeSettings();
-  } else if (e.code === "Escape" && modalComing.classList.contains("open")) {
-    modalComing.classList.remove("open");
-  } else if (e.code === "Escape" && modalExit.classList.contains("open")) {
-    modalExit.classList.remove("open");
+    saveSettingsFromUI();
+    settingsPanel.classList.remove("open");
+    settingsPanel.classList.add("hidden");
+  } else if (e.code === "Escape" && pauseMenu.classList.contains("hidden") === false) {
+    closePause();
+  } else if (e.code === "Escape" && !pauseMenu.classList.contains("hidden") === false) {
+    // world select screen or main menu — close to main menu
+    if (!worldSelect.classList.contains("hidden")) showScreen(menu);
+  } else if (e.code === "Escape" && !worldCreate.classList.contains("hidden")) {
+    showScreen(worldSelect);
+    renderWorldList();
+  } else if (e.code === "Escape") {
+    // Default: if in game, open pause
+    if (gameStarted && !health.dead) openPause();
   }
 
   // Q — إسقاط العنصر
@@ -654,109 +693,307 @@ document.getElementById("btn-respawn").addEventListener("click", () => {
   updateHUD();
 });
 
-function startGame() {
+function startGame(worldData) {
   try {
+    _currentWorldObj = worldData;
+    setWorldId(worldData.id);
+    _saveData = null;
+
     world.update(new THREE.Vector3(0, 0, 0));
     updateHUD();
 
-    if (saveData) {
-      player.pos.set(saveData.player.x, saveData.player.y, saveData.player.z);
-      player.vel.set(0, 0, 0);
-      yaw = saveData.player.yaw || 0;
-      pitch = saveData.player.pitch || 0;
-      player.flying = saveData.player.flying || false;
-      player.thirdPerson = saveData.player.thirdPerson || false;
-      if (saveData.inventory) {
-        for (let i = 0; i < saveData.inventory.length && i < inventory.slots.length; i++) {
-          inventory.slots[i] = saveData.inventory[i] ? { id: saveData.inventory[i].id, count: saveData.inventory[i].count, dur: saveData.inventory[i].dur } : null;
-        }
-        if (saveData.armor) {
-          for (let i = 0; i < saveData.armor.length && i < inventory.armor.length; i++) {
-            inventory.armor[i] = saveData.armor[i] ? { id: saveData.armor[i].id, count: saveData.armor[i].count, dur: saveData.armor[i].dur } : null;
+    // Load save data for this world
+    loadGame().then(data => {
+      _saveData = data;
+      if (_saveData) {
+        player.pos.set(_saveData.player.x, _saveData.player.y, _saveData.player.z);
+        player.vel.set(0, 0, 0);
+        yaw = _saveData.player.yaw || 0;
+        pitch = _saveData.player.pitch || 0;
+        player.flying = _saveData.player.flying || false;
+        player.thirdPerson = _saveData.player.thirdPerson || false;
+        if (_saveData.inventory) {
+          for (let i = 0; i < _saveData.inventory.length && i < inventory.slots.length; i++) {
+            inventory.slots[i] = _saveData.inventory[i] ? { id: _saveData.inventory[i].id, count: _saveData.inventory[i].count, dur: _saveData.inventory[i].dur } : null;
           }
+          if (_saveData.armor) {
+            for (let i = 0; i < _saveData.armor.length && i < inventory.armor.length; i++) {
+              inventory.armor[i] = _saveData.armor[i] ? { id: _saveData.armor[i].id, count: _saveData.armor[i].count, dur: _saveData.armor[i].dur } : null;
+            }
+          }
+          inventory.selectedHotbar = _saveData.selectedHotbar || 0;
+          inventory.offhand = _saveData.offhand ? { id: _saveData.offhand.id, count: _saveData.offhand.count, dur: _saveData.offhand.dur } : null;
         }
-        inventory.selectedHotbar = saveData.selectedHotbar || 0;
-        inventory.offhand = saveData.offhand ? { id: saveData.offhand.id, count: saveData.offhand.count, dur: saveData.offhand.dur } : null;
+        health.health = _saveData.player.health ?? 20;
+        health.food = _saveData.player.food ?? 20;
+        health.saturation = _saveData.player.saturation ?? 20;
+        health.setArmor(inventory.getArmorValue());
+        updateHUD();
+      } else {
+        player.spawn();
+        inventory.giveStarter();
       }
-      health.health = saveData.player.health ?? 20;
-      health.food = saveData.player.food ?? 20;
-      health.saturation = saveData.player.saturation ?? 20;
-      health.setArmor(inventory.getArmorValue());
-      updateHUD();
-    } else {
+      lastDir = player.applyCamera(yaw, pitch);
+      gameStarted = true;
+      hideAllMenus();
+      crosshair.classList.remove("hidden");
+      hud.classList.remove("hidden");
+      debug.classList.remove("hidden");
+      const p = canvas.requestPointerLock();
+      if (p && p.catch) p.catch(() => { started = true; });
+      if (document.pointerLockElement !== canvas) started = true;
+    }).catch(() => {
+      // if load fails, start new anyway
       player.spawn();
       inventory.giveStarter();
-    }
-    lastDir = player.applyCamera(yaw, pitch);
-    gameStarted = true;
-    menu.classList.add("hidden");
-    crosshair.classList.remove("hidden");
-    hud.classList.remove("hidden");
-    debug.classList.remove("hidden");
-    const p = canvas.requestPointerLock();
-    if (p && p.catch) p.catch(() => { started = true; });
-    if (document.pointerLockElement !== canvas) started = true;
+      lastDir = player.applyCamera(yaw, pitch);
+      gameStarted = true;
+      hideAllMenus();
+      crosshair.classList.remove("hidden");
+      hud.classList.remove("hidden");
+      debug.classList.remove("hidden");
+      const p = canvas.requestPointerLock();
+      if (p && p.catch) p.catch(() => { started = true; });
+      if (document.pointerLockElement !== canvas) started = true;
+    });
   } catch (err) {
     if (window.kcError) window.kcError("فشل بدء اللعبة: " + (err && err.stack ? err.stack : err));
     else alert("خطأ: " + err);
   }
 }
 
-// ===== زر اللعب =====
-document.getElementById("btn-play").addEventListener("click", startGame);
-
-// ===== الإعدادات =====
-const settingsPanel = document.getElementById("settings-panel");
-const volSlider = document.getElementById("vol-slider");
-const sensSlider = document.getElementById("sens-slider");
-
-document.getElementById("btn-settings").addEventListener("click", () => {
-  volSlider.value = Math.round(sound._volume * 100);
-  sensSlider.value = Math.round((SENS / 0.0022) * 10);
-  settingsPanel.classList.add("open");
-});
-
-function closeSettings() {
-  sound._volume = parseInt(volSlider.value) / 100;
-  SENS = 0.0022 * (parseInt(sensSlider.value) / 10);
-  settingsPanel.classList.remove("open");
+// ===== شاشات القوائم =====
+function showScreen(screen) {
+  hideAllMenus();
+  screen.classList.remove("hidden");
 }
 
-document.getElementById("btn-back-menu").addEventListener("click", closeSettings);
+// دالة مساعدة لعرض الوقت
+function fmtTime(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+// ====================================================================
+// قائمة العوالم
+// ====================================================================
+async function renderWorldList() {
+  const list = document.getElementById("world-list");
+  list.innerHTML = "";
+  const worlds = await WM.listWorlds();
+  if (worlds.length === 0) {
+    list.innerHTML = '<div class="world-card" style="cursor:default;color:#888;justify-content:center;padding:20px">No worlds yet. Create one!</div>';
+    return;
+  }
+  for (const w of worlds) {
+    const card = document.createElement("div");
+    card.className = "world-card";
+    card.innerHTML = `
+      <div class="world-icon">🌍</div>
+      <div class="world-info">
+        <div class="world-name">${w.name}</div>
+        <div class="world-meta">${w.gameMode} • ${w.difficulty} • ${fmtTime(w.playTime)}</div>
+      </div>
+      <button class="world-delete" data-id="${w.id}" title="Delete">🗑</button>
+      <span class="world-play">▶</span>
+    `;
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".world-delete")) return;
+      startGame(w);
+    });
+    card.querySelector(".world-delete").addEventListener("click", (e) => {
+      e.stopPropagation();
+      showDeleteConfirm(w);
+    });
+    list.appendChild(card);
+  }
+}
+
+function showDeleteConfirm(world) {
+  document.getElementById("delete-msg").textContent = `Delete "${world.name}"? This cannot be undone.`;
+  const modal = document.getElementById("modal-delete");
+  modal.classList.remove("hidden");
+  document.getElementById("btn-confirm-delete").onclick = async () => {
+    await WM.deleteWorld(world.id);
+    modal.classList.add("hidden");
+    renderWorldList();
+  };
+  document.getElementById("btn-cancel-delete").onclick = () => modal.classList.add("hidden");
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); }, { once: true });
+}
+
+// ====================================================================
+// Singleplayer — فتح شاشة اختيار العالم
+// ====================================================================
+document.getElementById("btn-singleplayer").addEventListener("click", () => {
+  renderWorldList();
+  showScreen(worldSelect);
+});
+
+// ====================================================================
+// إنشاء عالم
+// ====================================================================
+document.getElementById("btn-create-world").addEventListener("click", () => {
+  document.getElementById("create-name").value = "My World";
+  document.getElementById("create-seed").value = "";
+  document.getElementById("create-mode").value = "survival";
+  document.getElementById("create-difficulty").value = "normal";
+  showScreen(worldCreate);
+});
+
+document.getElementById("btn-cancel-create").addEventListener("click", () => {
+  showScreen(worldSelect);
+  renderWorldList();
+});
+
+document.getElementById("btn-random-seed").addEventListener("click", () => {
+  document.getElementById("create-seed").value = Math.floor(Math.random() * 2147483647).toString();
+});
+
+document.getElementById("btn-create-confirm").addEventListener("click", async () => {
+  const name = document.getElementById("create-name").value.trim() || "My World";
+  const seed = document.getElementById("create-seed").value.trim() || Math.floor(Math.random() * 2147483647).toString();
+  const mode = document.getElementById("create-mode").value;
+  const diff = document.getElementById("create-difficulty").value;
+  const world = await WM.createWorld(name, seed, mode, diff);
+  if (world) startGame(world);
+});
+
+// ====================================================================
+// الرجوع للقائمة الرئيسية
+// ====================================================================
+document.getElementById("btn-back-menu").addEventListener("click", () => {
+  showScreen(menu);
+});
+
+// ====================================================================
+// الإعدادات
+// ====================================================================
+const settingsPanel = document.getElementById("settings-panel");
+
+function loadSettingsIntoUI() {
+  const s = WM.loadSettings();
+  document.getElementById("vol-master").value = s.masterVolume;
+  document.getElementById("vol-sfx").value = s.sfxVolume;
+  document.getElementById("vol-music").value = s.musicVolume;
+  document.getElementById("sens-slider").value = s.sensitivity;
+  document.getElementById("auto-jump").checked = s.autoJump;
+  document.getElementById("invert-y").checked = s.invertY;
+  document.getElementById("render-dist").value = s.renderDistance;
+  document.getElementById("fov-slider").value = s.fov;
+  document.getElementById("brightness").value = Math.round(s.brightness * 100);
+  document.getElementById("lang-select").value = s.language;
+  applySettings(s);
+}
+
+function applySettings(s) {
+  sound._volume = (s.masterVolume / 100) * (s.sfxVolume / 100);
+  SENS = 0.0022 * (s.sensitivity / 10);
+  if (world) world.renderDistance = s.renderDistance;
+  camera.fov = s.fov;
+  camera.updateProjectionMatrix();
+  scene.background.setHSL(0.58, 0.4, 0.6 * s.brightness);
+}
+
+function saveSettingsFromUI() {
+  const s = {
+    masterVolume: parseInt(document.getElementById("vol-master").value),
+    sfxVolume: parseInt(document.getElementById("vol-sfx").value),
+    musicVolume: parseInt(document.getElementById("vol-music").value),
+    sensitivity: parseInt(document.getElementById("sens-slider").value),
+    autoJump: document.getElementById("auto-jump").checked,
+    invertY: document.getElementById("invert-y").checked,
+    renderDistance: parseInt(document.getElementById("render-dist").value),
+    fov: parseInt(document.getElementById("fov-slider").value),
+    brightness: parseInt(document.getElementById("brightness").value) / 100,
+    language: document.getElementById("lang-select").value,
+  };
+  WM.saveSettings(s);
+}
+
+document.getElementById("btn-settings").addEventListener("click", () => {
+  loadSettingsIntoUI();
+  settingsPanel.classList.add("open");
+  settingsPanel.classList.remove("hidden");
+});
+
+document.getElementById("btn-pause-settings").addEventListener("click", () => {
+  loadSettingsIntoUI();
+  settingsPanel.classList.add("open");
+  settingsPanel.classList.remove("hidden");
+});
+
+document.getElementById("btn-save-settings").addEventListener("click", () => {
+  saveSettingsFromUI();
+  settingsPanel.classList.remove("open");
+  settingsPanel.classList.add("hidden");
+});
+
 settingsPanel.addEventListener("click", (e) => {
-  if (e.target === settingsPanel) closeSettings();
+  if (e.target === settingsPanel) {
+    saveSettingsFromUI();
+    settingsPanel.classList.remove("open");
+    settingsPanel.classList.add("hidden");
+  }
 });
 
-// ===== ماركت بليس (قريباً) =====
-const modalComing = document.getElementById("modal-coming");
-document.getElementById("btn-marketplace").addEventListener("click", () => {
-  modalComing.classList.add("open");
-});
-document.getElementById("btn-close-coming").addEventListener("click", () => {
-  modalComing.classList.remove("open");
-});
-modalComing.addEventListener("click", (e) => {
-  if (e.target === modalComing) modalComing.classList.remove("open");
+// ====================================================================
+// قائمة الإيقاف المؤقت
+// ====================================================================
+function openPause() {
+  _paused = true;
+  document.exitPointerLock();
+  resetMining();
+  showScreen(pauseMenu);
+}
+
+function closePause() {
+  _paused = false;
+  pauseMenu.classList.add("hidden");
+  if (gameStarted) canvas.requestPointerLock().catch(() => {});
+}
+
+document.getElementById("btn-resume").addEventListener("click", closePause);
+
+document.getElementById("btn-save-world").addEventListener("click", () => {
+  if (_currentWorldObj) {
+    saveGame(player, inventory, health, world, drops);
+    _currentWorldObj.lastPlayed = Date.now();
+    WM.updateWorld(_currentWorldObj);
+  }
 });
 
-// ===== خروج =====
-const modalExit = document.getElementById("modal-exit");
-document.getElementById("btn-exit").addEventListener("click", () => {
-  modalExit.classList.add("open");
+document.getElementById("btn-save-quit").addEventListener("click", () => {
+  if (_currentWorldObj) {
+    saveGame(player, inventory, health, world, drops);
+    _currentWorldObj.lastPlayed = Date.now();
+    WM.updateWorld(_currentWorldObj);
+  }
+  gameStarted = false;
+  closePause();
+  showScreen(menu);
 });
-document.getElementById("btn-confirm-exit").addEventListener("click", () => {
+
+document.getElementById("btn-quit-desktop").addEventListener("click", () => {
+  gameStarted = false;
+  closePause();
+  showScreen(menu);
+});
+
+// ====================================================================
+// خروج من القائمة الرئيسية
+// ====================================================================
+document.getElementById("btn-quit").addEventListener("click", () => {
   window.close();
 });
-document.getElementById("btn-cancel-exit").addEventListener("click", () => {
-  modalExit.classList.remove("open");
-});
-modalExit.addEventListener("click", (e) => {
-  if (e.target === modalExit) modalExit.classList.remove("open");
-});
 
+// ====================================================================
+// الضغط على الكانفاس لطلب Pointer Lock
+// ====================================================================
 canvas.addEventListener("click", () => {
   if (gameStarted && document.pointerLockElement !== canvas) canvas.requestPointerLock().catch(() => {});
-  else if (!started && menuHidden() && !ui.isOpen) canvas.requestPointerLock().catch(() => {});
+  else if (!started && allMenusHidden() && !ui.isOpen) canvas.requestPointerLock().catch(() => {});
 });
 
 // ===== حلقة اللعبة =====
@@ -776,7 +1013,7 @@ function loop(now) {
     autoSave(dt);
   }
 
-  if (menuHidden() && !_paused) {
+  if (allMenusHidden() && !_paused) {
     const playing = !ui.isOpen && !health.dead;
     if (playing) {
       player.update(dt, yaw);

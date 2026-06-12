@@ -1,56 +1,28 @@
-const KEY = "kc-save";
-const DB_NAME = "kc-world";
-const DB_VERSION = 1;
-const STORE = "chunks";
+// طبقة حفظ متوافقة مع نظام العوالم
+import * as WM from "./WorldManager.js";
 
-let _db = null;
+let _worldId = null;
 
-function openDB() {
-  return new Promise((resolve, reject) => {
-    if (_db) { resolve(_db); return; }
-    const req = indexedDB.open(DB_NAME, DB_VERSION);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE)) {
-        db.createObjectStore(STORE);
-      }
-    };
-    req.onsuccess = (e) => { _db = e.target.result; resolve(_db); };
-    req.onerror = () => { _db = null; reject(req.error); };
-  });
-}
+export function setWorldId(id) { _worldId = id; }
+export function getWorldId() { return _worldId; }
 
 export async function saveChunk(cx, cz, blocks) {
-  try {
-    const db = await openDB();
-    const tx = db.transaction(STORE, "readwrite");
-    tx.objectStore(STORE).put(blocks, cx + "," + cz);
-    return new Promise((resolve) => { tx.oncomplete = () => resolve(true); tx.onerror = () => resolve(false); });
-  } catch (e) {
-    return false;
-  }
+  if (!_worldId) return false;
+  return WM.saveChunk(_worldId, cx, cz, blocks);
 }
 
 export async function loadChunk(cx, cz) {
-  try {
-    const db = await openDB();
-    return new Promise((resolve) => {
-      const tx = db.transaction(STORE, "readonly");
-      const req = tx.objectStore(STORE).get(cx + "," + cz);
-      req.onsuccess = () => resolve(req.result || null);
-      req.onerror = () => resolve(null);
-    });
-  } catch (e) {
-    return null;
-  }
+  if (!_worldId) return null;
+  return WM.loadChunk(_worldId, cx, cz);
 }
 
 export async function hasChunk(cx, cz) {
-  const data = await loadChunk(cx, cz);
-  return data !== null;
+  if (!_worldId) return false;
+  return WM.hasChunk(_worldId, cx, cz);
 }
 
 export function saveGame(player, inventory, health, world, drops) {
+  if (!_worldId) return false;
   try {
     const data = {
       version: 1,
@@ -72,25 +44,22 @@ export function saveGame(player, inventory, health, world, drops) {
       offhand: inventory.offhand ? { id: inventory.offhand.id, count: inventory.offhand.count, dur: inventory.offhand.dur } : null,
       selectedHotbar: inventory.selectedHotbar,
     };
-    localStorage.setItem(KEY, JSON.stringify(data));
+    WM.savePlayerData(_worldId, data);
     return true;
   } catch (e) {
     return false;
   }
 }
 
-export function loadGame() {
+export async function loadGame() {
+  if (!_worldId) return null;
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (!data || data.version < 1 || !data.player || !data.inventory) return null;
-    return data;
+    return await WM.loadPlayerData(_worldId);
   } catch (e) {
     return null;
   }
 }
 
 export function deleteSave() {
-  localStorage.removeItem(KEY);
+  // no-op: world saves are managed per-world
 }
