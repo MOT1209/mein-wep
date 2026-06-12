@@ -125,6 +125,16 @@ html {
     -moz-osx-font-smoothing: grayscale;
 }
 
+::selection {
+    background-color: var(--accent);
+    color: #fff;
+}
+
+body.nano-banana ::selection {
+    background-color: #facc15;
+    color: #000;
+}
+
 /* Consistent focus styles for accessibility */
 :focus-visible {
     outline: 2px solid var(--accent);
@@ -2093,7 +2103,7 @@ body.nano-banana {
     --radius-sm: 4px;
     
     --font-heading: 'JetBrains Mono', monospace;
-    --font-body: 'Inter', sans-serif;
+    --font-body: 'Space Grotesk', sans-serif;
     
     --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
