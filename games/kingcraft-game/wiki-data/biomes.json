@@ -1,0 +1,364 @@
+﻿{
+  "biomes": [
+    {
+      "id": "plains",
+      "name": "Plains",
+      "temperature": 0.8,
+      "downfall": 0.4,
+      "precipitation": "rain",
+      "grass_color": "#91bd59",
+      "foliage_color": "#77ab2f",
+      "sky_color": "#78a7ff",
+      "category": "flatland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "oak", "density": 0.05, "features": ["tall_grass", "flowers", "dandelion", "poppy"] },
+      "mobs": ["sheep", "pig", "chicken", "cow", "horse", "donkey", "rabbit"]
+    },
+    {
+      "id": "desert",
+      "name": "Desert",
+      "temperature": 2.0,
+      "downfall": 0.0,
+      "precipitation": "none",
+      "grass_color": "#bfb755",
+      "foliage_color": "#aea42a",
+      "sky_color": "#6eb1ff",
+      "category": "arid-land",
+      "blocks": {
+        "surface": "sand",
+        "top_layer": "sandstone",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": null, "density": 0.0, "features": ["cactus", "dead_bush", "dry_grass"] },
+      "mobs": ["rabbit", "camel", "husk", "parched"]
+    },
+    {
+      "id": "forest",
+      "name": "Forest",
+      "temperature": 0.7,
+      "downfall": 0.8,
+      "precipitation": "rain",
+      "grass_color": "#79c05a",
+      "foliage_color": "#59ae30",
+      "sky_color": "#79a6ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "oak_birch", "density": 0.1, "features": ["mushrooms", "flowers", "leaf_litter"] },
+      "mobs": ["wolf", "sheep", "pig", "chicken", "cow", "rabbit"]
+    },
+    {
+      "id": "taiga",
+      "name": "Taiga",
+      "temperature": 0.25,
+      "downfall": 0.8,
+      "precipitation": "rain",
+      "grass_color": "#86b783",
+      "foliage_color": "#68a464",
+      "sky_color": "#7da3ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "spruce", "density": 0.12, "features": ["ferns", "large_ferns", "sweet_berry_bushes"] },
+      "mobs": ["wolf", "fox", "rabbit", "sheep", "pig", "chicken", "cow"]
+    },
+    {
+      "id": "snowy_plains",
+      "name": "Snowy Plains",
+      "temperature": 0.0,
+      "downfall": 0.5,
+      "precipitation": "snow",
+      "grass_color": "#80b497",
+      "foliage_color": "#60a17b",
+      "sky_color": "#7fa1ff",
+      "category": "flatland",
+      "blocks": {
+        "surface": "snow_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "spruce", "density": 0.02, "features": ["snow"] },
+      "mobs": ["rabbit", "polar_bear", "stray"]
+    },
+    {
+      "id": "jungle",
+      "name": "Jungle",
+      "temperature": 0.95,
+      "downfall": 0.9,
+      "precipitation": "rain",
+      "grass_color": "#59c93c",
+      "foliage_color": "#30bb0b",
+      "sky_color": "#77a8ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "jungle", "density": 0.15, "features": ["vines", "cocoa", "melons", "bamboo", "fern", "jungle_bush"] },
+      "mobs": ["ocelot", "parrot", "panda", "warm_animal_variants"]
+    },
+    {
+      "id": "swamp",
+      "name": "Swamp",
+      "temperature": 0.8,
+      "downfall": 0.9,
+      "precipitation": "rain",
+      "grass_color": "#6a7039",
+      "foliage_color": "#6a7039",
+      "sky_color": "#78a7ff",
+      "category": "wetland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "clay",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "oak_vines", "density": 0.08, "features": ["lily_pads", "blue_orchid", "sugar_cane", "mushrooms", "dead_bush"] },
+      "mobs": ["frog_temperate", "witch", "slime", "bogged", "black_cat"]
+    },
+    {
+      "id": "savanna",
+      "name": "Savanna",
+      "temperature": 2.0,
+      "downfall": 0.0,
+      "precipitation": "none",
+      "grass_color": "#bfb755",
+      "foliage_color": "#aea42a",
+      "sky_color": "#6eb1ff",
+      "category": "arid-land",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "acacia", "density": 0.04, "features": ["tall_grass"] },
+      "mobs": ["horse", "armadillo", "warm_animal_variants", "llama", "zombie_horseman"]
+    },
+    {
+      "id": "badlands",
+      "name": "Badlands",
+      "temperature": 2.0,
+      "downfall": 0.0,
+      "precipitation": "none",
+      "grass_color": "#90814d",
+      "foliage_color": "#9e814d",
+      "sky_color": "#6eb1ff",
+      "category": "arid-land",
+      "blocks": {
+        "surface": "red_sand",
+        "top_layer": "terracotta",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": null, "density": 0.0, "features": ["cactus", "dead_bush", "dry_grass"] },
+      "mobs": ["armadillo"]
+    },
+    {
+      "id": "ocean",
+      "name": "Ocean",
+      "temperature": 0.5,
+      "downfall": 0.5,
+      "precipitation": "rain",
+      "grass_color": "#8eb971",
+      "foliage_color": "#71a74d",
+      "sky_color": "#7ba4ff",
+      "category": "offshore",
+      "blocks": {
+        "surface": "gravel",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": null, "density": 0.0, "features": ["kelp", "seagrass"] },
+      "mobs": ["cod", "salmon", "squid", "dolphin", "nautilus", "drowned"]
+    },
+    {
+      "id": "river",
+      "name": "River",
+      "temperature": 0.5,
+      "downfall": 0.5,
+      "precipitation": "rain",
+      "grass_color": "#8eb971",
+      "foliage_color": "#71a74d",
+      "sky_color": "#7ba4ff",
+      "category": "wetland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "sand",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "oak", "density": 0.01, "features": ["clay", "sand", "seagrass"] },
+      "mobs": ["squid", "cod", "salmon", "drowned"]
+    },
+    {
+      "id": "mushroom_fields",
+      "name": "Mushroom Fields",
+      "temperature": 0.9,
+      "downfall": 1.0,
+      "precipitation": "rain",
+      "grass_color": "#55c93f",
+      "foliage_color": "#2bbb0f",
+      "sky_color": "#78a7ff",
+      "category": "offshore",
+      "blocks": {
+        "surface": "mycelium",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "huge_mushroom", "density": 0.1, "features": ["mushrooms"] },
+      "mobs": ["mooshroom", "bat", "glow_squid"]
+    },
+    {
+      "id": "dark_forest",
+      "name": "Dark Forest",
+      "temperature": 0.7,
+      "downfall": 0.8,
+      "precipitation": "rain",
+      "grass_color": "#507a32",
+      "foliage_color": "#59ae30",
+      "sky_color": "#79a6ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "dark_oak", "density": 0.2, "features": ["huge_mushrooms", "oak", "birch", "leaf_litter"] },
+      "mobs": ["sheep", "pig", "chicken", "cow", "wolf"]
+    },
+    {
+      "id": "birch_forest",
+      "name": "Birch Forest",
+      "temperature": 0.6,
+      "downfall": 0.6,
+      "precipitation": "rain",
+      "grass_color": "#88bb67",
+      "foliage_color": "#6ba941",
+      "sky_color": "#7aa5ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "birch", "density": 0.1, "features": ["wildflowers"] },
+      "mobs": ["sheep", "pig", "chicken", "cow", "rabbit"]
+    },
+    {
+      "id": "flower_forest",
+      "name": "Flower Forest",
+      "temperature": 0.7,
+      "downfall": 0.8,
+      "precipitation": "rain",
+      "grass_color": "#79c05a",
+      "foliage_color": "#59ae30",
+      "sky_color": "#79a6ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "oak_birch", "density": 0.04, "features": ["all_flowers", "tall_grass", "bee_nests"] },
+      "mobs": ["rabbit", "bee"]
+    },
+    {
+      "id": "sunflower_plains",
+      "name": "Sunflower Plains",
+      "temperature": 0.8,
+      "downfall": 0.4,
+      "precipitation": "rain",
+      "grass_color": "#91bd59",
+      "foliage_color": "#77ab2f",
+      "sky_color": "#78a7ff",
+      "category": "flatland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "oak", "density": 0.03, "features": ["sunflowers", "tall_grass"] },
+      "mobs": ["sheep", "pig", "chicken", "cow", "horse", "donkey", "rabbit"]
+    },
+    {
+      "id": "ice_spikes",
+      "name": "Ice Spikes",
+      "temperature": 0.0,
+      "downfall": 0.5,
+      "precipitation": "snow",
+      "grass_color": "#80b497",
+      "foliage_color": "#60a17b",
+      "sky_color": "#7fa1ff",
+      "category": "flatland",
+      "blocks": {
+        "surface": "snow_block",
+        "top_layer": "packed_ice",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": null, "density": 0.0, "features": ["packed_ice_spikes"] },
+      "mobs": ["rabbit", "polar_bear", "stray"]
+    },
+    {
+      "id": "snowy_taiga",
+      "name": "Snowy Taiga",
+      "temperature": -0.5,
+      "downfall": 0.4,
+      "precipitation": "snow",
+      "grass_color": "#839eff",
+      "foliage_color": "#68a464",
+      "sky_color": "#839eff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "spruce", "density": 0.1, "features": ["ferns", "large_ferns", "sweet_berry_bushes"] },
+      "mobs": ["wolf", "fox", "rabbit", "cold_animal_variants"]
+    },
+    {
+      "id": "old_growth_pine_taiga",
+      "name": "Old Growth Pine Taiga",
+      "temperature": 0.3,
+      "downfall": 0.8,
+      "precipitation": "rain",
+      "grass_color": "#86b87f",
+      "foliage_color": "#68a55f",
+      "sky_color": "#7ca3ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "podzol",
+        "top_layer": "coarse_dirt",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "giant_spruce_pine", "density": 0.15, "features": ["mossy_cobblestone", "mushrooms", "dead_bushes", "podzol"] },
+      "mobs": ["wolf", "fox", "rabbit", "cold_animal_variants"]
+    },
+    {
+      "id": "bamboo_jungle",
+      "name": "Bamboo Jungle",
+      "temperature": 0.95,
+      "downfall": 0.9,
+      "precipitation": "rain",
+      "grass_color": "#59c93c",
+      "foliage_color": "#30bb0b",
+      "sky_color": "#77a8ff",
+      "category": "woodland",
+      "blocks": {
+        "surface": "grass_block",
+        "top_layer": "podzol",
+        "underground": "stone"
+      },
+      "vegetation": { "trees": "jungle_mega", "density": 0.12, "features": ["bamboo", "fancy_oak", "jungle_bush", "podzol"] },
+      "mobs": ["panda", "ocelot", "parrot", "warm_animal_variants"]
+    }
+  ]
+}

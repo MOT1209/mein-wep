@@ -2064,7 +2064,91 @@ body.admin-section-editing .vault-item { position: relative; }
 .install-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 6px 20px var(--accent-glow) !important; }
 .install-btn:disabled { background: linear-gradient(135deg, #10b981, #059669) !important; cursor: default !important; }
 
-/* Tech stack marquee styles defined in enhancements.css */
+    /* Tech stack marquee styles defined in enhancements.css */
+
+/* =========================================
+   NANO BANANA 2 — Premium Design System
+   ========================================= */
+body.nano-banana {
+    --bg-main: #050505;
+    --bg-secondary: #0a0a0a;
+    --bg-alt: #0f0f0f;
+    --bg-glass: rgba(10, 10, 10, 0.85);
+    
+    --accent: #facc15; /* Banana Yellow */
+    --accent-rgb: 250, 204, 21;
+    --accent-glow: rgba(250, 204, 21, 0.25);
+    --accent-dark: #ca8a04;
+    --accent-2: #ffffff;
+    
+    --text-high: #ffffff;
+    --text-med: #e5e5e5;
+    --text-low: #a3a3a3;
+    
+    --border: rgba(250, 204, 21, 0.2);
+    --border-accent: rgba(250, 204, 21, 0.4);
+    
+    --radius-lg: 12px; /* Sharper, "Nano" feel */
+    --radius-md: 8px;
+    --radius-sm: 4px;
+    
+    --font-heading: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+    
+    --shadow-lg: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+body.nano-banana .text-gradient {
+    background: linear-gradient(135deg, #facc15 0%, #fef08a 50%, #ca8a04 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+body.nano-banana .bg-mesh {
+    background: radial-gradient(circle at 0% 0%, rgba(250, 204, 21, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, rgba(255, 255, 255, 0.02) 0%, transparent 50%);
+}
+
+body.nano-banana .navbar {
+    border-radius: 0;
+    top: 0;
+    width: 100%;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.9);
+}
+
+body.nano-banana .glass-card,
+body.nano-banana .blur-glass {
+    border-radius: var(--radius-md);
+    background: rgba(15, 15, 15, 0.8);
+    border: 1px solid rgba(250, 204, 21, 0.1);
+}
+
+body.nano-banana .btn-primary {
+    background: #facc15;
+    color: #000;
+    border-radius: 4px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+body.nano-banana .btn-primary:hover {
+    background: #ffffff;
+    box-shadow: 0 0 20px rgba(250, 204, 21, 0.4);
+}
+
+body.nano-banana .command-panel {
+    background: #000;
+    border: 1px solid #facc15;
+    border-radius: 0;
+}
+
+body.nano-banana .system-dot {
+    background: #facc15;
+    box-shadow: 0 0 10px #facc15;
+}
 
 /* =========================================
    SERVICES / CAREER / OBJECTIVES
