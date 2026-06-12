@@ -22,6 +22,15 @@ const TILE_NAMES = [
   "sponge", "red_flower", "yellow_flower",
   "brown_mushroom", "red_mushroom", "dead_bush", "tall_grass",
   "cactus", "cactus_top", "vine",
+
+  // المرحلة 5: زراعة
+  "farmland",
+  "wheat0", "wheat1", "wheat2",
+  "carrots0", "carrots1", "carrots2",
+  "potatoes0", "potatoes1", "potatoes2",
+
+  // المرحلة 5: طاولة سحر
+  "enchanting_table",
 ];
 
 // مولّد عشوائي بسيط ثابت لكل بلاطة (لنمط متّسق)
@@ -173,6 +182,127 @@ const TILE_DRAW = {
   vine:     (ctx, ox, oy) => { ctx.clearRect(ox,oy,TILE,TILE); ctx.fillStyle="rgba(40,120,20,0.6)";ctx.fillRect(ox+3,oy,10,TILE); const r=rng(316);for(let i=0;i<6;i++){ctx.fillStyle=shade(0x2a7a1a,Math.floor((r()-0.5)*20));ctx.fillRect(ox+Math.floor(r()*12)+2,oy+Math.floor(r()*14),3,3);} },
   cactus:   (ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x2a7a2a, 22, 317); ctx.fillStyle=shade(0x1a5a1a,10);ctx.fillRect(ox,oy,1,TILE);ctx.fillRect(ox+TILE-1,oy,1,TILE);ctx.fillRect(ox,oy,TILE,1);ctx.fillRect(oy,oy+TILE-1,TILE,1);ctx.fillStyle="#3a9a3a";ctx.fillRect(ox+3,oy+2,2,2);ctx.fillRect(ox+11,oy+6,2,2);ctx.fillRect(ox+5,oy+11,2,2); },
   cactus_top:(ctx, ox, oy) => { drawNoisy(ctx, ox, oy, 0x2a7a2a, 22, 318); ctx.fillStyle=shade(0x1a5a1a,10);ctx.fillRect(ox,oy,TILE,1);ctx.fillRect(ox,oy+TILE-1,TILE,1);ctx.fillRect(ox,oy,1,TILE);ctx.fillRect(ox+TILE-1,oy,1,TILE);ctx.fillStyle="#3a9a3a";ctx.fillRect(ox+6,oy+4,4,3); },
+
+  // ===== المرحلة 5: زراعة =====
+  farmland: (ctx, ox, oy) => {
+    drawNoisy(ctx, ox, oy, 0x6a4a2a, 28, 401);
+    ctx.fillStyle = shade(0x5a3a1a, 10);
+    for (let x = 0; x < TILE; x += 3) {
+      ctx.fillRect(ox + x, oy + 2, 1, 12);
+    }
+    ctx.fillStyle = shade(0x7a5a3a, 5);
+    ctx.fillRect(ox, oy, TILE, 2);
+  },
+  wheat0: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#5a8a2a";
+    ctx.fillRect(ox + 7, oy + 10, 2, 4);
+    ctx.fillStyle = "#4a7a1a";
+    ctx.fillRect(ox + 6, oy + 8, 4, 3);
+  },
+  wheat1: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#5a8a2a";
+    ctx.fillRect(ox + 7, oy + 8, 2, 6);
+    ctx.fillStyle = "#6a9a3a";
+    ctx.fillRect(ox + 5, oy + 4, 6, 5);
+    ctx.fillStyle = "#8aba5a";
+    ctx.fillRect(ox + 6, oy + 3, 4, 3);
+  },
+  wheat2: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#5a8a2a";
+    ctx.fillRect(ox + 7, oy + 6, 2, 8);
+    ctx.fillStyle = "#8aba5a";
+    ctx.fillRect(ox + 3, oy + 2, 10, 6);
+    ctx.fillStyle = "#d0b040";
+    for (let i = 0; i < 3; i++) {
+      ctx.fillRect(ox + 4 + i * 4, oy + 3 + (i % 2) * 2, 2, 2);
+    }
+  },
+  carrots0: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#3a7a2a";
+    ctx.fillRect(ox + 7, oy + 10, 2, 4);
+    ctx.fillStyle = "#2a6a1a";
+    ctx.fillRect(ox + 6, oy + 8, 4, 3);
+  },
+  carrots1: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#3a7a2a";
+    ctx.fillRect(ox + 7, oy + 8, 2, 6);
+    ctx.fillStyle = "#4a9a3a";
+    ctx.fillRect(ox + 4, oy + 4, 8, 5);
+    ctx.fillStyle = "#e06020";
+    ctx.fillRect(ox + 5, oy + 12, 2, 2);
+    ctx.fillRect(ox + 9, oy + 11, 2, 2);
+  },
+  carrots2: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#3a7a2a";
+    ctx.fillRect(ox + 7, oy + 4, 2, 8);
+    ctx.fillStyle = "#4a9a3a";
+    ctx.fillRect(ox + 2, oy + 2, 12, 5);
+    ctx.fillStyle = "#e06020";
+    ctx.fillRect(ox + 4, oy + 10, 3, 4);
+    ctx.fillRect(ox + 9, oy + 11, 3, 4);
+    ctx.fillStyle = "#f08040";
+    ctx.fillRect(ox + 5, oy + 11, 1, 1);
+    ctx.fillRect(ox + 10, oy + 12, 1, 1);
+  },
+  potatoes0: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#4a7a2a";
+    ctx.fillRect(ox + 7, oy + 10, 2, 4);
+    ctx.fillStyle = "#3a6a1a";
+    ctx.fillRect(ox + 6, oy + 8, 4, 3);
+  },
+  potatoes1: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#4a7a2a";
+    ctx.fillRect(ox + 7, oy + 6, 2, 8);
+    ctx.fillStyle = "#5a9a3a";
+    ctx.fillRect(ox + 3, oy + 3, 10, 5);
+    ctx.fillStyle = "#8a6a3a";
+    ctx.fillRect(ox + 4, oy + 12, 3, 2);
+    ctx.fillRect(ox + 9, oy + 11, 3, 2);
+  },
+  potatoes2: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#4a7a2a";
+    ctx.fillRect(ox + 7, oy + 4, 2, 8);
+    ctx.fillStyle = "#5a9a3a";
+    ctx.fillRect(ox + 1, oy + 1, 14, 5);
+    ctx.fillStyle = "#8a6a3a";
+    ctx.fillRect(ox + 3, oy + 6, 4, 3);
+    ctx.fillRect(ox + 9, oy + 7, 4, 3);
+    ctx.fillStyle = "#a08050";
+    ctx.fillRect(ox + 4, oy + 7, 1, 1);
+    ctx.fillRect(ox + 10, oy + 8, 1, 1);
+  },
+
+  enchanting_table: (ctx, ox, oy) => {
+    // قاعدة حجرية
+    drawNoisy(ctx, ox, oy, 0x6a4a3a, 22, 501);
+    // حافة خشبية
+    ctx.fillStyle = "#3a2a1a";
+    ctx.fillRect(ox, oy, TILE, 2);
+    ctx.fillRect(ox, oy + TILE - 2, TILE, 2);
+    ctx.fillRect(ox, oy, 2, TILE);
+    ctx.fillRect(ox + TILE - 2, oy, 2, TILE);
+    // كتاب في المنتصف
+    ctx.fillStyle = "#c04040";
+    ctx.fillRect(ox + 5, oy + 5, 6, 6);
+    ctx.fillStyle = "#e06060";
+    ctx.fillRect(ox + 5, oy + 5, 3, 3);
+    ctx.fillRect(ox + 8, oy + 8, 3, 3);
+    // زخرفة ذهبية
+    ctx.fillStyle = "#f6cb3a";
+    ctx.fillRect(ox + 3, oy + 3, 1, 1);
+    ctx.fillRect(ox + TILE - 4, oy + 3, 1, 1);
+    ctx.fillRect(ox + 3, oy + TILE - 4, 1, 1);
+    ctx.fillRect(ox + TILE - 4, oy + TILE - 4, 1, 1);
+  },
 };
 
 let _atlasTexture = null;

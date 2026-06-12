@@ -31,6 +31,13 @@ export const TOOLS = {
   diamond_axe:    { id: "diamond_axe",    label: "فأس ألماسي", kind: "axe",     speed: 8, tier: 4, durability: 1562 },
   diamond_shovel: { id: "diamond_shovel", label: "مجرفة ألماسية", kind: "shovel", speed: 8, tier: 4, durability: 1562 },
   diamond_sword:  { id: "diamond_sword",  label: "سيف ألماسي", kind: "sword",   speed: 1, tier: 4, durability: 1562, damage: 7 },
+
+  // معازق (hoes) — السرعة هنا = كفاءة الحرث
+  wooden_hoe:   { id: "wooden_hoe",   label: "معزقة خشبية",   kind: "hoe", speed: 2, tier: 1, durability: 60 },
+  stone_hoe:    { id: "stone_hoe",    label: "معزقة حجرية",   kind: "hoe", speed: 4, tier: 2, durability: 132 },
+  iron_hoe:     { id: "iron_hoe",     label: "معزقة حديدية",  kind: "hoe", speed: 6, tier: 3, durability: 251 },
+  golden_hoe:   { id: "golden_hoe",   label: "معزقة ذهبية",   kind: "hoe", speed: 12, tier: 3, durability: 33 },
+  diamond_hoe:  { id: "diamond_hoe",  label: "معزقة ألماسية", kind: "hoe", speed: 8, tier: 4, durability: 1562 },
 };
 
 // الأداة الفعّالة لكل بلوك + المستوى المطلوب للحصول على نَقْع.

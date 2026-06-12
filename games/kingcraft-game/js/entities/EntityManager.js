@@ -1,7 +1,7 @@
 import { Mob, MOB_TYPES } from "./Mob.js";
 import { createMobMesh } from "./MobRenderer.js";
 
-const HOSTILE_TYPES = ["zombie", "skeleton", "creeper", "spider"];
+const HOSTILE_TYPES = ["zombie", "skeleton", "creeper", "spider", "enderman", "witch", "slime", "husk"];
 const PASSIVE_TYPES = ["cow", "sheep", "chicken", "pig"];
 const MAX_HOSTILE = 12;
 const MAX_PASSIVE = 8;

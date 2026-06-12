@@ -9,6 +9,7 @@ export const SMELTING = {
   porkchop: { out: "cooked_porkchop", time: 6 },
   chicken:  { out: "cooked_chicken", time: 6 },
   mutton:   { out: "cooked_mutton", time: 6 },
+  potato:   { out: "baked_potato", time: 8 },
 };
 
 // قيمة الوقود = عدد الثواني التي يحترقها كل عنصر

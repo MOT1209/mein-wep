@@ -21,6 +21,26 @@ export const MOB_TYPES = {
     hostile: true, detectionRange: 14, attackRange: 2.5, attackCooldown: 1.0,
     drops: [{ id: "string", count: [0, 2], chance: 1 }, { id: "spider_eye", count: [0, 1], chance: 0.33 }],
   },
+  enderman: {
+    health: 40, w: 0.6, h: 2.9, speed: 2.5, damage: 7,
+    hostile: true, detectionRange: 64, attackRange: 3.0, attackCooldown: 1.0,
+    drops: [{ id: "ender_pearl", count: [0, 1], chance: 0.5 }],
+  },
+  witch: {
+    health: 26, w: 0.6, h: 1.95, speed: 1.8, damage: 4,
+    hostile: true, detectionRange: 16, attackRange: 8.0, attackCooldown: 2.0,
+    drops: [{ id: "stick", count: [0, 2], chance: 0.5 }, { id: "redstone_dust", count: [0, 2], chance: 0.25 }],
+  },
+  slime: {
+    health: 8, w: 0.5, h: 0.5, speed: 2.0, damage: 3,
+    hostile: true, detectionRange: 10, attackRange: 2.0, attackCooldown: 1.5,
+    drops: [{ id: "slimeball", count: [0, 2], chance: 1 }],
+  },
+  husk: {
+    health: 20, w: 0.6, h: 1.95, speed: 2.3, damage: 3.5,
+    hostile: true, detectionRange: 16, attackRange: 2.5, attackCooldown: 1.0,
+    drops: [{ id: "rotten_flesh", count: [0, 2], chance: 1 }],
+  },
   cow: {
     health: 10, w: 0.9, h: 1.4, speed: 1.5, damage: 0,
     hostile: false, detectionRange: 0, attackRange: 0, attackCooldown: 0,

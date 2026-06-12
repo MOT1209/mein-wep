@@ -16,6 +16,7 @@ import { SoundManager } from "./utils/SoundManager.js";
 import { EXHAUSTION_PER_BREAK, WORLD_HEIGHT } from "./utils/Constants.js";
 import { saveGame, loadGame } from "./utils/SaveLoad.js";
 import { EntityManager } from "./entities/EntityManager.js";
+import { FarmingSystem, isCropSeed, getCropInfo } from "./world/Farming.js";
 
 const canvas = document.getElementById("game");
 const menu = document.getElementById("menu");
@@ -52,6 +53,7 @@ const hotbar = new Hotbar(document.getElementById("hotbar"), inventory);
 const health = new HealthSystem();
 const sound = new SoundManager();
 const entityManager = new EntityManager(scene, world);
+const farming = new FarmingSystem(world);
 entityManager._onAttack = (damage) => {
   health.takeDamage(damage);
   updateHUD();
@@ -237,6 +239,7 @@ function updateMining(dt) {
       if (d) drops.spawn(hit.block[0], hit.block[1], hit.block[2], d, 1);
     }
     if (getBlock(id).name === "furnace") dropFurnace(hit.block);
+    farming.onBlockBreak(hit.block[0], hit.block[1], hit.block[2]);
     world.setBlock(hit.block[0], hit.block[1], hit.block[2], AIR);
     damageTool();
     health.addExhaustion(EXHAUSTION_PER_BREAK);
@@ -302,6 +305,7 @@ function rightClick() {
 
   if (name === "crafting_table") { openUI("table"); return; }
   if (name === "furnace") { openUI("furnace", furnaces.get(hit.block[0], hit.block[1], hit.block[2])); return; }
+  if (name === "enchanting_table") { openUI("enchant"); return; }
 
   const sel = inventory.selectedStack;
   if (!sel) return;
@@ -314,6 +318,46 @@ function rightClick() {
     sound.playEat();
     updateHUD();
     return;
+  }
+
+  // حرث بالأداة (hoe)
+  const tool = sel.id ? getTool(sel.id) : null;
+  if (tool && tool.kind === "hoe") {
+    const [bx, by, bz] = hit.block;
+    if (farming.till(bx, by, bz)) {
+      sound.playPlace();
+      const invIdx = inventory.selectedSlot;
+      const stack = inventory.hotbar[invIdx];
+      if (stack && stack.durability != null) {
+        stack.durability -= 1;
+        if (stack.durability <= 0) inventory.hotbar[invIdx] = null;
+      }
+      return;
+    }
+  }
+
+  // غرس بذور
+  if (isCropSeed(sel.id)) {
+    const [px, py, pz] = hit.place;
+    if (!intersectsPlayer(px, py, pz)) {
+      const placed = farming.plant(px, py, pz, sel.id);
+      if (placed) {
+        inventory.consumeSelected(1);
+        sound.playPlace();
+        return;
+      }
+    }
+  }
+
+  // حصاد المحصول الناضج
+  const cropInfo = getCropInfo(id);
+  if (cropInfo && cropInfo.stage >= 2) {
+    const drops2 = farming.harvest(hit.block[0], hit.block[1], hit.block[2]);
+    if (drops2) {
+      for (const d of drops2) drops.spawn(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5, d.id, d.count);
+      sound.playBreak();
+      return;
+    }
   }
 
   if (isPlaceable(sel.id)) {
@@ -478,6 +522,9 @@ function runCommand(cmd) {
         break;
       case "seed":
         debug.textContent += "\nSeed: " + world.seed;
+        break;
+      case "spawn":
+        player.spawn();
         break;
       case "save-all": case "save":
         saveGame(player, inventory, health, world, drops);
@@ -723,6 +770,7 @@ function loop(now) {
 
   if (gameStarted) {
     furnaces.tick(dt);
+    farming.tick(dt);
     health.setArmor(inventory.getArmorValue());
     health.tick(dt);
     autoSave(dt);

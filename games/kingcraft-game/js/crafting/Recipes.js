@@ -25,7 +25,7 @@ export const RECIPES = [
   { out: { id: "gold_ingot", count: 9 }, shapeless: ["gold_block"] },
   { out: { id: "diamond", count: 9 },    shapeless: ["diamond_block"] },
 
-  { out: { id: "bread", count: 2 }, shapeless: ["apple", "apple", "apple"] },
+  { out: { id: "bread", count: 2 }, shapeless: ["wheat", "wheat", "wheat"] },
 ];
 
 // ===== دروع =====
@@ -62,6 +62,7 @@ for (const [m, prefix] of TOOL_MATERIALS) {
   RECIPES.push({ out: { id: prefix + "_pickaxe", count: 1 }, shape: [[m, m, m], [null, T, null], [null, T, null]] });
   RECIPES.push({ out: { id: prefix + "_axe", count: 1 },     shape: [[m, m, null], [m, T, null], [null, T, null]] });
   RECIPES.push({ out: { id: prefix + "_shovel", count: 1 },  shape: [[m], [T], [T]] });
+  RECIPES.push({ out: { id: prefix + "_hoe", count: 1 },     shape: [[m, m, null], [null, T, null], [null, T, null]] });
   RECIPES.push({ out: { id: prefix + "_sword", count: 1 },   shape: [[m], [m], [T]] });
 }
 

@@ -21,6 +21,15 @@ const COLORS = {
   spider_body: "#6f4f2f",
   spider_leg: "#3f2f1f",
   spider_eye: "#ff0000",
+  enderman_body: "#1a1a1a",
+  enderman_eye: "#ff00ff",
+  witch_body: "#4a2a5a",
+  witch_hat: "#2a1a2a",
+  witch_nose: "#6a4a3a",
+  slime_body: "#6fc96f",
+  slime_eye: "#000000",
+  husk_body: "#8a7a5a",
+  husk_leg: "#6a5a3a",
   cow_body: "#8f6f3f",
   cow_spot: "#f0f0f0",
   cow_head: "#7f5f2f",
@@ -127,6 +136,38 @@ export function createMobMesh(type) {
           addPart(g, box(0.2, pigLegH, 0.2), mat(COLORS.pig_leg), side * 0.28, pigLegH / 2, front * 0.3);
         }
       }
+      break;
+    }
+    case "enderman": {
+      addPart(g, box(0.5, 0.5, 0.5), mat(COLORS.enderman_body), 0, 2.65, 0);
+      addPart(g, box(0.55, 1.0, 0.4), mat(COLORS.enderman_body), 0, 1.85, 0);
+      addPart(g, box(0.2, 0.75, 0.2), mat(COLORS.enderman_body), -0.22, 0.37, 0);
+      addPart(g, box(0.2, 0.75, 0.2), mat(COLORS.enderman_body), 0.22, 0.37, 0);
+      addPart(g, box(0.08, 0.08, 0.04), mat(COLORS.enderman_eye), -0.12, 2.75, -0.23);
+      addPart(g, box(0.08, 0.08, 0.04), mat(COLORS.enderman_eye), 0.12, 2.75, -0.23);
+      break;
+    }
+    case "witch": {
+      addPart(g, box(0.5, 0.5, 0.5), mat(COLORS.witch_body), 0, 1.75, 0);
+      addPart(g, box(0.6, 0.75, 0.4), mat(COLORS.witch_body), 0, 1.1, 0);
+      addPart(g, box(0.3, 0.15, 0.3), mat(COLORS.witch_hat), 0, 2.05, 0.05);
+      addPart(g, box(0.4, 0.1, 0.4), mat(COLORS.witch_hat), 0, 1.9, 0.05);
+      addPart(g, box(0.08, 0.08, 0.15), mat(COLORS.witch_nose), 0, 1.65, -0.3);
+      addPart(g, box(0.2, 0.75, 0.2), mat(COLORS.witch_body), -0.2, 0.37, 0);
+      addPart(g, box(0.2, 0.75, 0.2), mat(COLORS.witch_body), 0.2, 0.37, 0);
+      break;
+    }
+    case "slime": {
+      addPart(g, box(0.5, 0.45, 0.5), mat(COLORS.slime_body), 0, 0.25, 0);
+      addPart(g, box(0.08, 0.08, 0.06), mat(COLORS.slime_eye), -0.12, 0.35, -0.22);
+      addPart(g, box(0.08, 0.08, 0.06), mat(COLORS.slime_eye), 0.12, 0.35, -0.22);
+      break;
+    }
+    case "husk": {
+      addPart(g, box(0.5, 0.5, 0.5), mat(COLORS.husk_body), 0, 1.75, 0);
+      addPart(g, box(0.6, 0.75, 0.4), mat(COLORS.husk_body), 0, 1.1, 0);
+      addPart(g, box(0.25, 0.75, 0.25), mat(COLORS.husk_leg), -0.18, 0.37, 0);
+      addPart(g, box(0.25, 0.75, 0.25), mat(COLORS.husk_leg), 0.18, 0.37, 0);
       break;
     }
   }

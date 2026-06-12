@@ -32,6 +32,12 @@ const MATERIAL_ICONS = {
   leather: (ctx, s) => { px(ctx, s*0.25, s*0.35, s*0.5, s*0.4, "#a06030"); px(ctx, s*0.3, s*0.38, s*0.4, s*0.2, "#b07040"); },
   feather: (ctx, s) => { px(ctx, s*0.35, s*0.25, s*0.2, s*0.5, "#e8e8e8"); px(ctx, s*0.55, s*0.3, s*0.2, s*0.3, "#e8e8e8"); px(ctx, s*0.5, s*0.3, s*0.1, s*0.04, "#d0d0d0"); },
   white_wool: (ctx, s) => { px(ctx, s*0.2, s*0.3, s*0.6, s*0.5, "#f0f0f0"); px(ctx, s*0.25, s*0.35, s*0.1, s*0.1, "#e0e0e0"); px(ctx, s*0.5, s*0.35, s*0.15, s*0.1, "#e0e0e0"); },
+  ender_pearl: (ctx, s) => { px(ctx, s*0.3, s*0.3, s*0.4, s*0.4, "#1a5a3a"); px(ctx, s*0.22, s*0.22, s*0.56, s*0.56, "#2a7a4a", 0.3); ctx.fillStyle = "#2a7a4a"; ctx.beginPath(); ctx.ellipse(s*0.5, s*0.5, s*0.28, s*0.28, 0, 0, Math.PI*2); ctx.fill(); },
+  redstone_dust: (ctx, s) => { px(ctx, s*0.3, s*0.42, s*0.4, s*0.16, "#cc0000"); px(ctx, s*0.35, s*0.38, s*0.08, s*0.08, "#ff2222"); px(ctx, s*0.55, s*0.44, s*0.1, s*0.1, "#ff2222"); },
+  slimeball: (ctx, s) => { ctx.fillStyle = "#6fc96f"; ctx.beginPath(); ctx.ellipse(s*0.5, s*0.5, s*0.3, s*0.3, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = "#8fe98f"; px(ctx, s*0.35, s*0.35, s*0.1, s*0.1, "#8fe98f"); },
+  // محاصيل
+  wheat_seeds: (ctx, s) => { px(ctx, s*0.3, s*0.5, s*0.4, s*0.3, "#8a6a2a"); px(ctx, s*0.35, s*0.4, s*0.3, s*0.15, "#a08030"); px(ctx, s*0.45, s*0.2, s*0.1, s*0.25, "#8a6a2a"); },
+  wheat: (ctx, s) => { px(ctx, s*0.2, s*0.4, s*0.6, s*0.4, "#c0a040"); px(ctx, s*0.25, s*0.5, s*0.5, s*0.15, "#d0b050"); px(ctx, s*0.45, s*0.15, s*0.1, s*0.3, "#8a7a3a"); },
 };
 
 // أيقونات الدروع (أشكال مبسطة)
@@ -72,6 +78,7 @@ function drawTool(ctx, s, kind, tier) {
   if (kind === "pickaxe") { px(ctx, s*0.22, s*0.22, s*0.56, s*0.1, c); px(ctx, s*0.22, s*0.22, s*0.1, s*0.12, c); px(ctx, s*0.68, s*0.22, s*0.1, s*0.12, c); }
   else if (kind === "axe") { px(ctx, s*0.5, s*0.18, s*0.26, s*0.26, c); }
   else if (kind === "shovel") { px(ctx, s*0.4, s*0.16, s*0.22, s*0.22, c); }
+  else if (kind === "hoe") { px(ctx, s*0.4, s*0.16, s*0.22, s*0.18, c); px(ctx, s*0.36, s*0.32, s*0.3, s*0.06, c); }
   else if (kind === "sword") { px(ctx, s*0.46, s*0.14, s*0.1, s*0.5, c); px(ctx, s*0.38, s*0.62, s*0.26, s*0.08, "#7a5230"); }
 }
 
@@ -92,6 +99,9 @@ const materials = [
   ["rotten_flesh", "لحم فاسد"], ["bone", "عظم"], ["arrow", "سهم"],
   ["gunpowder", "بارود"], ["string", "خيط"], ["spider_eye", "عين عنكبوت"],
   ["leather", "جلد"], ["feather", "ريشة"], ["white_wool", "صوف أبيض"],
+  ["ender_pearl", "لؤلؤة إندر"], ["redstone_dust", "غبار ريدستون"], ["slimeball", "كرة سلايم"],
+  // محاصيل
+  ["wheat_seeds", "بذور قمح"], ["wheat", "قمح"],
 ];
 
 // أطعمة
@@ -106,10 +116,14 @@ const FOOD_ICONS = {
   cooked_chicken: (ctx, s) => { px(ctx, s*0.2, s*0.3, s*0.6, s*0.5, "#b09060"); px(ctx, s*0.3, s*0.35, s*0.4, s*0.15, "#d0a070"); },
   porkchop: (ctx, s) => { px(ctx, s*0.25, s*0.35, s*0.5, s*0.4, "#e09080"); px(ctx, s*0.3, s*0.4, s*0.4, s*0.15, "#f0a090"); },
   cooked_porkchop: (ctx, s) => { px(ctx, s*0.25, s*0.35, s*0.5, s*0.4, "#b07060"); px(ctx, s*0.3, s*0.4, s*0.4, s*0.15, "#c08070"); },
+  baked_potato: (ctx, s) => { px(ctx, s*0.25, s*0.3, s*0.5, s*0.5, "#9a7a4a"); px(ctx, s*0.3, s*0.35, s*0.4, s*0.3, "#b09060"); px(ctx, s*0.35, s*0.5, s*0.3, s*0.1, "#c0a070"); },
+  carrot: (ctx, s) => { px(ctx, s*0.3, s*0.2, s*0.4, s*0.6, "#e06020"); px(ctx, s*0.35, s*0.25, s*0.3, s*0.5, "#f08040"); px(ctx, s*0.42, s*0.1, s*0.16, s*0.12, "#3a7a2a"); },
+  potato: (ctx, s) => { px(ctx, s*0.25, s*0.3, s*0.5, s*0.5, "#8a6a3a"); px(ctx, s*0.3, s*0.35, s*0.4, s*0.3, "#a08050"); px(ctx, s*0.35, s*0.5, s*0.3, s*0.1, "#c0a060"); },
 };
 
 const foods = [
   ["apple", "تفاحة"], ["bread", "خبز"],
+  ["carrot", "جزر"], ["potato", "بطاطس نيئة"], ["baked_potato", "بطاطس مشوية"],
   ["cooked_beef", "لحم مشوي"], ["cooked_porkchop", "خنزير مشوي"],
   ["cooked_chicken", "دجاج مشوي"], ["cooked_mutton", "خروف مشوي"],
   ["beef", "لحم بقري نيء"], ["porkchop", "خنزير نيء"],
@@ -117,11 +131,13 @@ const foods = [
 ];
 const FOOD_VALS = {
   apple: 4, bread: 5,
+  carrot: 3, potato: 1, baked_potato: 5,
   cooked_beef: 8, cooked_porkchop: 8, cooked_chicken: 6, cooked_mutton: 6,
   beef: 3, porkchop: 3, chicken: 2, mutton: 2,
 };
 const SAT_VALS = {
   apple: 2.4, bread: 6,
+  carrot: 3.6, potato: 0.6, baked_potato: 6,
   cooked_beef: 12.8, cooked_porkchop: 12.8, cooked_chicken: 7.2, cooked_mutton: 9.6,
   beef: 1.8, porkchop: 1.8, chicken: 1.2, mutton: 1.2,
 };

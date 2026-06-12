@@ -79,11 +79,14 @@ export class InventoryUI {
 
     const title = document.createElement("div");
     title.className = "inv-title";
-    title.textContent = this.mode === "furnace" ? "فرن" : (this.mode === "table" ? "طاولة التصنيع" : "المخزون");
+    const titleText = this.mode === "furnace" ? "فرن" : (this.mode === "table" ? "طاولة التصنيع" : (this.mode === "enchant" ? "طاولة سحر ✦" : "المخزون"));
+    title.textContent = titleText;
     panel.appendChild(title);
 
     if (this.mode === "furnace") {
       panel.appendChild(this._buildFurnaceTop());
+    } else if (this.mode === "enchant") {
+      panel.appendChild(this._buildEnchantTop());
     } else {
       panel.appendChild(this._buildCraftTop());
     }
@@ -164,6 +167,16 @@ export class InventoryUI {
     row.appendChild(arrow);
 
     row.appendChild(this._slot("result", 0, "inv-result"));
+    return row;
+  }
+
+  _buildEnchantTop() {
+    const row = document.createElement("div");
+    row.className = "inv-row";
+    const msg = document.createElement("div");
+    msg.style.cssText = "padding:16px;color:#aaf;font-size:14px;text-align:center;border:1px solid #446;border-radius:6px;background:#1a1a2e;width:200px;";
+    msg.textContent = "✦ طاولة السحر قريباً\nضع أداة + لازورد";
+    row.appendChild(msg);
     return row;
   }
 

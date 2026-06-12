@@ -54,6 +54,20 @@ export const BLOCKS = [
   { id: 42, name: "tall_grass", label: "عشب طويل", hardness: 0, tile: "tall_grass", transparent: true, solid: false },
   { id: 43, name: "cactus",     label: "صبار",    hardness: 0.4, tiles: { top: "cactus_top", bottom: "cactus_top", side: "cactus" }, transparent: true },
   { id: 44, name: "vine",       label: "نبات متسلق", hardness: 0.2, tile: "vine", transparent: true, solid: false },
+
+  // ===== بلوكات المرحلة 5: زراعة + إنهانت =====
+  { id: 45, name: "farmland",   label: "أرض مزروعة", hardness: 0.6, tile: "farmland", transparent: false },
+  { id: 46, name: "wheat0",     label: "قمح (بذرة)",  hardness: 0, tile: "wheat0", transparent: true, solid: false },
+  { id: 47, name: "wheat1",     label: "قمح (نمو)",   hardness: 0, tile: "wheat1", transparent: true, solid: false },
+  { id: 48, name: "wheat2",     label: "قمح (ناضج)",  hardness: 0, tile: "wheat2", transparent: true, solid: false },
+  { id: 49, name: "carrots0",   label: "جزر (بذرة)",  hardness: 0, tile: "carrots0", transparent: true, solid: false },
+  { id: 50, name: "carrots1",   label: "جزر (نمو)",   hardness: 0, tile: "carrots1", transparent: true, solid: false },
+  { id: 51, name: "carrots2",   label: "جزر (ناضج)",  hardness: 0, tile: "carrots2", transparent: true, solid: false },
+  { id: 52, name: "potatoes0",  label: "بطاطس (بذرة)", hardness: 0, tile: "potatoes0", transparent: true, solid: false },
+  { id: 53, name: "potatoes1",  label: "بطاطس (نمو)",  hardness: 0, tile: "potatoes1", transparent: true, solid: false },
+  { id: 54, name: "potatoes2",  label: "بطاطس (ناضج)", hardness: 0, tile: "potatoes2", transparent: true, solid: false },
+
+  { id: 55, name: "enchanting_table", label: "طاولة سحر", hardness: 5.0, tile: "enchanting_table", transparent: false },
 ];
 
 const byId = BLOCKS;
@@ -89,6 +103,9 @@ export function blockDrop(id) {
     if (r < 0.05) return "apple";
     if (r < 0.15) return "stick";
     return null;
+  }
+  if (b.name === "tall_grass") {
+    return Math.random() < 0.2 ? "wheat_seeds" : null;
   }
   return b.name;
 }
