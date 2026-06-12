@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'Rashid-v11';
+﻿const CACHE_NAME = 'Rashid-v12';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -20,25 +20,35 @@ const ASSETS_TO_CACHE = [
     './js/pwa-installer.js',
     './js/admin.js',
     './src/js/main.js',
-    './src/js/modules/admin-content.js',
+    './src/js/utils/cache.js',
     './src/js/utils/dom.js',
     './src/js/utils/thumbnails.js',
     './src/js/services/supabase.js',
     './src/js/services/analytics.js',
+    './src/js/modules/admin-content.js',
     './src/js/modules/animations.js',
+    './src/js/modules/github.js',
     './src/js/modules/mobile.js',
     './src/js/modules/navbar.js',
     './src/js/modules/projects.js',
     './src/js/modules/settings.js',
+    './src/js/modules/supabase.js',
     './src/js/modules/theme.js',
     './src/js/modules/translations.js',
     './src/js/modules/enhancements.js',
     './src/js/modules/updates.js',
     './src/js/modules/statistics.js',
     './src/js/modules/vault.js',
+    './src/css/main.css',
+    './src/css/base/variables.css',
+    './src/css/base/responsive.css',
     './src/css/components/design-system.css',
     './src/css/components/navbar.css',
     './src/css/components/hero.css',
+    './src/vault/prompts.js',
+    './src/vault/images.js',
+    './src/vault/codes.js',
+    './src/vault/media.js',
     './models/Rashid-app/index.html',
     './models/Rashid-app/style.css',
     './models/Rashid-app/script.js',
@@ -96,15 +106,30 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 })
                 .catch(() =>
-                    caches.match(event.request, cacheOptions)
-                        .then((cached) => cached || caches.match('./offline.html', cacheOptions))
+                    caches.match(event.request)
+                        .then((cached) => cached || caches.match('./offline.html'))
                 )
         );
         return;
     }
 
+    // For JS/CSS: always fetch fresh, then cache
+    const url = new URL(event.request.url);
+    if (/\.(js|css)(\?|$)/.test(url.pathname)) {
+        event.respondWith(
+            fetch(event.request).then((response) => {
+                if (response && response.status === 200) {
+                    const copy = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+                }
+                return response;
+            }).catch(() => caches.match(event.request))
+        );
+        return;
+    }
+
     event.respondWith(
-        caches.match(event.request, cacheOptions).then((cached) => {
+        caches.match(event.request).then((cached) => {
             if (cached) return cached;
             return fetch(event.request).then((response) => {
                 if (!response || response.status !== 200 || response.type === 'opaque') return response;
@@ -112,7 +137,6 @@ self.addEventListener('fetch', (event) => {
                 caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
                 return response;
             }).catch(() => {
-                // Return nothing gracefully if network fails and no cache
                 return new Response('', { status: 408, statusText: 'Network timeout' });
             });
         })

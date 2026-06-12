@@ -15,10 +15,16 @@ let _supabaseClient = null;
 /** Lazily creates the singleton Supabase client */
 export const initSupabase = () => {
   if (_supabaseClient) return _supabaseClient;
+  // Prefer the client already created by supabase-config.js
+  if (typeof window !== 'undefined' && window.supabaseClient) {
+    _supabaseClient = window.supabaseClient;
+    return _supabaseClient;
+  }
+  // Fallback: read from meta tags
   const url = getSupabaseUrl();
   const anonKey = getSupabaseAnonKey();
-  if (!url || !anonKey) {
-    console.error('Supabase URL or anon key missing – check <meta> tags in index.html');
+  if (!url || !anonKey || url.includes('YOUR_PROJECT')) {
+    console.warn('Supabase URL or anon key missing – check supabase-config.js');
     return null;
   }
   _supabaseClient = supabase.createClient(url, anonKey);
@@ -39,8 +45,7 @@ export const onAuthStateChange = (onChange) => {
     onChange(session ?? null);
   });
   return () => {
-    // unsubscribe
-    client.removeSubscription(subscription);
+    subscription?.unsubscribe?.();
   };
 };
 
