@@ -992,6 +992,18 @@ function closePause() {
 
 document.getElementById("btn-resume").addEventListener("click", closePause);
 
+document.getElementById("btn-save-worlds").addEventListener("click", () => {
+  if (_currentWorldObj) {
+    saveGame(player, inventory, health, world, drops);
+    _currentWorldObj.lastPlayed = Date.now();
+    WM.updateWorld(_currentWorldObj);
+  }
+  gameStarted = false;
+  closePause();
+  renderWorldList();
+  showScreen(worldSelect);
+});
+
 document.getElementById("btn-save-quit").addEventListener("click", () => {
   if (_currentWorldObj) {
     saveGame(player, inventory, health, world, drops);
