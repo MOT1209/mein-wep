@@ -185,44 +185,123 @@
             <h2>System Access</h2>
         </div>
 
+        <!-- Login Form -->
         <form id="admin-login-form">
             <div class="form-group">
-                <label>Identifier</label>
+                <label>Email</label>
                 <div class="input-wrapper">
                     <i class="fas fa-user"></i>
-                    <input type="text" id="admin-username" placeholder="Email (as Identifier)" required>
+                    <input type="email" id="admin-username" placeholder="Email" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>Security Key</label>
+                <label>Password</label>
                 <div class="input-wrapper">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="admin-password" placeholder="Password" required>
                 </div>
             </div>
 
-            <button type="submit" class="btn-login">Authenticate</button>
+            <button type="submit" class="btn-login" id="login-submit-btn">Authenticate</button>
             <div class="error-msg" id="admin-login-error">
                 <i class="fas fa-circle-exclamation"></i> Invalid Credentials
             </div>
         </form>
 
-        <div class="back-link">
+        <div style="text-align:center;margin-top:16px;">
+            <a href="#" id="toggle-auth-mode" style="color:#8b5cf6;text-decoration:none;font-size:0.9rem;">
+                <i class="fas fa-user-plus"></i> Create New Account
+            </a>
+            <span style="color:#3f3f46;margin:0 8px;">|</span>
+            <a href="#" id="forgot-password-link" style="color:#71717a;text-decoration:none;font-size:0.85rem;">
+                <i class="fas fa-key"></i> Forgot Password
+            </a>
+        </div>
+
+        <div class="back-link" style="margin-top:12px;">
             <a href="../index.html"><i class="fas fa-arrow-left"></i> Return to Site</a>
         </div>
     </div>
 
-    <!-- Admin Logic -->
-    <script src="../js/admin.js?v=4.0"></script>
-
     <script>
-        // Custom Dashboard redirect logic if needed
-        // The admin.js handles SIGNED_IN by calling openDashboard()
-        // We can override openDashboard for the login page specifically.
+        let isSignupMode = false;
+
+        // Override openDashboard for login page → redirect to dashboard
         window.openDashboard = function () {
             window.location.href = 'dashboard.html';
         };
+
+        // Toggle login / signup
+        document.getElementById('toggle-auth-mode').addEventListener('click', (e) => {
+            e.preventDefault();
+            isSignupMode = !isSignupMode;
+            const form = document.getElementById('admin-login-form');
+            const btn = document.getElementById('login-submit-btn');
+            const toggle = document.getElementById('toggle-auth-mode');
+            const error = document.getElementById('admin-login-error');
+            error.style.display = 'none';
+            if (isSignupMode) {
+                btn.textContent = 'Create Account';
+                toggle.innerHTML = '<i class="fas fa-sign-in-alt"></i> Already have an account? Login';
+                form.querySelector('label').textContent = 'New Email';
+            } else {
+                btn.textContent = 'Authenticate';
+                toggle.innerHTML = '<i class="fas fa-user-plus"></i> Create New Account';
+                form.querySelector('label').textContent = 'Email';
+            }
+        });
+
+        // Forgot password
+        document.getElementById('forgot-password-link').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const client = window.supabaseClient;
+            if (!client) { alert('Supabase not available'); return; }
+            const email = document.getElementById('admin-username').value.trim();
+            if (!email) { alert('Enter your email first, then click Forgot Password.'); return; }
+            const { error } = await client.auth.resetPasswordForEmail(email);
+            if (error) alert(error.message);
+            else alert('Password reset email sent to ' + email + '. Check your inbox.');
+        });
+
+        // Handle signup
+        const originalSubmit = document.getElementById('admin-login-form').addEventListener;
+        document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const client = window.supabaseClient;
+            if (!client) { alert('Supabase not available'); return; }
+            const email = document.getElementById('admin-username').value.trim();
+            const password = document.getElementById('admin-password').value;
+            const errorEl = document.getElementById('admin-login-error');
+            errorEl.style.display = 'none';
+
+            if (isSignupMode) {
+                const { data, error } = await client.auth.signUp({ email, password });
+                if (error) {
+                    errorEl.innerText = error.message;
+                    errorEl.style.display = 'block';
+                    document.getElementById('admin-login-form').classList.add('shake');
+                    setTimeout(() => document.getElementById('admin-login-form').classList.remove('shake'), 500);
+                } else {
+                    // Try to add user to admin_users via RPC
+                    try { await client.rpc('add_admin_user'); } catch {}
+                    alert('Account created! Check your email for confirmation, then login.');
+                    isSignupMode = false;
+                    document.getElementById('login-submit-btn').textContent = 'Authenticate';
+                    document.getElementById('toggle-auth-mode').innerHTML = '<i class="fas fa-user-plus"></i> Create New Account';
+                }
+            } else {
+                const { data, error } = await client.auth.signInWithPassword({ email, password });
+                if (error) {
+                    errorEl.innerText = error.message;
+                    errorEl.style.display = 'block';
+                    document.getElementById('admin-login-form').classList.add('shake');
+                    setTimeout(() => document.getElementById('admin-login-form').classList.remove('shake'), 500);
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
+            }
+        });
 
         // Add CSS for shake inline for convenience
         const style = document.createElement('style');

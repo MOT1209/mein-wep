@@ -1,46 +1,42 @@
-/* src/js/modules/supabase.js
-   Initializes the Supabase client from meta‑tags (set in index.html) and
-   exposes:
-     - supabase client (getClient)
-     - auth state listener (onAuthStateChange)
-     - helpers for public data fetching
-     - realtime subscription helper
-   Only the public anon key is ever exposed.
-*/
 import { getSupabaseUrl, getSupabaseAnonKey } from '../config/supabase.js';
 
-// eslint-disable-next-line no-undef
 let _supabaseClient = null;
 
-/** Lazily creates the singleton Supabase client */
 export const initSupabase = () => {
   if (_supabaseClient) return _supabaseClient;
-  // Prefer the client already created by supabase-config.js
+
   if (typeof window !== 'undefined' && window.supabaseClient) {
     _supabaseClient = window.supabaseClient;
     return _supabaseClient;
   }
-  // Fallback: read from meta tags
+
   const url = getSupabaseUrl();
   const anonKey = getSupabaseAnonKey();
-  if (!url || !anonKey || url.includes('YOUR_PROJECT')) {
-    console.warn('Supabase URL or anon key missing – check supabase-config.js');
+  if (!url || !anonKey) {
+    console.warn('Supabase config missing – check supabase-config.js');
     return null;
   }
-  _supabaseClient = supabase.createClient(url, anonKey);
+
+  if (typeof supabase === 'undefined') {
+    console.warn('Supabase JS library not loaded yet – will retry');
+    return null;
+  }
+
+  try {
+    _supabaseClient = supabase.createClient(url, anonKey);
+    window.supabaseClient = _supabaseClient;
+  } catch (err) {
+    console.warn('Supabase init failed:', err);
+    return null;
+  }
   return _supabaseClient;
 };
 
-/** Returns the initialized client (or null) */
 export const getClient = () => _supabaseClient;
 
-/**
- * Subscribe to auth state changes.
- * @param {Function(UserSession|null)} onChange – called whenever the session changes
- */
 export const onAuthStateChange = (onChange) => {
   const client = getClient();
-  if (!client) return () => {}; // no‑op
+  if (!client) return () => {};
   const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {
     onChange(session ?? null);
   });
@@ -49,7 +45,6 @@ export const onAuthStateChange = (onChange) => {
   };
 };
 
-/** Fetch public rows from any table (used by vault sections) */
 export const fetchPublic = async (table, options = {}) => {
   const client = getClient();
   if (!client) return { data: null, error: new Error('Supabase client not ready') };
@@ -62,7 +57,6 @@ export const fetchPublic = async (table, options = {}) => {
   return { data: data ?? [], error };
 };
 
-/** Realtime subscription helper – returns an unsubscribe function */
 export const subscribe = (table, callback) => {
   const client = getClient();
   if (!client) return () => {};

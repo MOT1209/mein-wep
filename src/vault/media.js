@@ -1,64 +1,55 @@
-/* src/vault/media.js
-   Media Section – responsive embeds for video/audio.
-   Uses native <video> and <audio> controls with preload="metadata".
-*/
-export const initSection = (cached) => {
-  const { qs, qsa } = cached;
+const FALLBACK_MEDIA = [
+  { title: 'Platform Overview', type: 'video', url: '', description: 'Overview of the Rashid ecosystem and features (video coming soon)' },
+  { title: 'KingCraft Gameplay', type: 'video', url: '', description: 'Walkthrough of KingCraft 3D voxel sandbox (video coming soon)' },
+  { title: 'Rashid AI Demo', type: 'video', url: '', description: 'AI assistant features and capabilities demo (video coming soon)' },
+];
+
+export const initSection = async (cached) => {
+  const { qs } = cached;
   const container = qs('#vault-media');
   if (!container) return;
 
   const render = (items) => {
     container.innerHTML = '';
     const grid = document.createElement('div');
-    grid.className = 'row g-4';
+    grid.className = 'vault-section-grid vault-media-grid';
     items.forEach((it) => {
-      const col = document.createElement('div');
-      col.className = 'col-12 col-sm-6 col-md-4';
-      let mediaEl = '';
-      if (it.type === 'video') {
-        mediaEl = `
-          <video controls preload="metadata" class="w-100 rounded" poster="${it.thumbnail || ''}">
-            <source src="${it.url}" type="${it.mimeType || 'video/mp4'}">
-            Your browser does not support the video tag.
-          </video>`;
-      } else if (it.type === 'audio') {
-        mediaEl = `
-          <audio controls preload="metadata" class="w-100">
-            <source src="${it.url}" type="${it.mimeType || 'audio/mpeg'}">
-            Your browser does not support the audio element.
-          </audio>`;
-      }
       const card = document.createElement('div');
-      card.className = 'card h-100';
+      card.className = 'vault-card vault-media-card';
+      const hasSource = it.type === 'video' && it.url;
       card.innerHTML = `
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">${escapeHtml(it.title)}</h5>
-          <div class="flex-grow-1">${mediaEl}</div>
-          ${it.description ? `<p class="card-text small text-muted mt-2">${escapeHtml(it.description)}</p>` : ''}
+        <div class="vault-card-body">
+          <h4>${escapeHtml(it.title)}</h4>
+          ${hasSource ? `
+            <div class="vault-media-wrapper">
+              <video controls preload="metadata" poster="${escapeAttr(it.thumbnail || '')}" class="vault-video">
+                <source src="${escapeAttr(it.url)}" type="${escapeAttr(it.mimeType || 'video/mp4')}">
+              </video>
+            </div>` : `
+            <div class="vault-media-placeholder">
+              <i class="fas fa-video"></i>
+              <span>${escapeHtml(it.description || 'Content coming soon')}</span>
+            </div>`}
+          ${it.description && !hasSource ? '' : it.description ? `<p class="vault-desc">${escapeHtml(it.description)}</p>` : ''}
         </div>`;
-      col.appendChild(card);
-      grid.appendChild(col);
+      grid.appendChild(card);
     });
     container.appendChild(grid);
   };
 
-  (async () => {
+  try {
     const { data, error } = await window.__supabase.fetchPublic('media', {
       order: { column: 'sort_order', ascending: true }
     });
-    if (error) {
-      console.error('Failed to load media', error);
-      container.innerHTML = '<p class="text-danger">Could not load media.</p>';
-      return;
-    }
-    render(data ?? []);
-  })();
+    if (error || !data?.length) { render(FALLBACK_MEDIA); return; }
+    render(data);
+  } catch { render(FALLBACK_MEDIA); }
 };
 
-/* Helper utilities */
-function qs(s, root = document) { return root.querySelector(s); }
-function qsa(s, root = document) { return root.querySelectorAll(s); }
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g,
     (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" }[m]));
+}
+function escapeAttr(str) {
+  return String(str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }

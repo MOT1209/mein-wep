@@ -1,13 +1,11 @@
-/* src/js/config/supabase.js
-   Tiny helper to read Supabase URL and anon key from <meta> tags.
-   Only the public anon key is ever exposed to the client.
-*/
 export const getSupabaseUrl = () => {
   const meta = document.querySelector('meta[name="supabase-url"]');
-  return meta ? meta.content : null;
+  if (meta) return meta.content;
+  return window.Rashid_SUPABASE?.url || 'https://kcltollasghlvuoxvjqa.supabase.co';
 };
 
 export const getSupabaseAnonKey = () => {
   const meta = document.querySelector('meta[name="supabase-anon-key"]');
-  return meta ? meta.content : null;
+  if (meta) return meta.content;
+  return window.Rashid_SUPABASE?.anonKey || 'sb_publishable_H6DYBEKQ3UAZp6qoI63K3Q_UhmyNycm';
 };

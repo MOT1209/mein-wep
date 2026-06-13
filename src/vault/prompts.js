@@ -1,89 +1,80 @@
-/* src/vault/prompts.js
-   Prompts Section – shows custom AI prompts.
-   Features:
-     • One‑click copy to clipboard (Navigator.clipboard)
-     • Minimal toast notification on success
-*/
-export const initSection = (cached) => {
-  const { qs, qsa } = cached;
+const FALLBACK_PROMPTS = [
+  { title: 'Code Review Assistant', content: 'Review the following code for bugs, performance issues, and best practices. Provide specific suggestions for improvement.' },
+  { title: 'API Design Pattern', content: 'Design a RESTful API for {resource} with CRUD operations, pagination, filtering, sorting, and authentication.' },
+  { title: 'Debug Mode', content: 'Analyze this error log and identify the root cause. Suggest a fix and explain why the error occurred.' },
+  { title: 'Unit Test Generator', content: 'Generate comprehensive unit tests for the following function using {testing_framework}. Include edge cases.' },
+  { title: 'Refactoring Expert', content: 'Refactor this code to improve readability, maintainability, and performance while preserving functionality.' },
+  { title: 'Database Schema', content: 'Design a normalized database schema for {use_case} with proper indexes, constraints, and relationships.' },
+];
 
+export const initSection = async (cached) => {
+  const { qs, qsa } = cached;
   const container = qs('#vault-prompts');
   if (!container) return;
 
-  // Helper to create a toast
   const showToast = (msg) => {
+    const existing = qs('.toast-container');
+    const toastRoot = existing || (() => {
+      const el = document.createElement('div');
+      el.className = 'toast-container';
+      document.body.appendChild(el);
+      return el;
+    })();
     const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.innerText = msg;
-    document.body.appendChild(toast);
-    // Trigger reflow for animation
-    toast.offsetHeight;
-    toast.classList.add('show');
+    toast.className = 'toast show';
+    toast.textContent = msg;
+    toastRoot.appendChild(toast);
     setTimeout(() => {
-      toast.classList.remove('show');
-      toast.addEventListener('transitionend', () => toast.remove());
-    }, 3000);
+      toast.remove();
+    }, 2500);
   };
 
-  // Render function
   const render = (prompts) => {
-    container.innerHTML = ''; // clear
+    container.innerHTML = '';
     const grid = document.createElement('div');
-    grid.className = 'row g-4';
+    grid.className = 'vault-section-grid';
     prompts.forEach((p) => {
-      const col = document.createElement('div');
-      col.className = 'col-12 col-sm-6 col-md-4 col-lg-3';
       const card = document.createElement('div');
-      card.className = 'card h-100';
+      card.className = 'vault-card';
       card.innerHTML = `
-        <div class="card-body d-flex flex-column">
-          <h5 class="card-title">${escapeHtml(p.title)}</h5>
-          <p class="card-text flex-grow-1">${escapeHtml(p.content)}</p>
-          <button class="btn btn-sm btn-outline-secondary mt-2 copy-btn"
-                  data-prompt="${escapeHtml(p.content)}">
-            📋 Copy
+        <div class="vault-card-body">
+          <h4>${escapeHtml(p.title)}</h4>
+          <p>${escapeHtml(p.content)}</p>
+          <button class="vault-copy-btn" data-copy="${escapeHtml(p.content)}">
+            <i class="fas fa-copy"></i> Copy Prompt
           </button>
         </div>`;
-      col.appendChild(card);
-      grid.appendChild(col);
+      grid.appendChild(card);
     });
     container.appendChild(grid);
-    // attach copy listeners
-    qsa('.copy-btn', container).forEach((btn) => {
+    qsa('.vault-copy-btn', container).forEach((btn) => {
       btn.addEventListener('click', async () => {
-        const text = btn.dataset.prompt;
+        const text = btn.dataset.copy;
         try {
           await navigator.clipboard.writeText(text);
-          showToast('Prompt copied!');
-        } catch (err) {
-          console.error('Clipboard write failed', err);
-          showToast('Copy failed – see console');
+          btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+          setTimeout(() => { btn.innerHTML = '<i class="fas fa-copy"></i> Copy Prompt'; }, 2000);
+        } catch {
+          showToast('Could not copy – clipboard access denied');
         }
       });
     });
   };
 
-  // Fetch from Supabase
-  (async () => {
+  try {
     const { data, error } = await window.__supabase.fetchPublic('prompts', {
       order: { column: 'sort_order', ascending: true }
     });
-    if (error) {
-      console.error('Failed to load prompts', error);
-      container.innerHTML = '<p class="text-danger">Could not load prompts.</p>';
+    if (error || !data?.length) {
+      render(FALLBACK_PROMPTS);
       return;
     }
-    render(data ?? []);
-  })();
+    render(data);
+  } catch {
+    render(FALLBACK_PROMPTS);
+  }
 };
 
-/* ---- tiny DOM helpers (should already be on window via main.js, but define locally) ---- */
-function qs(s, root = document) {
-  return root.querySelector(s);
-}
-function qsa(s, root = document) {
-  return root.querySelectorAll(s);
-}
 function escapeHtml(str) {
   return str.replace(/[&<>"']/g,
     (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" }[m]));

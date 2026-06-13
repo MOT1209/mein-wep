@@ -1,4 +1,4 @@
-import { qs, qsa } from '../utils/dom.js?v=1.1';
+import { qs, qsa } from '../utils/dom.js';
 
 export function initStatistics() {
   const target = qs('#updates');
@@ -16,15 +16,15 @@ export function initStatistics() {
       </div>
       <div class="stats-grid">
         <div class="stat-card reveal">
-          <div class="stat-number" data-target="50">0</div>
+          <div class="stat-number" data-target="0">0</div>
           <div class="stat-label">Projects Deployed</div>
         </div>
         <div class="stat-card reveal">
-          <div class="stat-number" data-target="6">0</div>
+          <div class="stat-number" data-target="0">0</div>
           <div class="stat-label">Vault Categories</div>
         </div>
         <div class="stat-card reveal">
-          <div class="stat-number" data-target="10">0</div>
+          <div class="stat-number" data-target="0">0</div>
           <div class="stat-label">Tech Stacks</div>
         </div>
         <div class="stat-card reveal">
@@ -43,7 +43,6 @@ export function initStatistics() {
     });
   }
 
-  // Animated counter on intersect
   const counterObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -58,6 +57,45 @@ export function initStatistics() {
   statsSection.querySelectorAll('.stat-number').forEach(el => {
     counterObserver.observe(el);
   });
+
+  loadStats();
+}
+
+async function loadStats() {
+  let projectsCount = 15;
+  let vaultCount = 6;
+  let techCount = 10;
+
+  try {
+    const client = window.supabaseClient ||
+      (window.__supabase?.fetchPublic ? null : null);
+
+    if (client) {
+      const { count: pCount, error: pErr } = await client
+        .from('projects')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'Public');
+      if (!pErr && pCount) projectsCount = pCount;
+    }
+
+    if (client) {
+      const { count: vCount, error: vErr } = await client
+        .from('vault_items')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'Public');
+      if (!vErr && vCount) vaultCount = vCount;
+    }
+  } catch (err) {
+    console.warn('Could not fetch real-time stats, using defaults:', err.message);
+  }
+
+  const el = qs('#statistics');
+  if (!el) return;
+
+  const numbers = el.querySelectorAll('.stat-number');
+  if (numbers[0]) numbers[0].dataset.target = projectsCount;
+  if (numbers[1]) numbers[1].dataset.target = vaultCount;
+  if (numbers[2]) numbers[2].dataset.target = techCount;
 }
 
 function animateCounter(el, target) {

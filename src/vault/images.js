@@ -1,51 +1,44 @@
-/* src/vault/images.js
-   Images Section – responsive grid with native lazy loading.
-*/
-export const initSection = (cached) => {
-  const { qs, qsa } = cached;
+const FALLBACK_IMAGES = [
+  { url: 'images/screenshots/kingcraft.svg', description: 'KingCraft — 3D voxel sandbox world' },
+  { url: 'images/screenshots/rust-construction.svg', description: 'Rust Construction — physics sandbox' },
+  { url: 'images/screenshots/farm-empire.svg', description: 'Farm Empire — farming simulation' },
+  { url: 'images/screenshots/rashid-ai.svg', description: 'Rashid AI — conversational assistant' },
+  { url: 'images/screenshots/default.svg', description: 'Project showcase placeholder' },
+];
+
+export const initSection = async (cached) => {
+  const { qs } = cached;
   const container = qs('#vault-images');
   if (!container) return;
 
   const render = (images) => {
     container.innerHTML = '';
     const grid = document.createElement('div');
-    grid.className = 'row g-3';
+    grid.className = 'vault-section-grid vault-images-grid';
     images.forEach((img) => {
-      const col = document.createElement('div');
-      col.className = 'col-12 col-sm-6 col-md-4 col-lg-3';
       const figure = document.createElement('figure');
-      figure.className = 'mb-0';
-      const imgEl = document.createElement('img');
-      imgEl.className = 'img-fluid rounded';
-      imgEl.src = img.url;
-      imgEl.alt = img.description || '';
-      imgEl.loading = 'lazy';
-      figure.appendChild(imgEl);
-      if (img.description) {
-        const figcap = document.createElement('figcaption');
-        figcap.className = 'text-center mt-1 small text-muted';
-        figcap.innerText = img.description;
-        figure.appendChild(figcap);
-      }
-      col.appendChild(figure);
-      grid.appendChild(col);
+      figure.className = 'vault-image-figure';
+      figure.innerHTML = `
+        <img src="${escapeAttr(img.url)}" alt="${escapeAttr(img.description || '')}" loading="lazy" class="vault-img">
+        ${img.description ? `<figcaption>${escapeHtml(img.description)}</figcaption>` : ''}`;
+      grid.appendChild(figure);
     });
     container.appendChild(grid);
   };
 
-  (async () => {
+  try {
     const { data, error } = await window.__supabase.fetchPublic('images', {
       order: { column: 'sort_order', ascending: true }
     });
-    if (error) {
-      console.error('Failed to load images', error);
-      container.innerHTML = '<p class="text-danger">Could not load images.</p>';
-      return;
-    }
-    render(data ?? []);
-  })();
+    if (error || !data?.length) { render(FALLBACK_IMAGES); return; }
+    render(data);
+  } catch { render(FALLBACK_IMAGES); }
 };
 
-/* Helper utilities */
-function qs(s, root = document) { return root.querySelector(s); }
-function qsa(s, root = document) { return root.querySelectorAll(s); }
+function escapeHtml(str) {
+  return str.replace(/[&<>"']/g,
+    (m) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;" }[m]));
+}
+function escapeAttr(str) {
+  return String(str || '').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
