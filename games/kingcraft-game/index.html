@@ -44,7 +44,15 @@
     if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(function(rs) { rs.forEach(function(r) { r.unregister(); }); }); }
   </script>
 
-  <!-- Three.js (resolved by Vite from node_modules) -->
+  <!-- Three.js importmap (للاستخدام المباشر بدون Vite) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
 </head>
 <body>
   <!-- ===== القائمة الرئيسية ===== -->
