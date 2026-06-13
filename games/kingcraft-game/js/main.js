@@ -655,8 +655,7 @@ window.addEventListener("keydown", (e) => {
     document.getElementById("modal-delete").classList.add("hidden");
   } else if (e.code === "Escape" && pauseMenu.classList.contains("hidden") === false) {
     closePause();
-  } else if (e.code === "Escape" && !pauseMenu.classList.contains("hidden") === false) {
-    // world select screen or main menu — close to main menu
+  } else if (e.code === "Escape" && !pauseMenu.classList.contains("hidden") === false && !gameStarted) {
     if (!worldSelect.classList.contains("hidden")) showScreen(menu);
   } else if (e.code === "Escape" && !worldCreate.classList.contains("hidden")) {
     showScreen(worldSelect);
