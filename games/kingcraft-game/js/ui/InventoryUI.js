@@ -36,12 +36,24 @@ export class InventoryUI {
     this.render();
   }
 
-  close() {
+  close(playerPos, dropsManager) {
     // أعد عناصر التصنيع والكومة المحمولة إلى المخزون
     for (let i = 0; i < this.craft.length; i++) {
-      if (this.craft[i]) { this.inv.addItem(this.craft[i].id, this.craft[i].count); this.craft[i] = null; }
+      if (this.craft[i]) {
+        const rem = this.inv.addItem(this.craft[i].id, this.craft[i].count);
+        if (rem > 0 && dropsManager && playerPos) {
+          dropsManager.spawn(playerPos.x, playerPos.y, playerPos.z, this.craft[i].id, rem);
+        }
+        this.craft[i] = null;
+      }
     }
-    if (this.held) { this.inv.addItem(this.held.id, this.held.count); this.held = null; }
+    if (this.held) {
+      const rem = this.inv.addItem(this.held.id, this.held.count);
+      if (rem > 0 && dropsManager && playerPos) {
+        dropsManager.spawn(playerPos.x, playerPos.y, playerPos.z, this.held.id, rem);
+      }
+      this.held = null;
+    }
     this._updateHeld();
     this.mode = null;
     this.furnace = null;

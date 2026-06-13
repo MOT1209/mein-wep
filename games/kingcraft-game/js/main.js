@@ -38,7 +38,7 @@ function hideAllMenus() { ALL_SCREENS.forEach(s => s.classList.add("hidden")); }
 
 // ===== Three.js =====
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
-renderer.setPixelRatio(1);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const scene = new THREE.Scene();
@@ -119,8 +119,8 @@ health.onDeath = () => {
 })();
 
 player.health = health;
-window._kcYaw = 0;
-window._kcPitch = 0;
+player._yaw = 0;
+player._pitch = 0;
 
 // حفظ تلقائي كل 30 ثانية
 let _saveTimer = 0;
@@ -144,6 +144,10 @@ const ui = new InventoryUI(inventory);
 ui.onClose = () => {
   crosshair.classList.remove("hidden");
   if (allMenusHidden()) requestAnimationFrame(() => { canvas.requestPointerLock().catch(() => {}); });
+};
+const _closeUI = () => {
+  const pp = player.pos;
+  ui.close(pp, drops);
 };
 
 // ===== صندوق التحديد + تراكب التكسير =====
@@ -169,6 +173,7 @@ document.addEventListener("mousemove", (e) => {
     if (!started) return;
     yaw -= e.movementX * SENS;
     pitch -= e.movementY * SENS;
+    player._yaw = yaw; player._pitch = pitch;
   } else if (gameStarted) {
     if (_lastMouseX === null) { _lastMouseX = e.clientX; _lastMouseY = e.clientY; return; }
     const dx = e.clientX - _lastMouseX;
@@ -177,6 +182,7 @@ document.addEventListener("mousemove", (e) => {
     _lastMouseY = e.clientY;
     yaw -= dx * SENS;
     pitch -= dy * SENS;
+    player._yaw = yaw; player._pitch = pitch;
   } else {
     return;
   }
@@ -411,10 +417,10 @@ let _showAdvancedTooltips = false;
 let _chunkBorderLines = null;
 let _hitboxLines = null;
 let _paused = false;
+let _lastEntityCount = -1;
+let _lastChunkBorderPos = null;
 
-function showHitboxes(show) {
-  if (_hitboxLines) { scene.remove(_hitboxLines); _hitboxLines.geometry.dispose(); }
-  if (!show) { _hitboxLines = null; return; }
+function buildHitboxGeometry() {
   const g = new THREE.BufferGeometry();
   const pos = []; const idx = [];
   let off = 0;
@@ -433,14 +439,25 @@ function showHitboxes(show) {
   }
   g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
   g.setIndex(idx);
-  _hitboxLines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.6 }));
-  _hitboxLines.visible = true;
+  return g;
+}
+
+function showHitboxes(show) {
+  if (!show) {
+    if (_hitboxLines) { scene.remove(_hitboxLines); _hitboxLines.geometry.dispose(); _hitboxLines = null; }
+    _lastEntityCount = -1;
+    return;
+  }
+  const cnt = entityManager.entities.filter(e => e.alive).length;
+  if (_hitboxLines && cnt === _lastEntityCount) return;
+  _lastEntityCount = cnt;
+  if (_hitboxLines) { scene.remove(_hitboxLines); _hitboxLines.geometry.dispose(); }
+  if (cnt === 0) { _hitboxLines = null; return; }
+  _hitboxLines = new THREE.LineSegments(buildHitboxGeometry(), new THREE.LineBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.6 }));
   scene.add(_hitboxLines);
 }
 
-function showChunkBorders(show, playerPos) {
-  if (_chunkBorderLines) { scene.remove(_chunkBorderLines); _chunkBorderLines.geometry.dispose(); }
-  if (!show) { _chunkBorderLines = null; return; }
+function buildChunkBorderGeometry(playerPos) {
   const g = new THREE.BufferGeometry();
   const pos = [];
   const S = 16;
@@ -461,8 +478,20 @@ function showChunkBorders(show, playerPos) {
     }
   }
   g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-  _chunkBorderLines = new THREE.LineSegments(g, new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.3 }));
-  _chunkBorderLines.visible = true;
+  return g;
+}
+
+function showChunkBorders(show, playerPos) {
+  if (!show) {
+    if (_chunkBorderLines) { scene.remove(_chunkBorderLines); _chunkBorderLines.geometry.dispose(); _chunkBorderLines = null; }
+    _lastChunkBorderPos = null;
+    return;
+  }
+  const key = Math.floor(playerPos.x / 16) + "," + Math.floor(playerPos.z / 16);
+  if (_chunkBorderLines && key === _lastChunkBorderPos) return;
+  _lastChunkBorderPos = key;
+  if (_chunkBorderLines) { scene.remove(_chunkBorderLines); _chunkBorderLines.geometry.dispose(); }
+  _chunkBorderLines = new THREE.LineSegments(buildChunkBorderGeometry(playerPos), new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.3 }));
   scene.add(_chunkBorderLines);
 }
 
@@ -576,13 +605,12 @@ function runCommand(cmd) {
         }
         break;
     }
-  } catch (err) { /* command error — ignore */ }
+  } catch (err) { console.warn("KingCraft: أمر غير صالح:", err); }
 }
 
 // ===== لوحة المفاتيح: المخزون + التحكمات =====
 window.addEventListener("keydown", (e) => {
-  // تتبع مفتاح F3 (حتى لو اللعبة ما بدأت)
-  if (e.code === "F3") { _f3Held = true; window._kcF3Held = true; e.preventDefault(); }
+  if (e.code === "F3") { _f3Held = true; player._f3Held = true; e.preventDefault(); }
   if (!gameStarted) return;
 
   // Chat open — special handling
@@ -597,7 +625,7 @@ window.addEventListener("keydown", (e) => {
     e.preventDefault();
     if (e.code === "KeyA") { world.update(player.pos); }
     else if (e.code === "KeyB") { _showHitboxes = !_showHitboxes; showHitboxes(_showHitboxes); }
-    else if (e.code === "KeyC") { navigator.clipboard.writeText(`XYZ: ${player.pos.x.toFixed(2)} / ${player.pos.y.toFixed(2)} / ${player.pos.z.toFixed(2)}`).catch(() => {}); }
+    else if (e.code === "KeyC") { navigator.clipboard.writeText(`XYZ: ${player.pos.x.toFixed(2)} / ${player.pos.y.toFixed(2)} / ${player.pos.z.toFixed(2)}`).catch(() => {}); console.log("KingCraft: تم نسخ الإحداثيات"); }
     else if (e.code === "KeyF" && !ui.isOpen) { world.renderDistance = Math.min(world.renderDistance + 1, 12); }
     else if (e.code === "KeyG") { _showChunkBorders = !_showChunkBorders; showChunkBorders(_showChunkBorders, player.pos); }
     else if (e.code === "KeyH") { _showAdvancedTooltips = !_showAdvancedTooltips; }
@@ -613,10 +641,10 @@ window.addEventListener("keydown", (e) => {
   if (e.code === "F3" && !e.repeat) { e.preventDefault(); debug.classList.toggle("hidden"); return; }
 
   if (e.code === "KeyE") {
-    if (ui.isOpen) ui.close();
+    if (ui.isOpen) _closeUI();
     else openUI("inventory");
   } else if (e.code === "Escape" && ui.isOpen) {
-    ui.close();
+    _closeUI();
   } else if (e.code === "Escape" && settingsPanel.classList.contains("open")) {
     saveSettingsFromUI();
     settingsPanel.classList.remove("open");
@@ -682,7 +710,7 @@ window.addEventListener("keydown", (e) => {
 });
 
 window.addEventListener("keyup", (e) => {
-  if (e.code === "F3") { _f3Held = false; window._kcF3Held = false; }
+  if (e.code === "F3") { _f3Held = false; player._f3Held = false; }
 });
 
 // ===== إعادة الحياة =====
@@ -714,8 +742,10 @@ function startGame(worldData) {
         player.vel.set(0, 0, 0);
         yaw = _saveData.player.yaw || 0;
         pitch = _saveData.player.pitch || 0;
+        player._yaw = yaw; player._pitch = pitch;
         player.flying = _saveData.player.flying || false;
         player.thirdPerson = _saveData.player.thirdPerson || false;
+        player.bedPos = _saveData.player.bedPos || null;
         if (_saveData.inventory) {
           for (let i = 0; i < _saveData.inventory.length && i < inventory.slots.length; i++) {
             inventory.slots[i] = _saveData.inventory[i] ? { id: _saveData.inventory[i].id, count: _saveData.inventory[i].count, dur: _saveData.inventory[i].dur } : null;
@@ -746,8 +776,8 @@ function startGame(worldData) {
       const p = canvas.requestPointerLock();
       if (p && p.catch) p.catch(() => { started = true; });
       if (document.pointerLockElement !== canvas) started = true;
-    }).catch(() => {
-      // if load fails, start new anyway
+    }).catch((err) => {
+      console.warn("KingCraft: فشل تحميل السيف, بدء عالم جديد", err);
       player.spawn();
       inventory.giveStarter();
       lastDir = player.applyCamera(yaw, pitch);
@@ -761,7 +791,9 @@ function startGame(worldData) {
       if (document.pointerLockElement !== canvas) started = true;
     });
   } catch (err) {
-    if (window.kcError) window.kcError("فشل بدء اللعبة: " + (err && err.stack ? err.stack : err));
+    const msg = err && err.stack ? err.stack : err;
+    console.error("KingCraft: فشل بدء اللعبة:", msg);
+    if (window.kcError) window.kcError("فشل بدء اللعبة: " + msg);
     else alert("خطأ: " + err);
   }
 }
@@ -1037,11 +1069,22 @@ function loop(now) {
     if (playing) {
       player.update(dt, yaw);
       lastDir = player.applyCamera(yaw, pitch);
-      window._kcYaw = yaw;
-      window._kcPitch = pitch;
+
+      // صوت السباحة
+      if (player.inWater && !player._wasInWater) sound.playSplash();
 
       // صوت الخطوات
-      if (player.onGround && (Math.abs(player.vel.x) > 0.05 || Math.abs(player.vel.z) > 0.05) && !player.flying) {
+      if (player.inWater) {
+        if (Math.abs(player.vel.x) > 0.05 || Math.abs(player.vel.z) > 0.05) {
+          _stepTimer += dt;
+          if (_stepTimer >= 0.6) {
+            _stepTimer = 0;
+            sound.playSplash();
+          }
+        } else {
+          _stepTimer = 0.6;
+        }
+      } else if (player.onGround && (Math.abs(player.vel.x) > 0.05 || Math.abs(player.vel.z) > 0.05) && !player.flying) {
         _stepTimer += dt;
         const stepInterval = player.keys["ControlLeft"] ? 0.35 : 0.5;
         if (_stepTimer >= stepInterval) {
@@ -1066,9 +1109,8 @@ function loop(now) {
     }
     world.update(player.pos);
 
-    // تحديث حدود الأراضي وصناديق الاصطدام إن كانت ظاهرة
-    if (_showChunkBorders && _chunkBorderLines) showChunkBorders(true, player.pos);
-    if (_showHitboxes && _hitboxLines) showHitboxes(true);
+    if (_showChunkBorders) showChunkBorders(true, player.pos);
+    if (_showHitboxes) showHitboxes(true);
 
     const hit = playing ? raycastVoxel(world, eyeOrigin(), lastDir) : null;
     if (hit) {
@@ -1118,6 +1160,6 @@ if ("serviceWorker" in navigator) {
     }
     const regs = await navigator.serviceWorker.getRegistrations();
     await Promise.all(regs.map((r) => r.unregister()));
-    navigator.serviceWorker.register("sw.js").catch(() => {});
+    navigator.serviceWorker.register("sw.js").catch((err) => { console.warn("KingCraft: فشل تسجيل Service Worker", err); });
   });
 }

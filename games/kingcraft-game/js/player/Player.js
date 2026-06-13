@@ -9,6 +9,7 @@ import {
 const HALF = PLAYER_WIDTH / 2;
 const SNEAK_HEIGHT = 1.5;
 const SNEAK_SPEED = 1.2;
+const SWIM_SPEED = 3.0;
 
 export class Player {
   constructor(world, camera) {
@@ -25,6 +26,11 @@ export class Player {
     this._height = PLAYER_HEIGHT;
     this._eye = PLAYER_EYE;
     this.sound = null;
+    this.bedPos = null;
+    this.inWater = false;
+    this._wasInWater = false;
+
+    this._headInWater = false;
 
     this.keys = {};
     this._lastSpace = 0;
@@ -34,7 +40,7 @@ export class Player {
 
   _bindInput() {
     window.addEventListener("keydown", (e) => {
-      if (window._kcF3Held) return; // F3 combos تمنع الحركة
+      if (this._f3Held) return; // F3 combos تمنع الحركة
       const k = e.code;
       this.keys[k] = true;
       if (k === "KeyV") this.thirdPerson = !this.thirdPerson;
@@ -50,9 +56,14 @@ export class Player {
   }
 
   spawn() {
-    const y = this.world.spawnHeight(0, 0);
-    this.pos.set(0.5, y + 0.2, 0.5);
-    this.vel.set(0, 0, 0);
+    if (this.bedPos) {
+      this.pos.set(this.bedPos.x + 0.5, this.bedPos.y + 0.5, this.bedPos.z + 0.5);
+      this.vel.set(0, 0, 0);
+    } else {
+      const y = this.world.spawnHeight(0, 0);
+      this.pos.set(0.5, y + 0.2, 0.5);
+      this.vel.set(0, 0, 0);
+    }
     this._height = PLAYER_HEIGHT;
     this._eye = PLAYER_EYE;
     this._fallDist = 0;
@@ -73,8 +84,10 @@ export class Player {
     dt = Math.min(dt, 0.05);
     const startY = this.pos.y;
     this._prevOnGround = this.onGround;
+    this._wasInWater = this.inWater;
+    this._checkWater();
 
-    this.sneaking = this.keys["ShiftLeft"] && !this.flying && this.onGround;
+    this.sneaking = this.keys["ShiftLeft"] && !this.flying && this.onGround && !this.inWater;
 
     const targetH = this.sneaking ? SNEAK_HEIGHT : PLAYER_HEIGHT;
     if (targetH > this._height && this._collides(this.pos.x, this.pos.y, this.pos.z, targetH)) {
@@ -105,6 +118,17 @@ export class Player {
       this.vel.y = 0;
       if (this.keys["Space"])               this.vel.y = FLY_SPEED;
       if (this.keys["ShiftLeft"])           this.vel.y = -FLY_SPEED;
+    } else if (this.inWater) {
+      const swimSpeed = SWIM_SPEED * 0.7;
+      this.vel.x = moveX * swimSpeed / baseSpeed;
+      this.vel.z = moveZ * swimSpeed / baseSpeed;
+      this.vel.y -= GRAVITY * 0.5 * dt;
+      if (this.keys["Space"]) {
+        this.vel.y = 3.5;
+      }
+      if (this.keys["ShiftLeft"]) {
+        this.vel.y = -2.0;
+      }
     } else {
       this.vel.x = moveX;
       this.vel.z = moveZ;
@@ -120,7 +144,7 @@ export class Player {
     this._moveAxis("z", this.vel.z * dt);
     this._moveAxis("y", this.vel.y * dt);
 
-    if (!this.flying) {
+    if (!this.flying && !this.inWater) {
       const dy = startY - this.pos.y;
       if (dy > 0 && !this.onGround) {
         this._fallDist += dy;
@@ -133,7 +157,7 @@ export class Player {
       this._fallDist = 0;
     }
 
-    if (this.onGround && run && (Math.abs(this.vel.x) > 0.1 || Math.abs(this.vel.z) > 0.1)) {
+    if (this.onGround && run && !this.inWater && (Math.abs(this.vel.x) > 0.1 || Math.abs(this.vel.z) > 0.1)) {
       if (this.health) this.health.addExhaustion(EXHAUSTION_PER_SPRINT * (Math.abs(this.vel.x) + Math.abs(this.vel.z)) * dt);
     }
 
@@ -179,6 +203,18 @@ export class Player {
     const look = eye.clone().add(dir);
     this.camera.lookAt(look);
     return dir;
+  }
+
+  _checkWater() {
+    const wx = Math.floor(this.pos.x);
+    const wy = Math.floor(this.pos.y + this._eye * 0.5);
+    const wz = Math.floor(this.pos.z);
+    this._headInWater = this.world.isLiquidAt(wx, wy, wz);
+    this.inWater = this.world.isLiquidAt(wx, wy - 1, wz) || this._headInWater;
+  }
+
+  setBed(x, y, z) {
+    this.bedPos = { x: Math.floor(x), y: Math.floor(y), z: Math.floor(z) };
   }
 
   get height() { return this._height; }

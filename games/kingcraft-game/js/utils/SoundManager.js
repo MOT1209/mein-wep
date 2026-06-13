@@ -244,6 +244,23 @@ export class SoundManager {
     o.stop(ctx.currentTime + 0.5);
   }
 
+  playSplash() {
+    const ctx = this._ensure();
+    if (!ctx) return;
+    const b = this._noise(0.15);
+    const f = ctx.createBiquadFilter();
+    f.type = "bandpass";
+    f.frequency.value = 1200;
+    f.Q.value = 3;
+    const g = ctx.createGain();
+    g.gain.value = this._volume * 0.4;
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+    const n = ctx.createBufferSource();
+    n.buffer = b;
+    n.connect(f); f.connect(g); g.connect(ctx.destination);
+    n.start();
+  }
+
   playSwing() {
     const ctx = this._ensure();
     if (!ctx) return;

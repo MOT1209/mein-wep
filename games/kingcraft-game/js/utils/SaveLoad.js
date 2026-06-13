@@ -25,19 +25,20 @@ export function saveGame(player, inventory, health, world, drops) {
   if (!_worldId) return false;
   try {
     const data = {
-      version: 1,
+      version: 2,
       time: Date.now(),
       player: {
         x: player.pos.x,
         y: player.pos.y,
         z: player.pos.z,
-        yaw: window._kcYaw || 0,
-        pitch: window._kcPitch || 0,
+        yaw: player._yaw || 0,
+        pitch: player._pitch || 0,
         health: health ? health.health : 20,
         food: health ? health.food : 20,
         saturation: health ? health.saturation : 20,
         flying: player.flying,
         thirdPerson: player.thirdPerson,
+        bedPos: player.bedPos,
       },
       inventory: inventory.slots.map(s => s ? { id: s.id, count: s.count, dur: s.dur } : null),
       armor: inventory.armor.map(s => s ? { id: s.id, count: s.count, dur: s.dur } : null),

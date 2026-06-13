@@ -1,7 +1,7 @@
 // إدارة العالم: القطع، التحميل/التفريغ حول اللاعب، القراءة/الكتابة بإحداثيات عالمية.
 import * as THREE from "three";
 import { CHUNK_SIZE, WORLD_HEIGHT, RENDER_DISTANCE } from "../utils/Constants.js";
-import { AIR, isSolid } from "./BlockData.js";
+import { AIR, isSolid, isLiquid } from "./BlockData.js";
 import { Chunk } from "./Chunk.js";
 import { TerrainGen } from "./TerrainGen.js";
 import { buildAtlas } from "../blocks/BlockTexture.js";
@@ -118,6 +118,10 @@ export class World {
     return isSolid(this.getBlock(Math.floor(x), Math.floor(y), Math.floor(z)));
   }
 
+  isLiquidAt(x, y, z) {
+    return isLiquid(this.getBlock(Math.floor(x), Math.floor(y), Math.floor(z)));
+  }
+
   update(playerPos) {
     const pcx = Math.floor(playerPos.x / S);
     const pcz = Math.floor(playerPos.z / S);
@@ -185,7 +189,13 @@ export class World {
     const cx = Math.floor(x / S), cz = Math.floor(z / S);
     this.ensureChunk(cx, cz);
     for (let y = WORLD_HEIGHT - 1; y > 0; y--) {
-      if (isSolid(this.getBlock(x, y, z))) return y + 1;
+      if (isSolid(this.getBlock(x, y, z))) {
+        let top = y + 1;
+        while (top < WORLD_HEIGHT - 1 && !isSolid(this.getBlock(x, top, z)) && this.getBlock(x, top, z) !== AIR) {
+          top++;
+        }
+        return top;
+      }
     }
     return WORLD_HEIGHT / 2;
   }
