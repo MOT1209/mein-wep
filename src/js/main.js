@@ -15,7 +15,7 @@ import { initAnimations } from './modules/animations.js';
 import { initProjectFilters, initProjects } from './modules/projects.js';
 import { initSettings } from './modules/settings.js';
 import { initAnalytics, trackContactFormSubmit } from './services/analytics.js';
-import { incrementVisitorCount } from './services/supabase.js';
+import { incrementVisitorCount, submitContactMessage } from './services/supabase.js';
 import { qs, qsa, on } from './utils/dom.js';
 import {
   initTypewriter,
@@ -115,17 +115,25 @@ const boot = async () => {
   // 7️⃣ Contact form & visitor counter
   const contactForm = qs('.ct-form');
   if (contactForm) {
-    on(contactForm, 'submit', (e) => {
+    on(contactForm, 'submit', async (e) => {
       e.preventDefault();
-      const name = contactForm.querySelector('#ct-name')?.value ?? '';
-      const email = contactForm.querySelector('#ct-email')?.value ?? '';
-      const msg = contactForm.querySelector('#ct-msg')?.value ?? '';
-      const messages = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
-      messages.push({ name, email, message: msg, date: new Date().toLocaleString() });
-      localStorage.setItem('contactMessages', JSON.stringify(messages));
-      alert('Message Sent! (See Admin Dashboard)');
-      trackContactFormSubmit();
-      contactForm.reset();
+      const nameVal = contactForm.querySelector('#ct-name')?.value ?? '';
+      const emailVal = contactForm.querySelector('#ct-email')?.value ?? '';
+      const msgVal = contactForm.querySelector('#ct-msg')?.value ?? '';
+      const submitBtn = contactForm.querySelector('button[type="submit"]');
+      if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
+      const { error } = await submitContactMessage(nameVal, emailVal, msgVal);
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>'; }
+      if (error) {
+        alert('Failed to send. Your message was saved locally.');
+        const msgs = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
+        msgs.push({ name: nameVal, email: emailVal, message: msgVal, date: new Date().toLocaleString() });
+        localStorage.setItem('contactMessages', JSON.stringify(msgs));
+      } else {
+        alert('Message sent! I\'ll get back to you soon.');
+        trackContactFormSubmit();
+        contactForm.reset();
+      }
     });
   }
 

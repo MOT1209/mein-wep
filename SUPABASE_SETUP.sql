@@ -388,3 +388,24 @@ create policy "Vault items admin update" on public.vault_items for update
   to authenticated using (public.is_admin()) with check (public.is_admin());
 create policy "Vault items admin delete" on public.vault_items for delete
   to authenticated using (public.is_admin());
+
+-- ==============================================================================
+-- 11. TABLE: contact_messages
+-- ==============================================================================
+create table if not exists public.contact_messages (
+  id bigint generated always as identity primary key,
+  name text not null,
+  email text not null,
+  message text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.contact_messages enable row level security;
+
+create policy "Anyone can insert contact messages"
+on public.contact_messages for insert to anon, authenticated
+with check (true);
+
+create policy "Only admins can view contact messages"
+on public.contact_messages for select
+to authenticated using (public.is_admin());

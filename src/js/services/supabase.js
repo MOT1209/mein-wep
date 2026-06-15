@@ -109,6 +109,18 @@ export async function incrementVisitorCount() {
     if (error) console.warn('Visitor count sync failed:', error.message);
 }
 
+export async function submitContactMessage(name, email, message) {
+    const client = getSupabaseClient();
+    if (!client) return { error: new Error('Supabase client is not available') };
+
+    return createContentItem('contact_messages', {
+        name,
+        email,
+        message,
+        created_at: new Date().toISOString()
+    });
+}
+
 async function fetchPublicContent(table) {
     const client = getSupabaseClient();
     if (!client) return { items: null, error: new Error('Supabase client is not available') };
