@@ -418,6 +418,13 @@ body.light-mode .navbar.scrolled { background: rgba(250, 250, 250, 0.92); }
 .ct-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-subtle); }
 .ct-input::placeholder { color: var(--text-muted); }
 textarea.ct-input { resize: vertical; min-height: 100px; }
+.ct-toast {
+  padding: 12px 20px; border-radius: var(--radius-sm); font-size: 0.85rem;
+  margin-top: 8px; animation: ctFadeIn 0.3s ease; text-align: center;
+}
+.ct-toast-success { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid rgba(34,197,94,0.25); }
+.ct-toast-info { background: rgba(56,189,248,0.15); color: #38bdf8; border: 1px solid rgba(56,189,248,0.25); }
+@keyframes ctFadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ── Component: Footer ── */
 .footer {

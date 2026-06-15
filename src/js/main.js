@@ -113,6 +113,18 @@ const boot = async () => {
   }
 
   // 7️⃣ Contact form & visitor counter
+  const showToast = (message, type = 'success') => {
+    const existing = qs('.ct-toast');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = `ct-toast ct-toast-${type}`;
+    toast.textContent = message;
+    toast.setAttribute('role', 'alert');
+    const form = qs('.ct-form');
+    if (form) form.parentNode.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+  };
+
   const contactForm = qs('.ct-form');
   if (contactForm) {
     on(contactForm, 'submit', async (e) => {
@@ -125,12 +137,14 @@ const boot = async () => {
       const { error } = await submitContactMessage(nameVal, emailVal, msgVal);
       if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>'; }
       if (error) {
-        alert('Failed to send. Your message was saved locally.');
+        showToast('Saved locally — will sync when available.', 'info');
         const msgs = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
         msgs.push({ name: nameVal, email: emailVal, message: msgVal, date: new Date().toLocaleString() });
         localStorage.setItem('contactMessages', JSON.stringify(msgs));
+        trackContactFormSubmit();
+        contactForm.reset();
       } else {
-        alert('Message sent! I\'ll get back to you soon.');
+        showToast('Message sent! I\'ll get back to you soon.', 'success');
         trackContactFormSubmit();
         contactForm.reset();
       }

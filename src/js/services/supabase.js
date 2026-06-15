@@ -113,12 +113,12 @@ export async function submitContactMessage(name, email, message) {
     const client = getSupabaseClient();
     if (!client) return { error: new Error('Supabase client is not available') };
 
-    return createContentItem('contact_messages', {
-        name,
-        email,
-        message,
-        created_at: new Date().toISOString()
-    });
+    const { error } = await withTimeout(
+        client.from('contact_messages').insert({ name, email, message }).select(),
+        'Supabase contact message'
+    );
+
+    return { error };
 }
 
 async function fetchPublicContent(table) {
