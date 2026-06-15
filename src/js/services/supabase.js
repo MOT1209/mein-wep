@@ -114,7 +114,7 @@ export async function submitContactMessage(name, email, message) {
     if (!client) return { error: new Error('Supabase client is not available') };
 
     const { error } = await withTimeout(
-        client.from('contact_messages').insert({ name, email, message }).select(),
+        client.from('contact_messages').insert({ name, email, message }),
         'Supabase contact message'
     );
 
