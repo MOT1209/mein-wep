@@ -342,12 +342,15 @@
                     <i class="fas fa-search"></i>
                     <input type="text" class="vault-search" placeholder="Search vault..." aria-label="Search vault">
                 </div>
-                <div class="vault-filters" role="tablist" aria-label="Vault categories">
-                    <button class="vault-filter active" data-filter="prompts" role="tab" aria-selected="true">Prompts</button>
-                    <button class="vault-filter" data-filter="code" role="tab" aria-selected="false">Code</button>
-                    <button class="vault-filter" data-filter="media" role="tab" aria-selected="false">Media</button>
-                    <button class="vault-filter" data-filter="docs" role="tab" aria-selected="false">Docs</button>
-                    <button class="vault-filter" data-filter="archives" role="tab" aria-selected="false">Archives</button>
+                <div class="vault-toolbar-actions">
+                    <div class="vault-filters" role="tablist" aria-label="Vault categories">
+                        <button class="vault-filter active" data-filter="prompts" role="tab" aria-selected="true">Prompts</button>
+                        <button class="vault-filter" data-filter="code" role="tab" aria-selected="false">Code</button>
+                        <button class="vault-filter" data-filter="media" role="tab" aria-selected="false">Media</button>
+                        <button class="vault-filter" data-filter="docs" role="tab" aria-selected="false">Docs</button>
+                        <button class="vault-filter" data-filter="archives" role="tab" aria-selected="false">Archives</button>
+                    </div>
+                    <button class="vault-add-btn" id="vault-add-btn"><i class="fas fa-plus"></i> Add</button>
                 </div>
             </div>
             <div class="vault-section-desc" id="vault-section-desc">Click an item to copy, view, or download.</div>

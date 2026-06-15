@@ -179,10 +179,8 @@ function showFlash(msg) {
 function createCard(item) {
   const card = document.createElement('div');
   card.className = 'vault-card';
-  card.dataset.category = item.category;
+  card.dataset.category = item.category || 'prompts';
   card.dataset.itemId = item.id;
-
-  const catLabel = item.category.charAt(0).toUpperCase() + item.category.slice(1);
 
   let contentPreview = '';
   let actionBtn = '';
@@ -260,7 +258,7 @@ function renderGrid() {
   grid.innerHTML = '';
 
   if (items.length === 0) {
-    grid.innerHTML = `<div class="vault-empty">No items found in <strong>${currentFilter}</strong>. ${window.__admin?.user ? 'Use the Vault Manager above to add one.' : ''}</div>`;
+    grid.innerHTML = `<div class="vault-empty">No items found in <strong>${currentFilter}</strong>. Click <strong>+ Add</strong> to add one.</div>`;
     return;
   }
 
@@ -307,6 +305,143 @@ function switchTab(category) {
   renderGrid();
 }
 
+/* ── Vault Modal ── */
+let vaultModal = null;
+
+function initVaultModal() {
+  if (qs('#vault-modal')) return;
+  vaultModal = document.createElement('div');
+  vaultModal.id = 'vault-modal';
+  vaultModal.className = 'admin-modal';
+  vaultModal.innerHTML = `
+    <div class="admin-modal-overlay"></div>
+    <div class="admin-modal-content">
+      <div class="admin-modal-header">
+        <h3 id="vault-modal-title">Add to Vault</h3>
+        <button class="admin-modal-close" data-action="close-modal"><i class="fas fa-xmark"></i></button>
+      </div>
+      <form class="admin-modal-form" id="vault-form">
+        <div class="admin-field">
+          <label for="vf-icon">Icon</label>
+          <input type="text" id="vf-icon" class="admin-input" value="fas fa-folder" required>
+        </div>
+        <div class="admin-field">
+          <label for="vf-title">Title</label>
+          <input type="text" id="vf-title" class="admin-input" required placeholder="e.g. My Prompt">
+        </div>
+        <div class="admin-field">
+          <label for="vf-desc">Description</label>
+          <textarea id="vf-desc" class="admin-input" rows="2" placeholder="What is this?"></textarea>
+        </div>
+        <div class="admin-field">
+          <label for="vf-tags">Tags <small>(comma separated)</small></label>
+          <input type="text" id="vf-tags" class="admin-input" placeholder="js, react, api">
+        </div>
+        <div class="admin-field" id="vf-content-field">
+          <label for="vf-content">Content <small>(for prompts, code, docs)</small></label>
+          <textarea id="vf-content" class="admin-input" rows="4" placeholder="Paste text here..."></textarea>
+        </div>
+        <div class="admin-field" id="vf-file-field" style="display:none;">
+          <label for="vf-file-url">File URL <small>(for media, archives)</small></label>
+          <input type="text" id="vf-file-url" class="admin-input" placeholder="https://example.com/file.zip">
+        </div>
+        <div class="admin-field admin-only" id="vf-locked-field">
+          <label class="admin-check">
+            <input type="checkbox" id="vf-locked"> <span>Locked <i class="fas fa-lock"></i></span>
+          </label>
+        </div>
+        <div class="admin-field">
+          <label for="vf-category">Category</label>
+          <select id="vf-category" class="admin-input">
+            <option value="prompts">Prompts</option>
+            <option value="code">Code</option>
+            <option value="media">Media</option>
+            <option value="docs">Docs</option>
+            <option value="archives">Archives</option>
+          </select>
+        </div>
+        <div class="admin-modal-actions">
+          <button type="button" class="admin-btn" data-action="close-modal">Cancel</button>
+          <button type="submit" class="admin-btn admin-btn-primary">Save to Vault</button>
+        </div>
+      </form>
+    </div>`;
+  document.body.appendChild(vaultModal);
+
+  /* Category toggle */
+  const catSelect = vaultModal.querySelector('#vf-category');
+  on(catSelect, 'change', () => {
+    const val = catSelect.value;
+    vaultModal.querySelector('#vf-content-field').style.display = (val === 'media' || val === 'archives') ? 'none' : '';
+    vaultModal.querySelector('#vf-file-field').style.display = (val === 'media' || val === 'archives') ? '' : 'none';
+  });
+
+  /* Close */
+  on(vaultModal.querySelector('[data-action="close-modal"]'), 'click', () => vaultModal.classList.remove('open'));
+  on(vaultModal.querySelector('.admin-modal-overlay'), 'click', () => vaultModal.classList.remove('open'));
+  on(vaultModal.querySelector('#vault-form'), 'submit', saveVaultItemForm);
+}
+
+function openVaultModal() {
+  if (!vaultModal) initVaultModal();
+  vaultModal.querySelector('#vault-modal-title').textContent = 'Add to Vault';
+  vaultModal.querySelector('#vault-form').reset();
+  vaultModal.querySelector('#vf-icon').value = 'fas fa-folder';
+  delete vaultModal.dataset.editId;
+  vaultModal.querySelector('#vf-category').value = 'prompts';
+  vaultModal.querySelector('#vf-content-field').style.display = '';
+  vaultModal.querySelector('#vf-file-field').style.display = 'none';
+  vaultModal.classList.add('open');
+}
+
+function saveVaultItemForm(e) {
+  e.preventDefault();
+  const cat = vaultModal.querySelector('#vf-category').value;
+  const data = {
+    icon: vaultModal.querySelector('#vf-icon').value.trim() || 'fas fa-folder',
+    title: vaultModal.querySelector('#vf-title').value.trim(),
+    description: vaultModal.querySelector('#vf-desc').value.trim(),
+    tags: vaultModal.querySelector('#vf-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+    category: cat,
+    locked: vaultModal.querySelector('#vf-locked')?.checked || false,
+    content: (cat === 'media' || cat === 'archives') ? '' : vaultModal.querySelector('#vf-content').value.trim(),
+    fileUrl: (cat === 'media' || cat === 'archives') ? vaultModal.querySelector('#vf-file-url').value.trim() : '',
+    fileType: cat === 'media' ? 'image' : cat === 'archives' ? 'zip' : '',
+  };
+  if (!data.title) { showFlash('Enter a title'); return; }
+
+  const editId = vaultModal.dataset.editId;
+  if (editId) {
+    updateVaultItem(Number(editId), data);
+    showFlash('Updated!');
+  } else {
+    addVaultItem(data);
+    showFlash('Added to vault!');
+  }
+  vaultModal.classList.remove('open');
+}
+
+export function openEditVaultModal(item) {
+  if (!vaultModal) initVaultModal();
+  vaultModal.querySelector('#vault-modal-title').textContent = 'Edit Vault Item';
+  vaultModal.querySelector('#vf-icon').value = item.icon || 'fas fa-folder';
+  vaultModal.querySelector('#vf-title').value = item.title || '';
+  vaultModal.querySelector('#vf-desc').value = item.description || '';
+  vaultModal.querySelector('#vf-tags').value = (item.tags || []).join(', ');
+  vaultModal.querySelector('#vf-content').value = item.content || '';
+  vaultModal.querySelector('#vf-file-url').value = item.fileUrl || '';
+  vaultModal.querySelector('#vf-category').value = item.category || 'prompts';
+  const cat = item.category || 'prompts';
+  vaultModal.querySelector('#vf-content-field').style.display = (cat === 'media' || cat === 'archives') ? 'none' : '';
+  vaultModal.querySelector('#vf-file-field').style.display = (cat === 'media' || cat === 'archives') ? '' : 'none';
+  if (vaultModal.querySelector('#vf-locked')) {
+    vaultModal.querySelector('#vf-locked').checked = !!item.locked;
+    vaultModal.querySelector('#vf-locked').closest('.admin-field')?.classList.remove('admin-only');
+  }
+  vaultModal.dataset.editId = item.id;
+  vaultModal.classList.add('open');
+}
+
 /* ── Init ── */
 export async function initVaultSearch() {
   if (!qs('#vault-grid')) return;
@@ -335,6 +470,12 @@ export async function initVaultSearch() {
       currentQuery = searchInput.value.toLowerCase();
       renderGrid();
     });
+  }
+
+  /* Add button (always visible) */
+  const addBtn = qs('#vault-add-btn');
+  if (addBtn) {
+    on(addBtn, 'click', openVaultModal);
   }
 
   /* Initial render */

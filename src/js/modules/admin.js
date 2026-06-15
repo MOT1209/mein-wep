@@ -1,13 +1,12 @@
 import { getSupabaseClient, isCurrentUserAdmin } from '../services/supabase.js';
 import { qs, qsa, on } from '../utils/dom.js';
-import { escapeHtml, sanitizeInput } from '../utils/security.js';
-import { addVaultItem, updateVaultItem, deleteVaultItem, getVaultStore } from './vault.js';
+import { escapeHtml } from '../utils/security.js';
+import { addVaultItem, updateVaultItem, deleteVaultItem, getVaultStore, openEditVaultModal } from './vault.js';
 
 const VAULT_PIN_KEY = 'rashid_vault_pin';
 
 let isAdmin = false;
 let adminUser = null;
-let vaultModal = null;
 
 /* ── Init Admin Mode ── */
 export async function initAdmin() {
@@ -174,106 +173,17 @@ function initVaultAdmin() {
     </div>`;
   vaultSection.parentNode.insertBefore(panel, vaultSection.nextSibling);
 
-  initModal();
-}
-
-/* ── Modal ── */
-function initModal() {
-  if (qs('#vault-modal')) return;
-  vaultModal = document.createElement('div');
-  vaultModal.id = 'vault-modal';
-  vaultModal.className = 'admin-modal';
-  vaultModal.innerHTML = `
-    <div class="admin-modal-overlay"></div>
-    <div class="admin-modal-content">
-      <div class="admin-modal-header">
-        <h3 id="vault-modal-title">Vault Item</h3>
-        <button class="admin-modal-close" data-action="close-modal"><i class="fas fa-xmark"></i></button>
-      </div>
-      <form class="admin-modal-form" id="vault-form">
-        <div class="admin-field">
-          <label for="vf-icon">Icon</label>
-          <input type="text" id="vf-icon" class="admin-input" value="fas fa-folder" required>
-        </div>
-        <div class="admin-field">
-          <label for="vf-title">Title</label>
-          <input type="text" id="vf-title" class="admin-input" required>
-        </div>
-        <div class="admin-field">
-          <label for="vf-desc">Description</label>
-          <textarea id="vf-desc" class="admin-input" rows="2"></textarea>
-        </div>
-        <div class="admin-field">
-          <label for="vf-tags">Tags <small>(comma separated)</small></label>
-          <input type="text" id="vf-tags" class="admin-input" placeholder="js, react, api">
-        </div>
-        <div class="admin-field" id="vf-content-field">
-          <label for="vf-content">Content <small>(for prompts, code, docs)</small></label>
-          <textarea id="vf-content" class="admin-input" rows="4" placeholder="Paste the prompt text, code, or documentation content here..."></textarea>
-        </div>
-        <div class="admin-field" id="vf-file-field" style="display:none;">
-          <label for="vf-file-url">File URL <small>(for media, archives)</small></label>
-          <input type="text" id="vf-file-url" class="admin-input" placeholder="https://example.com/file.zip">
-        </div>
-        <div class="admin-field">
-          <label for="vf-category">Category</label>
-          <select id="vf-category" class="admin-input">
-            <option value="prompts">Prompts</option>
-            <option value="code">Code</option>
-            <option value="media">Media</option>
-            <option value="docs">Docs</option>
-            <option value="archives">Archives</option>
-          </select>
-        </div>
-        <div class="admin-field-row">
-          <label class="admin-check">
-            <input type="checkbox" id="vf-locked"> <span>Locked <i class="fas fa-lock"></i></span>
-          </label>
-        </div>
-        <div class="admin-modal-actions">
-          <button type="button" class="admin-btn" data-action="close-modal">Cancel</button>
-          <button type="submit" class="admin-btn admin-btn-primary">Save</button>
-        </div>
-      </form>
-    </div>`;
-  document.body.appendChild(vaultModal);
-
-  /* Show/hide content/file fields based on category */
-  const catSelect = vaultModal.querySelector('#vf-category');
-  on(catSelect, 'change', () => toggleCategoryFields(catSelect.value));
-  toggleCategoryFields(catSelect.value);
-
-  on(vaultModal.querySelector('[data-action="close-modal"]'), 'click', () => vaultModal.classList.remove('open'));
-  on(vaultModal.querySelector('.admin-modal-overlay'), 'click', () => vaultModal.classList.remove('open'));
-  on(vaultModal.querySelector('#vault-form'), 'submit', saveVaultItem);
-
-  on(document, 'click', (e) => {
-    const addBtn = e.target.closest('[data-action="add-vault-item"]');
-    if (addBtn) {
-      vaultModal.querySelector('#vault-modal-title').textContent = 'Add Vault Item';
-      vaultModal.querySelector('#vault-form').reset();
-      vaultModal.querySelector('#vf-icon').value = 'fas fa-folder';
-      delete vaultModal.dataset.editId;
-      toggleCategoryFields(vaultModal.querySelector('#vf-category').value);
-      vaultModal.classList.add('open');
-    }
-    const pinBtn = e.target.closest('[data-action="set-vault-pin"]');
-    if (pinBtn) {
-      const current = localStorage.getItem(VAULT_PIN_KEY) || '1234';
-      const pin = prompt('Enter new 4-6 digit PIN:', current);
-      if (pin && pin.length >= 4) {
-        localStorage.setItem(VAULT_PIN_KEY, pin);
-        showToast('PIN updated');
-      }
-    }
-  });
-
-  /* Edit/delete on vault cards */
+  /* Delegate: edit/delete vault cards */
   on(document, 'click', (e) => {
     const editBtn = e.target.closest('.vault-card-btn[data-action="edit-vault"]');
     if (editBtn) {
       const card = editBtn.closest('.vault-card');
-      if (card) openEditModal(card);
+      if (card) {
+        const store = getVaultStore();
+        const id = Number(card.dataset.itemId);
+        const item = store.items.find(i => i.id === id);
+        if (item) openEditVaultModal(item);
+      }
       return;
     }
     const delBtn = e.target.closest('.vault-card-btn[data-action="delete-vault"]');
@@ -286,71 +196,17 @@ function initModal() {
       }
       return;
     }
+    const pinBtn = e.target.closest('[data-action="set-vault-pin"]');
+    if (pinBtn) {
+      const current = localStorage.getItem(VAULT_PIN_KEY) || '1234';
+      const pin = prompt('Enter new 4-6 digit PIN:', current);
+      if (pin && pin.length >= 4) {
+        localStorage.setItem(VAULT_PIN_KEY, pin);
+        showToast('PIN updated');
+      }
+      return;
+    }
   });
-}
-
-function toggleCategoryFields(cat) {
-  const contentField = vaultModal.querySelector('#vf-content-field');
-  const fileField = vaultModal.querySelector('#vf-file-field');
-  if (!contentField || !fileField) return;
-  if (cat === 'media' || cat === 'archives') {
-    contentField.style.display = 'none';
-    fileField.style.display = '';
-  } else {
-    contentField.style.display = '';
-    fileField.style.display = 'none';
-  }
-}
-
-function openEditModal(card) {
-  const store = getVaultStore();
-  const id = Number(card.dataset.itemId);
-  const item = store.items.find(i => i.id === id);
-  if (!item) return;
-
-  vaultModal.querySelector('#vault-modal-title').textContent = 'Edit Vault Item';
-  vaultModal.querySelector('#vf-icon').value = item.icon || 'fas fa-folder';
-  vaultModal.querySelector('#vf-title').value = item.title || '';
-  vaultModal.querySelector('#vf-desc').value = item.description || '';
-  vaultModal.querySelector('#vf-tags').value = (item.tags || []).join(', ');
-  vaultModal.querySelector('#vf-content').value = item.content || '';
-  vaultModal.querySelector('#vf-file-url').value = item.fileUrl || '';
-  vaultModal.querySelector('#vf-category').value = item.category || 'prompts';
-  vaultModal.querySelector('#vf-locked').checked = !!item.locked;
-  toggleCategoryFields(item.category);
-  vaultModal.dataset.editId = id;
-  vaultModal.classList.add('open');
-}
-
-async function saveVaultItem(e) {
-  e.preventDefault();
-  const cat = vaultModal.querySelector('#vf-category').value;
-  const data = {
-    icon: sanitizeInput(vaultModal.querySelector('#vf-icon').value) || 'fas fa-folder',
-    title: sanitizeInput(vaultModal.querySelector('#vf-title').value),
-    description: sanitizeInput(vaultModal.querySelector('#vf-desc').value),
-    tags: vaultModal.querySelector('#vf-tags').value.split(',').map(t => sanitizeInput(t.trim())).filter(Boolean),
-    category: cat,
-    locked: vaultModal.querySelector('#vf-locked').checked,
-    content: cat === 'media' || cat === 'archives' ? '' : sanitizeInput(vaultModal.querySelector('#vf-content').value),
-    fileUrl: cat === 'media' || cat === 'archives' ? sanitizeInput(vaultModal.querySelector('#vf-file-url').value) : '',
-    fileType: cat === 'media' ? 'image' : cat === 'archives' ? 'zip' : '',
-  };
-  if (!data.title) return;
-
-  const editId = vaultModal.dataset.editId;
-
-  /* vault store's add/update handle Supabase sync automatically */
-
-  if (editId) {
-    updateVaultItem(Number(editId), data);
-    showToast('Updated');
-  } else {
-    addVaultItem(data);
-    showToast('Added');
-  }
-
-  vaultModal.classList.remove('open');
 }
 
 function showToast(msg, type) {
