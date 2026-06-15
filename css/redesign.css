@@ -596,6 +596,21 @@ body.admin-logged-in .admin-login-btn { display: none !important; }
 .admin-btn-primary { background: var(--accent-subtle); color: var(--accent); border-color: transparent; }
 .admin-btn-primary:hover { background: rgba(var(--accent-rgb),0.2); }
 
+/* Admin Register Prompt */
+.admin-register-prompt {
+  position: fixed; inset: 0; z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.6);
+}
+.admin-register-box {
+  text-align: center; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 40px 32px; max-width: 400px; width: 90%;
+}
+.admin-register-icon { font-size: 2.5rem; color: var(--accent); display: block; margin-bottom: 12px; }
+.admin-register-box h4 { font-size: 1.1rem; margin: 0 0 8px; color: var(--text); }
+.admin-register-box p { font-size: 0.85rem; color: var(--text-secondary); margin: 0 0 20px; line-height: 1.5; }
+.admin-register-box .admin-btn { margin: 4px; }
+
 /* Vault Card Edit Buttons */
 .vault-card-actions {
   position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 5;

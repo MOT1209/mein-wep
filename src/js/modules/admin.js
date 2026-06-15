@@ -14,16 +14,20 @@ export async function initAdmin() {
   if (!client) return;
   const { data: { session } } = await client.auth.getSession();
   if (!session) return;
-  const admin = await isCurrentUserAdmin();
-  if (!admin) return;
 
-  isAdmin = true;
   adminUser = session.user;
-  document.body.classList.add('admin-logged-in');
   window.__admin = { user: session.user };
 
-  injectAdminBar();
-  initVaultAdmin();
+  const admin = await isCurrentUserAdmin();
+  if (admin) {
+    isAdmin = true;
+    document.body.classList.add('admin-logged-in');
+    injectAdminBar();
+    initVaultAdmin();
+    return;
+  }
+
+  injectRegisterPrompt();
 }
 
 /* ── Admin Bar ── */
@@ -45,6 +49,44 @@ function injectAdminBar() {
     document.body.classList.remove('admin-logged-in');
     isAdmin = false;
     bar.remove();
+    location.reload();
+  });
+}
+
+/* ── Register Admin Prompt ── */
+function injectRegisterPrompt() {
+  const existing = qs('.admin-register-prompt');
+  if (existing) return;
+  const prompt = document.createElement('div');
+  prompt.className = 'admin-register-prompt';
+  prompt.innerHTML = `
+    <div class="admin-register-box">
+      <span class="admin-register-icon"><i class="fas fa-shield-halved"></i></span>
+      <h4>Admin Access</h4>
+      <p>You're logged in as <strong>${escapeHtml(adminUser?.email || '')}</strong> but not registered as admin.</p>
+      <button class="admin-btn admin-btn-primary" id="register-admin-btn">
+        <i class="fas fa-user-shield"></i> Register as Admin
+      </button>
+      <button class="admin-btn" id="admin-logout-btn">Logout</button>
+    </div>`;
+  document.body.appendChild(prompt);
+
+  on(prompt.querySelector('#register-admin-btn'), 'click', async () => {
+    const client = getSupabaseClient();
+    if (!client) return;
+    try {
+      const { error } = await client.rpc('add_admin_user');
+      if (error) { alert('Error: ' + error.message); return; }
+      prompt.innerHTML = `<div class="admin-register-box"><p style="color:#22c55e;">✅ Registered! Refreshing...</p></div>`;
+      setTimeout(() => location.reload(), 1000);
+    } catch (err) {
+      alert('Failed: ' + err.message);
+    }
+  });
+
+  on(prompt.querySelector('#admin-logout-btn'), 'click', async () => {
+    const client = getSupabaseClient();
+    if (client) await client.auth.signOut();
     location.reload();
   });
 }
