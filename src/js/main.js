@@ -66,35 +66,9 @@ const boot = async () => {
   initProjectFilters();
   initProjects(); // fetches & renders projects
 
-  // 6️⃣ Vault – lazy load each section when it enters viewport
-  //    We'll use a simple IntersectionObserver for each container.
-  const vaultContainers = {
-    prompts: qs('#vault-prompts'),
-    images: qs('#vault-images'),
-    codes: qs('#vault-codes'),
-    media: qs('#vault-media'),
-  };
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      const section = entry.target.dataset.section; // we set this in HTML
-      if (section && !window[`_${section}Loaded`]) {
-        // Dynamically import the matching init function
-        import(`../vault/${section}.js`)
-          .then((mod) => mod.initSection(cached))
-          .catch((err) => console.error(`Failed to load ${section} section`, err));
-        window[`_${section}Loaded`] = true;
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { rootMargin: '0px 0px -100px 0px' });
-
-  Object.values(vaultContainers).forEach((el) => {
-    if (el) {
-      el.dataset.section = el.id.replace('vault-', ''); // e.g., prompts
-      observer.observe(el);
-    }
-  });
+  // 6️⃣ Vault (now rendered by vault.js module)
+  initVaultSearch();
+  initVaultLock();
 
   // 7️⃣ Misc
   initTypewriter();
@@ -106,8 +80,6 @@ const boot = async () => {
   initScrollProgress();
   initLatestUpdates();
   initStatistics();
-  initVaultSearch();
-  initVaultLock();
   const githubContainer = qs('#github-stats');
   if (githubContainer) {
     (window.requestIdleCallback

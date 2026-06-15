@@ -342,76 +342,17 @@
                     <i class="fas fa-search"></i>
                     <input type="text" class="vault-search" placeholder="Search vault..." aria-label="Search vault">
                 </div>
-                <div class="vault-filters">
-                    <button class="vault-filter active" data-filter="all">All</button>
-                    <button class="vault-filter" data-filter="prompts">Prompts</button>
-                    <button class="vault-filter" data-filter="code">Code</button>
-                    <button class="vault-filter" data-filter="media">Media</button>
-                    <button class="vault-filter" data-filter="docs">Docs</button>
-                    <button class="vault-filter" data-filter="archives">Archives</button>
+                <div class="vault-filters" role="tablist" aria-label="Vault categories">
+                    <button class="vault-filter active" data-filter="prompts" role="tab" aria-selected="true">Prompts</button>
+                    <button class="vault-filter" data-filter="code" role="tab" aria-selected="false">Code</button>
+                    <button class="vault-filter" data-filter="media" role="tab" aria-selected="false">Media</button>
+                    <button class="vault-filter" data-filter="docs" role="tab" aria-selected="false">Docs</button>
+                    <button class="vault-filter" data-filter="archives" role="tab" aria-selected="false">Archives</button>
                 </div>
             </div>
-            <div class="vault-grid">
-                <div class="vault-card" data-category="prompts">
-                    <div class="vault-card-icon"><i class="fas fa-message"></i></div>
-                    <h4>Prompts</h4>
-                    <p>AI prompts &amp; templates</p>
-                    <div class="vault-tags">
-                        <span class="vt">gemini</span>
-                        <span class="vt">chatgpt</span>
-                        <span class="vt">system</span>
-                    </div>
-                </div>
-                <div class="vault-card" data-category="code">
-                    <div class="vault-card-icon"><i class="fas fa-code"></i></div>
-                    <h4>Code</h4>
-                    <p>Snippets &amp; libraries</p>
-                    <div class="vault-tags">
-                        <span class="vt">javascript</span>
-                        <span class="vt">python</span>
-                        <span class="vt">react</span>
-                    </div>
-                </div>
-                <div class="vault-card" data-category="media">
-                    <div class="vault-card-icon"><i class="fas fa-image"></i></div>
-                    <h4>Media</h4>
-                    <p>Design assets &amp; graphics</p>
-                    <div class="vault-tags">
-                        <span class="vt">screenshots</span>
-                        <span class="vt">icons</span>
-                        <span class="vt">brand</span>
-                    </div>
-                </div>
-                <div class="vault-card" data-category="docs">
-                    <div class="vault-card-icon"><i class="fas fa-book"></i></div>
-                    <h4>Docs</h4>
-                    <p>Documentation &amp; guides</p>
-                    <div class="vault-tags">
-                        <span class="vt">api</span>
-                        <span class="vt">setup</span>
-                        <span class="vt">reference</span>
-                    </div>
-                </div>
-                <div class="vault-card" data-category="archives">
-                    <div class="vault-card-icon"><i class="fas fa-archive"></i></div>
-                    <h4>Archives</h4>
-                    <p>Legacy projects &amp; backups</p>
-                    <div class="vault-tags">
-                        <span class="vt">backup</span>
-                        <span class="vt">legacy</span>
-                        <span class="vt">v1</span>
-                    </div>
-                </div>
-                <div class="vault-card" data-category="media">
-                    <div class="vault-card-icon"><i class="fas fa-video"></i></div>
-                    <h4>Videos</h4>
-                    <p>Tutorials &amp; recordings</p>
-                    <div class="vault-tags">
-                        <span class="vt">demo</span>
-                        <span class="vt">walkthrough</span>
-                        <span class="vt">showcase</span>
-                    </div>
-                </div>
+            <div class="vault-section-desc" id="vault-section-desc">Click an item to copy, view, or download.</div>
+            <div class="vault-grid" id="vault-grid">
+                <!-- Items rendered by vault.js -->
             </div>
         </div>
     </section>
