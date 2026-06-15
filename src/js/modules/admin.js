@@ -1,4 +1,4 @@
-import { getSupabaseClient, isCurrentUserAdmin, createContentItem } from '../services/supabase.js';
+import { getSupabaseClient, isCurrentUserAdmin } from '../services/supabase.js';
 import { qs, qsa, on } from '../utils/dom.js';
 import { escapeHtml, sanitizeInput } from '../utils/security.js';
 import { addVaultItem, updateVaultItem, deleteVaultItem, getVaultStore } from './vault.js';
@@ -340,15 +340,7 @@ async function saveVaultItem(e) {
 
   const editId = vaultModal.dataset.editId;
 
-  /* Try Supabase sync */
-  const client = getSupabaseClient();
-  if (client) {
-    const { error } = await createContentItem('vault_items', {
-      title: data.title, description: data.description, icon_class: data.icon,
-      link: data.fileUrl || null, status: 'Public', sort_order: 100,
-    });
-    if (error) console.warn('Supabase save:', error.message);
-  }
+  /* vault store's add/update handle Supabase sync automatically */
 
   if (editId) {
     updateVaultItem(Number(editId), data);
@@ -390,11 +382,11 @@ export function initVaultLock() {
     showUnlockPrompt();
   };
 
-  /* Poll until cards rendered */
+  /* Poll until cards rendered (up to 8s for async Supabase load) */
   let attempts = 0;
   const iv = setInterval(() => {
     attempts++;
-    if (lockedCards().length > 0 || attempts > 20) {
+    if (lockedCards().length > 0 || attempts > 40) {
       clearInterval(iv);
       check();
     }

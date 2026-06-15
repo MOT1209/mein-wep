@@ -43,6 +43,66 @@ export async function fetchPublicVaultItems() {
     return fetchPublicContent('vault_items');
 }
 
+/* ── Vault Items (new structure) ── */
+export async function fetchVaultItems() {
+    const client = getSupabaseClient();
+    if (!client) return { items: null, error: new Error('Supabase client is not available') };
+
+    const session = (await client.auth.getSession()).data.session;
+    let query = client.from('vault_items').select('*').order('sort_order', { ascending: true });
+
+    if (!session) {
+        query = query.eq('status', 'Public');
+    }
+
+    const { data, error } = await withTimeout(query, 'Supabase vault items');
+    return { items: data || [], error };
+}
+
+export async function saveVaultItemToDB(item) {
+    const client = getSupabaseClient();
+    if (!client) return { data: null, error: new Error('Supabase client is not available') };
+
+    const record = {
+        title: item.title,
+        description: item.description || '',
+        icon_class: item.icon || 'fas fa-folder',
+        content: item.content || '',
+        file_url: item.fileUrl || '',
+        file_type: item.fileType || '',
+        category: item.category || 'prompts',
+        tags: item.tags || [],
+        locked: item.locked || false,
+        status: 'Public',
+        sort_order: item.sort_order || 100,
+    };
+
+    if (item.supabaseId) {
+        const { data, error } = await withTimeout(
+            client.from('vault_items').update(record).eq('id', item.supabaseId).select().single(),
+            'Supabase update vault item'
+        );
+        return { data, error };
+    } else {
+        const { data, error } = await withTimeout(
+            client.from('vault_items').insert(record).select().single(),
+            'Supabase insert vault item'
+        );
+        return { data, error };
+    }
+}
+
+export async function deleteVaultItemFromDB(id) {
+    const client = getSupabaseClient();
+    if (!client) return { error: new Error('Supabase client is not available') };
+
+    const { error } = await withTimeout(
+        client.from('vault_items').delete().eq('id', id),
+        'Supabase delete vault item'
+    );
+    return { error };
+}
+
 export async function createContentItem(table, item) {
     const client = getSupabaseClient();
     if (!client) return { item: null, error: new Error('Supabase client is not available') };

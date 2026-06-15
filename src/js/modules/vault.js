@@ -1,14 +1,52 @@
 import { qs, qsa, on } from '../utils/dom.js';
+import { fetchVaultItems, saveVaultItemToDB, deleteVaultItemFromDB } from '../services/supabase.js';
+
+/* ── Supabase field mapper ── */
+function fromDB(item) {
+  return {
+    id: item.sort_order || Date.now(),
+    supabaseId: item.id,
+    title: item.title || '',
+    description: item.description || '',
+    category: item.category || 'prompts',
+    tags: item.tags || [],
+    content: item.content || '',
+    fileUrl: item.file_url || '',
+    fileType: item.file_type || '',
+    icon: item.icon_class || 'fas fa-folder',
+    locked: item.locked || false,
+    sort_order: item.sort_order || 100,
+    _fromDB: true,
+  };
+}
 
 /* ── Vault Data Store ── */
 const vaultStore = {
   items: [],
   nextId: 1,
+  _loading: false,
+  _loaded: false,
 
-  init(data) {
+  async init(data) {
     this.items = data;
     this.nextId = data.length > 0 ? Math.max(...data.map(i => i.id)) + 1 : 1;
     this.save();
+  },
+
+  async loadFromSupabase() {
+    this._loading = true;
+    const { items, error } = await fetchVaultItems();
+    if (!error && items && items.length > 0) {
+      const mapped = items.map(fromDB);
+      this.items = mapped;
+      this.nextId = Math.max(...mapped.map(i => i.id), 0) + 1;
+      this.save();
+      this._loaded = true;
+      this._loading = false;
+      return true;
+    }
+    this._loading = false;
+    return false;
   },
 
   add(item) {
@@ -18,20 +56,34 @@ const vaultStore = {
     item.updatedAt = now;
     this.items.push(item);
     this.save();
+    /* Try Supabase (async, non-blocking) */
+    saveVaultItemToDB(item).then(result => {
+      if (result.data && result.data.id) {
+        item.supabaseId = result.data.id;
+      }
+    }).catch(() => {});
     return item;
   },
 
   update(id, data) {
     const idx = this.items.findIndex(i => i.id === id);
     if (idx === -1) return null;
-    this.items[idx] = { ...this.items[idx], ...data, updatedAt: new Date().toISOString() };
+    const item = this.items[idx];
+    this.items[idx] = { ...item, ...data, updatedAt: new Date().toISOString() };
     this.save();
+    /* Try Supabase */
+    saveVaultItemToDB(this.items[idx]).catch(() => {});
     return this.items[idx];
   },
 
   delete(id) {
+    const item = this.items.find(i => i.id === id);
     this.items = this.items.filter(i => i.id !== id);
     this.save();
+    /* Try Supabase */
+    if (item && item.supabaseId) {
+      deleteVaultItemFromDB(item.supabaseId).catch(() => {});
+    }
   },
 
   save() {
@@ -256,12 +308,16 @@ function switchTab(category) {
 }
 
 /* ── Init ── */
-export function initVaultSearch() {
+export async function initVaultSearch() {
   if (!qs('#vault-grid')) return;
 
-  /* Load or init data */
-  if (!vaultStore.load()) {
-    vaultStore.init(FALLBACK_DATA);
+  /* Load from Supabase first, fall back to localStorage */
+  const loadedFromDB = await vaultStore.loadFromSupabase();
+
+  if (!loadedFromDB) {
+    if (!vaultStore.load()) {
+      vaultStore.init(FALLBACK_DATA);
+    }
   }
 
   /* Tab clicks */
