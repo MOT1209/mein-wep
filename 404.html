@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, follow">
+    <meta name="description" content="Page not found — Rashid Portfolio">
+    <title>404 — Page Not Found | Rashid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/redesign.css">
+    <style>
+        .page-404 { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 120px 24px 60px; }
+        .page-404-inner { text-align: center; max-width: 480px; }
+        .page-404-code { font-family: var(--font-mono); font-size: clamp(4rem, 10vw, 7rem); font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 8px; opacity: 0.8; }
+        .page-404 h1 { font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 12px; }
+        .page-404 p { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.6; margin-bottom: 32px; }
+        .page-404-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+        .page-404-icon { font-size: 3rem; color: var(--text-muted); margin-bottom: 16px; opacity: 0.3; }
+    </style>
+</head>
+<body>
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="index.html#projects">Projects</a>
+                <a href="index.html#skills">Skills</a>
+                <a href="blog/">Blog</a>
+                <a href="index.html#contact">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="page-404">
+        <div class="page-404-inner">
+            <div class="page-404-icon"><i class="fas fa-map-signs"></i></div>
+            <div class="page-404-code">404</div>
+            <h1>Lost in the void</h1>
+            <p>The page you're looking for doesn't exist or has been moved. Let me help you find your way back.</p>
+            <div class="page-404-actions">
+                <a href="index.html" class="btn btn-primary"><i class="fas fa-home"></i> Go Home</a>
+                <a href="index.html#projects" class="btn btn-secondary"><i class="fas fa-code"></i> View Projects</a>
+                <a href="blog/" class="btn btn-secondary"><i class="fas fa-newspaper"></i> Read Blog</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

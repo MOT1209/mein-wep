@@ -70,6 +70,33 @@ const boot = async () => {
   initVaultSearch();
   initVaultLock();
 
+  // 6b️⃣ Animate skills progress bars when section is visible
+  const skillsSection = qs('#skills');
+  if (skillsSection) {
+    const fills = skillsSection.querySelectorAll('.sk-progress-fill');
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      fills.forEach((f) => { f.style.width = f.style.width || '0%'; });
+    } else {
+      const skillsObs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            skillsObs.disconnect();
+            fills.forEach((f, i) => {
+              const target = f.getAttribute('data-width') || '0%';
+              setTimeout(() => { f.style.width = target; }, i * 60);
+            });
+          }
+        });
+      }, { threshold: 0.3 });
+      skillsObs.observe(skillsSection);
+      fills.forEach((f) => {
+        const w = f.style.width || '0%';
+        f.setAttribute('data-width', w);
+        f.style.width = '0';
+      });
+    }
+  }
+
   // 7️⃣ Misc
   initTypewriter();
   initTechStackMarquee();

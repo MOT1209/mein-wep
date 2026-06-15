@@ -68,6 +68,18 @@ export const BLOCKS = [
   { id: 54, name: "potatoes2",  label: "بطاطس (ناضج)", hardness: 0, tile: "potatoes2", transparent: true, solid: false },
 
   { id: 55, name: "enchanting_table", label: "طاولة سحر", hardness: 5.0, tile: "enchanting_table", transparent: false },
+
+  // ===== بلوكات الإضاءة =====
+  { id: 56, name: "torch", label: "مشعل", hardness: 0, tile: "torch", transparent: true, solid: false, lightLevel: 15 },
+
+  // ===== مستويات المياه (7-1 أقل كثافة) =====
+  { id: 57, name: "water_1", label: "ماء", hardness: 100, tile: "water", transparent: true, liquid: true },
+  { id: 58, name: "water_2", label: "ماء", hardness: 100, tile: "water", transparent: true, liquid: true },
+  { id: 59, name: "water_3", label: "ماء", hardness: 100, tile: "water", transparent: true, liquid: true },
+  { id: 60, name: "water_4", label: "ماء", hardness: 100, tile: "water", transparent: true, liquid: true },
+  { id: 61, name: "water_5", label: "ماء", hardness: 100, tile: "water", transparent: true, liquid: true },
+  { id: 62, name: "water_6", label: "ماء", hardness: 100, tile: "water", transparent: true, liquid: true },
+  { id: 63, name: "water_7", label: "ماء", hardness: 100, tile: "water", transparent: true, liquid: true },
 ];
 
 const byId = BLOCKS;
@@ -75,9 +87,9 @@ const _byName = {};
 for (const b of BLOCKS) _byName[b.name] = b;
 
 // جداول بحث سريعة (بدون استدعاء دوال)
-const _transparent = new Array(32).fill(false);
-const _liquid = new Array(32).fill(false);
-const _solid = new Array(32).fill(true);
+const _transparent = new Array(64).fill(false);
+const _liquid = new Array(64).fill(false);
+const _solid = new Array(64).fill(true);
 _transparent[AIR] = true; // الهواء شفاف دائماً
 _solid[AIR] = false;
 for (const b of BLOCKS) {
@@ -94,6 +106,12 @@ export function isSolid(id) { return _solid[id] === true; }
 export function isTransparent(id) { return _transparent[id] === true; }
 export function isLiquid(id) { return _liquid[id] === true; }
 
+const _lightLevel = new Array(64).fill(0);
+for (const b of BLOCKS) {
+  if (b.lightLevel) _lightLevel[b.id] = b.lightLevel;
+}
+export function blockLightLevel(id) { return _lightLevel[id] || 0; }
+
 // ما يسقط عند كسر البلوك (item id نصّي)
 export function blockDrop(id) {
   const b = getBlock(id);
@@ -107,6 +125,7 @@ export function blockDrop(id) {
   if (b.name === "tall_grass") {
     return Math.random() < 0.2 ? "wheat_seeds" : null;
   }
+  if (b.liquid) return null;
   return b.name;
 }
 

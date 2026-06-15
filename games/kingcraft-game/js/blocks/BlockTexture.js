@@ -31,6 +31,9 @@ const TILE_NAMES = [
 
   // المرحلة 5: طاولة سحر
   "enchanting_table",
+
+  // المرحلة 6: مشاعل
+  "torch",
 ];
 
 // مولّد عشوائي بسيط ثابت لكل بلاطة (لنمط متّسق)
@@ -279,6 +282,26 @@ const TILE_DRAW = {
     ctx.fillStyle = "#a08050";
     ctx.fillRect(ox + 4, oy + 7, 1, 1);
     ctx.fillRect(ox + 10, oy + 8, 1, 1);
+  },
+
+  torch: (ctx, ox, oy) => {
+    ctx.clearRect(ox, oy, TILE, TILE);
+    ctx.fillStyle = "#8a6a3a";
+    ctx.fillRect(ox + 6, oy + 9, 4, 6);
+    ctx.fillStyle = "#6a4a2a";
+    ctx.fillRect(ox + 7, oy + 10, 2, 5);
+    ctx.fillStyle = "#f0d020";
+    ctx.beginPath();
+    ctx.ellipse(ox + 8, oy + 7, 4, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#fcf8a0";
+    ctx.beginPath();
+    ctx.ellipse(ox + 8, oy + 6, 2, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ff8010";
+    ctx.beginPath();
+    ctx.ellipse(ox + 8, oy + 8, 1, 2, 0, 0, Math.PI * 2);
+    ctx.fill();
   },
 
   enchanting_table: (ctx, ox, oy) => {

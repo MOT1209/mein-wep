@@ -31,8 +31,29 @@
       "image": "https://rashid-wep.vercel.app/images/logo.webp",
       "jobTitle": "Full-Stack Developer & AI Engineer",
       "description": "Building AI-powered platforms, 3D games with Three.js, and open-source tools. Creator of KingCraft and Alking AI.",
-      "knowsAbout": ["JavaScript","TypeScript","Python","Next.js","Three.js","Supabase","React","Node.js","AI","PWA"],
-      "sameAs": ["https://github.com/MOT1209"]
+      "knowsAbout": ["JavaScript","TypeScript","Python","Next.js","Three.js","Supabase","React","Node.js","AI","PWA","PostgreSQL","Gemini"],
+      "sameAs": ["https://github.com/MOT1209"],
+      "makesOffer": [
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"Web Development","description":"Full-stack web platforms with Next.js & Supabase"}},
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"AI Integration","description":"AI assistants, chatbots, and automation powered by Gemini & OpenRouter"}},
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"3D Game Development","description":"Browser-based 3D games with Three.js and custom engines"}}
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Rashid — Full-Stack Developer & AI Engineer",
+      "url": "https://rashid-wep.vercel.app",
+      "description": "Full-stack developer and AI engineer portfolio. Building AI-powered platforms, 3D games, and open-source tools.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209"},
+      "inLanguage": ["en","ar"],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://rashid-wep.vercel.app/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
     }
     </script>
 
@@ -79,6 +100,7 @@
                 <a href="#timeline">Timeline</a>
                 <a href="#github">Open Source</a>
                 <a href="#vault">Vault</a>
+                <a href="blog/">Blog</a>
                 <a href="#contact">Contact</a>
             </div>
             <div class="nav-actions">
@@ -99,6 +121,7 @@
         <a href="#timeline">Timeline</a>
         <a href="#github">Open Source</a>
         <a href="#vault">Vault</a>
+        <a href="blog/">Blog</a>
         <a href="#contact">Contact</a>
     </div>
 
@@ -249,20 +272,55 @@
 
     <div class="section-divider"></div>
 
-    <!-- Skills — Grid -->
+    <!-- Skills — Progress Bars -->
     <section id="skills" class="section reveal">
         <div class="container">
             <div class="section-head">
                 <h2>Skills</h2>
                 <p>Technologies I use daily to build production-ready systems.</p>
             </div>
-            <div class="sk-grid">
-                <div class="sk-card"><h3>Frontend</h3><div class="sk-badges"><span class="sk-badge">React</span><span class="sk-badge">Next.js 15</span><span class="sk-badge">Three.js</span><span class="sk-badge">Tailwind</span><span class="sk-badge">HTML/CSS</span></div></div>
-                <div class="sk-card"><h3>Backend</h3><div class="sk-badges"><span class="sk-badge">Node.js</span><span class="sk-badge">Python</span><span class="sk-badge">REST</span><span class="sk-badge">GraphQL</span><span class="sk-badge">WebSockets</span></div></div>
-                <div class="sk-card"><h3>Databases</h3><div class="sk-badges"><span class="sk-badge">PostgreSQL</span><span class="sk-badge">Supabase</span><span class="sk-badge">SQLite</span><span class="sk-badge">Firestore</span></div></div>
-                <div class="sk-card"><h3>DevOps</h3><div class="sk-badges"><span class="sk-badge">Vercel</span><span class="sk-badge">Git</span><span class="sk-badge">CI/CD</span><span class="sk-badge">Docker</span></div></div>
-                <div class="sk-card"><h3>AI</h3><div class="sk-badges"><span class="sk-badge">Gemini API</span><span class="sk-badge">OpenRouter</span><span class="sk-badge">LLMs</span><span class="sk-badge">NLP</span><span class="sk-badge">RAG</span></div></div>
-                <div class="sk-card"><h3>Tools</h3><div class="sk-badges"><span class="sk-badge">VS Code</span><span class="sk-badge">Figma</span><span class="sk-badge">Webpack</span><span class="sk-badge">ES Modules</span><span class="sk-badge">PWA</span></div></div>
+            <div class="sk-progress-grid">
+                <div class="sk-progress-group">
+                    <h3>Frontend</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">React</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div><span class="sk-progress-pct">92%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Next.js 15</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div><span class="sk-progress-pct">88%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Three.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Tailwind CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">HTML/CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div><span class="sk-progress-pct">95%</span></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>Backend</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">Node.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Python</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div><span class="sk-progress-pct">82%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">REST APIs</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:93%"></div></div><span class="sk-progress-pct">93%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">WebSockets</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:75%"></div></div><span class="sk-progress-pct">75%</span></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>Databases</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">PostgreSQL</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Supabase</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">SQLite</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div><span class="sk-progress-pct">70%</span></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>DevOps</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">Vercel</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div><span class="sk-progress-pct">92%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Git</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">CI/CD</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:80%"></div></div><span class="sk-progress-pct">80%</span></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>AI & ML</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">Gemini API</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">OpenRouter</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">LLMs & NLP</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div><span class="sk-progress-pct">82%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">RAG</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div><span class="sk-progress-pct">70%</span></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>Tools</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">VS Code</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div><span class="sk-progress-pct">95%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Figma</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:72%"></div></div><span class="sk-progress-pct">72%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">ES Modules</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div><span class="sk-progress-pct">88%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">PWA</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
+                </div>
             </div>
         </div>
     </section>

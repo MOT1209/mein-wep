@@ -14,33 +14,48 @@
     <meta name="twitter:title" content="Portfolio Optimization: From 72 to 85 in One Day">
     <meta name="twitter:image" content="../images/logo.webp">
     <title>Portfolio Optimization Tips — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Portfolio Optimization: From 72 to 85 in One Day",
+      "description": "How I optimized a portfolio site with WebP images, SEO structured data, accessibility fixes, and performance tuning.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-11",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/portfolio-optimization-tips.html",
+      "keywords": ["Web Development","SEO","Performance","Accessibility","Optimization"]
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css?v=4.1">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/redesign.css">
     <style>
-        body { padding-top: 100px; background: #09090b; }
-        .blog-post { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
-        .blog-post .post-meta { color: #52525b; font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 16px; flex-wrap: wrap; }
+        body { padding-top: var(--nav-height); background: var(--bg); font-family: var(--font); color: var(--text-secondary); }
+        .blog-post { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+        .blog-post .post-meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
         .blog-post .post-meta span { display: flex; align-items: center; gap: 6px; }
-        .blog-post h1 { font-size: 2.5rem; color: #fff; margin-bottom: 15px; line-height: 1.2; }
-        .blog-post .post-content { color: #d4d4d8; font-size: 1.05rem; line-height: 1.8; }
-        .blog-post .post-content h2 { color: #fff; font-size: 1.6rem; margin: 40px 0 16px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; }
-        .blog-post .post-content h3 { color: #a5f3fc; font-size: 1.2rem; margin: 30px 0 12px; }
+        .blog-post h1 { font-size: clamp(1.6rem,3vw,2.5rem); color: var(--text); margin-bottom: 15px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+        .blog-post .post-content { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.8; }
+        .blog-post .post-content h2 { color: var(--text); font-size: 1.4rem; margin: 40px 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 600; }
+        .blog-post .post-content h3 { color: var(--accent); font-size: 1.15rem; margin: 30px 0 12px; font-weight: 600; }
         .blog-post .post-content p { margin-bottom: 16px; }
-        .blog-post .post-content code { background: rgba(24,24,27,0.8); padding: 2px 8px; border-radius: 6px; font-size: 0.9rem; color: #38bdf8; font-family: 'JetBrains Mono', monospace; }
+        .blog-post .post-content code { background: var(--bg-elevated); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono); }
         .blog-post .post-content ul { margin: 16px 0; padding-left: 24px; }
         .blog-post .post-content li { margin-bottom: 8px; }
-        .blog-post .back-link { display: inline-flex; align-items: center; gap: 8px; color: #38bdf8; text-decoration: none; font-size: 0.9rem; margin-bottom: 30px; }
-        .blog-post .back-link:hover { text-decoration: underline; }
-        .post-tag { display: inline-block; background: rgba(56,189,248,0.1); color: #38bdf8; padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+        .blog-post .post-content a { color: var(--accent); }
+        .blog-post .post-content a:hover { text-decoration: underline; }
+        .blog-post .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 30px; }
+        .blog-post .back-link:hover { opacity: 0.8; }
+        .post-tag { display: inline-block; background: var(--accent-subtle); color: var(--accent); padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
         .stats-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin: 24px 0; }
-        .stat-card { background: rgba(24,24,27,0.8); border: 1px solid rgba(255,255,255,0.05); border-radius: 12px; padding: 20px; text-align: center; }
-        .stat-card .num { font-size: 2rem; font-weight: 800; color: #38bdf8; }
-        .stat-card .label { font-size: 0.8rem; color: #52525b; margin-top: 4px; }
+        .stat-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; text-align: center; }
+        .stat-card .num { font-size: 2rem; font-weight: 800; color: var(--accent); }
+        .stat-card .label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
         @media (max-width: 768px) {
-            body { padding-top: 80px; }
             .blog-post h1 { font-size: 1.6rem; }
             .blog-post .post-content { font-size: 0.95rem; }
             .stats-grid { grid-template-columns: 1fr; }
@@ -48,17 +63,17 @@
     </style>
 </head>
 <body class="dark-mode">
-    <div class="bg-mesh"></div>
-    <nav class="navbar">
-        <div class="container nav-container">
-            <a href="../index.html" class="logo">Rashid<span class="accent-dot">.</span></a>
-            <ul class="nav-links">
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="index.html">Blog</a></li>
-                <li><a href="../index.html#projects">Projects</a></li>
-            </ul>
-            <div class="nav-controls">
-                <button id="theme-toggle" aria-label="Switch theme"><i aria-hidden="true" class="fas fa-moon"></i></button>
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
             </div>
         </div>
     </nav>

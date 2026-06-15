@@ -1,4 +1,3 @@
-// نقطة الدخول: تهيئة Three.js، العالم، اللاعب، المخزون، التصنيع، الأفران، وحلقة اللعبة.
 import * as THREE from "three";
 import { World } from "./world/World.js";
 import { Player } from "./player/Player.js";
@@ -13,31 +12,16 @@ import { getItem, isPlaceable, placeBlockId } from "./items/Items.js";
 import { getTool, BLOCK_TOOL } from "./player/Tools.js";
 import { HealthSystem } from "./player/Health.js";
 import { SoundManager } from "./utils/SoundManager.js";
-import { EXHAUSTION_PER_BREAK, WORLD_HEIGHT } from "./utils/Constants.js";
+import { EXHAUSTION_PER_BREAK } from "./utils/Constants.js";
 import { saveGame, loadGame, setWorldId } from "./utils/SaveLoad.js";
 import * as WM from "./utils/WorldManager.js";
 import { EntityManager } from "./entities/EntityManager.js";
 import { FarmingSystem, isCropSeed, getCropInfo } from "./world/Farming.js";
-
-const canvas = document.getElementById("game");
-const menu = document.getElementById("menu");
-const worldSelect = document.getElementById("world-select");
-const worldCreate = document.getElementById("world-create");
-const pauseMenu = document.getElementById("pause-menu");
-const crosshair = document.getElementById("crosshair");
-const hud = document.getElementById("hud");
-const debug = document.getElementById("debug");
-const menuHidden = () => menu.classList.contains("hidden") && !worldSelect.classList.contains("hidden") === false;
-
-let _currentWorldObj = null;
-let _saveData = null;
-// جميع شاشات القوائم
-const ALL_SCREENS = [menu, worldSelect, worldCreate, pauseMenu];
-function allMenusHidden() { return ALL_SCREENS.every(s => s.classList.contains("hidden")); }
-function hideAllMenus() { ALL_SCREENS.forEach(s => s.classList.add("hidden")); }
+import { MenuSystem } from "./ui/MenuSystem.js";
+import { DebugTools } from "./game/DebugTools.js";
 
 // ===== Three.js =====
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById("game"), antialias: false });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 
@@ -53,7 +37,7 @@ sun.position.set(0.6, 1, 0.4);
 scene.add(sun);
 scene.add(new THREE.AmbientLight(0xb8d0e8, 0.7));
 
-// ===== العالم واللاعب والأنظمة =====
+// ===== الأنظمة =====
 const world = new World(scene);
 const player = new Player(world, camera);
 const inventory = new Inventory();
@@ -65,17 +49,28 @@ const health = new HealthSystem();
 const sound = new SoundManager();
 const entityManager = new EntityManager(scene, world);
 const farming = new FarmingSystem(world);
-entityManager._onAttack = (damage) => {
-  health.takeDamage(damage);
-  updateHUD();
-};
-entityManager._onDrop = (x, y, z, dropList) => {
-  for (const d of dropList) drops.spawn(x, y, z, d.id, d.count);
-};
+const menu = new MenuSystem();
+const debugTools = new DebugTools(scene, world, entityManager, player, renderer);
+
+entityManager._onAttack = (damage) => { health.takeDamage(damage); updateHUD(); };
+entityManager._onDrop = (x, y, z, dropList) => { for (const d of dropList) drops.spawn(x, y, z, d.id, d.count); };
 entityManager._onMobHurt = () => sound.playMobHurt();
 entityManager._onMobDeath = () => sound.playMobDeath();
 player.sound = sound;
+player.health = health;
+player._yaw = 0;
+player._pitch = 0;
 
+// ===== الـ UI =====
+const ui = new InventoryUI(inventory);
+ui.onClose = () => {
+  document.getElementById("crosshair").classList.remove("hidden");
+  if (menu.allHidden()) requestAnimationFrame(() => { document.getElementById("game").requestPointerLock().catch(() => {}); });
+};
+const closeUI = () => { const pp = player.pos; ui.close(pp, drops); };
+menu.closeUICallback = closeUI;
+
+// ===== HUD =====
 function renderStatBar(el, value, max, fullChar, emptyChar) {
   el.innerHTML = "";
   for (let i = 0; i < max; i += 2) {
@@ -89,7 +84,7 @@ function renderStatBar(el, value, max, fullChar, emptyChar) {
 }
 
 function updateHUD() {
-  renderStatBar(document.getElementById("health-bar"), health.health, 20, "❤️", "🖤");
+  renderStatBar(document.getElementById("health-bar"), health.health, 20, "❤", "🖤");
   renderStatBar(document.getElementById("food-bar"), health.food, 20, "🍗", "💧");
 }
 
@@ -100,57 +95,46 @@ health.onDeath = () => {
   document.exitPointerLock();
 };
 
-// تهيئة غير متزامنة — نحمل العوالم من IndexedDB
+menu.onRespawn = () => {
+  health.reset();
+  player.spawn();
+  entityManager.clear();
+  highlight.visible = false;
+  crackBox.visible = false;
+  crackMat.opacity = 0;
+  document.getElementById("death-screen").classList.add("hidden");
+  updateHUD();
+};
+
+// ===== حفظ تلقائي =====
+let _saveTimer = 0;
+let _gameStarted = false;
+
+function doSave() {
+  if (!_gameStarted || !menu.currentWorld) return;
+  saveGame(player, inventory, health, world, drops);
+  const w = menu.currentWorld;
+  w.lastPlayed = Date.now();
+  WM.updateWorld(w);
+}
+menu.saveCallback = doSave;
+
+// ===== توليد العوالم =====
 (async function initWorlds() {
   const worlds = await WM.listWorlds();
   if (worlds.length === 0) {
-    // أول تشغيل: إنشاء عالم افتراضي
     const w = await WM.createWorld("My World");
-    if (w) _currentWorldObj = w;
+    if (w) menu.currentWorld = w;
   }
-  // إذا في legacy save, نرحله
   const legacy = localStorage.getItem("kc-save");
   if (legacy && worlds.length === 0) {
     const migrated = await WM.migrateLegacySave();
-    if (migrated) _currentWorldObj = migrated;
+    if (migrated) menu.currentWorld = migrated;
   }
-  // نعرض قائمة العوالم
-  renderWorldList();
+  menu.renderWorldList();
 })();
 
-player.health = health;
-player._yaw = 0;
-player._pitch = 0;
-
-// حفظ تلقائي كل 30 ثانية
-let _saveTimer = 0;
-
-// مؤقت صوت الخطوات
-let _stepTimer = 0.3;
-
-function autoSave(dt) {
-  if (!gameStarted || !_currentWorldObj) return;
-  _saveTimer += dt;
-  if (_saveTimer >= 30) {
-    _saveTimer = 0;
-    saveGame(player, inventory, health, world, drops);
-    _currentWorldObj.lastPlayed = Date.now();
-    _currentWorldObj.playTime += 30;
-    WM.updateWorld(_currentWorldObj);
-  }
-}
-
-const ui = new InventoryUI(inventory);
-ui.onClose = () => {
-  crosshair.classList.remove("hidden");
-  if (allMenusHidden()) requestAnimationFrame(() => { canvas.requestPointerLock().catch(() => {}); });
-};
-const _closeUI = () => {
-  const pp = player.pos;
-  ui.close(pp, drops);
-};
-
-// ===== صندوق التحديد + تراكب التكسير =====
+// ===== صندوق التحديد + الكراك =====
 const highlight = new THREE.LineSegments(
   new THREE.EdgesGeometry(new THREE.BoxGeometry(1.001, 1.001, 1.001)),
   new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.4 })
@@ -163,38 +147,22 @@ const crackBox = new THREE.Mesh(new THREE.BoxGeometry(1.03, 1.03, 1.03), crackMa
 crackBox.visible = false;
 scene.add(crackBox);
 
-// ===== التحكم بالنظر =====
-let yaw = 0, pitch = 0, started = false, gameStarted = false;
+// ===== النظر =====
+let yaw = 0, pitch = 0, started = false;
 let SENS = 0.0022;
 let _lastMouseX = null, _lastMouseY = null;
 
-document.addEventListener("mousemove", (e) => {
-  if (document.pointerLockElement === canvas) {
-    if (!started) return;
-    yaw -= e.movementX * SENS;
-    pitch -= e.movementY * SENS;
-    player._yaw = yaw; player._pitch = pitch;
-  } else if (gameStarted) {
-    if (_lastMouseX === null) { _lastMouseX = e.clientX; _lastMouseY = e.clientY; return; }
-    const dx = e.clientX - _lastMouseX;
-    const dy = e.clientY - _lastMouseY;
-    _lastMouseX = e.clientX;
-    _lastMouseY = e.clientY;
-    yaw -= dx * SENS;
-    pitch -= dy * SENS;
-    player._yaw = yaw; player._pitch = pitch;
-  } else {
-    return;
-  }
-  const lim = Math.PI / 2 - 0.01;
-  pitch = Math.max(-lim, Math.min(lim, pitch));
-});
-document.addEventListener("pointerlockchange", () => {
-  started = document.pointerLockElement === canvas;
-  if (!started) { _lastMouseX = null; _lastMouseY = null; }
-});
+function applySettingsToScene(s) {
+  SENS = 0.0022 * (s.sensitivity / 10);
+  if (world) world.renderDistance = s.renderDistance;
+  camera.fov = s.fov;
+  camera.updateProjectionMatrix();
+  scene.background.setHSL(0.58, 0.4, 0.6 * s.brightness);
+}
+const initSettings = WM.loadSettings();
+applySettingsToScene(initSettings);
 
-// ===== أدوات مساعدة =====
+// ===== مساعدة =====
 let lastDir = new THREE.Vector3();
 const _eyeOrigin = new THREE.Vector3();
 function eyeOrigin() { return _eyeOrigin.set(player.pos.x, player.pos.y + player.eye, player.pos.z); }
@@ -241,13 +209,18 @@ function damageTool() {
   inventory._changed();
 }
 
-// ===== التعدين (كسر مستمر بالضغط) =====
+function dropFurnace(pos) {
+  const s = furnaces.get(pos[0], pos[1], pos[2]);
+  for (const stack of [s.input, s.fuel, s.output]) {
+    if (stack) drops.spawn(pos[0], pos[1], pos[2], stack.id, stack.count);
+  }
+  furnaces.remove(pos[0], pos[1], pos[2]);
+}
+
+// ===== التعدين =====
 let mineDown = false, miningKey = null, miningProgress = 0;
 
-function resetMining() {
-  miningKey = null; miningProgress = 0;
-  crackBox.visible = false; crackMat.opacity = 0;
-}
+function resetMining() { miningKey = null; miningProgress = 0; crackBox.visible = false; crackMat.opacity = 0; }
 
 function updateMining(dt) {
   if (!mineDown) { resetMining(); return; }
@@ -255,25 +228,15 @@ function updateMining(dt) {
   if (!hit) { resetMining(); return; }
   const id = world.getBlock(hit.block[0], hit.block[1], hit.block[2]);
   if (id === AIR || getBlock(id).liquid) { resetMining(); return; }
-
   const key = hit.block.join(",");
   if (key !== miningKey) { miningKey = key; miningProgress = 0; }
-
   const tool = heldTool();
   miningProgress += dt / breakTime(id, tool);
-
-  // صوت حفر أثناء التقدم (كل 25%)
   const prevCrack = Math.floor((miningProgress - dt / breakTime(id, tool)) / 0.25);
   const nowCrack = Math.floor(miningProgress / 0.25);
-  if (nowCrack > prevCrack && nowCrack < 4) {
-    sound.playDig();
-  }
-
+  if (nowCrack > prevCrack && nowCrack < 4) sound.playDig();
   if (miningProgress >= 1) {
-    if (canDrop(id, tool)) {
-      const d = blockDrop(id);
-      if (d) drops.spawn(hit.block[0], hit.block[1], hit.block[2], d, 1);
-    }
+    if (canDrop(id, tool)) { const d = blockDrop(id); if (d) drops.spawn(hit.block[0], hit.block[1], hit.block[2], d, 1); }
     if (getBlock(id).name === "furnace") dropFurnace(hit.block);
     farming.onBlockBreak(hit.block[0], hit.block[1], hit.block[2]);
     world.setBlock(hit.block[0], hit.block[1], hit.block[2], AIR);
@@ -283,31 +246,14 @@ function updateMining(dt) {
     resetMining();
     return;
   }
-
   crackBox.position.set(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5);
   crackBox.visible = true;
   crackMat.opacity = 0.15 + miningProgress * 0.55;
 }
 
-function dropFurnace(pos) {
-  const s = furnaces.get(pos[0], pos[1], pos[2]);
-  for (const stack of [s.input, s.fuel, s.output]) {
-    if (stack) drops.spawn(pos[0], pos[1], pos[2], stack.id, stack.count);
-  }
-  furnaces.remove(pos[0], pos[1], pos[2]);
-}
-
-// ===== فتح/إغلاق الواجهات =====
-function openUI(mode, furnaceState = null) {
-  resetMining(); mineDown = false;
-  crosshair.classList.add("hidden");
-  document.exitPointerLock();
-  ui.open(mode, furnaceState);
-}
-
 // ===== الفأرة =====
-canvas.addEventListener("mousedown", (e) => {
-  if ((!gameStarted && !started) || ui.isOpen) return;
+document.getElementById("game").addEventListener("mousedown", (e) => {
+  if ((!_gameStarted && !started) || ui.isOpen) return;
   if (e.button === 0) {
     const eo = eyeOrigin();
     const hitEntity = entityManager.getEntityAt(eo.x, eo.y, eo.z, lastDir, 5);
@@ -329,8 +275,9 @@ canvas.addEventListener("mousedown", (e) => {
   }
   if (e.button === 2) rightClick();
 });
-canvas.addEventListener("mouseup", (e) => { if (e.button === 0) { mineDown = false; resetMining(); } });
-canvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+document.getElementById("game").addEventListener("mouseup", (e) => { if (e.button === 0) { mineDown = false; resetMining(); } });
+document.getElementById("game").addEventListener("contextmenu", (e) => e.preventDefault());
 window.addEventListener("blur", () => { mineDown = false; resetMining(); });
 
 function rightClick() {
@@ -338,25 +285,13 @@ function rightClick() {
   if (!hit) return;
   const id = world.getBlock(hit.block[0], hit.block[1], hit.block[2]);
   const name = getBlock(id).name;
-
   if (name === "crafting_table") { openUI("table"); return; }
   if (name === "furnace") { openUI("furnace", furnaces.get(hit.block[0], hit.block[1], hit.block[2])); return; }
   if (name === "enchanting_table") { openUI("enchant"); return; }
-
   const sel = inventory.selectedStack;
   if (!sel) return;
-
-  // أكل الطعام
   const it = getItem(sel.id);
-  if (it && it.food != null && health.food < 20) {
-    health.eat(it.food, it.saturation);
-    inventory.consumeSelected(1);
-    sound.playEat();
-    updateHUD();
-    return;
-  }
-
-  // حرث بالأداة (hoe)
+  if (it && it.food != null && health.food < 20) { health.eat(it.food, it.saturation); inventory.consumeSelected(1); sound.playEat(); updateHUD(); return; }
   const tool = sel.id ? getTool(sel.id) : null;
   if (tool && tool.kind === "hoe") {
     const [bx, by, bz] = hit.block;
@@ -364,193 +299,113 @@ function rightClick() {
       sound.playPlace();
       const invIdx = inventory.selectedSlot;
       const stack = inventory.hotbar[invIdx];
-      if (stack && stack.durability != null) {
-        stack.durability -= 1;
-        if (stack.durability <= 0) inventory.hotbar[invIdx] = null;
-      }
+      if (stack && stack.durability != null) { stack.durability -= 1; if (stack.durability <= 0) inventory.hotbar[invIdx] = null; }
       return;
     }
   }
-
-  // غرس بذور
   if (isCropSeed(sel.id)) {
     const [px, py, pz] = hit.place;
-    if (!intersectsPlayer(px, py, pz)) {
-      const placed = farming.plant(px, py, pz, sel.id);
-      if (placed) {
-        inventory.consumeSelected(1);
-        sound.playPlace();
-        return;
-      }
-    }
+    if (!intersectsPlayer(px, py, pz) && farming.plant(px, py, pz, sel.id)) { inventory.consumeSelected(1); sound.playPlace(); return; }
   }
-
-  // حصاد المحصول الناضج
   const cropInfo = getCropInfo(id);
   if (cropInfo && cropInfo.stage >= 2) {
-    const drops2 = farming.harvest(hit.block[0], hit.block[1], hit.block[2]);
-    if (drops2) {
-      for (const d of drops2) drops.spawn(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5, d.id, d.count);
-      sound.playBreak();
-      return;
-    }
+    const d2 = farming.harvest(hit.block[0], hit.block[1], hit.block[2]);
+    if (d2) { for (const d of d2) drops.spawn(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5, d.id, d.count); sound.playBreak(); return; }
   }
-
   if (isPlaceable(sel.id)) {
     const [px, py, pz] = hit.place;
-    if (!intersectsPlayer(px, py, pz)) {
-      world.setBlock(px, py, pz, placeBlockId(sel.id));
-      inventory.consumeSelected(1);
-      sound.playPlace();
+    if (!intersectsPlayer(px, py, pz)) { world.setBlock(px, py, pz, placeBlockId(sel.id)); inventory.consumeSelected(1); sound.playPlace(); }
+  }
+}
+
+function openUI(mode, furnaceState = null) {
+  resetMining(); mineDown = false;
+  document.getElementById("crosshair").classList.add("hidden");
+  document.exitPointerLock();
+  ui.open(mode, furnaceState);
+}
+
+// ===== تشغيل اللعبة =====
+menu.onStartGame = (worldData) => {
+  menu.currentWorld = worldData;
+  setWorldId(worldData.id);
+  world.update(new THREE.Vector3(0, 0, 0));
+  updateHUD();
+  loadGame().then(data => {
+    if (data) {
+      player.pos.set(data.player.x, data.player.y, data.player.z);
+      player.vel.set(0, 0, 0);
+      yaw = data.player.yaw || 0;
+      pitch = data.player.pitch || 0;
+      player._yaw = yaw; player._pitch = pitch;
+      player.flying = data.player.flying || false;
+      player.thirdPerson = data.player.thirdPerson || false;
+      player.bedPos = data.player.bedPos || null;
+      if (data.inventory) {
+        for (let i = 0; i < data.inventory.length && i < inventory.slots.length; i++) {
+          inventory.slots[i] = data.inventory[i] ? { id: data.inventory[i].id, count: data.inventory[i].count, dur: data.inventory[i].dur } : null;
+        }
+        if (data.armor) {
+          for (let i = 0; i < data.armor.length && i < inventory.armor.length; i++) {
+            inventory.armor[i] = data.armor[i] ? { id: data.armor[i].id, count: data.armor[i].count, dur: data.armor[i].dur } : null;
+          }
+        }
+        inventory.selectedHotbar = data.selectedHotbar || 0;
+        inventory.offhand = data.offhand ? { id: data.offhand.id, count: data.offhand.count, dur: data.offhand.dur } : null;
+      }
+      health.health = data.player.health ?? 20;
+      health.food = data.player.food ?? 20;
+      health.saturation = data.player.saturation ?? 20;
+      health.setArmor(inventory.getArmorValue());
+      updateHUD();
+    } else {
+      player.spawn();
+      inventory.giveStarter();
     }
-  }
-}
+    lastDir = player.applyCamera(yaw, pitch);
+    _gameStarted = true;
+    menu.gameStarted = true;
+    menu.hideAll();
+    document.getElementById("crosshair").classList.remove("hidden");
+    document.getElementById("hud").classList.remove("hidden");
+    document.getElementById("debug").classList.remove("hidden");
+    const p = document.getElementById("game").requestPointerLock();
+    if (p && p.catch) p.catch(() => { started = true; });
+    if (document.pointerLockElement !== document.getElementById("game")) started = true;
+  }).catch((err) => {
+    console.warn("KingCraft: فشل تحميل السيف, بدء عالم جديد", err);
+    player.spawn();
+    inventory.giveStarter();
+    lastDir = player.applyCamera(yaw, pitch);
+    _gameStarted = true;
+    menu.gameStarted = true;
+    menu.hideAll();
+    document.getElementById("crosshair").classList.remove("hidden");
+    document.getElementById("hud").classList.remove("hidden");
+    document.getElementById("debug").classList.remove("hidden");
+    const p = document.getElementById("game").requestPointerLock();
+    if (p && p.catch) p.catch(() => { started = true; });
+    if (document.pointerLockElement !== document.getElementById("game")) started = true;
+  });
+};
 
-// Chat input
-const chatInput = document.getElementById("chat-input");
+// ===== الصوت خطوات + SWIM =====
+let _stepTimer = 0.3;
 
-// ===== أدوات F3 المساعدة =====
-let _f3Held = false;
-let _showHitboxes = false;
-let _showChunkBorders = false;
-let _showAdvancedTooltips = false;
-let _chunkBorderLines = null;
-let _hitboxLines = null;
-let _paused = false;
-let _lastEntityCount = -1;
-let _lastChunkBorderPos = null;
-
-function buildHitboxGeometry() {
-  const g = new THREE.BufferGeometry();
-  const pos = []; const idx = [];
-  let off = 0;
-  for (const e of entityManager.entities) {
-    if (!e.alive) continue;
-    const hw = 0.3, hh = e.h || 0.9;
-    const [x, y, z] = [e.pos.x, e.pos.y, e.pos.z];
-    const corners = [
-      [x-hw, y, z-hw], [x+hw, y, z-hw], [x+hw, y, z+hw], [x-hw, y, z+hw],
-      [x-hw, y+hh, z-hw], [x+hw, y+hh, z-hw], [x+hw, y+hh, z+hw], [x-hw, y+hh, z+hw],
-    ];
-    for (const c of corners) { pos.push(c[0], c[1], c[2]); }
-    const edges = [0,1, 1,2, 2,3, 3,0, 4,5, 5,6, 6,7, 7,4, 0,4, 1,5, 2,6, 3,7];
-    for (const e of edges) idx.push(off + e);
-    off += 8;
-  }
-  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-  g.setIndex(idx);
-  return g;
-}
-
-function showHitboxes(show) {
-  if (!show) {
-    if (_hitboxLines) { scene.remove(_hitboxLines); _hitboxLines.geometry.dispose(); _hitboxLines = null; }
-    _lastEntityCount = -1;
-    return;
-  }
-  const cnt = entityManager.entities.filter(e => e.alive).length;
-  if (_hitboxLines && cnt === _lastEntityCount) return;
-  _lastEntityCount = cnt;
-  if (_hitboxLines) { scene.remove(_hitboxLines); _hitboxLines.geometry.dispose(); }
-  if (cnt === 0) { _hitboxLines = null; return; }
-  _hitboxLines = new THREE.LineSegments(buildHitboxGeometry(), new THREE.LineBasicMaterial({ color: 0xff4444, transparent: true, opacity: 0.6 }));
-  scene.add(_hitboxLines);
-}
-
-function buildChunkBorderGeometry(playerPos) {
-  const g = new THREE.BufferGeometry();
-  const pos = [];
-  const S = 16;
-  const R = world.renderDistance;
-  const pcx = Math.floor(playerPos.x / S) * S;
-  const pcz = Math.floor(playerPos.z / S) * S;
-  for (let dz = -R; dz <= R; dz++) {
-    for (let dx = -R; dx <= R; dx++) {
-      const x = pcx + dx * S, z = pcz + dz * S;
-      pos.push(x, 0, z, x+S, 0, z);
-      pos.push(x+S, 0, z, x+S, 0, z+S);
-      pos.push(x+S, 0, z+S, x, 0, z+S);
-      pos.push(x, 0, z+S, x, 0, z);
-      pos.push(x, WORLD_HEIGHT, z, x+S, WORLD_HEIGHT, z);
-      pos.push(x+S, WORLD_HEIGHT, z, x+S, WORLD_HEIGHT, z+S);
-      pos.push(x+S, WORLD_HEIGHT, z+S, x, WORLD_HEIGHT, z+S);
-      pos.push(x, WORLD_HEIGHT, z+S, x, WORLD_HEIGHT, z);
-    }
-  }
-  g.setAttribute("position", new THREE.Float32BufferAttribute(pos, 3));
-  return g;
-}
-
-function showChunkBorders(show, playerPos) {
-  if (!show) {
-    if (_chunkBorderLines) { scene.remove(_chunkBorderLines); _chunkBorderLines.geometry.dispose(); _chunkBorderLines = null; }
-    _lastChunkBorderPos = null;
-    return;
-  }
-  const key = Math.floor(playerPos.x / 16) + "," + Math.floor(playerPos.z / 16);
-  if (_chunkBorderLines && key === _lastChunkBorderPos) return;
-  _lastChunkBorderPos = key;
-  if (_chunkBorderLines) { scene.remove(_chunkBorderLines); _chunkBorderLines.geometry.dispose(); }
-  _chunkBorderLines = new THREE.LineSegments(buildChunkBorderGeometry(playerPos), new THREE.LineBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.3 }));
-  scene.add(_chunkBorderLines);
-}
-
-function showF3Help() {
-  const lines = [
-    "§e=== F3 Shortcuts ===",
-    "F3        : Toggle debug",
-    "F3 + A    : Reload chunks",
-    "F3 + B    : Toggle hitboxes",
-    "F3 + C    : Copy coordinates",
-    "F3 + D    : Clear chat",
-    "F3 + Esc  : Pause",
-    "F3 + F    : Increase render distance",
-    "F3 + G    : Toggle chunk borders",
-    "F3 + H    : Toggle advanced tooltips",
-    "F3 + Q    : Show this help",
-    "F3 + T    : Rebuild all chunks",
-  ];
-  // Show in chat area
-  const msgEl = chatInput.querySelector(".chat-msgs");
-  msgEl.innerHTML = lines.map(l => `<div style="color:#fff;font:13px monospace;padding:2px 4px">${l}</div>`).join("");
-  setTimeout(() => { if (!chatInput.classList.contains("hidden")) msgEl.innerHTML = ""; }, 5000);
-}
-
-function rebuildAllChunks() {
-  const keys = [...world.chunks.keys()];
-  for (const k of keys) {
-    const c = world.chunks.get(k);
-    if (c) { c.dirty = true; world._inQueue.add(c); world._meshQueue.push(c); }
-  }
-}
-
-function chatSend() {
-  const input = chatInput.querySelector("input");
-  const text = input.value.trim();
-  chatInput.classList.add("hidden");
-  if (text.startsWith("/")) { runCommand(text.slice(1)); }
-  else if (text) { /* normal chat — no server to send to */ }
-  canvas.requestPointerLock().catch(() => {});
-}
-
+// ===== الأوامر =====
 function runCommand(cmd) {
   const parts = cmd.trim().split(/\s+/);
   const c = parts[0].toLowerCase();
   const args = parts.slice(1);
-
   try {
     switch (c) {
       case "gamemode": case "gm":
         const mode = args[0];
-        if (mode === "creative" || mode === "1" || mode === "c") { player.flying = true; gameStarted = true; }
+        if (mode === "creative" || mode === "1" || mode === "c") { player.flying = true; _gameStarted = true; }
         else if (mode === "survival" || mode === "0" || mode === "s") { player.flying = false; }
         else if (mode === "spectator" || mode === "3" || mode === "sp") { player.flying = true; player.thirdPerson = true; }
         break;
-      case "give":
-        if (args.length < 1) break;
-        const count = parseInt(args[1]) || 1;
-        inventory.addItem(args[0], count);
-        break;
+      case "give": if (args.length >= 1) inventory.addItem(args[0], parseInt(args[1]) || 1); break;
       case "tp": case "teleport":
         if (args.length >= 3) { player.pos.set(parseFloat(args[0]) + 0.5, parseFloat(args[1]), parseFloat(args[2]) + 0.5); player.vel.set(0, 0, 0); }
         break;
@@ -565,117 +420,75 @@ function runCommand(cmd) {
         else if (args[0] === "rain") SKY.setHex(0x4a6b8a);
         else if (args[0] === "thunder") SKY.setHex(0x2a3a4a);
         break;
-      case "kill":
-        if (args[0] === "@p" || !args[0]) health.takeDamage(100);
-        else if (args[0] === "@e") { for (const e of entityManager.entities) e.alive = false; }
-        break;
-      case "summon":
-        if (args.length >= 1) { entityManager.spawnMob(args[0], player.pos.x, player.pos.y, player.pos.z); }
-        break;
-      case "difficulty": case "diff":
-        const d = args[0];
-        if (d === "peaceful" || d === "0") { /* no hostile mobs */ }
-        else if (d === "easy" || d === "1") { /* lower damage */ }
-        else if (d === "normal" || d === "2") { /* normal */ }
-        else if (d === "hard" || d === "3") { /* higher damage */ }
-        break;
-      case "seed":
-        debug.textContent += "\nSeed: " + world.seed;
-        break;
-      case "spawn":
-        player.spawn();
-        break;
-      case "save-all": case "save":
-        saveGame(player, inventory, health, world, drops);
-        break;
+      case "kill": if (args[0] === "@p" || !args[0]) health.takeDamage(100); else if (args[0] === "@e") { for (const e of entityManager.entities) e.alive = false; } break;
+      case "summon": if (args.length >= 1) entityManager.spawnMob(args[0], player.pos.x, player.pos.y, player.pos.z); break;
+      case "seed": document.getElementById("debug").textContent += "\nSeed: " + world.seed; break;
+      case "spawn": player.spawn(); break;
+      case "save-all": case "save": doSave(); break;
       case "fill":
         if (args.length >= 7) {
           const [x1, y1, z1, x2, y2, z2, block] = args;
-          const minX = Math.min(parseInt(x1), parseInt(x2));
-          const maxX = Math.max(parseInt(x1), parseInt(x2));
-          const minY = Math.min(parseInt(y1), parseInt(y2));
-          const maxY = Math.max(parseInt(y1), parseInt(y2));
-          const minZ = Math.min(parseInt(z1), parseInt(z2));
-          const maxZ = Math.max(parseInt(z1), parseInt(z2));
-          const id = typeof block === "string" ? (blockByName(block)?.id || parseInt(block)) : parseInt(block);
-          for (let y = minY; y <= maxY; y++)
-            for (let x = minX; x <= maxX; x++)
-              for (let z = minZ; z <= maxZ; z++)
-                world.setBlock(x, y, z, id);
+          const minX = Math.min(parseInt(x1), parseInt(x2)), maxX = Math.max(parseInt(x1), parseInt(x2));
+          const minY = Math.min(parseInt(y1), parseInt(y2)), maxY = Math.max(parseInt(y1), parseInt(y2));
+          const minZ = Math.min(parseInt(z1), parseInt(z2)), maxZ = Math.max(parseInt(z1), parseInt(z2));
+          const bid = typeof block === "string" ? (blockByName(block)?.id || parseInt(block)) : parseInt(block);
+          for (let y = minY; y <= maxY; y++) for (let x = minX; x <= maxX; x++) for (let z = minZ; z <= maxZ; z++) world.setBlock(x, y, z, bid);
         }
         break;
     }
   } catch (err) { console.warn("KingCraft: أمر غير صالح:", err); }
 }
 
-// ===== لوحة المفاتيح: المخزون + التحكمات =====
-window.addEventListener("keydown", (e) => {
-  if (e.code === "F3") { _f3Held = true; player._f3Held = true; e.preventDefault(); }
-  if (!gameStarted) return;
+function chatSend() {
+  const input = document.getElementById("chat-input").querySelector("input");
+  const text = input.value.trim();
+  document.getElementById("chat-input").classList.add("hidden");
+  if (text.startsWith("/")) runCommand(text.slice(1));
+  document.getElementById("game").requestPointerLock().catch(() => {});
+}
 
-  // Chat open — special handling
+// ===== لوحة المفاتيح =====
+window.addEventListener("keydown", (e) => {
+  if (e.code === "F3") { debugTools.f3Held = true; player._f3Held = true; e.preventDefault(); }
+  if (!_gameStarted) return;
+
+  const chatInput = document.getElementById("chat-input");
   if (!chatInput.classList.contains("hidden")) {
     if (e.code === "Enter") { chatSend(); return; }
-    if (e.code === "Escape") { chatInput.classList.add("hidden"); canvas.requestPointerLock().catch(() => {}); return; }
+    if (e.code === "Escape") { chatInput.classList.add("hidden"); document.getElementById("game").requestPointerLock().catch(() => {}); return; }
     return;
   }
 
-  // ===== F3 + ? — اختصارات التصحيح (تسبق التحكمات العادية) =====
-  if (_f3Held) {
+  if (debugTools.f3Held) {
     e.preventDefault();
     if (e.code === "KeyA") { world.update(player.pos); }
-    else if (e.code === "KeyB") { _showHitboxes = !_showHitboxes; showHitboxes(_showHitboxes); }
-    else if (e.code === "KeyC") { navigator.clipboard.writeText(`XYZ: ${player.pos.x.toFixed(2)} / ${player.pos.y.toFixed(2)} / ${player.pos.z.toFixed(2)}`).catch(() => {}); console.log("KingCraft: تم نسخ الإحداثيات"); }
+    else if (e.code === "KeyB") debugTools.toggleHitboxes();
+    else if (e.code === "KeyC") debugTools.copyCoords();
     else if (e.code === "KeyF" && !ui.isOpen) { world.renderDistance = Math.min(world.renderDistance + 1, 12); }
-    else if (e.code === "KeyG") { _showChunkBorders = !_showChunkBorders; showChunkBorders(_showChunkBorders, player.pos); }
-    else if (e.code === "KeyH") { _showAdvancedTooltips = !_showAdvancedTooltips; }
+    else if (e.code === "KeyG") debugTools.toggleChunkBorders();
+    else if (e.code === "KeyH") debugTools.showAdvancedTooltips = !debugTools.showAdvancedTooltips;
     else if (e.code === "KeyD") { document.querySelector(".chat-msgs").innerHTML = ""; }
-    else if (e.code === "KeyQ") { showF3Help(); }
-    else if (e.code === "KeyT") { rebuildAllChunks(); }
-    else if (e.code === "Escape") { openPause(); }
-    else if (e.code === "F3") { if (!e.repeat) debug.classList.toggle("hidden"); }
-    return; // أي مفتاح مع F3 لا ينفّذ التحكمات العادية
+    else if (e.code === "KeyQ") debugTools.showF3Help();
+    else if (e.code === "KeyT") debugTools.rebuildAllChunks();
+    else if (e.code === "Escape") menu.openPause();
+    else if (e.code === "F3") { if (!e.repeat) document.getElementById("debug").classList.toggle("hidden"); }
+    return;
   }
 
-  // ===== التحكمات العادية =====
-  if (e.code === "F3" && !e.repeat) { e.preventDefault(); debug.classList.toggle("hidden"); return; }
+  if (e.code === "F3" && !e.repeat) { e.preventDefault(); document.getElementById("debug").classList.toggle("hidden"); return; }
 
-  if (e.code === "KeyE") {
-    if (ui.isOpen) _closeUI();
-    else openUI("inventory");
-  } else if (e.code === "Escape" && ui.isOpen) {
-    _closeUI();
-  } else if (e.code === "Escape" && settingsPanel.classList.contains("open")) {
-    saveSettingsFromUI();
-    settingsPanel.classList.remove("open");
-    settingsPanel.classList.add("hidden");
-  } else if (e.code === "Escape" && !document.getElementById("modal-quit").classList.contains("hidden")) {
-    document.getElementById("modal-quit").classList.add("hidden");
-  } else if (e.code === "Escape" && !document.getElementById("modal-delete").classList.contains("hidden")) {
-    document.getElementById("modal-delete").classList.add("hidden");
-  } else if (e.code === "Escape" && pauseMenu.classList.contains("hidden") === false) {
-    closePause();
-  } else if (e.code === "Escape" && !pauseMenu.classList.contains("hidden") === false && !gameStarted) {
-    if (!worldSelect.classList.contains("hidden")) showScreen(menu);
-  } else if (e.code === "Escape" && !worldCreate.classList.contains("hidden")) {
-    showScreen(worldSelect);
-    renderWorldList();
-  } else if (e.code === "Escape") {
-    // Default: if in game, open pause
-    if (gameStarted && !health.dead) openPause();
-  }
+  if (e.code === "KeyE") { if (ui.isOpen) closeUI(); else openUI("inventory"); }
+  else if (e.code === "Escape" && ui.isOpen) closeUI();
+  else if (e.code === "Escape" && menu.settingsPanel.classList.contains("open")) { menu._saveSettings(); menu.settingsPanel.classList.remove("open"); menu.settingsPanel.classList.add("hidden"); }
+  else if (e.code === "Escape" && menu.pauseMenu.classList.contains("hidden") === false) menu.closePause();
+  else if (e.code === "Escape" && !menu.pauseMenu.classList.contains("hidden") === false && !_gameStarted) { if (!menu.worldSelect.classList.contains("hidden")) menu.showScreen(menu.menu); }
+  else if (e.code === "Escape" && !menu.worldCreate.classList.contains("hidden")) { menu.showScreen(menu.worldSelect); menu.renderWorldList(); }
+  else if (e.code === "Escape") { if (_gameStarted && !health.dead) menu.openPause(); }
 
-  // Q — إسقاط العنصر
   if (e.code === "KeyQ" && !ui.isOpen) {
     const sel = inventory.selectedStack;
-    if (sel && sel.count > 0) {
-      const pp = player.pos;
-      drops.spawn(Math.floor(pp.x), Math.floor(pp.y), Math.floor(pp.z), sel.id, 1);
-      inventory.consumeSelected(1);
-    }
+    if (sel && sel.count > 0) { const pp = player.pos; drops.spawn(Math.floor(pp.x), Math.floor(pp.y), Math.floor(pp.z), sel.id, 1); inventory.consumeSelected(1); }
   }
-
-  // F — تبديل اليد الثانية
   if (e.code === "KeyF" && !ui.isOpen && !e.repeat) {
     const h = inventory.selectedHotbar;
     const main = inventory.slots[h];
@@ -683,434 +496,76 @@ window.addEventListener("keydown", (e) => {
     inventory.offhand = main ? { id: main.id, count: main.count, dur: main.dur } : null;
     inventory._changed();
   }
-
-  // T — شات
   if (e.code === "KeyT" && !ui.isOpen) {
     document.exitPointerLock();
     chatInput.classList.remove("hidden");
     chatInput.querySelector("input").value = "";
     chatInput.querySelector("input").focus();
   }
-
-  // F2 — تصوير
-  if (e.code === "F2") {
-    e.preventDefault();
-    const link = document.createElement("a");
-    link.download = "kingcraft-" + Date.now() + ".png";
-    link.href = renderer.domElement.toDataURL("image/png");
-    link.click();
-  }
-
-  // F5 — تبديل المنظور
-  if (e.code === "F5") {
-    e.preventDefault();
-    player.thirdPerson = !player.thirdPerson;
-  }
+  if (e.code === "F2") { e.preventDefault(); debugTools.takeScreenshot(); }
+  if (e.code === "F5") { e.preventDefault(); player.thirdPerson = !player.thirdPerson; }
 });
 
 window.addEventListener("keyup", (e) => {
-  if (e.code === "F3") { _f3Held = false; player._f3Held = false; }
+  if (e.code === "F3") { debugTools.f3Held = false; player._f3Held = false; }
 });
 
-// ===== إعادة الحياة =====
-document.getElementById("btn-respawn").addEventListener("click", () => {
-  health.reset();
-  player.spawn();
-  entityManager.clear();
-  highlight.visible = false;
-  crackBox.visible = false;
-  crackMat.opacity = 0;
-  document.getElementById("death-screen").classList.add("hidden");
-  updateHUD();
+document.getElementById("game").addEventListener("mousemove", (e) => {
+  if (document.pointerLockElement === document.getElementById("game")) {
+    if (!started) return;
+    yaw -= e.movementX * SENS;
+    pitch -= e.movementY * SENS;
+    player._yaw = yaw; player._pitch = pitch;
+  } else if (_gameStarted) {
+    if (_lastMouseX === null) { _lastMouseX = e.clientX; _lastMouseY = e.clientY; return; }
+    const dx = e.clientX - _lastMouseX, dy = e.clientY - _lastMouseY;
+    _lastMouseX = e.clientX; _lastMouseY = e.clientY;
+    yaw -= dx * SENS; pitch -= dy * SENS;
+    player._yaw = yaw; player._pitch = pitch;
+  } else return;
+  const lim = Math.PI / 2 - 0.01;
+  pitch = Math.max(-lim, Math.min(lim, pitch));
 });
 
-function startGame(worldData) {
-  try {
-    _currentWorldObj = worldData;
-    setWorldId(worldData.id);
-    _saveData = null;
-
-    world.update(new THREE.Vector3(0, 0, 0));
-    updateHUD();
-
-    // Load save data for this world
-    loadGame().then(data => {
-      _saveData = data;
-      if (_saveData) {
-        player.pos.set(_saveData.player.x, _saveData.player.y, _saveData.player.z);
-        player.vel.set(0, 0, 0);
-        yaw = _saveData.player.yaw || 0;
-        pitch = _saveData.player.pitch || 0;
-        player._yaw = yaw; player._pitch = pitch;
-        player.flying = _saveData.player.flying || false;
-        player.thirdPerson = _saveData.player.thirdPerson || false;
-        player.bedPos = _saveData.player.bedPos || null;
-        if (_saveData.inventory) {
-          for (let i = 0; i < _saveData.inventory.length && i < inventory.slots.length; i++) {
-            inventory.slots[i] = _saveData.inventory[i] ? { id: _saveData.inventory[i].id, count: _saveData.inventory[i].count, dur: _saveData.inventory[i].dur } : null;
-          }
-          if (_saveData.armor) {
-            for (let i = 0; i < _saveData.armor.length && i < inventory.armor.length; i++) {
-              inventory.armor[i] = _saveData.armor[i] ? { id: _saveData.armor[i].id, count: _saveData.armor[i].count, dur: _saveData.armor[i].dur } : null;
-            }
-          }
-          inventory.selectedHotbar = _saveData.selectedHotbar || 0;
-          inventory.offhand = _saveData.offhand ? { id: _saveData.offhand.id, count: _saveData.offhand.count, dur: _saveData.offhand.dur } : null;
-        }
-        health.health = _saveData.player.health ?? 20;
-        health.food = _saveData.player.food ?? 20;
-        health.saturation = _saveData.player.saturation ?? 20;
-        health.setArmor(inventory.getArmorValue());
-        updateHUD();
-      } else {
-        player.spawn();
-        inventory.giveStarter();
-      }
-      lastDir = player.applyCamera(yaw, pitch);
-      gameStarted = true;
-      hideAllMenus();
-      crosshair.classList.remove("hidden");
-      hud.classList.remove("hidden");
-      debug.classList.remove("hidden");
-      const p = canvas.requestPointerLock();
-      if (p && p.catch) p.catch(() => { started = true; });
-      if (document.pointerLockElement !== canvas) started = true;
-    }).catch((err) => {
-      console.warn("KingCraft: فشل تحميل السيف, بدء عالم جديد", err);
-      player.spawn();
-      inventory.giveStarter();
-      lastDir = player.applyCamera(yaw, pitch);
-      gameStarted = true;
-      hideAllMenus();
-      crosshair.classList.remove("hidden");
-      hud.classList.remove("hidden");
-      debug.classList.remove("hidden");
-      const p = canvas.requestPointerLock();
-      if (p && p.catch) p.catch(() => { started = true; });
-      if (document.pointerLockElement !== canvas) started = true;
-    });
-  } catch (err) {
-    const msg = err && err.stack ? err.stack : err;
-    console.error("KingCraft: فشل بدء اللعبة:", msg);
-    if (window.kcError) window.kcError("فشل بدء اللعبة: " + msg);
-    else alert("خطأ: " + err);
-  }
-}
-
-// ===== شاشات القوائم =====
-function showScreen(screen) {
-  hideAllMenus();
-  screen.classList.remove("hidden");
-}
-
-// دالة مساعدة لعرض الوقت
-function fmtTime(seconds) {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  return h > 0 ? `${h}h ${m}m` : `${m}m`;
-}
-
-// ====================================================================
-// قائمة العوالم
-// ====================================================================
-async function renderWorldList() {
-  const list = document.getElementById("world-list");
-  list.innerHTML = "";
-  const worlds = await WM.listWorlds();
-  if (worlds.length === 0) {
-    list.innerHTML = '<div class="world-card" style="cursor:default;color:#888;justify-content:center;padding:20px">No worlds yet. Create one!</div>';
-    return;
-  }
-  for (const w of worlds) {
-    const card = document.createElement("div");
-    card.className = "world-card";
-    card.innerHTML = `
-      <div class="world-icon">🌍</div>
-      <div class="world-info">
-        <div class="world-name">${w.name}</div>
-        <div class="world-meta">${w.gameMode} • ${w.difficulty} • ${fmtTime(w.playTime)}</div>
-      </div>
-      <button class="world-delete" data-id="${w.id}" title="Delete">🗑</button>
-      <span class="world-play">▶</span>
-    `;
-    card.addEventListener("click", (e) => {
-      if (e.target.closest(".world-delete")) return;
-      startGame(w);
-    });
-    card.querySelector(".world-delete").addEventListener("click", (e) => {
-      e.stopPropagation();
-      showDeleteConfirm(w);
-    });
-    list.appendChild(card);
-  }
-}
-
-function showDeleteConfirm(world) {
-  document.getElementById("delete-msg").textContent = `Delete "${world.name}"? This cannot be undone.`;
-  const modal = document.getElementById("modal-delete");
-  modal.classList.remove("hidden");
-  document.getElementById("btn-confirm-delete").onclick = async () => {
-    await WM.deleteWorld(world.id);
-    modal.classList.add("hidden");
-    renderWorldList();
-  };
-  document.getElementById("btn-cancel-delete").onclick = () => modal.classList.add("hidden");
-  modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); }, { once: true });
-}
-
-// ====================================================================
-// Singleplayer — فتح شاشة اختيار العالم
-// ====================================================================
-document.getElementById("btn-singleplayer").addEventListener("click", () => {
-  renderWorldList();
-  showScreen(worldSelect);
-});
-
-// ====================================================================
-// إنشاء عالم
-// ====================================================================
-document.getElementById("btn-create-world").addEventListener("click", () => {
-  document.getElementById("create-name").value = "My World";
-  document.getElementById("create-seed").value = "";
-  document.getElementById("create-mode").value = "survival";
-  document.getElementById("create-difficulty").value = "normal";
-  showScreen(worldCreate);
-});
-
-document.getElementById("btn-cancel-create").addEventListener("click", () => {
-  showScreen(worldSelect);
-  renderWorldList();
-});
-
-document.getElementById("btn-random-seed").addEventListener("click", () => {
-  document.getElementById("create-seed").value = Math.floor(Math.random() * 2147483647).toString();
-});
-
-document.getElementById("btn-create-confirm").addEventListener("click", async () => {
-  const name = document.getElementById("create-name").value.trim() || "My World";
-  const seed = document.getElementById("create-seed").value.trim() || Math.floor(Math.random() * 2147483647).toString();
-  const mode = document.getElementById("create-mode").value;
-  const diff = document.getElementById("create-difficulty").value;
-  const world = await WM.createWorld(name, seed, mode, diff);
-  if (world) startGame(world);
-});
-
-// ====================================================================
-// الرجوع للقائمة الرئيسية
-// ====================================================================
-document.getElementById("btn-back-menu").addEventListener("click", () => {
-  showScreen(menu);
-});
-
-// ====================================================================
-// الإعدادات
-// ====================================================================
-const settingsPanel = document.getElementById("settings-panel");
-
-function loadSettingsIntoUI() {
-  const s = WM.loadSettings();
-  document.getElementById("vol-master").value = s.masterVolume;
-  document.getElementById("vol-sfx").value = s.sfxVolume;
-  document.getElementById("vol-music").value = s.musicVolume;
-  document.getElementById("sens-slider").value = s.sensitivity;
-  document.getElementById("auto-jump").checked = s.autoJump;
-  document.getElementById("invert-y").checked = s.invertY;
-  document.getElementById("render-dist").value = s.renderDistance;
-  document.getElementById("fov-slider").value = s.fov;
-  document.getElementById("brightness").value = Math.round(s.brightness * 100);
-  document.getElementById("lang-select").value = s.language;
-  applySettings(s);
-}
-
-function applySettings(s) {
-  sound._volume = (s.masterVolume / 100) * (s.sfxVolume / 100);
-  SENS = 0.0022 * (s.sensitivity / 10);
-  if (world) world.renderDistance = s.renderDistance;
-  camera.fov = s.fov;
-  camera.updateProjectionMatrix();
-  scene.background.setHSL(0.58, 0.4, 0.6 * s.brightness);
-}
-
-function saveSettingsFromUI() {
-  const s = {
-    masterVolume: parseInt(document.getElementById("vol-master").value),
-    sfxVolume: parseInt(document.getElementById("vol-sfx").value),
-    musicVolume: parseInt(document.getElementById("vol-music").value),
-    sensitivity: parseInt(document.getElementById("sens-slider").value),
-    autoJump: document.getElementById("auto-jump").checked,
-    invertY: document.getElementById("invert-y").checked,
-    renderDistance: parseInt(document.getElementById("render-dist").value),
-    fov: parseInt(document.getElementById("fov-slider").value),
-    brightness: parseInt(document.getElementById("brightness").value) / 100,
-    language: document.getElementById("lang-select").value,
-  };
-  WM.saveSettings(s);
-}
-
-document.getElementById("btn-settings").addEventListener("click", () => {
-  loadSettingsIntoUI();
-  settingsPanel.classList.add("open");
-  settingsPanel.classList.remove("hidden");
-});
-
-document.getElementById("btn-pause-settings").addEventListener("click", () => {
-  loadSettingsIntoUI();
-  settingsPanel.classList.add("open");
-  settingsPanel.classList.remove("hidden");
-});
-
-document.getElementById("btn-save-settings").addEventListener("click", () => {
-  saveSettingsFromUI();
-  settingsPanel.classList.remove("open");
-  settingsPanel.classList.add("hidden");
-});
-
-settingsPanel.addEventListener("click", (e) => {
-  if (e.target === settingsPanel) {
-    saveSettingsFromUI();
-    settingsPanel.classList.remove("open");
-    settingsPanel.classList.add("hidden");
-  }
-});
-
-// ====================================================================
-// قائمة الإيقاف المؤقت
-// ====================================================================
-function openPause() {
-  _paused = true;
-  document.exitPointerLock();
-  resetMining();
-  showScreen(pauseMenu);
-}
-
-function closePause() {
-  _paused = false;
-  pauseMenu.classList.add("hidden");
-  if (gameStarted) canvas.requestPointerLock().catch(() => {});
-}
-
-document.getElementById("btn-resume").addEventListener("click", closePause);
-
-document.getElementById("btn-save-worlds").addEventListener("click", () => {
-  if (_currentWorldObj) {
-    saveGame(player, inventory, health, world, drops);
-    _currentWorldObj.lastPlayed = Date.now();
-    WM.updateWorld(_currentWorldObj);
-  }
-  gameStarted = false;
-  closePause();
-  renderWorldList();
-  showScreen(worldSelect);
-});
-
-document.getElementById("btn-save-quit").addEventListener("click", () => {
-  if (_currentWorldObj) {
-    saveGame(player, inventory, health, world, drops);
-    _currentWorldObj.lastPlayed = Date.now();
-    WM.updateWorld(_currentWorldObj);
-  }
-  gameStarted = false;
-  closePause();
-  showScreen(menu);
-});
-
-// زر Quit Game في قائمة الإيقاف → يفتح تأكيد
-document.getElementById("btn-quit-game").addEventListener("click", () => {
-  document.getElementById("modal-quit").classList.remove("hidden");
-});
-
-// زر Quit Game في القائمة الرئيسية → يفتح نفس التأكيد
-document.getElementById("btn-quit").addEventListener("click", () => {
-  document.getElementById("modal-quit").classList.remove("hidden");
-});
-
-// تأكيد الخروج
-document.getElementById("btn-confirm-quit").addEventListener("click", () => {
-  document.getElementById("modal-quit").classList.add("hidden");
-  // save before quit if in game
-  if (gameStarted && _currentWorldObj) {
-    saveGame(player, inventory, health, world, drops);
-    _currentWorldObj.lastPlayed = Date.now();
-    WM.updateWorld(_currentWorldObj);
-  }
-  gameStarted = false;
-  closePause();
-  showScreen(menu);
-  window.close();
-});
-
-document.getElementById("btn-cancel-quit").addEventListener("click", () => {
-  document.getElementById("modal-quit").classList.add("hidden");
-});
-
-// Close quit modal on backdrop click
-document.getElementById("modal-quit").addEventListener("click", (e) => {
-  if (e.target === document.getElementById("modal-quit")) {
-    document.getElementById("modal-quit").classList.add("hidden");
-  }
-});
-
-// ====================================================================
-// الضغط على الكانفاس لطلب Pointer Lock
-// ====================================================================
-canvas.addEventListener("click", () => {
-  if (gameStarted && document.pointerLockElement !== canvas) canvas.requestPointerLock().catch(() => {});
-  else if (!started && allMenusHidden() && !ui.isOpen) canvas.requestPointerLock().catch(() => {});
+document.addEventListener("pointerlockchange", () => {
+  started = document.pointerLockElement === document.getElementById("game");
+  if (!started) { _lastMouseX = null; _lastMouseY = null; }
 });
 
 // ===== حلقة اللعبة =====
 let last = performance.now();
-let frames = 0, fpsTime = 0, fps = 0;
-let debugTimer = 0;
+let frames = 0, fpsTime = 0, fps = 0, debugTimer = 0;
 
 function loop(now) {
   const dt = Math.min((now - last) / 1000, 0.05);
   last = now;
 
-  if (gameStarted) {
+  if (_gameStarted) {
     furnaces.tick(dt);
     farming.tick(dt);
     health.setArmor(inventory.getArmorValue());
     health.tick(dt);
-    autoSave(dt);
+    _saveTimer += dt;
+    if (_saveTimer >= 30) { _saveTimer = 0; doSave(); menu.currentWorld.playTime += 30; WM.updateWorld(menu.currentWorld); }
   }
 
-  if (allMenusHidden() && !_paused) {
+  if (menu.allHidden() && !menu.paused) {
     const playing = !ui.isOpen && !health.dead;
     if (playing) {
       player.update(dt, yaw);
       lastDir = player.applyCamera(yaw, pitch);
-
-      // صوت السباحة
       if (player.inWater && !player._wasInWater) sound.playSplash();
-
-      // صوت الخطوات
       if (player.inWater) {
         if (Math.abs(player.vel.x) > 0.05 || Math.abs(player.vel.z) > 0.05) {
           _stepTimer += dt;
-          if (_stepTimer >= 0.6) {
-            _stepTimer = 0;
-            sound.playSplash();
-          }
-        } else {
-          _stepTimer = 0.6;
-        }
+          if (_stepTimer >= 0.6) { _stepTimer = 0; sound.playSplash(); }
+        } else _stepTimer = 0.6;
       } else if (player.onGround && (Math.abs(player.vel.x) > 0.05 || Math.abs(player.vel.z) > 0.05) && !player.flying) {
         _stepTimer += dt;
         const stepInterval = player.keys["ControlLeft"] ? 0.35 : 0.5;
-        if (_stepTimer >= stepInterval) {
-          _stepTimer = 0;
-          sound.playStep();
-        }
-      } else {
-        _stepTimer = 0.3;
-      }
-
-      // صوت الهبوط
-      if (player.onGround && !player._prevOnGround && player._fallDist > 0.5) {
-        sound.playLand();
-      }
-
+        if (_stepTimer >= stepInterval) { _stepTimer = 0; sound.playStep(); }
+      } else _stepTimer = 0.3;
+      if (player.onGround && !player._prevOnGround && player._fallDist > 0.5) sound.playLand();
       updateMining(dt);
       drops.update(dt, player, inventory);
       entityManager.update(dt, player.pos);
@@ -1119,17 +574,12 @@ function loop(now) {
       ui.tickFurnace();
     }
     world.update(player.pos);
-
-    if (_showChunkBorders) showChunkBorders(true, player.pos);
-    if (_showHitboxes) showHitboxes(true);
+    debugTools.updateChunkBorders(player.pos);
+    debugTools.updateHitboxes();
 
     const hit = playing ? raycastVoxel(world, eyeOrigin(), lastDir) : null;
-    if (hit) {
-      highlight.visible = true;
-      highlight.position.set(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5);
-    } else {
-      highlight.visible = false;
-    }
+    if (hit) { highlight.visible = true; highlight.position.set(hit.block[0] + 0.5, hit.block[1] + 0.5, hit.block[2] + 0.5); }
+    else highlight.visible = false;
 
     frames++; debugTimer += dt;
     if (debugTimer >= 0.5) {
@@ -1137,15 +587,10 @@ function loop(now) {
       frames = 0; debugTimer = 0;
       const tooltipId = hit ? world.getBlock(hit.block[0], hit.block[1], hit.block[2]) : 0;
       const tooltipName = tooltipId ? (getItem(tooltipId)?.name || `ID:${tooltipId}`) : "";
-      debug.textContent =
-        `KingCraft v0.4\n` +
-        `FPS: ${fps}\n` +
-        `XYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\n` +
-        `chunks: ${world.chunks.size} • drops: ${drops.entities.length} • mobs: ${entityManager.entities.length}` +
-        (player.flying ? "\n[طيران]" : "") +
-        (player.sneaking ? "\n[زحف]" : "") +
-        (_paused ? "\n§c⏸ PAUSED" : "") +
-        (_showAdvancedTooltips && tooltipName ? `\n[${tooltipName}]` : "");
+      document.getElementById("debug").textContent =
+        `KingCraft v0.4\nFPS: ${fps}\nXYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\nchunks: ${world.chunks.size} • drops: ${drops.entities.length} • mobs: ${entityManager.entities.length}` +
+        (player.flying ? "\n[طيران]" : "") + (player.sneaking ? "\n[زحف]" : "") + (menu.paused ? "\n§c⏸ PAUSED" : "") +
+        (debugTools.showAdvancedTooltips && tooltipName ? `\n[${tooltipName}]` : "");
     }
   }
 
@@ -1155,20 +600,12 @@ function loop(now) {
 requestAnimationFrame(loop);
 
 // ===== تغيير الحجم =====
-window.addEventListener("resize", () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
+window.addEventListener("resize", () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 
 // ===== PWA =====
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
-    // امسح كل التخزين المؤقت أولاً عشان نتأكد من تحميل أحدث الملفات
-    if ("caches" in window) {
-      const names = await caches.keys();
-      await Promise.all(names.map((n) => caches.delete(n)));
-    }
+    if ("caches" in window) { const names = await caches.keys(); await Promise.all(names.map((n) => caches.delete(n))); }
     const regs = await navigator.serviceWorker.getRegistrations();
     await Promise.all(regs.map((r) => r.unregister()));
     navigator.serviceWorker.register("sw.js").catch((err) => { console.warn("KingCraft: فشل تسجيل Service Worker", err); });

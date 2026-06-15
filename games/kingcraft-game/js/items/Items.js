@@ -87,7 +87,7 @@ function register(item) { ITEMS[item.id] = item; }
 
 // بلوكات قابلة للوضع (نتخطى الهواء والماء)
 for (const b of BLOCKS) {
-  if (b.id === 0 || b.name === "water") continue;
+  if (b.id === 0 || b.liquid) continue;
   register({ id: b.name, label: b.label || b.name, maxStack: 64, placeable: true, blockId: b.id });
 }
 

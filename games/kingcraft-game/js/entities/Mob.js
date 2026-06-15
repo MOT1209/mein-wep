@@ -1,4 +1,5 @@
 import { Entity } from "./Entity.js";
+import { findPath } from "../utils/Pathfinding.js";
 
 export const MOB_TYPES = {
   zombie: {
@@ -84,6 +85,9 @@ export class Mob extends Entity {
     this._hurtFlash = 0;
     this._idleTimer = 0;
     this._drops = def.drops;
+    this.path = null;
+    this.pathIndex = 0;
+    this._repathTimer = 0;
   }
 
   takeDamage(amount) {
@@ -97,6 +101,7 @@ export class Mob extends Entity {
     this.attackTimer = Math.max(0, this.attackTimer - dt);
     this._hurtFlash = Math.max(0, this._hurtFlash - dt);
     this._idleTimer += dt;
+    this._repathTimer -= dt;
 
     const dx = playerPos.x - this.pos.x;
     const dz = playerPos.z - this.pos.z;
@@ -108,6 +113,7 @@ export class Mob extends Entity {
         this._idleTimer = 0;
       } else if (this._idleTimer > 3) {
         this.target = null;
+        this.path = null;
       }
     }
 
@@ -118,22 +124,54 @@ export class Mob extends Entity {
       this.yaw = Math.atan2(-tdx, -tdz);
 
       if (tDist > this.attackRange) {
-        const norm = this.speed / Math.max(tDist, 0.5);
-        this.vel.x = tdx * norm;
-        this.vel.z = tdz * norm;
+        let usingPath = false;
 
-        if (this.onGround) {
-          const step = Math.floor(this.pos.y);
-          const aheadX = Math.floor(this.pos.x + this.vel.x * 0.5 / this.speed);
-          const aheadZ = Math.floor(this.pos.z + this.vel.z * 0.5 / this.speed);
-          if (this.isSolidAt(aheadX, step + 2, aheadZ) && !this.isSolidAt(aheadX, step + 1, aheadZ)) {
-            this.vel.y = 7;
-            this.onGround = false;
+        if (this._repathTimer <= 0 || !this.path) {
+          this.path = findPath(this.world, this.pos.x, this.pos.y, this.pos.z, this.target.x, this.target.y, this.target.z);
+          this.pathIndex = 0;
+          this._repathTimer = 1.5 + Math.random() * 0.5;
+        }
+
+        if (this.path && this.pathIndex < this.path.length) {
+          const wp = this.path[this.pathIndex];
+          const wdx = wp.x - this.pos.x;
+          const wdz = wp.z - this.pos.z;
+          const wDist = Math.hypot(wdx, wdz);
+
+          if (wDist < 0.5) {
+            this.pathIndex++;
+          } else {
+            usingPath = true;
+            const norm = this.speed / Math.max(wDist, 0.5);
+            this.vel.x = wdx * norm;
+            this.vel.z = wdz * norm;
+
+            if (this.onGround && wp.y > this.pos.y + 0.5) {
+              this.vel.y = 7;
+              this.onGround = false;
+            }
+          }
+        }
+
+        if (!usingPath) {
+          const norm = this.speed / Math.max(tDist, 0.5);
+          this.vel.x = tdx * norm;
+          this.vel.z = tdz * norm;
+
+          if (this.onGround) {
+            const step = Math.floor(this.pos.y);
+            const aheadX = Math.floor(this.pos.x + this.vel.x * 0.5 / this.speed);
+            const aheadZ = Math.floor(this.pos.z + this.vel.z * 0.5 / this.speed);
+            if (this.isSolidAt(aheadX, step + 2, aheadZ) && !this.isSolidAt(aheadX, step + 1, aheadZ)) {
+              this.vel.y = 7;
+              this.onGround = false;
+            }
           }
         }
       } else {
         this.vel.x = 0;
         this.vel.z = 0;
+        this.path = null;
         if (this.hostile && this.attackTimer <= 0) {
           this.attackTimer = this.attackCooldownMax;
           return { attack: true, damage: this.attackDamage, mob: this };
