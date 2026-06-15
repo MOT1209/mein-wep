@@ -76,11 +76,14 @@ function injectRegisterPrompt() {
     if (!client) return;
     try {
       const { error } = await client.rpc('add_admin_user');
-      if (error) { alert('Error: ' + error.message); return; }
+      if (error) {
+        injectRegisterSql(prompt);
+        return;
+      }
       prompt.innerHTML = `<div class="admin-register-box"><p style="color:#22c55e;">✅ Registered! Refreshing...</p></div>`;
       setTimeout(() => location.reload(), 1000);
     } catch (err) {
-      alert('Failed: ' + err.message);
+      injectRegisterSql(prompt);
     }
   });
 
@@ -294,12 +297,12 @@ async function saveVaultItem(e) {
   showToast(editId ? 'Updated' : 'Added');
 }
 
-function showToast(msg) {
+function showToast(msg, type) {
   const t = document.createElement('div');
-  t.className = 'admin-toast';
+  t.className = 'admin-toast' + (type === 'error' ? ' admin-toast--error' : '');
   t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 2500);
+  setTimeout(() => t.remove(), 3500);
 }
 
 /* ── Vault Lock System ── */
@@ -359,6 +362,62 @@ export function initVaultLock() {
       });
     }
   }
+}
+
+/* ── Register SQL Prompt ── */
+function injectRegisterSql(promptEl) {
+  const sql = `create or replace function public.add_admin_user()
+returns void
+language sql
+security definer
+set search_path = public
+as $$
+  insert into public.admin_users (user_id, email)
+  values ((select auth.uid()), (select email from auth.users where id = (select auth.uid())))
+  on conflict (user_id) do nothing;
+$$;
+
+revoke all on function public.add_admin_user() from public;
+grant execute on function public.add_admin_user() to authenticated;`;
+
+  promptEl.innerHTML = `<div class="admin-register-box">
+    <h4>🔧 Create Admin Function</h4>
+    <p>The database function <code>add_admin_user</code> doesn't exist yet.</p>
+    <p style="font-size:0.85em;color:#94a3b8;">Open your Supabase SQL Editor and run:</p>
+    <pre style="background:#1e293b;color:#e2e8f0;padding:1em;border-radius:8px;font-size:0.8em;overflow-x:auto;white-space:pre-wrap;text-align:left;direction:ltr;" id="admin-sql-code">${escapeHtml(sql)}</pre>
+    <button class="admin-btn" id="copy-sql-btn" style="margin-top:6px;"><i class="fas fa-copy"></i> Copy SQL</button>
+    <p style="font-size:0.85em;color:#94a3b8;margin-top:8px;">After running, click below to retry:</p>
+    <button class="admin-btn admin-btn-primary" id="retry-admin-register"><i class="fas fa-rotate"></i> Check & Retry</button>
+    <button class="admin-btn" onclick="this.closest('.admin-register-prompt').remove()">Dismiss</button>
+  </div>`;
+
+  on(promptEl.querySelector('#copy-sql-btn'), 'click', () => {
+    navigator.clipboard.writeText(sql).then(() => showToast('SQL copied!')).catch(() => showToast('Copy failed'));
+  });
+  on(promptEl.querySelector('#retry-admin-register'), 'click', async () => {
+    const c = getSupabaseClient();
+    if (!c) return;
+    try {
+      const { error } = await c.rpc('add_admin_user');
+      if (!error) {
+        promptEl.innerHTML = `<div class="admin-register-box"><p style="color:#22c55e;">✅ Registered! Refreshing...</p></div>`;
+        setTimeout(() => location.reload(), 1000);
+        return;
+      }
+    } catch {}
+    try {
+      const { error: directError } = await c.from('admin_users').insert({
+        user_id: (await c.auth.getSession()).data.session?.user?.id,
+        email: (await c.auth.getSession()).data.session?.user?.email
+      });
+      if (!directError) {
+        promptEl.innerHTML = `<div class="admin-register-box"><p style="color:#22c55e;">✅ Registered! Refreshing...</p></div>`;
+        setTimeout(() => location.reload(), 1000);
+        return;
+      }
+    } catch {}
+    showToast('Need the DB function. Run the SQL above first.', 'error');
+  });
 }
 
 export function setVaultPin(pin) {
