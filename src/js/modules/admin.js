@@ -1,0 +1,332 @@
+import { getSupabaseClient, isCurrentUserAdmin, createContentItem } from '../services/supabase.js';
+import { qs, qsa, on } from '../utils/dom.js';
+import { escapeHtml, sanitizeInput } from '../utils/security.js';
+
+const VAULT_PIN_KEY = 'rashid_vault_pin';
+
+let isAdmin = false;
+let adminUser = null;
+let vaultModal = null;
+
+/* ── Init Admin Mode ── */
+export async function initAdmin() {
+  const client = getSupabaseClient();
+  if (!client) return;
+  const { data: { session } } = await client.auth.getSession();
+  if (!session) return;
+  const admin = await isCurrentUserAdmin();
+  if (!admin) return;
+
+  isAdmin = true;
+  adminUser = session.user;
+  document.body.classList.add('admin-logged-in');
+  window.__admin = { user: session.user };
+
+  injectAdminBar();
+  initVaultAdmin();
+}
+
+/* ── Admin Bar ── */
+function injectAdminBar() {
+  if (qs('.admin-bar')) return;
+  const bar = document.createElement('div');
+  bar.className = 'admin-bar';
+  bar.innerHTML = `
+    <span class="admin-bar-icon"><i class="fas fa-shield-halved"></i></span>
+    <span class="admin-bar-label">Admin</span>
+    <span class="admin-bar-user">${escapeHtml(adminUser?.email || '')}</span>
+    <span class="admin-bar-sep"></span>
+    <button class="admin-bar-btn" data-action="logout" title="Sign out"><i class="fas fa-right-from-bracket"></i></button>
+  `;
+  document.body.prepend(bar);
+  on(bar.querySelector('[data-action="logout"]'), 'click', async () => {
+    const c = getSupabaseClient();
+    if (c) await c.auth.signOut();
+    document.body.classList.remove('admin-logged-in');
+    isAdmin = false;
+    bar.remove();
+    location.reload();
+  });
+}
+
+/* ── Vault Admin ── */
+function initVaultAdmin() {
+  const vaultSection = qs('#vault');
+  if (!vaultSection) return;
+  const container = vaultSection.querySelector('.container');
+  if (!container) return;
+
+  const panel = document.createElement('div');
+  panel.className = 'vault-admin-panel admin-only';
+  panel.innerHTML = `
+    <div class="vault-admin-header">
+      <h3><i class="fas fa-screwdriver-wrench"></i> Vault Manager</h3>
+      <div class="vault-admin-actions">
+        <button class="admin-btn" data-action="set-vault-pin">
+          <i class="fas fa-key"></i> Set PIN
+        </button>
+        <button class="admin-btn admin-btn-primary" data-action="add-vault-item">
+          <i class="fas fa-plus"></i> Add Item
+        </button>
+      </div>
+    </div>`;
+  vaultSection.parentNode.insertBefore(panel, vaultSection.nextSibling);
+
+  addEditDeleteButtons();
+  initModal();
+}
+
+function addEditDeleteButtons() {
+  qsa('.vault-card').forEach(card => {
+    const actions = document.createElement('div');
+    actions.className = 'vault-card-actions admin-only';
+    actions.innerHTML = `
+      <button class="vault-card-btn" data-action="edit-vault" title="Edit"><i class="fas fa-pen"></i></button>
+      <button class="vault-card-btn vault-card-btn-danger" data-action="delete-vault" title="Delete"><i class="fas fa-trash"></i></button>`;
+    card.style.position = 'relative';
+    card.appendChild(actions);
+  });
+
+  on(document, 'click', (e) => {
+    const btn = e.target.closest('.vault-card-btn');
+    if (!btn) return;
+    const card = btn.closest('.vault-card');
+    if (!card) return;
+    if (btn.dataset.action === 'edit-vault') openEditModal(card);
+    if (btn.dataset.action === 'delete-vault' && confirm('Delete this vault item?')) card.remove();
+  });
+}
+
+/* ── Modal ── */
+function initModal() {
+  if (qs('#vault-modal')) return;
+  vaultModal = document.createElement('div');
+  vaultModal.id = 'vault-modal';
+  vaultModal.className = 'admin-modal';
+  vaultModal.innerHTML = `
+    <div class="admin-modal-overlay"></div>
+    <div class="admin-modal-content">
+      <div class="admin-modal-header">
+        <h3 id="vault-modal-title">Vault Item</h3>
+        <button class="admin-modal-close" data-action="close-modal"><i class="fas fa-xmark"></i></button>
+      </div>
+      <form class="admin-modal-form" id="vault-form">
+        <div class="admin-field">
+          <label for="vf-icon">Icon</label>
+          <input type="text" id="vf-icon" class="admin-input" value="fas fa-folder" required>
+        </div>
+        <div class="admin-field">
+          <label for="vf-title">Title</label>
+          <input type="text" id="vf-title" class="admin-input" required>
+        </div>
+        <div class="admin-field">
+          <label for="vf-desc">Description</label>
+          <textarea id="vf-desc" class="admin-input" rows="2"></textarea>
+        </div>
+        <div class="admin-field">
+          <label for="vf-tags">Tags <small>(comma separated)</small></label>
+          <input type="text" id="vf-tags" class="admin-input" placeholder="js, react, api">
+        </div>
+        <div class="admin-field">
+          <label for="vf-link">Link <small>(optional)</small></label>
+          <input type="text" id="vf-link" class="admin-input" placeholder="vault/prompts/index.html">
+        </div>
+        <div class="admin-field">
+          <label for="vf-category">Category</label>
+          <select id="vf-category" class="admin-input">
+            <option value="prompts">Prompts</option>
+            <option value="code">Code</option>
+            <option value="media">Media</option>
+            <option value="docs">Docs</option>
+            <option value="archives">Archives</option>
+            <option value="videos">Videos</option>
+          </select>
+        </div>
+        <div class="admin-field-row">
+          <label class="admin-check">
+            <input type="checkbox" id="vf-locked"> <span>Locked <i class="fas fa-lock"></i></span>
+          </label>
+        </div>
+        <div class="admin-modal-actions">
+          <button type="button" class="admin-btn" data-action="close-modal">Cancel</button>
+          <button type="submit" class="admin-btn admin-btn-primary">Save</button>
+        </div>
+      </form>
+    </div>`;
+  document.body.appendChild(vaultModal);
+  on(vaultModal.querySelector('[data-action="close-modal"]'), 'click', () => vaultModal.classList.remove('open'));
+  on(vaultModal.querySelector('.admin-modal-overlay'), 'click', () => vaultModal.classList.remove('open'));
+  on(vaultModal.querySelector('#vault-form'), 'submit', saveVaultItem);
+  on(document, 'click', (e) => {
+    const addBtn = e.target.closest('[data-action="add-vault-item"]');
+    if (addBtn) {
+      vaultModal.querySelector('#vault-modal-title').textContent = 'Add Vault Item';
+      vaultModal.querySelector('#vault-form').reset();
+      vaultModal.querySelector('#vf-icon').value = 'fas fa-folder';
+      delete vaultModal.dataset.editId;
+      vaultModal.classList.add('open');
+    }
+    const pinBtn = e.target.closest('[data-action="set-vault-pin"]');
+    if (pinBtn) {
+      const current = localStorage.getItem(VAULT_PIN_KEY) || '1234';
+      const pin = prompt('Enter new 4-6 digit PIN:', current);
+      if (pin && pin.length >= 4) {
+        localStorage.setItem(VAULT_PIN_KEY, pin);
+        showToast('PIN updated');
+      }
+    }
+  });
+}
+
+function openEditModal(card) {
+  vaultModal.querySelector('#vault-modal-title').textContent = 'Edit Vault Item';
+  vaultModal.querySelector('#vf-icon').value = card.querySelector('.vault-card-icon i')?.className || 'fas fa-folder';
+  vaultModal.querySelector('#vf-title').value = card.querySelector('h4')?.textContent || '';
+  vaultModal.querySelector('#vf-desc').value = card.querySelector('p')?.textContent || '';
+  vaultModal.querySelector('#vf-tags').value = Array.from(card.querySelectorAll('.vt')).map(t => t.textContent).join(', ');
+  vaultModal.querySelector('#vf-link').value = card.dataset.link || '';
+  vaultModal.querySelector('#vf-category').value = card.dataset.category || 'prompts';
+  vaultModal.querySelector('#vf-locked').checked = !!card.querySelector('.vault-lock-badge');
+  vaultModal.dataset.editId = card.dataset.itemId || '';
+  vaultModal.classList.add('open');
+}
+
+async function saveVaultItem(e) {
+  e.preventDefault();
+  const data = {
+    icon: sanitizeInput(vaultModal.querySelector('#vf-icon').value) || 'fas fa-folder',
+    title: sanitizeInput(vaultModal.querySelector('#vf-title').value),
+    desc: sanitizeInput(vaultModal.querySelector('#vf-desc').value),
+    tags: vaultModal.querySelector('#vf-tags').value.split(',').map(t => sanitizeInput(t.trim())).filter(Boolean),
+    link: sanitizeInput(vaultModal.querySelector('#vf-link').value),
+    category: vaultModal.querySelector('#vf-category').value,
+    locked: vaultModal.querySelector('#vf-locked').checked,
+  };
+  if (!data.title) return;
+
+  const editId = vaultModal.dataset.editId;
+  const client = getSupabaseClient();
+  if (client) {
+    const { error } = await createContentItem('vault_items', {
+      title: data.title, description: data.desc, icon_class: data.icon,
+      link: data.link || null, status: 'Public', sort_order: 100,
+    });
+    if (error) console.warn('Supabase save:', error.message);
+  }
+
+  const grid = qs('.vault-grid');
+  if (editId) {
+    const card = grid.querySelector(`[data-item-id="${editId}"]`);
+    if (card) {
+      card.querySelector('h4').textContent = data.title;
+      card.querySelector('p').textContent = data.desc;
+      card.querySelector('.vault-card-icon i').className = data.icon;
+      card.dataset.category = data.category;
+      card.querySelector('.vault-tags').innerHTML = data.tags.map(t => `<span class="vt">${escapeHtml(t)}</span>`).join('');
+    }
+  } else {
+    const card = document.createElement('div');
+    card.className = 'vault-card';
+    card.dataset.category = data.category;
+    card.dataset.itemId = Date.now().toString();
+    card.innerHTML = `<div class="vault-card-icon"><i class="${escapeHtml(data.icon)}"></i></div>
+      <h4>${escapeHtml(data.title)}</h4>
+      <p>${escapeHtml(data.desc)}</p>
+      <div class="vault-tags">${data.tags.map(t => `<span class="vt">${escapeHtml(t)}</span>`).join('')}</div>`;
+    if (data.locked) {
+      const b = document.createElement('div');
+      b.className = 'vault-lock-badge';
+      b.innerHTML = '<i class="fas fa-lock"></i>';
+      card.appendChild(b);
+    }
+    const actions = document.createElement('div');
+    actions.className = 'vault-card-actions admin-only';
+    actions.innerHTML = `<button class="vault-card-btn" data-action="edit-vault" title="Edit"><i class="fas fa-pen"></i></button>
+      <button class="vault-card-btn vault-card-btn-danger" data-action="delete-vault" title="Delete"><i class="fas fa-trash"></i></button>`;
+    card.style.position = 'relative';
+    card.appendChild(actions);
+    grid.appendChild(card);
+  }
+
+  vaultModal.classList.remove('open');
+  showToast(editId ? 'Updated' : 'Added');
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'admin-toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+/* ── Vault Lock System ── */
+export function initVaultLock() {
+  const grid = qs('.vault-grid');
+  if (!grid) return;
+
+  const lockedCards = qsa('.vault-card', grid);
+  const isUnlocked = sessionStorage.getItem('vault_unlocked') === 'true';
+
+  lockedCards.forEach(card => {
+    const lockBadge = card.querySelector('.vault-lock-badge');
+    if (!lockBadge) return;
+
+    if (isUnlocked) {
+      lockBadge.style.display = 'none';
+      card.style.opacity = '1';
+      card.style.pointerEvents = 'auto';
+    } else {
+      card.style.opacity = '0.5';
+      card.style.pointerEvents = 'none';
+    }
+  });
+
+  if (!isUnlocked && lockedCards.length > 0) {
+    const prompt = document.createElement('div');
+    prompt.className = 'vault-unlock-prompt admin-only';
+    if (!qs('.vault-unlock-prompt')) {
+      prompt.innerHTML = `
+        <div class="vault-unlock-box">
+          <i class="fas fa-lock"></i>
+          <h4>Vault Locked</h4>
+          <p>Enter PIN to access locked items</p>
+          <div class="vault-unlock-input-row">
+            <input type="password" id="vault-pin-input" class="admin-input" placeholder="Enter PIN" maxlength="6" inputmode="numeric">
+            <button class="admin-btn admin-btn-primary" id="vault-unlock-btn">Unlock</button>
+          </div>
+          <button class="vault-unlock-skip" id="vault-skip-lock">Skip</button>
+        </div>`;
+      grid.parentNode.insertBefore(prompt, grid);
+    }
+
+    const existingPrompt = qs('.vault-unlock-prompt');
+    if (existingPrompt) {
+      on(existingPrompt.querySelector('#vault-unlock-btn'), 'click', () => {
+        const pin = existingPrompt.querySelector('#vault-pin-input').value;
+        const stored = localStorage.getItem(VAULT_PIN_KEY) || '1234';
+        if (pin === stored) {
+          sessionStorage.setItem('vault_unlocked', 'true');
+          location.reload();
+        } else {
+          showToast('Wrong PIN', 'error');
+        }
+      });
+      on(existingPrompt.querySelector('#vault-skip-lock'), 'click', () => {
+        existingPrompt.remove();
+      });
+    }
+  }
+}
+
+export function setVaultPin(pin) {
+  if (pin && pin.length >= 4) {
+    localStorage.setItem(VAULT_PIN_KEY, pin);
+    return true;
+  }
+  return false;
+}
+
+export function getVaultPin() {
+  return localStorage.getItem(VAULT_PIN_KEY) || '1234';
+}

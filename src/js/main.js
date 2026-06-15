@@ -30,6 +30,7 @@ import { initLatestUpdates } from './modules/updates.js';
 import { initStatistics } from './modules/statistics.js';
 import { initVaultSearch } from './modules/vault.js';
 import { renderGitHubStats } from './modules/github.js';
+import { initAdmin, initVaultLock } from './modules/admin.js';
 
 let cached = null; // will be filled once DOM is ready
 let authUnsubscribe = null;
@@ -50,19 +51,22 @@ const boot = async () => {
     // You could also reload private data here if needed
   });
 
-  // 3️⃣ Core UI
+  // 3️⃣ Admin (session based)
+  initAdmin();
+
+  // 4️⃣ Core UI
   initTheme(cached);
   initNavbar(cached);
   // initMobileMenu(cached); — handled by inline script for new HTML structure
   initAnimations(cached);
 
-  // 4️⃣ Optional enhancements (keep existing)
+  // 5️⃣ Optional enhancements (keep existing)
   initAnalytics();
   initSettings();
   initProjectFilters();
   initProjects(); // fetches & renders projects
 
-  // 5️⃣ Vault – lazy load each section when it enters viewport
+  // 6️⃣ Vault – lazy load each section when it enters viewport
   //    We'll use a simple IntersectionObserver for each container.
   const vaultContainers = {
     prompts: qs('#vault-prompts'),
@@ -92,7 +96,7 @@ const boot = async () => {
     }
   });
 
-  // 6️⃣ Misc
+  // 7️⃣ Misc
   initTypewriter();
   initTechStackMarquee();
   initLiveStats();
@@ -103,6 +107,7 @@ const boot = async () => {
   initLatestUpdates();
   initStatistics();
   initVaultSearch();
+  initVaultLock();
   const githubContainer = qs('#github-stats');
   if (githubContainer) {
     (window.requestIdleCallback
@@ -112,7 +117,7 @@ const boot = async () => {
     });
   }
 
-  // 7️⃣ Contact form & visitor counter
+  // 8️⃣ Contact form & visitor counter
   const showToast = (message, type = 'success') => {
     const existing = qs('.ct-toast');
     if (existing) existing.remove();
