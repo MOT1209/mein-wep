@@ -53,7 +53,7 @@ const boot = async () => {
   // 3️⃣ Core UI
   initTheme(cached);
   initNavbar(cached);
-  initMobileMenu(cached);
+  // initMobileMenu(cached); — handled by inline script for new HTML structure
   initAnimations(cached);
 
   // 4️⃣ Optional enhancements (keep existing)
@@ -112,14 +112,14 @@ const boot = async () => {
     });
   }
 
-  // 7️⃣ Contact form & visitor counter (keep original logic)
-  const contactForm = qs('.contact-form');
+  // 7️⃣ Contact form & visitor counter
+  const contactForm = qs('.ct-form');
   if (contactForm) {
     on(contactForm, 'submit', (e) => {
       e.preventDefault();
-      const name = contactForm.querySelector('input[type="text"]')?.value ?? '';
-      const email = contactForm.querySelector('input[type="email"]')?.value ?? '';
-      const msg = contactForm.querySelector('textarea')?.value ?? '';
+      const name = contactForm.querySelector('#ct-name')?.value ?? '';
+      const email = contactForm.querySelector('#ct-email')?.value ?? '';
+      const msg = contactForm.querySelector('#ct-msg')?.value ?? '';
       const messages = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
       messages.push({ name, email, message: msg, date: new Date().toLocaleString() });
       localStorage.setItem('contactMessages', JSON.stringify(messages));

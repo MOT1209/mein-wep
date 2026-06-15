@@ -1,42 +1,25 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="description" content="Rashid (MOT1209) — Full-Stack Developer & Open Source enthusiast. Building web platforms, AI tools, and 3D games with Next.js 15, Supabase & Three.js. 15+ repositories on GitHub.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="description" content="Rashid (MOT1209) — Full-Stack Developer & AI Engineer. Building web platforms, AI tools, and 3D games with Next.js 15, Supabase & Three.js.">
     <meta name="robots" content="index, follow">
-    <meta name="keywords" content="Rashid, MOT1209, Full-Stack Developer, Web Developer, Next.js 15, Supabase, Three.js, AI Workspace, PWA, Portfolio, React, Python">
     <meta name="author" content="Rashid (MOT1209)">
     <link rel="canonical" href="https://rashid-wep.vercel.app/">
-    <link rel="alternate" type="application/rss+xml" title="Rashid Blog" href="blog/rss.xml">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Rashid - AI Workspace | Full-Stack Developer Portfolio">
-    <meta property="og:description" content="AI-powered workspace featuring Rashid AI, 3D games, PWA apps, and a knowledge vault. Built with Next.js 15, Supabase & Three.js.">
+    <meta property="og:title" content="Rashid — Full-Stack Developer & AI Engineer">
+    <meta property="og:description" content="Building AI-powered platforms, 3D games, and open-source tools. Creator of KingCraft, Alking, and Rashid AI.">
     <meta property="og:image" content="https://rashid-wep.vercel.app/images/logo.webp">
-    <meta property="og:image:width" content="512">
-    <meta property="og:image:height" content="512">
     <meta property="og:url" content="https://rashid-wep.vercel.app/">
-    <meta property="og:site_name" content="Rashid - AI Workspace">
-    <meta property="og:locale" content="en_US">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Rashid - AI Workspace | Full-Stack Developer Portfolio">
-    <meta name="twitter:description" content="AI-powered workspace featuring Rashid AI, 3D games, PWA apps, and a knowledge vault. Built with Next.js 15, Supabase & Three.js.">
+    <meta name="twitter:title" content="Rashid — Full-Stack Developer & AI Engineer">
+    <meta name="twitter:description" content="Building AI-powered platforms, 3D games, and open-source tools.">
     <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/logo.webp">
-    <meta name="twitter:site" content="@MOT1209">
     <meta name="twitter:creator" content="@MOT1209">
-    <meta name="google-site-verification" content="WFDr55g9xZjg44GRFNfD9zRe5ujJln4tyS9-eCFazx4">
-    <!-- hreflang for multilingual support -->
-    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/">
-    <link rel="alternate" hreflang="ar" href="https://rashid-wep.vercel.app/?lang=ar">
-    <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/?lang=de">
-    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/">
-    <meta name="color-scheme" content="dark light">
-    <!-- Supabase config loaded via js/supabase-config.js (CDN) — meta tags not needed -->
-    <title>Rashid — AI Workspace | Full-Stack Developer Portfolio</title>
+    <title>Rashid — Full-Stack Developer & AI Engineer</title>
 
-    <!-- JSON-LD Schema -->
+    <!-- JSON-LD -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -48,366 +31,152 @@
       "jobTitle": "Full-Stack Developer & AI Engineer",
       "description": "Building AI-powered platforms, 3D games with Three.js, and open-source tools. Creator of KingCraft and Alking AI.",
       "knowsAbout": ["JavaScript","TypeScript","Python","Next.js","Three.js","Supabase","React","Node.js","AI","PWA"],
-      "sameAs": [
-        "https://github.com/MOT1209",
-        "https://www.youtube.com/@مختبرالبرمجه",
-        "https://www.tiktok.com/@programmierlabor"
-      ],
-      "alumniOf": "",
-      "worksFor": {
-        "@type": "Organization",
-        "name": "Independent"
-      },
-      "mainEntityOfPage": {
-        "@type": "WebSite",
-        "url": "https://rashid-wep.vercel.app",
-        "name": "Rashid AI Workspace",
-        "description": "AI-powered developer portfolio and command center featuring AI chat, 3D games, and open-source projects.",
-        "author": { "@type": "Person", "name": "Rashid" }
-      }
+      "sameAs": ["https://github.com/MOT1209"]
     }
     </script>
 
-    <!-- Google Fonts -->
+    <!-- Fonts: Inter + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preconnect" href="https://pagead2.googlesyndication.com">
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
-    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
-    <link rel="preload" href="images/logo.webp" as="image" fetchpriority="high">
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-        rel="stylesheet" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-    <!-- Font Awesome (lazy) -->
-    <link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
-    <!-- Critical CSS (render-blocking) -->
-    <link rel="stylesheet" href="src/css/main.css?v=1.0">
+    <!-- CSS -->
     <link rel="stylesheet" href="css/style.css?v=8.0">
-
-    <!-- Non-critical CSS (deferred) -->
-    <link rel="stylesheet" href="css/admin.css?v=3.0" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/app-mode.css?v=3.0" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/mobile-improvements.css?v=1.0" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/redesign.css?v=1.0">
     <link rel="stylesheet" href="css/enhancements.css?v=1.0" media="print" onload="this.media='all'">
 
-    <!-- Supabase JS (deferred) -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="js/supabase-config.js?v=1.1" defer></script>
 
-    <!-- PWA Manifest -->
+    <!-- PWA -->
     <link rel="manifest" href="manifest.json?v=2">
-    <meta name="theme-color" content="#09090b" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#f8fafc" media="(prefers-color-scheme: light)">
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
-    
-<!-- Google tag (gtag.js) - GA4 -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-W139X3X20X"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-W139X3X20X', { 'anonymize_ip': true });
-</script>
-</head>
+    <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
 
+    <!-- GA4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W139X3X20X"></script>
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-W139X3X20X',{'anonymize_ip':true});</script>
+</head>
 <body class="dark-mode">
 
-    <a href="#main-content" class="skip-link" tabindex="1">Skip to main content</a>
-
-    <!-- Premium Dynamic Background -->
-    <div class="bg-mesh"></div>
+    <!-- Skip Link -->
+    <a href="#main" class="skip-link" tabindex="1">Skip to main content</a>
 
     <!-- Navigation -->
     <nav class="navbar" role="navigation">
-        <div class="container nav-container">
-            <a href="#hero" class="logo">Rashid<span class="accent-dot">.</span></a>
-
-            <ul class="nav-links">
-                <li><a href="#models">Models</a></li>
-                <li><a href="#github">GitHub</a></li>
-                <li><a href="#vault">Vault</a></li>
-                <li><a href="#projects">Projects</a></li>
-                <li><a href="#about">About</a></li>
-            </ul>
-
-            <div class="nav-controls">
-                <button id="settings-btn" class="control-btn" aria-label="Settings">
-                    <i aria-hidden="true" class="fas fa-sliders-h"></i>
-                </button>
-                <button id="theme-toggle" class="control-btn" aria-label="Toggle Theme">
-                    <i aria-hidden="true" class="fas fa-sun"></i>
-                </button>
-                <button class="hamburger" aria-label="Open navigation menu" aria-controls="mobile-menu" aria-expanded="false">
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                    <span class="bar"></span>
-                </button>
+        <div class="nav-inner">
+            <a href="#home" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="#home" class="active">Home</a>
+                <a href="#about">About</a>
+                <a href="#projects">Projects</a>
+                <a href="#skills">Skills</a>
+                <a href="#timeline">Timeline</a>
+                <a href="#github">Open Source</a>
+                <a href="#vault">Vault</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+                <button class="nav-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders-h"></i></button>
+                <button class="hamburger" id="hamburger" aria-label="Open menu"><i class="fas fa-bars"></i></button>
             </div>
         </div>
     </nav>
 
-    <!-- Mobile Menu Overlay -->
+    <!-- Mobile Menu -->
     <div class="mobile-menu" id="mobile-menu">
-        <a href="#models">Models</a>
-        <a href="#github">GitHub</a>
-        <a href="#vault">Vault</a>
-        <a href="#projects">Projects</a>
+        <a href="#home">Home</a>
         <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#github">Open Source</a>
+        <a href="#vault">Vault</a>
+        <a href="#contact">Contact</a>
     </div>
 
-    <!-- Hero Section -->
-    <header id="hero" role="banner">
-        <div class="container hero-content" id="main-content">
-            <div class="hero-text">
-                <div class="badge fade-in"><i class="fas fa-terminal" aria-hidden="true"></i> Rashid Command Center</div>
-                <h1 class="fade-in delay-1">Build, store, and launch from one <span class="text-gradient">AI workspace</span></h1>
-                <p class="command-copy fade-in delay-2"><strong>Rashid</strong> is a Full-Stack Developer passionate about Next.js 15, Python, and Supabase.</p>
-                <p class="fade-in delay-2">Building Alking, FromLiten, and 3D simulation worlds with Three.js. This is my digital command center.</p>
-                <div class="cta-buttons fade-in delay-3">
-                    <a href="#projects" class="btn btn-primary">Open Projects <i aria-hidden="true" class="fas fa-arrow-right"></i></a>
-                    <a href="#vault" class="btn btn-glass"><i aria-hidden="true" class="fas fa-vault"></i> Enter Vault</a>
+    <!-- Hero -->
+    <section id="home" class="hero reveal">
+        <div class="container hero-grid">
+            <div>
+                <div class="hero-tag">Available for collaboration</div>
+                <h1>Building the future with <span>code &amp; AI</span></h1>
+                <p>I'm <strong style="color:var(--text);">Rashid</strong> — a Full-Stack Developer and AI Engineer. I build AI-powered platforms, 3D games, and open-source tools that push the boundaries of what the web can do.</p>
+                <div class="hero-cta">
+                    <a href="#projects" class="btn btn-primary">View Projects <i class="fas fa-arrow-right"></i></a>
+                    <a href="#contact" class="btn btn-secondary">Get in Touch</a>
                 </div>
-                <div class="hero-stats fade-in delay-4">
-                    <div class="stat">
-                        <span class="stat-num">15</span>
-                        <span class="stat-label">Repositories</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-num">13+</span>
-                        <span class="stat-label">Projects</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-num">15+</span>
-                        <span class="stat-label">Tech Stacks</span>
-                    </div>
+                <div class="hero-tech">
+                    <span class="tech-badge">Next.js 15</span>
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">Supabase</span>
+                    <span class="tech-badge">Three.js</span>
+                    <span class="tech-badge">React</span>
+                    <span class="tech-badge">Node.js</span>
                 </div>
             </div>
-            <div class="hero-visual fade-in delay-2">
-                <div class="command-panel" aria-label="Rashid system overview">
-                    <div class="command-panel-header">
-                        <div><span class="system-dot"></span><span>system online</span></div>
-                        <strong>Rashid OS</strong>
-                    </div>
-                    <div class="command-grid">
-                        <div class="command-metric"><span>Models</span><strong>3</strong></div>
-                        <div class="command-metric"><span>Vault</span><strong>6</strong></div>
-                        <div class="command-metric"><span>PWAs</span><strong>5</strong></div>
-                        <div class="command-metric"><span>Status</span><strong>Live</strong></div>
-                    </div>
-                    <div class="command-feed">
-                        <span>Rashid AI ready</span>
-                        <span>Vault admin controls hidden</span>
-                        <span>Offline cache enabled</span>
-                    </div>
+            <div class="hero-visual">
+                <div class="hero-image">
+                    <img src="images/logo.webp" alt="Rashid" width="320" height="320" fetchpriority="high">
                 </div>
-                <div class="hero-img-wrapper">
-                    <div class="glass-card main-visual">
-                        <picture>
-                            <source srcset="images/logo.webp" type="image/webp">
-                            <img src="images/logo.png" alt="Rashid AI Workspace - Full-Stack Developer & AI Engineer Portfolio" width="512" height="512" loading="eager" fetchpriority="high">
-                        </picture>
-                    </div>
-                    <div class="glass-card decor-1"></div>
-                    <div class="glass-card decor-2"></div>
-                </div>
-            </div>
-        </div>
-        <div class="scroll-indicator fade-in delay-5">
-            <div class="mouse">
-                <div class="wheel"></div>
-            </div>
-        </div>
-    </header>
-
-
-    
-    <section id="models" class="section alt-bg" aria-label="Rashid AI Models">
-        <div class="container">
-            <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-shapes" aria-hidden="true"></i> Rashid Models</h2>
-                <p class="reveal">AI models and neural architectures crafted by Rashid, focused on quality, precision, and useful innovation.</p>
-            </div>
-            
-            <div class="models-grid">
-                <div class="model-card reveal">
-                    <div class="model-icon"><i aria-hidden="true" class="fas fa-brain"></i></div>
-                    <h3>Rashid AI v2.0</h3>
-                    <p>Flagship conversational AI powered by Gemini & OpenRouter. Multilingual support (Arabic, English, German, +8 more).</p>
-                    <div class="model-specs">
-                        <span><i aria-hidden="true" class="fas fa-microchip"></i> Gemini API</span>
-                        <span><i aria-hidden="true" class="fas fa-language"></i> 10+ Languages</span>
-                    </div>
-                    <a href="models/Rashid-Model/index.html" class="btn btn-primary">Launch Model <i aria-hidden="true" class="fas fa-external-link-alt"></i></a>
-                </div>
-                
-                <div class="model-card reveal">
-                    <div class="model-icon"><i aria-hidden="true" class="fas fa-cubes"></i></div>
-                    <h3>Game Engine Core</h3>
-                    <p>Proprietary 3D engine built with Three.js. Features: physics simulation, AI behaviors, procedural generation.</p>
-                    <div class="model-specs">
-                        <span><i aria-hidden="true" class="fas fa-cube"></i> Three.js</span>
-                        <span><i aria-hidden="true" class="fas fa-bolt"></i> Real-time</span>
-                    </div>
-                    <a href="games/index.html" class="btn btn-primary">Play Games <i aria-hidden="true" class="fas fa-gamepad"></i></a>
-                </div>
-                
-                <div class="model-card reveal">
-                    <div class="model-icon"><i aria-hidden="true" class="fas fa-server"></i></div>
-                    <h3>Backend Infrastructure</h3>
-                    <p>Supabase-powered backend with authentication, real-time database, and PWA capabilities.</p>
-                    <div class="model-specs">
-                        <span><i aria-hidden="true" class="fas fa-database"></i> Supabase</span>
-                        <span><i aria-hidden="true" class="fas fa-bolt"></i> Real-time</span>
-                    </div>
-                    <button class="btn btn-glass" disabled aria-disabled="true" style="cursor:not-allowed; opacity:0.6; position:relative;"><i class="fas fa-clock" style="margin-right:6px;"></i> Coming Soon<span style="position:absolute;top:-8px;right:-8px;background:#f59e0b;color:#000;font-size:0.6rem;padding:2px 6px;border-radius:99px;font-weight:700;">DEV</span></button>
+                <div class="hero-status">
+                    <div class="hero-status-item"><span>Status</span><span style="color:#22c55e;">Active</span></div>
+                    <div class="hero-status-item"><span>Projects</span><span>13+</span></div>
+                    <div class="hero-status-item"><span>Repos</span><span>15</span></div>
+                    <div class="hero-status-item"><span>AI Model</span><span>v3.0</span></div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- The Vault Section -->
-    <!-- GitHub Section -->
-    <section id="github" class="section" aria-label="GitHub Profile">
-        <div class="container">
-            <div class="section-head">
-                <h2 class="reveal"><i class="fab fa-github" aria-hidden="true"></i> Open Source</h2>
-                <p class="reveal">Real-time GitHub statistics, repositories, and recent activity.</p>
-            </div>
-            <div id="github-stats" class="reveal"></div>
-        </div>
-    </section>
+    <div class="section-divider"></div>
 
-    <section id="vault" class="section" aria-label="Knowledge Vault">
+    <!-- About -->
+    <section id="about" class="section reveal">
         <div class="container">
             <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-vault" aria-hidden="true"></i> The Vault</h2>
-                <p class="reveal">Rashid's knowledge repository for prompts, code, media, documentation, and archives.</p>
+                <h2>About Me</h2>
+                <p>Full-Stack Developer &amp; AI Engineer — building the future one project at a time.</p>
             </div>
-            
-            <div class="vault-grid">
-                <div id="vault-prompts" data-section="prompts"></div>
-                <div id="vault-images" data-section="images"></div>
-                <div id="vault-codes" data-section="codes"></div>
-                <div id="vault-media" data-section="media"></div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Games & Apps Section -->
-    <section id="projects" class="section alt-bg" aria-label="Projects Showcase">
-        <div class="container">
-            <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-layer-group" aria-hidden="true"></i> Project Matrix</h2>
-                <p class="reveal">Games, apps, models, and tools organized for scanning, launching, and expanding.</p>
-            </div>
-            
-            <!-- Filter Buttons -->
-            <div class="filter-group">
-                <button class="filter-btn active" data-filter="all">All</button>
-                <button class="filter-btn" data-filter="games">Games</button>
-                <button class="filter-btn" data-filter="app">Apps</button>
-                <button class="filter-btn" data-filter="model">Models</button>
-            </div>
-            
-            <!-- Projects are dynamically injected by JS into #gaming-grid -->
-            
-            <!-- Dynamic Projects (injected by JS) -->
-            <div class="projects-grid" id="gaming-grid" style="margin-top: 30px;"></div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="section" aria-label="About Rashid">
-        <div class="container">
-            <div class="section-head">
-                <h2 class="reveal"><i class="fas fa-info-circle" aria-hidden="true"></i> About Rashid</h2>
-                <p class="reveal">Full-Stack Developer & AI Engineer — building the future one project at a time.</p>
-            </div>
-            
-            <div class="about-grid reveal">
-                <div class="about-content">
-                    <div class="about-text">
-                        <h3>Who is Rashid?</h3>
-                        <p>I am <strong>Rashid</strong> (MOT1209), a Full-Stack Developer and AI Engineer specialized in building dynamic, immersive web platforms. My journey started with curiosity — manipulating CSS, breaking JavaScript, rebuilding everything better. Now I build AI-powered tools, 3D games, and full-stack applications used by thousands.</p>
-                        
-                        <h3>What do I build?</h3>
-                        <p>AI assistants powered by <strong>Gemini & OpenRouter</strong>, 3D sandbox worlds with <strong>Three.js</strong>, full-stack platforms with <strong>Next.js 15 + Supabase</strong>, and open-source tools that help developers ship faster. Every project is a PWA — installable, offline-ready, and performant.</p>
-                        
-                        <h3>Mission</h3>
-                        <p>Democratizing AI and 3D web development through open-source tools, educational content, and community-driven platforms. I believe technology should empower everyone — from solo devs to global teams.</p>
-                    </div>
-                    
-                    <!-- Achievements Timeline -->
-                    <div class="about-timeline" style="margin-top: 32px;">
-                        <h3 style="margin-bottom: 20px; font-family: var(--font-heading);">
-                            <i class="fas fa-trophy" style="color: #fbbf24;"></i> Milestones
-                        </h3>
-                        <div class="timeline" style="border-left: 2px solid var(--border); padding-left: 24px;">
-                            <div class="timeline-item" style="position:relative; margin-bottom: 24px;">
-                                <div style="position:absolute; left:-33px; top:4px; width:14px; height:14px; border-radius:50%; background:var(--accent); border:2px solid var(--bg-main);"></div>
-                                <span style="font-size:0.8rem; color:var(--text-low);">2025</span>
-                                <p style="margin-top:4px;">Founded <strong>Alking</strong> — open-source community platform built with Next.js 15 & Supabase</p>
-                            </div>
-                            <div class="timeline-item" style="position:relative; margin-bottom: 24px;">
-                                <div style="position:absolute; left:-33px; top:4px; width:14px; height:14px; border-radius:50%; background:#22c55e; border:2px solid var(--bg-main);"></div>
-                                <span style="font-size:0.8rem; color:var(--text-low);">2025</span>
-                                <p style="margin-top:4px;">Launched <strong>KingCraft</strong> — 3D voxel sandbox with entity AI, combat, crafting, and infinite worlds</p>
-                            </div>
-                            <div class="timeline-item" style="position:relative; margin-bottom: 24px;">
-                                <div style="position:absolute; left:-33px; top:4px; width:14px; height:14px; border-radius:50%; background:#38bdf8; border:2px solid var(--bg-main);"></div>
-                                <span style="font-size:0.8rem; color:var(--text-low);">2025</span>
-                                <p style="margin-top:4px;">Built <strong>Rashid AI v2.0</strong> — multilingual AI assistant with Gemini 1.5 Flash</p>
-                            </div>
-                            <div class="timeline-item" style="position:relative; margin-bottom: 24px;">
-                                <div style="position:absolute; left:-33px; top:4px; width:14px; height:14px; border-radius:50%; background:#f59e0b; border:2px solid var(--bg-main);"></div>
-                                <span style="font-size:0.8rem; color:var(--text-low);">2024</span>
-                                <p style="margin-top:4px;">Started open-source journey — 15+ repositories, 6+ PWA applications, 21-page portfolio platform</p>
-                            </div>
-                        </div>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3>Rashid <span style="color:var(--accent);">(MOT1209)</span></h3>
+                    <div class="subtitle">Lead Architect &amp; AI Engineer</div>
+                    <p>I build AI-powered tools, 3D game engines, and full-stack platforms used by thousands. My journey started with curiosity — manipulating CSS, breaking JavaScript, rebuilding everything better. Now I create intelligent systems that push web capabilities forward.</p>
+                    <p><strong>What I build:</strong> AI assistants powered by Gemini &amp; OpenRouter, 3D sandbox worlds with Three.js, full-stack platforms with Next.js 15 + Supabase, and open-source tools that help developers ship faster.</p>
+                    <p><strong>Mission:</strong> Democratizing AI and 3D web development through open-source tools, educational content, and community-driven platforms.</p>
+                    <div class="about-stats">
+                        <div class="stat-box"><span class="stat-num">15+</span><span class="stat-label">Repos</span></div>
+                        <div class="stat-box"><span class="stat-num">13+</span><span class="stat-label">Projects</span></div>
+                        <div class="stat-box"><span class="stat-num">24/7</span><span class="stat-label">Live</span></div>
                     </div>
                 </div>
-                
                 <div>
-                    <h3 style="margin-bottom: 20px; font-family: var(--font-heading);"><i class="fas fa-tools"></i> Technologies</h3>
-                    <div class="skills-grid">
-                        <div class="skill-badge"><i class="fab fa-js" aria-hidden="true"></i> JavaScript</div>
-                        <div class="skill-badge"><i class="fab fa-react" aria-hidden="true"></i> React</div>
-                        <div class="skill-badge"><i class="fab fa-python" aria-hidden="true"></i> Python</div>
-                        <div class="skill-badge"><i class="fab fa-node" aria-hidden="true"></i> Node.js</div>
-                        <div class="skill-badge"><i class="fas fa-database" aria-hidden="true"></i> Supabase</div>
-                        <div class="skill-badge"><i class="fas fa-cube" aria-hidden="true"></i> Three.js</div>
-                        <div class="skill-badge"><i class="fab fa-html5" aria-hidden="true"></i> HTML5</div>
-                        <div class="skill-badge"><i class="fab fa-css3-alt" aria-hidden="true"></i> CSS3</div>
-                        <div class="skill-badge"><i class="fab fa-git-alt" aria-hidden="true"></i> Git</div>
-                        <div class="skill-badge"><i class="fas fa-cloud" aria-hidden="true"></i> Vercel</div>
-                    </div>
-                    
-                    <div class="about-stats" style="margin-top: 32px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
-                        <div class="stat-item" style="background: var(--bg-glass); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border); text-align: center;">
-                            <span class="stat-num" style="font-size: 1.8rem; display:block; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">15</span>
-                            <span class="stat-label" style="font-size: 0.8rem; color: var(--text-low); text-transform: uppercase; letter-spacing: 0.5px;">Repositories</span>
-                        </div>
-                        <div class="stat-item" style="background: var(--bg-glass); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border); text-align: center;">
-                            <span class="stat-num" style="font-size: 1.8rem; display:block; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">13+</span>
-                            <span class="stat-label" style="font-size: 0.8rem; color: var(--text-low); text-transform: uppercase; letter-spacing: 0.5px;">Projects</span>
-                        </div>
-                        <div class="stat-item" style="background: var(--bg-glass); padding: 20px; border-radius: var(--radius-sm); border: 1px solid var(--border); text-align: center;">
-                            <span class="stat-num" style="font-size: 1.8rem; display:block; font-weight:800; background:linear-gradient(135deg,var(--accent),var(--accent-2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;">15+</span>
-                            <span class="stat-label" style="font-size: 0.8rem; color: var(--text-low); text-transform: uppercase; letter-spacing: 0.5px;">Tech Stacks</span>
+                    <div class="about-card" style="margin-bottom:20px;">
+                        <h3 style="margin-bottom:16px;">Core Technologies</h3>
+                        <div class="skills-grid">
+                            <span class="skill-tag"><i class="fab fa-js"></i> JavaScript</span>
+                            <span class="skill-tag"><i class="fab fa-react"></i> React</span>
+                            <span class="skill-tag"><i class="fab fa-python"></i> Python</span>
+                            <span class="skill-tag"><i class="fab fa-node"></i> Node.js</span>
+                            <span class="skill-tag"><i class="fas fa-database"></i> Supabase</span>
+                            <span class="skill-tag"><i class="fas fa-cube"></i> Three.js</span>
+                            <span class="skill-tag"><i class="fas fa-cloud"></i> Vercel</span>
+                            <span class="skill-tag"><i class="fab fa-git-alt"></i> Git</span>
+                            <span class="skill-tag"><i class="fas fa-robot"></i> AI/ML</span>
+                            <span class="skill-tag"><i class="fas fa-mobile-alt"></i> PWA</span>
                         </div>
                     </div>
-
-                    <div style="margin-top: 20px; padding: 20px; background: var(--bg-glass); border-radius: var(--radius-sm); border: 1px solid var(--border); text-align: center;">
-                        <p style="font-size: 0.9rem; color: var(--text-med);">
-                            <i class="fas fa-quote-left" style="color: var(--accent); opacity: 0.5;"></i>
+                    <div class="about-card">
+                        <p style="font-style:italic;color:var(--text-muted);text-align:center;">
+                            <i class="fas fa-quote-left" style="color:var(--accent);opacity:0.5;"></i>
                             "Code is not just syntax — it's a tool to shape reality. Every line is a brick in the future we're building."
-                            <i class="fas fa-quote-right" style="color: var(--accent); opacity: 0.5;"></i>
+                            <i class="fas fa-quote-right" style="color:var(--accent);opacity:0.5;"></i>
                         </p>
                     </div>
                 </div>
@@ -415,368 +184,399 @@
         </div>
     </section>
 
-    <!-- Experience & Education -->
-    <section id="experience" class="section" aria-label="Experience Timeline">
+    <div class="section-divider"></div>
+
+    <!-- Projects (Core section) -->
+    <section id="projects" class="section reveal">
         <div class="container">
             <div class="section-head">
-                <h2 class="reveal">Rashid Timeline</h2>
-                <p class="reveal">The evolution of Rashid's creative coding journey.</p>
+                <h2>Projects</h2>
+                <p>Games, apps, AI models, and tools I've built. Each project is a PWA — installable, offline-ready, and performant.</p>
             </div>
+            <div class="projects-header">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="games">Games</button>
+                    <button class="filter-btn" data-filter="app">Apps</button>
+                    <button class="filter-btn" data-filter="model">AI Models</button>
+                    <button class="filter-btn" data-filter="tool">Tools</button>
+                </div>
+            </div>
+            <div class="projects-grid" id="gaming-grid">
+                <!-- Projects injected by JS -->
+            </div>
+        </div>
+    </section>
 
-            <div class="timeline">
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content blur-glass">
-                        <span class="period">2024 – Present</span>
-                        <h3>Next-Gen Frameworks & Three.js</h3>
-                        <p>Developing premium full-stack portals using Next.js 15 and Supabase, alongside interactive 3D simulations utilizing Three.js.</p>
-                    </div>
+    <div class="section-divider"></div>
+
+    <!-- Rashid AI v3.0 — Product Feature -->
+    <section id="ai-product" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Rashid AI <span style="font-size:0.6em;vertical-align:middle;padding:4px 12px;background:var(--accent-subtle);color:var(--accent);border-radius:100px;">v3.0</span></h2>
+                <p>Your AI-powered development assistant — built into the browser.</p>
+            </div>
+            <div class="ai-grid">
+                <div class="ai-card">
+                    <div class="ai-card-icon"><i class="fas fa-brain"></i></div>
+                    <h4>What It Does</h4>
+                    <p>Rashid AI is a multimodal assistant that understands code, generates solutions, and responds in 10+ languages using Gemini &amp; OpenRouter APIs.</p>
                 </div>
-                
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content blur-glass">
-                        <span class="period">2023 – 2024</span>
-                        <h3>Full-Stack & Backend Integration</h3>
-                        <p>Leveraging Supabase for real-time databases and user authentication, building responsive PWAs, and developing automation tools (BOTTIKTOK2, Gem-PRO).</p>
-                    </div>
+                <div class="ai-card">
+                    <div class="ai-card-icon"><i class="fas fa-microphone-alt"></i></div>
+                    <h4>Voice &amp; Chat</h4>
+                    <p>Speak naturally or type. Rashid AI processes voice input, generates speech output, and maintains context across conversations.</p>
                 </div>
-                
-                <div class="timeline-item reveal">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content blur-glass">
-                        <span class="period">2022 – 2023</span>
-                        <h3>GitHub Launch & Open Source</h3>
-                        <p>Established the main MOT1209 GitHub workspace, publishing original utilities, web projects, and open-source tools.</p>
+                <div class="ai-card">
+                    <div class="ai-card-icon"><i class="fas fa-cube"></i></div>
+                    <h4>3D Avatar</h4>
+                    <p>Interactive 3D avatar with real-time facial expressions and lip-sync. Visual feedback for every interaction.</p>
+                </div>
+                <div class="ai-card ai-card-wide">
+                    <div class="ai-card-icon"><i class="fas fa-code"></i></div>
+                    <div>
+                        <h4>Use Cases</h4>
+                        <p>Code refactoring · Debugging · API integration · Language translation · Creative writing · Learning assistance · System prompts · Automation scripts</p>
+                        <a href="#contact" class="btn btn-primary" style="margin-top:16px;">Try It Now <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section id="contact" class="section" aria-label="Contact Section">
+    <div class="section-divider"></div>
+
+    <!-- Skills — Grid -->
+    <section id="skills" class="section reveal">
         <div class="container">
-            <div class="contact-container blur-glass reveal">
-                <div class="contact-info">
-                    <h3>Connect with <span class="text-gradient">Rashid</span></h3>
-                    <p>Interested in collaboration or just want to say hello? Reach out through any of the channels below.</p>
+            <div class="section-head">
+                <h2>Skills</h2>
+                <p>Technologies I use daily to build production-ready systems.</p>
+            </div>
+            <div class="sk-grid">
+                <div class="sk-card"><h3>Frontend</h3><div class="sk-badges"><span class="sk-badge">React</span><span class="sk-badge">Next.js 15</span><span class="sk-badge">Three.js</span><span class="sk-badge">Tailwind</span><span class="sk-badge">HTML/CSS</span></div></div>
+                <div class="sk-card"><h3>Backend</h3><div class="sk-badges"><span class="sk-badge">Node.js</span><span class="sk-badge">Python</span><span class="sk-badge">REST</span><span class="sk-badge">GraphQL</span><span class="sk-badge">WebSockets</span></div></div>
+                <div class="sk-card"><h3>Databases</h3><div class="sk-badges"><span class="sk-badge">PostgreSQL</span><span class="sk-badge">Supabase</span><span class="sk-badge">SQLite</span><span class="sk-badge">Firestore</span></div></div>
+                <div class="sk-card"><h3>DevOps</h3><div class="sk-badges"><span class="sk-badge">Vercel</span><span class="sk-badge">Git</span><span class="sk-badge">CI/CD</span><span class="sk-badge">Docker</span></div></div>
+                <div class="sk-card"><h3>AI</h3><div class="sk-badges"><span class="sk-badge">Gemini API</span><span class="sk-badge">OpenRouter</span><span class="sk-badge">LLMs</span><span class="sk-badge">NLP</span><span class="sk-badge">RAG</span></div></div>
+                <div class="sk-card"><h3>Tools</h3><div class="sk-badges"><span class="sk-badge">VS Code</span><span class="sk-badge">Figma</span><span class="sk-badge">Webpack</span><span class="sk-badge">ES Modules</span><span class="sk-badge">PWA</span></div></div>
+            </div>
+        </div>
+    </section>
 
-                    <div class="contact-methods">
-                        <!-- Email (Active) -->
-                        <a href="mailto:zwnt45602@gmail.com" class="contact-method-card" aria-label="Send email to Rashid">
-                            <div class="method-icon"><i aria-hidden="true" class="fas fa-envelope"></i></div>
-                            <div class="method-info">
-                                <h4>Email</h4>
-                                <p>zwnt45602@gmail.com</p>
-                            </div>
-                        </a>
+    <div class="section-divider"></div>
 
-                        <!-- GitHub (Active) -->
-                        <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer" class="contact-method-card" aria-label="Visit GitHub profile">
-                            <div class="method-icon"><i aria-hidden="true" class="fab fa-github"></i></div>
-                            <div class="method-info">
-                                <h4>GitHub</h4>
-                                <p>@MOT1209</p>
-                            </div>
-                        </a>
-
-                        <!-- LinkedIn (Coming Soon - Future Ready) -->
-                        <div class="contact-method-card social-placeholder" aria-label="LinkedIn coming soon">
-                            <div class="method-icon" style="background: rgba(10,102,194,0.1); color: #0a66c2;"><i aria-hidden="true" class="fab fa-linkedin-in"></i></div>
-                            <div class="method-info">
-                                <h4>LinkedIn</h4>
-                                <p style="color: var(--text-low);">Coming soon</p>
-                            </div>
-                        </div>
-
-                        <!-- Discord (Coming Soon - Future Ready) -->
-                        <div class="contact-method-card social-placeholder" aria-label="Discord coming soon">
-                            <div class="method-icon" style="background: rgba(88,101,242,0.1); color: #5865f2;"><i aria-hidden="true" class="fab fa-discord"></i></div>
-                            <div class="method-info">
-                                <h4>Discord</h4>
-                                <p style="color: var(--text-low);">Coming soon</p>
-                            </div>
-                        </div>
-
-                        <!-- Telegram (Coming Soon - Future Ready) -->
-                        <div class="contact-method-card social-placeholder" aria-label="Telegram coming soon">
-                            <div class="method-icon" style="background: rgba(0,136,204,0.1); color: #0088cc;"><i aria-hidden="true" class="fab fa-telegram-plane"></i></div>
-                            <div class="method-info">
-                                <h4>Telegram</h4>
-                                <p style="color: var(--text-low);">Coming soon</p>
-                            </div>
-                        </div>
+    <!-- Timeline — Alternating -->
+    <section id="timeline" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Timeline</h2>
+                <p>The evolution of my creative coding journey.</p>
+            </div>
+            <div class="tl">
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2025</span></div>
+                    <div class="tl-content">
+                        <h4>Rashid AI v3.0 &amp; 3D Game Engine</h4>
+                        <p>Launched multilingual AI assistant with voice synthesis, 3D avatar, and Gemini API integration. Upgraded KingCraft and Rust Construction with improved physics and rendering.</p>
+                        <div class="tl-tags"><span>AI</span><span>Three.js</span><span>Product Launch</span></div>
                     </div>
                 </div>
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2024</span></div>
+                    <div class="tl-content">
+                        <h4>Next-Gen Frameworks &amp; Supabase</h4>
+                        <p>Developing premium full-stack portals using Next.js 15 and Supabase, alongside interactive 3D simulations using Three.js. Built Alking and Gem-PRO.</p>
+                        <div class="tl-tags"><span>Next.js</span><span>Supabase</span><span>Full-Stack</span></div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2023</span></div>
+                    <div class="tl-content">
+                        <h4>Full-Stack &amp; Backend Integration</h4>
+                        <p>Leveraging Supabase for real-time databases and user authentication, building responsive PWAs, and developing automation tools. Started the 3D game journey with Three.js.</p>
+                        <div class="tl-tags"><span>PWA</span><span>Supabase</span><span>Backend</span></div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2022</span></div>
+                    <div class="tl-content">
+                        <h4>GitHub Launch &amp; Open Source</h4>
+                        <p>Established the MOT1209 GitHub workspace, publishing original utilities, web projects, and open-source tools. Started contributing to the developer community.</p>
+                        <div class="tl-tags"><span>Open Source</span><span>GitHub</span><span>Launch</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                <form class="contact-form">
-                    <div class="form-group">
-                        <label for="contact-name">Full Name</label>
-                        <input type="text" id="contact-name" class="form-input" placeholder="Your Name" required>
+    <div class="section-divider"></div>
+
+    <!-- GitHub / Open Source — Dashboard -->
+    <section id="github" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Open Source</h2>
+                <p>Real-time GitHub dashboard — stats, repos, and activity.</p>
+            </div>
+            <div class="gh-dashboard" id="github-stats">
+                <p style="color:var(--text-muted);text-align:center;padding:60px;">Loading GitHub data...</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Vault — Knowledge Hub -->
+    <section id="vault" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>The Vault</h2>
+                <p>Knowledge repository — prompts, code, media, docs, and archives.</p>
+            </div>
+            <div class="vault-toolbar">
+                <div class="vault-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="vault-search" placeholder="Search vault..." aria-label="Search vault">
+                </div>
+                <div class="vault-filters">
+                    <button class="vault-filter active" data-filter="all">All</button>
+                    <button class="vault-filter" data-filter="prompts">Prompts</button>
+                    <button class="vault-filter" data-filter="code">Code</button>
+                    <button class="vault-filter" data-filter="media">Media</button>
+                    <button class="vault-filter" data-filter="docs">Docs</button>
+                    <button class="vault-filter" data-filter="archives">Archives</button>
+                </div>
+            </div>
+            <div class="vault-grid">
+                <div class="vault-card" data-category="prompts">
+                    <div class="vault-card-icon"><i class="fas fa-message"></i></div>
+                    <h4>Prompts</h4>
+                    <p>AI prompts &amp; templates</p>
+                    <div class="vault-tags">
+                        <span class="vt">gemini</span>
+                        <span class="vt">chatgpt</span>
+                        <span class="vt">system</span>
                     </div>
-                    <div class="form-group">
-                        <label for="contact-email">Email Address</label>
-                        <input type="email" id="contact-email" class="form-input" placeholder="name@example.com" required>
+                </div>
+                <div class="vault-card" data-category="code">
+                    <div class="vault-card-icon"><i class="fas fa-code"></i></div>
+                    <h4>Code</h4>
+                    <p>Snippets &amp; libraries</p>
+                    <div class="vault-tags">
+                        <span class="vt">javascript</span>
+                        <span class="vt">python</span>
+                        <span class="vt">react</span>
                     </div>
-                    <div class="form-group">
-                        <label for="contact-message">Your Message</label>
-                        <textarea id="contact-message" class="form-input" rows="4" placeholder="Tell me about your project..."
-                            required></textarea>
+                </div>
+                <div class="vault-card" data-category="media">
+                    <div class="vault-card-icon"><i class="fas fa-image"></i></div>
+                    <h4>Media</h4>
+                    <p>Design assets &amp; graphics</p>
+                    <div class="vault-tags">
+                        <span class="vt">screenshots</span>
+                        <span class="vt">icons</span>
+                        <span class="vt">brand</span>
                     </div>
-                    <button type="submit" class="btn btn-primary">Send Message <i
-                            aria-hidden="true" class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="vault-card" data-category="docs">
+                    <div class="vault-card-icon"><i class="fas fa-book"></i></div>
+                    <h4>Docs</h4>
+                    <p>Documentation &amp; guides</p>
+                    <div class="vault-tags">
+                        <span class="vt">api</span>
+                        <span class="vt">setup</span>
+                        <span class="vt">reference</span>
+                    </div>
+                </div>
+                <div class="vault-card" data-category="archives">
+                    <div class="vault-card-icon"><i class="fas fa-archive"></i></div>
+                    <h4>Archives</h4>
+                    <p>Legacy projects &amp; backups</p>
+                    <div class="vault-tags">
+                        <span class="vt">backup</span>
+                        <span class="vt">legacy</span>
+                        <span class="vt">v1</span>
+                    </div>
+                </div>
+                <div class="vault-card" data-category="media">
+                    <div class="vault-card-icon"><i class="fas fa-video"></i></div>
+                    <h4>Videos</h4>
+                    <p>Tutorials &amp; recordings</p>
+                    <div class="vault-tags">
+                        <span class="vt">demo</span>
+                        <span class="vt">walkthrough</span>
+                        <span class="vt">showcase</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Contact — Final Section -->
+    <section id="contact" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Get in Touch</h2>
+                <p>Let's build something great together. Reach out anytime.</p>
+            </div>
+            <div class="ct-grid">
+                <div class="ct-channels">
+                    <a href="mailto:zwnt45602@gmail.com" class="ct-btn ct-email" aria-label="Send email to zwnt45602@gmail.com"><i class="fas fa-envelope"></i><span>Email</span><small>zwnt45602@gmail.com</small></a>
+                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener" class="ct-btn ct-gh" aria-label="GitHub profile MOT1209"><i class="fab fa-github"></i><span>GitHub</span><small>@MOT1209</small></a>
+                    <a class="ct-btn ct-ph" aria-label="LinkedIn (coming soon)"><i class="fab fa-linkedin-in"></i><span>LinkedIn</span><small>Coming soon</small></a>
+                    <div class="ct-row">
+                        <a class="ct-btn ct-ph" aria-label="Discord (coming soon)"><i class="fab fa-discord"></i><span>Discord</span><small>Soon</small></a>
+                        <a class="ct-btn ct-ph" aria-label="Telegram (coming soon)"><i class="fab fa-telegram-plane"></i><span>Telegram</span><small>Soon</small></a>
+                    </div>
+                </div>
+                <form class="ct-form">
+                    <label for="ct-name">Name</label>
+                    <input type="text" id="ct-name" class="ct-input" placeholder="Your name" required>
+                    <label for="ct-email">Email</label>
+                    <input type="email" id="ct-email" class="ct-input" placeholder="name@example.com" required>
+                    <label for="ct-msg">Message</label>
+                    <textarea id="ct-msg" class="ct-input" rows="4" placeholder="Tell me about your project..." required></textarea>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px 24px;font-size:1rem;">Send Message <i class="fas fa-paper-plane"></i></button>
                 </form>
             </div>
         </div>
     </section>
 
-    <!-- Settings Modal -->
-    <div class="settings-overlay" id="settings-overlay"></div>
-    <div class="settings-modal blur-glass" id="settings-modal" tabindex="0" role="dialog" aria-label="Settings">
-        <div class="settings-header">
-            <h3><i aria-hidden="true" class="fas fa-palette"></i> Customize Workspace</h3>
-            <button class="close-settings" id="close-settings"><i aria-hidden="true" class="fas fa-times"></i></button>
+    <!-- Footer -->
+    <footer class="footer container" style="max-width:var(--max-width);">
+        <p>&copy; <span class="copyright-year"></span> Rashid. Built with <i class="fas fa-heart" style="color:var(--accent);"></i> and open source.</p>
+        <div class="footer-links">
+            <a href="https://github.com/MOT1209" target="_blank" rel="noopener">GitHub</a>
+            <a href="blog/">Blog</a>
+            <a href="admin/login.html" id="admin-access-link" style="opacity:0.3;">Admin</a>
         </div>
+    </footer>
 
+    <!-- Settings Modal — Customize Workspace -->
+    <div class="settings-overlay" id="settings-overlay"></div>
+    <div class="settings-modal blur-glass" id="settings-modal" role="dialog" aria-label="Customize Workspace">
+        <div class="settings-header">
+            <h3><i class="fas fa-palette"></i> Customize Workspace</h3>
+            <button class="close-settings" id="close-settings"><i class="fas fa-times"></i></button>
+        </div>
         <div class="settings-body">
-            <!-- Accent Color Selection -->
-            <div class="setting-item">
-                <label>Accent Color</label>
-                <div class="accent-picker">
-                    <div class="accent-dot active" data-color="#38bdf8" style="background: #38bdf8;"></div>
-                    <div class="accent-dot" data-color="#f472b6" style="background: #f472b6;"></div>
-                    <div class="accent-dot" data-color="#34d399" style="background: #34d399;"></div>
-                    <div class="accent-dot" data-color="#fbbf24" style="background: #fbbf24;"></div>
-                    <div class="accent-dot" data-color="#a78bfa" style="background: #a78bfa;"></div>
+            <div class="setting-section">
+                <h4>Theme</h4>
+                <div class="theme-selector">
+                    <button class="theme-opt active" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
+                    <button class="theme-opt" data-theme="light"><i class="fas fa-sun"></i> Light</button>
                 </div>
             </div>
-
-            <!-- Language Picker -->
-            <div class="setting-item">
-                <label><i aria-hidden="true" class="fas fa-language"></i> Site Language</label>
+            <div class="setting-section">
+                <h4>Accent Color</h4>
+                <div class="accent-picker">
+                    <div class="accent-dot active" data-color="#38bdf8" style="background:#38bdf8;"></div>
+                    <div class="accent-dot" data-color="#f472b6" style="background:#f472b6;"></div>
+                    <div class="accent-dot" data-color="#34d399" style="background:#34d399;"></div>
+                    <div class="accent-dot" data-color="#fbbf24" style="background:#fbbf24;"></div>
+                    <div class="accent-dot" data-color="#a78bfa" style="background:#a78bfa;"></div>
+                    <div class="accent-dot" data-color="#f97316" style="background:#f97316;"></div>
+                </div>
+            </div>
+            <div class="setting-section">
+                <h4>Language</h4>
                 <div class="lang-grid">
                     <button class="lang-btn active" data-lang="en">English</button>
                     <button class="lang-btn" data-lang="ar">العربية</button>
                     <button class="lang-btn" data-lang="de">Deutsch</button>
                 </div>
-                <div id="google_translate_element"></div>
             </div>
-
-            <!-- Nano Banana Theme Toggle -->
-            <div class="setting-item">
+            <div class="setting-section">
+                <h4>Performance</h4>
                 <div class="toggle-row">
-                    <span><i class="fas fa-bolt" style="color: #facc15;"></i> Nano Banana 2</span>
-                    <label class="switch">
-                        <input type="checkbox" id="nano-banana-toggle">
-                        <span class="slider" style="background: rgba(250,204,21,0.2);"></span>
-                    </label>
+                    <div>
+                        <span>Performance Mode</span>
+                        <p class="desc">Disable animations and 3D effects for speed.</p>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="perf-mode"><span class="slider"></span></label>
                 </div>
-                <p class="desc">تبديل التصميم الجريء — أصفر نيون، أسود عميق، بدون زوايا دائرية.</p>
-            </div>
-
-            <!-- Aesthetics Toggle -->
-            <div class="setting-item">
                 <div class="toggle-row">
-                    <span>Performance Mode</span>
-                    <label class="switch">
-                        <input type="checkbox" id="perf-mode">
-                        <span class="slider"></span>
-                    </label>
+                    <div>
+                        <span>Reduce Motion</span>
+                        <p class="desc">Minimize transitions and motion effects.</p>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="reduce-motion"><span class="slider"></span></label>
                 </div>
-                <p class="desc">Disable background animations for speed.</p>
             </div>
-        </div>
-
-        <div class="settings-footer">
-            <p>Rashid Design System v3.1</p>
+            <div class="setting-section">
+                <h4>Info</h4>
+                <p class="desc">Design System v4.0 · Built with Inter + JetBrains Mono</p>
+            </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="main-footer" role="contentinfo">
-        <div class="container footer-grid">
-            <div class="footer-brand">
-                <a href="#hero" class="logo">Rashid<span>.</span></a>
-                <p>Full-Stack Developer — Next.js 15, Python, Supabase & Three.js.</p>
-                <div class="social-links">
-                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener" aria-label="GitHub Profile"><i aria-hidden="true" class="fab fa-github"></i></a>
-                    <!-- LinkedIn و Discord تم إخفاؤهما مؤقتاً ريثما يتم تفعيل الروابط -->
-                </div>
-            </div>
-            <div class="footer-nav">
-                <h4>Navigation</h4>
-                <a href="#github">GitHub</a>
-                <a href="#projects">Projects</a>
-                <a href="#vault">Vault</a>
-                <a href="games/index.html">Games</a>
-                <a href="about.html">About</a>
-                <a href="contact.html">Contact</a>
-            </div>
-            <div class="footer-nav">
-                <h4>Ecosystem</h4>
-                <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>
-                <a href="blog/">Blog</a>
-                <a href="learning.html">Learning</a>
-                <a href="vault/prompts/">Prompts</a>
-                <a href="vault/code/">Code Library</a>
-            </div>
-            <div class="footer-nav">
-                <h4>Legal</h4>
-                <a href="privacy.html">Privacy Policy</a>
-                <a href="terms.html">Terms of Service</a>
-            </div>
-            <div class="footer-legal">
-                <p>&copy; <span class="copyright-year"></span> <strong>Rashid</strong>. Built with <i aria-hidden="true" class="fas fa-heart" style="color: var(--accent);"></i> and open source.</p>
-                <!-- Admin access: hidden from UI, use keyboard shortcut Ctrl+Shift+A to reveal -->
-                <a href="admin/login.html" class="admin-link" rel="noopener noreferrer" id="admin-access-link" style="display:none;">Internal Access</a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- Unified Rashid-AI Widget Space -->
+    <!-- Voice / AI Widget -->
     <div id="voice-widget">
-        <!-- Toggle Button -->
-        <div class="voice-widget-toggle">
-            <i aria-hidden="true" class="fas fa-microphone-alt"></i>
-        </div>
-
-        <!-- Glow Ring Animation -->
+        <div class="voice-widget-toggle"><i class="fas fa-microphone-alt"></i></div>
         <div class="voice-glow-ring"></div>
-
-        <!-- Glassmorphism Panel -->
         <div class="voice-panel" id="voice-panel">
             <div class="voice-header">
-                <h3>
-                    <span class="voice-status-dot"></span> Rashid-AI v3.0
-                </h3>
-                <span class="voice-close"><i aria-hidden="true" class="fas fa-times"></i></span>
+                <h3><span class="voice-status-dot"></span> Rashid-AI v3.0</h3>
+                <span class="voice-close"><i class="fas fa-times"></i></span>
             </div>
-
-            <!-- Avatar & Visualizer Mixed Area -->
             <div class="visualizer-container" id="avatar-viewport">
-                <!-- 3D Avatar will be injected here -->
                 <div id="voice-visualizer">
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
-                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
                 </div>
             </div>
-
-            <!-- Chat Body -->
             <div class="voice-chat-body" id="voice-chat-body">
-                <div class="chat-msg bot">
-                    Hello! I am your unified AI assistant. How can I help you today?
-                </div>
+                <div class="chat-msg bot">Hello! I am your unified AI assistant. How can I help you today?</div>
             </div>
-
-            <!-- Input Area -->
             <div class="voice-footer">
-                <button id="voice-speaker-toggle" class="footer-btn">
-                    <i aria-hidden="true" class="fas fa-volume-up"></i>
-                </button>
+                <button id="voice-speaker-toggle" class="footer-btn"><i class="fas fa-volume-up"></i></button>
                 <div class="voice-input-wrapper">
                     <input type="text" id="voice-input" class="voice-input" placeholder="Ask me anything about code...">
-                    <button id="voice-mic-btn" class="mic-btn">
-                        <i aria-hidden="true" class="fas fa-microphone"></i>
-                    </button>
+                    <button id="voice-mic-btn" class="mic-btn"><i class="fas fa-microphone"></i></button>
                 </div>
-                <button id="voice-send-btn" class="footer-btn">
-                    <i aria-hidden="true" class="fas fa-paper-plane"></i>
-                </button>
+                <button id="voice-send-btn" class="footer-btn"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
-    <!-- Libraries & Configuration -->
+    <!-- Scripts -->
     <script src="js/gemini-config.js"></script>
-
-    <!-- Google Translate Script (lazy) -->
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'ar',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-            }, 'google_translate_element');
-        }
-        function loadGoogleTranslate() {
-            var s = document.createElement('script');
-            s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-            s.defer = true;
-            document.body.appendChild(s);
-        }
-        if (window.requestIdleCallback) {
-            requestIdleCallback(loadGoogleTranslate, { timeout: 3000 });
-        } else {
-            setTimeout(loadGoogleTranslate, 2000);
-        }
-    </script>
-
-    <!-- Unified Rashid-AI Logic -->
     <script src="js/rashid-ai-v2.js?v=3.0"></script>
-
-    <!-- Core App Scripts (direct import) -->
     <script type="module" src="src/js/main.js?v=2.0"></script>
     <script src="js/admin.js?v=3.1" defer></script>
-
-    <!-- PWA Install Manager -->
     <script src="js/pwa-installer.js?v=1.1" defer></script>
-    <script type="application/ld+json">
-    [
-      {
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        "name": "Rashid - AI Workspace",
-        "url": "https://rashid-wep.vercel.app/",
-        "description": "Rashid (MOT1209) — Full-Stack Developer building AI-powered web platforms, 3D games, and PWA apps with Next.js 15, Supabase, and Three.js.",
-        "potentialAction": {
-          "@type": "SearchAction",
-          "target": {
-            "@type": "EntryPoint",
-            "urlTemplate": "https://rashid-wep.vercel.app/?q={search_term_string}"
-          },
-          "query-input": "required name=search_term_string"
-        }
-      },
-      {
-        "@context": "https://schema.org",
-        "@type": "Person",
-        "name": "Rashid",
-        "alternateName": "MOT1209",
-        "url": "https://rashid-wep.vercel.app/",
-        "jobTitle": "Full-Stack Developer",
-        "knowsAbout": ["Next.js 15", "Python", "Supabase", "Three.js", "AI", "PWA"],
-        "sameAs": [
-          "https://github.com/MOT1209"
-        ]
-      }
-    ]
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://rashid-wep.vercel.app/" },
-        { "@type": "ListItem", "position": 2, "name": "Projects", "item": "https://rashid-wep.vercel.app/#projects" },
-        { "@type": "ListItem", "position": 3, "name": "Vault", "item": "https://rashid-wep.vercel.app/#vault" }
-      ]
-    }
-    </script>
     <script>
-    // Admin link: reveal on Ctrl+Shift+A
-    document.addEventListener('keydown', function(e) {
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') {
-        e.preventDefault();
-        var link = document.getElementById('admin-access-link');
-        if (link) { link.style.display = 'inline'; link.style.opacity = '0.5'; }
-      }
+    // Dynamic year
+    document.querySelectorAll('.copyright-year').forEach(function(el){el.textContent=new Date().getFullYear();});
+    // Mobile menu
+    (function(){
+      var hm=document.getElementById('hamburger'),mm=document.getElementById('mobile-menu');
+      if(hm&&mm){hm.addEventListener('click',function(){mm.classList.toggle('open');});}
+      document.querySelectorAll('.mobile-menu a').forEach(function(a){
+        a.addEventListener('click',function(){if(mm)mm.classList.remove('open');});
+      });
+    })();
+    // iOS viewport fix
+    (function(){var vh=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh+'px');window.addEventListener('resize',function(){var vh2=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh2+'px');});})();
+    // Nav scroll highlight
+    document.addEventListener('scroll',function(){
+      var sections=document.querySelectorAll('section[id]');
+      var scrollPos=window.scrollY+120;
+      sections.forEach(function(s){
+        if(s.offsetTop<=scrollPos&&s.offsetTop+s.offsetHeight>scrollPos){
+          document.querySelectorAll('.nav-links a').forEach(function(a){a.classList.remove('active');});
+          var link=document.querySelector('.nav-links a[href="#'+s.id+'"]');
+          if(link)link.classList.add('active');
+        }
+      });
     });
-    // Dynamic copyright year
-    document.querySelectorAll('.copyright-year').forEach(function(el) { el.textContent = new Date().getFullYear(); });
+    // Admin access: Ctrl+Shift+A
+    document.addEventListener('keydown',function(e){
+      if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();window.open('admin/login.html','_blank');}
+    });
     </script>
 </body>
-
 </html>

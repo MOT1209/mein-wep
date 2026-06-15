@@ -161,7 +161,7 @@ function renderProjects(projects) {
 
     regular.forEach(project => {
         const category = String(project.category || '').toLowerCase();
-        const targetGrid = category.includes('game') ? gamingGrid : (appsGrid || gamingGrid);
+        const targetGrid = category.includes('game') || category.includes('model') || category.includes('tool') ? gamingGrid : (appsGrid || gamingGrid);
         targetGrid?.insertAdjacentHTML('beforeend', createProjectCard(project, lang));
     });
 
@@ -206,7 +206,7 @@ function createProjectCard(project, lang) {
     const projectLink = safeUrl(project.link || project.project_link);
     const githubLink = safeUrl(project.github_link, '');
     const category = String(project.category || '').toLowerCase();
-    const categoryKey = category.includes('game') ? 'games' : (category.includes('model') ? 'model' : 'app');
+    const categoryKey = category.includes('game') ? 'games' : (category.includes('model') ? 'model' : (category.includes('tool') ? 'tool' : 'app'));
     const iconClass = safeIconClass(project.image_url);
     const title = escapeHTML(project.title || 'Untitled Project');
     const description = escapeHTML(project.description || '');
