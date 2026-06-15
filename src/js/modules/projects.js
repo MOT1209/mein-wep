@@ -116,6 +116,12 @@ export async function initProjects() {
         return;
     }
 
+    const dbTitles = new Set(projects.map(p => p.title));
+    const extra = fallbackProjects.filter(f => !dbTitles.has(f.title));
+    if (extra.length > 0) {
+        projects = [...projects, ...extra];
+    }
+
     renderProjects(projects);
 }
 
