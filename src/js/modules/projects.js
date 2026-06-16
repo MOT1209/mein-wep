@@ -21,7 +21,7 @@ const projectScreenshots = {
 // Projects that have Android APK builds
 const apkProjects = {
     'KingCraft': { url: '/apks/kingcraft-game-v0.6.0.apk', version: '0.6.0' },
-    'Rust Construction': { url: '/apks/rust-game-v1.0.0.apk', version: '1.0.0' },
+    'Rust Construction': { url: '/apks/rust-game-v1.1.0.apk', version: '1.1.0' },
     'Farm Empire': { url: '/apks/farm-game-v2.0.0.apk', version: '2.0.0' },
     'Quran Pro': { url: '/apks/quran-app-v1.0.0.apk', version: '1.0.0' },
     'Calculator App': { url: '/apks/calculator-app-v1.0.0.apk', version: '1.0.0' },

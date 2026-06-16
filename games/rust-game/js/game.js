@@ -46,6 +46,7 @@ const state = {
     building: {
         blueprintOpen: false,
         selectedBlueprint: null, // 'foundation', 'wall', 'doorway', 'ceiling'
+        rotationY: 0, // Current Y-axis rotation for the blueprint in radians
         placingStructure: false,
         lookingAtStructure: null,
         toolCupboards: [] // [{pos, radius}]
@@ -150,8 +151,57 @@ const velocity = new THREE.Vector3();
 const direction = new THREE.Vector3();
 
 // ==================== CORE FUNCTIONS ====================
+// ==================== TERRAIN GENERATION ====================
+// Simple pseudo-noise for terrain
+function hash(x, z) {
+    let h = x * 374761393 + z * 668265263;
+    h = (h ^ (h >> 13)) * 1274126177;
+    return (h ^ (h >> 16)) / 2147483647;
+}
+
+function smoothNoise(x, z) {
+    const ix = Math.floor(x);
+    const iz = Math.floor(z);
+    const fx = x - ix;
+    const fz = z - iz;
+    const sx = fx * fx * (3 - 2 * fx);
+    const sz = fz * fz * (3 - 2 * fz);
+    const v00 = hash(ix, iz);
+    const v10 = hash(ix + 1, iz);
+    const v01 = hash(ix, iz + 1);
+    const v11 = hash(ix + 1, iz + 1);
+    const v0 = v00 + (v10 - v00) * sx;
+    const v1 = v01 + (v11 - v01) * sx;
+    return v0 + (v1 - v0) * sz;
+}
+
+function fbm(x, z, octaves = 4) {
+    let value = 0;
+    let amplitude = 1;
+    let frequency = 1;
+    let maxVal = 0;
+    for (let i = 0; i < octaves; i++) {
+        value += amplitude * smoothNoise(x * frequency, z * frequency);
+        maxVal += amplitude;
+        amplitude *= 0.5;
+        frequency *= 2;
+    }
+    return value / maxVal;
+}
+
 function getTerrainHeight(x, z) {
-    return Math.sin(x * 0.05) * Math.cos(z * 0.05) * 2.5;
+    // Multi-octave noise for varied terrain
+    const h1 = fbm(x * 0.015, z * 0.015, 4) * 8;  // Large hills
+    const h2 = fbm(x * 0.04, z * 0.04, 3) * 3;    // Medium detail
+    const h3 = Math.sin(x * 0.02) * Math.cos(z * 0.025) * 1.5; // Ridge effect
+    const baseHeight = h1 + h2 + h3;
+
+    // Flatten near origin (spawn area)
+    const distFromOrigin = Math.sqrt(x * x + z * z);
+    const flattenRadius = 15;
+    const blend = Math.min(1, distFromOrigin / flattenRadius);
+    const spawnHeight = 0;
+    return spawnHeight + (baseHeight - spawnHeight) * Math.max(0, blend * blend * (3 - 2 * blend));
 }
 
 function getItemCount(id) {
@@ -319,19 +369,44 @@ try {
     scene.add(sun);
 
     // World Detail
-    const groundGeo = new THREE.PlaneGeometry(CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE, 100, 100);
+    const groundGeo = new THREE.PlaneGeometry(CONFIG.WORLD_SIZE, CONFIG.WORLD_SIZE, 120, 120);
     groundGeo.rotateX(-Math.PI / 2);
     const groundPos = groundGeo.attributes.position;
+    const colors = new Float32Array(groundPos.count * 3);
     for (let i = 0; i < groundPos.count; i++) {
         const x = groundPos.getX(i);
         const z = groundPos.getZ(i);
-        groundPos.setY(i, getTerrainHeight(x, z));
+        const y = getTerrainHeight(x, z);
+        groundPos.setY(i, y);
+        // Vertex color based on height
+        const normY = (y + 4) / 16; // normalize roughly
+        let r, g, b;
+        if (y < 0.5) {
+            // Low: sandy/dirt
+            r = 0.6; g = 0.5 + normY * 0.2; b = 0.2;
+        } else if (y < 3) {
+            // Mid: grass
+            const t = (y - 0.5) / 2.5;
+            r = 0.2 + t * 0.3;
+            g = 0.5 + t * 0.15;
+            b = 0.1 + t * 0.1;
+        } else {
+            // High: rocky
+            const t = Math.min(1, (y - 3) / 5);
+            r = 0.4 + t * 0.3;
+            g = 0.35 + t * 0.25;
+            b = 0.2 + t * 0.2;
+        }
+        colors[i * 3] = r;
+        colors[i * 3 + 1] = g;
+        colors[i * 3 + 2] = b;
     }
+    groundGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     groundGeo.computeVertexNormals();
     const ground = new THREE.Mesh(groundGeo, new THREE.MeshStandardMaterial({
-        color: 0x4a7c44,
-        roughness: 0.8,
-        metalness: 0.1
+        vertexColors: true,
+        roughness: 0.9,
+        metalness: 0.05
     }));
     ground.receiveShadow = true;
     scene.add(ground);
@@ -408,7 +483,7 @@ try {
 
         if (state.building.selectedBlueprint) {
             const name = BUILDING_TYPES[state.building.selectedBlueprint].name;
-            indicator.innerHTML = `📐 Selected: <span style="color:#ffd700;">${name}</span> (Press G to cancel)`;
+            indicator.innerHTML = `📐 Selected: <span style="color:#ffd700;">${name}</span> | Angle: ${Math.round(state.building.rotationY * 180 / Math.PI)}° (Press R to rotate, G to cancel)`;
             indicator.style.display = 'block';
         } else {
             indicator.style.display = 'none';
@@ -490,6 +565,7 @@ try {
             });
             const structure = new THREE.Mesh(geometry, material);
             structure.position.set(snapX, targetY, snapZ);
+            structure.rotation.y = state.building.rotationY;
             structure.castShadow = true;
             structure.receiveShadow = true;
 
@@ -781,6 +857,7 @@ try {
             }
 
             ghostMesh.position.set(snapX, targetY, snapZ);
+            ghostMesh.rotation.y = state.building.rotationY;
             ghostMesh.visible = true;
 
             const canBuild = canBuildHere({ x: snapX, z: snapZ }, blueprint);
@@ -1048,6 +1125,13 @@ try {
             }
         }
 
+        // Rotate blueprint (R key)
+        if (e.code === 'KeyR' && state.building.selectedBlueprint) {
+            state.building.rotationY = (state.building.rotationY + Math.PI / 2) % (Math.PI * 2);
+            showNotification(`Rotated ${Math.round(state.building.rotationY * 180 / Math.PI)}°`, "#ffa000");
+            updateBlueprintIndicator();
+        }
+
         // Escape to force lock/close everything
         if (e.code === 'Escape') {
             const inv = document.getElementById('inventory');
@@ -1293,6 +1377,7 @@ try {
             structures: builtStructures.map(s => ({
                 type: s.userData.buildType || 'structure', // Use buildType for structures
                 pos: { x: s.position.x, y: s.position.y, z: s.position.z },
+                rot: s.rotation.y,
                 tier: s.userData.tier,
                 health: s.userData.health,
                 maxHealth: s.userData.maxHealth,
@@ -1338,6 +1423,7 @@ try {
 
                 const structure = new THREE.Mesh(geometry, material);
                 structure.position.set(s.pos.x, s.pos.y, s.pos.z);
+                if (s.rot) structure.rotation.y = s.rot;
                 structure.castShadow = true;
                 structure.receiveShadow = true;
 

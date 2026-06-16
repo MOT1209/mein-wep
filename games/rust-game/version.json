@@ -1,7 +1,7 @@
 ﻿{
-  "version": "1.0.0",
-  "buildNumber": 1,
-  "apkUrl": "https://rashid-wep.vercel.app/apks/rust-game-v1.0.0.apk",
-  "changelog": "Initial release",
+  "version": "1.1.0",
+  "buildNumber": 2,
+  "apkUrl": "https://rashid-wep.vercel.app/apks/rust-game-v1.1.0.apk",
+  "changelog": "Added: Blueprint rotation (R key), improved terrain with multi-octave noise & vertex coloring, flattened spawn area",
   "releaseDate": "2026-06-16"
 }
