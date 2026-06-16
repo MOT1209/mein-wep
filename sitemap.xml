@@ -88,4 +88,12 @@
         <loc>https://rashid-wep.vercel.app/blog/portfolio-optimization-tips.html</loc>
         <priority>0.6</priority>
     </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/downloads.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/games/kingcraft-game/</loc>
+        <priority>0.7</priority>
+    </url>
 </urlset>

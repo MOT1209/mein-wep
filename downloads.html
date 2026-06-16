@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Download APK files for Rashid's apps and games — Quran App, Calculator Vault, Quiz App, KingCraft, Rust Survival, Farm Empire">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/downloads.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Downloads — Rashid Apps & Games APK">
+    <meta property="og:description" content="Download Android APK files for all Rashid apps and games.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/logo.webp">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/downloads.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Downloads — Rashid Apps & Games APK">
+    <title>Downloads — Rashid Apps & Games APK</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <style>
+        .downloads-page {
+            min-height: 100vh;
+            padding: 120px 20px 60px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .downloads-page h1 {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .downloads-page .subtitle {
+            text-align: center;
+            color: var(--text-med);
+            font-size: 16px;
+            margin-bottom: 48px;
+        }
+        .downloads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .download-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        .download-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg), 0 0 30px rgba(var(--accent-rgb), 0.08);
+        }
+        .download-card .card-icon {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+        .download-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-high);
+            margin: 0 0 4px;
+        }
+        .download-card .card-type {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .type-app { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .type-game { background: rgba(34, 211, 238, 0.2); color: #67e8f9; }
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-med);
+            line-height: 1.6;
+            margin: 4px 0 16px;
+            flex: 1;
+        }
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-low);
+            margin-bottom: 16px;
+        }
+        .card-meta i { margin-right: 4px; }
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .download-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.4);
+        }
+        .download-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            background: var(--bg-alt);
+        }
+        .how-it-works {
+            margin-top: 60px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-intensity));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+        }
+        .how-it-works h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-high);
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .step {
+            text-align: center;
+            padding: 20px 12px;
+        }
+        .step-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            margin: 0 auto 12px;
+            color: #fff;
+        }
+        .step h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-high);
+            margin: 0 0 6px;
+        }
+        .step p {
+            font-size: 13px;
+            color: var(--text-med);
+            margin: 0;
+            line-height: 1.5;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-med);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 32px;
+            transition: var(--transition);
+        }
+        .back-link:hover { color: var(--text-high); }
+        .update-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #22c55e;
+        }
+        .update-badge i { font-size: 10px; }
+        @media (max-width: 600px) {
+            .downloads-page { padding: 100px 16px 40px; }
+            .downloads-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#about">About</a>
+                <a href="/#projects">Projects</a>
+                <a href="/blog/">Blog</a>
+                <a href="downloads.html" class="active">Downloads</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        <a href="/">Home</a>
+        <a href="/#about">About</a>
+        <a href="/#projects">Projects</a>
+        <a href="/blog/">Blog</a>
+        <a href="downloads.html">Downloads</a>
+    </div>
+
+    <main class="downloads-page">
+
+        <h1>Download APK</h1>
+        <p class="subtitle">Install Rashid's apps and games directly on your Android device</p>
+
+        <div class="downloads-grid" id="downloads-grid">
+            <!-- Populated by JS -->
+        </div>
+
+        <div class="how-it-works">
+            <h2><i class="fas fa-info-circle"></i> How Updates Work</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h4>Install APK</h4>
+                    <p>Download the APK file and install it on your Android device.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h4>Open App</h4>
+                    <p>Launch the app. It checks for updates automatically.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h4>Update Available</h4>
+                    <p>When a new version is released, a banner appears: "Update Available".</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <h4>Download Update</h4>
+                    <p>Tap the button to download and install the new APK at your convenience.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const OWNER = 'MOT1209';
+        const REPO = 'mein-wep';
+
+        const projects = [
+            {
+                id: 'quran-app',
+                name: 'Quran App',
+                icon: '<i class="fas fa-book-quran" style="color:#059669"></i>',
+                type: 'app',
+                desc: 'Read and listen to the Holy Quran with multiple reciters, tafsir, translation, and offline bookmarks.',
+                version: '1.0.0',
+                ghRelease: 'quran-app-v1.0.0'
+            },
+            {
+                id: 'calculator-app',
+                name: 'Smart Vault',
+                icon: '<i class="fas fa-calculator" style="color:#818cf8"></i>',
+                type: 'app',
+                desc: 'A calculator that doubles as a secret vault. Hide files, photos, and data behind a working calculator.',
+                version: '1.0.0',
+                ghRelease: 'calculator-app-v1.0.0'
+            },
+            {
+                id: 'quiz-app',
+                name: 'Quiz Master',
+                icon: '<i class="fas fa-brain" style="color:#a855f7"></i>',
+                type: 'app',
+                desc: 'Multi-category quiz platform with timers, scoring, and progress tracking across various topics.',
+                version: '1.0.0',
+                ghRelease: 'quiz-app-v1.0.0'
+            },
+            {
+                id: 'kingcraft-game',
+                name: 'KingCraft',
+                icon: '<i class="fas fa-cube" style="color:#f59e0b"></i>',
+                type: 'game',
+                desc: 'A 3D voxel sandbox game. Mine resources, craft tools, build structures, and survive.',
+                version: '0.6.0',
+                ghRelease: 'kingcraft-game-v0.6.0'
+            },
+            {
+                id: 'rust-game',
+                name: 'Rust Survival 3D',
+                icon: '<i class="fas fa-skull" style="color:#ef4444"></i>',
+                type: 'game',
+                desc: 'Physics-driven sandbox survival game. Mine resources, craft tools, and build structures in 3D.',
+                version: '1.0.0',
+                ghRelease: 'rust-game-v1.0.0'
+            },
+            {
+                id: 'farm-game',
+                name: 'Farm Empire',
+                icon: '<i class="fas fa-tractor" style="color:#22c55e"></i>',
+                type: 'game',
+                desc: 'Build and expand your dream farming empire with crop growth simulations and real-time weather.',
+                version: '1.0.0',
+                ghRelease: 'farm-game-v1.0.0'
+            }
+        ];
+
+        const grid = document.getElementById('downloads-grid');
+
+        // Try to get latest release info from GitHub API for each project
+        async function getReleaseInfo(ghRelease) {
+            try {
+                const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${ghRelease}`);
+                if (!res.ok) return null;
+                const data = await res.json();
+                return data;
+            } catch {
+                return null;
+            }
+        }
+
+        async function renderCards() {
+            for (const p of projects) {
+                const release = await getReleaseInfo(p.ghRelease);
+                const hasAPK = release && release.assets && release.assets.some(a => a.name.endsWith('.apk'));
+
+                const card = document.createElement('div');
+                card.className = 'download-card';
+
+                let btnHtml;
+                if (hasAPK) {
+                    const apkAsset = release.assets.find(a => a.name.endsWith('.apk'));
+                    btnHtml = `<a href="${apkAsset.browser_download_url}" class="download-btn" target="_blank" rel="noopener"><i class="fas fa-download"></i> Download APK</a>`;
+                } else {
+                    btnHtml = `<a href="https://github.com/${OWNER}/${REPO}/actions" class="download-btn disabled" target="_blank" rel="noopener"><i class="fas fa-clock"></i> Building...</a>`;
+                }
+
+                card.innerHTML = `
+                    <div class="card-icon">${p.icon}</div>
+                    <span class="card-type type-${p.type}">${p.type === 'app' ? 'Application' : 'Game'}</span>
+                    <h3>${p.name}</h3>
+                    <div class="card-desc">${p.desc}</div>
+                    <div class="card-meta">
+                        <span><i class="fas fa-tag"></i> v${p.version}</span>
+                        <span>${hasAPK ? '<span class="update-badge"><i class="fas fa-circle"></i> Ready</span>' : '<span style="color:var(--text-low)"><i class="fas fa-spinner fa-spin"></i> Pending first build</span>'}</span>
+                    </div>
+                    ${btnHtml}
+                `;
+                grid.appendChild(card);
+            }
+        }
+        renderCards();
+    </script>
+
+    <!-- Footer -->
+    <footer style="text-align:center;padding:40px 20px;color:var(--text-low);font-size:13px;border-top:1px solid var(--border)">
+        <p>&copy; 2026 Rashid (MOT1209). All rights reserved.</p>
+        <p style="margin-top:4px">
+            <a href="/" style="color:var(--text-med);text-decoration:none">Home</a> &middot;
+            <a href="/privacy.html" style="color:var(--text-med);text-decoration:none">Privacy</a> &middot;
+            <a href="/terms.html" style="color:var(--text-med);text-decoration:none">Terms</a>
+        </p>
+    </footer>
+
+</body>
+</html>

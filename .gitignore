@@ -24,3 +24,17 @@ package-lock.json
 .playwright-mcp/
 console-errors.log
 *.log
+
+# Capacitor / Android generated files (built in CI)
+apps/*/node_modules/
+apps/*/android/
+apps/*/www/
+games/*/node_modules/
+games/*/android/
+games/*/www/
+games/kingcraft-game/dist/
+
+# Keystore (sensitive)
+**/*.jks
+**/*.keystore
+**/keystore.properties

@@ -1,0 +1,231 @@
+# Auto-build APKs for apps & games
+# Triggers when any project under apps/ or games/ changes
+# Uploads built APK to GitHub Releases + updates version.json
+
+name: Build APKs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/*/index.html'
+      - 'apps/*/js/**'
+      - 'apps/*/css/**'
+      - 'games/*/index.html'
+      - 'games/*/js/**'
+      - 'games/*/css/**'
+      - 'games/kingcraft-game/src/**'
+      - 'games/kingcraft-game/js/**'
+      - 'scripts/**'
+  workflow_dispatch:
+    inputs:
+      forceAll:
+        description: 'Build APKs for ALL projects'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  detect:
+    name: Detect Changed Projects
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.detect.outputs.projects }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - id: detect
+        run: |
+          ALL='["apps/quran-app","apps/calculator-app","apps/quiz-app","games/kingcraft-game","games/rust-game","games/farm-game"]'
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.forceAll }}" == "true" ]]; then
+            echo "projects=$ALL" >> $GITHUB_OUTPUT
+            echo "Force-building ALL projects"
+            exit 0
+          fi
+
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+          echo "Changed: $CHANGED"
+
+          PROJECTS='[]'
+          for dir in apps/quran-app apps/calculator-app apps/quiz-app games/kingcraft-game games/rust-game games/farm-game; do
+            if echo "$CHANGED" | grep -q "^$dir/"; then
+              PROJECTS=$(echo "$PROJECTS" | jq --arg d "$dir" '. + [$d]')
+              echo "Changed: $dir"
+            fi
+          done
+
+          if [ "$PROJECTS" = "[]" ]; then
+            if echo "$CHANGED" | grep -q "^scripts/"; then
+              echo "projects=$ALL"
+              echo "Scripts changed - rebuilding all"
+            else
+              echo "projects=[]"
+              echo "No project changes"
+            fi
+          else
+            echo "projects=$PROJECTS"
+          fi
+
+  build:
+    name: Build ${{ matrix.project }}
+    needs: detect
+    if: ${{ fromJson(needs.detect.outputs.projects)[0] != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.detect.outputs.projects) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+          yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses 2>/dev/null || true
+
+      - name: Extract project info
+        id: info
+        run: |
+          FOLDER=$(basename ${{ matrix.project }})
+          echo "folder=$FOLDER" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.project }}
+        run: |
+          npm install 2>&1 | tail -5
+
+      - name: Add Android platform
+        working-directory: ${{ matrix.project }}
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android 2>&1 | tail -5
+            echo "Android platform added"
+          else
+            echo "Android platform already exists"
+          fi
+
+      - name: Build web assets
+        working-directory: ${{ matrix.project }}
+        run: |
+          if [ "${{ steps.info.outputs.folder }}" = "kingcraft-game" ]; then
+            npm run build 2>&1 | tail -5
+          fi
+          node ../../scripts/copy-to-www.mjs .
+
+      - name: Sync Capacitor
+        working-directory: ${{ matrix.project }}
+        run: npx cap sync android 2>&1 | tail -10
+
+      - name: Get current version
+        id: version
+        run: |
+          VER_FILE="${{ matrix.project }}/version.json"
+          if [ -f "$VER_FILE" ]; then
+            VER=$(cat $VER_FILE)
+            BUILD=$(echo $VER | jq -r '.buildNumber // 1')
+            NEW_BUILD=$((BUILD + 1))
+            VERSION=$(echo $VER | jq -r '.version')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "build=$NEW_BUILD" >> $GITHUB_OUTPUT
+          else
+            echo "version=1.0.0" >> $GITHUB_OUTPUT
+            echo "build=1" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Generate keystore (if not provided) and build APK
+        working-directory: ${{ matrix.project }}
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KS_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+            # Use provided keystore
+            echo "$KS_B64" | base64 -d > release-key.jks
+            echo "Using provided keystore"
+            npx cap build android \
+              --keystorepath ./release-key.jks \
+              --keystorepass "$KS_PASS" \
+              --keystorealias "${KS_ALIAS:-rashid-key}" \
+              --keystorealiaspass "${KS_KEY_PASS:-$KS_PASS}" \
+              --androidreleasetype APK \
+              --signing-type apksigner 2>&1 | tail -20
+          else
+            # Generate temp keystore and build
+            echo "No keystore secret set. Generating temporary keystore..."
+            keytool -genkey -v \
+              -keystore temp-key.jks \
+              -storepass "TempPass123" \
+              -alias "rashid-temp" \
+              -keypass "TempPass123" \
+              -keyalg RSA -keysize 2048 -validity 365 \
+              -dname "CN=Rashid, OU=Dev, O=RashidApps, L=City, ST=State, C=SA" \
+              -noprompt 2>&1
+
+            echo "Temp keystore created. Building APK..."
+            npx cap build android \
+              --keystorepath ./temp-key.jks \
+              --keystorepass "TempPass123" \
+              --keystorealias "rashid-temp" \
+              --keystorealiaspass "TempPass123" \
+              --androidreleasetype APK \
+              --signing-type apksigner 2>&1 | tail -20
+          fi
+
+      - name: Locate APK
+        id: apk
+        run: |
+          APK_FILE=$(find ${{ matrix.project }}/android/app/build/outputs/apk -name "*.apk" -type f 2>/dev/null | head -1)
+          if [ -n "$APK_FILE" ]; then
+            echo "path=$APK_FILE" >> $GITHUB_OUTPUT
+            echo "APK: $APK_FILE"
+          else
+            echo "path=" >> $GITHUB_OUTPUT
+            echo "No APK found"
+          fi
+
+      - name: Upload APK to release
+        if: steps.apk.outputs.path != ''
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.info.outputs.folder }}-v${{ steps.version.outputs.version }}
+          name: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }}
+          files: ${{ steps.apk.outputs.path }}
+          generate_release_notes: false
+          make_latest: false
+
+      - name: Commit updated version.json
+        if: steps.apk.outputs.path != ''
+        run: |
+          VER_FILE="${{ matrix.project }}/version.json"
+          if [ -f "$VER_FILE" ]; then
+            NEW_VER=$(cat $VER_FILE | jq ".buildNumber = ${{ steps.version.outputs.build }}")
+            echo "$NEW_VER" > $VER_FILE
+            git config user.name "APK Bot"
+            git config user.email "bot@rashid.app"
+            git add "$VER_FILE"
+            git diff --cached --quiet || git commit -m "bump: ${{ steps.info.outputs.folder }} build ${{ steps.version.outputs.build }}"
+            git push 2>&1 | tail -5
+          fi
