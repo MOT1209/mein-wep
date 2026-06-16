@@ -1453,7 +1453,7 @@ try {
         }
     }
 
-    function showNotification(msg) {
+    function showNotification(msg, color = '#4caf50') {
         let note = document.getElementById('game-notification');
         if (!note) {
             note = document.createElement('div');
@@ -1462,6 +1462,7 @@ try {
             document.body.appendChild(note);
         }
         note.textContent = msg;
+        note.style.color = color;
         note.style.display = 'block';
         setTimeout(() => note.style.display = 'none', 2000);
     }
