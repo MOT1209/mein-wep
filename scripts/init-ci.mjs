@@ -101,7 +101,7 @@ export default config;
   const versionFile = {
     version: '1.0.0',
     buildNumber: 1,
-    apkUrl: `https://github.com/MOT1209/mein-wep/releases/download/${folderName}-v1.0.0/app-release.apk`,
+    apkUrl: `https://rashid-wep.vercel.app/apks/${folderName}-v1.0.0.apk`,
     changelog: 'Initial release',
     releaseDate: new Date().toISOString().split('T')[0]
   };

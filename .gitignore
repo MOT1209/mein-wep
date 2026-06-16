@@ -38,3 +38,6 @@ games/kingcraft-game/dist/
 **/*.jks
 **/*.keystore
 **/keystore.properties
+
+# Don't ignore APK files in apks/ (they're committed for site hosting)
+!apks/*.apk

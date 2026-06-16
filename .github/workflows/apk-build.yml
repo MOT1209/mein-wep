@@ -1,6 +1,5 @@
 # Auto-build APKs for apps & games
-# Triggers when any project under apps/ or games/ changes
-# Uploads built APK to GitHub Releases + updates version.json
+# Copies APK to apks/ folder so Vercel serves it on the site
 
 name: Build APKs
 
@@ -45,12 +44,10 @@ jobs:
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.forceAll }}" == "true" ]]; then
             echo "projects=$ALL" >> $GITHUB_OUTPUT
-            echo "Force-building ALL projects"
             exit 0
           fi
 
           CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
-          echo "Changed: $CHANGED"
 
           PROJECTS='[]'
           for dir in apps/quran-app apps/calculator-app apps/quiz-app games/kingcraft-game games/rust-game games/farm-game; do
@@ -63,10 +60,8 @@ jobs:
           if [ "$PROJECTS" = "[]" ]; then
             if echo "$CHANGED" | grep -q "^scripts/"; then
               echo "projects=$ALL"
-              echo "Scripts changed - rebuilding all"
             else
               echo "projects=[]"
-              echo "No project changes"
             fi
           else
             echo "projects=$PROJECTS"
@@ -112,17 +107,13 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ matrix.project }}
-        run: |
-          npm install 2>&1 | tail -5
+        run: npm install 2>&1 | tail -5
 
       - name: Add Android platform
         working-directory: ${{ matrix.project }}
         run: |
           if [ ! -d "android" ]; then
             npx cap add android 2>&1 | tail -5
-            echo "Android platform added"
-          else
-            echo "Android platform already exists"
           fi
 
       - name: Build web assets
@@ -153,7 +144,7 @@ jobs:
             echo "build=1" >> $GITHUB_OUTPUT
           fi
 
-      - name: Generate keystore (if not provided) and build APK
+      - name: Build APK
         working-directory: ${{ matrix.project }}
         env:
           KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
@@ -162,9 +153,7 @@ jobs:
           KS_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
         run: |
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
-            # Use provided keystore
             echo "$KS_B64" | base64 -d > release-key.jks
-            echo "Using provided keystore"
             npx cap build android \
               --keystorepath ./release-key.jks \
               --keystorepass "$KS_PASS" \
@@ -173,8 +162,6 @@ jobs:
               --androidreleasetype APK \
               --signing-type apksigner 2>&1 | tail -20
           else
-            # Generate temp keystore and build
-            echo "No keystore secret set. Generating temporary keystore..."
             keytool -genkey -v \
               -keystore temp-key.jks \
               -storepass "TempPass123" \
@@ -183,8 +170,6 @@ jobs:
               -keyalg RSA -keysize 2048 -validity 365 \
               -dname "CN=Rashid, OU=Dev, O=RashidApps, L=City, ST=State, C=SA" \
               -noprompt 2>&1
-
-            echo "Temp keystore created. Building APK..."
             npx cap build android \
               --keystorepath ./temp-key.jks \
               --keystorepass "TempPass123" \
@@ -194,38 +179,45 @@ jobs:
               --signing-type apksigner 2>&1 | tail -20
           fi
 
-      - name: Locate APK
+      - name: Copy APK to site folder
         id: apk
         run: |
           APK_FILE=$(find ${{ matrix.project }}/android/app/build/outputs/apk -name "*.apk" -type f 2>/dev/null | head -1)
           if [ -n "$APK_FILE" ]; then
-            echo "path=$APK_FILE" >> $GITHUB_OUTPUT
-            echo "APK: $APK_FILE"
+            FOLDER="${{ steps.info.outputs.folder }}"
+            VERSION="${{ steps.version.outputs.version }}"
+            DEST="apks/${FOLDER}-v${VERSION}.apk"
+            cp "$APK_FILE" "$DEST"
+            echo "path=$DEST" >> $GITHUB_OUTPUT
+            echo "APK copied to $DEST"
           else
             echo "path=" >> $GITHUB_OUTPUT
             echo "No APK found"
           fi
 
-      - name: Upload APK to release
-        if: steps.apk.outputs.path != ''
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ steps.info.outputs.folder }}-v${{ steps.version.outputs.version }}
-          name: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }}
-          files: ${{ steps.apk.outputs.path }}
-          generate_release_notes: false
-          make_latest: false
-
-      - name: Commit updated version.json
+      - name: Update version.json with site URL
         if: steps.apk.outputs.path != ''
         run: |
           VER_FILE="${{ matrix.project }}/version.json"
+          FOLDER="${{ steps.info.outputs.folder }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD="${{ steps.version.outputs.build }}"
+          SITE_URL="https://rashid-wep.vercel.app/apks/${FOLDER}-v${VERSION}.apk"
           if [ -f "$VER_FILE" ]; then
-            NEW_VER=$(cat $VER_FILE | jq ".buildNumber = ${{ steps.version.outputs.build }}")
-            echo "$NEW_VER" > $VER_FILE
-            git config user.name "APK Bot"
-            git config user.email "bot@rashid.app"
-            git add "$VER_FILE"
-            git diff --cached --quiet || git commit -m "bump: ${{ steps.info.outputs.folder }} build ${{ steps.version.outputs.build }}"
-            git push 2>&1 | tail -5
+            NEW_VER=$(cat $VER_FILE | jq \
+              --arg url "$SITE_URL" \
+              --argjson bld "$BUILD" \
+              '.apkUrl = $url | .buildNumber = $bld')
+            echo "$NEW_VER" > "$VER_FILE"
+            echo "Updated version.json with site URL"
           fi
+
+      - name: Commit APK + version.json
+        if: steps.apk.outputs.path != ''
+        run: |
+          git config user.name "APK Bot"
+          git config user.email "bot@rashid.app"
+          git add "${{ matrix.project }}/version.json"
+          git add "apks/${{ steps.info.outputs.folder }}-v${{ steps.version.outputs.version }}.apk"
+          git diff --cached --quiet || git commit -m "add apk: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }}"
+          git push 2>&1 | tail -5

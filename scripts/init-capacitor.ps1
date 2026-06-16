@@ -137,7 +137,7 @@ $verContent = @"
 {
   "version": "$AppVersion",
   "buildNumber": 1,
-  "apkUrl": "https://github.com/MOT1209/mein-wep/releases/download/$folderSlug-v$AppVersion/app-release.apk",
+  "apkUrl": "https://rashid-wep.vercel.app/apks/$folderSlug-v$AppVersion.apk",
   "changelog": "Initial release",
   "releaseDate": "$(Get-Date -Format 'yyyy-MM-dd')"
 }

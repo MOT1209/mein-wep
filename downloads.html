@@ -270,95 +270,80 @@
     </main>
 
     <script>
-        const OWNER = 'MOT1209';
-        const REPO = 'mein-wep';
+        const BASE = 'https://rashid-wep.vercel.app';
 
         const projects = [
             {
-                id: 'quran-app',
                 name: 'Quran App',
                 icon: '<i class="fas fa-book-quran" style="color:#059669"></i>',
                 type: 'app',
                 desc: 'Read and listen to the Holy Quran with multiple reciters, tafsir, translation, and offline bookmarks.',
                 version: '1.0.0',
-                ghRelease: 'quran-app-v1.0.0'
+                apkUrl: BASE + '/apks/quran-app-v1.0.0.apk'
             },
             {
-                id: 'calculator-app',
                 name: 'Smart Vault',
                 icon: '<i class="fas fa-calculator" style="color:#818cf8"></i>',
                 type: 'app',
-                desc: 'A calculator that doubles as a secret vault. Hide files, photos, and data behind a working calculator.',
+                desc: 'A calculator that doubles as a secret vault. Hide files and data behind a working calculator.',
                 version: '1.0.0',
-                ghRelease: 'calculator-app-v1.0.0'
+                apkUrl: BASE + '/apks/calculator-app-v1.0.0.apk'
             },
             {
-                id: 'quiz-app',
                 name: 'Quiz Master',
                 icon: '<i class="fas fa-brain" style="color:#a855f7"></i>',
                 type: 'app',
                 desc: 'Multi-category quiz platform with timers, scoring, and progress tracking across various topics.',
                 version: '1.0.0',
-                ghRelease: 'quiz-app-v1.0.0'
+                apkUrl: BASE + '/apks/quiz-app-v1.0.0.apk'
             },
             {
-                id: 'kingcraft-game',
                 name: 'KingCraft',
                 icon: '<i class="fas fa-cube" style="color:#f59e0b"></i>',
                 type: 'game',
-                desc: 'A 3D voxel sandbox game. Mine resources, craft tools, build structures, and survive.',
+                desc: 'A 3D voxel sandbox game. Mine resources, craft tools, build structures, and survive nights.',
                 version: '0.6.0',
-                ghRelease: 'kingcraft-game-v0.6.0'
+                apkUrl: BASE + '/apks/kingcraft-game-v0.6.0.apk'
             },
             {
-                id: 'rust-game',
                 name: 'Rust Survival 3D',
                 icon: '<i class="fas fa-skull" style="color:#ef4444"></i>',
                 type: 'game',
-                desc: 'Physics-driven sandbox survival game. Mine resources, craft tools, and build structures in 3D.',
+                desc: 'Physics-driven sandbox survival game. Mine, craft, and build structures in 3D.',
                 version: '1.0.0',
-                ghRelease: 'rust-game-v1.0.0'
+                apkUrl: BASE + '/apks/rust-game-v1.0.0.apk'
             },
             {
-                id: 'farm-game',
                 name: 'Farm Empire',
                 icon: '<i class="fas fa-tractor" style="color:#22c55e"></i>',
                 type: 'game',
-                desc: 'Build and expand your dream farming empire with crop growth simulations and real-time weather.',
+                desc: 'Build and expand your dream farming empire with crop simulations and real-time weather.',
                 version: '1.0.0',
-                ghRelease: 'farm-game-v1.0.0'
+                apkUrl: BASE + '/apks/farm-game-v1.0.0.apk'
             }
         ];
 
         const grid = document.getElementById('downloads-grid');
 
-        // Try to get latest release info from GitHub API for each project
-        async function getReleaseInfo(ghRelease) {
+        async function checkApkExists(url) {
             try {
-                const res = await fetch(`https://api.github.com/repos/${OWNER}/${REPO}/releases/tags/${ghRelease}`);
-                if (!res.ok) return null;
-                const data = await res.json();
-                return data;
+                const res = await fetch(url, { method: 'HEAD' });
+                return res.ok;
             } catch {
-                return null;
+                return false;
             }
         }
 
         async function renderCards() {
             for (const p of projects) {
-                const release = await getReleaseInfo(p.ghRelease);
-                const hasAPK = release && release.assets && release.assets.some(a => a.name.endsWith('.apk'));
+                const exists = await checkApkExists(p.apkUrl);
 
                 const card = document.createElement('div');
                 card.className = 'download-card';
 
-                let btnHtml;
-                if (hasAPK) {
-                    const apkAsset = release.assets.find(a => a.name.endsWith('.apk'));
-                    btnHtml = `<a href="${apkAsset.browser_download_url}" class="download-btn" target="_blank" rel="noopener"><i class="fas fa-download"></i> Download APK</a>`;
-                } else {
-                    btnHtml = `<a href="https://github.com/${OWNER}/${REPO}/actions" class="download-btn disabled" target="_blank" rel="noopener"><i class="fas fa-clock"></i> Building...</a>`;
-                }
+                const btnHtml = exists
+                    ? `<a href="${p.apkUrl}" class="download-btn" download><i class="fas fa-download"></i> Download APK</a>`
+                    : `<a href="#" class="download-btn disabled"><i class="fas fa-clock"></i> Building...</a>`;
 
                 card.innerHTML = `
                     <div class="card-icon">${p.icon}</div>
@@ -367,7 +352,7 @@
                     <div class="card-desc">${p.desc}</div>
                     <div class="card-meta">
                         <span><i class="fas fa-tag"></i> v${p.version}</span>
-                        <span>${hasAPK ? '<span class="update-badge"><i class="fas fa-circle"></i> Ready</span>' : '<span style="color:var(--text-low)"><i class="fas fa-spinner fa-spin"></i> Pending first build</span>'}</span>
+                        <span>${exists ? '<span class="update-badge"><i class="fas fa-circle"></i> Ready</span>' : '<span style="color:var(--text-low)"><i class="fas fa-spinner fa-spin"></i> Pending first build</span>'}</span>
                     </div>
                     ${btnHtml}
                 `;
