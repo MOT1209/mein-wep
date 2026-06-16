@@ -9,33 +9,34 @@ GAME.camera = {
   targetTheta: 0,
   targetPhi: 0.45,
   targetDistance: 8,
-  isDragging: false,
-  prevMouse: { x: 0, y: 0 },
-  sensitivity: 0.005,
+  isLocked: false,
+  sensitivity: 10,
+  invertY: false,
 
   init: function() {
     this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
     this.camera.position.set(0, 6, 12);
-
+    this.loadSettings();
     var self = this;
-    document.addEventListener('mousedown', function(e) {
-      if (e.button === 0 || e.button === 2) {
-        self.isDragging = true;
-        self.prevMouse.x = e.clientX;
-        self.prevMouse.y = e.clientY;
+
+    document.addEventListener('click', function() {
+      if (!self.isLocked && !GAME.ui.isMenuVisible()) {
+        document.body.requestPointerLock();
       }
     });
-    document.addEventListener('mousemove', function(e) {
-      if (!self.isDragging) return;
-      var dx = e.clientX - self.prevMouse.x;
-      var dy = e.clientY - self.prevMouse.y;
-      self.targetTheta -= dx * self.sensitivity;
-      self.targetPhi = Math.max(0.1, Math.min(1.2, self.targetPhi + dy * self.sensitivity));
-      self.prevMouse.x = e.clientX;
-      self.prevMouse.y = e.clientY;
+    document.addEventListener('pointerlockchange', function() {
+      self.isLocked = document.pointerLockElement === document.body;
+      var crosshair = document.getElementById('crosshair');
+      if (crosshair) crosshair.style.opacity = self.isLocked ? '1' : '0';
     });
-    document.addEventListener('mouseup', function() { self.isDragging = false; });
-    document.addEventListener('mouseleave', function() { self.isDragging = false; });
+    document.addEventListener('mousemove', function(e) {
+      if (!self.isLocked) return;
+      var sens = self.sensitivity * 0.001;
+      var dx = e.movementX * sens;
+      var dy = e.movementY * sens * (self.invertY ? -1 : 1);
+      self.targetTheta -= dx;
+      self.targetPhi = Math.max(0.1, Math.min(1.2, self.targetPhi + dy));
+    });
     document.addEventListener('wheel', function(e) {
       self.targetDistance = Math.max(self.minDist, Math.min(self.maxDist, self.targetDistance + e.deltaY * 0.01));
     }, { passive: true });
@@ -44,6 +45,14 @@ GAME.camera = {
       self.camera.aspect = window.innerWidth / window.innerHeight;
       self.camera.updateProjectionMatrix();
     });
+  },
+
+  loadSettings: function() {
+    try {
+      var s = JSON.parse(localStorage.getItem('farmSettings') || '{}');
+      this.sensitivity = s.sensitivity || 10;
+      this.invertY = s.invertY || false;
+    } catch(e) {}
   },
 
   update: function(targetPos) {

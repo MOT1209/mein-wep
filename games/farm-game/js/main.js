@@ -14,17 +14,47 @@ GAME.game = {
     money: 200,
     day: 1,
     time: 6,
-    inventory: { wheat: 0, tomato: 0, carrot: 0 },
+    inventory: { wheat: 0, tomato: 0, carrot: 0, apple: 0 },
+    crafted: { bread: 0, ketchup: 0, juice: 0 },
     selectedTool: 0,
     plots: [],
-    timeScale: 60
+    timeScale: 60,
+    xp: 0,
+    level: 1
+  },
+
+  recipes: {
+    bread: { name: '🍞 Bread', icon: '🍞', inputs: { wheat: 2 }, sellPrice: 65, xpReward: 10 },
+    ketchup: { name: '🥫 Ketchup', icon: '🥫', inputs: { tomato: 2 }, sellPrice: 100, xpReward: 15 },
+    juice: { name: '🧃 Carrot Juice', icon: '🧃', inputs: { carrot: 2 }, sellPrice: 80, xpReward: 12 }
   },
 
   init: function() {
     var self = this;
     GAME.ui.init();
 
+    var loadingSteps = [
+      { at: 10, msg: 'Preparing world...' },
+      { at: 25, msg: 'Planting trees...' },
+      { at: 40, msg: 'Raising animals...' },
+      { at: 55, msg: 'Setting up weather...' },
+      { at: 70, msg: 'Tuning audio...' },
+      { at: 85, msg: 'Almost ready...' },
+    ];
+    var stepIdx = 0;
+    var loadInterval = setInterval(function() {
+      var p = 10 + stepIdx * 15;
+      GAME.ui.showLoading(p);
+      var txt = document.querySelector('.loader-text');
+      if (txt && stepIdx < loadingSteps.length) txt.textContent = loadingSteps[stepIdx].msg;
+      stepIdx++;
+      if (stepIdx > 6) clearInterval(loadInterval);
+    }, 80);
+
     this.scene = new THREE.Scene();
+    this.scene.background = new THREE.Color(0x87CEEB);
+    this.scene.fog = new THREE.Fog(0x87CEEB, 30, 60);
+
     var renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -42,11 +72,16 @@ GAME.game = {
     GAME.weather.init(this.scene);
     GAME.audio.init();
 
-    var self = this;
     this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
 
-    GAME.ui.hideLoading();
-    GAME.ui.showMenu();
+    var muteBtn = document.getElementById('mute-btn');
+    if (muteBtn && GAME.audio && GAME.audio.muted) muteBtn.textContent = '🔇';
+
+    setTimeout(function() {
+      GAME.ui.hideLoading();
+      GAME.ui.showMenu();
+    }, 800);
+
     this.clock = new THREE.Clock();
     this.isRunning = true;
 
@@ -81,15 +116,19 @@ GAME.game = {
     this.state = {
       health: 100, energy: 100, money: 200,
       day: 1, time: 6,
-      inventory: { wheat: 0, tomato: 0, carrot: 0 },
+      inventory: { wheat: 0, tomato: 0, carrot: 0, apple: 0 },
+      crafted: { bread: 0, ketchup: 0, juice: 0 },
       selectedTool: 0,
       plots: [],
-      timeScale: 60
+      timeScale: 60,
+      xp: 0,
+      level: 1
     };
     this.initPlots();
     this.selectTool(0);
     GAME.ui.hideMenu();
     GAME.ui.showNotification('🌾 Welcome to your new farm!', 'success');
+    GAME.audio.play('chime');
   },
 
   loadGame: function() {
@@ -102,7 +141,10 @@ GAME.game = {
         this.state.money = data.money || 200;
         this.state.day = data.day || 1;
         this.state.time = data.time || 6;
-        this.state.inventory = data.inventory || { wheat: 0, tomato: 0, carrot: 0 };
+        this.state.inventory = data.inventory || { wheat: 0, tomato: 0, carrot: 0, apple: 0 };
+        this.state.crafted = data.crafted || { bread: 0, ketchup: 0, juice: 0 };
+        this.state.xp = data.xp || 0;
+        this.state.level = data.level || 1;
         this.selectTool(this.state.selectedTool || 0);
         GAME.ui.hideMenu();
         GAME.ui.showNotification('🌾 Welcome back, farmer!', 'success');
@@ -124,7 +166,10 @@ GAME.game = {
         day: this.state.day,
         time: this.state.time,
         inventory: this.state.inventory,
-        selectedTool: this.state.selectedTool
+        crafted: this.state.crafted,
+        selectedTool: this.state.selectedTool,
+        xp: this.state.xp,
+        level: this.state.level
       };
       localStorage.setItem('farmGameSave', JSON.stringify(data));
       GAME.ui.showNotification('💾 Game saved!', 'success');
@@ -143,8 +188,9 @@ GAME.game = {
   togglePause: function() {
     this.isPaused = !this.isPaused;
     var el = document.getElementById('pause-menu');
-    if (el) {
-      el.classList.toggle('hidden', !this.isPaused);
+    if (el) el.classList.toggle('hidden', !this.isPaused);
+    if (this.isPaused && document.pointerLockElement) {
+      document.exitPointerLock();
     }
   },
 
@@ -154,6 +200,26 @@ GAME.game = {
     for (var i = 0; i < slots.length; i++) {
       slots[i].classList.toggle('active', i === index);
     }
+  },
+
+  addXP: function(amount) {
+    this.state.xp += amount;
+    var needed = this.state.level * 100;
+    if (this.state.xp >= needed) {
+      this.state.xp -= needed;
+      this.state.level++;
+      GAME.ui.showNotification('⭐ Level up! You\'re now level ' + this.state.level + '!', 'success');
+      GAME.audio.play('chime');
+    }
+  },
+
+  getEnergyCost: function(base) {
+    var reduction = Math.min(base - 1, Math.floor((this.state.level - 1) / 2));
+    return Math.max(1, base - reduction);
+  },
+
+  getSellPriceBonus: function() {
+    return 1 + (this.state.level - 1) * 0.03;
   },
 
   interact: function() {
@@ -205,6 +271,7 @@ GAME.game = {
     else if (tool === 3) { this.plantClosest('tomato'); GAME.audio.play('step'); }
     else if (tool === 4) { this.plantClosest('carrot'); GAME.audio.play('step'); }
     else if (tool === 5) { this.harvestClosest(); GAME.audio.play('harvest'); }
+    else if (tool === 6) { this.plantClosest('apple'); GAME.audio.play('step'); }
   },
 
   findClosestPlot: function(state) {
@@ -226,9 +293,10 @@ GAME.game = {
   plowClosest: function() {
     var idx = this.findClosestPlot('empty');
     if (idx === null) { GAME.ui.showNotification('❌ No empty plots nearby', 'error'); return; }
-    if (this.state.energy < 5) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
+    var cost = this.getEnergyCost(5);
+    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
     this.state.plots[idx].state = 'plowed';
-    this.state.energy -= 5;
+    this.state.energy -= cost;
     var plot = this.state.plots[idx];
     var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
     var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
@@ -236,63 +304,148 @@ GAME.game = {
     mesh.receiveShadow = true;
     this.scene.add(mesh);
     plot.mesh = mesh;
-    GAME.ui.showNotification('✅ Plowed!', 'success');
+    this.addXP(5);
+    GAME.ui.showNotification('✅ Plowed! +5 XP', 'success');
   },
 
   waterClosest: function() {
     var idx = this.findClosestPlot('planted');
     if (idx === null) { GAME.ui.showNotification('❌ No planted crops nearby', 'error'); return; }
-    if (this.state.energy < 3) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
+    var cost = this.getEnergyCost(3);
+    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
     this.state.plots[idx].watered = true;
-    this.state.energy -= 3;
-    GAME.ui.showNotification('💧 Watered crops!', 'success');
+    this.state.energy -= cost;
+    this.addXP(3);
+    GAME.ui.showNotification('💧 Watered crops! +3 XP', 'success');
   },
 
   plantClosest: function(crop) {
     var idx = this.findClosestPlot('plowed');
     if (idx === null) { GAME.ui.showNotification('❌ No plowed plots nearby', 'error'); return; }
-    var price = { wheat: 10, tomato: 20, carrot: 15 };
-    if (this.state.money < price[crop]) { GAME.ui.showNotification('❌ Not enough money! $' + price[crop], 'error'); return; }
-    if (this.state.energy < 8) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
-    this.state.money -= price[crop];
-    this.state.energy -= 8;
+    var prices = { wheat: 10, tomato: 20, carrot: 15, apple: 50 };
+    var energyBase = { wheat: 8, tomato: 8, carrot: 8, apple: 12 };
+    var cost = this.getEnergyCost(energyBase[crop] || 8);
+    if (!prices[crop]) return;
+    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
+    if ((this.state.inventory[crop] || 0) > 0) {
+      this.state.inventory[crop]--;
+    } else if (this.state.money >= prices[crop]) {
+      this.state.money -= prices[crop];
+    } else {
+      GAME.ui.showNotification('❌ Need $' + prices[crop] + ' or a seed in inventory!', 'error');
+      return;
+    }
+    this.state.energy -= cost;
     this.state.plots[idx].state = 'planted';
     this.state.plots[idx].crop = crop;
     this.state.plots[idx].growth = 0;
     this.state.plots[idx].watered = false;
     var plot = this.state.plots[idx];
-    var cropMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-    var plant = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, 0.3), cropMat);
-    plant.position.set(plot.x, 0.2, plot.z);
-    this.scene.add(plant);
-    plot.mesh = plant;
-    GAME.ui.showNotification('🌱 Planted ' + crop + '!', 'success');
+    var isTree = crop === 'apple';
+
+    if (isTree) {
+      var trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
+      var leafMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
+      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.5), trunkMat);
+      trunk.position.set(plot.x, 0.3, plot.z);
+      this.scene.add(trunk);
+      var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 6), leafMat);
+      leaf.position.set(plot.x, 0.8, plot.z);
+      leaf.scale.y = 0.7;
+      this.scene.add(leaf);
+      var group = new THREE.Group();
+      group.add(trunk);
+      group.add(leaf);
+      plot.mesh = group;
+    } else {
+      var cropMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+      var plant = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, 0.3), cropMat);
+      plant.position.set(plot.x, 0.2, plot.z);
+      this.scene.add(plant);
+      plot.mesh = plant;
+    }
+    this.addXP(8);
+    GAME.ui.showNotification('🌱 Planted ' + crop + '! +8 XP', 'success');
   },
 
   harvestClosest: function() {
     var idx = this.findClosestPlot('ready');
     if (idx === null) { GAME.ui.showNotification('❌ No crops ready to harvest', 'error'); return; }
-    if (this.state.energy < 10) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
+    var cost = this.getEnergyCost(10);
+    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
     var plot = this.state.plots[idx];
-    var prices = { wheat: 25, tomato: 40, carrot: 35 };
-    this.state.money += prices[plot.crop] || 25;
-    this.state.energy -= 10;
-    if (plot.mesh) { this.scene.remove(plot.mesh); }
-    plot.state = 'plowed';
-    plot.crop = null;
-    plot.growth = 0;
-    plot.watered = false;
-    var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
-    var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
-    mesh.position.set(plot.x, 0.08, plot.z);
-    mesh.receiveShadow = true;
-    this.scene.add(mesh);
-    plot.mesh = mesh;
-    GAME.ui.showNotification('💰 Harvested! +$' + prices[plot.crop], 'success');
+    var cropType = plot.crop;
+    var prices = { wheat: 25, tomato: 40, carrot: 35, apple: 80 };
+    var bonus = this.getSellPriceBonus();
+    var salePrice = Math.floor((prices[cropType] || 25) * bonus);
+    this.state.money += salePrice;
+    this.state.energy -= cost;
+
+    if (cropType === 'apple') {
+      if (plot.mesh) {
+        var kids = plot.mesh.children || [];
+        for (var i = 0; i < kids.length; i++) this.scene.remove(kids[i]);
+      }
+      this.scene.remove(plot.mesh);
+      var trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
+      var leafMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
+      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.5), trunkMat);
+      trunk.position.set(plot.x, 0.3, plot.z);
+      this.scene.add(trunk);
+      var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 6), leafMat);
+      leaf.position.set(plot.x, 0.8, plot.z);
+      leaf.scale.y = 0.7;
+      this.scene.add(leaf);
+      var group = new THREE.Group();
+      group.add(trunk);
+      group.add(leaf);
+      plot.mesh = group;
+      plot.state = 'planted';
+      plot.growth = 0;
+      plot.watered = false;
+      GAME.ui.showNotification('🍎 Apple harvested! Tree regrowing... +$' + salePrice, 'success');
+    } else {
+      if (plot.mesh) { this.scene.remove(plot.mesh); }
+      var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
+      var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
+      mesh.position.set(plot.x, 0.08, plot.z);
+      mesh.receiveShadow = true;
+      this.scene.add(mesh);
+      plot.mesh = mesh;
+      plot.state = 'plowed';
+      plot.crop = null;
+      plot.growth = 0;
+      plot.watered = false;
+      this.state.inventory[cropType] = (this.state.inventory[cropType] || 0) + 1;
+      GAME.ui.showNotification('💰 Harvested ' + cropType + '! +$' + salePrice, 'success');
+    }
+    this.addXP(15);
+  },
+
+  craftItem: function(recipeId) {
+    var recipe = this.recipes[recipeId];
+    if (!recipe) return;
+    for (var ingredient in recipe.inputs) {
+      var needed = recipe.inputs[ingredient];
+      var have = this.state.inventory[ingredient] || 0;
+      if (have < needed) {
+        GAME.ui.showNotification('❌ Need ' + needed + ' ' + ingredient + ' for ' + recipe.name, 'error');
+        return;
+      }
+    }
+    for (var ingredient in recipe.inputs) {
+      this.state.inventory[ingredient] -= recipe.inputs[ingredient];
+    }
+    this.state.crafted[recipeId] = (this.state.crafted[recipeId] || 0) + 1;
+    this.addXP(recipe.xpReward);
+    GAME.ui.showNotification('🔨 Crafted ' + recipe.name + '! +' + recipe.xpReward + ' XP', 'success');
+    GAME.audio.play('chime');
+    GAME.ui.refreshInventory();
   },
 
   buySeed: function(type) {
-    var prices = { wheat: 10, tomato: 20, carrot: 15 };
+    var prices = { wheat: 10, tomato: 20, carrot: 15, apple: 50 };
+    if (!prices[type]) return;
     if (this.state.money < prices[type]) {
       GAME.ui.showNotification('❌ Not enough money!', 'error');
       return;
@@ -303,15 +456,33 @@ GAME.game = {
   },
 
   sellItem: function(type) {
+    var producePrices = { wheat: 25, tomato: 40, carrot: 35, apple: 80 };
+    var craftedPrices = { bread: 65, ketchup: 100, juice: 80 };
+
+    if (craftedPrices[type] !== undefined) {
+      var amt = this.state.crafted[type] || 0;
+      if (amt <= 0) {
+        GAME.ui.showNotification('❌ No ' + type + ' to sell!', 'error');
+        return;
+      }
+      var bonus = this.getSellPriceBonus();
+      var price = Math.floor(craftedPrices[type] * bonus);
+      this.state.money += price * amt;
+      this.state.crafted[type] = 0;
+      GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
+      return;
+    }
+
     if (!this.state.inventory[type] || this.state.inventory[type] <= 0) {
       GAME.ui.showNotification('❌ No ' + type + ' to sell!', 'error');
       return;
     }
-    var prices = { wheat: 25, tomato: 40, carrot: 35 };
+    var bonus = this.getSellPriceBonus();
+    var price = Math.floor((producePrices[type] || 25) * bonus);
     var amt = this.state.inventory[type];
-    this.state.money += prices[type] * amt;
+    this.state.money += price * amt;
     this.state.inventory[type] = 0;
-    GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (prices[type] * amt), 'success');
+    GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
   },
 
   sleep: function() {
@@ -319,12 +490,19 @@ GAME.game = {
     this.state.energy = 100;
     this.state.day++;
     this.state.time = 6;
-    GAME.ui.showNotification('🌙 Slept! Day ' + this.state.day + ' ☀️', 'success');
+    this.addXP(5);
+    GAME.ui.showNotification('🌙 Slept! Day ' + this.state.day + ' ☀️ +5 XP', 'success');
   },
 
   update: function(delta) {
     if (this.isPaused || this.isShopOpen) return;
     var state = this.state;
+
+    if (state.health <= 0) {
+      this.handleDeath();
+      return;
+    }
+
     state.time += delta * 0.01 * state.timeScale;
     if (state.time >= 24) {
       state.time -= 24;
@@ -338,11 +516,13 @@ GAME.game = {
       var plot = state.plots[i];
       if (plot.state === 'planted') {
         var growthRate = plot.watered ? 1.5 : 0.5;
-        plot.growth += delta * growthRate * 0.02;
+        var levelBonus = 1 + (state.level - 1) * 0.02;
+        var treeMultiplier = plot.crop === 'apple' ? 0.33 : 1;
+        plot.growth += delta * growthRate * 0.02 * levelBonus * treeMultiplier;
         if (plot.growth >= 1) {
           plot.state = 'ready';
           plot.growth = 1;
-          if (plot.mesh) {
+          if (plot.mesh && plot.crop !== 'apple') {
             this.scene.remove(plot.mesh);
             var cropColors = { wheat: 0xdaa520, tomato: 0xff4444, carrot: 0xff8c00 };
             var color = cropColors[plot.crop] || 0xdaa520;
@@ -351,9 +531,8 @@ GAME.game = {
             plant.position.set(plot.x, 0.4, plot.z);
             this.scene.add(plant);
             plot.mesh = plant;
-            GAME.ui.showNotification('🌾 Crops ready to harvest!', 'success');
           }
-        } else if (plot.mesh && plot.growth > 0.3) {
+        } else if (plot.mesh && plot.growth > 0.3 && plot.crop !== 'apple') {
           var s = 1 + plot.growth * 1.5;
           plot.mesh.scale.set(1, s, 1);
         }
@@ -371,6 +550,22 @@ GAME.game = {
     if (GAME.weather) GAME.weather.update(delta);
     this.updateInteractionHints();
     GAME.ui.updateHUD(state);
+  },
+
+  handleDeath: function() {
+    this.isPaused = true;
+    GAME.ui.showNotification('💀 You passed out from exhaustion!', 'error');
+    var self = this;
+    setTimeout(function() {
+      self.state.health = 50;
+      self.state.energy = 50;
+      self.state.money = Math.max(0, self.state.money - 50);
+      self.state.time = 6;
+      self.state.xp = Math.max(0, self.state.xp - 20);
+      self.isPaused = false;
+      GAME.player.mesh.position.set(0, 0, 15);
+      GAME.ui.showNotification('💀 Lost $50 and 20 XP. Be more careful!', 'error');
+    }, 2000);
   },
 
   updateInteractionHints: function() {

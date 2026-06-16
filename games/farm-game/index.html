@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#4a7c3f">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#2d5a27">
   <meta name="description" content="3D Farm Game — Grow crops, raise animals, build your dream farm.">
   <link rel="manifest" href="manifest.json">
   <link rel="canonical" href="https://rashid-wep.vercel.app/games/farm-game/">
@@ -12,96 +12,236 @@
   <meta property="og:image" content="../../images/logo.png">
   <title>Farm Game 3D</title>
   <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-  <div id="blocker"></div>
-  <div id="loading-screen">
-    <div class="loader-icon">🌾</div>
-    <div class="loader-bar"><div class="loader-fill"></div></div>
-    <div class="loader-text">Loading Farm World...</div>
-  </div>
-  <div id="main-menu">
-    <div class="menu-title">
-      <span class="title-icon">🌾</span>
-      <h1>Farm World</h1>
-      <p class="title-sub">3D Farming Simulator</p>
+  <!-- Loading Screen -->
+  <div id="loading-screen" role="status" aria-label="Loading">
+    <div class="loader-inner">
+      <div class="loader-icon">🌾</div>
+      <div class="loader-bar"><div class="loader-fill"></div></div>
+      <div class="loader-text">Planting seeds...</div>
     </div>
-    <div class="menu-buttons">
-      <button class="menu-btn primary" onclick="startGame()">NEW GAME</button>
-      <button class="menu-btn" onclick="continueGame()">CONTINUE</button>
-    </div>
-    <p class="menu-credits">v2.0 — Dev by Rashid</p>
   </div>
-  <div id="hud">
+
+  <!-- Main Menu -->
+  <div id="main-menu" role="dialog" aria-label="Main menu">
+    <div class="menu-bg-pattern"></div>
+    <div class="menu-content">
+      <div class="menu-emblem">🌾</div>
+      <h1 class="menu-title">Farm World</h1>
+      <p class="menu-subtitle">3D Farming Simulator</p>
+      <div class="menu-divider"></div>
+      <div class="menu-buttons">
+        <button class="menu-btn primary" onclick="startGame()" aria-label="Start new game">New Game</button>
+        <button class="menu-btn" onclick="continueGame()" aria-label="Continue saved game">Continue</button>
+      </div>
+      <p class="menu-version">v2.0 — Made with care</p>
+    </div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" aria-hidden="true">
     <div class="hud-top">
       <div class="hud-stats">
-        <div class="stat"><span class="stat-icon">❤️</span><span id="health-val">100</span></div>
-        <div class="stat"><span class="stat-icon">⚡</span><span id="energy-val">100</span></div>
-        <div class="stat"><span class="stat-icon">💰</span><span id="money-val">200</span></div>
+        <div class="stat health-stat">
+          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ff4757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill health-fill" id="health-fill" style="width:100%"></div></div>
+          <span class="stat-val" id="health-val">100</span>
+        </div>
+        <div class="stat energy-stat">
+          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#faca15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          <div class="stat-bar-wrap"><div class="stat-bar-fill energy-fill" id="energy-fill" style="width:100%"></div></div>
+          <span class="stat-val" id="energy-val">100</span>
+        </div>
+        <div class="stat money-stat">
+          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#faca15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
+          <span class="stat-val" id="money-val">200</span>
+        </div>
+        <div class="stat level-stat">
+          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7ec850" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          <span class="stat-val" id="level-val">Lv.1</span>
+        </div>
       </div>
       <div class="hud-time">
         <span id="day-val">Day 1</span>
-        <span id="time-val">☀️ 06:00</span>
+        <span id="time-val">☀️ 06:00 AM</span>
       </div>
     </div>
+
     <div class="hud-bottom">
-      <div class="toolbar" id="toolbar">
-        <div class="tool-slot active" data-tool="0"><span class="tool-key">1</span><span class="tool-icon">🚜</span><span class="tool-label">Plow</span></div>
-        <div class="tool-slot" data-tool="1"><span class="tool-key">2</span><span class="tool-icon">💧</span><span class="tool-label">Water</span></div>
-        <div class="tool-slot" data-tool="2"><span class="tool-key">3</span><span class="tool-icon">🌾</span><span class="tool-label">Wheat</span></div>
-        <div class="tool-slot" data-tool="3"><span class="tool-key">4</span><span class="tool-icon">🍅</span><span class="tool-label">Tomato</span></div>
-        <div class="tool-slot" data-tool="4"><span class="tool-key">5</span><span class="tool-icon">🥕</span><span class="tool-label">Carrot</span></div>
-        <div class="tool-slot" data-tool="5"><span class="tool-key">6</span><span class="tool-icon">🧺</span><span class="tool-label">Harvest</span></div>
+      <div class="toolbar" id="toolbar" role="toolbar" aria-label="Tools">
+        <button class="tool-slot active" data-tool="0" aria-label="Plow tool" tabindex="0"><span class="tool-key">1</span><span class="tool-icon">🚜</span><span class="tool-label">Plow</span></button>
+        <button class="tool-slot" data-tool="1" aria-label="Water tool"><span class="tool-key">2</span><span class="tool-icon">💧</span><span class="tool-label">Water</span></button>
+        <button class="tool-slot" data-tool="2" aria-label="Plant wheat"><span class="tool-key">3</span><span class="tool-icon">🌾</span><span class="tool-label">Wheat</span></button>
+        <button class="tool-slot" data-tool="3" aria-label="Plant tomato"><span class="tool-key">4</span><span class="tool-icon">🍅</span><span class="tool-label">Tomato</span></button>
+        <button class="tool-slot" data-tool="4" aria-label="Plant carrot"><span class="tool-key">5</span><span class="tool-icon">🥕</span><span class="tool-label">Carrot</span></button>
+        <button class="tool-slot" data-tool="5" aria-label="Harvest tool"><span class="tool-key">6</span><span class="tool-icon">🧺</span><span class="tool-label">Harvest</span></button>
+        <button class="tool-slot" data-tool="6" aria-label="Plant apple tree"><span class="tool-key">7</span><span class="tool-icon">🌳</span><span class="tool-label">Apple</span></button>
       </div>
-      <div class="hud-controls-hint">[WASD] Move &nbsp;|&nbsp; [Click+Drag] Look &nbsp;|&nbsp; [E] Interact &nbsp;|&nbsp; [F] Action &nbsp;|&nbsp; [Esc] Menu</div>
+      <div class="hud-controls-hint">[WASD] Move &nbsp;|&nbsp; [Mouse] Look &nbsp;|&nbsp; [E] Interact &nbsp;|&nbsp; [F] Action &nbsp;|&nbsp; [I] Inventory &nbsp;|&nbsp; [Esc] Menu</div>
     </div>
-    <div id="interaction-hint" class="interaction-hint hidden"></div>
+
+    <div id="interaction-hint" class="interaction-hint hidden">Press [E] to interact</div>
   </div>
-  <div id="shop-ui" class="modal-overlay hidden">
+
+  <!-- Shop -->
+  <div id="shop-ui" class="modal-overlay hidden" role="dialog" aria-label="Shop" aria-modal="true">
     <div class="modal-box">
-      <div class="modal-header"><h2>🏪 General Store</h2><button class="modal-close" onclick="toggleShop()">✕</button></div>
+      <div class="modal-header">
+        <h2><span class="modal-icon">🏪</span> General Store</h2>
+        <button class="modal-close" onclick="toggleShop()" aria-label="Close shop">✕</button>
+      </div>
       <div class="modal-body">
         <div class="shop-section">
-          <h3>Seeds</h3>
-          <div class="shop-item"><span>🌾 Wheat Seed</span><span>$10</span><button onclick="buySeed('wheat')">Buy</button></div>
-          <div class="shop-item"><span>🍅 Tomato Seed</span><span>$20</span><button onclick="buySeed('tomato')">Buy</button></div>
-          <div class="shop-item"><span>🥕 Carrot Seed</span><span>$15</span><button onclick="buySeed('carrot')">Buy</button></div>
+          <h3>🌱 Seeds</h3>
+          <div class="shop-item"><span class="item-name">🌾 Wheat Seed</span><span class="item-price">$10</span><button class="shop-buy-btn" onclick="buySeed('wheat')">Buy</button></div>
+          <div class="shop-item"><span class="item-name">🍅 Tomato Seed</span><span class="item-price">$20</span><button class="shop-buy-btn" onclick="buySeed('tomato')">Buy</button></div>
+          <div class="shop-item"><span class="item-name">🥕 Carrot Seed</span><span class="item-price">$15</span><button class="shop-buy-btn" onclick="buySeed('carrot')">Buy</button></div>
+          <div class="shop-item"><span class="item-name">🌳 Apple Sapling</span><span class="item-price">$50</span><button class="shop-buy-btn" onclick="buySeed('apple')">Buy</button></div>
         </div>
         <div class="shop-section">
           <h3>🐑 Animals</h3>
-          <div class="shop-item"><span>🐔 Chicken</span><span>$50</span><button onclick="buyAnimal('chicken')">Buy</button></div>
-          <div class="shop-item"><span>🐄 Cow</span><span>$200</span><button onclick="buyAnimal('cow')">Buy</button></div>
-          <div class="shop-item"><span>🐑 Sheep</span><span>$150</span><button onclick="buyAnimal('sheep')">Buy</button></div>
+          <div class="shop-item"><span class="item-name">🐔 Chicken</span><span class="item-price">$50</span><button class="shop-buy-btn" onclick="buyAnimal('chicken')">Buy</button></div>
+          <div class="shop-item"><span class="item-name">🐄 Cow</span><span class="item-price">$200</span><button class="shop-buy-btn" onclick="buyAnimal('cow')">Buy</button></div>
+          <div class="shop-item"><span class="item-name">🐑 Sheep</span><span class="item-price">$150</span><button class="shop-buy-btn" onclick="buyAnimal('sheep')">Buy</button></div>
         </div>
         <div class="shop-section">
-          <h3>Sell</h3>
-          <div class="shop-item"><span>🌾 Wheat</span><span>$25</span><button onclick="sellItem('wheat')">Sell All</button></div>
-          <div class="shop-item"><span>🍅 Tomato</span><span>$40</span><button onclick="sellItem('tomato')">Sell All</button></div>
-          <div class="shop-item"><span>🥕 Carrot</span><span>$35</span><button onclick="sellItem('carrot')">Sell All</button></div>
+          <h3>💰 Sell Produce</h3>
+          <div class="shop-item"><span class="item-name">🌾 Wheat</span><span class="item-price">$25 / ea</span><button class="shop-sell-btn" onclick="sellItem('wheat')">Sell All</button></div>
+          <div class="shop-item"><span class="item-name">🍅 Tomato</span><span class="item-price">$40 / ea</span><button class="shop-sell-btn" onclick="sellItem('tomato')">Sell All</button></div>
+          <div class="shop-item"><span class="item-name">🥕 Carrot</span><span class="item-price">$35 / ea</span><button class="shop-sell-btn" onclick="sellItem('carrot')">Sell All</button></div>
+        </div>
+        <div class="shop-section">
+          <h3>🍳 Crafted Goods</h3>
+          <div class="shop-item"><span class="item-name">🍞 Bread</span><span class="item-price" id="bread-price">$65 / ea</span><button class="shop-sell-btn" onclick="sellItem('bread')">Sell All</button></div>
+          <div class="shop-item"><span class="item-name">🥫 Ketchup</span><span class="item-price" id="ketchup-price">$100 / ea</span><button class="shop-sell-btn" onclick="sellItem('ketchup')">Sell All</button></div>
+          <div class="shop-item"><span class="item-name">🧃 Carrot Juice</span><span class="item-price" id="juice-price">$80 / ea</span><button class="shop-sell-btn" onclick="sellItem('juice')">Sell All</button></div>
         </div>
       </div>
     </div>
   </div>
-  <div id="pause-menu" class="modal-overlay hidden">
-    <div class="modal-box">
-      <div class="modal-header"><h2>⏸️ Paused</h2></div>
+
+  <!-- Inventory -->
+  <div id="inventory-ui" class="modal-overlay hidden" role="dialog" aria-label="Inventory" aria-modal="true">
+    <div class="modal-box inv-box">
+      <div class="modal-header">
+        <h2><span class="modal-icon">🎒</span> Inventory</h2>
+        <button class="modal-close" onclick="toggleInventory()" aria-label="Close inventory">✕</button>
+      </div>
+      <div class="inv-tabs">
+        <button class="inv-tab active" onclick="switchInvTab('items')" data-tab="items">📦 Items</button>
+        <button class="inv-tab" onclick="switchInvTab('crafting')" data-tab="crafting">🔨 Craft</button>
+      </div>
       <div class="modal-body">
-        <button class="menu-btn primary" onclick="resumeGame()">Resume</button>
-        <button class="menu-btn" onclick="saveAndQuit()">Save &amp; Quit</button>
+        <!-- Items Tab -->
+        <div class="inv-panel active" id="inv-items">
+          <div class="inv-section">
+            <h3>🌾 Crops</h3>
+            <div class="inv-row"><span class="inv-icon">🌾</span><span class="inv-name">Wheat</span><span class="inv-count" id="inv-wheat">0</span></div>
+            <div class="inv-row"><span class="inv-icon">🍅</span><span class="inv-name">Tomato</span><span class="inv-count" id="inv-tomato">0</span></div>
+            <div class="inv-row"><span class="inv-icon">🥕</span><span class="inv-name">Carrot</span><span class="inv-count" id="inv-carrot">0</span></div>
+            <div class="inv-row"><span class="inv-icon">🍎</span><span class="inv-name">Apple</span><span class="inv-count" id="inv-apple">0</span></div>
+          </div>
+          <div class="inv-section">
+            <h3>🍳 Crafted</h3>
+            <div class="inv-row"><span class="inv-icon">🍞</span><span class="inv-name">Bread</span><span class="inv-count" id="inv-bread">0</span></div>
+            <div class="inv-row"><span class="inv-icon">🥫</span><span class="inv-name">Ketchup</span><span class="inv-count" id="inv-ketchup">0</span></div>
+            <div class="inv-row"><span class="inv-icon">🧃</span><span class="inv-name">Carrot Juice</span><span class="inv-count" id="inv-juice">0</span></div>
+          </div>
+        </div>
+        <!-- Crafting Tab -->
+        <div class="inv-panel" id="inv-crafting">
+          <div class="craft-recipe" data-recipe="bread">
+            <div class="craft-info">
+              <span class="craft-icon">🍞</span>
+              <span class="craft-name">Bread</span>
+              <span class="craft-cost">2 🌾</span>
+              <span class="craft-result">→ Sell: $65</span>
+            </div>
+            <button class="craft-btn" onclick="craftItem('bread')">Craft</button>
+          </div>
+          <div class="craft-recipe" data-recipe="ketchup">
+            <div class="craft-info">
+              <span class="craft-icon">🥫</span>
+              <span class="craft-name">Ketchup</span>
+              <span class="craft-cost">2 🍅</span>
+              <span class="craft-result">→ Sell: $100</span>
+            </div>
+            <button class="craft-btn" onclick="craftItem('ketchup')">Craft</button>
+          </div>
+          <div class="craft-recipe" data-recipe="juice">
+            <div class="craft-info">
+              <span class="craft-icon">🧃</span>
+              <span class="craft-name">Carrot Juice</span>
+              <span class="craft-cost">2 🥕</span>
+              <span class="craft-result">→ Sell: $80</span>
+            </div>
+            <button class="craft-btn" onclick="craftItem('juice')">Craft</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-  <div id="notif" class="notification hidden"></div>
+
+  <!-- Pause Menu -->
+  <div id="pause-menu" class="modal-overlay hidden" role="dialog" aria-label="Pause menu" aria-modal="true">
+    <div class="modal-box pause-box">
+      <div class="modal-header"><h2>⏸️ Paused</h2></div>
+      <div class="modal-body pause-body">
+        <button class="menu-btn primary pause-btn" onclick="resumeGame()">▶ Resume</button>
+        <button class="menu-btn pause-btn" onclick="openSettings()">⚙ Settings</button>
+        <button class="menu-btn pause-btn pause-save" onclick="saveAndQuit()">💾 Save &amp; Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div id="settings-panel" class="modal-overlay hidden" role="dialog" aria-label="Settings" aria-modal="true">
+    <div class="modal-box settings-box">
+      <div class="modal-header">
+        <h2>⚙ Settings</h2>
+        <button class="modal-close" onclick="closeSettings()" aria-label="Close settings">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-group">
+          <h3>🔊 Audio</h3>
+          <div class="setting-row"><label for="vol-master">Master Volume</label><input type="range" id="vol-master" min="0" max="100" value="50" class="setting-slider"></div>
+          <div class="setting-row"><label for="vol-sfx">SFX Volume</label><input type="range" id="vol-sfx" min="0" max="100" value="80" class="setting-slider"></div>
+        </div>
+        <div class="settings-group">
+          <h3>🎮 Controls</h3>
+          <div class="setting-row"><label for="sens-slider">Camera Sensitivity</label><input type="range" id="sens-slider" min="1" max="20" value="10" class="setting-slider"></div>
+          <div class="setting-row"><label for="invert-y">Invert Y</label><label class="toggle"><input type="checkbox" id="invert-y"><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><label for="pointer-lock">Pointer Lock</label><label class="toggle"><input type="checkbox" id="pointer-lock" checked><span class="toggle-slider"></span></label></div>
+        </div>
+        <div class="settings-group">
+          <h3>🎬 Graphics</h3>
+          <div class="setting-row"><label for="render-dist">Render Distance</label><input type="range" id="render-dist" min="4" max="16" value="8" class="setting-slider"></div>
+          <div class="setting-row"><label for="shadows">Shadows</label><label class="toggle"><input type="checkbox" id="shadows" checked><span class="toggle-slider"></span></label></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div id="notif" class="notification hidden" role="alert" aria-live="polite"></div>
+
+  <!-- Crosshair -->
   <div id="crosshair"><div class="crosshair-dot"></div></div>
-  <button id="mute-btn" onclick="toggleMute()">🔊</button>
-  <div id="touch-controls" class="touch-only">
+
+  <!-- Mute Button -->
+  <button id="mute-btn" onclick="toggleMute()" aria-label="Toggle mute">🔊</button>
+
+  <!-- Touch Controls -->
+  <div id="touch-controls" class="touch-only" aria-hidden="true">
     <div class="touch-joystick" id="touch-joystick">
       <div class="joystick-knob" id="joystick-knob"></div>
     </div>
     <div class="touch-buttons">
-      <button class="touch-btn" id="touch-interact" ontouchstart="touchInteract()">E</button>
-      <button class="touch-btn" id="touch-action" ontouchstart="touchAction()">F</button>
+      <button class="touch-btn" id="touch-interact" ontouchstart="touchInteract()" aria-label="Interact">E</button>
+      <button class="touch-btn" id="touch-action" ontouchstart="touchAction()" aria-label="Action">F</button>
     </div>
   </div>
 

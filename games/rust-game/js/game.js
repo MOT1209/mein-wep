@@ -411,6 +411,8 @@ try {
     ground.receiveShadow = true;
     scene.add(ground);
 
+    let previewMesh = null;
+    const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
     const interactables = [];
     const collisionObjects = [];
     const builtStructures = [];
@@ -1451,20 +1453,6 @@ try {
         } catch (e) {
             console.error("Failed to load save:", e);
         }
-    }
-
-    function showNotification(msg, color = '#4caf50') {
-        let note = document.getElementById('game-notification');
-        if (!note) {
-            note = document.createElement('div');
-            note.id = 'game-notification';
-            note.style.cssText = "position:fixed; top:20px; right:20px; background:rgba(0,0,0,0.7); color:#4caf50; padding:10px 20px; border-radius:5px; font-weight:bold; z-index:1000; display:none;";
-            document.body.appendChild(note);
-        }
-        note.textContent = msg;
-        note.style.color = color;
-        note.style.display = 'block';
-        setTimeout(() => note.style.display = 'none', 2000);
     }
 
     function updateBuildingPrivilegeUI() {
