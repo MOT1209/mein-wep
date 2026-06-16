@@ -2069,6 +2069,14 @@ body.admin-section-editing .vault-item { position: relative; }
     border-radius: 999px !important;
 }
 
+.apk-tag {
+    background: linear-gradient(135deg, #34d399, #10b981) !important;
+    color: white !important;
+    font-size: 0.7rem !important;
+    padding: 3px 8px !important;
+    border-radius: 999px !important;
+}
+
 .pwa-install-btn,
 .install-btn {
     background: linear-gradient(135deg, var(--accent), var(--accent-dark)) !important;

@@ -2,14 +2,14 @@ export const translations = {
     ar: {
         viewProject: 'عرض المشروع',
         sourceCode: 'الكود المصدري',
-        install: 'تثبيت',
-        installTitle: 'تثبيت كتطبيق'
+        install: 'تثبيت APK',
+        installTitle: 'تحميل نسخة Android'
     },
     en: {
         viewProject: 'View Project',
         sourceCode: 'Source Code',
-        install: 'Install',
-        installTitle: 'Install as app'
+        install: 'Install APK',
+        installTitle: 'Download Android APK'
     }
 };
 

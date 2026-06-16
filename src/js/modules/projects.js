@@ -18,6 +18,16 @@ const projectScreenshots = {
     'Rashid AI': '../images/screenshots/rashid-ai.svg'
 };
 
+// Projects that have Android APK builds
+const apkProjects = {
+    'KingCraft': { url: '/apks/kingcraft-game-v0.6.0.apk', version: '0.6.0' },
+    'Rust Construction': { url: '/apks/rust-game-v1.0.0.apk', version: '1.0.0' },
+    'Farm Empire': { url: '/apks/farm-game-v2.0.0.apk', version: '2.0.0' },
+    'Quran Pro': { url: '/apks/quran-app-v1.0.0.apk', version: '1.0.0' },
+    'Calculator App': { url: '/apks/calculator-app-v1.0.0.apk', version: '1.0.0' },
+    'Quiz Master': { url: '/apks/quiz-app-v1.0.0.apk', version: '1.0.0' }
+};
+
 const fallbackProjects = [
     // ── GitHub Repositories (MOT1209) ──
     { title: 'Alking', category: 'App', description: 'Full-stack community-driven application built with Next.js 15 and Supabase. A free-to-use platform to connect and help others.', link: 'https://github.com/MOT1209/Alking', github_link: 'https://github.com/MOT1209/Alking', image_url: '../images/screenshots/default.svg', technologies: ['Next.js', 'Supabase', 'Full-Stack'] },
@@ -216,8 +226,7 @@ function createProjectCard(project, lang) {
     const iconClass = safeIconClass(project.image_url);
     const title = escapeHTML(project.title || 'Untitled Project');
     const description = escapeHTML(project.description || '');
-    const pwaProjects = ['quran-app', 'farm-game', 'rust-game', 'calculator-vault', 'quiz-app', 'kingcraft-game'];
-    const isPWA = pwaProjects.some(slug => projectLink.includes(slug));
+    const hasAPK = apkProjects[title];
     const visualContent = project.image_url && !project.image_url.startsWith('fas ')
         ? `<img src="${safeUrl(project.image_url, '')}" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`
         : `<img src="../images/screenshots/default.svg" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`;
@@ -229,11 +238,12 @@ function createProjectCard(project, lang) {
             ? '<div class="project-status-badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;border-color:rgba(251,191,36,0.3);">\u25CF Live Demo</div>'
             : '<div class="project-status-badge" style="background:rgba(52,211,153,0.15);color:#34d399;border-color:rgba(52,211,153,0.3);">\u25CF Active</div>';
     const tagsHTML = techArray.filter(Boolean).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
-    const installBtn = isPWA ? `
-        <button class="btn btn-secondary install-btn" data-project="${projectLink}" style="padding: 10px 15px; font-size: 0.85rem; margin-right: 10px;" title="${escapeHTML(labels.installTitle)}" aria-label="${escapeHTML(labels.installTitle)}">
-            <i class="fas fa-mobile-alt"></i> <span class="btn-text">${escapeHTML(labels.install)}</span>
-        </button>
-    ` : '';
+    const apkTag = hasAPK ? '<span class="tag apk-tag"><i class="fas fa-android"></i> APK</span>' : '';
+    const installBtn = hasAPK
+        ? `<a href="${escapeHTML(apkProjects[title].url)}" download class="btn btn-secondary" style="padding: 10px 15px; font-size: 0.85rem; margin-right: 10px;" title="${escapeHTML(labels.installTitle)}" aria-label="${escapeHTML(labels.installTitle)}">
+            <i class="fab fa-android"></i> <span class="btn-text">${escapeHTML(labels.install)}</span>
+        </a>`
+        : '';
 
     return `
         <article class="project-card reveal" data-category="${categoryKey}">
@@ -241,7 +251,7 @@ function createProjectCard(project, lang) {
             <div class="project-info">
                 <h3>${title}</h3>
                 <p>${description}</p>
-                <div class="project-tags">${tagsHTML}${isPWA ? '<span class="tag pwa-tag"><i class="fas fa-download"></i> PWA</span>' : ''}</div>
+                <div class="project-tags">${tagsHTML}${apkTag}</div>
                 <div class="project-actions" style="margin-top: 15px;">
                     ${installBtn}
                     <a href="${projectLink}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">${escapeHTML(labels.viewProject)} <i class="fas fa-external-link-alt" style="font-size: 0.8rem;"></i></a>
