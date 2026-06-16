@@ -8,8 +8,8 @@
 */
 :root {
     /* Fonts */
-    --font-heading: 'Bricolage Grotesque', sans-serif;
-    --font-body: 'Space Grotesk', sans-serif;
+    --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     --font-mono: 'JetBrains Mono', monospace;
     --font-primary: var(--font-body);
 
@@ -133,13 +133,6 @@ html {
 body.nano-banana ::selection {
     background-color: #facc15;
     color: #000;
-}
-
-/* Consistent focus styles for accessibility */
-:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-    border-radius: 4px;
 }
 
 body {
@@ -464,7 +457,8 @@ h1, h2, h3, h4, h5, h6 {
     backdrop-filter: blur(20px);
 }
 
-.mobile-menu.active { display: flex; }
+.mobile-menu.active,
+.mobile-menu.open { display: flex; }
 .mobile-menu a {
     font-size: 1.5rem;
     font-weight: 700;
@@ -472,6 +466,25 @@ h1, h2, h3, h4, h5, h6 {
     transition: color 0.2s;
 }
 .mobile-menu a:hover { color: var(--accent); }
+.mobile-menu-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    color: var(--text-med);
+    font-size: 1.5rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: color 0.2s, background 0.2s;
+    z-index: 10;
+}
+.mobile-menu-close:hover { color: var(--accent); background: rgba(var(--accent-rgb), 0.08); }
 
 /* =========================================
    HERO SECTION

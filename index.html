@@ -1,8 +1,8 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Rashid (MOT1209) — Full-Stack Developer & AI Engineer. Building web platforms, AI tools, and 3D games with Next.js 15, Supabase & Three.js.">
     <meta name="robots" content="index, follow">
     <meta name="author" content="Rashid (MOT1209)">
@@ -107,13 +107,14 @@
                 <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
                 <button class="nav-btn admin-login-btn" id="admin-login-btn" aria-label="Admin login" onclick="window.open('admin/login.html','_blank')"><i class="fas fa-key"></i></button>
                 <button class="nav-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders-h"></i></button>
-                <button class="hamburger" id="hamburger" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
             </div>
         </div>
     </nav>
 
     <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobile-menu">
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
         <a href="#home">Home</a>
         <a href="#about">About</a>
         <a href="#projects">Projects</a>
@@ -557,11 +558,15 @@
     document.querySelectorAll('.copyright-year').forEach(function(el){el.textContent=new Date().getFullYear();});
     // Mobile menu
     (function(){
-      var hm=document.getElementById('hamburger'),mm=document.getElementById('mobile-menu');
-      if(hm&&mm){hm.addEventListener('click',function(){mm.classList.toggle('open');});}
+      var hm=document.getElementById('hamburger'),mm=document.getElementById('mobile-menu'),mc=document.getElementById('mobile-menu-close');
+      function openMenu(){if(mm){mm.classList.add('open');if(hm)hm.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';}}
+      function closeMenu(){if(mm){mm.classList.remove('open');if(hm)hm.setAttribute('aria-expanded','false');document.body.style.overflow='';}}
+      if(hm){hm.addEventListener('click',function(){if(mm&&mm.classList.contains('open')){closeMenu();}else{openMenu();}});}
+      if(mc){mc.addEventListener('click',closeMenu);}
       document.querySelectorAll('.mobile-menu a').forEach(function(a){
-        a.addEventListener('click',function(){if(mm)mm.classList.remove('open');});
+        a.addEventListener('click',closeMenu);
       });
+      document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mm&&mm.classList.contains('open')){closeMenu();}});
     })();
     // iOS viewport fix
     (function(){var vh=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh+'px');window.addEventListener('resize',function(){var vh2=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh2+'px');});})();
