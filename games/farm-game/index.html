@@ -1,746 +1,118 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#228B22">
-    <link rel="manifest" href="manifest.json">
-    <meta name="description" content="Rashid 3D Farm Simulator — Build and expand your dream farming empire with crop growth simulations and real-time weather.">
-    <link rel="canonical" href="https://rashid-wep.vercel.app/games/farm-game/">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="3D Farm Simulator - Enhanced">
-    <meta property="og:description" content="Rashid 3D Farm Simulator — Build and expand your dream farming empire.">
-    <meta property="og:image" content="../../images/logo.png">
-    <meta property="og:url" content="https://rashid-wep.vercel.app/games/farm-game/">
-    <title>3D Farm Simulator - Enhanced</title>
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #87CEEB;
-            font-family: 'Minecraft', 'Segoe UI', monospace;
-        }
-
-        /* Minecraft-style Font Import if possible, otherwise pixel style */
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
-        #ui-container {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            color: white;
-            font-family: 'VT323', monospace;
-            font-size: 24px;
-            text-shadow: 2px 2px 0 #000;
-            pointer-events: none;
-        }
-
-        /* Minecraft Hotbar */
-        #hotbar-container {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.4);
-            padding: 5px;
-            border-radius: 4px;
-            display: flex;
-            gap: 5px;
-            border: 2px solid #333;
-        }
-
-        .slot {
-            width: 60px;
-            height: 60px;
-            background: rgba(139, 139, 139, 0.6);
-            border: 3px solid #555;
-            border-top-color: #999;
-            border-left-color: #999;
-            border-bottom-color: #333;
-            border-right-color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            transition: 0.1s;
-        }
-
-        .slot.active {
-            border: 4px solid white;
-            background: rgba(139, 139, 139, 0.8);
-            transform: scale(1.1);
-            z-index: 10;
-        }
-
-        .slot img {
-            width: 40px;
-            height: 40px;
-            image-rendering: pixelated;
-        }
-
-        /* Placeholder for icons */
-        .slot-key {
-            position: absolute;
-            top: 2px;
-            left: 4px;
-            font-size: 14px;
-            color: #fff;
-            text-shadow: 1px 1px 0 #000;
-            font-family: 'VT323', monospace;
-        }
-
-        .slot-count {
-            position: absolute;
-            bottom: 2px;
-            right: 4px;
-            font-size: 18px;
-            color: #fff;
-            text-shadow: 1px 1px 0 #000;
-            font-family: 'VT323', monospace;
-        }
-
-        .slot-icon {
-            font-size: 30px;
-        }
-
-        /* Controls Overlay */
-        #controls-overlay {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: white;
-            font-family: 'VT323', monospace;
-            text-align: right;
-            text-shadow: 1px 1px 0 #000;
-            font-size: 20px;
-        }
-
-        #interaction-msg {
-            position: absolute;
-            top: 55%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: 'VT323', monospace;
-            font-size: 30px;
-            color: #fff;
-            text-shadow: 2px 2px 0 #000;
-            display: none;
-        }
-
-        /* Main Menu */
-        #main-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2000;
-            color: white;
-            font-family: 'VT323', monospace;
-        }
-
-        #main-menu h1 {
-            font-size: 80px;
-            margin-bottom: 20px;
-            color: #2ecc71;
-            text-shadow: 4px 4px 0 #000;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .menu-btn {
-            background: #e67e22;
-            color: white;
-            border: 4px solid #d35400;
-            padding: 15px 50px;
-            font-size: 32px;
-            font-family: inherit;
-            cursor: pointer;
-            transition: 0.2s;
-            margin: 10px;
-            text-transform: uppercase;
-            box-shadow: 0 6px 0 #a04000;
-        }
-
-        .menu-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 0 #a04000;
-        }
-
-        .menu-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 0 0 #a04000;
-        }
-
-        .credits {
-            margin-top: 50px;
-            color: #bdc3c7;
-            font-size: 18px;
-        }
-
-        /* Crosshair Helper Loop */
-        #crosshair::before,
-        #crosshair::after {
-            content: '';
-            position: absolute;
-            background: rgba(255, 255, 255, 0.8);
-        }
-
-        #crosshair::before {
-            top: 9px;
-            left: 0;
-            width: 20px;
-            height: 2px;
-        }
-
-        #crosshair::after {
-            top: 0;
-            left: 9px;
-            width: 2px;
-            height: 20px;
-        }
-    </style>
-    <!-- Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- Game Controls System -->
-    <script src="../js/unified-game-controls.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#4a7c3f">
+  <meta name="description" content="3D Farm Game — Grow crops, raise animals, build your dream farm.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="canonical" href="https://rashid-wep.vercel.app/games/farm-game/">
+  <meta property="og:title" content="Farm Game 3D">
+  <meta property="og:description" content="3D Farm Game — Grow crops, raise animals, build your dream farm.">
+  <meta property="og:image" content="../../images/logo.png">
+  <title>Farm Game 3D</title>
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
-
 <body>
-
-    <!-- MAIN MENU -->
-    <div id="main-menu">
-        <h1>🌾 FARM WORLD 3D</h1>
-        <button class="menu-btn" onclick="startGame()">START GAME</button>
-        <div class="credits">Dev by Rashid | v1.2</div>
+  <div id="blocker"></div>
+  <div id="loading-screen">
+    <div class="loader-icon">🌾</div>
+    <div class="loader-bar"><div class="loader-fill"></div></div>
+    <div class="loader-text">Loading Farm World...</div>
+  </div>
+  <div id="main-menu">
+    <div class="menu-title">
+      <span class="title-icon">🌾</span>
+      <h1>Farm World</h1>
+      <p class="title-sub">3D Farming Simulator</p>
     </div>
-
-    <div id="ui-container">
-        <div>Health: ❤️❤️❤️❤️❤️</div>
-        <div>Money: $<span id="money-display" style="color:#ffd700">100</span></div>
-        <div id="time-display" style="font-size: 18px; color: #caf0f8;">Time: Day</div>
+    <div class="menu-buttons">
+      <button class="menu-btn primary" onclick="startGame()">NEW GAME</button>
+      <button class="menu-btn" onclick="continueGame()">CONTINUE</button>
     </div>
-
-    <div id="hotbar-container">
-        <div class="slot active" id="slot-0">
-            <span class="slot-key">1</span>
-            <div class="slot-icon">🚜</div>
-            <span class="slot-count">Plow</span>
-        </div>
-        <div class="slot" id="slot-1">
-            <span class="slot-key">2</span>
-            <div class="slot-icon">💧</div>
-            <span class="slot-count">Water</span>
-        </div>
-        <div class="slot" id="slot-2">
-            <span class="slot-key">3</span>
-            <div class="slot-icon">🌾</div>
-            <span class="slot-count" id="seed-wheat-count">5</span>
-        </div>
-        <div class="slot" id="slot-3">
-            <span class="slot-key">4</span>
-            <div class="slot-icon">🍅</div>
-            <span class="slot-count" id="seed-tomato-count">2</span>
-        </div>
-        <div class="slot" id="slot-4">
-            <span class="slot-key">5</span>
-            <div class="slot-icon">🧺</div>
-            <span class="slot-count">Harv</span>
-        </div>
+    <p class="menu-credits">v2.0 — Dev by Rashid</p>
+  </div>
+  <div id="hud">
+    <div class="hud-top">
+      <div class="hud-stats">
+        <div class="stat"><span class="stat-icon">❤️</span><span id="health-val">100</span></div>
+        <div class="stat"><span class="stat-icon">⚡</span><span id="energy-val">100</span></div>
+        <div class="stat"><span class="stat-icon">💰</span><span id="money-val">200</span></div>
+      </div>
+      <div class="hud-time">
+        <span id="day-val">Day 1</span>
+        <span id="time-val">☀️ 06:00</span>
+      </div>
     </div>
-    <div id="controls-overlay">
-        [WASD] Move <br>
-        [F] / [Space] Action/Sleep<br>
-        [P] Plow | [L] Water<br>
-        [K] Plant Wheat | [J] Plant Tomato<br>
-        [H] Harvest<br>
-        [E] Shop / Sell
+    <div class="hud-bottom">
+      <div class="toolbar" id="toolbar">
+        <div class="tool-slot active" data-tool="0"><span class="tool-key">1</span><span class="tool-icon">🚜</span><span class="tool-label">Plow</span></div>
+        <div class="tool-slot" data-tool="1"><span class="tool-key">2</span><span class="tool-icon">💧</span><span class="tool-label">Water</span></div>
+        <div class="tool-slot" data-tool="2"><span class="tool-key">3</span><span class="tool-icon">🌾</span><span class="tool-label">Wheat</span></div>
+        <div class="tool-slot" data-tool="3"><span class="tool-key">4</span><span class="tool-icon">🍅</span><span class="tool-label">Tomato</span></div>
+        <div class="tool-slot" data-tool="4"><span class="tool-key">5</span><span class="tool-icon">🥕</span><span class="tool-label">Carrot</span></div>
+        <div class="tool-slot" data-tool="5"><span class="tool-key">6</span><span class="tool-icon">🧺</span><span class="tool-label">Harvest</span></div>
+      </div>
+      <div class="hud-controls-hint">[WASD] Move &nbsp;|&nbsp; [Click+Drag] Look &nbsp;|&nbsp; [E] Interact &nbsp;|&nbsp; [F] Action &nbsp;|&nbsp; [Esc] Menu</div>
     </div>
-
-    <!-- Shop UI Overlay -->
-    <div id="shop-ui"
-        style="display:none; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.9); padding:20px; border:2px solid white; border-radius:10px; text-align:center; font-family:'VT323', monospace; color:white; z-index:100;">
-        <h2>🏪 General Store</h2>
-        <p>Press Key to Buy:</p>
-        <p>[1] Buy Wheat Seed ($10)</p>
-        <p>[2] Buy Tomato Seed ($20)</p>
-        <hr style="border-color:#555;">
-        <p>[E] Sell Harvested Crops</p>
-        <p>[Esc] Close</p>
+    <div id="interaction-hint" class="interaction-hint hidden"></div>
+  </div>
+  <div id="shop-ui" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header"><h2>🏪 General Store</h2><button class="modal-close" onclick="toggleShop()">✕</button></div>
+      <div class="modal-body">
+        <div class="shop-section">
+          <h3>Seeds</h3>
+          <div class="shop-item"><span>🌾 Wheat Seed</span><span>$10</span><button onclick="buySeed('wheat')">Buy</button></div>
+          <div class="shop-item"><span>🍅 Tomato Seed</span><span>$20</span><button onclick="buySeed('tomato')">Buy</button></div>
+          <div class="shop-item"><span>🥕 Carrot Seed</span><span>$15</span><button onclick="buySeed('carrot')">Buy</button></div>
+        </div>
+        <div class="shop-section">
+          <h3>🐑 Animals</h3>
+          <div class="shop-item"><span>🐔 Chicken</span><span>$50</span><button onclick="buyAnimal('chicken')">Buy</button></div>
+          <div class="shop-item"><span>🐄 Cow</span><span>$200</span><button onclick="buyAnimal('cow')">Buy</button></div>
+          <div class="shop-item"><span>🐑 Sheep</span><span>$150</span><button onclick="buyAnimal('sheep')">Buy</button></div>
+        </div>
+        <div class="shop-section">
+          <h3>Sell</h3>
+          <div class="shop-item"><span>🌾 Wheat</span><span>$25</span><button onclick="sellItem('wheat')">Sell All</button></div>
+          <div class="shop-item"><span>🍅 Tomato</span><span>$40</span><button onclick="sellItem('tomato')">Sell All</button></div>
+          <div class="shop-item"><span>🥕 Carrot</span><span>$35</span><button onclick="sellItem('carrot')">Sell All</button></div>
+        </div>
+      </div>
     </div>
-
-    <div id="crosshair"></div>
-    <div id="interaction-msg">PRESS 'E' TO OPEN SHOP</div>
-
-    <!-- Minecraft Hotbar -->
-    <!-- Mobile Controls are now handled by unified-game-controls.js -->
-
-    <script>
-        // Initialize Advanced Game Controls System v3.0
-        const gameControls = new UnifiedGameControls({
-            requireLandscape: true,
-            showCameraControls: false, // Farm game doesn't need camera control
-            actionButtons: [
-                { id: 'farm', label: '🌾', action: 'farm', key: 'KeyF', color: '#2ecc71' },
-                { id: 'shop', label: '🏪', action: 'shop', key: 'KeyE', color: '#e74c3c' },
-                { id: 'seed', label: '🌱', action: 'seed', key: 'KeyQ', color: '#f39c12' },
-                { id: 'harvest', label: '✂️', action: 'harvest', key: 'KeyR', color: '#9b59b6' }
-            ],
-            onMove: (dx, dy) => {
-                // Movement: dx (left/right), dy (forward/backward)
-                const speed = keys.shift ? 0.15 : 0.08;
-                const forward = new THREE.Vector3(0, 0, -1).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
-                const right = new THREE.Vector3(1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), player.rotation.y);
-
-                player.position.add(forward.multiplyScalar(-dy * speed));
-                player.position.add(right.multiplyScalar(dx * speed));
-
-                // Boundary check
-                player.position.x = Math.max(-49, Math.min(49, player.position.x));
-                player.position.z = Math.max(-49, Math.min(49, player.position.z));
-            },
-            onAction: (action) => {
-                switch (action) {
-                    case 'farm':
-                    case 'harvest':
-                        performAction();
-                        break;
-                    case 'shop':
-                        checkInteractions();
-                        break;
-                    case 'seed':
-                        // Switch seed type
-                        gameState.selectedTool = (gameState.selectedTool + 1) % 2;
-                        updateUI();
-                        break;
-                    case 'sprint':
-                        keys.shift = true;
-                        setTimeout(() => keys.shift = false, 200);
-                        break;
-                    case 'crouch':
-                        player.position.y = player.position.y > 0.5 ? 0.5 : 0;
-                        break;
-                }
-            },
-            debug: false
-        });
-
-        gameControls.init();
-
-        // --- GAME STATE ---
-        const gameState = {
-            menuOpen: true, // Start with menu open
-            money: 100,
-            inventory: { wheat: 0, tomato: 0 },
-            seeds: { wheat: 5, tomato: 2 },
-            selectedTool: 0,
-            dayTime: 0,
-            isDay: true,
-            shopOpen: false
-        };
-
-        function startGame() {
-            gameState.menuOpen = false;
-            document.getElementById('main-menu').style.display = 'none';
-        }
-
-        // --- SCENE SETUP ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.Fog(0x87CEEB, 10, 60);
-
-        const camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.1, 100);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        document.body.appendChild(renderer.domElement);
-
-        // Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-        scene.add(ambientLight);
-
-        const sunLight = new THREE.DirectionalLight(0xffffff, 1);
-        sunLight.position.set(50, 50, 50);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.set(2048, 2048);
-        scene.add(sunLight);
-
-        // Ground
-        const ground = new THREE.Mesh(new THREE.PlaneGeometry(100, 100), new THREE.MeshStandardMaterial({ color: 0x5fa052 }));
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Player
-        const player = new THREE.Group();
-        const body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 1.5, 0.3), new THREE.MeshStandardMaterial({ color: 0x00cccc }));
-        body.position.y = 0.75; body.castShadow = true;
-        const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshStandardMaterial({ color: 0xffccaa }));
-        head.position.y = 1.75; head.castShadow = true;
-        player.add(body); player.add(head);
-        scene.add(player);
-        player.position.set(0, 0, 5);
-
-        // --- BUILDINGS ---
-
-        // 1. Enterable Barn
-        const barnGroup = new THREE.Group();
-        barnGroup.position.set(-8, 0, -8);
-        scene.add(barnGroup);
-
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0xa83232 }); // Red
-        const darkWood = new THREE.MeshStandardMaterial({ color: 0x4e342e });
-
-        // Left Wall
-        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 8), wallMat);
-        leftWall.position.set(-3.5, 2.5, 0); leftWall.castShadow = true; leftWall.receiveShadow = true;
-        barnGroup.add(leftWall);
-
-        // Right Wall
-        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 8), wallMat);
-        rightWall.position.set(3.5, 2.5, 0); rightWall.castShadow = true; rightWall.receiveShadow = true;
-        barnGroup.add(rightWall);
-
-        // Back Wall
-        const backWall = new THREE.Mesh(new THREE.BoxGeometry(8, 5, 1), wallMat);
-        backWall.position.set(0, 2.5, -3.5); backWall.castShadow = true; backWall.receiveShadow = true;
-        barnGroup.add(backWall);
-
-        // Roof
-        const roof = new THREE.Mesh(new THREE.ConeGeometry(7, 4, 4), darkWood);
-        roof.position.set(0, 6.5, 0);
-        roof.rotation.y = Math.PI / 4;
-        roof.scale.z = 1.4; // Elongate to cover barn
-        roof.castShadow = true;
-        barnGroup.add(roof);
-
-        // Bed (Inside Barn)
-        const bedGroup = new THREE.Group();
-        bedGroup.position.set(2, 0.5, -2); // Inside right corner
-        // Frame
-        const bedFrame = new THREE.Mesh(new THREE.BoxGeometry(2, 0.4, 3.5), new THREE.MeshStandardMaterial({ color: 0x3e2723 }));
-        bedGroup.add(bedFrame);
-        // Mattress
-        const mattress = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.2, 3.3), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-        mattress.position.y = 0.3;
-        bedGroup.add(mattress);
-        // Pillow
-        const pillow = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.15, 0.8), new THREE.MeshStandardMaterial({ color: 0xff0000 }));
-        pillow.position.set(0, 0.45, -1);
-        bedGroup.add(pillow);
-        barnGroup.add(bedGroup);
-
-        // Market Stall (For Buying)
-        const marketGroup = new THREE.Group();
-        marketGroup.position.set(8, 0, -5);
-        scene.add(marketGroup);
-        // Table
-        const table = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 1), darkWood);
-        table.position.y = 0.5;
-        marketGroup.add(table);
-        // Pole
-        const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.1, 3), darkWood);
-        pole.position.set(0, 1.5, 0);
-        marketGroup.add(pole);
-        // Canopy
-        const canopy = new THREE.Mesh(new THREE.ConeGeometry(2.5, 1, 4), new THREE.MeshStandardMaterial({ color: 0xffaa00 }));
-        canopy.position.set(0, 3, 0); canopy.rotation.y = Math.PI / 4;
-        marketGroup.add(canopy);
-
-        // Farm Plots (Grid)
-        const plots = [];
-        const plotGroup = new THREE.Group();
-        scene.add(plotGroup);
-
-        function createPlot(x, z) {
-            const plot = new THREE.Mesh(new THREE.BoxGeometry(2, 0.1, 2), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
-            plot.position.set(x, 0.05, z);
-            plot.receiveShadow = true;
-            plot.userData = { type: 'plot', state: 'empty', crop: null };
-            plotGroup.add(plot);
-            plots.push(plot);
-            const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(2, 0.1, 2)), new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.2, transparent: true }));
-            plot.add(edges);
-        }
-
-        for (let x = -2; x <= 2; x++) for (let z = -2; z <= 2; z++) createPlot(x * 2.2, z * 2.2);
-
-        // --- CONTROLS ---
-        const keys = { w: false, a: false, s: false, d: false };
-
-        window.addEventListener('keydown', (e) => {
-            if (gameState.menuOpen) return;
-
-            if (gameState.shopOpen) {
-                if (e.key === 'Escape') toggleShop();
-                if (e.key === '1') buySeed('wheat');
-                if (e.key === '2') buySeed('tomato');
-                if (e.code === 'KeyE') sellCrops();
-                return;
-            }
-
-            const code = e.code;
-            const key = e.key.toLowerCase();
-
-            if (code === 'KeyW') keys.w = true;
-            if (code === 'KeyA') keys.a = true;
-            if (code === 'KeyS') keys.s = true;
-            if (code === 'KeyD') keys.d = true;
-
-            if (key === 'p') selectTool(0);
-            if (key === 'l') selectTool(1);
-            if (key === 'k') selectTool(2);
-            if (key === 'j') selectTool(3);
-            if (key === 'h') selectTool(4);
-
-            if (code === 'Space' || code === 'KeyF') performAction();
-            if (code === 'KeyE') checkInteractions();
-        });
-
-        window.addEventListener('keyup', (e) => {
-            const code = e.code;
-            if (code === 'KeyW') keys.w = false;
-            if (code === 'KeyA') keys.a = false;
-            if (code === 'KeyS') keys.s = false;
-            if (code === 'KeyD') keys.d = false;
-        });
-
-        function selectTool(idx) {
-            gameState.selectedTool = idx;
-            document.querySelectorAll('.slot').forEach((el, i) => el.classList.toggle('active', i === idx));
-        }
-
-        function checkInteractions() {
-            // Market/Shop Distance
-            if (player.position.distanceTo(marketGroup.position) < 4) {
-                toggleShop();
-                return;
-            }
-        }
-
-        function toggleShop() {
-            gameState.shopOpen = !gameState.shopOpen;
-            document.getElementById('shop-ui').style.display = gameState.shopOpen ? 'block' : 'none';
-        }
-
-        function buySeed(type) {
-            const cost = type === 'wheat' ? 10 : 20;
-            if (gameState.money >= cost) {
-                gameState.money -= cost;
-                gameState.seeds[type]++;
-                updateUI();
-            } else {
-                alert("Not enough money!");
-            }
-        }
-
-        function sellCrops() {
-            let earnings = gameState.inventory.wheat * 20 + gameState.inventory.tomato * 35;
-            if (earnings > 0) {
-                gameState.money += earnings;
-                gameState.inventory.wheat = 0;
-                gameState.inventory.tomato = 0;
-                alert(`Sold all crops for $${earnings}!`);
-                updateUI();
-            } else {
-                alert("Nothing to sell!");
-            }
-        }
-
-        function performAction() {
-            // 1. Check Bed Sleep
-            const bedPos = new THREE.Vector3().copy(barnGroup.position).add(bedGroup.position);
-            if (player.position.distanceTo(bedPos) < 2.5) {
-                sleep();
-                return;
-            }
-
-            // 2. Farming
-            const pBox = new THREE.Box3().setFromObject(player).expandByScalar(-0.5);
-            let interacted = false;
-            plots.forEach(plot => {
-                if (interacted) return;
-                if (player.position.distanceTo(plot.position) < 1.5) {
-                    farmAction(plot);
-                    interacted = true;
-                }
-            });
-        }
-
-        function sleep() {
-            gameState.dayTime = 0; // Reset to morning
-            alert("You slept! It's morning now.");
-        }
-
-        function farmAction(plot) {
-            const data = plot.userData;
-            const tool = gameState.selectedTool;
-
-            if (tool === 0 && data.state === 'empty') { // Plow
-                data.state = 'plowed'; plot.material.color.setHex(0x5D4037);
-            }
-            if (tool === 1 && data.state !== 'empty') { // Water
-                plot.material.color.setHex(0x3E2723);
-            }
-            if (tool === 2 && data.state === 'plowed') { // Wheat
-                if (gameState.seeds.wheat > 0) {
-                    gameState.seeds.wheat--;
-                    plant(plot, 0xffff00);
-                    updateUI();
-                } else alert("No Wheat Seeds! Buy at Shop (E).");
-            }
-            if (tool === 3 && data.state === 'plowed') { // Tomato
-                if (gameState.seeds.tomato > 0) {
-                    gameState.seeds.tomato--;
-                    plant(plot, 0xff0000);
-                    updateUI();
-                } else alert("No Tomato Seeds! Buy at Shop (E).");
-            }
-            if (tool === 4 && data.state === 'grown') { // Harvest
-                if (data.cropType === 'wheat') gameState.inventory.wheat++; // Keep strings logic if present
-                else if (data.cropType === 'tomato') gameState.inventory.tomato++;
-                // Wait, previous code checked cropType. I need to ensure plant function sets it.
-                // Assuming cropType is set in plant function below (I will ensure it).
-
-                alert(`Harvested! (Crops in bag)`);
-                plot.remove(data.plantMesh); data.state = 'plowed'; data.plantMesh = null; plot.material.color.setHex(0x5D4037);
-            }
-        }
-
-        function plant(plot, color) {
-            plot.userData.state = 'planted';
-            // Set cropType based on color/tool roughly or strict param?
-            // Let's deduce from color for simplicity or add param.
-            // Better: update plant signature in previous usage? No, I control usage.
-            plot.userData.cropType = (color === 0xffff00) ? 'wheat' : 'tomato';
-
-            const sprout = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshStandardMaterial({ color: 0x00ff00 }));
-            sprout.position.y = 0.5; plot.add(sprout); plot.userData.plantMesh = sprout;
-
-            setTimeout(() => {
-                if (plot.userData.state === 'planted') {
-                    plot.userData.state = 'grown'; sprout.scale.set(1, 3, 1); sprout.position.y = 0.7; sprout.material.color.setHex(color);
-                }
-            }, 3000); // Reverting to 3000ms real time.
-        }
-
-        function updateUI() {
-            document.getElementById('money-display').innerText = gameState.money;
-            document.getElementById('seed-wheat-count').innerText = gameState.seeds.wheat;
-            document.getElementById('seed-tomato-count').innerText = gameState.seeds.tomato;
-        }
-
-        // Cycle logic
-        const clock = new THREE.Clock();
-        const CYCLE_DURATION = 300; // 5 minutes
-
-        function animate() {
-            requestAnimationFrame(animate);
-            if (gameState.shopOpen) return;
-
-            const dt = clock.getDelta();
-
-            // Time Cycle
-            gameState.dayTime += dt;
-            if (gameState.dayTime > CYCLE_DURATION) gameState.dayTime = 0;
-
-            // Simple Day/Night logic
-            const timeRatio = gameState.dayTime / CYCLE_DURATION; // 0 to 1
-            // 0.0 - 0.5: Day, 0.5 - 1.0: Night
-            const isNight = timeRatio > 0.5;
-            gameState.isDay = !isNight;
-
-            // Visual Updates
-            if (isNight) {
-                scene.background.setHex(0x0f172a); // Dark Blue
-                scene.fog.color.setHex(0x0f172a);
-                ambientLight.intensity = 0.1;
-                sunLight.intensity = 0.0; // Moon is separate usually but lets just dim sun
-                document.getElementById('time-display').innerText = "Time: Night 🌙";
-            } else {
-                scene.background.setHex(0x87CEEB); // Sky Blue
-                scene.fog.color.setHex(0x87CEEB);
-                ambientLight.intensity = 0.6;
-                sunLight.intensity = 1.0;
-                document.getElementById('time-display').innerText = "Time: Day ☀️";
-            }
-
-            // Movement
-            const speed = 5 * dt;
-            if (keys.w) player.position.z -= speed;
-            if (keys.s) player.position.z += speed;
-            if (keys.a) player.position.x -= speed;
-            if (keys.d) player.position.x += speed;
-
-            // Simple Collision for Barn Walls (Basic Box Clamp)
-            // Just check if inside wall bbox? Too complex for this snippet.
-            // Player will just phase through for now, as "enterable" is requested.
-            // Since mesh is separate walls, player can walk between them.
-
-            // Face direction
-            if (keys.w) player.rotation.y = Math.PI;
-            if (keys.s) player.rotation.y = 0;
-            if (keys.a) player.rotation.y = -Math.PI / 2;
-            if (keys.d) player.rotation.y = Math.PI / 2;
-
-            camera.position.x = player.position.x;
-            camera.position.z = player.position.z + 8;
-            camera.position.y = 8;
-            camera.lookAt(player.position);
-
-            // Trigger Display
-            const marketDist = player.position.distanceTo(marketGroup.position);
-            const msg = document.getElementById('interaction-msg');
-            msg.style.display = 'none';
-            if (marketDist < 4) {
-                msg.innerText = "PRESS 'E' FOR SHOP";
-                msg.style.display = 'block';
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        // Init UI
-        updateUI();
-        animate();
-    </script>
-
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js')
-                .then(reg => console.log('[Farm Game] SW registered:', reg))
-                .catch(err => console.log('[Farm Game] SW registration failed:', err));
-        }
-    </script>
-  <script src="js/update-checker.js"></script>
+  </div>
+  <div id="pause-menu" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header"><h2>⏸️ Paused</h2></div>
+      <div class="modal-body">
+        <button class="menu-btn primary" onclick="resumeGame()">Resume</button>
+        <button class="menu-btn" onclick="saveAndQuit()">Save &amp; Quit</button>
+      </div>
+    </div>
+  </div>
+  <div id="notif" class="notification hidden"></div>
+  <div id="crosshair"><div class="crosshair-dot"></div></div>
+  <button id="mute-btn" onclick="toggleMute()">🔊</button>
+  <div id="touch-controls" class="touch-only">
+    <div class="touch-joystick" id="touch-joystick">
+      <div class="joystick-knob" id="joystick-knob"></div>
+    </div>
+    <div class="touch-buttons">
+      <button class="touch-btn" id="touch-interact" ontouchstart="touchInteract()">E</button>
+      <button class="touch-btn" id="touch-action" ontouchstart="touchAction()">F</button>
+    </div>
+  </div>
+
+  <script src="js/collision.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/player.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/animals.js"></script>
+  <script src="js/weather.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/main.js"></script>
 </body>
-
 </html>

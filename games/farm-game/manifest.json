@@ -1,15 +1,15 @@
 {
-  "name": "3D Farm Simulator",
-  "short_name": "Farm Sim",
-  "description": "لعبة محاكاة مزرعة ثلاثية الأبعاد",
+  "name": "Farm World 3D",
+  "short_name": "Farm World",
+  "description": "3D Farming Simulator — Grow crops, raise animals, build your dream farm.",
   "start_url": "/games/farm-game/",
   "display": "standalone",
   "background_color": "#87CEEB",
-  "theme_color": "#228B22",
+  "theme_color": "#4a7c3f",
   "orientation": "landscape-primary",
   "scope": "/games/farm-game/",
-  "lang": "ar",
-  "dir": "rtl",
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "icons/icon-192.png",
@@ -24,5 +24,5 @@
       "purpose": "any maskable"
     }
   ],
-  "categories": ["games", "entertainment"]
+  "categories": ["games", "entertainment", "simulation"]
 }

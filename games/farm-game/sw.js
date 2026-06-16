@@ -1,9 +1,19 @@
 // Farm Game Service Worker
-const CACHE_NAME = 'farm-game-v1';
+const CACHE_NAME = 'farm-game-v2';
 const STATIC_ASSETS = [
     '/games/farm-game/',
     '/games/farm-game/index.html',
-    '/games/farm-game/manifest.json'
+    '/games/farm-game/manifest.json',
+    '/games/farm-game/css/style.css',
+    '/games/farm-game/js/collision.js',
+    '/games/farm-game/js/world.js',
+    '/games/farm-game/js/player.js',
+    '/games/farm-game/js/camera.js',
+    '/games/farm-game/js/audio.js',
+    '/games/farm-game/js/animals.js',
+    '/games/farm-game/js/weather.js',
+    '/games/farm-game/js/ui.js',
+    '/games/farm-game/js/main.js'
 ];
 
 // Install Event
@@ -59,10 +69,11 @@ self.addEventListener('fetch', (event) => {
                         return new Response(
                             `<!DOCTYPE html>
                             <html>
-                            <head><title>Offline - Farm Game</title></head>
-                            <body style="text-align:center;font-family:sans-serif;padding:50px;background:#87CEEB;">
-                                <h1>🚜 أنت في وضع عدم الاتصال</h1>
-                                <p>Offline Mode - Please check your connection</p>
+                            <head><title>Offline - Farm Game 3D</title></head>
+                            <body style="text-align:center;font-family:system-ui,sans-serif;padding:60px 20px;background:#2d5a27;color:#fff;">
+                                <h1 style="font-size:64px;margin-bottom:16px;">🌾</h1>
+                                <h2 style="font-weight:400;">You're offline</h2>
+                                <p style="opacity:0.7;margin-top:8px;">Connect to the internet to play Farm World</p>
                             </body>
                             </html>`,
                             { headers: { 'Content-Type': 'text/html' } }
