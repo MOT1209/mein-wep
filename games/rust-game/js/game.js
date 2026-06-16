@@ -1191,17 +1191,15 @@ try {
                     else performAction();
                     break;
                 case 'build':
-                    // Toggle building mode
-                    const bpMenu = document.getElementById('blueprint-menu');
-                    if (bpMenu.style.display === 'flex') {
-                        bpMenu.style.display = 'none';
+                    const radialMenu = document.getElementById('radial-menu');
+                    if (radialMenu.style.display === 'flex') {
+                        radialMenu.style.display = 'none';
                         state.building.selectedBlueprint = null;
                         if (previewMesh) { scene.remove(previewMesh); previewMesh = null; }
                         if (!isTouchDevice) pointerControls.lock();
                     } else {
-                        bpMenu.style.display = 'flex';
+                        radialMenu.style.display = 'flex';
                         pointerControls.unlock();
-                        renderBlueprintList();
                     }
                     break;
                 case 'jump':
