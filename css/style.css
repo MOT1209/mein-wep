@@ -3526,6 +3526,7 @@ body.light-mode .navbar.scrolled { background: rgba(250, 250, 250, 0.92); }
 .ct-btn small { font-size: 0.8rem; color: var(--text-muted); margin-left: auto; }
 .ct-email i { color: #ea4335; }
 .ct-gh i { color: var(--text); }
+.ct-li i { color: #0a66c2; }
 .ct-ph { opacity: 0.5; cursor: default; }
 .ct-ph i { color: var(--text-muted); }
 .ct-ph:hover { transform: none; border-color: var(--border); }
