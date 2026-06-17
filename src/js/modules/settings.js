@@ -54,6 +54,8 @@ export function initSettings() {
         if (!langCode) return;
         document.cookie = `googtrans=/en/${langCode}; path=/`;
         localStorage.setItem('lastLang', langCode);
+        document.documentElement.lang = langCode;
+        document.documentElement.dir = langCode === 'ar' ? 'rtl' : 'ltr';
         setTimeout(() => location.reload(), 300);
     };
 

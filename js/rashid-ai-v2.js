@@ -314,14 +314,13 @@ class RashidAI {
 
     checkGeminiAvailability() {
         if (typeof GEMINI_CONFIG !== 'undefined') {
-            // Support both proxy mode and direct key mode
-            if (GEMINI_CONFIG.useProxy && GEMINI_CONFIG.proxyUrl) {
+            const cfg = GEMINI_CONFIG;
+            if (cfg.proxyUrl && cfg.proxyUrl !== '') {
                 this.geminiEnabled = true;
                 this.useProxy = true;
-                console.log('✅ Gemini API enabled via Cloudflare Worker proxy');
-            } else if (GEMINI_CONFIG.apiKey && GEMINI_CONFIG.apiKey !== 'YOUR_API_KEY_HERE') {
-                this.geminiEnabled = true;
-                console.log('✅ Gemini API enabled - High-quality AI Activated');
+                console.log('✅ Gemini API enabled via /api/gemini (Vercel proxy)');
+            } else {
+                console.warn('⚠️ Gemini API not configured — using keyword fallback only');
             }
         }
     }
@@ -425,24 +424,13 @@ class RashidAI {
         try {
             let data;
             
-            if (this.useProxy) {
-                // 🔒 Call via Cloudflare Worker proxy (API key is safe)
-                const response = await fetch(GEMINI_CONFIG.proxyUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
-                });
-                data = await response.json();
-            } else {
-                // Direct call (fallback - only for local dev)
-                const url = `${GEMINI_CONFIG.apiEndpoint}/models/${GEMINI_CONFIG.model}:generateContent?key=${GEMINI_CONFIG.apiKey}`;
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.7, maxOutputTokens: 150 } })
-                });
-                data = await response.json();
-            }
+            // 🔒 Call via Vercel /api/gemini proxy (API key stays server-side)
+            const response = await fetch(GEMINI_CONFIG.proxyUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+            });
+            data = await response.json();
             
             return data.candidates?.[0]?.content?.parts?.[0]?.text || null;
         } catch (e) { 
