@@ -4,10 +4,11 @@
  */
 export async function fetchGitHubStats(username = 'MOT1209') {
     try {
+        const proxy = '/api/github?endpoint=';
         const [userRes, reposRes, eventsRes] = await Promise.all([
-            fetch(`https://api.github.com/users/${username}`),
-            fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=updated`),
-            fetch(`https://api.github.com/users/${username}/events?per_page=5`)
+            fetch(`${proxy}/users/${username}`),
+            fetch(`${proxy}/users/${username}/repos?per_page=100&sort=updated`),
+            fetch(`${proxy}/users/${username}/events?per_page=5`)
         ]);
 
         if (!userRes.ok) throw new Error('GitHub API error');

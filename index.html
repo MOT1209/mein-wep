@@ -66,9 +66,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css?v=8.0">
-    <link rel="stylesheet" href="css/redesign.css?v=1.0">
-    <link rel="stylesheet" href="css/enhancements.css?v=1.0" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/style.css?v=9.0">
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -79,9 +77,10 @@
     <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
 
-    <!-- GA4 -->
+    <!-- GA4 (consent-aware) -->
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied'});</script>
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-W139X3X20X"></script>
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-W139X3X20X',{'anonymize_ip':true});</script>
+    <script>gtag('js',new Date());gtag('config','G-W139X3X20X',{'anonymize_ip':true});</script>
 </head>
 <body class="dark-mode">
 
@@ -284,44 +283,44 @@
             <div class="sk-progress-grid">
                 <div class="sk-progress-group">
                     <h3>Frontend</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">React</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div><span class="sk-progress-pct">92%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Next.js 15</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div><span class="sk-progress-pct">88%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Three.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Tailwind CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">HTML/CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div><span class="sk-progress-pct">95%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">React</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Next.js 15</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Three.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Tailwind CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">HTML/CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div></div>
                 </div>
                 <div class="sk-progress-group">
                     <h3>Backend</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">Node.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Python</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div><span class="sk-progress-pct">82%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">REST APIs</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:93%"></div></div><span class="sk-progress-pct">93%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">WebSockets</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:75%"></div></div><span class="sk-progress-pct">75%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Node.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Python</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">REST APIs</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:93%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">WebSockets</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:75%"></div></div></div>
                 </div>
                 <div class="sk-progress-group">
                     <h3>Databases</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">PostgreSQL</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Supabase</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">SQLite</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div><span class="sk-progress-pct">70%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">PostgreSQL</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Supabase</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">SQLite</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div></div>
                 </div>
                 <div class="sk-progress-group">
                     <h3>DevOps</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">Vercel</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div><span class="sk-progress-pct">92%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Git</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">CI/CD</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:80%"></div></div><span class="sk-progress-pct">80%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Vercel</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Git</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">CI/CD</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:80%"></div></div></div>
                 </div>
                 <div class="sk-progress-group">
                     <h3>AI & ML</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">Gemini API</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div><span class="sk-progress-pct">90%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">OpenRouter</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">LLMs & NLP</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div><span class="sk-progress-pct">82%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">RAG</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div><span class="sk-progress-pct">70%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Gemini API</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">OpenRouter</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">LLMs & NLP</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">RAG</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div></div>
                 </div>
                 <div class="sk-progress-group">
                     <h3>Tools</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">VS Code</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div><span class="sk-progress-pct">95%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Figma</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:72%"></div></div><span class="sk-progress-pct">72%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">ES Modules</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div><span class="sk-progress-pct">88%</span></div>
-                    <div class="sk-progress"><span class="sk-progress-label">PWA</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div><span class="sk-progress-pct">85%</span></div>
+                    <div class="sk-progress"><span class="sk-progress-label">VS Code</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Figma</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:72%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">ES Modules</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">PWA</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
                 </div>
             </div>
         </div>
@@ -553,6 +552,36 @@
     <script type="module" src="src/js/main.js?v=2.0"></script>
     <script src="js/admin.js?v=3.1" defer></script>
 
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+  <div class="cookie-content">
+    <div class="cookie-text">
+      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
+      <span>This site uses cookies for analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+    </div>
+    <div class="cookie-actions">
+      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  var banner = document.getElementById('cookie-consent');
+  if (localStorage.getItem('cookieConsent')) { return; }
+  setTimeout(function() { banner.classList.add('visible'); }, 500);
+  document.getElementById('cookie-accept').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
+  });
+  document.getElementById('cookie-decline').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'declined');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
+  });
+})();
+</script>
     <script src="js/pwa-installer.js?v=1.1" defer></script>
     <script>
     // Dynamic year

@@ -9,10 +9,12 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="canonical" href="https://rashid-wep.vercel.app/admin/dashboard.html">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <!-- Google AdSense (deferred until consent) -->
+    <script>if (localStorage.getItem('cookieConsent') === 'accepted') { var s=document.createElement('script'); s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958'; s.crossOrigin='anonymous'; document.head.appendChild(s); }</script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
+        body { opacity: 0; }
+        body.auth-ok { opacity: 1; transition: opacity 0.3s; }
         :root {
             --bg: #09090b;
             --sidebar: #18181b;
@@ -608,6 +610,22 @@
     <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-config.js"></script>
+
+    <!-- 🔒 Protect dashboard: redirect if not authenticated -->
+    <script>
+    (async function() {
+      if (!window.supabaseClient) {
+        window.location.replace('login.html');
+        return;
+      }
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.replace('login.html');
+      } else {
+        document.body.classList.add('auth-ok');
+      }
+    })();
+    </script>
 
     <!-- Admin Logic -->
     <script src="../js/admin.js?v=4.0"></script>

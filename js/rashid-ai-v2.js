@@ -283,7 +283,6 @@ class RashidAI {
 
     async init() {
         this.setupDOM();
-        this.setupAvatar();
         this.setupSpeechRecognition();
         this.loadVoices();
         this.checkGeminiAvailability();
@@ -335,7 +334,12 @@ class RashidAI {
         const speakerToggle = document.getElementById('voice-speaker-toggle');
 
         if (toggleBtn) {
-            toggleBtn.onclick = () => {
+            this._avatarLoaded = false;
+            toggleBtn.onclick = async () => {
+                if (!this._avatarLoaded) {
+                    this._avatarLoaded = true;
+                    await this.setupAvatar();
+                }
                 panel.classList.toggle('active');
                 if (panel.classList.contains('active')) {
                     const welcome = this.userLang === 'ar' ? "أهلاً بك! ربي يسعد يومك، شلون أقدر أساعدك اليوم؟" : "Welcome! I'm Rashid-AI. How can I assist you today?";

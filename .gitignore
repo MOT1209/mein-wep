@@ -7,9 +7,11 @@
 # Ignore actual config with API keys
 js/gemini-config.js
 
-# Ignore environment files
+# Ignore environment files (any depth — protects nested project secrets like models/king2 ai-Model/.env)
 .env
 .env.local
+**/.env
+**/.env.local
 *.key
 
 # Ignore API keys

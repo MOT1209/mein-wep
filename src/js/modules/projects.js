@@ -186,12 +186,29 @@ function renderProjects(projects) {
 
     initThumbnails();
 
+    verifyApkButtons();
+
     qsa('.project-card .btn-primary').forEach(btn => {
         on(btn, 'click', () => {
             const title = btn.closest('.project-card')?.querySelector('h3')?.textContent || 'Unknown';
             const cat = btn.closest('.project-card')?.dataset?.category || 'unknown';
             trackProjectClick(title, cat);
         });
+    });
+}
+
+// Reveal an APK "Install" button only when its file actually exists.
+// Mirrors the HEAD-check used on downloads.html so missing builds never 404.
+function verifyApkButtons() {
+    qsa('.apk-install-btn').forEach(async (btn) => {
+        const url = btn.dataset.apkUrl;
+        if (!url) return;
+        try {
+            const res = await fetch(url, { method: 'HEAD' });
+            if (res.ok) btn.style.display = '';
+        } catch {
+            /* file unavailable — leave the button hidden */
+        }
     });
 }
 
@@ -235,8 +252,10 @@ function createProjectCard(project, lang) {
             : '<div class="project-status-badge" style="background:rgba(52,211,153,0.15);color:#34d399;border-color:rgba(52,211,153,0.3);">\u25CF Active</div>';
     const tagsHTML = techArray.filter(Boolean).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
     const apkTag = hasAPK ? '<span class="tag apk-tag"><i class="fas fa-android"></i> APK</span>' : '';
+    // APK button is hidden by default and only revealed after verifyApkButtons()
+    // confirms the file exists — prevents broken 404 links when a build is missing.
     const installBtn = hasAPK
-        ? `<a href="${escapeHTML(apkProjects[title].url)}" download class="btn btn-secondary" style="padding: 10px 15px; font-size: 0.85rem; margin-right: 10px;" title="${escapeHTML(labels.installTitle)}" aria-label="${escapeHTML(labels.installTitle)}">
+        ? `<a href="${escapeHTML(apkProjects[title].url)}" download class="btn btn-secondary apk-install-btn" data-apk-url="${escapeHTML(apkProjects[title].url)}" style="display:none; padding: 10px 15px; font-size: 0.85rem; margin-right: 10px;" title="${escapeHTML(labels.installTitle)}" aria-label="${escapeHTML(labels.installTitle)}">
             <i class="fab fa-android"></i> <span class="btn-text">${escapeHTML(labels.install)}</span>
         </a>`
         : '';

@@ -15,7 +15,7 @@ import { initAnimations } from './modules/animations.js';
 import { initProjectFilters, initProjects } from './modules/projects.js';
 import { initSettings } from './modules/settings.js';
 import { initAnalytics, trackContactFormSubmit } from './services/analytics.js';
-import { incrementVisitorCount, submitContactMessage } from './services/supabase.js';
+import { incrementVisitorCount, submitContactMessage, countProjects } from './services/supabase.js';
 import { qs, qsa, on } from './utils/dom.js';
 import {
   initTypewriter,
@@ -154,6 +154,30 @@ const boot = async () => {
       }
     });
   }
+
+  // 9️⃣ Dynamic numbers — replace hardcoded stats
+  (async () => {
+    const { count: projectCount } = await countProjects();
+    const repoCountEls = document.querySelectorAll('.hero-status-item:nth-child(3) span:last-child, .stat-box:nth-child(1) .stat-num');
+    const projectCountEls = document.querySelectorAll('.hero-status-item:nth-child(2) span:last-child, .stat-box:nth-child(2) .stat-num');
+    const hasRealProjectCount = await (async () => {
+      const { count } = await countProjects();
+      return count !== null && count > 0;
+    })();
+    if (hasRealProjectCount) {
+      const { count } = await countProjects();
+      projectCountEls.forEach(el => el.textContent = count + '+');
+    }
+    try {
+      const r = await fetch('/api/github?endpoint=/users/MOT1209');
+      if (r.ok) {
+        const user = await r.json();
+        if (user.public_repos) {
+          repoCountEls.forEach(el => el.textContent = (user.public_repos > 15 ? user.public_repos : 15) + '+');
+        }
+      }
+    } catch (_) {}
+  })();
 
   // Visitor counter (unchanged)
   const visits = parseInt(localStorage.getItem('visitorCount') ?? '0', 10);
