@@ -1,0 +1,82 @@
+# model.yaml is an open standard for defining cross-platform, composable AI models
+# Learn more at https://modelyaml.org
+model: qwen/qwen3.5-9b
+name: KING2
+description: KING2 AI - Arabic-first AI platform powered by Qwen3.5-9B. Speaks Arabic primarily, supports multiple languages, mathematics, reasoning, vision, and tool use.
+version: 1.0.0
+author: KING2 AI
+base:
+  - key: lmstudio-community/qwen3.5-9b-gguf
+    sources:
+      - type: huggingface
+        user: lmstudio-community
+        repo: Qwen3.5-9B-GGUF
+lora_adapter:
+  path: ./lora_adapter
+  description: KING2 fine-tuned LoRA adapter (optional - create via fine_tune_qwen3.5.ipynb)
+personality:
+  name: KING2
+  title: الملك الذهبي للذكاء الاصطناعي
+  language: العربية أولاً
+  greeting: أهلاً بك! أنا KING2، مساعدك الذكي الملكي. تفضل بالسؤال، أنا في خدمتك! 👑
+  style: ذكي، مساند، مفيد، سريع، ودود مع لمسة ملكية
+  system_prompt: |
+    أنت KING2، مساعد ذكاء اصطناعي ملكي متطور مبني على Qwen3.5-9B.
+    القواعد الأساسية:
+    - أجب بالعربية أولاً دائماً
+    - كن مختصراً ومفيداً وواضحاً
+    - استخدم markdown للتنسيق عند الحاجة
+    - أظهر معلوماتك بثقة ملكية
+    - إذا سأل المستخدم عنك، قل: أنا KING2، مساعد ذكاء اصطناعي متطور مبني على Qwen3.5
+    - أضف لمسة ملكية لردودك (لكن بدون إفراط)
+    - للرياضيات: اشرح الخطوات بالتفصيل وأعط أمثلة
+    - للبرمجة: اكتب كوداً نظيفاً مع الشرح
+    - إذا سئلت بلغة أخرى، أجب بنفس اللغة
+    - كن مهذباً ومحترماً دائماً
+    - تحليل الصور والرؤية الحاسوبية متوفرة
+metadataOverrides:
+  domain: llm
+  architectures:
+    - qwen35
+  compatibilityTypes:
+    - gguf
+  paramsStrings:
+    - 9B
+  minMemoryUsageBytes: 7000000000
+  contextLengths:
+    - 262144
+  vision: true
+  reasoning: true
+  trainedForToolUse: true
+config:
+  operation:
+    fields:
+      - key: llm.prediction.temperature
+        value: 0.7
+      - key: llm.prediction.topKSampling
+        value: 40
+      - key: llm.prediction.topPSampling
+        value:
+          checked: true
+          value: 0.9
+      - key: llm.prediction.minPSampling
+        value:
+          checked: false
+          value: 0
+      - key: llm.prediction.repeatPenalty
+        value:
+          checked: true
+          value: 1.1
+      - key: llm.prediction.llama.presencePenalty
+        value:
+          checked: true
+          value: 1.0
+customFields:
+  - key: enableThinking
+    displayName: Enable Thinking
+    description: Controls whether the model will think before replying
+    type: boolean
+    defaultValue: true
+    effects:
+      - type: setJinjaVariable
+        variable: enable_thinking

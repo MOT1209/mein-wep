@@ -1,0 +1,22 @@
+{
+  "type": "model",
+  "owner": "google",
+  "name": "gemma-4-e4b",
+  "dependencies": [
+    {
+      "type": "model",
+      "purpose": "baseModel",
+      "modelKeys": [
+        "lmstudio-community/gemma-4-e4b-it-gguf"
+      ],
+      "sources": [
+        {
+          "type": "huggingface",
+          "user": "lmstudio-community",
+          "repo": "gemma-4-E4B-it-GGUF"
+        }
+      ]
+    }
+  ],
+  "revision": 4
+}

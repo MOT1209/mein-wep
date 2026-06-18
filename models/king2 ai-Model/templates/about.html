@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KING2 - تعريف بكيان KING2 الملكي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #050a14;
+            --bg-secondary: #0a1425;
+            --bg-card: rgba(15, 29, 50, 0.7);
+            --gold: #d4af37;
+            --gold-light: #e8c547;
+            --gold-dark: #b8962e;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --glass-border: rgba(212, 175, 55, 0.15);
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(15, 29, 50, 0.5) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .about-container {
+            position: relative;
+            z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        .about-header {
+            text-align: center;
+            padding: 60px 20px;
+            margin-bottom: 50px;
+            animation: fadeIn 1s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .crown-icon {
+            font-size: 5rem;
+            display: block;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.4));
+            animation: crownFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes crownFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .about-header h1 {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+
+        .about-header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Sections */
+        .about-section {
+            margin-bottom: 40px;
+            opacity: 0;
+            animation: slideUp 0.8s ease forwards;
+        }
+
+        .about-section:nth-child(1) { animation-delay: 0.2s; }
+        .about-section:nth-child(2) { animation-delay: 0.4s; }
+        .about-section:nth-child(3) { animation-delay: 0.6s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 35px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .section-card:hover {
+            border-color: var(--gold);
+            box-shadow: 0 10px 40px rgba(212, 175, 55, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .section-title .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 15px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .section-title h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+
+        .section-card p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.9;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-item {
+            background: rgba(212, 175, 55, 0.05);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+
+        .feature-item:hover {
+            background: rgba(212, 175, 55, 0.1);
+            border-color: var(--gold);
+            transform: translateX(-5px);
+        }
+
+        .feature-item .emoji {
+            font-size: 1.8rem;
+            flex-shrink: 0;
+        }
+
+        .feature-item .text {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* Founder Section */
+        .founder-card {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .founder-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 20px;
+            box-shadow: 0 5px 25px var(--gold-glow);
+        }
+
+        .founder-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+
+        .founder-role {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Back Button */
+        .back-section {
+            text-align: center;
+            margin-top: 50px;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards;
+            animation-delay: 0.8s;
+        }
+
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+            border: none;
+            border-radius: 16px;
+            color: var(--bg-primary);
+            font-family: inherit;
+            font-size: 1.1rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .back-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 35px rgba(212, 175, 55, 0.5);
+        }
+
+        .back-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Tech Stack */
+        .tech-tags {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .tech-tag {
+            padding: 8px 18px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            border-radius: 25px;
+            color: var(--gold);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tech-tag:hover {
+            background: rgba(212, 175, 55, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .about-header h1 {
+                font-size: 2rem;
+            }
+
+            .section-card {
+                padding: 25px;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="about-container">
+        <!-- Header -->
+        <header class="about-header">
+            <span class="crown-icon">👑</span>
+            <h1>تعريف بكيان KING2 الملكي</h1>
+            <p>المساعد الذكي المدعوم بالذكاء الاصطناعي المتقدم - من تطوير راشد (Alking)</p>
+        </header>
+
+        <!-- About Company -->
+        <section class="about-section">
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="icon">🏢</div>
+                    <h2>عن شركتنا</h2>
+                </div>
+                <p>نحن مؤسسة تقنية رائدة، انطلقت برؤية طموحة لكسر الحواجز بين الإنسان والذكاء الاصطناعي. نهدف لتقديم حلول مبتكرة تسهل حياة المستخدمين وتفتح آفاقاً جديدة للإبداع الرقمي، مع الالتزام بأعلى معايير الخصوصية والتطور.</p>
+            </div>
+        </section>
+
+        <!-- About KING2 Model -->
+        <section class="about-section">
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="icon">🧠</div>
+                    <h2>عن النموذج KING2</h2>
+                </div>
+                <p>KING2 ليس مجرد شات بوت، بل هو مساعد ذكي متطور صُمم ليكون العقل المفكر بجانبك. يتميز بقدرات فائقة على التحليل المنطقي، التخيل البصري، والتفاعل اللحظي، مما يجعله الشريك الأمثل للمبدعين والمبرمجين.</p>
+                
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <span class="emoji">🤖</span>
+                        <span class="text">تحليل منطقي متقدم</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="emoji">👁️</span>
+                        <span class="text">تخيل بصري فائق</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="emoji">⚡</span>
+                        <span class="text">تفاعل لحظي سريع</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="emoji">🔒</span>
+                        <span class="text">خصوصية وأمان عالي</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="emoji">🌍</span>
+                        <span class="text">دعم اللغة العربية بالكامل</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="emoji">📚</span>
+                        <span class="text">تعلم مستمر من المحادثات</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technologies -->
+        <section class="about-section">
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="icon">⚙️</div>
+                    <h2>التقنيات المستخدمة</h2>
+                </div>
+                <div class="tech-tags">
+                    <span class="tech-tag">Gemini AI</span>
+                    <span class="tech-tag">Groq</span>
+                    <span class="tech-tag">OpenRouter</span>
+                    <span class="tech-tag">FastAPI</span>
+                    <span class="tech-tag">PostgreSQL</span>
+                    <span class="tech-tag">Python</span>
+                    <span class="tech-tag">Glassmorphism UI</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Founder -->
+        <section class="about-section">
+            <div class="section-card founder-card">
+                <div class="founder-avatar">👑</div>
+                <h3 class="founder-name">راشد (Alking)</h3>
+                <p class="founder-role">المؤسس والمدير التنفيذي - KING2 AI</p>
+            </div>
+        </section>
+
+        <!-- Back Button -->
+        <section class="back-section">
+            <a href="/" class="back-btn">
+                ← العودة للديوان الملكي
+            </a>
+        </section>
+    </div>
+</body>
+</html>

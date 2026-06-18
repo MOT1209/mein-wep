@@ -1,0 +1,18 @@
+{
+  "name": "KING2 AI Backend",
+  "description": "Python FastAPI backend for KING2 AI platform",
+  "env": {
+    "GEMINI_API_KEY": { "required": true },
+    "GROQ_API_KEY": { "required": true },
+    "OPENROUTER_API_KEY": { "required": true },
+    "ZAI_API_KEY": { "required": true },
+    "RASHID_USERNAME": { "value": "admin" },
+    "RASHID_PASSWORD": { "required": true },
+    "SUPABASE_URL": { "required": false },
+    "SUPABASE_ANON_KEY": { "required": false },
+    "OAUTH_REDIRECT_BASE": { "required": false }
+  },
+  "buildpacks": [
+    { "url": "heroku/python" }
+  ]
+}

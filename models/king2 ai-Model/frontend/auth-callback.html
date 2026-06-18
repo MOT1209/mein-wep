@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جاري تسجيل الدخول...</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { background: #050a14; color: #d4af37; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; flex-direction: column; gap: 20px; }
+        .spinner { width: 40px; height: 40px; border: 4px solid rgba(212,175,55,0.2); border-top-color: #d4af37; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="spinner"></div>
+    <div>جاري تسجيل الدخول...</div>
+    <script>
+        let supabaseClient = null;
+
+        async function initSupabase() {
+            try {
+                const res = await fetch('/api/config');
+                const config = await res.json();
+                if (window.supabase && config.supabaseUrl && config.supabaseAnonKey) {
+                    supabaseClient = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+                }
+            } catch (e) {
+                console.warn('[AuthCallback] Config load failed:', e);
+            }
+        }
+
+        async function handleCallback() {
+            if (!supabaseClient) {
+                document.body.innerHTML = '<div>❌ تعذر تحميل الإعدادات. <a href="/" style="color:#d4af37;">العودة</a></div>';
+                return;
+            }
+            const { data: { session }, error } = await supabaseClient.auth.getSession();
+            if (error || !session) {
+                console.error('[AuthCallback] No session:', error);
+                document.body.innerHTML = '<div>❌ فشل تسجيل الدخول. <a href="/" style="color:#d4af37;">العودة</a></div>';
+                return;
+            }
+            const token = session.access_token;
+            try {
+                const r = await fetch(window.location.origin + '/auth/supabase', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ access_token: token }),
+                    credentials: 'same-origin',
+                });
+                const data = await r.json();
+                if (data.success) {
+                    window.location.href = '/';
+                } else {
+                    document.body.innerHTML = '<div>❌ ' + (data.error || 'خطأ') + '. <a href="/" style="color:#d4af37;">العودة</a></div>';
+                }
+            } catch (e) {
+                document.body.innerHTML = '<div>❌ خطأ في الاتصال. <a href="/" style="color:#d4af37;">العودة</a></div>';
+            }
+        }
+        initSupabase().then(handleCallback);
+    </script>
+</body>
+</html>

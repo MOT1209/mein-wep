@@ -44,7 +44,5 @@ games/kingcraft-game/dist/
 # Don't ignore APK files in apks/ (they're committed for site hosting)
 !apks/*.apk
 
-
-# Embedded git repos
-models/king2 ai-Model/
-
+# king2 model: tracked in main repo; secrets are committed only as encrypted .enc
+# (plaintext .env* stay ignored via models/king2 ai-Model/.gitignore)

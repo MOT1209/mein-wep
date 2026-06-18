@@ -1,0 +1,24 @@
+name: Deploy Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app.py'
+      - 'king2_engine.py'
+      - 'model_manager.py'
+      - 'requirements.txt'
+      - 'Dockerfile'
+      - 'render.yaml'
+      - 'railway.toml'
+
+jobs:
+  render-deploy:
+    name: Deploy to Render
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+        shell: bash
