@@ -133,6 +133,12 @@ const boot = async () => {
   if (contactForm) {
     on(contactForm, 'submit', async (e) => {
       e.preventDefault();
+      // Spam honeypot: real users never see/fill #ct-website. If filled, silently drop.
+      if (contactForm.querySelector('#ct-website')?.value) {
+        contactForm.reset();
+        showToast('Message sent! I\'ll get back to you soon.', 'success');
+        return;
+      }
       const nameVal = contactForm.querySelector('#ct-name')?.value ?? '';
       const emailVal = contactForm.querySelector('#ct-email')?.value ?? '';
       const msgVal = contactForm.querySelector('#ct-msg')?.value ?? '';

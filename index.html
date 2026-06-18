@@ -450,6 +450,11 @@
                     <a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener" class="ct-btn ct-tt" aria-label="TikTok profile"><i class="fab fa-tiktok"></i><span>TikTok</span><small>@programmierlabor</small></a>
                 </div>
                 <form class="ct-form">
+                    <!-- Honeypot: hidden from humans, bots tend to fill it. Submissions with a value are dropped. -->
+                    <div class="ct-hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+                        <label for="ct-website">Website</label>
+                        <input type="text" id="ct-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
                     <label for="ct-name">Name</label>
                     <input type="text" id="ct-name" class="ct-input" placeholder="Your name" required>
                     <label for="ct-email">Email</label>
