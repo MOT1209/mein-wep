@@ -144,9 +144,25 @@ const boot = async () => {
       const msgVal = contactForm.querySelector('#ct-msg')?.value ?? '';
       const submitBtn = contactForm.querySelector('button[type="submit"]');
       if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Sending...'; }
-      const { error } = await submitContactMessage(nameVal, emailVal, msgVal);
+      // Deliver to owner's inbox via FormSubmit (no backend/API key) AND persist to Supabase.
+      const emailDelivery = fetch('https://formsubmit.co/ajax/zwnt45602@gmail.com', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: nameVal,
+          email: emailVal,
+          message: msgVal,
+          _subject: `New message from ${nameVal} — rashid-wep`,
+          _template: 'table',
+          _captcha: 'false'
+        })
+      }).then(r => r.ok).catch(() => false);
+      const [{ error }, emailed] = await Promise.all([
+        submitContactMessage(nameVal, emailVal, msgVal),
+        emailDelivery
+      ]);
       if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>'; }
-      if (error) {
+      if (error && !emailed) {
         showToast('Saved locally — will sync when available.', 'info');
         const msgs = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
         msgs.push({ name: nameVal, email: emailVal, message: msgVal, date: new Date().toLocaleString() });
