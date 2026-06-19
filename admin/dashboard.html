@@ -347,6 +347,9 @@
             <div class="nav-item" onclick="showSection('messages', this)">
                 <i class="fas fa-envelope"></i> Messages <span id="messages-badge" style="display:none;background:var(--danger,#ef4444);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;margin-left:4px;"></span>
             </div>
+            <div class="nav-item" onclick="showSection('updates', this)">
+                <i class="fas fa-cloud-arrow-up"></i> App Updates
+            </div>
             <div class="nav-item" onclick="showSection('settings', this)">
                 <i class="fas fa-cog"></i> System Settings
             </div>
@@ -488,6 +491,48 @@
             </div>
             <div class="controls-grid" id="messages-list-container">
                 <p style="text-align:center;color:var(--text-muted);">Open this tab to load messages.</p>
+            </div>
+        </div>
+
+        <!-- App Updates (OTA publisher) -->
+        <div id="updates" class="dashboard-section">
+            <div class="section-header" style="margin-bottom:16px;">
+                <p style="color:var(--text-muted);margin:0;">انشر تحديثاً → يظهر إشعار للمستخدمين الذين لديهم نسخة أقدم.</p>
+            </div>
+            <div style="background:var(--card-bg,#18181b);border:1px solid var(--border,#27272a);border-radius:12px;padding:20px;max-width:560px;margin-bottom:24px;">
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>التطبيق</label>
+                    <select id="upd-app" onchange="fillUpdateForm()" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;font-family:inherit;">
+                        <option value="com.rashid.kingcraft">KingCraft</option>
+                        <option value="com.rashid.rustsurvival">Rust Construction</option>
+                        <option value="com.rashid.farmempire">Farm Empire</option>
+                        <option value="com.rashid.quranpro">Quran Pro</option>
+                        <option value="com.rashid.smartvault">Calculator Vault</option>
+                        <option value="com.rashid.quizmaster">Quiz Master</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>الإصدار الجديد (مثل 0.7.0)</label>
+                    <input type="text" id="upd-version" placeholder="0.7.0" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;">
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>رابط APK</label>
+                    <input type="text" id="upd-url" placeholder="/apks/kingcraft-game-v0.7.0.apk" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;">
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>ملاحظات التحديث (كل سطر = نقطة)</label>
+                    <textarea id="upd-notes" rows="4" placeholder="إضافة ميزة جديدة&#10;إصلاح أخطاء وتحسين الأداء" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;font-family:inherit;"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>التاريخ</label>
+                    <input type="date" id="upd-date" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;">
+                </div>
+                <button class="btn-save" onclick="publishUpdate()"><i class="fas fa-cloud-arrow-up"></i> نشر التحديث</button>
+                <p id="upd-msg" style="margin-top:10px;display:none;"></p>
+            </div>
+            <h3 style="margin-bottom:12px;font-size:1rem;color:var(--text-muted);">الإصدارات المنشورة حالياً</h3>
+            <div class="controls-grid" id="updates-list-container">
+                <p style="text-align:center;color:var(--text-muted);">افتح هذا التبويب لتحميل الإصدارات.</p>
             </div>
         </div>
 
@@ -664,6 +709,7 @@
                 'models': 'Models Manager',
                 'bot': 'Bot Knowledge Base',
                 'messages': 'Contact Messages',
+                'updates': 'App Updates',
                 'content': 'Content Editor',
                 'settings': 'System Settings'
             }[id] || 'Dashboard';
@@ -671,6 +717,7 @@
             if (id === 'models' && typeof fetchModels === 'function') fetchModels();
             if (id === 'bot' && typeof fetchBotKnowledge === 'function') fetchBotKnowledge();
             if (id === 'messages' && typeof fetchMessages === 'function') fetchMessages();
+            if (id === 'updates' && typeof fetchAppUpdates === 'function') fetchAppUpdates();
         }
 
         function logout() {
@@ -774,6 +821,69 @@
             const { error } = await client.from('contact_messages').delete().eq('id', id);
             if (error) alert(error.message);
             else fetchMessages();
+        };
+
+        // ── App Updates (OTA publisher) ──
+        let _appUpdates = {};
+        const APP_NAMES = {
+            'com.rashid.kingcraft': 'KingCraft', 'com.rashid.rustsurvival': 'Rust Construction',
+            'com.rashid.farmempire': 'Farm Empire', 'com.rashid.quranpro': 'Quran Pro',
+            'com.rashid.smartvault': 'Calculator Vault', 'com.rashid.quizmaster': 'Quiz Master'
+        };
+        window.fetchAppUpdates = async function () {
+            const client = window.supabaseClient;
+            const container = document.getElementById('updates-list-container');
+            if (!container) return;
+            if (!client) { container.innerHTML = '<p style="color:var(--danger)">Supabase not available.</p>'; return; }
+            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
+            const { data, error } = await client.from('app_updates').select('*');
+            if (error) {
+                container.innerHTML = '<p style="color:var(--danger)">جدول app_updates غير موجود — شغّل SUPABASE_APP_UPDATES.sql أولاً. ' + escapeHTML(error.message) + '</p>';
+                return;
+            }
+            _appUpdates = {};
+            (data || []).forEach(r => { _appUpdates[r.app_id] = r; });
+            fillUpdateForm();
+            container.innerHTML = '';
+            Object.keys(APP_NAMES).forEach(id => {
+                const r = _appUpdates[id];
+                const div = document.createElement('div');
+                div.className = 'control-row';
+                div.innerHTML = `
+                    <div>
+                        <h3>${escapeHTML(APP_NAMES[id])}</h3>
+                        <p style="color:var(--text-muted);font-size:0.8rem;">${r ? 'v' + escapeHTML(r.version) + (r.release_date ? ' · ' + escapeHTML(r.release_date) : '') : 'لا يوجد إصدار منشور'}</p>
+                    </div>`;
+                container.appendChild(div);
+            });
+        };
+        window.fillUpdateForm = function () {
+            const id = document.getElementById('upd-app').value;
+            const r = _appUpdates[id];
+            document.getElementById('upd-version').value = r ? (r.version || '') : '';
+            document.getElementById('upd-url').value = r ? (r.url || '') : '';
+            document.getElementById('upd-notes').value = r ? (r.notes || '') : '';
+            document.getElementById('upd-date').value = r ? (r.release_date || '') : '';
+        };
+        window.publishUpdate = async function () {
+            const client = window.supabaseClient;
+            const msg = document.getElementById('upd-msg');
+            const show = (t, ok) => { msg.style.display = 'block'; msg.style.color = ok ? 'var(--success,#22c55e)' : 'var(--danger,#ef4444)'; msg.textContent = t; };
+            if (!client) return show('Supabase not available', false);
+            const id = document.getElementById('upd-app').value;
+            const version = document.getElementById('upd-version').value.trim();
+            if (!version) return show('أدخل رقم الإصدار', false);
+            const payload = {
+                app_id: id, name: APP_NAMES[id], version,
+                url: document.getElementById('upd-url').value.trim(),
+                notes: document.getElementById('upd-notes').value,
+                release_date: document.getElementById('upd-date').value || null,
+                updated_at: new Date().toISOString()
+            };
+            const { error } = await client.from('app_updates').upsert(payload, { onConflict: 'app_id' });
+            if (error) return show('فشل النشر: ' + error.message, false);
+            show('✓ تم نشر التحديث — سيظهر الإشعار للمستخدمين بإصدار أقدم.', true);
+            fetchAppUpdates();
         };
 
         window.toggleVaultStatus = async function (table, id, isPublic) {
