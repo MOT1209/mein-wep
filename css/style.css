@@ -3045,7 +3045,7 @@ ul { list-style: none; }
 }
 
 /* ── Container ── */
-.container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 clamp(16px, 4vw, 24px); }
 
 /* ── Component: Navbar ── */
 .navbar {
@@ -3117,13 +3117,13 @@ body.light-mode .navbar.scrolled { background: rgba(250, 250, 250, 0.92); }
   background: var(--accent);
 }
 .hero h1 {
-  font-size: clamp(1.8rem, 4vw, 3.5rem); font-weight: 700; line-height: 1.1;
-  letter-spacing: -0.03em; color: var(--text); margin-bottom: 16px;
+  font-size: clamp(1.75rem, 5vw, 3.6rem); font-weight: 700; line-height: 1.1;
+  letter-spacing: -0.03em; color: var(--text); margin-bottom: clamp(12px, 2vw, 18px);
 }
 .hero h1 span { color: var(--accent); }
 .hero p {
-  font-size: 1.1rem; color: var(--text-secondary); max-width: 540px;
-  margin-bottom: 32px; line-height: 1.7;
+  font-size: clamp(1rem, 1.4vw, 1.15rem); color: var(--text-secondary); max-width: 540px;
+  margin-bottom: clamp(24px, 4vw, 32px); line-height: 1.7;
 }
 .hero-cta { display: flex; gap: 12px; margin-bottom: 40px; }
 .hero-tech { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -3163,14 +3163,14 @@ body.light-mode .navbar.scrolled { background: rgba(250, 250, 250, 0.92); }
 }
 
 /* ── Component: Section ── */
-.section { padding: 100px 0; content-visibility: visible; }
+.section { padding: clamp(56px, 9vw, 100px) 0; content-visibility: visible; }
 .section::after { display: none; }
-.section-head { margin-bottom: 48px; }
+.section-head { margin-bottom: clamp(28px, 5vw, 48px); }
 .section-head h2 {
-  font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 700; color: var(--text);
+  font-size: clamp(1.6rem, 3.2vw, 2.25rem); font-weight: 700; color: var(--text);
   letter-spacing: -0.02em; margin-bottom: 12px;
 }
-.section-head p { font-size: 1rem; color: var(--text-muted); max-width: 600px; }
+.section-head p { font-size: clamp(0.95rem, 1.4vw, 1.05rem); color: var(--text-muted); max-width: 600px; }
 .section-divider { height: 1px; background: var(--border); max-width: var(--max-width); margin: 0 auto; }
 .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
 .reveal.active { opacity: 1; transform: translateY(0); }
@@ -3633,7 +3633,6 @@ textarea.ct-input { resize: vertical; min-height: 100px; }
 /* ── Responsive ── */
 @media (max-width: 1024px) {
   .hero-grid { grid-template-columns: 1fr; gap: 40px; }
-  .hero h1 { font-size: 2.8rem; }
   .hero-visual { order: -1; justify-content: center; }
   .hero-image { width: 200px; height: 200px; }
   .hero-status { position: static; margin-top: 20px; }
@@ -3650,21 +3649,16 @@ textarea.ct-input { resize: vertical; min-height: 100px; }
   .nav-links { display: none; }
   .hamburger { display: flex; }
   .hero { padding: 100px 0 60px; }
-  .hero h1 { font-size: 2rem; }
-  .hero p { font-size: 1rem; }
   .projects-grid { grid-template-columns: 1fr; }
   .projects-header { flex-direction: column; gap: 16px; align-items: flex-start; }
   .vault-grid { grid-template-columns: 1fr 1fr; }
   .sk-progress-grid { grid-template-columns: repeat(2, 1fr); }
   .footer { flex-direction: column; gap: 16px; text-align: center; }
-  .section { padding: 64px 0; }
-  .section-head h2 { font-size: 1.5rem; }
   .ai-grid { grid-template-columns: 1fr; }
   .vault-toolbar { flex-direction: column; align-items: stretch; }
   .vault-search-wrap { max-width: none; }
 }
 @media (max-width: 480px) {
-  .hero h1 { font-size: 1.6rem; }
   .hero-cta { flex-direction: column; }
   .filter-group { flex-wrap: wrap; }
   .vault-grid { grid-template-columns: 1fr; }
@@ -5211,5 +5205,51 @@ select.admin-input { cursor: pointer; }
         transition-duration: 0.01ms !important;
         scroll-behavior: auto !important;
     }
+}
+
+/* =========================================
+   RESPONSIVE POLISH v9.1
+   Fluid sizing for smooth scaling across
+   phone → iPad → laptop → desktop.
+   Placed last so these fluid values govern.
+   ========================================= */
+
+/* Cards — fluid heading & body text */
+.project-info h3 { font-size: clamp(1.05rem, 1.6vw, 1.3rem); }
+.project-info p { font-size: clamp(0.85rem, 1.2vw, 0.92rem); }
+.about-card { padding: clamp(20px, 3vw, 32px); }
+.ai-card { padding: clamp(20px, 2.6vw, 28px); }
+
+/* Buttons — comfortable & fluid */
+.btn {
+  padding: clamp(11px, 1.4vw, 13px) clamp(20px, 2.4vw, 26px);
+  font-size: clamp(0.875rem, 1.1vw, 0.95rem);
+}
+
+/* Hero call-to-action spacing */
+.hero-cta { gap: clamp(10px, 1.6vw, 14px); margin-bottom: clamp(28px, 5vw, 40px); }
+
+/* Stat / status numbers scale gently */
+.stat-num { font-size: clamp(1.4rem, 2.4vw, 1.9rem); }
+
+/* ---- Tablet / iPad (768–1024) ---- */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .projects-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ai-grid, .vault-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .sk-progress-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hero-image { width: clamp(210px, 30vw, 264px); height: clamp(210px, 30vw, 264px); }
+}
+
+/* ---- Small phones: single comfortable column ---- */
+@media (max-width: 560px) {
+  .projects-grid { grid-template-columns: 1fr; }
+  .hero-cta { flex-direction: column; }
+  .hero-cta .btn { width: 100%; justify-content: center; }
+  .about-stats, .hero-status { gap: 8px; }
+}
+
+/* ---- Large desktops: a touch more breathing room ---- */
+@media (min-width: 1600px) {
+  .container { max-width: 1400px; }
 }
 
