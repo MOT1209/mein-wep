@@ -14,6 +14,8 @@
  *
  * Fails soft: if sharp is missing or no source icon exists, it logs and
  * exits 0 so it never breaks the CI build.
+ *
+ * Build trigger: full rebuild of all APKs (icons + bundled web content).
  */
 
 import fs from 'fs';
