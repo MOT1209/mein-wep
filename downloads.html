@@ -372,6 +372,39 @@
             .downloads-grid { grid-template-columns: 1fr; }
             .steps { grid-template-columns: 1fr; }
         }
+
+        /* ── Live Phone Preview ── */
+        .phone-preview { margin: clamp(48px, 8vw, 80px) 0; text-align: center; }
+        .phone-preview h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); margin-bottom: 8px; }
+        .preview-sub { color: var(--text-muted, #8596b0); margin-bottom: 24px; }
+        .preview-apps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 28px; }
+        .preview-app { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 100px;
+            border: 1px solid var(--border, rgba(255,255,255,0.1)); background: var(--bg-surface, rgba(255,255,255,0.04));
+            color: var(--text-muted, #a8b5c9); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            transition: all .25s ease; font-family: inherit; }
+        .preview-app:hover { border-color: var(--accent, #6366f1); color: var(--text, #f1f5f9); }
+        .preview-app.active { background: var(--accent, #6366f1); color: #fff; border-color: var(--accent, #6366f1); }
+        .phone-frame { position: relative; width: min(330px, 86vw); aspect-ratio: 330 / 680; margin: 0 auto;
+            background: #0b0b10; border: 10px solid #16161d; border-radius: 46px; padding: 0; overflow: hidden;
+            box-shadow: 0 30px 70px -20px rgba(0,0,0,.7), inset 0 0 0 2px rgba(255,255,255,.04); }
+        .phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 124px; height: 22px;
+            background: #16161d; border-radius: 0 0 14px 14px; z-index: 3; }
+        .phone-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 110px; height: 4px;
+            background: rgba(255,255,255,.35); border-radius: 4px; z-index: 3; pointer-events: none; }
+        .phone-screen { position: relative; width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #000; }
+        .phone-screen iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+        .phone-loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-secondary, #0a0a0f); z-index: 2; }
+        .phone-loader.hidden { display: none; }
+        .phone-spinner { width: 34px; height: 34px; border: 3px solid rgba(255,255,255,.15);
+            border-top-color: var(--accent, #6366f1); border-radius: 50%; animation: phone-spin .8s linear infinite; }
+        @keyframes phone-spin { to { transform: rotate(360deg); } }
+        .preview-actions { margin-top: 22px; }
+        .preview-open { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 100px;
+            background: var(--bg-surface, rgba(255,255,255,.05)); border: 1px solid var(--border, rgba(255,255,255,.1));
+            color: var(--text, #f1f5f9); text-decoration: none; font-size: .9rem; font-weight: 600; transition: all .25s ease; }
+        .preview-open:hover { border-color: var(--accent, #6366f1); }
+        @media (max-width: 480px) { .phone-frame { border-width: 8px; border-radius: 38px; } }
     </style>
 </head>
 <body class="dark-mode">
@@ -418,6 +451,35 @@
         <div class="downloads-grid" id="downloads-grid">
             <!-- Populated by JS -->
         </div>
+
+        <!-- Live Phone Preview (real apps running inside a phone frame) -->
+        <section class="phone-preview" aria-labelledby="preview-title">
+            <h2 id="preview-title"><i class="fas fa-mobile-screen-button"></i> Live Preview — جرّبها الآن</h2>
+            <p class="preview-sub">اختر تطبيقاً وشغّله مباشرة داخل محاكي هاتف — بدون تثبيت.</p>
+            <div class="preview-apps" role="tablist" aria-label="Choose an app to preview">
+                <button class="preview-app active" type="button" data-src="apps/maarifah-web/index.html"><i class="fas fa-graduation-cap"></i> Maarifah</button>
+                <button class="preview-app" type="button" data-src="apps/quran-app/index.html"><i class="fas fa-book-quran"></i> Quran</button>
+                <button class="preview-app" type="button" data-src="apps/calculator-app/index.html"><i class="fas fa-calculator"></i> Calculator</button>
+                <button class="preview-app" type="button" data-src="apps/quiz-app/index.html"><i class="fas fa-circle-question"></i> Quiz</button>
+                <button class="preview-app" type="button" data-src="games/kingcraft-game/index.html"><i class="fas fa-cube"></i> KingCraft</button>
+                <button class="preview-app" type="button" data-src="games/rust-game/index.html"><i class="fas fa-hammer"></i> Rust</button>
+                <button class="preview-app" type="button" data-src="games/farm-game/index.html"><i class="fas fa-seedling"></i> Farm</button>
+            </div>
+            <div class="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                    <div class="phone-loader" id="phone-loader"><span class="phone-spinner"></span></div>
+                    <iframe id="preview-iframe" title="App live preview" loading="lazy"
+                        src="apps/maarifah-web/index.html" allow="fullscreen; autoplay; gyroscope"></iframe>
+                </div>
+                <div class="phone-bar"></div>
+            </div>
+            <div class="preview-actions">
+                <a class="preview-open" id="preview-open" href="apps/maarifah-web/index.html" target="_blank" rel="noopener">
+                    <i class="fas fa-up-right-from-square"></i> فتح في نافذة كاملة
+                </a>
+            </div>
+        </section>
 
         <div class="how-it-works">
             <h2><i class="fas fa-info-circle"></i> How Updates Work</h2>
@@ -614,6 +676,25 @@
         grid.addEventListener('click', (e) => {
             if (e.target.closest('[data-open-guide]')) openGuide();
         });
+
+        // ── Live phone preview: switch the running app inside the phone frame ──
+        (function () {
+            const iframe = document.getElementById('preview-iframe');
+            const loader = document.getElementById('phone-loader');
+            const openBtn = document.getElementById('preview-open');
+            const btns = document.querySelectorAll('.preview-app');
+            if (!iframe) return;
+            iframe.addEventListener('load', () => loader && loader.classList.add('hidden'));
+            btns.forEach((b) => b.addEventListener('click', () => {
+                btns.forEach((x) => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+                b.classList.add('active');
+                b.setAttribute('aria-selected', 'true');
+                if (loader) loader.classList.remove('hidden');
+                const src = b.dataset.src;
+                iframe.src = src;
+                if (openBtn) openBtn.href = src;
+            }));
+        })();
     </script>
 
     <!-- Footer -->
