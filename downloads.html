@@ -20,7 +20,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/style.css?v=9.0">
+    <link rel="stylesheet" href="css/style.css?v=9.1">
     <link rel="icon" type="image/png" href="images/logo.png">
 
     <style>
@@ -196,6 +196,177 @@
             color: #22c55e;
         }
         .update-badge i { font-size: 10px; }
+
+        /* "How do I install?" link inside each card */
+        .install-help {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-med);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: var(--transition);
+            align-self: flex-start;
+        }
+        .install-help:hover { color: var(--accent); }
+
+        /* Global "How to Install" CTA under subtitle */
+        .install-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: -32px auto 48px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-high);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-accent);
+            backdrop-filter: blur(var(--blur-intensity));
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .install-cta:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.18);
+            transform: translateY(-2px);
+        }
+        .install-cta-wrap { text-align: center; }
+
+        /* ===== Installation Guide Modal ===== */
+        .guide-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .guide-overlay.active { opacity: 1; visibility: visible; }
+        .guide-modal {
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            max-width: 540px;
+            width: 100%;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 32px;
+            box-shadow: var(--shadow-lg), 0 0 60px rgba(var(--accent-rgb), 0.12);
+            transform: translateY(20px) scale(0.98);
+            transition: transform 0.25s ease;
+        }
+        .guide-overlay.active .guide-modal { transform: translateY(0) scale(1); }
+        .guide-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        .guide-head h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-high);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .guide-head h2 i { color: var(--accent); }
+        .guide-close {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-med);
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .guide-close:hover { color: var(--text-high); border-color: var(--border-accent); }
+        .guide-intro {
+            font-size: 14px;
+            color: var(--text-med);
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+        .guide-steps { list-style: none; padding: 0; margin: 0; }
+        .guide-step {
+            display: flex;
+            gap: 16px;
+            padding-bottom: 24px;
+            position: relative;
+        }
+        .guide-step:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            left: 17px;
+            top: 38px;
+            bottom: 4px;
+            width: 2px;
+            background: var(--border);
+        }
+        .guide-step .num {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        .guide-step .body h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-high);
+            margin: 6px 0 4px;
+        }
+        .guide-step .body p {
+            font-size: 14px;
+            color: var(--text-med);
+            line-height: 1.6;
+            margin: 0;
+        }
+        .guide-step .body strong { color: var(--accent); font-weight: 600; }
+        .guide-note {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-top: 8px;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            font-size: 13px;
+            color: var(--text-med);
+            line-height: 1.6;
+        }
+        .guide-note i { color: #22c55e; font-size: 16px; margin-top: 2px; }
+        @media (max-width: 600px) {
+            .guide-modal { padding: 24px 20px; }
+        }
         @media (max-width: 600px) {
             .downloads-page { padding: 100px 16px 40px; }
             .downloads-grid { grid-template-columns: 1fr; }
@@ -238,6 +409,12 @@
         <h1>Download APK</h1>
         <p class="subtitle">Install Rashid's apps and games directly on your Android device</p>
 
+        <div class="install-cta-wrap">
+            <button class="install-cta" id="open-guide-btn" type="button">
+                <i class="fas fa-circle-question"></i> How to install an APK?
+            </button>
+        </div>
+
         <div class="downloads-grid" id="downloads-grid">
             <!-- Populated by JS -->
         </div>
@@ -268,6 +445,53 @@
             </div>
         </div>
     </main>
+
+    <!-- Installation Guide Modal -->
+    <div class="guide-overlay" id="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="guide-title" hidden>
+        <div class="guide-modal">
+            <div class="guide-head">
+                <h2 id="guide-title"><i class="fas fa-mobile-screen-button"></i> How to Install</h2>
+                <button class="guide-close" id="guide-close" aria-label="Close guide" type="button"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="guide-intro">Since these apps are distributed directly (not via Google Play), Android shows a one-time security prompt. Just follow these simple steps:</p>
+
+            <ol class="guide-steps">
+                <li class="guide-step">
+                    <span class="num">1</span>
+                    <div class="body">
+                        <h4>Download the APK</h4>
+                        <p>Tap <strong>Download APK</strong> on any app above. The file saves to your device.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">2</span>
+                    <div class="body">
+                        <h4>Open the file</h4>
+                        <p>Tap the download notification, or find the file in your <strong>Downloads</strong> / Files app and open it.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">3</span>
+                    <div class="body">
+                        <h4>Allow "Unknown Sources"</h4>
+                        <p>Android may warn that installing is blocked. Tap <strong>Settings</strong>, then enable <strong>Allow from this source</strong> (also called "Install unknown apps") for your browser or file manager.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">4</span>
+                    <div class="body">
+                        <h4>Tap Install</h4>
+                        <p>Go back and press <strong>Install</strong>. Once it finishes, open the app and you're ready to go!</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="guide-note">
+                <i class="fas fa-shield-halved"></i>
+                <span>The "Unknown Sources" warning is standard for any app installed outside Google Play — it does not mean the app is unsafe. You can turn the permission back off after installing.</span>
+            </div>
+        </div>
+    </div>
 
     <script>
         const BASE = 'https://rashid-wep.vercel.app';
@@ -355,11 +579,41 @@
                         <span>${exists ? '<span class="update-badge"><i class="fas fa-circle"></i> Ready</span>' : '<span style="color:var(--text-low)"><i class="fas fa-spinner fa-spin"></i> Pending first build</span>'}</span>
                     </div>
                     ${btnHtml}
+                    <button class="install-help" type="button" data-open-guide><i class="fas fa-circle-question"></i> How do I install this?</button>
                 `;
                 grid.appendChild(card);
             }
         }
         renderCards();
+
+        /* ===== Installation Guide Modal control ===== */
+        const guideOverlay = document.getElementById('guide-overlay');
+        const guideClose = document.getElementById('guide-close');
+
+        function openGuide() {
+            guideOverlay.hidden = false;
+            requestAnimationFrame(() => guideOverlay.classList.add('active'));
+            document.body.style.overflow = 'hidden';
+            guideClose.focus();
+        }
+        function closeGuide() {
+            guideOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => { guideOverlay.hidden = true; }, 250);
+        }
+
+        document.getElementById('open-guide-btn').addEventListener('click', openGuide);
+        guideClose.addEventListener('click', closeGuide);
+        guideOverlay.addEventListener('click', (e) => {
+            if (e.target === guideOverlay) closeGuide();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && guideOverlay.classList.contains('active')) closeGuide();
+        });
+        // Per-card "How do I install?" buttons (delegated, since cards render async)
+        grid.addEventListener('click', (e) => {
+            if (e.target.closest('[data-open-guide]')) openGuide();
+        });
     </script>
 
     <!-- Footer -->
