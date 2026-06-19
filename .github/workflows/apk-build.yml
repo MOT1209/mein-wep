@@ -124,6 +124,12 @@ jobs:
           fi
           node ../../scripts/copy-to-www.mjs .
 
+      - name: Generate launcher icons
+        working-directory: ${{ matrix.project }}
+        run: |
+          npm install --no-save sharp 2>&1 | tail -3 || echo "sharp install failed — icons will be skipped"
+          node ../../scripts/gen-icons.mjs .
+
       - name: Sync Capacitor
         working-directory: ${{ matrix.project }}
         run: npx cap sync android 2>&1 | tail -10
