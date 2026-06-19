@@ -52,7 +52,7 @@ jobs:
           PROJECTS='[]'
           for dir in apps/quran-app apps/calculator-app apps/quiz-app games/kingcraft-game games/rust-game games/farm-game; do
             if echo "$CHANGED" | grep -q "^$dir/"; then
-              PROJECTS=$(echo "$PROJECTS" | jq --arg d "$dir" '. + [$d]')
+              PROJECTS=$(echo "$PROJECTS" | jq -c --arg d "$dir" '. + [$d]')
               echo "Changed: $dir"
             fi
           done
