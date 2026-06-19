@@ -1,0 +1,47 @@
+{
+  "updatedAt": "2026-06-19",
+  "apps": {
+    "com.rashid.kingcraft": {
+      "name": "KingCraft",
+      "version": "0.6.0",
+      "url": "/apks/kingcraft-game-v0.6.0.apk",
+      "date": "2026-06-16",
+      "notes": ["الإصدار الحالي المستقر."]
+    },
+    "com.rashid.rustsurvival": {
+      "name": "Rust Construction",
+      "version": "1.1.0",
+      "url": "/apks/rust-game-v1.1.0.apk",
+      "date": "2026-06-16",
+      "notes": ["تدوير البناء وتحسين التضاريس.", "إصلاحات استقرار."]
+    },
+    "com.rashid.farmempire": {
+      "name": "Farm Empire",
+      "version": "2.0.0",
+      "url": "/apks/farm-game-v2.0.0.apk",
+      "date": "2026-06-16",
+      "notes": ["عالم ثلاثي الأبعاد، زراعة، حيوانات، وطقس."]
+    },
+    "com.rashid.quranpro": {
+      "name": "Quran Pro",
+      "version": "1.0.0",
+      "url": "/apks/quran-app-v1.0.0.apk",
+      "date": "2026-06-16",
+      "notes": ["الإصدار الأول."]
+    },
+    "com.rashid.smartvault": {
+      "name": "Calculator Vault",
+      "version": "1.0.0",
+      "url": "/apks/calculator-app-v1.0.0.apk",
+      "date": "2026-06-16",
+      "notes": ["الإصدار الأول."]
+    },
+    "com.rashid.quizmaster": {
+      "name": "Quiz Master",
+      "version": "1.0.0",
+      "url": "/apks/quiz-app-v1.0.0.apk",
+      "date": "2026-06-16",
+      "notes": ["الإصدار الأول."]
+    }
+  }
+}
