@@ -39,7 +39,7 @@ const fallbackProjects = [
     { title: 'Farm Empire', category: 'Game', description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!', link: 'games/farm-game/index.html', image_url: '../images/screenshots/farm-empire.svg', technologies: ['WebGL', 'Simulation', 'Economy'] },
     { title: 'Rashid AI', category: 'Model', description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support with 10+ languages.', link: 'models/Rashid-Model/index.html', image_url: '../images/screenshots/rashid-ai.svg', technologies: ['Gemini API', 'OpenRouter', 'AI'] },
     { title: 'Quran Pro', category: 'App', description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.', link: 'apps/quran-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Audio', 'PWA', 'Offline'] },
-    { title: 'Calculator App', category: 'App', description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!', link: 'apps/calculator-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Security', 'PWA', 'Privacy'] },
+    { title: 'Calculator App', category: 'App', description: 'Privacy-focused calculator with secret vault. Hide files behind a calculator interface!', link: 'apps/calculator-vault/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Security', 'PWA', 'Privacy'] },
     { title: 'Quiz Master', category: 'App', description: 'Interactive quiz platform with multiple categories, scoring, and progress tracking.', link: 'apps/quiz-app/index.html', image_url: '../images/screenshots/default.svg', technologies: ['Education', 'PWA', 'Gamification'] }
 ];
 
@@ -123,8 +123,17 @@ export async function initProjects() {
         return;
     }
 
-    const dbTitles = new Set(projects.map(p => p.title));
-    const extra = fallbackProjects.filter(f => !dbTitles.has(f.title));
+    // Dedupe the offline fallback against DB rows by BOTH normalized title and
+    // normalized link (folder), so the same project isn't shown twice when the DB
+    // and the fallback use different names (e.g. "Farmer Game" vs "Farm Empire").
+    const norm = (s) => String(s || '').toLowerCase().replace(/^\/+/, '').replace(/\/index\.html$/, '').replace(/\/+$/, '').trim();
+    const dbKeys = new Set();
+    projects.forEach(p => {
+        if (p.title) dbKeys.add('t:' + norm(p.title));
+        const l = norm(p.link || p.project_link);
+        if (l) dbKeys.add('l:' + l);
+    });
+    const extra = fallbackProjects.filter(f => !dbKeys.has('t:' + norm(f.title)) && !dbKeys.has('l:' + norm(f.link)));
     if (extra.length > 0) {
         projects = [...projects, ...extra];
     }
