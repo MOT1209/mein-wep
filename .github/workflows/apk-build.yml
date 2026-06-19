@@ -59,12 +59,12 @@ jobs:
 
           if [ "$PROJECTS" = "[]" ]; then
             if echo "$CHANGED" | grep -q "^scripts/"; then
-              echo "projects=$ALL"
+              echo "projects=$ALL" >> $GITHUB_OUTPUT
             else
-              echo "projects=[]"
+              echo "projects=[]" >> $GITHUB_OUTPUT
             fi
           else
-            echo "projects=$PROJECTS"
+            echo "projects=$PROJECTS" >> $GITHUB_OUTPUT
           fi
 
   build:
