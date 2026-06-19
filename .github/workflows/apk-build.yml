@@ -107,7 +107,10 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ matrix.project }}
-        run: npm install 2>&1 | tail -5
+        run: |
+          npm install 2>&1 | tail -5
+          # Capacitor reads capacitor.config.ts → needs TypeScript at build time
+          npm install --no-save typescript 2>&1 | tail -3
 
       - name: Add Android platform
         working-directory: ${{ matrix.project }}
@@ -198,7 +201,8 @@ jobs:
             echo "APK copied to $DEST"
           else
             echo "path=" >> $GITHUB_OUTPUT
-            echo "No APK found"
+            echo "::error::No APK produced for ${{ matrix.project }} — Capacitor/Gradle build failed"
+            exit 1
           fi
 
       - name: Update version.json with site URL
