@@ -57,3 +57,11 @@ with check (exists (select 1 from public.admin_users where user_id = (select aut
 create policy "Admins can delete knowledge"
 on public.bot_knowledge for delete to authenticated
 using (exists (select 1 from public.admin_users where user_id = (select auth.uid())));
+
+-- ------------------------------------------------------------------------------
+-- 3. إغلاق ثغرة التسجيل الذاتي كأدمن
+--    الدالة add_admin_user() (security definer) كانت تسمح لأي مستخدم مسجّل
+--    بإضافة نفسه إلى admin_users عبر RPC. لم تعد الواجهة تستدعيها (المرحلة 2)،
+--    ونحذفها هنا لإغلاق المسار نهائياً. (idempotent: if exists)
+-- ------------------------------------------------------------------------------
+drop function if exists public.add_admin_user();

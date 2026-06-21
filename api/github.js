@@ -18,6 +18,23 @@ const ALLOWED_ORIGINS = [
   'http://127.0.0.1:5500',
 ];
 
+// rate-limit بسيط في الذاكرة (لكل IP). ملاحظة: يُعاد ضبطه عند cold start وهو
+// لكل نسخة serverless على حدة. للإنتاج عبر عدة نسخ، استبدله بـ Upstash Redis.
+const RATE_LIMIT = 10;          // عدد الطلبات
+const WINDOW_MS = 60 * 1000;    // لكل دقيقة
+const hits = new Map();         // ip -> { count, resetAt }
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || now > entry.resetAt) {
+    hits.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT;
+}
+
 module.exports = async (req, res) => {
   // تحقق من Origin: نحظر فقط إذا كان موجوداً وغير مدرج في القائمة البيضاء
   const origin = req.headers.origin;
@@ -33,6 +50,13 @@ module.exports = async (req, res) => {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+
+  // rate-limit بالـ IP
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+    || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests, slow down.' });
+  }
 
   const endpoint = req.query.endpoint;
   if (!endpoint || !ALLOWED.includes(endpoint)) {
