@@ -137,6 +137,7 @@ if torch.cuda.is_available():
 log("=== 2. INSTALLING ===")
 run_cmd("pip install -qU torch --index-url https://download.pytorch.org/whl/cu121")
 run_cmd("pip install -qU transformers datasets accelerate peft bitsandbytes trl unsloth")
+run_cmd("pip install -q 'datasets>=2.16.0,<=4.0.0'")
 
 # Clone LLaMA Factory
 if not os.path.exists("/content/LLaMA-Factory"):
@@ -207,7 +208,7 @@ start = time.time()
 eff_batch = cfg["per_device_train_batch_size"] * cfg["gradient_accumulation_steps"]
 log(f"Effective batch: {eff_batch} | Epochs: {cfg['num_train_epochs']} | LR: {cfg['learning_rate']} | LoRA: {cfg['lora_rank']}")
 
-result = run_cmd("cd /content/LLaMA-Factory && llamafactory-cli train train_config.yaml")
+result = run_cmd("cd /content/LLaMA-Factory && DISABLE_VERSION_CHECK=1 llamafactory-cli train train_config.yaml")
 
 elapsed = time.time() - start
 log(f"Training time: {elapsed:.0f}s ({elapsed/60:.1f} min)")
