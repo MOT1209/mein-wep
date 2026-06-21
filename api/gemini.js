@@ -9,8 +9,41 @@
  * Then redeploy. The client calls /api/gemini, the key never leaves Vercel.
  */
 
+// قائمة بيضاء للأصول المسموح لها باستدعاء البروكسي
+const ALLOWED_ORIGINS = [
+  'https://rashid-wep.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+];
+
+// rate-limit بسيط في الذاكرة (لكل IP). ملاحظة: يُعاد ضبطه عند cold start وهو
+// لكل نسخة serverless على حدة. للإنتاج عبر عدة نسخ، استبدله بـ Upstash Redis.
+const RATE_LIMIT = 10;          // عدد الطلبات
+const WINDOW_MS = 60 * 1000;    // لكل دقيقة
+const hits = new Map();         // ip -> { count, resetAt }
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || now > entry.resetAt) {
+    hits.set(ip, { count: 1, resetAt: now + WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT;
+}
+
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // تحقق من Origin: نحظر فقط إذا كان موجوداً وغير مدرج في القائمة البيضاء
+  const origin = req.headers.origin;
+  if (origin) {
+    if (!ALLOWED_ORIGINS.includes(origin)) {
+      return res.status(403).json({ error: 'Origin not allowed' });
+    }
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -20,6 +53,13 @@ module.exports = async (req, res) => {
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  // rate-limit بالـ IP
+  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
+    || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests, slow down.' });
   }
 
   const { prompt } = req.body || {};

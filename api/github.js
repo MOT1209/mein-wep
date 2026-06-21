@@ -10,8 +10,24 @@
 const GITHUB_API = 'https://api.github.com';
 const ALLOWED = ['/users/MOT1209', '/users/MOT1209/repos', '/users/MOT1209/events'];
 
+// قائمة بيضاء للأصول المسموح لها باستدعاء البروكسي
+const ALLOWED_ORIGINS = [
+  'https://rashid-wep.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5500',
+  'http://127.0.0.1:5500',
+];
+
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // تحقق من Origin: نحظر فقط إذا كان موجوداً وغير مدرج في القائمة البيضاء
+  const origin = req.headers.origin;
+  if (origin) {
+    if (!ALLOWED_ORIGINS.includes(origin)) {
+      return res.status(403).json({ error: 'Origin not allowed' });
+    }
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
