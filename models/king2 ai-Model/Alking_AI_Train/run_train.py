@@ -197,6 +197,7 @@ cfg = {
 }
 with open(os.path.join(DRIVE_PATH, "train_config.yaml"), "w") as f:
     yaml.dump(cfg, f, allow_unicode=True)
+run_cmd("cp '{}' /content/LLaMA-Factory/train_config.yaml".format(os.path.join(DRIVE_PATH, "train_config.yaml")))
 
 # 5. TRAIN
 log("=" * 50)
