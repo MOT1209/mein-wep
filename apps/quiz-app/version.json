@@ -1,7 +1,7 @@
-﻿{
-  "version": "1.0.0",
-  "buildNumber": 1,
+{
+  "version": "1.1.0",
+  "buildNumber": 2,
   "apkUrl": "https://rashid-wep.vercel.app/apks/quiz-app-v1.0.0.apk",
-  "changelog": "Initial release",
-  "releaseDate": "2026-06-16"
+  "changelog": "إصلاح عطل قاتل منع تشغيل التطبيق · إضافة تصنيف ثقافة عامة (30 سؤال) · مؤثرات صوتية · حفظ التقدم وأفضل النتائج · شاشات التقدم والإعدادات",
+  "releaseDate": "2026-06-22"
 }
