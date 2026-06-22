@@ -85,6 +85,28 @@ def generate_training_data():
     data.append(make_conv("ما هو LoRA؟", "Low-Rank Adaptation: أسلوب تدريب فعال بإضافة مصفوفات صغيرة قابلة للتدريب. يحتاج ذاكرة أقل، ملفات صغيرة."))
     data.append(make_conv("ما هو التعلم الآلي؟", "فرع من AI يتيح للأنظمة التعلم من البيانات. أنواعه: 1. Supervised (بيانات مصنفة) 2. Unsupervised (غير مصنفة) 3. Reinforcement (تعلم بالتفاعل)."))
 
+    # AI Image Generation
+    data.append(make_conv("ما هو Midjourney؟", "أداة ذكاء اصطناعي لتوليد الصور من النصوص. يعمل عبر Discord. يتميز بجودة فنية استثنائية. أحدث إصدار: V7. يستخدم معماري Diffusion."))
+    data.append(make_conv("ما هو DALL-E؟", "نموذج توليد صور من OpenAI. مدمج مع ChatGPT Plus. يتميز بفهم الأوامر النصية المعقدة بدقة. أحدث إصدار: DALL-E 3. يدعم تحرير الصور بعد الإنشاء."))
+    data.append(make_conv("ما هو Stable Diffusion؟", "نموذج مفتوح المصدر لتوليد الصور. يعمل محلياً على جهازك. يدعم التخصيص الكامل. يستخدم مع ComfyUI أو Automatic1111. مجاني بالكامل."))
+    data.append(make_conv("ما هو Leonardo AI؟", "منصة متكاملة لتوليد الصور بالذكاء الاصطناعي. تقدم خطة مجانية 150 صورة يومياً. تدعم نماذج Photoreal V2 و Phoenix. أدوات تحرير مدمجة."))
+    data.append(make_conv("ما هو Adobe Firefly؟", "أداة توليد الصور من Adobe. متكاملة مع Photoshop و Illustrator. آمنة للاستخدام التجاري. تركز على التصميم الاحترافي."))
+    data.append(make_conv("ما هو prompt engineering للصور؟", "فن كتابة الأوامر للحصول على نتائج دقيقة. الصيغة: [الموضوع] + [الأسلوب] + [الإضاءة] + [الزاوية] + [المعاملات]. مثال: --ar 16:9, --v 7, --q 2"))
+    data.append(make_conv("كيف أكتب prompt احترافي في Midjourney؟", "صيغة متقنة: /imagine prompt: [موضوع محدد] + [تفاصيل] + [نمط فني] + [إضاءة] + [مزاج] + [جودة]. أضف معاملات مثل --ar 16:9 و --v 7 و --style raw."))
+    data.append(make_conv("ما هي معاملات Midjourney؟", "--ar: نسبة الأبعاد (16:9, 9:16, 1:1). --v: إصدار النموذج. --style: درجة الأسلوب الفني. --q: الجودة. --s: قوة الأسلوب. --seed: رقم عشوائي ثابت للتكرار."))
+    data.append(make_conv("ما هو negative prompt؟", "أوامر سلبية تستبعد عناصر غير مرغوب فيها. في Stable Diffusion: 'no people, no text, no blurry'. في DALL-E: أضف 'بدون' في الوصف."))
+    data.append(make_conv("ما الفرق بين Midjourney و DALL-E؟", "Midjourney: جودة فنية أعلى، يعمل عبر Discord، مدفوع. DALL-E: دقة في فهم الأوامر، مدمج مع ChatGPT، يدخل العربية، أسهل للمبتدئين."))
+    data.append(make_conv("ما هو Imagen 3 من Google؟", "نموذج توليد صور من Google. يستخدم في Whisk. مجاني. جودة عالية. يدخل تحرير الصور وتوليد فيديو عبر Veo 2."))
+    data.append(make_conv("ما هو توليد الفيديو بالذكاء الاصطناعي؟", "أدوات: Sora (OpenAI) - نصوص إلى فيديو. Veo 2 (Google) - فيديو عالي الدقة. RunwayML - تحرير فيديو. Pika - إنشاء فيديو سريع."))
+    data.append(make_conv("كيف أستخدم AI لتصميم شعار؟", "أدوات: Looka - تصميم شعار بالوصف. Canva AI - قوالب جاهزة. Midjourney - شعارات فنية. Manus Design - شعارات قابلة للتعديل. صف فكرتك بدقة."))
+    data.append(make_conv("ما هو Canva Magic Media؟", "أداة توليد صور بالذكاء الاصطناعي مدمجة في Canva. تدعم اللغة العربية. سهلة للمبتدئين. مثالية لتصميم منشورات التواصل الاجتماعي."))
+    data.append(make_conv("ما هو Nano Banana Pro؟", "نموذج توليد صور متقدم. يستخدم في Manus Design. يدعم توليد صور عالية الدقة وفيديوهات ونماذج ثلاثية الأبعاد من النصوص."))
+    data.append(make_conv("كيف تكون صورة احترافية في Midjourney؟", "1. وصف دقيق للموضوع. 2. إضافة أسلوب: 'photorealistic' أو 'cinematic'. 3. تحديد الإضاءة: 'golden hour' أو 'dramatic lighting'. 4. أبعاد: --ar 16:9. 5. جودة: --q 2."))
+    data.append(make_conv("ما مفهوم 'seed' في توليد الصور؟", "رقم يتحكم بالعشوائية في توليد الصور. باستخدام نفس الـ seed مع نفس الـ prompt، تحصل على نفس الصورة. مفيد لإنشاء سلسلة صور متناسقة."))
+    data.append(make_conv("ما الفرق بين image-to-image و text-to-image؟", "Text-to-image: توليد صورة من وصف نصي. Image-to-image: تحويل صورة موجودة باستخدام وصف جديد. img2img يعطي تحكم أكبر في النتيجة."))
+    data.append(make_conv("ما هو ControlNet؟", "إضافة لـ Stable Diffusion تتحكم بدقة في توليد الصور. أنواع: Canny (الحواف)، Depth (العمق)، Pose (وضعية الجسم). يعطي تحكم كامل في التكوين."))
+    data.append(make_conv("كيف أختار أداة توليد صور مناسبة؟", "للفن والإبداع: Midjourney. للدقة والأوامر المعقدة: DALL-E. للتخصيص والمجانية: Stable Diffusion. للتصميم الاحترافي: Adobe Firefly. للمبتدئين: Canva أو Leonardo."))
+
     # Peace & Islamic
     data.append(make_conv("ما هو مفهوم السلام في الإسلام؟", "تحية الإسلام: 'السلام عليكم'. السلام اسم من أسماء الله. قال النبي: 'أفشوا السلام بينكم'. قال تعالى: 'وَالصُّلْحُ خَيْرٌ'."))
     data.append(make_conv("ما هي أركان الإسلام؟", "1. الشهادتان 2. الصلاة 3. الزكاة 4. صوم رمضان 5. الحج"))
