@@ -1,0 +1,119 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.3" r="0.6">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#d97706"/>
+      <stop offset="100%" stop-color="#b45309"/>
+    </linearGradient>
+    <linearGradient id="msg1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <linearGradient id="msg2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="720" fill="#0a0a12"/>
+  <rect width="1280" height="720" fill="url(#glow)"/>
+
+  <!-- Grid pattern -->
+  <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+    <rect width="30" height="30" fill="none"/>
+    <rect width="1" height="30" fill="rgba(245,158,11,0.04)"/>
+    <rect width="30" height="1" fill="rgba(245,158,11,0.04)"/>
+  </pattern>
+  <rect width="1280" height="720" fill="url(#grid)"/>
+
+  <!-- Chat container -->
+  <rect x="200" y="80" width="520" height="560" rx="16" fill="rgba(15,23,42,0.85)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+  
+  <!-- Chat header -->
+  <rect x="200" y="80" width="520" height="56" rx="16" fill="rgba(245,158,11,0.1)"/>
+  <rect x="200" y="120" width="520" height="16" fill="rgba(245,158,11,0.1)"/>
+  <!-- Crown Avatar -->
+  <circle cx="235" cy="108" r="18" fill="#d97706"/>
+  <text x="235" y="114" text-anchor="middle" font-family="Arial" font-size="16" fill="#fff">👑</text>
+  <text x="265" y="105" font-family="Arial, sans-serif" font-size="15" fill="#f1f5f9" font-weight="bold">KING2 AI</text>
+  <text x="265" y="120" font-family="Arial, sans-serif" font-size="11" fill="#22c55e">● Arabic-First Fine-Tuned</text>
+
+  <!-- Messages -->
+  <!-- Arabic user message -->
+  <rect x="240" y="160" width="200" height="36" rx="12" fill="rgba(245,158,11,0.15)"/>
+  <text x="255" y="183" font-family="Arial, sans-serif" font-size="13" fill="#e2e8f0">What is KING2 AI?</text>
+  
+  <!-- AI response -->
+  <rect x="450" y="210" width="250" height="120" rx="12" fill="rgba(15,23,42,0.6)" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
+  <text x="465" y="233" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">KING2 AI is a fine-tuned</text>
+  <text x="465" y="252" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Qwen2.5-3B model using</text>
+  <text x="465" y="271" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">QLoRA — specialized in</text>
+  <text x="465" y="290" font-family="Arial, sans-serif" font-size="13" fill="#38bdf8">Arabic, coding, and math!</text>
+  <text x="465" y="315" font-family="Arial, sans-serif" font-size="13" fill="#fcd34d">👑 ملك الذكاء الاصطناعي</text>
+  <!-- Tail -->
+  <polygon points="450,220 440,216 450,230" fill="rgba(15,23,42,0.6)"/>
+
+  <!-- Arabic user message 2 -->
+  <rect x="230" y="350" width="280" height="36" rx="12" fill="rgba(245,158,11,0.15)"/>
+  <text x="245" y="373" font-family="Arial, sans-serif" font-size="13" fill="#e2e8f0">اكتب كود React مع TypeScript</text>
+
+  <!-- AI response 2 in Arabic/code -->
+  <rect x="450" y="400" width="280" height="150" rx="12" fill="rgba(15,23,42,0.6)" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
+  <text x="465" y="423" font-family="monospace" font-size="12" fill="#d97706">import React from 'react';</text>
+  <text x="465" y="443" font-family="monospace" font-size="12" fill="#e2e8f0">interface ButtonProps {</text>
+  <text x="475" y="463" font-family="monospace" font-size="12" fill="#e2e8f0">label: string;</text>
+  <text x="475" y="483" font-family="monospace" font-size="12" fill="#e2e8f0">onClick: () =&gt; void;</text>
+  <text x="465" y="503" font-family="monospace" font-size="12" fill="#e2e8f0">}</text>
+  <text x="465" y="523" font-family="monospace" font-size="12" fill="#22c55e">$$ export const Button ...</text>
+  <text x="465" y="540" font-family="Arial, sans-serif" font-size="12" fill="#fcd34d">بكل سهولة! 🚀</text>
+  <!-- Tail -->
+  <polygon points="450,410 440,406 450,420" fill="rgba(15,23,42,0.6)"/>
+
+  <!-- Typing indicator -->
+  <ellipse cx="560" cy="575" rx="3" ry="3" fill="#f59e0b"/>
+  <ellipse cx="570" cy="575" rx="3" ry="3" fill="#f59e0b"/>
+  <ellipse cx="580" cy="575" rx="3" ry="3" fill="#f59e0b"/>
+
+  <!-- Input bar -->
+  <rect x="220" y="610" width="480" height="40" rx="20" fill="rgba(15,23,42,0.6)" stroke="rgba(245,158,11,0.2)" stroke-width="1"/>
+  <text x="245" y="635" font-family="Arial, sans-serif" font-size="13" fill="#64748b">اسألني أي شيء...</text>
+  <rect x="655" y="618" width="28" height="24" rx="12" fill="#d97706"/>
+  <text x="669" y="634" font-family="Arial" font-size="12" fill="#fff">→</text>
+
+  <!-- Right panel - features -->
+  <rect x="760" y="80" width="320" height="240" rx="16" fill="rgba(15,23,42,0.85)" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
+  
+  <!-- Feature items -->
+  <text x="790" y="115" font-family="Arial, sans-serif" font-size="15" fill="#f1f5f9" font-weight="bold">👑 KING2 Features</text>
+  
+  <text x="790" y="150" font-family="Arial, sans-serif" font-size="18" fill="#f59e0b">✦</text>
+  <text x="815" y="150" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Arabic-First AI</text>
+  <text x="815" y="165" font-family="Arial, sans-serif" font-size="11" fill="#64748b">Fine-tuned for Arabic</text>
+  
+  <text x="790" y="195" font-family="Arial, sans-serif" font-size="18" fill="#0ea5e9">✦</text>
+  <text x="815" y="195" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Qwen2.5-3B + QLoRA</text>
+  <text x="815" y="210" font-family="Arial, sans-serif" font-size="11" fill="#64748b">4-bit quantized fine-tune</text>
+
+  <text x="790" y="240" font-family="Arial, sans-serif" font-size="18" fill="#22c55e">✦</text>
+  <text x="815" y="240" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Code & Math Expert</text>
+  <text x="815" y="255" font-family="Arial, sans-serif" font-size="11" fill="#64748b">TypeScript, Python, JS</text>
+
+  <text x="790" y="285" font-family="Arial, sans-serif" font-size="18" fill="#f59e0b">✦</text>
+  <text x="815" y="285" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Trained on T4 GPU</text>
+  <text x="815" y="300" font-family="Arial, sans-serif" font-size="11" fill="#64748b">54 steps, 19 min</text>
+
+  <!-- Stats panel -->
+  <rect x="760" y="340" width="320" height="160" rx="16" fill="rgba(15,23,42,0.85)" stroke="rgba(245,158,11,0.15)" stroke-width="1"/>
+  <text x="790" y="375" font-family="Arial, sans-serif" font-size="15" fill="#f1f5f9" font-weight="bold">📊 Training Stats</text>
+  <text x="790" y="410" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Base Model: <tspan fill="#fcd34d" font-weight="bold">Qwen2.5-3B-Instruct</tspan></text>
+  <text x="790" y="435" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Training: <tspan fill="#fcd34d" font-weight="bold">QLoRA 4-bit</tspan></text>
+  <text x="790" y="460" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Loss: <tspan fill="#22c55e" font-weight="bold">0.9183</tspan></text>
+  <text x="790" y="485" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Steps: <tspan fill="#fcd34d" font-weight="bold">54</tspan></text>
+
+  <!-- Title -->
+  <text x="640" y="690" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#f59e0b" opacity="0.5">KING2 AI v4.0 — Qwen2.5-3B QLoRA</text>
+</svg>
