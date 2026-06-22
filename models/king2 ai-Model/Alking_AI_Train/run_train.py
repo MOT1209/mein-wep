@@ -143,14 +143,20 @@ run_cmd("pip install -q 'datasets>=2.16.0,<=4.0.0'")
 if not os.path.exists("/content/LLaMA-Factory"):
     run_cmd("git clone --depth 1 https://github.com/hiyouga/LLaMA-Factory.git /content/LLaMA-Factory")
     run_cmd("cd /content/LLaMA-Factory && pip install -e '.[torch,metrics]'")
+    run_cmd("pip install -q git+https://github.com/huggingface/transformers.git")
 
 # 3. GENERATE TRAINING DATA
 log("=== 3. TRAINING DATA ===")
-data = generate_training_data()
-
 data_path = os.path.join(DRIVE_PATH, "king2_training.json")
-with open(data_path, "w", encoding="utf-8") as f:
-    json.dump(data, f, ensure_ascii=False, indent=2)
+if os.path.exists(data_path) and os.path.getsize(data_path) > 1000:
+    with open(data_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    log(f"Loaded {len(data)} training examples from existing file")
+else:
+    data = generate_training_data()
+    os.makedirs(DRIVE_PATH, exist_ok=True)
+    with open(data_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
 info_path = os.path.join(DRIVE_PATH, "dataset_info.json")
 info = {"king2_training": {
