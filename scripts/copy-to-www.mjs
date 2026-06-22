@@ -49,7 +49,12 @@ function main() {
     process.exit(1);
   }
 
-  const projectDir = path.resolve(ROOT, projectArg);
+  // Resolve the project against the current working directory so that both
+  // `node scripts/copy-to-www.mjs apps/quiz-app` (from repo root) and
+  // `node ../../scripts/copy-to-www.mjs .` (from inside the app dir, as CI does)
+  // point at the right folder. Resolving against ROOT broke the `.` form,
+  // creating www/ at the repo root instead of inside the app → cap sync failed.
+  const projectDir = path.resolve(process.cwd(), projectArg);
   if (!fs.existsSync(projectDir)) {
     console.error(`Project directory not found: ${projectDir}`);
     process.exit(1);
