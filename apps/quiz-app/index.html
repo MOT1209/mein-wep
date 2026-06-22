@@ -43,23 +43,55 @@
             <div class="category-grid">
                 <div class="category-card" onclick="selectCategory('programming')">
                     <i class="fas fa-code"></i>
-                    <h3>أسئلة البرمجة</h3>
-                    <span>3 مستويات · 30 سؤال</span>
+                    <h3>البرمجة</h3>
+                    <span>3 مستويات</span>
                 </div>
                 <div class="category-card" onclick="selectCategory('general')">
                     <i class="fas fa-earth-americas"></i>
                     <h3>ثقافة عامة</h3>
-                    <span>3 مستويات · 30 سؤال</span>
+                    <span>3 مستويات</span>
+                </div>
+                <div class="category-card" onclick="selectCategory('science')">
+                    <i class="fas fa-flask"></i>
+                    <h3>العلوم</h3>
+                    <span>مستويان</span>
+                </div>
+                <div class="category-card" onclick="selectCategory('history')">
+                    <i class="fas fa-landmark"></i>
+                    <h3>التاريخ</h3>
+                    <span>مستويان</span>
+                </div>
+                <div class="category-card" onclick="selectCategory('islamic')">
+                    <i class="fas fa-mosque"></i>
+                    <h3>إسلاميات</h3>
+                    <span>مستويان</span>
+                </div>
+                <div class="category-card" onclick="selectCategory('sports')">
+                    <i class="fas fa-futbol"></i>
+                    <h3>رياضة</h3>
+                    <span>مستويان</span>
                 </div>
             </div>
 
             <div class="quiz-info" style="margin-top: 20px;">
-                <span><i class="fas fa-layer-group"></i> 3 مستويات</span>
-                <span><i class="fas fa-list-ol"></i> 10 أسئلة/مستوى</span>
+                <span><i class="fas fa-layer-group"></i> 6 تصنيفات</span>
+                <span><i class="fas fa-list-ol"></i> 140 سؤال</span>
                 <span><i class="fas fa-trophy"></i> تحدي النخبة</span>
             </div>
             <p style="font-size: 0.8rem; margin-top: 20px; opacity: 0.6;">* يجب الحصول على 7/10 للانتقال للمستوى التالي
             </p>
+        </div>
+
+        <!-- Level Select Screen -->
+        <div id="level-screen" class="card">
+            <button class="level-back" onclick="navigateTo('start')" aria-label="رجوع">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+            <h2 id="level-title">اختر المستوى</h2>
+            <p>اجمع 7/10 لفتح المستوى التالي. الكمال = 3 نجوم ⭐</p>
+            <div class="level-grid" id="level-grid">
+                <!-- Level tiles injected by JS -->
+            </div>
         </div>
 
         <!-- Quiz Screen -->
@@ -73,6 +105,7 @@
                         <i class="fas fa-stopwatch"></i>
                         <span id="time-left">15</span>
                     </div>
+                    <div class="streak-badge" id="streak-badge"><i class="fas fa-fire"></i> 0</div>
                     <div class="question-counter">
                         سؤال <span id="current-q">1</span> / <span id="total-q">10</span>
                     </div>
@@ -88,6 +121,9 @@
             </div>
 
             <div class="quiz-footer">
+                <button id="fifty-btn" class="btn btn-lifeline" onclick="useFifty()" title="حذف إجابتين خاطئتين">
+                    <i class="fas fa-wand-magic-sparkles"></i> 50:50
+                </button>
                 <button id="next-btn" class="btn btn-secondary" disabled>السؤال التالي</button>
             </div>
         </div>
@@ -98,6 +134,7 @@
                 <i class="fas fa-trophy"></i>
             </div>
             <h2>انتهى الاختبار!</h2>
+            <div class="result-stars" id="result-stars"></div>
             <div class="score-box">
                 <span class="score-text">لقد أحرزت:</span>
                 <div class="score-circle">
@@ -106,9 +143,12 @@
                 </div>
             </div>
             <p id="result-message">عمل رائع! مهاراتك في البرمجة مبشرة جداً.</p>
+            <div class="xp-reward" id="xp-reward"></div>
             <div class="action-buttons">
                 <button id="restart-btn" class="btn btn-primary">حاول مرة أخرى</button>
-                <button id="home-btn" class="btn btn-outline" onclick="window.location.reload()">الرئيسية</button>
+                <button id="review-btn" class="btn btn-secondary" onclick="showReview()"><i class="fas fa-list-check"></i> مراجعة الإجابات</button>
+                <button id="share-btn" class="btn btn-glass-share" onclick="shareResult()"><i class="fas fa-share-nodes"></i> مشاركة النتيجة</button>
+                <button id="home-btn" class="btn btn-outline">الرئيسية</button>
             </div>
         </div>
     </div>
@@ -124,19 +164,25 @@
                 primaryColor: '#6366f1',
                 showBackButton: true,
                 onBack: () => {
-                    // Go back to start screen or home
+                    // If a modal is open, close it first
+                    const modal = document.getElementById('app-modal');
+                    if (modal && modal.classList.contains('open')) { closeModal(); return; }
+
                     const startScreen = document.getElementById('start-screen');
                     const quizScreen = document.getElementById('quiz-screen');
                     const resultScreen = document.getElementById('result-screen');
+                    const levelScreen = document.getElementById('level-screen');
+                    const show = (el) => {
+                        document.querySelectorAll('.card').forEach(c => c.classList.remove('active'));
+                        el.classList.add('active');
+                    };
 
                     if (quizScreen.classList.contains('active')) {
-                        if (confirm('هل تريد الخروج من الاختبار؟')) {
-                            quizScreen.classList.remove('active');
-                            startScreen.classList.add('active');
-                        }
+                        if (confirm('هل تريد الخروج من الاختبار؟')) show(levelScreen);
                     } else if (resultScreen.classList.contains('active')) {
-                        resultScreen.classList.remove('active');
-                        startScreen.classList.add('active');
+                        show(levelScreen);
+                    } else if (levelScreen.classList.contains('active')) {
+                        show(startScreen);
                     } else {
                         window.history.back();
                     }
@@ -188,7 +234,10 @@
 
     <!-- Mobile Navigation Functions -->
     <script>
-        const CATEGORY_LABELS = { programming: 'أسئلة البرمجة', general: 'ثقافة عامة' };
+        const CATEGORY_LABELS = {
+            programming: 'البرمجة', general: 'ثقافة عامة', science: 'العلوم',
+            history: 'التاريخ', islamic: 'إسلاميات', sports: 'رياضة'
+        };
 
         function syncSoundIcon() {
             const icon = document.getElementById('sound-icon');
@@ -227,9 +276,28 @@
             document.getElementById('app-modal').classList.remove('open');
         }
 
+        function renderRankCard() {
+            if (!window.QuizApp) return '';
+            const r = QuizApp.getRank();
+            const pct = r.isMax ? 100 : Math.round((r.into / r.span) * 100);
+            const nextLine = r.isMax
+                ? 'أعلى رتبة — أنت من النخبة! 👑'
+                : `${r.into}/${r.span} XP للوصول إلى <b>${r.next}</b>`;
+            return `
+                <div class="rank-card">
+                    <div class="rank-icon">${r.icon}</div>
+                    <div class="rank-info">
+                        <div class="rank-name">${r.name}</div>
+                        <div class="rank-xp">${r.xp} XP</div>
+                        <div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%"></div></div>
+                        <div class="rank-next">${nextLine}</div>
+                    </div>
+                </div>`;
+        }
+
         function renderProgress() {
             if (!window.QuizApp) return '<p>جارٍ التحميل...</p>';
-            return QuizApp.categories().map(cat => {
+            return renderRankCard() + QuizApp.categories().map(cat => {
                 const total = QuizApp.totalLevels(cat);
                 const unlocked = Math.min(QuizApp.getUnlockedLevel(cat) + 1, total);
                 const best = QuizApp.getBestScore(cat);
@@ -248,6 +316,47 @@
 
         function showProgress() {
             openModal('📊 تقدمك', renderProgress());
+        }
+
+        function showReview() {
+            if (!window.QuizApp) return;
+            const review = QuizApp.getLastReview();
+            if (!review.length) { openModal('مراجعة الإجابات', '<p>لا توجد إجابات للمراجعة.</p>'); return; }
+            const html = review.map((item, i) => {
+                const correctTxt = item.options[item.correct];
+                const isRight = item.chosen === item.correct;
+                const chosenTxt = item.chosen >= 0 ? item.options[item.chosen] : 'لم تُجب (انتهى الوقت)';
+                return `
+                    <div class="review-item ${isRight ? 'right' : 'wrong'}">
+                        <div class="review-q"><span class="review-num">${i + 1}</span> ${item.question}</div>
+                        ${isRight
+                            ? `<div class="review-line ok"><i class="fas fa-check"></i> ${correctTxt}</div>`
+                            : `<div class="review-line bad"><i class="fas fa-xmark"></i> إجابتك: ${chosenTxt}</div>
+                               <div class="review-line ok"><i class="fas fa-check"></i> الصحيحة: ${correctTxt}</div>`}
+                    </div>`;
+            }).join('');
+            const correct = review.filter(r => r.chosen === r.correct).length;
+            openModal(`مراجعة الإجابات (${correct}/${review.length})`, html);
+        }
+
+        async function shareResult() {
+            if (!window.QuizApp) return;
+            const r = QuizApp.getLastResult();
+            if (!r) return;
+            const stars = '⭐'.repeat(r.stars) || '—';
+            const cat = QuizApp.categoryLabel(r.category);
+            const text = `🧠 تطبيق اسألني\nأحرزت ${r.score}/${r.total} في ${cat} — المستوى ${r.level} ${stars}\nجرّبه: https://rashid-wep.vercel.app/apps/quiz-app/`;
+            QuizApp.playSound('click');
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: 'نتيجتي في اسألني', text });
+                } else {
+                    await navigator.clipboard.writeText(text);
+                    openModal('تم النسخ ✅', '<p>تم نسخ نتيجتك إلى الحافظة — الصقها أينما تريد!</p>');
+                }
+            } catch (e) {
+                /* user cancelled share — ignore */
+            }
         }
 
         function showSettings() {
@@ -334,7 +443,7 @@
     </script>
   <script src="js/update-checker.js"></script>
   <!-- OTA update checker -->
-  <script>window.RASHID_APP={id:'com.rashid.quizmaster',version:'1.1.0',name:'Quiz Master'};</script>
+  <script>window.RASHID_APP={id:'com.rashid.quizmaster',version:'1.2.0',name:'Quiz Master'};</script>
   <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
 </body>
 

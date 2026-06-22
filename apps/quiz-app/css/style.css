@@ -461,6 +461,255 @@ p {
     }
 }
 
+/* ==================== Quiz footer & 50:50 lifeline ==================== */
+.quiz-footer {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.quiz-footer #next-btn { flex: 1; }
+
+.btn-lifeline {
+    width: auto !important;
+    flex-shrink: 0;
+    background: rgba(168, 85, 247, 0.15);
+    color: #c084fc;
+    border: 1px solid rgba(168, 85, 247, 0.35);
+    padding: 15px 18px;
+    font-size: 0.95rem;
+}
+
+.btn-lifeline:not(:disabled):hover {
+    background: rgba(168, 85, 247, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-lifeline:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.option.eliminated {
+    opacity: 0.25;
+    text-decoration: line-through;
+    filter: grayscale(1);
+    transition: all 0.3s ease;
+}
+
+/* ==================== Result: review & share buttons ==================== */
+.btn-glass-share {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+}
+
+.btn-glass-share:hover { background: rgba(56, 189, 248, 0.25); }
+
+/* Review modal items */
+.review-item {
+    text-align: right;
+    padding: 14px;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.review-item.right { border-color: rgba(16, 185, 129, 0.3); }
+.review-item.wrong { border-color: rgba(239, 68, 68, 0.3); }
+
+.review-q {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+    line-height: 1.5;
+}
+
+.review-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-left: 6px;
+}
+
+.review-line {
+    font-size: 0.85rem;
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.review-line.ok { color: var(--secondary); }
+.review-line.bad { color: var(--error); }
+
+/* ==================== Streak badge (quiz header) ==================== */
+.streak-badge {
+    background: rgba(251, 146, 60, 0.15);
+    color: #fb923c;
+    padding: 5px 14px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none;
+}
+
+.streak-badge.show {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.streak-badge i { margin-left: 4px; animation: flameFlicker 0.6s infinite alternate; }
+
+@keyframes flameFlicker {
+    from { opacity: 0.7; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1.1); }
+}
+
+/* ==================== XP reward (result screen) ==================== */
+.xp-reward {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fbbf24;
+    margin: -10px 0 20px;
+    min-height: 1.2em;
+}
+
+.xp-reward i { margin-left: 6px; }
+.xp-reward b { color: var(--secondary); }
+
+/* ==================== Rank card (progress modal) ==================== */
+.rank-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(16, 185, 129, 0.08));
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 18px;
+    margin-bottom: 18px;
+}
+
+.rank-icon { font-size: 2.6rem; line-height: 1; }
+.rank-info { flex: 1; }
+.rank-name { font-size: 1.2rem; font-weight: 800; }
+.rank-xp { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+.rank-next { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+
+/* ==================== Level Select Screen ==================== */
+.level-back {
+    position: absolute;
+    top: 22px;
+    right: 22px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-white);
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.2s ease;
+}
+
+.level-back:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+#level-screen { position: relative; }
+#level-title i { color: var(--primary); margin-left: 8px; }
+
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-top: 25px;
+}
+
+.level-tile {
+    aspect-ratio: 1;
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-white);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: inherit;
+    transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.level-tile .level-num {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.level-tile:not(.locked):hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.12);
+    box-shadow: 0 10px 20px var(--primary-glow);
+}
+
+.level-tile.done {
+    border-color: rgba(16, 185, 129, 0.4);
+    background: rgba(16, 185, 129, 0.08);
+}
+
+.level-tile.locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.level-tile.locked .level-num { opacity: 0.5; font-size: 1rem; }
+.level-tile .lock-icon { font-size: 1.3rem; color: var(--text-muted); }
+
+.level-stars {
+    display: flex;
+    gap: 3px;
+    font-size: 0.7rem;
+}
+
+.level-stars .fa-star { color: rgba(255, 255, 255, 0.15); }
+.level-stars .fa-star.on { color: #fbbf24; }
+
+/* Result screen stars */
+.result-stars {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    font-size: 2rem;
+    margin: -5px 0 10px;
+}
+
+.result-stars .fa-star { color: rgba(255, 255, 255, 0.15); }
+
+.result-stars .fa-star.on {
+    color: #fbbf24;
+    animation: starPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+}
+
+.result-stars .fa-star.on:nth-child(2) { animation-delay: 0.12s; }
+.result-stars .fa-star.on:nth-child(3) { animation-delay: 0.24s; }
+
+@keyframes starPop {
+    from { transform: scale(0) rotate(-45deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+}
+
 /* ==================== Modal (Progress / Settings / Help) ==================== */
 .app-modal {
     display: none;
