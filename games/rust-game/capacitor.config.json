@@ -1,0 +1,14 @@
+{
+  "appId": "com.rashid.rustgame",
+  "appName": "Rust Survival 3D",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "releaseType": "APK",
+      "signingType": "apksigner"
+    }
+  }
+}

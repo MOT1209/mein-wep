@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 2,
+    "summary": "Step 2 'Scroll down on the page' passed.",
+    "path": "steps/02-snapshot.html"
+  }
+]

@@ -1,0 +1,20 @@
+{
+  "testId": "d9ed426e-a629-4946-9233-8cf4ffc79fad",
+  "status": "failed",
+  "startedAt": "2026-06-19T16:54:08.901Z",
+  "finishedAt": "2026-06-19T16:57:19.259Z",
+  "videoUrl": "https://testsprite-videos.s3.us-east-1.amazonaws.com/a4b88408-60d1-702b-14de-e4429e915731/1781888236064275//tmp/c1ebd823-3269-4f45-980d-8264fbbf16ab/result.webm",
+  "failureAnalysisUrl": null,
+  "snapshotId": "snap_0df307a034cda2fa",
+  "runIdIfAvailable": "993a1deb-4e44-46a3-beca-373032dd5029",
+  "codeVersion": "v1",
+  "targetUrl": "https://rashid-wep.vercel.app",
+  "targetUrlSource": "run",
+  "failedStepIndex": 3,
+  "failureKind": "infra",
+  "summary": {
+    "passed": 0,
+    "failed": 1,
+    "skipped": 0
+  }
+}

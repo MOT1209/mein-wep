@@ -1,0 +1,14 @@
+{
+  "appId": "com.rashid.kingcraftgame",
+  "appName": "KingCraft",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "releaseType": "APK",
+      "signingType": "apksigner"
+    }
+  }
+}
