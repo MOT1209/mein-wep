@@ -88,7 +88,16 @@ body {
     display: block;
     opacity: 1;
     transform: translateY(0);
+    animation: cardSlideIn 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+@keyframes cardSlideIn {
+    from { opacity: 0; transform: translateY(28px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Tactile press feedback for all buttons */
+.btn:active:not(:disabled) { transform: scale(0.97); }
 
 /* Icons & Header */
 .icon-box {
@@ -248,9 +257,11 @@ p {
 
 .progress-bar {
     height: 100%;
-    background: var(--cat-accent);
+    background: linear-gradient(90deg, var(--cat-accent), color-mix(in srgb, var(--cat-accent) 60%, #fff));
     width: 0%;
+    border-radius: 4px;
     transition: width 0.4s ease;
+    box-shadow: 0 0 10px var(--cat-glow);
 }
 
 .header-stats {
@@ -328,6 +339,23 @@ p {
     justify-content: space-between;
     align-items: center;
     font-size: 1.05rem;
+    animation: optionIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) backwards;
+}
+
+@keyframes optionIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.option:active:not(.disabled) { transform: scale(0.98); }
+
+#question-text {
+    animation: questionIn 0.4s ease backwards;
+}
+
+@keyframes questionIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .option:hover:not(.disabled) {

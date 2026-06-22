@@ -608,10 +608,18 @@ function showQuestion() {
     q.options.forEach((option, index) => {
         const div = document.createElement('div');
         div.className = 'option';
+        div.style.animationDelay = (index * 0.07) + 's'; // staggered entrance
         div.innerHTML = `<span>${option}</span><i class="far fa-circle"></i>`;
         div.addEventListener('click', () => selectOption(index, div));
         optionsContainer.appendChild(div);
     });
+
+    // Animate the question text in too
+    if (questionText) {
+        questionText.style.animation = 'none';
+        void questionText.getBoundingClientRect?.();
+        questionText.style.animation = '';
+    }
 
     // Reset the 50:50 lifeline button state for this question
     const fiftyBtn = document.getElementById('fifty-btn');
