@@ -217,7 +217,7 @@ cfg = {
     "learning_rate": float(os.environ.get("KING2_LR", "2e-4")),
     "num_train_epochs": float(os.environ.get("KING2_EPOCHS", "3.0")),
     "max_grad_norm": 1.0, "warmup_ratio": 0.1,
-    "logging_steps": 5, "save_steps": 100, "save_total_limit": 2,
+    "logging_steps": 5, "save_strategy": "epoch", "save_total_limit": 2,
     "optim": "adamw_torch", "lr_scheduler_type": "cosine",
     "fp16": not torch.cuda.is_bf16_supported(),
     "bf16": torch.cuda.is_bf16_supported(),
