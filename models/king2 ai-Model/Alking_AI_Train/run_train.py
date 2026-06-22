@@ -165,7 +165,6 @@ run_cmd("pip install -q 'datasets>=2.16.0,<=4.0.0'")
 if not os.path.exists("/content/LLaMA-Factory"):
     run_cmd("git clone --depth 1 https://github.com/hiyouga/LLaMA-Factory.git /content/LLaMA-Factory")
     run_cmd("cd /content/LLaMA-Factory && pip install -e '.[torch,metrics]'")
-    run_cmd("pip install -q git+https://github.com/huggingface/transformers.git")
 
 # 3. GENERATE TRAINING DATA
 log("=== 3. TRAINING DATA ===")
@@ -199,7 +198,7 @@ log(f"Training samples: {len(data)}")
 log("=== 4. CONFIGURING TRAINING ===")
 MODEL = os.environ.get("KING2_MODEL", "qwen")
 if MODEL == "qwen":
-    model_name, template, output_dir = "Qwen/Qwen3.5-9B", "qwen", "king2-qwen3.5-9b"
+    model_name, template, output_dir = "Qwen/Qwen2.5-7B-Instruct", "qwen", "king2-qwen2.5-7b"
 else:
     model_name, template, output_dir = "google/gemma-4-e4b-it", "gemma", "king2-gemma-4-e4b"
 
