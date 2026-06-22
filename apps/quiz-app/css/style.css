@@ -634,6 +634,121 @@ p {
 .review-line.ok { color: var(--secondary); }
 .review-line.bad { color: var(--error); }
 
+/* ==================== Leaderboard ==================== */
+.lb-list { display: flex; flex-direction: column; gap: 8px; }
+
+.lb-row {
+    display: grid;
+    grid-template-columns: 40px 1fr auto;
+    grid-template-areas: "pos name score" "pos meta score";
+    align-items: center;
+    gap: 2px 12px;
+    padding: 12px 14px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+}
+
+.lb-row.lb-me {
+    background: color-mix(in srgb, var(--primary) 16%, transparent);
+    border-color: var(--primary);
+}
+
+.lb-pos { grid-area: pos; font-size: 1.5rem; text-align: center; }
+.lb-rank {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08); font-size: 0.9rem; font-weight: 700;
+}
+.lb-name { grid-area: name; font-weight: 700; font-size: 0.98rem; }
+.lb-meta { grid-area: meta; font-size: 0.75rem; color: var(--text-muted); }
+.lb-score { grid-area: score; font-weight: 800; color: var(--secondary); font-size: 1.05rem; }
+
+/* ==================== Welcome / Login screen ==================== */
+.app-logo {
+    width: 96px;
+    height: 96px;
+    border-radius: 24px;
+    margin: 0 auto 20px;
+    display: block;
+    box-shadow: 0 12px 30px var(--primary-glow);
+    animation: logoPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes logoPop {
+    from { transform: scale(0.5) rotate(-12deg); opacity: 0; }
+    to { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+#login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 10px;
+}
+
+.login-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.login-field i {
+    position: absolute;
+    right: 18px;
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
+.login-field input {
+    width: 100%;
+    padding: 16px 50px 16px 18px;
+    border-radius: 15px;
+    border: 2px solid var(--border);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-white);
+    font-family: inherit;
+    font-size: 1.05rem;
+    text-align: right;
+    transition: all 0.25s ease;
+}
+
+.login-field input:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(99, 102, 241, 0.08);
+    box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+.welcome-rank {
+    display: none;
+    margin-top: 18px;
+    font-size: 0.9rem;
+    color: var(--text-white);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+}
+
+.welcome-stats {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+.welcome-stats span {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 8px 14px;
+    border-radius: 12px;
+    font-size: 0.82rem;
+    color: var(--text-white);
+}
+
+.welcome-stats i { color: var(--primary); margin-left: 6px; }
+
 /* ==================== Confetti celebration ==================== */
 .confetti-layer {
     position: fixed;

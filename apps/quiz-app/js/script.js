@@ -292,6 +292,33 @@ function starsFor(score) {
     return 0;
 }
 
+// ── Player identity ──
+const PLAYER_KEY = 'quiz_player_name';
+function getPlayerName() { return localStorage.getItem(PLAYER_KEY) || ''; }
+function setPlayerName(name) {
+    const clean = String(name || '').trim().slice(0, 20);
+    if (clean) localStorage.setItem(PLAYER_KEY, clean);
+    return clean;
+}
+
+// ── Local leaderboard (works offline; no backend required) ──
+const LEADERBOARD_KEY = 'quiz_leaderboard_local';
+
+function getLeaderboard() {
+    try {
+        const arr = JSON.parse(localStorage.getItem(LEADERBOARD_KEY) || '[]');
+        return Array.isArray(arr) ? arr : [];
+    } catch { return []; }
+}
+
+function saveLocalScore(entry) {
+    const board = getLeaderboard();
+    board.push(entry);
+    // Sort by score desc, then most recent first; keep top 50
+    board.sort((a, b) => (b.score - a.score) || (b.ts - a.ts));
+    localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(board.slice(0, 50)));
+}
+
 // ── XP & Ranks ──
 const XP_KEY = 'quiz_xp';
 const RANKS = [
@@ -348,6 +375,7 @@ function resetProgress() {
         }
     });
     localStorage.removeItem(XP_KEY);
+    localStorage.removeItem(LEADERBOARD_KEY);
 }
 
 // ── Sound engine (Web Audio API — no external files, works offline) ──
@@ -440,6 +468,10 @@ window.QuizApp = {
     starsFor,
     getXP,
     getRank,
+    getPlayerName,
+    setPlayerName,
+    getLeaderboard,
+    totalQuestions: () => Object.values(quizDatabase).reduce((sum, cat) => sum + cat.reduce((s, l) => s + l.length, 0), 0),
     getLastReview: () => lastReview.slice(),
     getLastResult: () => lastResult,
     categoryLabel: (cat) => (CATEGORY_META[cat] ? CATEGORY_META[cat].label : cat),
@@ -792,11 +824,17 @@ async function showLevelComplete() {
         xpReward.innerHTML = `<i class="fas fa-bolt"></i> +${xpGain} XP${ranked}`;
     }
 
-    // Save to Leaderboard (Simple Prompter for name)
-    if (score >= 5) {
-        const playerName = prompt("رائع! ادخل اسمك للوحة المتصدرين:") || "لاعب مجهول";
-        saveHighScore(playerName, score, currentCategory, currentLevel + 1);
-    }
+    // Save to leaderboard using the logged-in player name (no prompt)
+    const playerName = getPlayerName() || 'لاعب';
+    saveLocalScore({
+        name: playerName,
+        score,
+        total: currentQuestions.length,
+        category: currentCategory,
+        level: currentLevel + 1,
+        ts: Date.now()
+    });
+    saveHighScore(playerName, score, currentCategory, currentLevel + 1); // best-effort online sync
 
     const totalLevels = quizDatabase[currentCategory].length;
     const isLastLevel = currentLevel + 1 >= totalLevels;

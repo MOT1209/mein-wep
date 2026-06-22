@@ -32,12 +32,35 @@
     <div class="bg-glow"></div>
 
     <div class="container">
+        <!-- Welcome / Login Screen -->
+        <div id="welcome-screen" class="card active">
+            <img src="icons/icon-192.png" alt="اسألني" class="app-logo" width="96" height="96">
+            <h1>تطبيق اسألني</h1>
+            <p>اختبر معلوماتك، اصعد المستويات، وتنافس على الصدارة!</p>
+            <form id="login-form" autocomplete="off">
+                <div class="login-field">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="player-name-input" placeholder="اكتب اسمك للبدء..."
+                        maxlength="20" aria-label="اسم اللاعب" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-play"></i> ابدأ اللعب
+                </button>
+            </form>
+            <div id="welcome-rank" class="welcome-rank"></div>
+            <div class="welcome-stats">
+                <span><i class="fas fa-layer-group"></i> 6 تصنيفات</span>
+                <span><i class="fas fa-list-ol"></i> <span id="welcome-qcount">140</span> سؤال</span>
+                <span><i class="fas fa-trophy"></i> لوحة متصدرين</span>
+            </div>
+        </div>
+
         <!-- Start Screen -->
-        <div id="start-screen" class="card active">
+        <div id="start-screen" class="card">
             <div class="icon-box">
                 <i class="fas fa-brain-circuit"></i>
             </div>
-            <h1>تطبيق اسألني</h1>
+            <h1>أهلاً <span id="greet-name">بك</span> 👋</h1>
             <p>اختر التصنيف الذي تود اختبار معلوماتك فيه:</p>
 
             <div class="category-grid">
@@ -220,9 +243,9 @@
                 <i class="fas fa-home"></i>
                 <span>الرئيسية</span>
             </button>
-            <button class="mobile-nav-item" onclick="navigateTo('category', event)">
-                <i class="fas fa-layer-group"></i>
-                <span>التصنيفات</span>
+            <button class="mobile-nav-item" onclick="navigateTo('leaderboard', event)">
+                <i class="fas fa-ranking-star"></i>
+                <span>المتصدرون</span>
             </button>
             <button class="mobile-nav-item" onclick="navigateTo('progress', event)">
                 <i class="fas fa-chart-line"></i>
@@ -321,6 +344,29 @@
             openModal('📊 تقدمك', renderProgress());
         }
 
+        function showLeaderboard() {
+            if (!window.QuizApp) return;
+            const board = QuizApp.getLeaderboard().slice(0, 10);
+            const me = QuizApp.getPlayerName();
+            if (!board.length) {
+                openModal('🏆 المتصدرون', '<p>لا توجد نتائج بعد — العب مستوى لتظهر هنا!</p>');
+                return;
+            }
+            const medals = ['🥇', '🥈', '🥉'];
+            const rows = board.map((e, i) => {
+                const rankMark = medals[i] || `<span class="lb-rank">${i + 1}</span>`;
+                const isMe = e.name === me ? ' lb-me' : '';
+                return `
+                    <div class="lb-row${isMe}">
+                        <div class="lb-pos">${rankMark}</div>
+                        <div class="lb-name">${e.name}</div>
+                        <div class="lb-meta">${QuizApp.categoryLabel(e.category)} · م${e.level}</div>
+                        <div class="lb-score">${e.score}/${e.total}</div>
+                    </div>`;
+            }).join('');
+            openModal('🏆 المتصدرون', `<div class="lb-list">${rows}</div>`);
+        }
+
         function showReview() {
             if (!window.QuizApp) return;
             const review = QuizApp.getLastReview();
@@ -407,6 +453,9 @@
                     window.QuizApp?.resetTheme();
                     showScreen('start-screen');
                     break;
+                case 'leaderboard':
+                    showLeaderboard();
+                    break;
                 case 'progress':
                     showProgress();
                     break;
@@ -433,8 +482,48 @@
             }
         });
 
+        // ── Welcome / Login flow ──
+        function enterApp(name) {
+            const clean = QuizApp.setPlayerName(name);
+            if (!clean) return;
+            const greet = document.getElementById('greet-name');
+            if (greet) greet.textContent = clean;
+            QuizApp.playSound('click');
+            showScreen('start-screen');
+        }
+
+        function initWelcome() {
+            if (!window.QuizApp) return;
+            const input = document.getElementById('player-name-input');
+            const form = document.getElementById('login-form');
+            const saved = QuizApp.getPlayerName();
+            const qc = document.getElementById('welcome-qcount');
+            if (qc) qc.textContent = QuizApp.totalQuestions();
+
+            if (saved && input) input.value = saved;
+
+            // Returning player → show their rank on the welcome screen
+            const rankBox = document.getElementById('welcome-rank');
+            if (saved && rankBox) {
+                const r = QuizApp.getRank();
+                rankBox.innerHTML = `أهلاً بعودتك، <b>${saved}</b> · ${r.icon} ${r.name} (${r.xp} XP)`;
+                rankBox.style.display = 'block';
+            }
+
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    enterApp(input.value || saved || 'لاعب');
+                });
+            }
+            // Update greeting name if already known
+            const greet = document.getElementById('greet-name');
+            if (saved && greet) greet.textContent = saved;
+        }
+
         // Initialize sound icon from saved preference
         syncSoundIcon();
+        initWelcome();
     </script>
 
     <!-- PWA Service Worker Registration -->
