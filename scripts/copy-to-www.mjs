@@ -10,7 +10,7 @@
  *   css/, js/, icons/, images/, screenshots/
  */
 
-// CI: rebuild trigger after JDK 21 upgrade for Capacitor 8.
+// CI: rebuild trigger after JDK 21 upgrade + race-safe APK push for Capacitor 8.
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
