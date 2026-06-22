@@ -229,5 +229,16 @@ jobs:
           git config user.email "bot@rashid.app"
           git add "${{ matrix.project }}/version.json"
           git add "apks/${{ steps.info.outputs.folder }}-v${{ steps.version.outputs.version }}.apk"
-          git diff --cached --quiet || git commit -m "add apk: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }}"
-          git push 2>&1 | tail -5
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          git commit -m "add apk: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }}"
+          # Parallel matrix jobs push concurrently — rebase & retry to avoid losing APKs to a push race
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            echo "push rejected (attempt $i), rebasing..."
+            git pull --rebase --autostash origin main || true
+            sleep $((RANDOM % 5 + 1))
+          done
+          echo "::error::Failed to push APK after retries"
+          exit 1
