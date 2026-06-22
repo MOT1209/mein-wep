@@ -1,11 +1,11 @@
 // Calculator Vault Service Worker
-const CACHE_NAME = 'calculator-vault-v1';
+const CACHE_NAME = 'calculator-app-v2';
 const STATIC_ASSETS = [
-    '/apps/calculator-vault/',
-    '/apps/calculator-vault/index.html',
-    '/apps/calculator-vault/css/style.css',
-    '/apps/calculator-vault/js/app.js',
-    '/apps/calculator-vault/manifest.json'
+    '/apps/calculator-app/',
+    '/apps/calculator-app/index.html',
+    '/apps/calculator-app/css/style.css',
+    '/apps/calculator-app/js/app.js',
+    '/apps/calculator-app/manifest.json'
 ];
 
 // Install Event
