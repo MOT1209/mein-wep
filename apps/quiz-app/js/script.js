@@ -239,6 +239,7 @@ const totalQDisplay = document.getElementById('total-q');
 const finalScoreDisplay = document.getElementById('final-score');
 const maxScoreDisplay = document.getElementById('max-score');
 const resultMessage = document.getElementById('result-message');
+const resultIcon = document.getElementById('result-icon');
 const streakBadge = document.getElementById('streak-badge');
 const xpReward = document.getElementById('xp-reward');
 
@@ -388,6 +389,45 @@ function playSound(type) {
     } catch (e) {
         /* audio unavailable — fail silently */
     }
+}
+
+// ── Celebration helpers (confetti + animated score count-up) ──
+function launchConfetti(intense) {
+    if (typeof document.createElement !== 'function' || !document.body) return;
+    const colors = ['#6366f1', '#10b981', '#f59e0b', '#f43f5e', '#06b6d4', '#fbbf24', '#22c55e'];
+    const layer = document.createElement('div');
+    layer.className = 'confetti-layer';
+    const count = intense ? 90 : 55;
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.background = colors[i % colors.length];
+        p.style.animationDelay = (Math.random() * 0.5) + 's';
+        p.style.animationDuration = (1.8 + Math.random() * 1.4) + 's';
+        p.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+        p.style.setProperty('--drift', (Math.random() * 140 - 70) + 'px');
+        layer.appendChild(p);
+    }
+    document.body.appendChild(layer);
+    setTimeout(() => layer.remove(), 3800);
+}
+
+function countUp(el, to, dur) {
+    if (!el) return;
+    dur = dur || 700;
+    if (typeof requestAnimationFrame !== 'function' || typeof performance === 'undefined') {
+        el.textContent = to; // non-browser / no rAF → set directly
+        return;
+    }
+    const start = performance.now();
+    (function tick(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3); // ease-out cubic
+        el.textContent = Math.round(eased * to);
+        if (t < 1) requestAnimationFrame(tick);
+        else el.textContent = to;
+    })(start);
 }
 
 // Public API for the UI layer (mobile nav, settings, sound toggle)
@@ -689,10 +729,21 @@ async function showLevelComplete() {
     clearInterval(timerInterval);
     quizScreen.classList.remove('active');
     resultScreen.classList.add('active');
-    finalScoreDisplay.textContent = score;
+    countUp(finalScoreDisplay, score);
     maxScoreDisplay.textContent = `/ ${currentQuestions.length}`;
     saveBestScore(currentCategory, score);
     saveLevelBest(currentCategory, currentLevel, score);
+
+    // Dynamic result icon + celebration by performance tier
+    const perfect = score >= currentQuestions.length;
+    const passed = score >= PASS_THRESHOLD;
+    if (resultIcon) {
+        const icon = perfect ? 'fa-crown' : (passed ? 'fa-trophy' : 'fa-face-sad-tear');
+        resultIcon.innerHTML = `<i class="fas ${icon}"></i>`;
+        resultIcon.classList.toggle('perfect', perfect);
+        resultIcon.classList.toggle('lose', !passed);
+    }
+    if (passed) launchConfetti(perfect);
 
     // Snapshot data for the review screen and share button
     lastReview = answers.slice();
