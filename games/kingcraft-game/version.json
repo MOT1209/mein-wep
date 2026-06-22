@@ -1,6 +1,6 @@
-﻿{
+{
   "version": "0.6.0",
-  "buildNumber": 1,
+  "buildNumber": 2,
   "apkUrl": "https://rashid-wep.vercel.app/apks/kingcraft-game-v0.6.0.apk",
   "changelog": "Initial release",
   "releaseDate": "2026-06-16"
