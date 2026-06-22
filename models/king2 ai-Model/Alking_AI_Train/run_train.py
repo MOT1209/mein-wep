@@ -198,7 +198,7 @@ log(f"Training samples: {len(data)}")
 log("=== 4. CONFIGURING TRAINING ===")
 MODEL = os.environ.get("KING2_MODEL", "qwen")
 if MODEL == "qwen":
-    model_name, template, output_dir = "Qwen/Qwen2.5-7B-Instruct", "qwen", "king2-qwen2.5-7b"
+    model_name, template, output_dir = "Qwen/Qwen2.5-3B-Instruct", "qwen", "king2-qwen2.5-3b"
 else:
     model_name, template, output_dir = "google/gemma-4-e4b-it", "gemma", "king2-gemma-4-e4b"
 

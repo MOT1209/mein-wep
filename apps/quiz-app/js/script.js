@@ -230,6 +230,9 @@ const resultStars = document.getElementById('result-stars');
 const questionText = document.getElementById('question-text');
 const optionsContainer = document.getElementById('options-container');
 const timerDisplay = document.getElementById('time-left');
+const timerRing = document.getElementById('timer-ring');
+const timerRingProgress = document.getElementById('timer-ring-progress');
+const TIMER_CIRCUMFERENCE = 2 * Math.PI * 20; // r=20 in the SVG
 const progressBar = document.getElementById('progress-bar');
 const currentQDisplay = document.getElementById('current-q');
 const totalQDisplay = document.getElementById('total-q');
@@ -400,6 +403,8 @@ window.QuizApp = {
     getLastReview: () => lastReview.slice(),
     getLastResult: () => lastResult,
     categoryLabel: (cat) => (CATEGORY_META[cat] ? CATEGORY_META[cat].label : cat),
+    categoryColor: (cat) => (CATEGORY_META[cat] ? CATEGORY_META[cat].color : null),
+    resetTheme: () => applyCategoryTheme(null),
     resetProgress,
     isSoundEnabled,
     setSoundEnabled,
@@ -422,18 +427,33 @@ function shuffleQuestion(q) {
 
 // Category labels for screens rendered from JS
 const CATEGORY_META = {
-    programming: { label: 'أسئلة البرمجة', icon: 'fas fa-code' },
-    general: { label: 'ثقافة عامة', icon: 'fas fa-earth-americas' },
-    science: { label: 'العلوم', icon: 'fas fa-flask' },
-    history: { label: 'التاريخ', icon: 'fas fa-landmark' },
-    islamic: { label: 'إسلاميات', icon: 'fas fa-mosque' },
-    sports: { label: 'رياضة', icon: 'fas fa-futbol' }
+    programming: { label: 'أسئلة البرمجة', icon: 'fas fa-code',          color: '#6366f1', glow: 'rgba(99, 102, 241, 0.45)' },
+    general:     { label: 'ثقافة عامة',    icon: 'fas fa-earth-americas', color: '#10b981', glow: 'rgba(16, 185, 129, 0.45)' },
+    science:     { label: 'العلوم',        icon: 'fas fa-flask',          color: '#06b6d4', glow: 'rgba(6, 182, 212, 0.45)' },
+    history:     { label: 'التاريخ',       icon: 'fas fa-landmark',       color: '#f59e0b', glow: 'rgba(245, 158, 11, 0.45)' },
+    islamic:     { label: 'إسلاميات',      icon: 'fas fa-mosque',         color: '#22c55e', glow: 'rgba(34, 197, 94, 0.45)' },
+    sports:      { label: 'رياضة',         icon: 'fas fa-futbol',         color: '#f43f5e', glow: 'rgba(244, 63, 94, 0.45)' }
 };
+
+// Apply the active category's accent color across themed screens
+function applyCategoryTheme(category) {
+    const meta = CATEGORY_META[category];
+    const root = document.documentElement;
+    if (!root || !root.style) return;
+    if (meta) {
+        root.style.setProperty('--cat-accent', meta.color);
+        root.style.setProperty('--cat-glow', meta.glow);
+    } else {
+        root.style.removeProperty('--cat-accent');
+        root.style.removeProperty('--cat-glow');
+    }
+}
 
 // Global Function for selection → now opens the level-select screen
 window.selectCategory = function (category) {
     if (!quizDatabase[category]) return;
     currentCategory = category;
+    applyCategoryTheme(category);
     openLevelSelect(category);
 };
 
@@ -444,6 +464,7 @@ window.startLevel = function (category, level) {
     if (level > getUnlockedLevel(category)) return;
     currentCategory = category;
     currentLevel = level;
+    applyCategoryTheme(category);
     startQuiz();
 };
 
@@ -584,11 +605,35 @@ window.useFifty = function () {
     });
 };
 
+function updateTimerRing(instant) {
+    if (!timerRingProgress) return;
+    timerRingProgress.style.strokeDasharray = String(TIMER_CIRCUMFERENCE);
+    // Reset to full instantly (no backward sweep) at the start of a question
+    if (instant) {
+        const prev = timerRingProgress.style.transition;
+        timerRingProgress.style.transition = 'none';
+        timerRingProgress.style.strokeDashoffset = '0';
+        // Force reflow so the 'none' transition takes effect before re-enabling
+        void timerRingProgress.getBoundingClientRect?.();
+        timerRingProgress.style.transition = prev || '';
+    }
+    const fraction = Math.max(0, timeLeft / QUESTION_TIME);
+    timerRingProgress.style.strokeDashoffset = String(TIMER_CIRCUMFERENCE * (1 - fraction));
+    // Color shifts: green → amber → red as time runs out
+    let stroke = 'var(--secondary)';
+    if (timeLeft <= 5) stroke = 'var(--error)';
+    else if (timeLeft <= 9) stroke = '#f59e0b';
+    timerRingProgress.style.stroke = stroke;
+    if (timerRing) timerRing.classList.toggle('low', timeLeft <= 5);
+}
+
 function startTimer() {
     clearInterval(timerInterval);
+    updateTimerRing(true);
     timerInterval = setInterval(() => {
         timeLeft--;
         timerDisplay.textContent = timeLeft;
+        updateTimerRing();
         if (timeLeft <= 0) {
             clearInterval(timerInterval);
             autoHandleTimeout();

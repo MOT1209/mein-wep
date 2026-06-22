@@ -41,32 +41,32 @@
             <p>اختر التصنيف الذي تود اختبار معلوماتك فيه:</p>
 
             <div class="category-grid">
-                <div class="category-card" onclick="selectCategory('programming')">
+                <div class="category-card cat-programming" onclick="selectCategory('programming')">
                     <i class="fas fa-code"></i>
                     <h3>البرمجة</h3>
                     <span>3 مستويات</span>
                 </div>
-                <div class="category-card" onclick="selectCategory('general')">
+                <div class="category-card cat-general" onclick="selectCategory('general')">
                     <i class="fas fa-earth-americas"></i>
                     <h3>ثقافة عامة</h3>
                     <span>3 مستويات</span>
                 </div>
-                <div class="category-card" onclick="selectCategory('science')">
+                <div class="category-card cat-science" onclick="selectCategory('science')">
                     <i class="fas fa-flask"></i>
                     <h3>العلوم</h3>
                     <span>مستويان</span>
                 </div>
-                <div class="category-card" onclick="selectCategory('history')">
+                <div class="category-card cat-history" onclick="selectCategory('history')">
                     <i class="fas fa-landmark"></i>
                     <h3>التاريخ</h3>
                     <span>مستويان</span>
                 </div>
-                <div class="category-card" onclick="selectCategory('islamic')">
+                <div class="category-card cat-islamic" onclick="selectCategory('islamic')">
                     <i class="fas fa-mosque"></i>
                     <h3>إسلاميات</h3>
                     <span>مستويان</span>
                 </div>
-                <div class="category-card" onclick="selectCategory('sports')">
+                <div class="category-card cat-sports" onclick="selectCategory('sports')">
                     <i class="fas fa-futbol"></i>
                     <h3>رياضة</h3>
                     <span>مستويان</span>
@@ -101,8 +101,11 @@
                     <div class="progress-bar" id="progress-bar"></div>
                 </div>
                 <div class="header-stats">
-                    <div class="timer">
-                        <i class="fas fa-stopwatch"></i>
+                    <div class="timer-ring" id="timer-ring">
+                        <svg class="timer-ring-svg" viewBox="0 0 48 48" aria-hidden="true">
+                            <circle class="timer-ring-track" cx="24" cy="24" r="20"></circle>
+                            <circle class="timer-ring-progress" id="timer-ring-progress" cx="24" cy="24" r="20"></circle>
+                        </svg>
                         <span id="time-left">15</span>
                     </div>
                     <div class="streak-badge" id="streak-badge"><i class="fas fa-fire"></i> 0</div>
@@ -401,6 +404,7 @@
                 case 'start':
                 case 'category':
                     closeModal();
+                    window.QuizApp?.resetTheme();
                     showScreen('start-screen');
                     break;
                 case 'progress':
