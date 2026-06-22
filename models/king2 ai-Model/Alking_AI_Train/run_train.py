@@ -217,11 +217,11 @@ cfg = {
     "learning_rate": float(os.environ.get("KING2_LR", "2e-4")),
     "num_train_epochs": float(os.environ.get("KING2_EPOCHS", "3.0")),
     "max_grad_norm": 1.0, "warmup_ratio": 0.1,
-    "logging_steps": 5, "save_strategy": "epoch", "save_total_limit": 2,
+    "logging_steps": 5, "save_steps": 10, "save_total_limit": 2,
     "optim": "adamw_torch", "lr_scheduler_type": "cosine",
     "fp16": not torch.cuda.is_bf16_supported(),
     "bf16": torch.cuda.is_bf16_supported(),
-    "flash_attn": "auto", "output_dir": output_dir, "report_to": "none",
+    "output_dir": output_dir, "report_to": "none",
 }
 with open(os.path.join(DRIVE_PATH, "train_config.yaml"), "w") as f:
     yaml.dump(cfg, f, allow_unicode=True)
@@ -236,6 +236,8 @@ eff_batch = cfg["per_device_train_batch_size"] * cfg["gradient_accumulation_step
 log(f"Effective batch: {eff_batch} | Epochs: {cfg['num_train_epochs']} | LR: {cfg['learning_rate']} | LoRA: {cfg['lora_rank']}")
 
 result = run_cmd("cd /content/LLaMA-Factory && DISABLE_VERSION_CHECK=1 llamafactory-cli train train_config.yaml")
+if result.returncode != 0:
+    log(f"TRAINING FAILED with exit code {result.returncode}")
 
 elapsed = time.time() - start
 log(f"Training time: {elapsed:.0f}s ({elapsed/60:.1f} min)")
