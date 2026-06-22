@@ -206,6 +206,7 @@ log(f"Model: {model_name} | Template: {template}")
 
 import yaml
 cfg = {
+    "stage": "sft", "do_train": True,
     "model_name_or_path": model_name, "template": template,
     "finetuning_type": "lora", "dataset": "king2_training",
     "dataset_dir": "data", "cutoff_len": 2048,
@@ -235,7 +236,7 @@ start = time.time()
 eff_batch = cfg["per_device_train_batch_size"] * cfg["gradient_accumulation_steps"]
 log(f"Effective batch: {eff_batch} | Epochs: {cfg['num_train_epochs']} | LR: {cfg['learning_rate']} | LoRA: {cfg['lora_rank']}")
 
-result = run_cmd("cd /content/LLaMA-Factory && DISABLE_VERSION_CHECK=1 llamafactory-cli train train_config.yaml")
+result = run_cmd("cd /content/LLaMA-Factory && HF_LOG_LEVEL=debug TRANSFORMERS_VERBOSITY=info DISABLE_VERSION_CHECK=1 llamafactory-cli train train_config.yaml")
 if result.returncode != 0:
     log(f"TRAINING FAILED with exit code {result.returncode}")
 
@@ -244,8 +245,14 @@ log(f"Training time: {elapsed:.0f}s ({elapsed/60:.1f} min)")
 
 # 6. SAVE
 log("=== 6. SAVING TO DRIVE ===")
-import glob
-checkpoints = sorted(glob.glob(f"/content/LLaMA-Factory/{output_dir}/checkpoint-*"))
+import glob, os
+out_dir = f"/content/LLaMA-Factory/{output_dir}"
+log(f"Checking output dir: {out_dir}")
+if os.path.exists(out_dir):
+    log(f"Contents: {os.listdir(out_dir)}")
+else:
+    log(f"Output dir does not exist!")
+checkpoints = sorted(glob.glob(f"{out_dir}/checkpoint-*"))
 if checkpoints:
     latest = checkpoints[-1]
     adapter_dir = os.path.join(DRIVE_PATH, f"{output_dir}_adapter")
