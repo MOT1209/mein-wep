@@ -1,6 +1,6 @@
 {
-  "name": "KingCraft",
-  "short_name": "KingCraft",
+  "name": "Voxel Realm",
+  "short_name": "Voxel Realm",
   "description": "لعبة عالم مكعبات ثلاثية الأبعاد في المتصفح",
   "start_url": "./index.html",
   "display": "fullscreen",

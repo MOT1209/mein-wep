@@ -66,6 +66,10 @@ module.exports = async (req, res) => {
   if (!prompt) {
     return res.status(400).json({ error: 'Missing prompt' });
   }
+  // حماية التكلفة: ارفض الطلبات غير النصية أو المفرطة الطول
+  if (typeof prompt !== 'string' || prompt.length > 8000) {
+    return res.status(400).json({ error: 'Invalid or too long prompt' });
+  }
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {

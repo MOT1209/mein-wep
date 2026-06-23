@@ -208,7 +208,7 @@ const DEFAULT_SETTINGS = {
   masterVolume: 50,
   sfxVolume: 80,
   musicVolume: 50,
-  sensitivity: 50,
+  sensitivity: 10,
   renderDistance: 8,
   fov: 80,
   brightness: 1.0,

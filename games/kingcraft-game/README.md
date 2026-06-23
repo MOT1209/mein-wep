@@ -1,4 +1,4 @@
-# KingCraft 👑
+# Voxel Realm 👑
 
 A **3D voxel sandbox game** built with Three.js — mine, craft, build, and survive in an immersive block world!
 
@@ -43,7 +43,7 @@ A **3D voxel sandbox game** built with Three.js — mine, craft, build, and surv
 
 - **Three.js r160** — 3D rendering engine
 - **Vanilla JavaScript** — ES Modules architecture
-- **CSS3** — Minecraft-style UI (HUD, inventory, menu)
+- **CSS3** — custom voxel-style UI (HUD, inventory, menu)
 
 ## 📁 Project Structure
 

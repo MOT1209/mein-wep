@@ -150,10 +150,13 @@ scene.add(crackBox);
 // ===== النظر =====
 let yaw = 0, pitch = 0, started = false;
 let SENS = 0.0022;
+let INVERT_Y = false;
 let _lastMouseX = null, _lastMouseY = null;
 
 function applySettingsToScene(s) {
   SENS = 0.0022 * (s.sensitivity / 10);
+  INVERT_Y = !!s.invertY;
+  player.autoJump = !!s.autoJump;
   if (world) world.renderDistance = s.renderDistance;
   camera.fov = s.fov;
   camera.updateProjectionMatrix();
@@ -161,6 +164,8 @@ function applySettingsToScene(s) {
 }
 const initSettings = WM.loadSettings();
 applySettingsToScene(initSettings);
+// تطبيق الإعدادات فوراً عند الحفظ من القائمة (بدون إعادة تحميل)
+menu.onSettingsChange = applySettingsToScene;
 
 // ===== مساعدة =====
 let lastDir = new THREE.Vector3();
@@ -373,7 +378,7 @@ menu.onStartGame = (worldData) => {
     if (p && p.catch) p.catch(() => { started = true; });
     if (document.pointerLockElement !== document.getElementById("game")) started = true;
   }).catch((err) => {
-    console.warn("KingCraft: فشل تحميل السيف, بدء عالم جديد", err);
+    console.warn("Voxel Realm: فشل تحميل السيف, بدء عالم جديد", err);
     player.spawn();
     inventory.giveStarter();
     lastDir = player.applyCamera(yaw, pitch);
@@ -436,7 +441,7 @@ function runCommand(cmd) {
         }
         break;
     }
-  } catch (err) { console.warn("KingCraft: أمر غير صالح:", err); }
+  } catch (err) { console.warn("Voxel Realm: أمر غير صالح:", err); }
 }
 
 function chatSend() {
@@ -514,13 +519,13 @@ document.getElementById("game").addEventListener("mousemove", (e) => {
   if (document.pointerLockElement === document.getElementById("game")) {
     if (!started) return;
     yaw -= e.movementX * SENS;
-    pitch -= e.movementY * SENS;
+    pitch -= e.movementY * SENS * (INVERT_Y ? -1 : 1);
     player._yaw = yaw; player._pitch = pitch;
   } else if (_gameStarted) {
     if (_lastMouseX === null) { _lastMouseX = e.clientX; _lastMouseY = e.clientY; return; }
     const dx = e.clientX - _lastMouseX, dy = e.clientY - _lastMouseY;
     _lastMouseX = e.clientX; _lastMouseY = e.clientY;
-    yaw -= dx * SENS; pitch -= dy * SENS;
+    yaw -= dx * SENS; pitch -= dy * SENS * (INVERT_Y ? -1 : 1);
     player._yaw = yaw; player._pitch = pitch;
   } else return;
   const lim = Math.PI / 2 - 0.01;
@@ -588,7 +593,7 @@ function loop(now) {
       const tooltipId = hit ? world.getBlock(hit.block[0], hit.block[1], hit.block[2]) : 0;
       const tooltipName = tooltipId ? (getItem(tooltipId)?.name || `ID:${tooltipId}`) : "";
       document.getElementById("debug").textContent =
-        `KingCraft v0.4\nFPS: ${fps}\nXYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\nchunks: ${world.chunks.size} • drops: ${drops.entities.length} • mobs: ${entityManager.entities.length}` +
+        `Voxel Realm v0.6.0\nFPS: ${fps}\nXYZ: ${player.pos.x.toFixed(1)} ${player.pos.y.toFixed(1)} ${player.pos.z.toFixed(1)}\nchunks: ${world.chunks.size} • drops: ${drops.entities.length} • mobs: ${entityManager.entities.length}` +
         (player.flying ? "\n[طيران]" : "") + (player.sneaking ? "\n[زحف]" : "") + (menu.paused ? "\n§c⏸ PAUSED" : "") +
         (debugTools.showAdvancedTooltips && tooltipName ? `\n[${tooltipName}]` : "");
     }
@@ -608,6 +613,6 @@ if ("serviceWorker" in navigator) {
     if ("caches" in window) { const names = await caches.keys(); await Promise.all(names.map((n) => caches.delete(n))); }
     const regs = await navigator.serviceWorker.getRegistrations();
     await Promise.all(regs.map((r) => r.unregister()));
-    navigator.serviceWorker.register("sw.js").catch((err) => { console.warn("KingCraft: فشل تسجيل Service Worker", err); });
+    navigator.serviceWorker.register("sw.js").catch((err) => { console.warn("Voxel Realm: فشل تسجيل Service Worker", err); });
   });
 }

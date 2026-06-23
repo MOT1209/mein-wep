@@ -22,6 +22,7 @@ export class MenuSystem {
     this._onStartGame = null;
     this._saveCallback = null;
     this._closeUICallback = null;
+    this._onSettingsChange = null;
     this._gameStarted = false;
 
     this._bindEvents();
@@ -32,6 +33,7 @@ export class MenuSystem {
   set onStartGame(fn) { this._onStartGame = fn; }
   set saveCallback(fn) { this._saveCallback = fn; }
   set closeUICallback(fn) { this._closeUICallback = fn; }
+  set onSettingsChange(fn) { this._onSettingsChange = fn; }
   get gameStarted() { return this._gameStarted; }
   set gameStarted(v) { this._gameStarted = v; }
 
@@ -256,5 +258,6 @@ export class MenuSystem {
       language: document.getElementById("lang-select").value,
     };
     WM.saveSettings(s);
+    if (this._onSettingsChange) this._onSettingsChange(s);
   }
 }

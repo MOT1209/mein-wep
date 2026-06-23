@@ -1,4 +1,4 @@
-/* ===== القائمة الرئيسية — تصميم مثل Minecraft الحقيقي ===== */
+/* ===== القائمة الرئيسية — تصميم Voxel Realm ===== */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
 /* الخلفية المتحركة (بانوراما مكعبات) */
@@ -67,7 +67,7 @@
   min-width: 340px;
 }
 
-/* ===== الشعار (Minecraft-style) ===== */
+/* ===== الشعار (voxel-style) ===== */
 .logo {
   font-size: 36px;
   font-weight: 900;
@@ -94,7 +94,7 @@
   font-family: 'Press Start 2P', monospace;
 }
 
-/* ===== أزرار Minecraft الأصلية ===== */
+/* ===== أزرار اللعبة ===== */
 .btn-mc {
   width: 310px;
   height: 40px;
@@ -349,7 +349,7 @@
   margin-top: 6px;
 }
 
-/* ===== قائمة الإيقاف المؤقت (مثل Minecraft بالضبط) ===== */
+/* ===== قائمة الإيقاف المؤقت ===== */
 .pause-overlay {
   position: fixed; inset: 0;
   display: flex;
@@ -495,7 +495,7 @@
   margin-top: 6px;
 }
 
-/* ===== المودالات (Minecraft-style) ===== */
+/* ===== المودالات (voxel-style) ===== */
 .modal-overlay {
   position: fixed; inset: 0;
   display: flex;

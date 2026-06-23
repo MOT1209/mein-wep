@@ -1,6 +1,6 @@
 {
-  "appId": "com.rashid.kingcraftgame",
-  "appName": "KingCraft",
+  "appId": "com.rashid.kingcraft",
+  "appName": "Voxel Realm",
   "webDir": "www",
   "server": {
     "androidScheme": "https"

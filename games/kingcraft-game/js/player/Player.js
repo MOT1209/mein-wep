@@ -21,6 +21,8 @@ export class Player {
     this._prevOnGround = false;
     this._fallDist = 0;
     this.flying = false;
+    this.autoJump = false;
+    this._hitWall = false;
     this.sneaking = false;
     this.thirdPerson = false;
     this._height = PLAYER_HEIGHT;
@@ -140,9 +142,17 @@ export class Player {
       }
     }
 
+    this._hitWall = false;
     this._moveAxis("x", this.vel.x * dt);
     this._moveAxis("z", this.vel.z * dt);
     this._moveAxis("y", this.vel.y * dt);
+
+    // قفز تلقائي: عند الاصطدام أفقياً بعقبة ونحن نمشي على الأرض
+    if (this.autoJump && this.onGround && !this.flying && !this.inWater && this._hitWall &&
+        (Math.abs(this.vel.x) > 0.05 || Math.abs(this.vel.z) > 0.05)) {
+      this.vel.y = JUMP_SPEED;
+      this.onGround = false;
+    }
 
     if (!this.flying && !this.inWater) {
       const dy = startY - this.pos.y;
@@ -179,6 +189,8 @@ export class Player {
       if (axis === "y") {
         if (amount < 0 && this.world.isSolidAt(p.x, p.y - 0.001, p.z)) this.onGround = true;
         this.vel.y = 0;
+      } else {
+        this._hitWall = true;
       }
     } else if (axis === "y" && amount < 0) {
       this.onGround = false;
