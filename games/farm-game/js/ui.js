@@ -29,7 +29,7 @@ GAME.ui = {
         if (typeof toggleInventory === 'function') toggleInventory();
       }
       var num = parseInt(e.key);
-      if (num >= 1 && num <= 7) {
+      if (num >= 1 && num <= 8) {
         if (typeof selectTool === 'function') selectTool(num - 1);
       }
     });
@@ -433,7 +433,7 @@ GAME.ui.refreshInventory = function() {
   var s = GAME.game && GAME.game.state;
   if (!s) return;
   var map = { wheat: 'inv-wheat', tomato: 'inv-tomato', carrot: 'inv-carrot', apple: 'inv-apple',
-              bread: 'inv-bread', ketchup: 'inv-ketchup', juice: 'inv-juice' };
+              bread: 'inv-bread', ketchup: 'inv-ketchup', juice: 'inv-juice', fertilizer: 'inv-fertilizer' };
   for (var key in map) {
     var el = document.getElementById(map[key]);
     if (el) el.textContent = s.inventory[key] !== undefined ? s.inventory[key] : (s.crafted[key] || 0);

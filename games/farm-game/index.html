@@ -79,6 +79,7 @@
         <button class="tool-slot" data-tool="4" aria-label="Plant carrot"><span class="tool-key">5</span><span class="tool-icon">🥕</span><span class="tool-label">Carrot</span></button>
         <button class="tool-slot" data-tool="5" aria-label="Harvest tool"><span class="tool-key">6</span><span class="tool-icon">🧺</span><span class="tool-label">Harvest</span></button>
         <button class="tool-slot" data-tool="6" aria-label="Plant apple tree"><span class="tool-key">7</span><span class="tool-icon">🌳</span><span class="tool-label">Apple</span></button>
+        <button class="tool-slot" data-tool="7" aria-label="Fertilizer"><span class="tool-key">8</span><span class="tool-icon">🧪</span><span class="tool-label">Fertilizer</span></button>
       </div>
       <div class="hud-controls-hint">[WASD] Move &nbsp;|&nbsp; [Mouse] Look &nbsp;|&nbsp; [E] Interact &nbsp;|&nbsp; [F] Action &nbsp;|&nbsp; [I] Inventory &nbsp;|&nbsp; [Esc] Menu</div>
     </div>
@@ -100,6 +101,7 @@
           <div class="shop-item"><span class="item-name">🍅 Tomato Seed</span><span class="item-price">$20</span><button class="shop-buy-btn" onclick="buySeed('tomato')">Buy</button></div>
           <div class="shop-item"><span class="item-name">🥕 Carrot Seed</span><span class="item-price">$15</span><button class="shop-buy-btn" onclick="buySeed('carrot')">Buy</button></div>
           <div class="shop-item"><span class="item-name">🌳 Apple Sapling</span><span class="item-price">$50</span><button class="shop-buy-btn" onclick="buySeed('apple')">Buy</button></div>
+          <div class="shop-item"><span class="item-name">🧪 Fertilizer</span><span class="item-price">$15</span><button class="shop-buy-btn" onclick="buyFertilizer()">Buy</button></div>
         </div>
         <div class="shop-section">
           <h3>🐑 Animals</h3>
@@ -143,6 +145,7 @@
             <div class="inv-row"><span class="inv-icon">🍅</span><span class="inv-name">Tomato</span><span class="inv-count" id="inv-tomato">0</span></div>
             <div class="inv-row"><span class="inv-icon">🥕</span><span class="inv-name">Carrot</span><span class="inv-count" id="inv-carrot">0</span></div>
             <div class="inv-row"><span class="inv-icon">🍎</span><span class="inv-name">Apple</span><span class="inv-count" id="inv-apple">0</span></div>
+            <div class="inv-row"><span class="inv-icon">🌱</span><span class="inv-name">Fertilizer</span><span class="inv-count" id="inv-fertilizer">0</span></div>
           </div>
           <div class="inv-section">
             <h3>🍳 Crafted</h3>

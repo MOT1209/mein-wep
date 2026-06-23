@@ -141,7 +141,7 @@ GAME.game = {
         this.state.money = data.money || 200;
         this.state.day = data.day || 1;
         this.state.time = data.time || 6;
-        this.state.inventory = data.inventory || { wheat: 0, tomato: 0, carrot: 0, apple: 0 };
+        this.state.inventory = data.inventory || { wheat: 0, tomato: 0, carrot: 0, apple: 0, fertilizer: 0 };
         this.state.crafted = data.crafted || { bread: 0, ketchup: 0, juice: 0 };
         this.state.xp = data.xp || 0;
         this.state.level = data.level || 1;
@@ -272,6 +272,27 @@ GAME.game = {
     else if (tool === 4) { this.plantClosest('carrot'); GAME.audio.play('step'); }
     else if (tool === 5) { this.harvestClosest(); GAME.audio.play('harvest'); }
     else if (tool === 6) { this.plantClosest('apple'); GAME.audio.play('step'); }
+    else if (tool === 7) { this.fertilizeClosest(); GAME.audio.play('step'); }
+  },
+
+  fertilizeClosest: function() {
+    var idx = this.findClosestPlot('planted');
+    if (idx === null) {
+      // Try to find ready plants too
+      idx = this.findClosestPlot('ready');
+    }
+    if (idx === null) {
+      GAME.ui.showNotification('❌ No plants nearby to fertilize', 'error');
+      return;
+    }
+    if ((this.state.inventory.fertilizer || 0) <= 0) {
+      GAME.ui.showNotification('❌ No fertilizer in inventory', 'error');
+      return;
+    }
+    this.state.plots[idx].fertilized = true;
+    this.state.inventory.fertilizer--;
+    GAME.ui.showNotification('🌱 Fertilized! Growth boosted.', 'success');
+    GAME.ui.refreshInventory();
   },
 
   findClosestPlot: function(state) {
@@ -296,6 +317,10 @@ GAME.game = {
     var cost = this.getEnergyCost(5);
     if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
     this.state.plots[idx].state = 'plowed';
+    this.state.plots[idx].crop = null;
+    this.state.plots[idx].growth = 0;
+    this.state.plots[idx].watered = false;
+    this.state.plots[idx].fertilized = false;
     this.state.energy -= cost;
     var plot = this.state.plots[idx];
     var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
@@ -340,6 +365,7 @@ GAME.game = {
     this.state.plots[idx].crop = crop;
     this.state.plots[idx].growth = 0;
     this.state.plots[idx].watered = false;
+    this.state.plots[idx].fertilized = false;
     var plot = this.state.plots[idx];
     var isTree = crop === 'apple';
 
@@ -416,6 +442,7 @@ GAME.game = {
       plot.crop = null;
       plot.growth = 0;
       plot.watered = false;
+      plot.fertilized = false;
       this.state.inventory[cropType] = (this.state.inventory[cropType] || 0) + 1;
       GAME.ui.showNotification('💰 Harvested ' + cropType + '! +$' + salePrice, 'success');
     }
@@ -485,6 +512,17 @@ GAME.game = {
     GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
   },
 
+  buyFertilizer: function() {
+    var price = 15;
+    if (this.state.money < price) {
+      GAME.ui.showNotification('❌ Not enough money! Need $' + price, 'error');
+      return;
+    }
+    this.state.money -= price;
+    this.state.inventory.fertilizer = (this.state.inventory.fertilizer || 0) + 1;
+    GAME.ui.showNotification('🌱 Bought fertilizer!', 'success');
+  },
+
   sleep: function() {
     this.state.health = Math.min(100, this.state.health + 30);
     this.state.energy = 100;
@@ -516,6 +554,10 @@ GAME.game = {
       var plot = state.plots[i];
       if (plot.state === 'planted') {
         var growthRate = plot.watered ? 1.5 : 0.5;
+        // Fertilizer increases growth rate by 50%
+        if (plot.fertilized) {
+          growthRate *= 1.5;
+        }
         var levelBonus = 1 + (state.level - 1) * 0.02;
         var treeMultiplier = plot.crop === 'apple' ? 0.33 : 1;
         plot.growth += delta * growthRate * 0.02 * levelBonus * treeMultiplier;
