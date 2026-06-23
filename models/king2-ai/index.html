@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KING2 AI — مساعد الذكاء الاصطناعي الملكي</title>
+  <meta name="description" content="KING2 AI — مساعد ذكي مخصص، مبني على Qwen2.5-3B مع LoRA">
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <div class="logo-section">
+          <span class="logo-icon">👑</span>
+          <div class="logo-text">
+            <h1>KING2 AI</h1>
+            <span class="logo-sub">مساعد الذكاء الاصطناعي الملكي</span>
+          </div>
+        </div>
+        <div class="status-badge" id="statusBadge">
+          <span class="status-dot"></span>
+          <span class="status-text">جاري التحميل...</span>
+        </div>
+      </div>
+      <div class="model-info">
+        Qwen2.5-3B + QLoRA &nbsp;·&nbsp; 54 steps &nbsp;·&nbsp; loss 0.9183
+      </div>
+    </header>
+
+    <main class="chat-main">
+      <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+          <div class="welcome-icon">👑</div>
+          <h2>مرحباً بك في KING2</h2>
+          <p>أنا مساعدك الذكي، متخصص في العربية والبرمجة والرياضيات.<br>اكتب سؤالك وسأجيبك بأفضل صورة.</p>
+          <div class="suggestion-chips" id="suggestionChips">
+            <button class="chip" data-prompt="ما هي لغة البرمجة الأفضل لتعلم الذكاء الاصطناعي؟">لغة برمجة للذكاء الاصطناعي</button>
+            <button class="chip" data-prompt="اكتب كود React مع TypeScript">كود React + TypeScript</button>
+            <button class="chip" data-prompt="اشرح لي الخوارزميات بالعربية">الخوارزميات بالعربية</button>
+            <button class="chip" data-prompt="ما هو الفرق بين SQL و NoSQL؟">SQL vs NoSQL</button>
+          </div>
+          <div class="cpu-notice">
+            ⚠️ الموديل يعمل على CPU — الرد قد يأخذ 30-60 ثانية
+          </div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="input-wrapper">
+          <textarea id="userInput" class="chat-input" placeholder="اكتب رسالتك هنا..." rows="1" autofocus></textarea>
+          <button id="sendBtn" class="send-btn" aria-label="إرسال">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <span>Fine-tuned with ❤️ by RASHID778</span>
+      <a href="https://huggingface.co/RASHID778/king2-qwen2.5-3b" target="_blank" rel="noopener">HF Model</a>
+      <a href="https://rashid-wep.vercel.app" target="_blank" rel="noopener">Rashid</a>
+    </footer>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
