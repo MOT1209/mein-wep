@@ -298,10 +298,7 @@ GAME.game = {
     this.state.inventory.fertilizer--;
     
     // Update fertilizer marker
-    var plot = this.state.plots[idx];
-    if (plot.fertilizerMarker) {
-      plot.fertilizerMarker.material.opacity = 0.8;
-    }
+    this.updatePlantVisual(this.state.plots[idx]);
     
     GAME.ui.showNotification('🌱 Fertilized! Growth boosted.', 'success');
     GAME.ui.refreshInventory();
@@ -589,10 +586,7 @@ GAME.game = {
     GAME.ui.showNotification('💧 Watered crops! +3 XP', 'success');
     
     // Update water marker visibility
-    var plot = this.state.plots[idx];
-    if (plot.waterMarker) {
-      plot.waterMarker.material.opacity = 0.6;
-    }
+    this.updatePlantVisual(this.state.plots[idx]);
   },
 
   plantClosest: function(crop) {
@@ -811,12 +805,7 @@ GAME.game = {
     // Update growth markers visibility
     for (var i = 0; i < state.plots.length; i++) {
       var plot = state.plots[i];
-      if (plot.waterMarker) {
-        plot.waterMarker.material.opacity = plot.watered ? 0.6 : 0;
-      }
-      if (plot.fertilizerMarker) {
-        plot.fertilizerMarker.material.opacity = plot.fertilized ? 0.8 : 0;
-      }
+      this.updatePlantVisual(plot, delta);
     }
     
     for (var i = 0; i < state.plots.length; i++) {
