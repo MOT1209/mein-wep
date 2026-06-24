@@ -1,6 +1,6 @@
 {
   "version": "2.0.0",
-  "buildNumber": 4,
+  "buildNumber": 5,
   "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.0.0.apk",
   "changelog": "Full rebuild: 3D world, player movement, third-person camera, collision, farming system, day/night cycle, shop UI",
   "releaseDate": "2026-06-16"
