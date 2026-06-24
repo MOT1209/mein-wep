@@ -128,9 +128,14 @@ as $$
   select exists (select 1 from public.admin_users where user_id = (select auth.uid()));
 $$;
 
+-- NOTE: anon MUST keep EXECUTE on is_admin(). The public SELECT policies on
+-- prompts/codes/images/media/lessons/models use `(status='Public' OR is_admin())`,
+-- so anonymous visitors evaluate is_admin() while reading. Without this grant the
+-- API returns 401 "permission denied for function is_admin" and the whole site's
+-- vault/content fails to load. The function is SECURITY DEFINER and returns false
+-- for anon (auth.uid() is null), so granting it is safe — no data is exposed.
 revoke all on function public.is_admin() from public;
-revoke execute on function public.is_admin() from anon;
-grant execute on function public.is_admin() to authenticated;
+grant execute on function public.is_admin() to anon, authenticated;
 
 -- RPC: add_admin_user (security definer — allows new users to self-register as admin)
 create or replace function public.add_admin_user()
