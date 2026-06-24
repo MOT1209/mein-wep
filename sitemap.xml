@@ -93,6 +93,30 @@
         <priority>0.6</priority>
     </url>
     <url>
+        <loc>https://rashid-wep.vercel.app/blog/building-a-pwa-with-service-workers.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/blog/fine-tuning-llms-with-lora.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/blog/flutter-clean-architecture.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/blog/building-a-game-ai-agent-in-javascript.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html</loc>
+        <priority>0.6</priority>
+    </url>
+    <url>
         <loc>https://rashid-wep.vercel.app/downloads.html</loc>
         <priority>0.8</priority>
     </url>

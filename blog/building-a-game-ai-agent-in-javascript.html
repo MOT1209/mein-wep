@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How I built an autonomous AI agent for a browser farming game using a finite state machine and utility-based decision making — all in vanilla JavaScript.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/building-a-game-ai-agent-in-javascript.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Building a Game AI Agent in Vanilla JavaScript">
+    <meta property="og:description" content="A finite state machine plus utility scoring gives a farming-game bot that plants, waters, harvests, and sells on its own.">
+    <meta property="og:image" content="../images/logo.webp">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/building-a-game-ai-agent-in-javascript.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Building a Game AI Agent in JavaScript">
+    <meta name="twitter:image" content="../images/logo.webp">
+    <title>Building a Game AI Agent in JavaScript — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Building a Game AI Agent in Vanilla JavaScript",
+      "description": "A finite state machine plus utility scoring gives a farming-game bot that plants, waters, harvests, and sells on its own.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-21",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/building-a-game-ai-agent-in-javascript.html",
+      "keywords": ["Game AI","JavaScript","State Machine","Agent","Game Dev"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.0">
+    <style>
+        body { padding-top: var(--nav-height); background: var(--bg); font-family: var(--font); color: var(--text-secondary); }
+        .blog-post { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+        .blog-post .post-meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+        .blog-post .post-meta span { display: flex; align-items: center; gap: 6px; }
+        .blog-post h1 { font-size: clamp(1.6rem,3vw,2.5rem); color: var(--text); margin-bottom: 15px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+        .blog-post .post-content { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.8; }
+        .blog-post .post-content h2 { color: var(--text); font-size: 1.4rem; margin: 40px 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 600; }
+        .blog-post .post-content h3 { color: var(--accent); font-size: 1.15rem; margin: 30px 0 12px; font-weight: 600; }
+        .blog-post .post-content p { margin-bottom: 16px; }
+        .blog-post .post-content code { background: var(--bg-elevated); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono); }
+        .blog-post .post-content pre { background: var(--bg-elevated); padding: 20px; border-radius: var(--radius); overflow-x: auto; margin: 20px 0; border: 1px solid var(--border); }
+        .blog-post .post-content pre code { background: none; padding: 0; color: var(--text-secondary); }
+        .blog-post .post-content ul { margin: 16px 0; padding-left: 24px; }
+        .blog-post .post-content li { margin-bottom: 8px; }
+        .blog-post .post-content a { color: var(--accent); }
+        .blog-post .post-content a:hover { text-decoration: underline; }
+        .blog-post .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 30px; }
+        .blog-post .back-link:hover { opacity: 0.8; }
+        .post-tag { display: inline-block; background: var(--accent-subtle); color: var(--accent); padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+    </style>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 21, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 8 min read</span>
+            <span class="post-tag">Game Dev</span>
+            <span class="post-tag">Game AI</span>
+        </div>
+
+        <h1>Building a Game AI Agent in Vanilla JavaScript</h1>
+
+        <div class="post-content">
+            <p>I added an "auto-play" mode to my browser farming game — an AI agent that plants seeds, waters crops, harvests when ripe, and sells produce at the shop, all without the player touching the keyboard. You don't need machine learning for this. A well-designed <strong>finite state machine</strong> combined with <strong>utility scoring</strong> produces behavior that looks genuinely smart. Here is the design.</p>
+
+            <h2>What "Game AI" Usually Means</h2>
+            <p>Game AI is rarely neural networks. It's mostly decision-making logic that picks a sensible action given the current world state, cheaply enough to run every frame. The two workhorse patterns are finite state machines and utility systems, and they compose beautifully.</p>
+
+            <h2>The Finite State Machine</h2>
+            <p>At the top level the agent is always in exactly one state. Each state knows what to do and when to hand off to another:</p>
+            <pre><code>const States = {
+  IDLE:    'idle',
+  PLANT:   'plant',
+  WATER:   'water',
+  HARVEST: 'harvest',
+  SELL:    'sell',
+};
+
+class FarmAgent {
+  constructor(game) {
+    this.game = game;
+    this.state = States.IDLE;
+  }
+
+  tick() {
+    switch (this.state) {
+      case States.IDLE:    return this.decide();
+      case States.PLANT:   return this.doPlant();
+      case States.WATER:   return this.doWater();
+      case States.HARVEST: return this.doHarvest();
+      case States.SELL:    return this.doSell();
+    }
+  }
+}</code></pre>
+            <p>The FSM keeps behavior readable: at any moment you know precisely what the agent is doing and which transitions are legal. No tangled web of booleans.</p>
+
+            <h2>The Decision Function: Utility Scoring</h2>
+            <p>A pure FSM gets rigid if transitions are hardcoded. The trick is to make the <code>IDLE</code> state <em>score</em> each possible action and pick the highest. Each action gets a number based on the world state:</p>
+            <pre><code>decide() {
+  const scores = {
+    [States.HARVEST]: this.scoreHarvest(),
+    [States.SELL]:    this.scoreSell(),
+    [States.WATER]:   this.scoreWater(),
+    [States.PLANT]:   this.scorePlant(),
+  };
+
+  // pick the action with the highest utility
+  const best = Object.entries(scores)
+    .sort((a, b) =&gt; b[1] - a[1])[0];
+
+  this.state = best[1] &gt; 0 ? best[0] : States.IDLE;
+}</code></pre>
+            <p>Now priorities <em>emerge</em> from the numbers instead of from rigid if/else chains. Tuning the agent means tuning the scoring functions.</p>
+
+            <h2>Designing Good Utility Functions</h2>
+            <p>This is where the craft is. Each score should reflect both <em>how valuable</em> and <em>how urgent</em> an action is:</p>
+            <pre><code>scoreHarvest() {
+  const ripe = this.game.crops.filter(c =&gt; c.isRipe).length;
+  return ripe * 100;              // ripe crops are top priority
+}
+
+scoreWater() {
+  const dry = this.game.crops.filter(c =&gt; c.isDry).length;
+  return dry * 40;                // important, but less than harvest
+}
+
+scoreSell() {
+  // only worth it once inventory is worth the trip
+  return this.game.inventoryValue &gt; 50
+    ? this.game.inventoryValue * 0.5 : 0;
+}
+
+scorePlant() {
+  const empty = this.game.emptyPlots.length;
+  // don't plant if we can't afford seeds
+  return this.game.coins &gt;= this.game.seedCost
+    ? empty * 20 : 0;
+}</code></pre>
+            <p>The constants (100, 40, 20) encode the agent's "personality." Bump harvesting higher and it becomes greedy about ripe crops; raise planting and it expands aggressively. A few well-chosen multipliers replace dozens of conditional rules.</p>
+
+            <h2>Acting Over Time, Not Instantly</h2>
+            <p>A real agent shouldn't teleport through tasks — it should move and act at a human-ish pace so the player can watch. I drive the agent from the game loop with a small cooldown so each action takes a beat:</p>
+            <pre><code>let cooldown = 0;
+function gameLoop(dt) {
+  cooldown -= dt;
+  if (cooldown &lt;= 0 &amp;&amp; agent.enabled) {
+    agent.tick();
+    cooldown = 0.4;   // act ~2.5 times per second
+  }
+  // ...render
+}</code></pre>
+            <p>This single line transformed it from a flickering glitch-machine into something that looks deliberate and alive.</p>
+
+            <h2>Avoiding Common Pitfalls</h2>
+            <ul>
+                <li><strong>Oscillation.</strong> If two actions have nearly equal scores the agent can flip-flop between them. Add a small "stickiness" bonus to the current state so it commits.</li>
+                <li><strong>Deadlock.</strong> Always make sure <em>some</em> action can score above zero, or include a safe fallback to <code>IDLE</code>, so the agent never freezes.</li>
+                <li><strong>Unreadable tuning.</strong> Keep all the magic numbers in one config object, not scattered through the scoring functions, so balancing is a single screen.</li>
+            </ul>
+
+            <h2>Why This Approach Wins</h2>
+            <p>A utility-driven FSM is debuggable (log the scores and you see exactly why a choice was made), tunable (designers adjust numbers, not code), and cheap (a few comparisons per tick). It scales from a farming bot to enemy AI, companion NPCs, or city-builder citizens. You reach for learning-based AI only when the action space is too large to score by hand — which, for most browser games, it never is.</p>
+
+            <p>You can watch the agent run in the farming game on the games page — flip on auto-play and let it tend the farm.</p>
+        </div>
+    </main>
+
+    <script src="../src/js/main.js" type="module"></script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How I built a dark design system with CSS-only animated aurora backgrounds, glassmorphism cards, and a themeable accent color using custom properties — no images, no JavaScript.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Aurora Backgrounds and Glassmorphism with Pure CSS">
+    <meta property="og:description" content="A dark, themeable design system built from CSS custom properties, animated gradient orbs, and backdrop-filter glass — no images required.">
+    <meta property="og:image" content="../images/logo.webp">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aurora Backgrounds and Glassmorphism with Pure CSS">
+    <meta name="twitter:image" content="../images/logo.webp">
+    <title>Aurora Backgrounds &amp; Glassmorphism with Pure CSS — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Aurora Backgrounds and Glassmorphism with Pure CSS",
+      "description": "A dark, themeable design system built from CSS custom properties, animated gradient orbs, and backdrop-filter glass — no images required.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-23",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html",
+      "keywords": ["CSS","Design System","Glassmorphism","Custom Properties","Web Design"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.0">
+    <style>
+        body { padding-top: var(--nav-height); background: var(--bg); font-family: var(--font); color: var(--text-secondary); }
+        .blog-post { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+        .blog-post .post-meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+        .blog-post .post-meta span { display: flex; align-items: center; gap: 6px; }
+        .blog-post h1 { font-size: clamp(1.6rem,3vw,2.5rem); color: var(--text); margin-bottom: 15px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+        .blog-post .post-content { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.8; }
+        .blog-post .post-content h2 { color: var(--text); font-size: 1.4rem; margin: 40px 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 600; }
+        .blog-post .post-content h3 { color: var(--accent); font-size: 1.15rem; margin: 30px 0 12px; font-weight: 600; }
+        .blog-post .post-content p { margin-bottom: 16px; }
+        .blog-post .post-content code { background: var(--bg-elevated); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono); }
+        .blog-post .post-content pre { background: var(--bg-elevated); padding: 20px; border-radius: var(--radius); overflow-x: auto; margin: 20px 0; border: 1px solid var(--border); }
+        .blog-post .post-content pre code { background: none; padding: 0; color: var(--text-secondary); }
+        .blog-post .post-content ul { margin: 16px 0; padding-left: 24px; }
+        .blog-post .post-content li { margin-bottom: 8px; }
+        .blog-post .post-content a { color: var(--accent); }
+        .blog-post .post-content a:hover { text-decoration: underline; }
+        .blog-post .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 30px; }
+        .blog-post .back-link:hover { opacity: 0.8; }
+        .post-tag { display: inline-block; background: var(--accent-subtle); color: var(--accent); padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+    </style>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 23, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 9 min read</span>
+            <span class="post-tag">Web Design</span>
+            <span class="post-tag">CSS</span>
+        </div>
+
+        <h1>Aurora Backgrounds and Glassmorphism with Pure CSS</h1>
+
+        <div class="post-content">
+            <p>The current look of this site — a near-black background with soft glowing orbs drifting behind frosted-glass cards — is built entirely with CSS. No background images, no canvas, no JavaScript animation loop. This post breaks down the three techniques behind it: a token system with custom properties, animated aurora orbs, and glassmorphism with <code>backdrop-filter</code>.</p>
+
+            <h2>Step One: A Token System</h2>
+            <p>Before any visuals, I define the entire palette and scale as CSS custom properties on <code>:root</code>. This is the backbone — every component references tokens, never raw values:</p>
+            <pre><code>:root {
+  --bg:            #050507;
+  --bg-surface:    rgba(255, 255, 255, 0.03);
+  --bg-elevated:   rgba(255, 255, 255, 0.05);
+  --text:          #f4f4f5;
+  --text-secondary:#a1a1aa;
+  --text-muted:    #52525b;
+  --border:        rgba(255, 255, 255, 0.08);
+
+  --accent:        #6366f1;   /* electric indigo */
+  --accent-glow:   #818cf8;
+  --accent-subtle: rgba(99, 102, 241, 0.12);
+
+  --radius:    14px;
+  --radius-lg: 20px;
+  --transition: 0.25s ease;
+}</code></pre>
+            <p>The payoff is huge: because <code>--accent</code> is a single variable, I can re-theme the entire site by changing one value — and even let JavaScript overwrite it at runtime for a user-selectable accent color.</p>
+
+            <h2>Step Two: The Aurora Background</h2>
+            <p>The glowing orbs are just large, heavily-blurred radial gradients positioned behind everything and slowly animated. Each "orb" is a pseudo-element:</p>
+            <pre><code>body::before,
+body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.5;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {           /* indigo orb, top-left */
+  width: 45vw; height: 45vw;
+  top: -10%; left: -10%;
+  background: radial-gradient(circle,
+    rgba(99,102,241,0.5), transparent 70%);
+  animation: drift 18s ease-in-out infinite;
+}
+
+body::after {            /* cyan orb, bottom-right */
+  width: 40vw; height: 40vw;
+  bottom: -15%; right: -10%;
+  background: radial-gradient(circle,
+    rgba(34,211,238,0.4), transparent 70%);
+  animation: drift 22s ease-in-out infinite reverse;
+}</code></pre>
+            <p>The motion comes from one reusable keyframe that nudges position and scale:</p>
+            <pre><code>@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(6%, 8%) scale(1.15); }
+}</code></pre>
+            <p>The heavy <code>blur(100px)</code> is what turns two hard gradient circles into a soft, atmospheric glow. Two pseudo-elements, zero images, and the background feels alive.</p>
+
+            <h2>Step Three: Glassmorphism Cards</h2>
+            <p>Cards sit on top of the aurora as frosted glass. The recipe is a translucent background plus <code>backdrop-filter: blur()</code>, which blurs whatever is <em>behind</em> the element:</p>
+            <pre><code>.glass-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}</code></pre>
+            <p>Three details sell the glass effect:</p>
+            <ul>
+                <li>The <strong>translucent background</strong> lets the aurora bleed through faintly.</li>
+                <li>The <strong>1px hairline border</strong> in a low-opacity white gives the edge a "lit rim," the way real glass catches light.</li>
+                <li><strong>saturate(140%)</strong> on the backdrop boosts the color behind the card so the glow reads through richer.</li>
+            </ul>
+
+            <h2>Performance: The Catch</h2>
+            <p><code>backdrop-filter</code> and large blurs are GPU-intensive. On weaker devices, dozens of glass cards plus animated orbs can drop the frame rate. My mitigations:</p>
+            <ul>
+                <li><strong>A performance toggle.</strong> A "reduce effects" setting swaps <code>backdrop-filter</code> for a solid surface color and pauses the orb animation.</li>
+                <li><strong>Respect <code>prefers-reduced-motion</code>.</strong> Users who ask for less motion get the orbs frozen automatically:</li>
+            </ul>
+            <pre><code>@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
+}</code></pre>
+            <ul>
+                <li><strong>Limit the blurred layers.</strong> Two orbs and glass only on real cards — not every box — keeps the compositor happy.</li>
+            </ul>
+
+            <h2>Accessibility and Contrast</h2>
+            <p>Dark, glowing designs can quietly fail contrast checks. Translucent text over a busy background is the usual culprit. I keep body text at a solid <code>--text-secondary</code> rather than a low alpha, ensure headings hit the 4.5:1 ratio against the darkest background, and never put essential text directly over the brightest part of an orb.</p>
+
+            <h2>Why CSS-Only Was the Right Call</h2>
+            <p>I could have used a canvas particle system or a WebGL shader for the background. CSS won because it's lightweight (no JS bundle, no render loop competing with the main thread), it degrades gracefully (older browsers just see a dark background), and it themes instantly through custom properties. For an atmospheric portfolio background, a couple of blurred gradients and a keyframe deliver 90% of the effect at a tiny fraction of the cost.</p>
+
+            <h2>Takeaways</h2>
+            <p>Build on a token system first — it makes everything after it themeable. Reach for pseudo-elements and <code>filter: blur()</code> before images or canvas. And always pair flashy effects with an escape hatch for performance and accessibility. The whole aesthetic of this site rests on those three moves, and you can read every line of it in the stylesheet.</p>
+        </div>
+    </main>
+
+    <script src="../src/js/main.js" type="module"></script>
+</body>
+</html>

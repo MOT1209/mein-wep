@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How I added a real backend — contact forms, a content vault, and analytics — to a static portfolio using Supabase, Postgres, and Row Level Security, with no server to maintain.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Adding a Real Backend to a Static Site with Supabase">
+    <meta property="og:description" content="Contact forms, a content vault, and Row Level Security on a static site — using Supabase and Postgres without running a server.">
+    <meta property="og:image" content="../images/logo.webp">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Adding a Real Backend with Supabase">
+    <meta name="twitter:image" content="../images/logo.webp">
+    <title>A Supabase Backend for Static Sites — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Adding a Real Backend to a Static Site with Supabase",
+      "description": "Contact forms, a content vault, and Row Level Security on a static site — using Supabase and Postgres without running a server.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-15",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html",
+      "keywords": ["Supabase","Postgres","RLS","Backend","Web Dev"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.0">
+    <style>
+        body { padding-top: var(--nav-height); background: var(--bg); font-family: var(--font); color: var(--text-secondary); }
+        .blog-post { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+        .blog-post .post-meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+        .blog-post .post-meta span { display: flex; align-items: center; gap: 6px; }
+        .blog-post h1 { font-size: clamp(1.6rem,3vw,2.5rem); color: var(--text); margin-bottom: 15px; line-height: 1.2; font-weight: 700; letter-spacing: -0.02em; }
+        .blog-post .post-content { color: var(--text-secondary); font-size: 1.05rem; line-height: 1.8; }
+        .blog-post .post-content h2 { color: var(--text); font-size: 1.4rem; margin: 40px 0 16px; border-bottom: 1px solid var(--border); padding-bottom: 8px; font-weight: 600; }
+        .blog-post .post-content h3 { color: var(--accent); font-size: 1.15rem; margin: 30px 0 12px; font-weight: 600; }
+        .blog-post .post-content p { margin-bottom: 16px; }
+        .blog-post .post-content code { background: var(--bg-elevated); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono); }
+        .blog-post .post-content pre { background: var(--bg-elevated); padding: 20px; border-radius: var(--radius); overflow-x: auto; margin: 20px 0; border: 1px solid var(--border); }
+        .blog-post .post-content pre code { background: none; padding: 0; color: var(--text-secondary); }
+        .blog-post .post-content ul { margin: 16px 0; padding-left: 24px; }
+        .blog-post .post-content li { margin-bottom: 8px; }
+        .blog-post .post-content a { color: var(--accent); }
+        .blog-post .post-content a:hover { text-decoration: underline; }
+        .blog-post .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 30px; }
+        .blog-post .back-link:hover { opacity: 0.8; }
+        .post-tag { display: inline-block; background: var(--accent-subtle); color: var(--accent); padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+    </style>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 15, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 9 min read</span>
+            <span class="post-tag">Backend</span>
+            <span class="post-tag">Supabase</span>
+        </div>
+
+        <h1>Adding a Real Backend to a Static Site with Supabase</h1>
+
+        <div class="post-content">
+            <p>A static site is wonderful right up to the moment you need it to <em>remember</em> something — a contact message, a saved snippet, a view count. The classic answer is "spin up a server," but I didn't want to maintain one. Supabase let me add a Postgres database, authentication, and instant APIs to my otherwise static portfolio without running any backend code of my own. Here is how I structured it and the mistakes I hit along the way.</p>
+
+            <h2>Why Supabase for a Static Front-End</h2>
+            <p>Supabase gives you a hosted Postgres database with an auto-generated REST and realtime API, plus a small JavaScript client you drop into the browser. For a static site that means:</p>
+            <ul>
+                <li>No server to deploy, patch, or pay for while idle.</li>
+                <li>A real relational database, not a key-value toy — I can run joins and SQL.</li>
+                <li>Security enforced at the database layer through <strong>Row Level Security</strong>, so the public anon key is safe to ship in the browser.</li>
+            </ul>
+
+            <h2>Connecting from the Browser</h2>
+            <p>The client initializes with the project URL and the public anon key. These are <em>meant</em> to be public — the security boundary is the database, not the key:</p>
+            <pre><code>import { createClient } from
+  'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  'https://YOUR-PROJECT.supabase.co',
+  'YOUR-ANON-PUBLIC-KEY'
+);</code></pre>
+            <p>Loading the client straight from an ESM CDN keeps me in the no-build-step world the rest of the site lives in.</p>
+
+            <h2>A Contact Form That Persists</h2>
+            <p>The contact form was the first feature. The table is intentionally simple:</p>
+            <pre><code>create table messages (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null,
+  email       text not null,
+  body        text not null,
+  created_at  timestamptz default now()
+);</code></pre>
+            <p>Inserting a row from the form handler is a single call:</p>
+            <pre><code>const { error } = await supabase
+  .from('messages')
+  .insert({ name, email, body });
+
+if (error) showError(error.message);
+else showSuccess('Message sent!');</code></pre>
+
+            <h2>Row Level Security Is the Whole Game</h2>
+            <p>This is the part people skip and then panic about. By default, with RLS enabled and no policies, <strong>nothing</strong> is allowed — which is the safe default. For the contact form I want anonymous visitors to be able to insert a message but never to read other people's messages:</p>
+            <pre><code>alter table messages enable row level security;
+
+-- anyone may submit a message
+create policy "anon can insert"
+  on messages for insert
+  to anon
+  with check (true);
+
+-- but nobody anonymous may read them back
+-- (no SELECT policy = no read access)</code></pre>
+            <p>The mental shift is important: with RLS, you don't hide the API, you describe <em>exactly</em> who can do what at the row level. The anon key being public no longer matters because the policy, not the key, decides access.</p>
+
+            <h2>A Read-Only Content Vault</h2>
+            <p>I also wanted a "vault" of public snippets and prompts that anyone can browse but only I can edit. That's the mirror image of the contact form — public SELECT, restricted writes:</p>
+            <pre><code>create policy "public can read vault"
+  on vault_items for select
+  to anon
+  using (is_published = true);
+
+create policy "owner can write"
+  on vault_items for all
+  to authenticated
+  using (auth.uid() = owner_id);</code></pre>
+            <p>The <code>is_published</code> flag means I can save drafts that stay invisible until I flip them live — a tiny CMS, enforced entirely in SQL.</p>
+
+            <h2>Lessons From the Migrations</h2>
+            <p>I keep every schema change in a versioned <code>.sql</code> file in the repo rather than clicking around the dashboard. A few things I learned:</p>
+            <ul>
+                <li><strong>Enable RLS first, then write policies.</strong> Forgetting to enable RLS leaves a table wide open even if you wrote policies — Supabase warns you, listen to it.</li>
+                <li><strong>Test as the anon role.</strong> What works in the SQL editor (which runs as an admin) can fail in the browser. Always verify with the real anon key.</li>
+                <li><strong>Add an index on <code>created_at</code></strong> if you sort by it. Cheap, and it keeps the messages list fast as it grows.</li>
+                <li><strong>Validate on the client and constrain in SQL.</strong> A <code>check</code> constraint on email format or a <code>not null</code> is the last line of defense if the front-end validation is bypassed.</li>
+            </ul>
+
+            <h2>Rate Limiting and Spam</h2>
+            <p>A public insert policy invites spam. I added two defenses without a server: a hidden honeypot field that real users never fill, and a Postgres function that rejects more than a few inserts per minute from the same source. For anything heavier, Supabase Edge Functions can sit in front of the table — but for a portfolio, the simple measures held up fine.</p>
+
+            <h2>The Takeaway</h2>
+            <p>"Static site" and "has a database" are no longer contradictory. With Supabase I got persistence, auth, and proper authorization while keeping a zero-build, zero-server front end. The single most important concept to internalize is Row Level Security — once you think of access control as SQL policies instead of hidden endpoints, the whole architecture clicks into place.</p>
+
+            <p>The contact form on this site runs on exactly this setup — <a href="../contact.html">try sending a message</a>.</p>
+        </div>
+    </main>
+
+    <script src="../src/js/main.js" type="module"></script>
+</body>
+</html>
