@@ -12,7 +12,11 @@ GAME.weather = {
     this.scene = scene;
     this.originalBg = new THREE.Color(0x87CEEB);
     this.setupRain();
+    this.setupSunRays();
     this.nextChange = 30 + Math.random() * 60;
+    // Lightning properties
+    this.lightningTimer = 0;
+    this.lightningDelay = 5 + Math.random() * 10; // 5-15 seconds
   },
 
   setupRain: function() {

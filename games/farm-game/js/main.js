@@ -71,6 +71,7 @@ GAME.game = {
     GAME.animals.init(this.scene);
     GAME.weather.init(this.scene);
     GAME.audio.init();
+    GAME.AIAgent.init(this.scene); // Initialize AI Agent System
 
     this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
 
@@ -105,7 +106,11 @@ GAME.game = {
           crop: null,
           growth: 0,
           watered: false,
-          mesh: null
+          fertilized: false,
+          growthStage: 0,
+          mesh: null,
+          waterMarker: null,
+          fertilizerMarker: null
         });
       }
     }
@@ -291,9 +296,249 @@ GAME.game = {
     }
     this.state.plots[idx].fertilized = true;
     this.state.inventory.fertilizer--;
+    
+    // Update fertilizer marker
+    var plot = this.state.plots[idx];
+    if (plot.fertilizerMarker) {
+      plot.fertilizerMarker.material.opacity = 0.8;
+    }
+    
     GAME.ui.showNotification('🌱 Fertilized! Growth boosted.', 'success');
     GAME.ui.refreshInventory();
   },
+  
+  addGrowthMarkers: function(plot) {
+    // Add water marker (animated water droplets)
+    if (!plot.waterMarker) {
+      // Create a group for water droplets
+      var waterGroup = new THREE.Group();
+      
+      // Create multiple water droplets for animation effect
+      for (var i = 0; i < 3; i++) {
+        var dropletGeo = new THREE.SphereGeometry(0.1, 8, 8);
+        var dropletMat = new THREE.MeshBasicMaterial({ 
+          color: 0x3498db, 
+          transparent: true, 
+          opacity: 0 
+        });
+        var droplet = new THREE.Mesh(dropletGeo, dropletMat);
+        droplet.position.set(
+          plot.x + (Math.random() - 0.5) * 0.3,
+          0.1 + i * 0.15,
+          plot.z + (Math.random() - 0.5) * 0.3
+        );
+        droplet.userData = {
+          originalY: droplet.position.y,
+          speed: 0.5 + Math.random() * 0.5
+        };
+        waterGroup.add(droplet);
+      }
+      
+      plot.waterMarker = waterGroup;
+      this.scene.add(plot.waterMarker);
+    }
+    
+    // Add fertilizer marker (animated fertilizer packets)
+    if (!plot.fertilizerMarker) {
+      // Create a group for fertilizer packets
+      var fertGroup = new THREE.Group();
+      
+      // Create fertilizer packet visual
+      var packetGeo = new THREE.BoxGeometry(0.2, 0.1, 0.2);
+      var packetMat = new THREE.MeshBasicMaterial({ 
+        color: 0x8B4513, 
+        transparent: true, 
+        opacity: 0 
+      });
+      var packet = new THREE.Mesh(packetGeo, packetMat);
+      packet.position.set(plot.x, 0.1, plot.z);
+      
+      // Add a small bag-like shape on top
+      var bagGeo = new THREE.ConeGeometry(0.12, 0.08, 4);
+      var bagMat = new THREE.MeshBasicMaterial({ 
+        color: 0x654321, 
+        transparent: true, 
+        opacity: 0 
+      });
+      var bag = new THREE.Mesh(bagGeo, bagMat);
+      bag.position.set(0, 0.05, 0);
+      bag.rotation.x = Math.PI / 2;
+      
+      packet.add(bag);
+      fertGroup.add(packet);
+      
+      plot.fertilizerMarker = fertGroup;
+      this.scene.add(plot.fertilizerMarker);
+    }
+  },
+  
+  updatePlantVisual: function(plot, delta) {
+    // If delta is not provided, use a default value for animation
+    if (delta === undefined) delta = 0.016; // Approximately 60 FPS
+    // Update water marker animation
+    if (plot.waterMarker) {
+      // Animate water droplets when plant is watered
+      if (plot.watered) {
+        // Animate droplets rising and fading
+        for (var i = 0; i < plot.waterMarker.children.length; i++) {
+          var droplet = plot.waterMarker.children[i];
+          droplet.position.y += droplet.userData.speed * (delta || 0.016);
+          
+          // Fade out as it goes up
+          var progress = (droplet.position.y - droplet.userData.originalY) / 0.3;
+          droplet.material.opacity = Math.max(0, 0.8 - progress * 0.8);
+          
+          // Reset droplet when it goes too high
+          if (droplet.position.y > droplet.userData.originalY + 0.3) {
+            droplet.position.y = droplet.userData.originalY;
+            droplet.material.opacity = 0;
+          }
+        }
+      } else {
+        // Fade out droplets when not watered
+        for (var i = 0; i < plot.waterMarker.children.length; i++) {
+          var droplet = plot.waterMarker.children[i];
+          if (droplet.material.opacity > 0) {
+            droplet.material.opacity -= 0.02;
+          }
+        }
+      }
+    }
+    
+    // Update fertilizer marker (pulse when active)
+    if (plot.fertilizerMarker) {
+      if (plot.fertilized) {
+        // Pulse the fertilizer packet
+        var pulse = Math.sin(Date.now() * 0.003) * 0.2 + 0.8; // Oscillate between 0.6 and 1.0
+        plot.fertilizerMarker.children[0].material.opacity = 0.6 * pulse;
+        // Also pulse the bag
+        plot.fertilizerMarker.children[0].children[0].material.opacity = 0.6 * pulse;
+      } else {
+        // Fade out when not fertilized
+        for (var i = 0; i < plot.fertilizerMarker.children.length; i++) {
+          var obj = plot.fertilizerMarker.children[i];
+          if (obj.material.opacity > 0) {
+            obj.material.opacity -= 0.02;
+          }
+          if (obj.children && obj.children.length > 0 && obj.children[0].material.opacity > 0) {
+            obj.children[0].material.opacity -= 0.02;
+          }
+        }
+      }
+    }
+    
+    // Define growth stages for different crops
+    var growthStages = {
+      wheat: [
+        { height: 0.2, color: 0x8b4513 }, // Seed (brown)
+        { height: 0.3, color: 0x8b4513 }, // Sprout (brown)
+        { height: 0.5, color: 0x228b22 }, // Seedling (green)
+        { height: 0.8, color: 0x228b22 }, // Mature (green)
+        { height: 1.0, color: 0xdaa520 }  // Ready (golden)
+      ],
+      tomato: [
+        { height: 0.2, color: 0x8b4513 }, // Seed (brown)
+        { height: 0.3, color: 0x8b4513 }, // Sprout (brown)
+        { height: 0.5, color: 0x228b22 }, // Seedling (green)
+        { height: 0.8, color: 0xff4500 }, // Mature (orange-red)
+        { height: 1.0, color: 0xff4444 }  // Ready (red)
+      ],
+      carrot: [
+        { height: 0.2, color: 0x8b4513 }, // Seed (brown)
+        { height: 0.3, color: 0x8b4513 }, // Sprout (brown)
+        { height: 0.4, color: 0xff8c00 }, // Seedling (orange)
+        { height: 0.6, color: 0xff8c00 }, // Mature (orange)
+        { height: 1.0, color: 0xff8c00 }  // Ready (orange)
+      ],
+      apple: [
+        { height: 0.2, color: 0x8b5a2b }, // Sapling (brown)
+        { height: 0.4, color: 0x8b5a2b }, // Young tree (brown)
+        { height: 0.6, color: 0x8b5a2b }, // Growing tree (brown)
+        { height: 0.8, color: 0x8b5a2b }, // Mature tree (brown)
+        { height: 1.0, color: 0x8b5a2b }  // Fruit-bearing (brown with apples - handled separately)
+      ]
+    };
+    
+    var stages = growthStages[plot.crop] || growthStages.wheat; // Default to wheat
+    var stage = stages[Math.min(plot.growthStage, stages.length - 1)];
+    
+    if (plot.crop === 'apple') {
+      // For apple trees, we don't scale the trunk/leaves, but we could add fruit visualization
+      // For simplicity, we'll just ensure the tree exists
+      if (!plot.mesh) {
+        // Create tree if it doesn't exist
+        var trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
+        var leafMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
+        var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.5), trunkMat);
+        trunk.position.set(plot.x, 0.3, plot.z);
+        this.scene.add(trunk);
+        var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 6), leafMat);
+        leaf.position.set(plot.x, 0.8, plot.z);
+        leaf.scale.y = 0.7;
+        this.scene.add(leaf);
+        var group = new THREE.Group();
+        group.add(trunk);
+        group.add(leaf);
+        plot.mesh = group;
+        
+        // Add apples when tree is mature (growthStage >= 3)
+        if (plot.growthStage >= 3) {
+          // Add some apples
+          for (var i = 0; i < 3; i++) {
+            var appleGeo = new THREE.SphereGeometry(0.08, 6, 6);
+            var appleMat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+            var apple = new THREE.Mesh(appleGeo, appleMat);
+            // Position apple randomly around the tree
+            var angle = Math.random() * Math.PI * 2;
+            var radius = 0.3 + Math.random() * 0.2;
+            apple.position.set(
+              plot.x + Math.cos(angle) * radius,
+              0.6 + Math.random() * 0.3,
+              plot.z + Math.sin(angle) * radius
+            );
+            this.scene.add(apple);
+            // Store reference to apples so we can remove them when harvesting
+            if (!plot.apples) plot.apples = [];
+            plot.apples.push(apple);
+          }
+        }
+      } else if (plot.growthStage >= 3 && plot.apples) {
+        // Ensure apples are visible when tree is mature
+        for (var i = 0; i < plot.apples.length; i++) {
+          plot.apples[i].visible = true;
+        }
+      }
+    } else if (plot.mesh) {
+      // For crops, update the plant mesh
+      plot.mesh.scale.set(0.2, stage.height, 0.2);
+      var mat = new THREE.MeshLambertMaterial({ color: stage.color });
+      plot.mesh.material = mat;
+      
+      // Add growth stage indicator (small floating number)
+      if (!plot.stageIndicator) {
+        // Create a simple text sprite for growth stage
+        // Since we don't have text rendering easily, we'll use a colored sphere
+        var indicatorGeo = new THREE.SphereGeometry(0.05, 6, 6);
+        var indicatorMat = new THREE.MeshBasicMaterial({ 
+          color: 0xffff00, 
+          transparent: true, 
+          opacity: 0.7 
+        });
+        plot.stageIndicator = new THREE.Mesh(indicatorGeo, indicatorMat);
+        plot.stageIndicator.position.set(plot.x, 0.2 + stage.height, plot.z);
+        this.scene.add(plot.stageIndicator);
+      }
+      
+      // Update indicator position and visibility
+      if (plot.stageIndicator) {
+        plot.stageIndicator.position.set(plot.x, 0.2 + stage.height * 1.1, plot.z);
+        // Show indicator for early growth stages
+        plot.stageIndicator.material.opacity = plot.growthStage < 2 ? 0.7 : 0;
+      }
+    }
+  },
+  
+
 
   findClosestPlot: function(state) {
     var p = GAME.player.mesh.position;
@@ -342,6 +587,12 @@ GAME.game = {
     this.state.energy -= cost;
     this.addXP(3);
     GAME.ui.showNotification('💧 Watered crops! +3 XP', 'success');
+    
+    // Update water marker visibility
+    var plot = this.state.plots[idx];
+    if (plot.waterMarker) {
+      plot.waterMarker.material.opacity = 0.6;
+    }
   },
 
   plantClosest: function(crop) {
@@ -366,6 +617,7 @@ GAME.game = {
     this.state.plots[idx].growth = 0;
     this.state.plots[idx].watered = false;
     this.state.plots[idx].fertilized = false;
+    this.state.plots[idx].growthStage = 0;
     var plot = this.state.plots[idx];
     var isTree = crop === 'apple';
 
@@ -389,6 +641,9 @@ GAME.game = {
       plant.position.set(plot.x, 0.2, plot.z);
       this.scene.add(plant);
       plot.mesh = plant;
+      
+      // Add water and fertilizer markers
+      this.addGrowthMarkers(plot);
     }
     this.addXP(8);
     GAME.ui.showNotification('🌱 Planted ' + crop + '! +8 XP', 'success');
@@ -408,30 +663,31 @@ GAME.game = {
     this.state.energy -= cost;
 
     if (cropType === 'apple') {
+      // For apple trees, reset growth but keep the tree
       if (plot.mesh) {
-        var kids = plot.mesh.children || [];
-        for (var i = 0; i < kids.length; i++) this.scene.remove(kids[i]);
+        // Keep the tree structure, just reset growth visuals
+        plot.growth = 0;
+        plot.growthStage = 0;
+        plot.state = 'planted';
+        plot.watered = false;
+        plot.fertilized = false;
+        this.updatePlantVisual(plot);
       }
-      this.scene.remove(plot.mesh);
-      var trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
-      var leafMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
-      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.5), trunkMat);
-      trunk.position.set(plot.x, 0.3, plot.z);
-      this.scene.add(trunk);
-      var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 6), leafMat);
-      leaf.position.set(plot.x, 0.8, plot.z);
-      leaf.scale.y = 0.7;
-      this.scene.add(leaf);
-      var group = new THREE.Group();
-      group.add(trunk);
-      group.add(leaf);
-      plot.mesh = group;
-      plot.state = 'planted';
-      plot.growth = 0;
-      plot.watered = false;
       GAME.ui.showNotification('🍎 Apple harvested! Tree regrowing... +$' + salePrice, 'success');
     } else {
+      // For crops, remove plant and reset to plowed state
       if (plot.mesh) { this.scene.remove(plot.mesh); }
+      
+      // Remove growth markers
+      if (plot.waterMarker) {
+        this.scene.remove(plot.waterMarker);
+        plot.waterMarker = null;
+      }
+      if (plot.fertilizerMarker) {
+        this.scene.remove(plot.fertilizerMarker);
+        plot.fertilizerMarker = null;
+      }
+      
       var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
       var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
       mesh.position.set(plot.x, 0.08, plot.z);
@@ -441,6 +697,7 @@ GAME.game = {
       plot.state = 'plowed';
       plot.crop = null;
       plot.growth = 0;
+      plot.growthStage = 0;
       plot.watered = false;
       plot.fertilized = false;
       this.state.inventory[cropType] = (this.state.inventory[cropType] || 0) + 1;
@@ -550,33 +807,86 @@ GAME.game = {
     if (state.energy > 100) state.energy = 100;
     if (state.health < 100) state.health += delta * 0.5;
     if (state.health > 100) state.health = 100;
+    
+    // Update growth markers visibility
+    for (var i = 0; i < state.plots.length; i++) {
+      var plot = state.plots[i];
+      if (plot.waterMarker) {
+        plot.waterMarker.material.opacity = plot.watered ? 0.6 : 0;
+      }
+      if (plot.fertilizerMarker) {
+        plot.fertilizerMarker.material.opacity = plot.fertilized ? 0.8 : 0;
+      }
+    }
+    
     for (var i = 0; i < state.plots.length; i++) {
       var plot = state.plots[i];
       if (plot.state === 'planted') {
-        var growthRate = plot.watered ? 1.5 : 0.5;
-        // Fertilizer increases growth rate by 50%
-        if (plot.fertilized) {
-          growthRate *= 1.5;
+        // Base growth rate
+        var baseGrowthRate = 0.5;
+        
+        // Water bonus
+        if (plot.watered) {
+          baseGrowthRate = 1.5;
         }
+        
+        // Fertilizer bonus
+        if (plot.fertilized) {
+          baseGrowthRate *= 1.5;
+        }
+        
+        // Weather effect
+        var weatherMultiplier = 1.0;
+        if (GAME.weather && GAME.weather.current === 'rainy') {
+          weatherMultiplier = 1.3; // Rain boosts growth
+        } else if (GAME.weather && GAME.weather.current === 'stormy') {
+          weatherMultiplier = 0.8; // Storm slightly hinders growth
+        }
+        
+        // Crop-specific growth rates
+        var cropGrowthRates = {
+          wheat: 1.0,
+          tomato: 1.2,
+          carrot: 0.9,
+          apple: 0.4 // Trees grow slower
+        };
+        var cropMultiplier = cropGrowthRates[plot.crop] || 1.0;
+        
+        // Level bonus
         var levelBonus = 1 + (state.level - 1) * 0.02;
+        
+        // Tree multiplier
         var treeMultiplier = plot.crop === 'apple' ? 0.33 : 1;
-        plot.growth += delta * growthRate * 0.02 * levelBonus * treeMultiplier;
+        
+        // Calculate final growth
+        var growthRate = baseGrowthRate * weatherMultiplier * cropMultiplier * levelBonus * treeMultiplier;
+        plot.growth += delta * growthRate * 0.02;
+        
+        // Update growth stage (0-4: seed, sprout, seedling, mature, ready)
+        var newGrowthStage = Math.floor(plot.growth * 4);
+        if (newGrowthStage > plot.growthStage) {
+          plot.growthStage = newGrowthStage;
+          this.updatePlantVisual(plot, delta);
+        }
+        
         if (plot.growth >= 1) {
           plot.state = 'ready';
           plot.growth = 1;
-          if (plot.mesh && plot.crop !== 'apple') {
-            this.scene.remove(plot.mesh);
-            var cropColors = { wheat: 0xdaa520, tomato: 0xff4444, carrot: 0xff8c00 };
-            var color = cropColors[plot.crop] || 0xdaa520;
-            var cropMat = new THREE.MeshLambertMaterial({ color: color });
-            var plant = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.4, 0.7, 6), cropMat);
-            plant.position.set(plot.x, 0.4, plot.z);
-            this.scene.add(plant);
-            plot.mesh = plant;
+          // Ensure final visual state
+          plot.growthStage = 4;
+          this.updatePlantVisual(plot, delta);
+          
+          // Special handling for trees (they reset after harvest)
+          if (plot.crop === 'apple') {
+            // Tree resets to planted state after harvest, but keeps growing
+            plot.state = 'planted';
+            plot.growth = 0;
+            plot.growthStage = 0;
           }
-        } else if (plot.mesh && plot.growth > 0.3 && plot.crop !== 'apple') {
-          var s = 1 + plot.growth * 1.5;
-          plot.mesh.scale.set(1, s, 1);
+        } else if (plot.mesh && plot.crop !== 'apple') {
+          // Smooth growth animation for non-tree crops
+          var scale = 0.2 + plot.growth * 0.8; // From 0.2 to 1.0
+          plot.mesh.scale.set(scale, scale, scale);
         }
       }
     }
@@ -590,6 +900,7 @@ GAME.game = {
     }
     if (GAME.animals) GAME.animals.update(delta);
     if (GAME.weather) GAME.weather.update(delta);
+    if (GAME.AIAgent) GAME.AIAgent.update(delta); // Update AI Agents
     this.updateInteractionHints();
     GAME.ui.updateHUD(state);
   },
