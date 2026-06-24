@@ -346,6 +346,20 @@ canvas { display: block; }
 }
 .setting-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
 .setting-slider::-moz-range-thumb { width: 14px; height: 14px; background: var(--green-bright); border-radius: 50%; border: none; cursor: pointer; }
+.setting-select {
+  background: rgba(255,255,255,0.1);
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+.setting-select:focus { border-color: var(--green-bright); }
+.setting-select option { background: #1a1a2e; color: #fff; }
 
 .toggle { position: relative; display: inline-block; width: 40px; height: 22px; cursor: pointer; flex-shrink: 0; }
 .toggle input { opacity: 0; width: 0; height: 0; }
@@ -471,4 +485,38 @@ canvas { display: block; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
   .loader-icon, .menu-emblem { animation: none; }
+}
+
+/* ===== Quests UI ===== */
+.quest-row {
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  transition: var(--transition);
+}
+.quest-row.quest-done {
+  background: rgba(34, 197, 94, 0.15);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.quest-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.quest-title { color: var(--text); font-weight: 500; }
+.quest-reward { color: var(--green-bright); font-size: 12px; font-weight: 600; }
+.quest-bar-wrap {
+  width: 100%; height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.quest-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green-light), var(--green-bright));
+  border-radius: 3px;
+  transition: width 0.4s ease;
 }

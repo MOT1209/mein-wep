@@ -13,7 +13,7 @@
   <title>Farm Game 3D</title>
   <link rel="stylesheet" href="css/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/lib/three.min.js"></script>
 </head>
 <body>
   <!-- Loading Screen -->
@@ -37,7 +37,7 @@
         <button class="menu-btn primary" onclick="startGame()" aria-label="Start new game">New Game</button>
         <button class="menu-btn" onclick="continueGame()" aria-label="Continue saved game">Continue</button>
       </div>
-      <p class="menu-version">v2.0 — Made with care</p>
+      <p class="menu-version">v2.0.1 — Made with care</p>
     </div>
   </div>
 
@@ -135,6 +135,7 @@
       <div class="inv-tabs">
         <button class="inv-tab active" onclick="switchInvTab('items')" data-tab="items">📦 Items</button>
         <button class="inv-tab" onclick="switchInvTab('crafting')" data-tab="crafting">🔨 Craft</button>
+        <button class="inv-tab" onclick="switchInvTab('quests')" data-tab="quests">📋 Daily</button>
       </div>
       <div class="modal-body">
         <!-- Items Tab -->
@@ -184,6 +185,12 @@
             <button class="craft-btn" onclick="craftItem('juice')">Craft</button>
           </div>
         </div>
+        <!-- Quests Tab -->
+        <div class="inv-panel" id="inv-quests">
+          <div id="quests-list">
+            <p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Loading quests...</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -223,6 +230,8 @@
           <h3>🎬 Graphics</h3>
           <div class="setting-row"><label for="render-dist">Render Distance</label><input type="range" id="render-dist" min="4" max="16" value="8" class="setting-slider"></div>
           <div class="setting-row"><label for="shadows">Shadows</label><label class="toggle"><input type="checkbox" id="shadows" checked><span class="toggle-slider"></span></label></div>
+          <div class="setting-row"><label for="quality-select">Quality</label><select id="quality-select" class="setting-select"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select></div>
+          <div class="setting-row"><label for="auto-quality">Auto Quality</label><label class="toggle"><input type="checkbox" id="auto-quality" checked><span class="toggle-slider"></span></label></div>
         </div>
       </div>
     </div>
@@ -249,17 +258,20 @@
   </div>
 
   <script src="js/collision.js"></script>
+  <script src="js/state.js"></script>
   <script src="js/world.js"></script>
   <script src="js/player.js"></script>
   <script src="js/camera.js"></script>
   <script src="js/audio.js"></script>
   <script src="js/animals.js"></script>
   <script src="js/weather.js"></script>
+  <script src="js/quests.js"></script>
   <script src="js/ui.js"></script>
+  <script src="js/save.js"></script>
   <script src="js/aiAgent.js"></script>
   <script src="js/main.js"></script>
   <!-- OTA update checker -->
-  <script>window.RASHID_APP={id:'com.rashid.farmempire',version:'2.0.0',name:'Farm Empire'};</script>
+  <script>window.RASHID_APP={id:'com.rashid.farmempire',version:'2.0.1',name:'Farm Empire'};</script>
   <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
 </body>
 </html>

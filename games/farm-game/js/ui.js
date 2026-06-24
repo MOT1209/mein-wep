@@ -216,6 +216,12 @@ GAME.ui = {
       if (invertEl) invertEl.checked = !!s.invertY;
       var plEl = document.getElementById('pointer-lock');
       if (plEl) plEl.checked = s.pointerLock !== false;
+      var shadowEl = document.getElementById('shadows');
+      if (shadowEl) shadowEl.checked = s.shadows !== false;
+      var qualityEl = document.getElementById('quality-select');
+      if (qualityEl) qualityEl.value = s.quality || 'high';
+      var autoQualityEl = document.getElementById('auto-quality');
+      if (autoQualityEl) autoQualityEl.checked = s.autoQuality !== false;
     } catch(e) {}
   },
 
@@ -233,6 +239,12 @@ GAME.ui = {
     s.invertY = invertEl ? invertEl.checked : false;
     var plEl = document.getElementById('pointer-lock');
     s.pointerLock = plEl ? plEl.checked : true;
+    var shadowEl = document.getElementById('shadows');
+    s.shadows = shadowEl ? shadowEl.checked : true;
+    var qualityEl = document.getElementById('quality-select');
+    s.quality = qualityEl ? qualityEl.value : 'high';
+    var autoQualityEl = document.getElementById('auto-quality');
+    s.autoQuality = autoQualityEl ? autoQualityEl.checked : true;
     try { localStorage.setItem('farmSettings', JSON.stringify(s)); } catch(e) {}
     if (GAME.camera) {
       GAME.camera.sensitivity = s.sensitivity;
@@ -241,6 +253,20 @@ GAME.ui = {
     if (GAME.audio) {
       GAME.audio.setMasterVol(s.masterVol);
       GAME.audio.setSfxVol(s.sfxVol);
+    }
+    if (GAME.game) {
+      GAME.game._autoQuality = s.autoQuality;
+      if (!s.autoQuality) {
+        GAME.game.setQuality(s.quality);
+      }
+      // Apply shadows toggle
+      if (GAME.game.renderer) {
+        GAME.game.renderer.shadowMap.enabled = s.shadows;
+      }
+      // Apply render distance
+      if (GAME.game.scene) {
+        GAME.game.scene.fog = new THREE.Fog(0x87CEEB, s.renderDist * 3, s.renderDist * 6);
+      }
     }
   },
 
@@ -436,6 +462,35 @@ GAME.ui.refreshInventory = function() {
               bread: 'inv-bread', ketchup: 'inv-ketchup', juice: 'inv-juice', fertilizer: 'inv-fertilizer' };
   for (var key in map) {
     var el = document.getElementById(map[key]);
-    if (el) el.textContent = s.inventory[key] !== undefined ? s.inventory[key] : (s.crafted[key] || 0);
+    if (el) {
+      if (s.inventory[key] !== undefined) el.textContent = s.inventory[key];
+      else if (s.crafted[key] !== undefined) el.textContent = s.crafted[key];
+    }
   }
+  // Refresh quests list
+  GAME.ui.refreshQuests();
+};
+
+GAME.ui.refreshQuests = function() {
+  var container = document.getElementById('quests-list');
+  if (!container) return;
+  var quests = GAME.game && GAME.game.state && GAME.game.state.quests;
+  if (!quests || quests.length === 0) {
+    container.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No quests today. Sleep to get new ones!</p>';
+    return;
+  }
+  var html = '';
+  for (var i = 0; i < quests.length; i++) {
+    var q = quests[i];
+    var pct = Math.min(100, Math.floor((q.current / q.target) * 100));
+    var done = q.completed ? '✅' : '';
+    html += '<div class="quest-row' + (q.completed ? ' quest-done' : '') + '">' +
+      '<div class="quest-header">' +
+        '<span class="quest-title">' + (q.completed ? '✅ ' : '📋 ') + q.title + ' — ' + q.desc + ' (' + q.current + '/' + q.target + ')</span>' +
+        '<span class="quest-reward">+' + q.rewardXP + ' XP</span>' +
+      '</div>' +
+      '<div class="quest-bar-wrap"><div class="quest-bar-fill" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+  }
+  container.innerHTML = html;
 };

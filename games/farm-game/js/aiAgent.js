@@ -335,7 +335,7 @@ GAME.AIAgent = {
                 
                 // Remove any existing mesh and add dirt
                 if (plot.mesh) {
-                  GAME.game.scene.remove(plot.mesh);
+                  GAME.game._disposePlotMesh(plot);
                 }
                 var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
                 var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
@@ -399,19 +399,11 @@ GAME.AIAgent = {
                   GAME.ui.showNotification('🍎 Apple harvested by ' + this.name + '! +$' + salePrice, 'success');
                 } else {
                   // Remove crop and add to inventory
-                  if (plot.mesh) {
-                    GAME.game.scene.remove(plot.mesh);
-                  }
+                  GAME.game._disposePlotMesh(plot);
                   
                   // Remove growth markers
-                  if (plot.waterMarker) {
-                    GAME.game.scene.remove(plot.waterMarker);
-                    plot.waterMarker = null;
-                  }
-                  if (plot.fertilizerMarker) {
-                    GAME.game.scene.remove(plot.fertilizerMarker);
-                    plot.fertilizerMarker = null;
-                  }
+                  GAME.game._disposePlotMarker(plot, 'waterMarker');
+                  GAME.game._disposePlotMarker(plot, 'fertilizerMarker');
                   
                   var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
                   var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);

@@ -18,6 +18,9 @@ GAME.world = {
     this.createFlowers();
     this.createAnimalPens();
     this.createFeedingTrough();
+    this.createDirtPath();
+    this.createScarecrow();
+    this.createWell();
   },
 
   createSky: function() {
@@ -176,30 +179,56 @@ GAME.world = {
   },
 
   createTrees: function() {
-    var trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
-    var leafMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
-    var positions = [
+    var trunkColors = [0x8B5A2B, 0x6b4423, 0x5d3a1a, 0x7a4a2a];
+    var leafColors = [0x3a7d2c, 0x2d6b1e, 0x4a8c3f, 0x5a9a4a, 0x228B22];
+    var treeTypes = [
+      // [positions]
       [-25, -25], [22, -28], [26, 5], [-28, 8], [-22, 22], [20, 20],
       [30, -15], [-30, -5], [-8, -28], [10, -30], [-35, 18], [35, -22],
-      [-20, -8], [24, -5], [15, -32], [-32, -2], [-5, 25], [28, -20]
+      [-20, -8], [24, -5], [15, -32], [-32, -2], [-5, 25], [28, -20],
+      // Extra trees for more forest feel
+      [-27, -20], [27, -18], [-25, 10], [30, 18], [18, -26], [-18, -30],
+      [30, -28], [-30, 28], [10, 28], [-10, 28]
     ];
-    for (var i = 0; i < positions.length; i++) {
+    for (var i = 0; i < treeTypes.length; i++) {
       var group = new THREE.Group();
-      var trunkH = 1.5 + Math.random() * 0.8;
-      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, trunkH), trunkMat);
+      var trunkMat = new THREE.MeshLambertMaterial({ color: trunkColors[Math.floor(Math.random() * trunkColors.length)] });
+      var trunkH = 1.5 + Math.random() * 1.2;
+      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.25, trunkH), trunkMat);
       trunk.position.y = trunkH / 2;
       trunk.castShadow = true;
       group.add(trunk);
-      var leafR = 1.0 + Math.random() * 0.6;
-      var leaf = new THREE.Mesh(new THREE.SphereGeometry(leafR, 6, 6), leafMat);
-      leaf.position.y = trunkH + 0.2 + Math.random() * 0.3;
-      leaf.scale.y = 0.85;
-      leaf.castShadow = true;
-      group.add(leaf);
-      group.position.set(positions[i][0], 0, positions[i][1]);
-      var angle = Math.random() * Math.PI * 2;
-      group.rotation.y = angle;
-      this.scene.add(group); this.objects.push(group);
+      
+      // Random tree shape: round (sphere) or cone (pine)
+      var isPine = Math.random() < 0.2;
+      var leafMat = new THREE.MeshLambertMaterial({ color: leafColors[Math.floor(Math.random() * leafColors.length)] });
+      if (isPine) {
+        // Pine tree shape with stacked cones
+        var cone1 = new THREE.Mesh(new THREE.ConeGeometry(0.8, 0.8, 6), leafMat);
+        cone1.position.y = trunkH + 0.4; cone1.castShadow = true; group.add(cone1);
+        var cone2 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.7, 6), leafMat);
+        cone2.position.y = trunkH + 0.9; cone2.castShadow = true; group.add(cone2);
+        var cone3 = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.6, 6), leafMat);
+        cone3.position.y = trunkH + 1.3; cone3.castShadow = true; group.add(cone3);
+      } else {
+        // Round tree - one or two spheres
+        var leafR = 0.8 + Math.random() * 0.8;
+        var leaf = new THREE.Mesh(new THREE.SphereGeometry(leafR, 6, 6), leafMat);
+        leaf.position.y = trunkH + 0.2 + Math.random() * 0.5;
+        leaf.scale.y = 0.85;
+        leaf.castShadow = true;
+        group.add(leaf);
+        if (Math.random() < 0.4) {
+          var leaf2 = new THREE.Mesh(new THREE.SphereGeometry(leafR * 0.7, 6, 6), leafMat);
+          leaf2.position.set(0.5 + Math.random() * 0.3, trunkH + 0.1, 0.4 + Math.random() * 0.3);
+          leaf2.castShadow = true;
+          group.add(leaf2);
+        }
+      }
+      group.position.set(treeTypes[i][0], 0, treeTypes[i][1]);
+      group.rotation.y = Math.random() * Math.PI * 2;
+      this.scene.add(group);
+      this.objects.push(group);
     }
   },
 
@@ -313,6 +342,93 @@ GAME.world = {
     coopRoof.rotation.y = Math.PI / 4;
     coopRoof.castShadow = true;
     this.scene.add(coopRoof); this.objects.push(coopRoof);
+  },
+
+  createDirtPath: function() {
+    var mat = new THREE.MeshLambertMaterial({ color: 0x8B7355 });
+    var segments = [
+      { x: -10, z: -19, w: 1.0, d: 10, a: 0 },
+      { x: 0, z: -16, w: 1.0, d: 14, a: 0.15 },
+      { x: 16, z: -9, w: 1.2, d: 2, a: 0 },
+    ];
+    for (var i = 0; i < segments.length; i++) {
+      var s = segments[i];
+      var path = new THREE.Mesh(new THREE.PlaneGeometry(s.w, s.d), mat);
+      path.rotation.x = -Math.PI / 2;
+      path.position.set(s.x, 0.03, s.z);
+      path.rotation.z = s.a;
+      path.receiveShadow = true;
+      this.scene.add(path);
+      this.objects.push(path);
+    }
+  },
+
+  createScarecrow: function() {
+    var group = new THREE.Group();
+    var postMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
+    var post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 2.0), postMat);
+    post.position.y = 1.0;
+    post.castShadow = true;
+    group.add(post);
+    var cross = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 1.4), postMat);
+    cross.position.y = 1.6;
+    cross.rotation.z = Math.PI / 2;
+    cross.castShadow = true;
+    group.add(cross);
+    var bodyMat = new THREE.MeshLambertMaterial({ color: 0xcc6644 });
+    var body = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.6, 0.15), bodyMat);
+    body.position.set(0, 1.4, 0);
+    group.add(body);
+    var headMat = new THREE.MeshLambertMaterial({ color: 0xd4a574 });
+    var head = new THREE.Mesh(new THREE.SphereGeometry(0.25, 6, 6), headMat);
+    head.position.set(0, 1.85, 0.05);
+    head.scale.set(1, 0.9, 0.8);
+    group.add(head);
+    var hatMat = new THREE.MeshLambertMaterial({ color: 0x5d3a1a });
+    var hatBrim = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.06), hatMat);
+    hatBrim.position.set(0, 2.0, 0);
+    group.add(hatBrim);
+    var hatTop = new THREE.Mesh(new THREE.ConeGeometry(0.3, 0.35, 6), hatMat);
+    hatTop.position.set(0, 2.2, 0);
+    group.add(hatTop);
+    group.position.set(-2, 0, 8);
+    this.scene.add(group);
+    this.objects.push(group);
+  },
+
+  createWell: function() {
+    var group = new THREE.Group();
+    var stoneMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
+    var woodMat = new THREE.MeshLambertMaterial({ color: 0x6b4423 });
+    for (var i = 0; i < 8; i++) {
+      var angle = (i / 8) * Math.PI * 2;
+      var stone = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.2), stoneMat);
+      stone.position.set(Math.sin(angle) * 0.6, 0.4, Math.cos(angle) * 0.6);
+      stone.castShadow = true;
+      group.add(stone);
+    }
+    var post1 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.5), woodMat);
+    post1.position.set(-0.7, 0.75, 0);
+    group.add(post1);
+    var post2 = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 1.5), woodMat);
+    post2.position.set(0.7, 0.75, 0);
+    group.add(post2);
+    var beam = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 1.6), woodMat);
+    beam.rotation.z = Math.PI / 2;
+    beam.position.set(0, 1.4, 0);
+    group.add(beam);
+    var ropeMat = new THREE.MeshBasicMaterial({ color: 0x5d3a1a });
+    var rope = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.9), ropeMat);
+    rope.position.set(0, 0.95, 0);
+    group.add(rope);
+    var bucketMat = new THREE.MeshLambertMaterial({ color: 0x6b4423 });
+    var bucket = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.12, 0.2), bucketMat);
+    bucket.position.set(0, 0.5, 0);
+    bucket.castShadow = true;
+    group.add(bucket);
+    group.position.set(-12, 0, -20);
+    this.scene.add(group);
+    this.objects.push(group);
   },
 
   createFeedingTrough: function() {

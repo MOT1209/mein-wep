@@ -1,33 +1,18 @@
 var GAME = GAME || {};
 
-GAME.game = {
+// Merge with existing GAME.game (from state.js), don't overwrite
+Object.assign(GAME.game, {
   scene: null,
   renderer: null,
   clock: null,
   isRunning: false,
   isPaused: false,
   isShopOpen: false,
-
-  state: {
-    health: 100,
-    energy: 100,
-    money: 200,
-    day: 1,
-    time: 6,
-    inventory: { wheat: 0, tomato: 0, carrot: 0, apple: 0 },
-    crafted: { bread: 0, ketchup: 0, juice: 0 },
-    selectedTool: 0,
-    plots: [],
-    timeScale: 60,
-    xp: 0,
-    level: 1
-  },
-
-  recipes: {
-    bread: { name: '🍞 Bread', icon: '🍞', inputs: { wheat: 2 }, sellPrice: 65, xpReward: 10 },
-    ketchup: { name: '🥫 Ketchup', icon: '🥫', inputs: { tomato: 2 }, sellPrice: 100, xpReward: 15 },
-    juice: { name: '🧃 Carrot Juice', icon: '🧃', inputs: { carrot: 2 }, sellPrice: 80, xpReward: 12 }
-  },
+  qualityLevel: 'high',
+  _autoQuality: true,
+  _fpFrames: 0,
+  _fpTime: 0,
+  _fpLowCounter: 0,
 
   init: function() {
     var self = this;
@@ -90,33 +75,6 @@ GAME.game = {
     this.animate();
   },
 
-  initPlots: function() {
-    var plots = [];
-    var rows = 6, cols = 6;
-    var spacing = 2.8;
-    var startX = -(cols - 1) * spacing / 2;
-    var startZ = 2;
-    for (var r = 0; r < rows; r++) {
-      for (var c = 0; c < cols; c++) {
-        plots.push({
-          row: r, col: c,
-          x: startX + c * spacing,
-          z: startZ + r * spacing,
-          state: 'empty',
-          crop: null,
-          growth: 0,
-          watered: false,
-          fertilized: false,
-          growthStage: 0,
-          mesh: null,
-          waterMarker: null,
-          fertilizerMarker: null
-        });
-      }
-    }
-    this.state.plots = plots;
-  },
-
   startNew: function() {
     this.state = {
       health: 100, energy: 100, money: 200,
@@ -127,67 +85,16 @@ GAME.game = {
       plots: [],
       timeScale: 60,
       xp: 0,
-      level: 1
+      level: 1,
+      quests: []
     };
     this.initPlots();
+    GAME.quests.generateDaily();
+    this.state.quests = GAME.quests.generateDaily();
     this.selectTool(0);
     GAME.ui.hideMenu();
     GAME.ui.showNotification('🌾 Welcome to your new farm!', 'success');
     GAME.audio.play('chime');
-  },
-
-  loadGame: function() {
-    try {
-      var saved = localStorage.getItem('farmGameSave');
-      if (saved) {
-        var data = JSON.parse(saved);
-        this.state.health = data.health || 100;
-        this.state.energy = data.energy || 100;
-        this.state.money = data.money || 200;
-        this.state.day = data.day || 1;
-        this.state.time = data.time || 6;
-        this.state.inventory = data.inventory || { wheat: 0, tomato: 0, carrot: 0, apple: 0, fertilizer: 0 };
-        this.state.crafted = data.crafted || { bread: 0, ketchup: 0, juice: 0 };
-        this.state.xp = data.xp || 0;
-        this.state.level = data.level || 1;
-        this.selectTool(this.state.selectedTool || 0);
-        GAME.ui.hideMenu();
-        GAME.ui.showNotification('🌾 Welcome back, farmer!', 'success');
-      } else {
-        this.startNew();
-      }
-    } catch (e) {
-      console.warn('Save corrupted, starting new game');
-      this.startNew();
-    }
-  },
-
-  saveGame: function() {
-    try {
-      var data = {
-        health: this.state.health,
-        energy: this.state.energy,
-        money: this.state.money,
-        day: this.state.day,
-        time: this.state.time,
-        inventory: this.state.inventory,
-        crafted: this.state.crafted,
-        selectedTool: this.state.selectedTool,
-        xp: this.state.xp,
-        level: this.state.level
-      };
-      localStorage.setItem('farmGameSave', JSON.stringify(data));
-      GAME.ui.showNotification('💾 Game saved!', 'success');
-    } catch (e) {
-      GAME.ui.showNotification('❌ Save failed!', 'error');
-    }
-  },
-
-  quitToMenu: function() {
-    this.isPaused = false;
-    document.getElementById('pause-menu').classList.add('hidden');
-    document.getElementById('hud').style.opacity = '0';
-    GAME.ui.showMenu();
   },
 
   togglePause: function() {
@@ -583,6 +490,7 @@ GAME.game = {
     this.state.plots[idx].watered = true;
     this.state.energy -= cost;
     this.addXP(3);
+    GAME.quests.track('water', 1);
     GAME.ui.showNotification('💧 Watered crops! +3 XP', 'success');
     
     // Update water marker visibility
@@ -640,6 +548,7 @@ GAME.game = {
       this.addGrowthMarkers(plot);
     }
     this.addXP(8);
+    GAME.quests.track('plant', 1);
     GAME.ui.showNotification('🌱 Planted ' + crop + '! +8 XP', 'success');
   },
 
@@ -670,17 +579,11 @@ GAME.game = {
       GAME.ui.showNotification('🍎 Apple harvested! Tree regrowing... +$' + salePrice, 'success');
     } else {
       // For crops, remove plant and reset to plowed state
-      if (plot.mesh) { this.scene.remove(plot.mesh); }
+      this._disposePlotMesh(plot);
       
       // Remove growth markers
-      if (plot.waterMarker) {
-        this.scene.remove(plot.waterMarker);
-        plot.waterMarker = null;
-      }
-      if (plot.fertilizerMarker) {
-        this.scene.remove(plot.fertilizerMarker);
-        plot.fertilizerMarker = null;
-      }
+      this._disposePlotMarker(plot, 'waterMarker');
+      this._disposePlotMarker(plot, 'fertilizerMarker');
       
       var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
       var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
@@ -698,6 +601,7 @@ GAME.game = {
       GAME.ui.showNotification('💰 Harvested ' + cropType + '! +$' + salePrice, 'success');
     }
     this.addXP(15);
+    GAME.quests.track('harvest', 1);
   },
 
   craftItem: function(recipeId) {
@@ -716,6 +620,7 @@ GAME.game = {
     }
     this.state.crafted[recipeId] = (this.state.crafted[recipeId] || 0) + 1;
     this.addXP(recipe.xpReward);
+    GAME.quests.track('craft', 1);
     GAME.ui.showNotification('🔨 Crafted ' + recipe.name + '! +' + recipe.xpReward + ' XP', 'success');
     GAME.audio.play('chime');
     GAME.ui.refreshInventory();
@@ -747,6 +652,7 @@ GAME.game = {
       var price = Math.floor(craftedPrices[type] * bonus);
       this.state.money += price * amt;
       this.state.crafted[type] = 0;
+      GAME.quests.track('earn', price * amt);
       GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
       return;
     }
@@ -760,6 +666,7 @@ GAME.game = {
     var amt = this.state.inventory[type];
     this.state.money += price * amt;
     this.state.inventory[type] = 0;
+    GAME.quests.track('earn', price * amt);
     GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
   },
 
@@ -779,6 +686,7 @@ GAME.game = {
     this.state.energy = 100;
     this.state.day++;
     this.state.time = 6;
+    this.state.quests = GAME.quests.generateDaily();
     this.addXP(5);
     GAME.ui.showNotification('🌙 Slept! Day ' + this.state.day + ' ☀️ +5 XP', 'success');
   },
@@ -796,6 +704,7 @@ GAME.game = {
     if (state.time >= 24) {
       state.time -= 24;
       state.day++;
+      state.quests = GAME.quests.generateDaily();
     }
     if (state.energy < 100) state.energy += delta * 1.5;
     if (state.energy > 100) state.energy = 100;
@@ -929,6 +838,40 @@ GAME.game = {
     GAME.ui.showInteractionHint(hints.length > 0 ? hints[0] : null);
   },
 
+  // Helper: properly dispose a plot's crop/tree mesh
+  _disposePlotMesh: function(plot) {
+    if (!plot.mesh) return;
+    this.scene.remove(plot.mesh);
+    if (plot.mesh.geometry) plot.mesh.geometry.dispose();
+    if (plot.mesh.material) plot.mesh.material.dispose();
+    // If mesh is a Group, dispose children recursively
+    if (plot.mesh.isGroup && plot.mesh.children) {
+      for (var i = 0; i < plot.mesh.children.length; i++) {
+        var child = plot.mesh.children[i];
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      }
+    }
+    plot.mesh = null;
+  },
+
+  // Helper: properly dispose a plot marker (water or fertilizer)
+  _disposePlotMarker: function(plot, key) {
+    var marker = plot[key];
+    if (!marker) return;
+    this.scene.remove(marker);
+    if (marker.children) {
+      for (var i = 0; i < marker.children.length; i++) {
+        var child = marker.children[i];
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) child.material.dispose();
+      }
+    }
+    if (marker.geometry) marker.geometry.dispose();
+    if (marker.material) marker.material.dispose();
+    plot[key] = null;
+  },
+
   animate: function() {
     var self = this;
     function loop() {
@@ -937,9 +880,62 @@ GAME.game = {
       var delta = Math.min(self.clock.getDelta(), 0.05);
       self.update(delta);
       self.renderer.render(self.scene, GAME.camera.camera);
+      
+      // FPS tracking for auto quality
+      self._fpFrames++;
+      self._fpTime += delta;
+      if (self._fpTime >= 2) { // Check every 2 seconds
+        var fps = self._fpFrames / self._fpTime;
+        self._fpFrames = 0;
+        self._fpTime = 0;
+        if (self._autoQuality) {
+          if (fps < 20) {
+            self._fpLowCounter++;
+          } else {
+            self._fpLowCounter = Math.max(0, self._fpLowCounter - 1);
+          }
+          if (self._fpLowCounter >= 2 && self.qualityLevel !== 'low') {
+            self.setQuality('low');
+            GAME.ui.showNotification('⚡ Lowered graphics for smoother gameplay', 'info');
+          } else if (self._fpLowCounter >= 1 && self.qualityLevel === 'high') {
+            self.setQuality('medium');
+            GAME.ui.showNotification('⚡ Adjusted graphics quality', 'info');
+          }
+        }
+      }
     }
     loop();
+  },
+
+  setQuality: function(level) {
+    if (level === this.qualityLevel) return;
+    this.qualityLevel = level;
+    switch (level) {
+      case 'low':
+        this.renderer.shadowMap.enabled = false;
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
+        this.renderer.toneMapping = THREE.NoToneMapping;
+        break;
+      case 'medium':
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.0;
+        break;
+      case 'high':
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.0;
+        break;
+    }
+    // Re-apply fog/render distance from settings
+    var rd = document.getElementById('render-dist');
+    var dist = rd ? parseFloat(rd.value) : 8;
+    this.scene.fog = new THREE.Fog(0x87CEEB, dist * 3, dist * 6);
   }
-};
+});
 
 GAME.game.init();

@@ -1,19 +1,24 @@
 // Farm Game Service Worker
-const CACHE_NAME = 'farm-game-v2';
+const CACHE_NAME = 'farm-game-v2_0_1';
 const STATIC_ASSETS = [
     '/games/farm-game/',
     '/games/farm-game/index.html',
     '/games/farm-game/manifest.json',
     '/games/farm-game/css/style.css',
     '/games/farm-game/js/collision.js',
+    '/games/farm-game/js/state.js',
     '/games/farm-game/js/world.js',
     '/games/farm-game/js/player.js',
     '/games/farm-game/js/camera.js',
     '/games/farm-game/js/audio.js',
     '/games/farm-game/js/animals.js',
     '/games/farm-game/js/weather.js',
+    '/games/farm-game/js/quests.js',
     '/games/farm-game/js/ui.js',
-    '/games/farm-game/js/main.js'
+    '/games/farm-game/js/save.js',
+    '/games/farm-game/js/aiAgent.js',
+    '/games/farm-game/js/main.js',
+    '/games/farm-game/js/lib/three.min.js'
 ];
 
 // Install Event
