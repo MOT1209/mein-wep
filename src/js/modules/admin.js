@@ -53,101 +53,15 @@ function injectAdminBar() {
   });
 }
 
-/* ── Register Admin Prompt ── */
+/* ── Secure: Admin registration disabled ── */
+/* 
+   Security fix: removed self-registration of admin users.
+   Only the database owner (Supabase Dashboard) can add admins.
+   The old add_admin_user() RPC was revoked from authenticated users.
+   See SUPABASE_SECURITY_FIX.sql for details.
+*/
 function injectRegisterPrompt() {
-  const existing = qs('.admin-register-prompt');
-  if (existing) return;
-  const prompt = document.createElement('div');
-  prompt.className = 'admin-register-prompt';
-  prompt.innerHTML = `
-    <div class="admin-register-box">
-      <span class="admin-register-icon"><i class="fas fa-shield-halved"></i></span>
-      <h4>Admin Access</h4>
-      <p>You're logged in as <strong>${escapeHtml(adminUser?.email || '')}</strong> but not registered as admin.</p>
-      <button class="admin-btn admin-btn-primary" id="register-admin-btn">
-        <i class="fas fa-user-shield"></i> Register as Admin
-      </button>
-      <button class="admin-btn" id="admin-logout-btn">Logout</button>
-    </div>`;
-  document.body.appendChild(prompt);
-
-  on(prompt.querySelector('#register-admin-btn'), 'click', async () => {
-    const client = getSupabaseClient();
-    if (!client) return;
-    try {
-      const { error } = await client.rpc('add_admin_user');
-      if (error) {
-        injectRegisterSql(prompt);
-        return;
-      }
-      prompt.innerHTML = `<div class="admin-register-box"><p style="color:#22c55e;">✅ Registered! Refreshing...</p></div>`;
-      setTimeout(() => location.reload(), 1000);
-    } catch (err) {
-      injectRegisterSql(prompt);
-    }
-  });
-
-  on(prompt.querySelector('#admin-logout-btn'), 'click', async () => {
-    const client = getSupabaseClient();
-    if (client) await client.auth.signOut();
-    location.reload();
-  });
-}
-
-/* ── Register SQL Prompt ── */
-function injectRegisterSql(promptEl) {
-  const sql = `create or replace function public.add_admin_user()
-returns void
-language sql
-security definer
-set search_path = public
-as $$
-  insert into public.admin_users (user_id, email)
-  values ((select auth.uid()), (select email from auth.users where id = (select auth.uid())))
-  on conflict (user_id) do nothing;
-$$;
-
-revoke all on function public.add_admin_user() from public;
-grant execute on function public.add_admin_user() to authenticated;`;
-
-  promptEl.innerHTML = `<div class="admin-register-box">
-    <h4>🔧 Create Admin Function</h4>
-    <p>The database function <code>add_admin_user</code> doesn't exist yet.</p>
-    <p style="font-size:0.85em;color:#94a3b8;">Open your Supabase SQL Editor and run:</p>
-    <pre style="background:#1e293b;color:#e2e8f0;padding:1em;border-radius:8px;font-size:0.8em;overflow-x:auto;white-space:pre-wrap;text-align:left;direction:ltr;" id="admin-sql-code">${escapeHtml(sql)}</pre>
-    <button class="admin-btn" id="copy-sql-btn" style="margin-top:6px;"><i class="fas fa-copy"></i> Copy SQL</button>
-    <p style="font-size:0.85em;color:#94a3b8;margin-top:8px;">After running, click below to retry:</p>
-    <button class="admin-btn admin-btn-primary" id="retry-admin-register"><i class="fas fa-rotate"></i> Check & Retry</button>
-    <button class="admin-btn" onclick="this.closest('.admin-register-prompt').remove()">Dismiss</button>
-  </div>`;
-
-  on(promptEl.querySelector('#copy-sql-btn'), 'click', () => {
-    navigator.clipboard.writeText(sql).then(() => showToast('SQL copied!')).catch(() => showToast('Copy failed'));
-  });
-  on(promptEl.querySelector('#retry-admin-register'), 'click', async () => {
-    const c = getSupabaseClient();
-    if (!c) return;
-    try {
-      const { error } = await c.rpc('add_admin_user');
-      if (!error) {
-        promptEl.innerHTML = `<div class="admin-register-box"><p style="color:#22c55e;">✅ Registered! Refreshing...</p></div>`;
-        setTimeout(() => location.reload(), 1000);
-        return;
-      }
-    } catch {}
-    try {
-      const { error: directError } = await c.from('admin_users').insert({
-        user_id: (await c.auth.getSession()).data.session?.user?.id,
-        email: (await c.auth.getSession()).data.session?.user?.email
-      });
-      if (!directError) {
-        promptEl.innerHTML = `<div class="admin-register-box"><p style="color:#22c55e;">✅ Registered! Refreshing...</p></div>`;
-        setTimeout(() => location.reload(), 1000);
-        return;
-      }
-    } catch {}
-    showToast('Need the DB function. Run the SQL above first.', 'error');
-  });
+  // No-op: admin registration is now manual via Supabase Dashboard only
 }
 
 /* ── Vault Admin ── */

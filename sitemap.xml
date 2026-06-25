@@ -29,6 +29,26 @@
         <priority>0.5</priority>
     </url>
     <url>
+        <loc>https://rashid-wep.vercel.app/404.html</loc>
+        <priority>0.3</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/offline.html</loc>
+        <priority>0.3</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/downloads.html</loc>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/devos.html</loc>
+        <priority>0.5</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/icon-generator.html</loc>
+        <priority>0.3</priority>
+    </url>
+    <url>
         <loc>https://rashid-wep.vercel.app/games/</loc>
         <priority>0.8</priority>
     </url>
@@ -38,6 +58,10 @@
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/games/rust-game/</loc>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/games/kingcraft-game/</loc>
         <priority>0.7</priority>
     </url>
     <url>
@@ -82,7 +106,7 @@
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/apps/maarifah-web/</loc>
-        <priority>0.7</priority>
+        <priority>0.6</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/blog/building-kingcraft-3d-game.html</loc>
@@ -115,13 +139,5 @@
     <url>
         <loc>https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html</loc>
         <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://rashid-wep.vercel.app/downloads.html</loc>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>https://rashid-wep.vercel.app/games/kingcraft-game/</loc>
-        <priority>0.7</priority>
     </url>
 </urlset>

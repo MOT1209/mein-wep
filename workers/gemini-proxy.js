@@ -13,9 +13,12 @@
 
 export default {
   async fetch(request, env) {
-    // CORS headers
+    // CORS headers — مقيدة بنطاق الموقع فقط (أمان)
+    const allowedOrigins = ['https://rashid-wep.vercel.app', 'https://mot1209.github.io', 'http://localhost:8080', 'http://localhost:8099', 'http://127.0.0.1:8099'];
+    const origin = request.headers.get('Origin') || '';
+    const corsOrigin = allowedOrigins.includes(origin) ? origin : 'https://rashid-wep.vercel.app';
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': corsOrigin,
       'Access-Control-Allow-Methods': 'POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };

@@ -27,67 +27,6 @@
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <style>
-.cookie-banner {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 9999;
-  background: rgba(6, 8, 13, 0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(148, 163, 184, 0.16);
-  padding: 16px 24px;
-  transform: translateY(100%);
-  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-}
-.cookie-banner.visible { transform: translateY(0); }
-.cookie-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-.cookie-text {
-  display: flex;
-  align-items: center;
-  color: #cbd5e1;
-  font-size: 0.9rem;
-  flex: 1;
-  min-width: 280px;
-}
-.cookie-text a { color: var(--accent, #38bdf8); text-decoration: underline; }
-.cookie-actions { display: flex; gap: 12px; flex-shrink: 0; }
-.cookie-btn {
-  padding: 10px 24px;
-  border-radius: 10px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: all 0.3s ease;
-  font-family: inherit;
-}
-.cookie-accept {
-  background: linear-gradient(135deg, #67e8f9, #34d399);
-  color: #061018;
-}
-.cookie-accept:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3); }
-.cookie-decline {
-  background: rgba(148, 163, 184, 0.1);
-  color: #94a3b8;
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-.cookie-decline:hover { background: rgba(148, 163, 184, 0.2); }
-@media (max-width: 640px) {
-  .cookie-content { flex-direction: column; text-align: center; }
-  .cookie-btn { width: 100%; justify-content: center; }
-}
-</style>
-    <style>
         body { padding-top: 100px; background: #09090b; }
         .contact-page { max-width: 700px; margin: 0 auto; padding: 40px 20px; }
         .contact-page h1 { font-size: 2.5rem; margin-bottom: 10px; color: #fff; }

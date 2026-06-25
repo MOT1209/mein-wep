@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'Rashid-v12';
+﻿const CACHE_NAME = 'Rashid-v13';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -12,8 +12,6 @@ const ASSETS_TO_CACHE = [
     './css/style.css',
     './css/admin.css',
     './css/app-mode.css',
-    './css/mobile-improvements.css',
-    './css/enhancements.css',
     './js/script.js',
     './js/rashid-ai-v2.js',
     './js/supabase-config.js',
@@ -39,22 +37,14 @@ const ASSETS_TO_CACHE = [
     './src/js/modules/updates.js',
     './src/js/modules/statistics.js',
     './src/js/modules/vault.js',
-    './src/css/main.css',
-    './src/css/base/variables.css',
-    './src/css/base/responsive.css',
-    './src/css/components/design-system.css',
-    './src/css/components/navbar.css',
-    './src/css/components/hero.css',
     './src/vault/prompts.js',
     './src/vault/images.js',
     './src/vault/codes.js',
     './src/vault/media.js',
-    './models/Rashid-app/index.html',
-    './models/Rashid-app/style.css',
-    './models/Rashid-app/script.js',
-    './images/logo.png',
-    './images/profile.jpg',
-    './images/avatar.jpg'
+    './models/Rashid-Model/index.html',
+    './images/logo.webp',
+    './images/avatar.webp',
+    './images/profile.webp'
 ];
 
 // Install Event - Cache Files
