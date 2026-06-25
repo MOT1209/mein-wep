@@ -705,6 +705,7 @@ Object.assign(GAME.game, {
   update: function(delta) {
     if (this.isPaused || this.isShopOpen) return;
     var state = this.state;
+    if (!state) return; // 🛡️ اللعبة لم تبدأ بعد (القائمة الرئيسةة ظاهرة)
 
     if (state.health <= 0) {
       this.handleDeath();
