@@ -41,8 +41,8 @@ games/kingcraft-game/dist/
 **/*.keystore
 **/keystore.properties
 
-# Ignore vendored library files (use CDN instead)
-games/*/js/lib/
+# Vendored library files (local fallback for CDN-disabled environments)
+# games/*/js/lib/
 
 # Don't ignore APK files in apks/ (they're committed for site hosting)
 !apks/*.apk
