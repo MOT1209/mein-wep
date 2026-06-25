@@ -1,5 +1,16 @@
 var GAME = GAME || {};
 
+// 🛡️ شبكة أمان عالمية: أي خطأ غير متوقع يظهر القائمة
+window.addEventListener('error', function(e) {
+  console.error('[FarmGame] 💥 Uncaught:', e.message);
+  var txt = document.querySelector('.loader-text');
+  if (txt) txt.textContent = '⚠️ Error: ' + (e.message || 'unknown');
+  try {
+    if (typeof GAME !== 'undefined' && GAME.ui && GAME.ui.hideLoading) GAME.ui.hideLoading();
+    if (typeof GAME !== 'undefined' && GAME.ui && GAME.ui.showMenu) GAME.ui.showMenu();
+  } catch(ex) { /* last resort */ }
+});
+
 // Merge with existing GAME.game (from state.js), don't overwrite
 Object.assign(GAME.game, {
   scene: null,
@@ -37,43 +48,63 @@ Object.assign(GAME.game, {
       if (stepIdx > 6) clearInterval(loadInterval);
     }, 80);
 
-    this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x87CEEB);
-    this.scene.fog = new THREE.Fog(0x87CEEB, 30, 60);
-
-    var renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.0;
-    document.body.prepend(renderer.domElement);
-    this.renderer = renderer;
-
-    GAME.camera.init();
-    GAME.world.init(this.scene);
-    GAME.player.init(this.scene);
-    GAME.animals.init(this.scene);
-    GAME.weather.init(this.scene);
-    GAME.audio.init();
-    GAME.AIAgent.init(this.scene); // Initialize AI Agent System
-
-    this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
-
-    var muteBtn = document.getElementById('mute-btn');
-    if (muteBtn && GAME.audio && GAME.audio.muted) muteBtn.textContent = '🔇';
-
+    // 🛡️ Fallback: after 3s show menu anyway (حتى لو صار خطأ بالتهيئة)
     setTimeout(function() {
       GAME.ui.hideLoading();
       GAME.ui.showMenu();
-    }, 800);
+      console.warn('[FarmGame] ⏰ Fallback timeout triggered — menu forced at 3s');
+    }, 3000);
 
-    this.clock = new THREE.Clock();
-    this.isRunning = true;
+    // ⚠️ Wrap heavy 3D init in try-catch لالتقاط أخطاء WebGL/THREE
+    try {
+      this.scene = new THREE.Scene();
+      this.scene.background = new THREE.Color(0x87CEEB);
+      this.scene.fog = new THREE.Fog(0x87CEEB, 30, 60);
 
-    // initPlots() تُستدعى فقط في startNew() لأن this.state لا توجد بعد
-    this.animate();
+      var renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.0;
+      document.body.prepend(renderer.domElement);
+      this.renderer = renderer;
+
+      GAME.camera.init();
+      GAME.world.init(this.scene);
+      GAME.player.init(this.scene);
+      GAME.animals.init(this.scene);
+      GAME.weather.init(this.scene);
+      GAME.audio.init();
+      GAME.AIAgent.init(this.scene);
+
+      this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
+
+      var muteBtn = document.getElementById('mute-btn');
+      if (muteBtn && GAME.audio && GAME.audio.muted) muteBtn.textContent = '🔇';
+
+      setTimeout(function() {
+        GAME.ui.hideLoading();
+        GAME.ui.showMenu();
+      }, 800);
+
+      this.clock = new THREE.Clock();
+      this.isRunning = true;
+
+      this.animate();
+    } catch (err) {
+      console.error('[FarmGame] ❌ Init error:', err.message, err.stack);
+      // Show error on loading screen للمساعدة في التشخيص
+      var txt = document.querySelector('.loader-text');
+      if (txt) txt.textContent = '⚠️ Error: ' + err.message;
+      GAME.ui.showLoading(100);
+      // Force menu after error message
+      setTimeout(function() {
+        GAME.ui.hideLoading();
+        GAME.ui.showMenu();
+      }, 2000);
+    }
   },
 
   startNew: function() {
