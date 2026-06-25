@@ -2,7 +2,7 @@ import { injectKnowledge } from '@/lib/knowledge/injector';
 import { auth } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 import { routeStream, resolveProvider } from '@/lib/models';
-import { generateWithRAG } from '@/lib/rag';
+import { getRAGContext } from '@/lib/rag';
 import { createLogger } from '@/lib/logger';
 import { RateLimiter } from '@/lib/rate-limit';
 import { createErrorResponse } from '@/lib/errors';
@@ -139,10 +139,14 @@ export async function POST(req: Request) {
       content: msg.content,
     }));
 
-    // ── PARALLEL: Kick off RAG immediately ────────────────
+    // ── PARALLEL: Kick off RAG retrieval immediately ──────
+    // NOTE: retrieval ONLY (getRAGContext). Previously this called
+    // generateWithRAG, which ran a full non-streaming LLM completion before
+    // the stream even started — doubling latency and feeding that answer back
+    // in as the user message. We now just fetch context and stream once.
     const ragPromise = userId
-      ? generateWithRAG(userId, userMessage, history).catch((err) => {
-          log.error('RAG generation failed', err);
+      ? getRAGContext(userId, userMessage).catch((err) => {
+          log.error('RAG retrieval failed', err);
           return null;
         })
       : Promise.resolve(null);
@@ -181,15 +185,20 @@ export async function POST(req: Request) {
       }
     }
 
-    // ── Await RAG (likely already finished while DB ran) ──
+    // ── Await RAG retrieval (likely already finished while DB ran) ──
     const ragContext = await ragPromise;
 
     // ── Build final AI prompt ─────────────────────────────
+    // Retrieved context goes in as a system message; the real user message is
+    // preserved as-is. injectKnowledge merges the KING2 identity prompt in.
     const contextMessages = injectKnowledge([
+      ...(ragContext
+        ? [{ role: 'system' as const, content: `معلومات ذات صلة قد تساعدك في الإجابة:\n${ragContext}` }]
+        : []),
       ...history,
       {
         role: 'user' as const,
-        content: ragContext || userMessage,
+        content: userMessage,
       },
     ]);
 
