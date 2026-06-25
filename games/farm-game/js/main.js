@@ -13,6 +13,7 @@ Object.assign(GAME.game, {
   _fpFrames: 0,
   _fpTime: 0,
   _fpLowCounter: 0,
+  particles: [],
 
   init: function() {
     var self = this;
@@ -203,9 +204,11 @@ Object.assign(GAME.game, {
     }
     this.state.plots[idx].fertilized = true;
     this.state.inventory.fertilizer--;
+    var plot = this.state.plots[idx];
+    this.spawnFertilizerParticles(plot.x, plot.z); // 🎆 جسيمات السماد
     
     // Update fertilizer marker
-    this.updatePlantVisual(this.state.plots[idx]);
+    this.updatePlantVisual(plot);
     
     GAME.ui.showNotification('🌱 Fertilized! Growth boosted.', 'success');
     GAME.ui.refreshInventory();
@@ -478,6 +481,7 @@ Object.assign(GAME.game, {
     mesh.receiveShadow = true;
     this.scene.add(mesh);
     plot.mesh = mesh;
+    this.spawnPlowParticles(plot.x, plot.z); // 🎆 جسيمات الحرث
     this.addXP(5);
     GAME.ui.showNotification('✅ Plowed! +5 XP', 'success');
   },
@@ -492,9 +496,11 @@ Object.assign(GAME.game, {
     this.addXP(3);
     GAME.quests.track('water', 1);
     GAME.ui.showNotification('💧 Watered crops! +3 XP', 'success');
+    var plot = this.state.plots[idx];
+    this.spawnWaterParticles(plot.x, plot.z); // 🎆 جسيمات الماء
     
     // Update water marker visibility
-    this.updatePlantVisual(this.state.plots[idx]);
+    this.updatePlantVisual(plot);
   },
 
   plantClosest: function(crop) {
@@ -550,6 +556,9 @@ Object.assign(GAME.game, {
     this.addXP(8);
     GAME.quests.track('plant', 1);
     GAME.ui.showNotification('🌱 Planted ' + crop + '! +8 XP', 'success');
+    // 🎆 جسيمات الزراعة
+    var plantColors = { wheat: 0x228B22, tomato: 0x228B22, carrot: 0x228B22, apple: 0x8B5A2B };
+    this.spawnParticles(plot.x, 0.5, plot.z, plantColors[crop] || 0x228B22, 12, 2, 0.08, 0.6);
   },
 
   harvestClosest: function() {
@@ -564,6 +573,8 @@ Object.assign(GAME.game, {
     var salePrice = Math.floor((prices[cropType] || 25) * bonus);
     this.state.money += salePrice;
     this.state.energy -= cost;
+    // 🎆 جسيمات الحصاد
+    this.spawnHarvestParticles(plot.x, plot.z, cropType);
 
     if (cropType === 'apple') {
       // For apple trees, reset growth but keep the tree
@@ -711,80 +722,59 @@ Object.assign(GAME.game, {
     if (state.health < 100) state.health += delta * 0.5;
     if (state.health > 100) state.health = 100;
     
-    // Update growth markers visibility
+    // ===== دمج التحديث البصري + النمو في حلقة واحدة =====
     for (var i = 0; i < state.plots.length; i++) {
       var plot = state.plots[i];
+      
+      // تحديث العلامات البصرية (مياه، سماد)
       this.updatePlantVisual(plot, delta);
-    }
-    
-    for (var i = 0; i < state.plots.length; i++) {
-      var plot = state.plots[i];
+      
       if (plot.state === 'planted') {
-        // Base growth rate
+        // معدل النمو الأساسي
         var baseGrowthRate = 0.5;
         
-        // Water bonus
-        if (plot.watered) {
-          baseGrowthRate = 1.5;
+        // مكافأة السقي
+        if (plot.watered) baseGrowthRate = 1.5;
+        
+        // مكافأة التسميد
+        if (plot.fertilized) baseGrowthRate *= 1.5;
+        
+        // تأثير الطقس
+        var weatherMult = 1.0;
+        if (GAME.weather) {
+          if (GAME.weather.current === 'rainy') weatherMult = 1.3;
+          else if (GAME.weather.current === 'stormy') weatherMult = 0.8;
         }
         
-        // Fertilizer bonus
-        if (plot.fertilized) {
-          baseGrowthRate *= 1.5;
-        }
+        // معدل نمو حسب نوع المحصول
+        var cropRates = { wheat: 1.0, tomato: 1.2, carrot: 0.9, apple: 0.35 };
+        var cropMult = cropRates[plot.crop] || 1.0;
         
-        // Weather effect
-        var weatherMultiplier = 1.0;
-        if (GAME.weather && GAME.weather.current === 'rainy') {
-          weatherMultiplier = 1.3; // Rain boosts growth
-        } else if (GAME.weather && GAME.weather.current === 'stormy') {
-          weatherMultiplier = 0.8; // Storm slightly hinders growth
-        }
+        // مكافأة المستوى
+        var levelMult = 1 + (state.level - 1) * 0.02;
         
-        // Crop-specific growth rates
-        var cropGrowthRates = {
-          wheat: 1.0,
-          tomato: 1.2,
-          carrot: 0.9,
-          apple: 0.4 // Trees grow slower
-        };
-        var cropMultiplier = cropGrowthRates[plot.crop] || 1.0;
-        
-        // Level bonus
-        var levelBonus = 1 + (state.level - 1) * 0.02;
-        
-        // Tree multiplier
-        var treeMultiplier = plot.crop === 'apple' ? 0.33 : 1;
-        
-        // Calculate final growth
-        var growthRate = baseGrowthRate * weatherMultiplier * cropMultiplier * levelBonus * treeMultiplier;
+        // الحساب النهائي
+        var growthRate = baseGrowthRate * weatherMult * cropMult * levelMult;
         plot.growth += delta * growthRate * 0.02;
         
-        // Update growth stage (0-4: seed, sprout, seedling, mature, ready)
-        var newGrowthStage = Math.floor(plot.growth * 4);
-        if (newGrowthStage > plot.growthStage) {
-          plot.growthStage = newGrowthStage;
+        // تحديث مرحلة النمو (0-4: بذرة، برعم، شتلة، ناضج، جاهز)
+        var newStage = Math.min(4, Math.floor(plot.growth * 4));
+        if (newStage > plot.growthStage) {
+          plot.growthStage = newStage;
           this.updatePlantVisual(plot, delta);
         }
         
+        // المحصول جاهز للحصاد
         if (plot.growth >= 1) {
           plot.state = 'ready';
           plot.growth = 1;
-          // Ensure final visual state
           plot.growthStage = 4;
           this.updatePlantVisual(plot, delta);
-          
-          // Special handling for trees (they reset after harvest)
-          if (plot.crop === 'apple') {
-            // Tree resets to planted state after harvest, but keeps growing
-            plot.state = 'planted';
-            plot.growth = 0;
-            plot.growthStage = 0;
-          }
+          // ⭐ أشجار التفاح تبقى في حالة 'ready' حتى يحصدها اللاعب!
         } else if (plot.mesh && plot.crop !== 'apple') {
-          // Smooth growth animation for non-tree crops
-          var scale = 0.2 + plot.growth * 0.8; // From 0.2 to 1.0
-          plot.mesh.scale.set(scale, scale, scale);
+          // حركة نمو سلسة للمحاصيل العادية
+          var s = 0.2 + plot.growth * 0.8;
+          plot.mesh.scale.set(s, s, s);
         }
       }
     }
@@ -799,6 +789,8 @@ Object.assign(GAME.game, {
     if (GAME.animals) GAME.animals.update(delta);
     if (GAME.weather) GAME.weather.update(delta);
     if (GAME.AIAgent) GAME.AIAgent.update(delta); // Update AI Agents
+    this.updateParticles(delta); // 🎆 تحديث الجسيمات
+    this.renderMinimap(); // 🗺️ تحديث الخريطة المصغرة
     this.updateInteractionHints();
     GAME.ui.updateHUD(state);
   },
@@ -935,6 +927,183 @@ Object.assign(GAME.game, {
     var rd = document.getElementById('render-dist');
     var dist = rd ? parseFloat(rd.value) : 8;
     this.scene.fog = new THREE.Fog(0x87CEEB, dist * 3, dist * 6);
+  },
+
+  // ===== 🎆 نظام الجسيمات (Particle Effects) =====
+  spawnParticles: function(x, y, z, color, count, speed, size, lifetime) {
+    if (!this.scene) return;
+    count = count || 20;
+    speed = speed || 3;
+    size = size || 0.15;
+    lifetime = lifetime || 1.0;
+    var colorObj = new THREE.Color(color);
+    var pts = [];
+    for (var i = 0; i < count; i++) {
+      var geo = new THREE.SphereGeometry(size * (0.5 + Math.random() * 0.5), 4, 4);
+      var mat = new THREE.MeshBasicMaterial({
+        color: color,
+        transparent: true,
+        opacity: 1
+      });
+      var mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      var vx = (Math.random() - 0.5) * speed;
+      var vy = Math.random() * speed * 0.8 + 0.5;
+      var vz = (Math.random() - 0.5) * speed;
+      mesh.userData = {
+        vx: vx, vy: vy, vz: vz,
+        life: lifetime,
+        maxLife: lifetime,
+        rotSpeed: (Math.random() - 0.5) * 6
+      };
+      this.scene.add(mesh);
+      pts.push(mesh);
+    }
+    this.particles = this.particles.concat(pts);
+  },
+
+  updateParticles: function(delta) {
+    for (var i = this.particles.length - 1; i >= 0; i--) {
+      var p = this.particles[i];
+      var d = p.userData;
+      p.position.x += d.vx * delta;
+      p.position.y += d.vy * delta;
+      p.position.z += d.vz * delta;
+      d.vy -= 2.0 * delta; // جاذبية
+      d.life -= delta;
+      p.rotation.x += d.rotSpeed * delta;
+      p.rotation.y += d.rotSpeed * delta;
+      var lifeRatio = Math.max(0, d.life / d.maxLife);
+      p.material.opacity = lifeRatio;
+      p.scale.setScalar(0.3 + lifeRatio * 0.7);
+      if (d.life <= 0) {
+        this.scene.remove(p);
+        p.geometry.dispose();
+        p.material.dispose();
+        this.particles.splice(i, 1);
+      }
+    }
+  },
+
+  // ===== 🌟 تأثيرات الأدوات =====
+  spawnPlowParticles: function(x, z) {
+    this.spawnParticles(x, 0.3, z, 0x8B6914, 15, 2, 0.12, 0.8);
+  },
+  spawnWaterParticles: function(x, z) {
+    this.spawnParticles(x, 0.5, z, 0x4fc3f7, 25, 3, 0.08, 0.6);
+  },
+  spawnHarvestParticles: function(x, z, cropType) {
+    var colors = { wheat: 0xdaa520, tomato: 0xff4444, carrot: 0xff8c00, apple: 0xff0000 };
+    this.spawnParticles(x, 0.5, z, colors[cropType] || 0xdaa520, 30, 4, 0.1, 0.9);
+  },
+  spawnFertilizerParticles: function(x, z) {
+    this.spawnParticles(x, 0.3, z, 0x8B4513, 12, 1.5, 0.1, 0.7);
+  },
+
+  // ===== 🗺️ الخريطة المصغرة (MiniMap) =====
+  renderMinimap: function() {
+    var canvas = document.getElementById('minimap-canvas');
+    if (!canvas) return;
+    var ctx = canvas.getContext('2d');
+    var w = canvas.width, h = canvas.height;
+    var mapScale = 0.9; // world coords to canvas ratio
+    var cx = w / 2, cy = h / 2;
+    
+    // خلفية شبه شفافة
+    ctx.fillStyle = 'rgba(0, 20, 0, 0.6)';
+    ctx.fillRect(0, 0, w, h);
+    
+    // شبكة
+    ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+    ctx.lineWidth = 0.5;
+    for (var i = 0; i < 7; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * 20, 0); ctx.lineTo(i * 20, h);
+      ctx.moveTo(0, i * 20); ctx.lineTo(w, i * 20);
+      ctx.stroke();
+    }
+    
+    function worldToMap(wx, wz) {
+      return { x: cx + wx * mapScale, y: cy - wz * mapScale };
+    }
+    
+    // رسم المباني (كمستطيلات)
+    var buildings = [
+      { x: -15, z: -15, w: 10, h: 8, c: '#d4a574', label: '🏠' }, // House
+      { x: 16, z: -12, w: 11, h: 9, c: '#a83232', label: '🏠' }, // Barn
+      { x: 0, z: -22, w: 7, h: 7, c: '#e67e22', label: '🏪' } // Market
+    ];
+    for (var b = 0; b < buildings.length; b++) {
+      var bd = buildings[b];
+      var p = worldToMap(bd.x, bd.z);
+      var bw = bd.w * mapScale;
+      var bh = bd.h * mapScale;
+      ctx.fillStyle = bd.c;
+      ctx.fillRect(p.x - bw/2, p.y - bh/2, bw, bh);
+      ctx.fillStyle = 'rgba(0,0,0,0.4)';
+      ctx.font = '7px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(bd.label, p.x, p.y + 2.5);
+    }
+    
+    // رسم قطع الأراضي
+    if (this.state && this.state.plots) {
+      for (var i = 0; i < this.state.plots.length; i++) {
+        var pl = this.state.plots[i];
+        var pp = worldToMap(pl.x, pl.z);
+        var s = 3.5;
+        if (pl.state === 'empty') ctx.fillStyle = 'rgba(60,40,20,0.4)';
+        else if (pl.state === 'plowed') ctx.fillStyle = 'rgba(100,60,20,0.5)';
+        else if (pl.state === 'planted') ctx.fillStyle = 'rgba(34, 139, 34, 0.6)';
+        else if (pl.state === 'ready') {
+          ctx.fillStyle = pl.crop === 'apple' ? 'rgba(139, 90, 43, 0.7)' : 'rgba(218, 165, 32, 0.8)';
+          // وميض للمحاصيل الجاهزة
+          var pulse = Math.sin(Date.now() * 0.004) * 0.3 + 0.7;
+          ctx.globalAlpha = pulse;
+        }
+        ctx.fillRect(pp.x - s, pp.y - s, s * 2, s * 2);
+        ctx.globalAlpha = 1.0;
+      }
+    }
+    
+    // رسم حدود العالم
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    var tl = worldToMap(-58, -58);
+    var br = worldToMap(58, 58);
+    ctx.strokeRect(tl.x, br.y, br.x - tl.x, tl.y - br.y);
+    
+    // رسم اتجاه الشمال
+    ctx.fillStyle = 'rgba(255,255,255,0.25)';
+    ctx.font = '8px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('N', cx, 10);
+    ctx.beginPath();
+    ctx.moveTo(cx, 12); ctx.lineTo(cx, 5); ctx.lineWidth = 1.5;
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    ctx.stroke();
+    
+    // رسم اللاعب
+    if (GAME.player && GAME.player.mesh) {
+      var pPos = GAME.player.mesh.position;
+      var pp = worldToMap(pPos.x, pPos.z);
+      // نقطة اللاعب
+      ctx.beginPath();
+      ctx.arc(pp.x, pp.y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = '#4fc3f7';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // اتجاه اللاعب
+      var angle = GAME.player.mesh.rotation.y;
+      ctx.beginPath();
+      ctx.moveTo(pp.x + Math.sin(angle) * 6, pp.y - Math.cos(angle) * 6);
+      ctx.lineTo(pp.x, pp.y);
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
   }
 });
 
