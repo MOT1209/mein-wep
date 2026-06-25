@@ -72,7 +72,7 @@ Object.assign(GAME.game, {
     this.clock = new THREE.Clock();
     this.isRunning = true;
 
-    this.initPlots();
+    // initPlots() تُستدعى فقط في startNew() لأن this.state لا توجد بعد
     this.animate();
   },
 
