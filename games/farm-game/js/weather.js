@@ -19,6 +19,33 @@ GAME.weather = {
     this.lightningDelay = 5 + Math.random() * 10; // 5-15 seconds
   },
 
+  setupSunRays: function() {
+    // أشعة الشمس التزيينية — عدسة ضوئية بسيطة
+    if (!this.scene) return;
+    var spriteMap = (function(){
+      var canvas = document.createElement('canvas');
+      canvas.width = 64; canvas.height = 64;
+      var ctx = canvas.getContext('2d');
+      var gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gradient.addColorStop(0, 'rgba(255,240,200,0.3)');
+      gradient.addColorStop(0.5, 'rgba(255,220,100,0.1)');
+      gradient.addColorStop(1, 'rgba(255,200,50,0)');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 64, 64);
+      return new THREE.CanvasTexture(canvas);
+    })();
+    var spriteMat = new THREE.SpriteMaterial({
+      map: spriteMap,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      transparent: true
+    });
+    this.sunRays = new THREE.Sprite(spriteMat);
+    this.sunRays.position.set(30, 45, 20);
+    this.sunRays.scale.set(25, 25, 1);
+    this.scene.add(this.sunRays);
+  },
+
   setupRain: function() {
     var positions = new Float32Array(this.rainCount * 3);
     var velocities = new Float32Array(this.rainCount);
