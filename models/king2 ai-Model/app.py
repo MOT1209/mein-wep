@@ -155,11 +155,91 @@ def qwen_vision_analyze(image_bytes, prompt=""):
         print(f"[QWEN VISION] Error: {e}")
     return None
 
+# Image prompt enhancement: Arabic description -> rich English prompt
+# Pollinations (Stable Diffusion based) gives far better results with detailed English.
+_QUALITY_SUFFIX = "highly detailed, cinematic lighting, sharp focus, 4k, high quality, professional"
+
+def _has_arabic(text):
+    return any('؀' <= ch <= 'ۿ' for ch in text)
+
+_ENHANCE_SYSTEM = (
+    "You convert Arabic image requests into a single rich English prompt for a "
+    "text-to-image model. Translate faithfully, keep every detail the user mentioned, "
+    "then add tasteful style/quality words. Output ONLY the English prompt on one line, "
+    "no quotes, no explanation."
+)
+
+def _enhance_via_gemini(prompt):
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        return None
+    for model in ("gemini-2.0-flash", "gemini-1.5-flash"):
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+            payload = {
+                "systemInstruction": {"parts": [{"text": _ENHANCE_SYSTEM}]},
+                "contents": [{"parts": [{"text": prompt}]}],
+                "generationConfig": {"maxOutputTokens": 200, "temperature": 0.6}
+            }
+            resp = requests.post(url, json=payload, timeout=20)
+            if resp.status_code == 200:
+                cands = resp.json().get("candidates") or []
+                if cands:
+                    return cands[0]["content"]["parts"][0]["text"].strip().replace("\n", " ")
+        except Exception as e:
+            print(f"Gemini enhance error ({model}): {e}")
+    return None
+
+def _enhance_via_groq(prompt):
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return None
+    try:
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        payload = {
+            "model": "llama-3.3-70b-versatile",
+            "messages": [
+                {"role": "system", "content": _ENHANCE_SYSTEM},
+                {"role": "user", "content": prompt},
+            ],
+            "max_tokens": 200, "temperature": 0.6,
+        }
+        resp = requests.post(url, json=payload, headers=headers, timeout=20)
+        if resp.status_code == 200:
+            choices = resp.json().get("choices") or []
+            if choices:
+                return choices[0]["message"]["content"].strip().replace("\n", " ")
+    except Exception as e:
+        print(f"Groq enhance error: {e}")
+    return None
+
+def enhance_image_prompt(prompt):
+    """Translate + enrich the user's description into a detailed English image prompt.
+    Tries Gemini, then Groq, then falls back to appending quality keywords."""
+    prompt = (prompt or "").strip()
+    if not prompt:
+        return prompt
+
+    # Pure-English prompts only get quality keywords appended.
+    if not _has_arabic(prompt):
+        return f"{prompt}, {_QUALITY_SUFFIX}"
+
+    for enhancer in (_enhance_via_gemini, _enhance_via_groq):
+        enhanced = enhancer(prompt)
+        if enhanced:
+            print(f"[Image] Enhanced prompt: {enhanced[:80]}...")
+            return enhanced
+
+    # Last resort: keep original Arabic but add quality keywords.
+    return f"{prompt}, {_QUALITY_SUFFIX}"
+
 # Image Generation via external API
 def generate_image(prompt):
     try:
-        url = f"https://image.pollinations.ai/prompt/{requests.utils.quote(prompt)}?width=1024&height=1024&nofeed=true"
-        resp = requests.get(url, timeout=30)
+        final_prompt = enhance_image_prompt(prompt)
+        url = f"https://image.pollinations.ai/prompt/{requests.utils.quote(final_prompt)}?width=1024&height=1024&nofeed=true"
+        resp = requests.get(url, timeout=60)
         if resp.status_code == 200:
             filename = f"gen_{int(time.time())}.jpg"
             filepath = os.path.join(UPLOAD_DIR, filename)

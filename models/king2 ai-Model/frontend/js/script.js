@@ -63,9 +63,6 @@ if (chats.length === 0) {
 }
 
 // Settings modal state (kept for compatibility)
-let settingsChatOffset = 0;
-let settingsChatTotal = 0;
-let settingsChatLimit = 15;
 let settingsSearchTimer = null;
 
 // ============ Sidebar Functions ============
@@ -701,6 +698,23 @@ window.handleKeyDown = function(event) {
     }
 };
 
+// Detect an image-generation request and return the cleaned subject.
+// Returns the prompt string (may be empty) if it's a draw request, or null otherwise.
+function detectDrawPrompt(msg) {
+    const patterns = [
+        /^\/draw\b\s*/i,
+        /^ارسم(ي|ن|لي|ها)?\s*/,
+        /^(صمم|اصنع|أنشئ|انشئ|ولّد|ولد|اعمل|سوّ?ي?|اعملي)\s+(لي\s+)?(صورة|رسمة|صوره)\s*(لـ|ل|عن)?\s*/,
+        /^(ابغى|ابي|أبي|أبغى|أريد|اريد|عايز|بدي)\s+(صورة|رسمة|صوره)\s*(لـ|ل|عن)?\s*/,
+        /^(صورة|رسمة|صوره)\s+(لـ|ل|عن)\s*/,
+        /^(draw|generate|create|make|render)\s+(me\s+)?(an?\s+)?(image|picture|photo|drawing|art)\s+(of\s+)?/i,
+    ];
+    for (const p of patterns) {
+        if (p.test(msg)) return msg.replace(p, '').trim();
+    }
+    return null;
+}
+
 // Image generation via /draw command
 async function generateImageRequest(prompt) {
     const formData = new FormData();
@@ -784,11 +798,11 @@ window.sendMessage = async function() {
 
     if (!isChatStarted) startChat();
 
-    const hasDrawCommand = msg.startsWith('/draw ') || msg.startsWith('/draw\n') || msg === '/draw' || msg.startsWith('ارسم ') || msg.startsWith('ارسم\n');
+    const drawPrompt = detectDrawPrompt(msg);
+    const hasDrawCommand = drawPrompt !== null;
 
     // Handle draw/generate command
     if (hasDrawCommand && !currentImage) {
-        const drawPrompt = msg.replace(/^\/draw\s*/i, '').replace(/^ارسم\s*/, '').trim();
         if (!drawPrompt) {
             addMessage('⚠️ اكتب وصفاً للصورة بعد الأمر. مثال: `/draw ملك على عرش ذهبي`', false);
             updateStatus('system', '');
