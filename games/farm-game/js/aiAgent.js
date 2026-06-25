@@ -51,10 +51,12 @@ GAME.AIAgent = {
   
   // Create a new AI agent
   createAgent: function(type, params) {
+    var STATES = this.STATES;
     var agent = {
       id: Date.now() + Math.floor(Math.random() * 10000),
       type: type,
-      state: this.STATES.IDLE,
+      STATES: STATES,
+      state: STATES.IDLE,
       position: { x: params.x || 0, z: params.z || 0 },
       targetPosition: null,
       name: params.name || 'Agent ' + this.agents.length,
