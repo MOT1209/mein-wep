@@ -80,7 +80,7 @@ Object.assign(GAME.game, {
     this.state = {
       health: 100, energy: 100, money: 200,
       day: 1, time: 6,
-      inventory: { wheat: 0, tomato: 0, carrot: 0, apple: 0 },
+      inventory: { wheat: 0, tomato: 0, carrot: 0, apple: 0, fertilizer: 0 },
       crafted: { bread: 0, ketchup: 0, juice: 0 },
       selectedTool: 0,
       plots: [],
