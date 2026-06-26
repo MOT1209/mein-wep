@@ -250,7 +250,7 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
       const formData = new FormData();
       formData.append('file', blob, 'pasted-image.png');
       formData.append('message', input.trim() || 'قم بتحليل هذه الصورة');
-      const res = await fetch('/api/vision', { method: 'POST', body: formData });
+      const res = await fetch('/king2/api/vision', { method: 'POST', body: formData });
       const data = await res.json();
       if (data.response) {
         append({ role: 'user', content: '[تم لصق صورة]\n' + (input.trim() || 'حلل هذه الصورة') });

@@ -10,7 +10,7 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <SessionProvider>
+    <SessionProvider basePath="/king2/api/auth">
       <LocaleProvider>
         {children}
       </LocaleProvider>

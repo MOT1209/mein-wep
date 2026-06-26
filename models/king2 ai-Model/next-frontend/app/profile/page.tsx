@@ -28,7 +28,7 @@ export default function ProfilePage() {
     if (status !== 'authenticated') return;
     try {
       setLoading(true);
-      const res = await fetch('/api/user/profile');
+      const res = await fetch('/king2/api/user/profile');
       if (!res.ok) throw new Error('فشل جلب البيانات');
       const data = await res.json();
       setName(data.name || '');
@@ -69,7 +69,7 @@ export default function ProfilePage() {
     setSaved(false);
     setError('');
     try {
-      const res = await fetch('/api/user/profile', {
+      const res = await fetch('/king2/api/user/profile', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, username, phone, bio }),

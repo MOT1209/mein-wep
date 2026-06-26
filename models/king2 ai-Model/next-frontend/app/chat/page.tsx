@@ -30,7 +30,7 @@ export default function ChatPage() {
 
     try {
       // Calling the FastAPI backend via Next.js rewrites
-      const response = await fetch('/api/py/chat', {
+      const response = await fetch('/king2/api/py/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

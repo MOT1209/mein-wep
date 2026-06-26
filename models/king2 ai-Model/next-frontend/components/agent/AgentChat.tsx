@@ -124,7 +124,7 @@ export function AgentChat({ agentId, agentName }: AgentChatProps) {
     abortRef.current = new AbortController();
 
     try {
-      const response = await fetch('/api/agent/chat', {
+      const response = await fetch('/king2/api/agent/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

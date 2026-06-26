@@ -30,7 +30,7 @@ export default function PdfPage() {
       const form = new FormData();
       form.append('file', f);
 
-      const res = await fetch('/api/media/pdf', {
+      const res = await fetch('/king2/api/media/pdf', {
         method: 'POST',
         body: form,
       });

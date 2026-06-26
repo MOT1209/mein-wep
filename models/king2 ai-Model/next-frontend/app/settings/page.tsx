@@ -119,7 +119,7 @@ export default function SettingsPage() {
 
   // Load settings from API
   useEffect(() => {
-    fetch('/api/settings')
+    fetch('/king2/api/settings')
       .then((res) => res.json())
       .then((data) => {
         if (data.language === 'ar' || data.language === 'en') {
@@ -149,7 +149,7 @@ export default function SettingsPage() {
 
     // Optionally persist to API (server-side) for authenticated users
     try {
-      await fetch('/api/settings', {
+      await fetch('/king2/api/settings', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -83,7 +83,7 @@ export default function AdminDashboard() {
 
     const checkConnection = async () => {
       try {
-        const res = await fetch('/api/health');
+        const res = await fetch('/king2/api/health');
         if (res.ok) {
           setConnectionStatus('connected');
         } else {
@@ -96,7 +96,7 @@ export default function AdminDashboard() {
 
     const fetchStats = async () => {
       try {
-        const response = await fetch('/api/admin/stats');
+        const response = await fetch('/king2/api/admin/stats');
         if (!response.ok) throw new Error('Failed to fetch stats');
         const data = await response.json();
         setStats(data);

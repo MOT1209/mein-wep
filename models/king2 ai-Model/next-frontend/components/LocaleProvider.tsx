@@ -38,7 +38,7 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     // If the user already has a stored preference, respect it over the API
     const stored = readStoredLocale();
 
-    fetch('/api/settings')
+    fetch('/king2/api/settings')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.language === 'ar' || data?.language === 'en') {

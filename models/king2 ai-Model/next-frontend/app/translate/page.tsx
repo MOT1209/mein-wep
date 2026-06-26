@@ -53,7 +53,7 @@ export default function TranslatePage() {
     const targetLabel = LANGUAGES.find((l) => l.code === targetLang)?.name || targetLang;
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('/king2/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

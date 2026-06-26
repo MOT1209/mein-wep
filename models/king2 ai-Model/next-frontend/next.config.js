@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  basePath: '/king2',
   experimental: {
     serverComponentsExternalPackages: ['bcryptjs'],
   },

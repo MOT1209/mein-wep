@@ -38,7 +38,7 @@ export default function SignUpPage() {
 
     try {
       // Create account
-      const res = await fetch('/api/auth/register', {
+      const res = await fetch('/king2/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),

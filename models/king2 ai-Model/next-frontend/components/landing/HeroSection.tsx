@@ -26,7 +26,7 @@ export function HeroSection() {
   const [stats, setStats] = useState<PlatformStats>(defaultStats);
 
   useEffect(() => {
-    fetch('/api/stats')
+    fetch('/king2/api/stats')
       .then((res) => res.json())
       .then((data) => {
         if (data.totalUsers !== undefined) setStats(data);

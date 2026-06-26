@@ -74,7 +74,7 @@ export default function PricingPage() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      fetch('/api/subscription')
+      fetch('/king2/api/subscription')
         .then((r) => r.json())
         .then((data) => setCurrentPlan(data.plan))
         .catch(() => {});
@@ -92,7 +92,7 @@ export default function PricingPage() {
 
     setIsLoading(planName);
     try {
-      const res = await fetch('/api/subscription', {
+      const res = await fetch('/king2/api/subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ plan: planName.toUpperCase() }),
@@ -200,7 +200,7 @@ export default function PricingPage() {
         <div className="text-center mt-16">
           <p className="text-zinc-600 text-sm">
             جميع الخطط تشمل التشفير الكامل (AES-256) والامتثال لـ GDPR. 
-            <a href="/privacy" className="text-[#D4AF37] hover:underline mr-1">سياسة الخصوصية</a>
+            <a href="/king2/privacy" className="text-[#D4AF37] hover:underline mr-1">سياسة الخصوصية</a>
           </p>
         </div>
       </div>

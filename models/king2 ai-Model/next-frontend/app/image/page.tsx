@@ -60,7 +60,7 @@ export default function ImagePage() {
     setError('');
 
     try {
-      const res = await fetch('/api/image', {
+      const res = await fetch('/king2/api/image', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: prompt.trim(), style, count: 1 }),
