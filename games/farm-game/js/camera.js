@@ -31,7 +31,8 @@ GAME.camera = {
     });
     document.addEventListener('mousemove', function(e) {
       if (!self.isLocked) return;
-      var sens = self.sensitivity * 0.001;
+      // معامل أنعم: عند القيمة الافتراضية 10 → 0.004 بدل 0.01 (أبطأ ~2.5×)
+      var sens = self.sensitivity * 0.0004;
       var dx = e.movementX * sens;
       var dy = e.movementY * sens * (self.invertY ? -1 : 1);
       self.targetTheta -= dx;
