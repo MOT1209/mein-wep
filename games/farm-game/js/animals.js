@@ -194,6 +194,8 @@ GAME.animals = {
       a.mesh.rotation.y = a.angle;
       if (a.hasProduct) {
         if (a._prodIndicator) {
+          a._prodIndicator.position.x = a.x;
+          a._prodIndicator.position.z = a.z;
           a._prodIndicator.position.y = 1.0 + Math.sin(Date.now() * 0.003) * 0.05;
         } else if (this.scene) {
           var icons = { chicken: '🥚', cow: '🥛', sheep: '🧶' };

@@ -67,6 +67,7 @@ GAME.ui = {
         GAME.camera.invertY = e.target.checked;
       }
       if (e.target.id === 'pointer-lock') {
+        if (GAME.camera) GAME.camera._pointerLockEnabled = e.target.checked;
       }
     });
     var loadBtn = document.getElementById('render-dist');

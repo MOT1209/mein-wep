@@ -21,7 +21,7 @@ GAME.camera = {
 
     document.addEventListener('click', function() {
       // لا تقفل المؤشر إذا كانت أي نافذة مفتوحة (قائمة/إعدادات/متجر/مخزون/إيقاف)
-      if (!self.isLocked && !GAME.ui.isUIBlocking()) {
+      if (!self.isLocked && !GAME.ui.isUIBlocking() && self._pointerLockEnabled !== false) {
         document.body.requestPointerLock();
       }
     });
@@ -54,6 +54,7 @@ GAME.camera = {
       var s = JSON.parse(localStorage.getItem('farmSettings') || '{}');
       this.sensitivity = s.sensitivity || 10;
       this.invertY = s.invertY || false;
+      this._pointerLockEnabled = s.pointerLock !== false;
     } catch(e) {}
   },
 

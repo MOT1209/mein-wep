@@ -11,7 +11,7 @@
   <meta property="og:description" content="3D Farm Game — Grow crops, raise animals, build your dream farm.">
   <meta property="og:image" content="../../images/logo.png">
   <title>Farm Game 3D</title>
-  <link rel="stylesheet" href="css/style.css?v=2.0.7">
+  <link rel="stylesheet" href="css/style.css?v=2.0.8">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Three.js: محلي أولاً (أسرع وأضمن)، CDN احتياطي -->
   <script src="js/lib/three.min.js"></script>
@@ -38,7 +38,7 @@
         <button class="menu-btn primary" onclick="startGame()" aria-label="Start new game">New Game</button>
         <button class="menu-btn" onclick="continueGame()" aria-label="Continue saved game">Continue</button>
       </div>
-      <p class="menu-version">v2.0.7 — Made with care</p>
+      <p class="menu-version">v2.0.8 — Made with care</p>
     </div>
   </div>
 
@@ -258,25 +258,32 @@
     <div class="touch-joystick" id="touch-joystick">
       <div class="joystick-knob" id="joystick-knob"></div>
     </div>
-    <div class="touch-buttons">
-      <button class="touch-btn" id="touch-interact" ontouchstart="touchInteract()" aria-label="Interact">E</button>
-      <button class="touch-btn" id="touch-action" ontouchstart="touchAction()" aria-label="Action">F</button>
+    <div class="touch-right">
+      <div class="touch-menu-btns">
+        <button class="touch-btn touch-menu-btn" ontouchstart="toggleShop()" aria-label="Shop">🏪</button>
+        <button class="touch-btn touch-menu-btn" ontouchstart="toggleInventory()" aria-label="Inventory">🎒</button>
+        <button class="touch-btn touch-menu-btn" ontouchstart="openSettings()" aria-label="Settings">⚙️</button>
+      </div>
+      <div class="touch-buttons">
+        <button class="touch-btn" id="touch-interact" ontouchstart="touchInteract()" aria-label="Interact">E</button>
+        <button class="touch-btn" id="touch-action" ontouchstart="touchAction()" aria-label="Action">F</button>
+      </div>
     </div>
   </div>
 
-  <script src="js/collision.js?v=2.0.7"></script>
-  <script src="js/state.js?v=2.0.7"></script>
-  <script src="js/world.js?v=2.0.7"></script>
-  <script src="js/player.js?v=2.0.7"></script>
-  <script src="js/camera.js?v=2.0.7"></script>
-  <script src="js/audio.js?v=2.0.7"></script>
-  <script src="js/animals.js?v=2.0.7"></script>
-  <script src="js/weather.js?v=2.0.7"></script>
-  <script src="js/quests.js?v=2.0.7"></script>
-  <script src="js/ui.js?v=2.0.7"></script>
-  <script src="js/save.js?v=2.0.7"></script>
-  <script src="js/aiAgent.js?v=2.0.7"></script>
-  <script src="js/main.js?v=2.0.7"></script>
+  <script src="js/collision.js?v=2.0.8"></script>
+  <script src="js/state.js?v=2.0.8"></script>
+  <script src="js/world.js?v=2.0.8"></script>
+  <script src="js/player.js?v=2.0.8"></script>
+  <script src="js/camera.js?v=2.0.8"></script>
+  <script src="js/audio.js?v=2.0.8"></script>
+  <script src="js/animals.js?v=2.0.8"></script>
+  <script src="js/weather.js?v=2.0.8"></script>
+  <script src="js/quests.js?v=2.0.8"></script>
+  <script src="js/ui.js?v=2.0.8"></script>
+  <script src="js/save.js?v=2.0.8"></script>
+  <script src="js/aiAgent.js?v=2.0.8"></script>
+  <script src="js/main.js?v=2.0.8"></script>
   <!-- OTA update checker -->
   <script>window.RASHID_APP={id:'com.rashid.farmempire',version:'2.0.1',name:'Farm Empire'};</script>
   <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
