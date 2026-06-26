@@ -86,6 +86,11 @@ GAME.weather = {
     } else {
       this.particleSystem.visible = false;
     }
+    // إشعار بتغيّر الطقس — فقط أثناء اللعب الفعلي (لا في القائمة)
+    if (GAME.game && GAME.game.state && GAME.ui && GAME.ui.showNotification) {
+      var names = { sunny: '☀️ Sunny skies', cloudy: '⛅ Cloudy', rainy: '🌧️ Rain — crops grow faster!', stormy: '⛈️ Storm — growth slowed' };
+      GAME.ui.showNotification(names[type] || type, 'info');
+    }
   },
 
   update: function(delta) {
@@ -104,6 +109,9 @@ GAME.weather = {
     } else if (this.current === 'rainy' || this.current === 'stormy') {
       this.scene.background.setHSL(0.6, 0.2, 0.5);
       if (this.scene.fog) this.scene.fog.color.setHSL(0.6, 0.2, 0.4);
+    } else if (this.current === 'cloudy') {
+      this.scene.background.setHSL(0.6, 0.1, 0.62); // غائم — سماء رمادية فاتحة
+      if (this.scene.fog) this.scene.fog.color.setHSL(0.6, 0.1, 0.58);
     } else {
       this.scene.background.copy(this.originalBg);
       if (this.scene.fog) this.scene.fog.color.setHSL(0.58, 0.3, 0.5);
@@ -130,7 +138,7 @@ GAME.weather = {
     this.nextChange -= delta;
     if (this.nextChange <= 0) {
       this.nextChange = 40 + Math.random() * 80;
-      var weathers = ['sunny', 'sunny', 'sunny', 'rainy', 'rainy', 'stormy'];
+      var weathers = ['sunny', 'sunny', 'sunny', 'cloudy', 'cloudy', 'rainy', 'rainy', 'stormy'];
       var newWeather = weathers[Math.floor(Math.random() * weathers.length)];
       this.setWeather(newWeather);
     }

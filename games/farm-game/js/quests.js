@@ -4,10 +4,15 @@ GAME.quests = {
 
   questPool: [
     { id: 'harvest', title: '🌾 Harvester', desc: 'Harvest crops', target: 3, rewardXP: 30 },
+    { id: 'harvest', title: '🌾 Big Harvest', desc: 'Harvest crops', target: 8, rewardXP: 70 },
     { id: 'earn', title: '💰 Entrepreneur', desc: 'Earn money', target: 100, rewardXP: 25 },
+    { id: 'earn', title: '💰 Tycoon', desc: 'Earn money', target: 300, rewardXP: 80 },
     { id: 'plant', title: '🌱 Sower', desc: 'Plant seeds', target: 5, rewardXP: 20 },
+    { id: 'plant', title: '🌱 Green Thumb', desc: 'Plant seeds', target: 10, rewardXP: 45 },
     { id: 'water', title: '💧 Waterer', desc: 'Water crops', target: 5, rewardXP: 15 },
-    { id: 'craft', title: '🔨 Crafter', desc: 'Craft items', target: 2, rewardXP: 35 }
+    { id: 'fertilize', title: '🧪 Nourisher', desc: 'Fertilize crops', target: 3, rewardXP: 30 },
+    { id: 'craft', title: '🔨 Crafter', desc: 'Craft items', target: 2, rewardXP: 35 },
+    { id: 'craft', title: '🔨 Artisan', desc: 'Craft items', target: 5, rewardXP: 75 }
   ],
 
   generateDaily: function() {
@@ -22,7 +27,14 @@ GAME.quests = {
       shuffled[i] = shuffled[j];
       shuffled[j] = tmp;
     }
-    var selected = shuffled.slice(0, 3);
+    // اختر 3 مهام بأنواع مختلفة (تجنّب تكرار نفس النوع في اليوم نفسه)
+    var selected = [];
+    var usedIds = {};
+    for (var k = 0; k < shuffled.length && selected.length < 3; k++) {
+      if (usedIds[shuffled[k].id]) continue;
+      usedIds[shuffled[k].id] = true;
+      selected.push(shuffled[k]);
+    }
     var quests = [];
     for (var q = 0; q < selected.length; q++) {
       quests.push({

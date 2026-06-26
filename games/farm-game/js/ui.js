@@ -149,7 +149,14 @@ GAME.ui = {
       var mins = Math.floor((state.time % 1) * 60);
       var ampm = hours >= 12 ? 'PM' : 'AM';
       var h12 = hours % 12 || 12;
-      var icon = hours >= 6 && hours < 18 ? '☀️' : '🌙';
+      // أيقونة تعكس الوقت والطقس الفعلي
+      var icon;
+      var w = (GAME.weather && GAME.weather.current) ? GAME.weather.current : 'sunny';
+      if (hours < 6 || hours >= 18) icon = '🌙';
+      else if (w === 'rainy') icon = '🌧️';
+      else if (w === 'stormy') icon = '⛈️';
+      else if (w === 'cloudy') icon = '⛅';
+      else icon = '☀️';
       timeEl.textContent = icon + ' ' + h12.toString().padStart(2, '0') + ':' + mins.toString().padStart(2, '0') + ' ' + ampm;
     }
 

@@ -6,21 +6,15 @@ GAME.world = {
   init: function(scene) {
     this.scene = scene;
     if (GAME.collision) GAME.collision.clear();
-    this.createSky();
-    this.createGround();
-    this.createPlayerHouse();
-    this.createBarn();
-    this.createMarket();
-    this.createFarmPlots();
-    this.createTrees();
-    this.createFences();
-    this.createPond();
-    this.createFlowers();
-    this.createAnimalPens();
-    this.createFeedingTrough();
-    this.createDirtPath();
-    this.createScarecrow();
-    this.createWell();
+    // 🛡️ بناء العالم خطوة بخطوة — فشل أي قطعة لا يوقف بناء البقية
+    var steps = ['createSky', 'createGround', 'createPlayerHouse', 'createBarn',
+      'createMarket', 'createFarmPlots', 'createTrees', 'createFences', 'createPond',
+      'createFlowers', 'createAnimalPens', 'createFeedingTrough', 'createDirtPath',
+      'createScarecrow', 'createWell'];
+    for (var i = 0; i < steps.length; i++) {
+      try { this[steps[i]](); }
+      catch (e) { console.error('[FarmGame] world.' + steps[i] + ' failed:', e.message); }
+    }
   },
 
   createSky: function() {
@@ -40,7 +34,9 @@ GAME.world = {
     sun.shadow.camera.bottom = -60;
     sun.shadow.camera.near = 1;
     sun.shadow.camera.far = 100;
+    sun.shadow.bias = -0.0005;
     s.add(sun);
+    this.sunLight = sun; // مرجع لضبط جودة الظل ديناميكياً حسب الأداء
     var amb = new THREE.AmbientLight(0x404060, 0.3);
     s.add(amb);
   },
@@ -147,19 +143,26 @@ GAME.world = {
     var spacing = 2.8;
     var startX = -(plotsPerRow - 1) * spacing / 2;
     var startZ = 2;
+    // ⚡ دمج بلاطات المزرعة في InstancedMesh (36 بلاطة × 2 = 72 ميش → 2 فقط)
+    var plotCount = 6 * plotsPerRow;
+    var _d = new THREE.Object3D();
+    var dirtInst = new THREE.InstancedMesh(new THREE.BoxGeometry(2.4, 0.15, 2.4), dirtMat, plotCount);
+    var edgeInst = new THREE.InstancedMesh(new THREE.BoxGeometry(2.6, 0.05, 2.6), edgeMat, plotCount);
+    dirtInst.receiveShadow = true;
+    var pIdx = 0;
     for (var row = 0; row < 6; row++) {
       for (var col = 0; col < plotsPerRow; col++) {
         var px = startX + col * spacing;
         var pz = startZ + row * spacing;
-        var dirt = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.15, 2.4), dirtMat);
-        dirt.position.set(px, 0.05, pz);
-        dirt.receiveShadow = true;
-        this.scene.add(dirt); this.objects.push(dirt);
-        var edge = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.05, 2.6), edgeMat);
-        edge.position.set(px, 0.025, pz);
-        this.scene.add(edge); this.objects.push(edge);
+        _d.position.set(px, 0.05, pz); _d.updateMatrix(); dirtInst.setMatrixAt(pIdx, _d.matrix);
+        _d.position.set(px, 0.025, pz); _d.updateMatrix(); edgeInst.setMatrixAt(pIdx, _d.matrix);
+        pIdx++;
       }
     }
+    dirtInst.instanceMatrix.needsUpdate = true;
+    edgeInst.instanceMatrix.needsUpdate = true;
+    this.scene.add(dirtInst); this.objects.push(dirtInst);
+    this.scene.add(edgeInst); this.objects.push(edgeInst);
     var fenceMat = new THREE.MeshLambertMaterial({ color: 0x8B7355 });
     var fw = (plotsPerRow) * spacing / 2 + 2.2;
     var fd = (6) * spacing / 2 + 2.2;
@@ -287,19 +290,36 @@ GAME.world = {
 
   createFlowers: function() {
     var colors = [0xff6b6b, 0xffd93d, 0xff8a5c, 0xc084fc, 0xf472b6];
+    // ⚡ جمع المواضع أولاً ثم رسمها كـ InstancedMesh (≈240 ميش → 2 فقط)
+    var spots = [];
     for (var i = 0; i < 120; i++) {
       var x = (Math.random() - 0.5) * 100;
       var z = (Math.random() - 0.5) * 100;
       if (Math.abs(x) < 35 && Math.abs(z) < 35) continue;
       if (Math.abs(x - (-10)) < 5 && Math.abs(z - (-27)) < 5) continue;
-      var col = colors[Math.floor(Math.random() * colors.length)];
-      var stem = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.3), new THREE.MeshLambertMaterial({ color: 0x3a7d2c }));
-      stem.position.set(x, 0.15, z);
-      this.scene.add(stem); this.objects.push(stem);
-      var head = new THREE.Mesh(new THREE.SphereGeometry(0.1, 4, 4), new THREE.MeshLambertMaterial({ color: col }));
-      head.position.set(x, 0.35, z);
-      this.scene.add(head); this.objects.push(head);
+      spots.push([x, z, colors[Math.floor(Math.random() * colors.length)]]);
     }
+    var n = spots.length;
+    if (n === 0) return;
+    var _d = new THREE.Object3D();
+    var stems = new THREE.InstancedMesh(
+      new THREE.CylinderGeometry(0.02, 0.02, 0.3),
+      new THREE.MeshLambertMaterial({ color: 0x3a7d2c }), n);
+    var heads = new THREE.InstancedMesh(
+      new THREE.SphereGeometry(0.1, 4, 4),
+      new THREE.MeshLambertMaterial({ color: 0xffffff }), n);
+    var _c = new THREE.Color();
+    for (var j = 0; j < n; j++) {
+      var s = spots[j];
+      _d.position.set(s[0], 0.15, s[1]); _d.updateMatrix(); stems.setMatrixAt(j, _d.matrix);
+      _d.position.set(s[0], 0.35, s[1]); _d.updateMatrix(); heads.setMatrixAt(j, _d.matrix);
+      heads.setColorAt(j, _c.setHex(s[2]));
+    }
+    stems.instanceMatrix.needsUpdate = true;
+    heads.instanceMatrix.needsUpdate = true;
+    if (heads.instanceColor) heads.instanceColor.needsUpdate = true;
+    this.scene.add(stems); this.objects.push(stems);
+    this.scene.add(heads); this.objects.push(heads);
   },
 
   createAnimalPens: function() {

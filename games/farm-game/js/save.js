@@ -35,6 +35,7 @@ GAME.game.loadGame = function() {
 };
 
 GAME.game.saveGame = function() {
+  if (!this.state) return; // لا حفظ قبل بدء اللعبة (الحفظ التلقائي يعمل حتى في القائمة)
   try {
     var data = {
       health: this.state.health,

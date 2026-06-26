@@ -97,13 +97,15 @@ Object.assign(GAME.game, {
         if (!self.isRunning) { self.isRunning = true; self.animate(); }
       }, false);
 
+      // أنظمة أساسية (فشلها فادح — يلتقطه catch الخارجي)
       GAME.camera.init();
       GAME.world.init(this.scene);
       GAME.player.init(this.scene);
-      GAME.animals.init(this.scene);
-      GAME.weather.init(this.scene);
-      GAME.audio.init();
-      GAME.AIAgent.init(this.scene);
+      // أنظمة ثانوية معزولة — فشل أيها لا يمنع تشغيل اللعبة
+      this._safe('animals.init', function() { GAME.animals.init(self.scene); });
+      this._safe('weather.init', function() { GAME.weather.init(self.scene); });
+      this._safe('audio.init', function() { GAME.audio.init(); });
+      this._safe('AIAgent.init', function() { GAME.AIAgent.init(self.scene); });
 
       this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
 
@@ -276,8 +278,10 @@ Object.assign(GAME.game, {
     
     // Update fertilizer marker
     this.updatePlantVisual(plot);
-    
-    GAME.ui.showNotification('🌱 Fertilized! Growth boosted.', 'success');
+
+    this.addXP(4);
+    GAME.quests.track('fertilize', 1);
+    GAME.ui.showNotification('🌱 Fertilized! Growth boosted. +4 XP', 'success');
     GAME.ui.refreshInventory();
   },
   
@@ -769,6 +773,18 @@ Object.assign(GAME.game, {
     GAME.ui.showNotification('🌙 Slept! Day ' + this.state.day + ' ☀️ +5 XP', 'success');
   },
 
+  // 🛡️ منفّذ آمن: يعزل أخطاء كل نظام حتى لا يُسقط خطأٌ واحد اللعبة كلها (ويسجّل مرة واحدة فقط)
+  _safe: function(label, fn) {
+    try { fn(); }
+    catch (e) {
+      if (!this._errored) this._errored = {};
+      if (!this._errored[label]) {
+        this._errored[label] = true;
+        console.error('[FarmGame] ⚠️ ' + label + ' failed (suppressed further):', e.message);
+      }
+    }
+  },
+
   update: function(delta) {
     if (this.isPaused || this.isShopOpen) return;
     var state = this.state;
@@ -846,21 +862,22 @@ Object.assign(GAME.game, {
         }
       }
     }
-    GAME.player.update(delta);
-    if (GAME.player.isMoving) {
-      this._stepTimer = (this._stepTimer || 0) + delta;
-      if (this._stepTimer > 0.4) {
-        GAME.audio.play('step');
-        this._stepTimer = 0;
+    // 🛡️ كل نظام معزول — خطأٌ في أحدها لا يوقف البقية ولا يطرد اللاعب للقائمة
+    var self = this;
+    this._safe('player', function() {
+      GAME.player.update(delta);
+      if (GAME.player.isMoving) {
+        self._stepTimer = (self._stepTimer || 0) + delta;
+        if (self._stepTimer > 0.4) { GAME.audio.play('step'); self._stepTimer = 0; }
       }
-    }
-    if (GAME.animals) GAME.animals.update(delta);
-    if (GAME.weather) GAME.weather.update(delta);
-    if (GAME.AIAgent) GAME.AIAgent.update(delta); // Update AI Agents
-    this.updateParticles(delta); // 🎆 تحديث الجسيمات
-    this.renderMinimap(); // 🗺️ تحديث الخريطة المصغرة
-    this.updateInteractionHints();
-    GAME.ui.updateHUD(state);
+    });
+    if (GAME.animals) this._safe('animals', function() { GAME.animals.update(delta); });
+    if (GAME.weather) this._safe('weather', function() { GAME.weather.update(delta); });
+    if (GAME.AIAgent) this._safe('AIAgent', function() { GAME.AIAgent.update(delta); });
+    this._safe('particles', function() { self.updateParticles(delta); }); // 🎆
+    this._safe('minimap', function() { self.renderMinimap(); }); // 🗺️
+    this._safe('hints', function() { self.updateInteractionHints(); });
+    this._safe('hud', function() { GAME.ui.updateHUD(state); });
   },
 
   handleDeath: function() {
@@ -1003,6 +1020,15 @@ Object.assign(GAME.game, {
         this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
         this.renderer.toneMappingExposure = 1.0;
         break;
+    }
+    // ⚡ ضبط دقة خريطة الظل حسب الجودة (أثقل عنصر على الأجهزة الضعيفة)
+    if (GAME.world && GAME.world.sunLight) {
+      var sz = level === 'high' ? 2048 : (level === 'medium' ? 1024 : 512);
+      var sh = GAME.world.sunLight.shadow;
+      if (sh.mapSize.width !== sz) {
+        sh.mapSize.set(sz, sz);
+        if (sh.map) { sh.map.dispose(); sh.map = null; } // إعادة توليد الخريطة بالحجم الجديد
+      }
     }
     // Re-apply fog/render distance from settings
     var rd = document.getElementById('render-dist');
