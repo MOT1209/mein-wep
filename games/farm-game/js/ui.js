@@ -109,7 +109,7 @@ GAME.ui = {
     var menu = document.getElementById('main-menu');
     if (menu) { menu.style.display = 'flex'; menu.style.opacity = '1'; }
     var hud = document.getElementById('hud');
-    if (hud) hud.style.opacity = '0';
+    if (hud) { hud.style.opacity = '0'; hud.setAttribute('aria-hidden', 'true'); }
     var crosshair = document.getElementById('crosshair');
     if (crosshair) crosshair.style.opacity = '0';
     if (document.pointerLockElement) document.exitPointerLock();
@@ -121,7 +121,7 @@ GAME.ui = {
     setTimeout(function() {
       if (menu) menu.style.display = 'none';
       var hud = document.getElementById('hud');
-      if (hud) hud.style.opacity = '1';
+      if (hud) { hud.style.opacity = '1'; hud.setAttribute('aria-hidden', 'false'); }
       var crosshair = document.getElementById('crosshair');
       if (crosshair) crosshair.style.opacity = '1';
     }, 300);

@@ -22,6 +22,7 @@ GAME.game.loadGame = function() {
       this.state.level = (typeof data.level === 'number') ? data.level : 1;
       this.state.selectedTool = (typeof data.selectedTool === 'number') ? data.selectedTool : 0;
       GAME.game.selectTool(this.state.selectedTool);
+      this._atMenu = false;
       GAME.ui.hideMenu();
       GAME.ui.showNotification('\uD83C\uDF3E Welcome back, farmer!', 'success');
     } else {
@@ -56,6 +57,7 @@ GAME.game.saveGame = function() {
 
 GAME.game.quitToMenu = function() {
   this.isPaused = false;
+  this._atMenu = true;
   document.getElementById('pause-menu').classList.add('hidden');
   document.getElementById('hud').style.opacity = '0';
   GAME.ui.showMenu();

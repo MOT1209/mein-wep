@@ -49,7 +49,8 @@ Object.assign(GAME.game, {
     }, 80);
 
     // 🛡️ Fallback: after 3s show menu anyway (حتى لو صار خطأ بالتهيئة)
-    setTimeout(function() {
+    // يُلغى تلقائياً عند نجاح التهيئة حتى لا يظهر التحذير في الحالة الطبيعية
+    this._fallbackTimer = setTimeout(function() {
       GAME.ui.hideLoading();
       GAME.ui.showMenu();
       console.warn('[FarmGame] ⏰ Fallback timeout triggered — menu forced at 3s');
@@ -57,19 +58,44 @@ Object.assign(GAME.game, {
 
     // ⚠️ Wrap heavy 3D init in try-catch لالتقاط أخطاء WebGL/THREE
     try {
+      // 🔍 تحقق من دعم WebGL قبل أي شيء — رسالة واضحة بدل خطأ غامض في الـ console
+      var _testCv = document.createElement('canvas');
+      var _glOk = !!(window.WebGLRenderingContext &&
+        (_testCv.getContext('webgl') || _testCv.getContext('experimental-webgl')));
+      if (!_glOk) throw new Error('WebGL not supported on this device/browser');
+
+      // 📱 كشف الأجهزة المحمولة/الضعيفة لضبط الجودة الافتراضية تلقائياً
+      var isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      var lowEnd = isMobile || (navigator.hardwareConcurrency || 4) <= 4;
+
       this.scene = new THREE.Scene();
       this.scene.background = new THREE.Color(0x87CEEB);
       this.scene.fog = new THREE.Fog(0x87CEEB, 30, 60);
 
-      var renderer = new THREE.WebGLRenderer({ antialias: true });
+      var renderer = new THREE.WebGLRenderer({
+        antialias: !lowEnd,
+        powerPreference: 'high-performance',
+        failIfMajorPerformanceCaveat: false
+      });
       renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowEnd ? 1.5 : 2));
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.0;
       document.body.prepend(renderer.domElement);
       this.renderer = renderer;
+
+      // 🛡️ معالجة فقدان/استعادة سياق WebGL (يمنع تجمّد اللعبة عند فقدان الـ GPU)
+      renderer.domElement.addEventListener('webglcontextlost', function(e) {
+        e.preventDefault();
+        self.isRunning = false;
+        console.warn('[FarmGame] ⚠️ WebGL context lost — paused rendering');
+      }, false);
+      renderer.domElement.addEventListener('webglcontextrestored', function() {
+        console.warn('[FarmGame] ✅ WebGL context restored — resuming');
+        if (!self.isRunning) { self.isRunning = true; self.animate(); }
+      }, false);
 
       GAME.camera.init();
       GAME.world.init(this.scene);
@@ -84,6 +110,9 @@ Object.assign(GAME.game, {
       var muteBtn = document.getElementById('mute-btn');
       if (muteBtn && GAME.audio && GAME.audio.muted) muteBtn.textContent = '🔇';
 
+      // 📱 خفض الجودة افتراضياً على الأجهزة المحمولة/الضعيفة (auto-quality سيضبط أكثر عند الحاجة)
+      if (lowEnd) this.setQuality('medium');
+
       setTimeout(function() {
         GAME.ui.hideLoading();
         GAME.ui.showMenu();
@@ -91,10 +120,16 @@ Object.assign(GAME.game, {
 
       this.clock = new THREE.Clock();
       this.isRunning = true;
+      this._fpStart = performance.now();
+
+      // ✅ التهيئة نجحت — ألغِ شبكة الأمان حتى لا يظهر تحذير الـ fallback في كل تحميل
+      if (this._fallbackTimer) { clearTimeout(this._fallbackTimer); this._fallbackTimer = null; }
 
       this.animate();
     } catch (err) {
       console.error('[FarmGame] ❌ Init error:', err.message, err.stack);
+      // التهيئة فشلت فعلاً — ألغِ مؤقت الـ fallback ودع معالج الخطأ يعرض القائمة
+      if (this._fallbackTimer) { clearTimeout(this._fallbackTimer); this._fallbackTimer = null; }
       // Show error on loading screen للمساعدة في التشخيص
       var txt = document.querySelector('.loader-text');
       if (txt) txt.textContent = '⚠️ Error: ' + err.message;
@@ -124,6 +159,7 @@ Object.assign(GAME.game, {
     GAME.quests.generateDaily();
     this.state.quests = GAME.quests.generateDaily();
     this.selectTool(0);
+    this._atMenu = false;
     GAME.ui.hideMenu();
     GAME.ui.showNotification('🌾 Welcome to your new farm!', 'success');
     GAME.audio.play('chime');
@@ -902,18 +938,31 @@ Object.assign(GAME.game, {
       if (!self.isRunning) return;
       requestAnimationFrame(loop);
       var delta = Math.min(self.clock.getDelta(), 0.05);
+      var now = performance.now();
+
+      // ⚡ خفض معدل الرسم في القائمة/الإيقاف لتوفير المعالج (المشهد ثابت هناك)
+      var playing = !!self.state && !self.isPaused && !self.isShopOpen && !self._atMenu;
+      if (!playing) {
+        // أعد ضبط عدّاد الـ FPS حتى لا يُساء حسابه عند العودة للعب
+        self._fpFrames = 0;
+        self._fpStart = now;
+        self._idleFrame = (self._idleFrame || 0) + 1;
+        if (self._idleFrame % 2 !== 0) return; // ارسم إطاراً من كل اثنين فقط
+      }
+
       self.update(delta);
       self.renderer.render(self.scene, GAME.camera.camera);
-      
-      // FPS tracking for auto quality
+
+      // 📊 قياس FPS الحقيقي (بالوقت الفعلي، لا بـ delta المقيّد) لضبط الجودة بدقة
       self._fpFrames++;
-      self._fpTime += delta;
-      if (self._fpTime >= 2) { // Check every 2 seconds
-        var fps = self._fpFrames / self._fpTime;
+      if (!self._fpStart) self._fpStart = now;
+      var elapsed = now - self._fpStart;
+      if (playing && elapsed >= 1000) { // افحص كل ثانية
+        var fps = self._fpFrames * 1000 / elapsed;
         self._fpFrames = 0;
-        self._fpTime = 0;
+        self._fpStart = now;
         if (self._autoQuality) {
-          if (fps < 20) {
+          if (fps < 25) {
             self._fpLowCounter++;
           } else {
             self._fpLowCounter = Math.max(0, self._fpLowCounter - 1);
