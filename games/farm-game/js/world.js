@@ -19,11 +19,51 @@ GAME.world = {
 
   createSky: function() {
     var s = this.scene;
-    s.background = new THREE.Color(0x87CEEB);
-    s.fog = new THREE.Fog(0x87CEEB, 70, 110);
+    s.background = null; // قبة السماء تتولى الخلفية
 
+    // 🌌 قبة سماء بتدرج لوني ديناميكي (ShaderMaterial)
+    var skyGeo = new THREE.SphereGeometry(180, 20, 10);
+    var skyMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTopColor:     { value: new THREE.Color(0x0055bb) },
+        uHorizonColor: { value: new THREE.Color(0x87CEEB) }
+      },
+      vertexShader: [
+        'varying vec3 vWorldPos;',
+        'void main() {',
+        '  vWorldPos = (modelMatrix * vec4(position, 1.0)).xyz;',
+        '  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);',
+        '}'
+      ].join('\n'),
+      fragmentShader: [
+        'uniform vec3 uTopColor;',
+        'uniform vec3 uHorizonColor;',
+        'varying vec3 vWorldPos;',
+        'void main() {',
+        '  float h = clamp(normalize(vWorldPos).y, 0.0, 1.0);',
+        '  h = h * h * (3.0 - 2.0 * h);',
+        '  gl_FragColor = vec4(mix(uHorizonColor, uTopColor, h), 1.0);',
+        '}'
+      ].join('\n'),
+      side: THREE.BackSide,
+      depthWrite: false,
+      depthTest: false
+    });
+    var sky = new THREE.Mesh(skyGeo, skyMat);
+    sky.renderOrder = -1;
+    s.add(sky);
+    this.sky = sky;
+    this.skyMat = skyMat;
+
+    // 🌫️ ضباب يتغير مع الوقت
+    s.fog = new THREE.Fog(0x87CEEB, 70, 120);
+
+    // 💡 إضاءة نصف الكرة (سماء + أرض)
     var hemi = new THREE.HemisphereLight(0x87CEEB, 0x7ec850, 0.6);
     s.add(hemi);
+    this.hemiLight = hemi;
+
+    // ☀️ ضوء الشمس الاتجاهي
     var sun = new THREE.DirectionalLight(0xffeedd, 1.0);
     sun.position.set(30, 40, 20);
     sun.castShadow = true;
@@ -36,9 +76,65 @@ GAME.world = {
     sun.shadow.camera.far = 100;
     sun.shadow.bias = -0.0005;
     s.add(sun);
-    this.sunLight = sun; // مرجع لضبط جودة الظل ديناميكياً حسب الأداء
+    this.sunLight = sun;
+
+    // 🌙 ضوء محيط
     var amb = new THREE.AmbientLight(0x404060, 0.3);
     s.add(amb);
+    this.ambLight = amb;
+
+    // ☀️ كرة الشمس (Sprite بتدرج إشعاعي)
+    var sunCv = document.createElement('canvas'); sunCv.width = sunCv.height = 128;
+    var sc = sunCv.getContext('2d');
+    var sg = sc.createRadialGradient(64,64,0, 64,64,64);
+    sg.addColorStop(0,    'rgba(255,255,200,1)');
+    sg.addColorStop(0.25, 'rgba(255,230,100,0.9)');
+    sg.addColorStop(0.6,  'rgba(255,160,50,0.35)');
+    sg.addColorStop(1,    'rgba(255,100,0,0)');
+    sc.fillStyle = sg; sc.fillRect(0,0,128,128);
+    this.sunSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(sunCv),
+      transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending
+    }));
+    this.sunSprite.scale.set(24, 24, 1);
+    s.add(this.sunSprite);
+
+    // 🌕 كرة القمر (Sprite أزرق فضي)
+    var moonCv = document.createElement('canvas'); moonCv.width = moonCv.height = 128;
+    var mc = moonCv.getContext('2d');
+    var mg = mc.createRadialGradient(64,64,0, 64,64,64);
+    mg.addColorStop(0,    'rgba(230,240,255,1)');
+    mg.addColorStop(0.35, 'rgba(180,210,255,0.7)');
+    mg.addColorStop(0.7,  'rgba(100,150,255,0.2)');
+    mg.addColorStop(1,    'rgba(50,80,200,0)');
+    mc.fillStyle = mg; mc.fillRect(0,0,128,128);
+    this.moonSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: new THREE.CanvasTexture(moonCv),
+      transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending
+    }));
+    this.moonSprite.scale.set(14, 14, 1);
+    s.add(this.moonSprite);
+
+    // ✨ حقل النجوم (Points فوق الأفق)
+    var starCount = 600;
+    var sGeo = new THREE.BufferGeometry();
+    var sPos = new Float32Array(starCount * 3);
+    for (var i = 0; i < starCount; i++) {
+      var theta = Math.random() * Math.PI * 2;
+      var phi   = Math.acos(2 * Math.random() - 1);
+      var r = 160;
+      sPos[i*3]   = r * Math.sin(phi) * Math.cos(theta);
+      sPos[i*3+1] = Math.abs(r * Math.cos(phi)) + 20;
+      sPos[i*3+2] = r * Math.sin(phi) * Math.sin(theta);
+    }
+    sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+    this.stars = new THREE.Points(sGeo, new THREE.PointsMaterial({
+      color: 0xffffff, size: 0.6, transparent: true, opacity: 0,
+      blending: THREE.AdditiveBlending, depthWrite: false
+    }));
+    s.add(this.stars);
   },
 
   createGround: function() {
@@ -471,5 +567,87 @@ GAME.world = {
     hay2.rotation.y = 0.5;
     hay2.castShadow = true;
     this.scene.add(hay2); this.objects.push(hay2);
+  }
+};
+
+// ===== دورة الإضاءة الديناميكية (نهار/ليل) =====
+GAME.world.updateLighting = function(time) {
+  if (!this.skyMat) return;
+
+  // 9 كيفريمات تغطي 24 ساعة
+  var kf = [
+    { t:  0,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
+    { t:  4.5,top:0x0a0a25, hor:0x0f1030, fog:0x08081a, sC:0x3355bb, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
+    { t:  5.5,top:0x1a2255, hor:0xff7733, fog:0xff9944, sC:0xff8800, sI:0.25, aI:0.08, hS:0x2233aa, hG:0x220e00, hI:0.25 },
+    { t:  7,  top:0x1a66cc, hor:0x88bbff, fog:0x99ccff, sC:0xffd090, sI:0.75, aI:0.20, hS:0x55aadd, hG:0x3d6020, hI:0.50 },
+    { t: 12,  top:0x004fbb, hor:0x44aaff, fog:0x87ceeb, sC:0xffffff, sI:1.00, aI:0.30, hS:0x87ceeb, hG:0x7ec850, hI:0.65 },
+    { t: 17,  top:0x0d4499, hor:0x66aaff, fog:0x88bbdd, sC:0xffe0aa, sI:0.85, aI:0.25, hS:0x77aabb, hG:0x508030, hI:0.55 },
+    { t: 19,  top:0x110022, hor:0xff5500, fog:0xff6622, sC:0xff4400, sI:0.30, aI:0.08, hS:0x220033, hG:0x110500, hI:0.18 },
+    { t: 21,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
+    { t: 24,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 }
+  ];
+
+  // إيجاد الكيفريمين المحيطين
+  var k0 = kf[0], k1 = kf[1];
+  for (var i = 0; i < kf.length - 1; i++) {
+    if (time >= kf[i].t && time <= kf[i+1].t) { k0 = kf[i]; k1 = kf[i+1]; break; }
+  }
+  var f = (k1.t === k0.t) ? 0 : (time - k0.t) / (k1.t - k0.t);
+  f = f * f * (3 - 2 * f); // smoothstep
+
+  var _t = new THREE.Color(); // مؤقت مشترك — لا تخصيص كائنات كل إطار
+  function ln(a, b) { return a + (b - a) * f; }
+
+  // قبة السماء
+  this.skyMat.uniforms.uTopColor.value.setHex(k0.top).lerp(_t.setHex(k1.top), f);
+  this.skyMat.uniforms.uHorizonColor.value.setHex(k0.hor).lerp(_t.setHex(k1.hor), f);
+
+  // ضباب
+  if (this.scene.fog) this.scene.fog.color.setHex(k0.fog).lerp(_t.setHex(k1.fog), f);
+
+  // ---- موضع الشمس (قوس فوق العالم) ----
+  var sunAngle = ((time - 6) / 12) * Math.PI; // 0 عند الشروق → π عند الغروب
+  var sX = Math.cos(sunAngle) * 90;
+  var sY = Math.max(-40, Math.sin(sunAngle) * 75 + 5);
+
+  if (this.sunLight) {
+    this.sunLight.color.setHex(k0.sC).lerp(_t.setHex(k1.sC), f);
+    this.sunLight.intensity = ln(k0.sI, k1.sI);
+    this.sunLight.position.set(sX, Math.max(5, sY), -20);
+  }
+  if (this.ambLight)  this.ambLight.intensity = ln(k0.aI, k1.aI);
+  if (this.hemiLight) {
+    this.hemiLight.color.setHex(k0.hS).lerp(_t.setHex(k1.hS), f);
+    this.hemiLight.groundColor.setHex(k0.hG).lerp(_t.setHex(k1.hG), f);
+    this.hemiLight.intensity = ln(k0.hI, k1.hI);
+  }
+
+  // ---- Sprite الشمس ----
+  if (this.sunSprite) {
+    this.sunSprite.position.set(sX, sY, -60);
+    var sOp = (time >= 5 && time <= 19) ? Math.min(1, Math.min((time-5)/1.5, (19-time)/1.5)) : 0;
+    this.sunSprite.material.opacity = sOp;
+  }
+
+  // ---- Sprite القمر (الجانب المعاكس) ----
+  var mAngle = sunAngle + Math.PI;
+  var mX = Math.cos(mAngle) * 90;
+  var mY = Math.max(-40, Math.sin(mAngle) * 75 + 5);
+  if (this.moonSprite) {
+    this.moonSprite.position.set(mX, mY, -60);
+    var mOp = 0;
+    if (time >= 21 || time <= 3)       mOp = 1;
+    else if (time > 19 && time < 21)   mOp = (time - 19) / 2;
+    else if (time > 3  && time < 5)    mOp = 1 - (time - 3) / 2;
+    this.moonSprite.material.opacity = Math.min(1, Math.max(0, mOp)) * 0.9;
+  }
+
+  // ---- النجوم ----
+  if (this.stars) {
+    var stOp = 0;
+    if (time >= 21 || time <= 4)      stOp = 0.9;
+    else if (time > 19 && time < 21)  stOp = (time - 19) / 2 * 0.9;
+    else if (time > 4  && time < 6)   stOp = Math.max(0, (1 - (time - 4) / 2) * 0.9);
+    this.stars.material.opacity = stOp;
   }
 };

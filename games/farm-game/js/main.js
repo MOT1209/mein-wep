@@ -873,6 +873,7 @@ Object.assign(GAME.game, {
     });
     if (GAME.animals) this._safe('animals', function() { GAME.animals.update(delta); });
     if (GAME.weather) this._safe('weather', function() { GAME.weather.update(delta); });
+    if (GAME.world && GAME.world.updateLighting) this._safe('world.lighting', function() { GAME.world.updateLighting(state.time); });
     if (GAME.AIAgent) this._safe('AIAgent', function() { GAME.AIAgent.update(delta); });
     this._safe('particles', function() { self.updateParticles(delta); }); // 🎆
     this._safe('minimap', function() { self.renderMinimap(); }); // 🗺️
@@ -1030,10 +1031,15 @@ Object.assign(GAME.game, {
         if (sh.map) { sh.map.dispose(); sh.map = null; } // إعادة توليد الخريطة بالحجم الجديد
       }
     }
-    // Re-apply fog/render distance from settings
+    // Re-apply fog/render distance — preserve dynamic color, only update near/far
     var rd = document.getElementById('render-dist');
     var dist = rd ? parseFloat(rd.value) : 8;
-    this.scene.fog = new THREE.Fog(0x87CEEB, dist * 3, dist * 6);
+    if (this.scene.fog) {
+      this.scene.fog.near = dist * 3;
+      this.scene.fog.far  = dist * 6;
+    } else {
+      this.scene.fog = new THREE.Fog(0x87CEEB, dist * 3, dist * 6);
+    }
   },
 
   // ===== 🎆 نظام الجسيمات (Particle Effects) =====
