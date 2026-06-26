@@ -1,8 +1,8 @@
 name: Deploy to GitHub Pages
 
+# Disabled auto-deploy: the site now serves from Vercel only (Next.js + /king2
+# proxy aren't supported by static GitHub Pages). Kept as manual-only for archive.
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
 
 permissions:

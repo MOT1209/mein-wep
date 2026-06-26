@@ -16,6 +16,8 @@
     }
   ],
   "rewrites": [
+    { "source": "/king2", "destination": "https://alking-ai-king2-7777-git-main-mot1209s-projects.vercel.app/king2" },
+    { "source": "/king2/:path*", "destination": "https://alking-ai-king2-7777-git-main-mot1209s-projects.vercel.app/king2/:path*" },
     { "source": "/api/gemini", "destination": "/api/gemini" }
   ]
 }
