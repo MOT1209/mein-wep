@@ -20,7 +20,8 @@ GAME.camera = {
     var self = this;
 
     document.addEventListener('click', function() {
-      if (!self.isLocked && !GAME.ui.isMenuVisible()) {
+      // لا تقفل المؤشر إذا كانت أي نافذة مفتوحة (قائمة/إعدادات/متجر/مخزون/إيقاف)
+      if (!self.isLocked && !GAME.ui.isUIBlocking()) {
         document.body.requestPointerLock();
       }
     });

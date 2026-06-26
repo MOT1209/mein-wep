@@ -92,6 +92,18 @@ GAME.ui = {
     return menu && menu.style.display !== 'none' && window.getComputedStyle(menu).opacity !== '0';
   },
 
+  // هل هناك واجهة تمنع اللعب (قائمة/إيقاف/أي نافذة منبثقة مفتوحة)؟
+  // تُستخدم لمنع قفل مؤشر الموس أثناء التفاعل مع الإعدادات/المتجر/المخزون
+  isUIBlocking: function() {
+    if (this.isMenuVisible()) return true;
+    if (GAME.game && GAME.game.isPaused) return true;
+    var overlays = document.querySelectorAll('.modal-overlay');
+    for (var i = 0; i < overlays.length; i++) {
+      if (!overlays[i].classList.contains('hidden')) return true;
+    }
+    return false;
+  },
+
   showLoading: function(progress) {
     var fill = document.querySelector('.loader-fill');
     if (fill) fill.style.width = Math.min(100, Math.max(0, progress)) + '%';
@@ -197,6 +209,7 @@ GAME.ui = {
     var panel = document.getElementById('settings-panel');
     if (!panel) return;
     panel.classList.remove('hidden');
+    if (document.pointerLockElement) document.exitPointerLock(); // حرّر الموس للتفاعل
     this._populateSettings();
   },
 
@@ -371,6 +384,7 @@ function toggleShop() {
   if (typeof GAME !== 'undefined' && GAME.game) {
     GAME.game.isShopOpen = !isOpen;
   }
+  if (!isOpen && document.pointerLockElement) document.exitPointerLock(); // حرّر الموس عند فتح المتجر
   if (!isOpen && GAME.game) {
     var bonus = GAME.game.getSellPriceBonus ? GAME.game.getSellPriceBonus() : 1;
     var prices = { bread: 65, ketchup: 100, juice: 80 };
@@ -442,6 +456,7 @@ function toggleInventory() {
   if (!el) return;
   var isOpen = !el.classList.contains('hidden');
   el.classList.toggle('hidden');
+  if (!isOpen && document.pointerLockElement) document.exitPointerLock(); // حرّر الموس عند فتح المخزون
   if (!isOpen && GAME.ui) GAME.ui.refreshInventory();
 }
 
