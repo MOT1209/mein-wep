@@ -143,7 +143,7 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
     stop,
     reload,
   } = useKing2Chat({
-    api: '/api/chat',
+    api: '/king2/api/chat',
     body: { model: 'auto', conversationId },
     onFinish: () => {
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
