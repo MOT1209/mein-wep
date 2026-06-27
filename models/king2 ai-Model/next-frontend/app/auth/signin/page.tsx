@@ -34,8 +34,10 @@ function SignInContent() {
 
       if (result?.error) {
         setErrorMsg(result.error === 'CredentialsSignin' ? 'البريد الإلكتروني أو كلمة المرور غير صحيحة' : result.error);
-      } else if (result?.url) {
-        router.push(result.url);
+      } else if (result?.ok) {
+        // result.url is an absolute URL that omits the basePath → push the relative
+        // callbackUrl so Next.js prepends basePath (avoids a 404 at the site root).
+        router.push(callbackUrl.startsWith('/') ? callbackUrl : '/');
       }
     } catch (err) {
       if (err instanceof TypeError && err.message === 'fetch failed') {
