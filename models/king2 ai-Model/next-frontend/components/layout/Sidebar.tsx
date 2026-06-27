@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession, signIn } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
@@ -154,13 +154,13 @@ export function Sidebar({ isOpen = true, onToggle }: SidebarProps) {
                 </div>
                 <span className="text-sm text-zinc-400">{isEnglish ? 'Guest' : 'زائر'}</span>
               </div>
-              <button
-                onClick={() => signIn(undefined, { callbackUrl: '/' })}
+              <Link
+                href="/auth/signin"
                 className="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-king-600 to-king-700 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-king-900/20 transition-all hover:from-king-500 hover:to-king-600 active:scale-[0.98]"
               >
                 <LogIn className="w-4 h-4" />
                 {isEnglish ? 'Sign In' : 'تسجيل الدخول'}
-              </button>
+              </Link>
               <Link
                 href="/auth/signup"
                 className="w-full flex items-center justify-center gap-2 rounded-xl border border-zinc-700 bg-surface-tertiary/50 px-4 py-2.5 text-sm font-medium text-zinc-300 transition-all hover:bg-surface-tertiary hover:text-white active:scale-[0.98]"
