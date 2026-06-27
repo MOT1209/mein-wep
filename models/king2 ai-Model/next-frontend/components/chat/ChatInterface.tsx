@@ -319,24 +319,63 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
     }
   }, []);
 
+  // Video / documents → upload to Supabase Storage and attach a link in the chat.
+  const uploadAttachment = useCallback(async (file: File) => {
+    setIsAnalyzing(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/king2/api/media/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (data.success && data.url) {
+        const label = file.type.startsWith('video/') ? '🎬 فيديو مرفوع' : '📎 ملف مرفوع';
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: crypto.randomUUID(),
+            role: 'user',
+            content: `${label}: [${file.name}](${data.url})`,
+            createdAt: new Date(),
+          },
+        ]);
+      } else {
+        setToast(data.error || 'فشل رفع الملف');
+        setTimeout(() => setToast(null), 4000);
+      }
+    } catch {
+      setToast('خطأ في رفع الملف');
+      setTimeout(() => setToast(null), 4000);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [setMessages]);
+
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = ''; // allow re-selecting the same file
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setToast('يُدعم رفع الصور فقط حالياً (الفيديو والمستندات قريباً)');
+
+    // Images → vision analysis flow
+    if (file.type.startsWith('image/')) {
+      if (file.size > 10 * 1024 * 1024) {
+        setToast('حجم الصورة كبير جداً (الحد 10 ميجابايت)');
+        setTimeout(() => setToast(null), 4000);
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (ev) => setPastedImage(ev.target?.result as string);
+      reader.readAsDataURL(file);
+      return;
+    }
+
+    // Video / documents → upload to storage
+    if (file.size > 50 * 1024 * 1024) {
+      setToast('حجم الملف كبير جداً (الحد 50 ميجابايت)');
       setTimeout(() => setToast(null), 4000);
       return;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      setToast('حجم الصورة كبير جداً (الحد 10 ميجابايت)');
-      setTimeout(() => setToast(null), 4000);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (ev) => setPastedImage(ev.target?.result as string);
-    reader.readAsDataURL(file);
-  }, []);
+    uploadAttachment(file);
+  }, [uploadAttachment]);
 
   // Persist the user's model choice across sessions.
   useEffect(() => {
@@ -637,7 +676,7 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv"
             onChange={handleFileSelect}
             className="hidden"
           />
