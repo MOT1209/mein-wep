@@ -3,7 +3,6 @@ import { GeminiProvider } from '../providers/gemini';
 import { GroqProvider } from '../providers/groq';
 import { OpenCodeZenProvider } from '../providers/opencode-zen';
 import { OpenRouterProvider } from '../providers/openrouter';
-import { HuggingFaceProvider } from '../providers/huggingface';
 import { isTransientError, TimeoutError, RateLimitError, ProviderError, NetworkError } from '../errors';
 
 // ─────────────────────────────────────────────────────────
@@ -40,7 +39,7 @@ const BACKOFF_BASE_MS = 100;
 const BACKOFF_MULTIPLIER = 2;
 const MAX_BACKOFF_MS = 1_600;
 
-const DEFAULT_FALLBACK_ORDER = ['opencode-zen', 'openrouter', 'gemini', 'groq', 'huggingface'];
+const DEFAULT_FALLBACK_ORDER = ['opencode-zen', 'openrouter', 'gemini', 'groq'];
 
 // ─────────────────────────────────────────────────────────
 // State
@@ -51,7 +50,6 @@ const providers: Record<string, BaseAIProvider> = {
   groq: new GroqProvider(),
   'opencode-zen': new OpenCodeZenProvider(),
   openrouter: new OpenRouterProvider(),
-  huggingface: new HuggingFaceProvider(),
 };
 
 const circuitBreaker: Record<string, CircuitBreakerState> = {};

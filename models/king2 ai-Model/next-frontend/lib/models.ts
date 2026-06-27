@@ -7,7 +7,7 @@ import {
 } from './fallback';
 import { Message } from './providers/base';
 
-export type King2Provider = 'gemini' | 'groq' | 'opencode-zen' | 'openrouter' | 'huggingface' | 'qwen' | 'auto';
+export type King2Provider = 'gemini' | 'groq' | 'opencode-zen' | 'openrouter' | 'auto';
 
 // ─────────────────────────────────────────────────────────
 // Content-type classification
@@ -96,13 +96,10 @@ interface ModelConfig {
 }
 
 const MODEL_REGISTRY: ModelConfig[] = [
-  { providerId: 'qwen', displayName: 'Qwen3.5-9B (محلي)', strengths: ['analytical', 'vision', 'code', 'general', 'creative'], priority: 0 },
   { providerId: 'openrouter', displayName: 'OpenRouter GLM 4.5 Air', strengths: ['creative', 'analytical', 'general'], priority: 1 },
   { providerId: 'gemini', displayName: 'Gemini 2.5 Flash', strengths: ['vision', 'analytical', 'general'], priority: 1 },
   { providerId: 'groq', displayName: 'Groq', strengths: ['code', 'general'], priority: 2 },
   { providerId: 'opencode-zen', displayName: 'OpenCode Zen (Claude/GPT/Gemini)', strengths: ['analytical', 'code', 'creative', 'general', 'vision'], priority: 0 },
-  { providerId: 'huggingface', displayName: 'HuggingFace Inference', strengths: ['general', 'code', 'multilingual'], priority: 3 },
-  { providerId: 'huggingface', displayName: 'HuggingFace Multilingual', strengths: ['multilingual', 'general', 'code'], priority: 3 },
 ];
 
 // ─────────────────────────────────────────────────────────
@@ -130,8 +127,6 @@ export function resolveProvider(
     if (explicit === 'groq') return 'groq';
     if (explicit === 'opencode-zen' || explicit === 'opencode') return 'opencode-zen';
     if (explicit === 'openrouter') return 'openrouter';
-    if (explicit === 'huggingface') return 'huggingface';
-    if (explicit === 'qwen') return 'qwen';
     if (explicit === 'auto') {
       // Will use smart routing below
     } else {

@@ -15,8 +15,6 @@ export const CHAT_MODELS: ChatModelOption[] = [
   { id: 'gemini', name: 'Gemini 2.5 Flash', desc: 'قوي ويفهم الصور', badge: 'رؤية', vision: true },
   { id: 'groq', name: 'Groq Llama', desc: 'استجابة فائقة السرعة', badge: 'سريع' },
   { id: 'openrouter', name: 'GLM 4.5 Air', desc: 'إبداعي ومتوازن' },
-  { id: 'qwen', name: 'Qwen المحلي', desc: 'نموذج KING2 المدرّب' },
-  { id: 'huggingface', name: 'HuggingFace', desc: 'متعدد اللغات' },
 ];
 
 export function getChatModel(id: string): ChatModelOption {
