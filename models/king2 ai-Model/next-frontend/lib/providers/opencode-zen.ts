@@ -1,29 +1,36 @@
 import { BaseAIProvider, Message, ProviderOptions, RateLimitInfo } from './base';
 import { ConfigurationError, ProviderError, NetworkError, RateLimitError } from '../errors';
 
-const ZAI_MODELS = ['glm-5.1', 'glm-5.1-pro', 'glm-4-plus'];
-const DEFAULT_MODEL = 'glm-5.1';
-const BASE_URL = 'https://api.z.ai/api/paas/v4';
-const TIMEOUT_MS = 15_000;
+// OpenCode Zen — OpenAI-compatible gateway (Claude, GPT, Gemini, DeepSeek…).
+const OPENCODE_ZEN_MODELS = [
+  'claude-sonnet-4-6',
+  'claude-opus-4-8',
+  'claude-haiku-4-5',
+  'gemini-3.5-flash',
+  'gpt-5.5',
+];
+const DEFAULT_MODEL = process.env.OPENCODE_ZEN_MODEL || 'claude-sonnet-4-6';
+const BASE_URL = 'https://opencode.ai/zen/v1';
+const TIMEOUT_MS = 30_000;
 const MAX_RETRIES = 2;
 
-export class ZaiProvider extends BaseAIProvider {
-  readonly id = 'zai';
-  readonly displayName = 'Z.ai GLM-5.1';
+export class OpenCodeZenProvider extends BaseAIProvider {
+  readonly id = 'opencode-zen';
+  readonly displayName = `OpenCode Zen ${DEFAULT_MODEL}`;
   readonly timeout = TIMEOUT_MS;
   readonly maxRetries = MAX_RETRIES;
 
   // ── Config ────────────────────────────────────────────
 
   isConfigured(): boolean {
-    const key = process.env.ZAI_API_KEY;
+    const key = process.env.OPENCODE_ZEN_API_KEY;
     return !!key && key !== 'your_api_key_here';
   }
 
   private getApiKey(): string {
-    const key = process.env.ZAI_API_KEY;
+    const key = process.env.OPENCODE_ZEN_API_KEY;
     if (!key || key === 'your_api_key_here') {
-      throw new ConfigurationError('ZAI_API_KEY is not configured', this.id);
+      throw new ConfigurationError('OPENCODE_ZEN_API_KEY is not configured', this.id);
     }
     return key;
   }
@@ -31,7 +38,7 @@ export class ZaiProvider extends BaseAIProvider {
   // ── Models ────────────────────────────────────────────
 
   getModels(): string[] {
-    return [...ZAI_MODELS];
+    return [...OPENCODE_ZEN_MODELS];
   }
 
   getRateLimits(): RateLimitInfo {
@@ -44,8 +51,7 @@ export class ZaiProvider extends BaseAIProvider {
     if (!this.isConfigured()) return false;
     try {
       const apiKey = this.getApiKey();
-      const url = `${BASE_URL}/models`;
-      const response = await fetch(url, {
+      const response = await fetch(`${BASE_URL}/models`, {
         headers: { Authorization: `Bearer ${apiKey}` },
         signal: AbortSignal.timeout(5000),
       });
@@ -97,19 +103,19 @@ export class ZaiProvider extends BaseAIProvider {
         if (response.status === 429) {
           const retryAfter = this.parseRetryAfter(response);
           throw new RateLimitError(
-            `Z.ai rate-limited: ${errBody}`,
+            `OpenCode Zen rate-limited: ${errBody}`,
             this.id,
             undefined,
             retryAfter,
           );
         }
-        throw new ProviderError(`Z.ai API error: ${errBody}`, this.id, response.status);
+        throw new ProviderError(`OpenCode Zen API error: ${errBody}`, this.id, response.status);
       }
 
       const data = await response.json();
       const text = data.choices?.[0]?.message?.content;
       if (!text) {
-        throw new ProviderError('Z.ai API returned an empty response', this.id);
+        throw new ProviderError('OpenCode Zen API returned an empty response', this.id);
       }
 
       this.recordSuccess(performance.now() - start);
@@ -118,9 +124,9 @@ export class ZaiProvider extends BaseAIProvider {
       this.recordFailure();
       if (error instanceof ProviderError || error instanceof ConfigurationError || error instanceof RateLimitError) throw error;
       if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-        throw new NetworkError(`Z.ai request timed out after ${timeout}ms`, this.id, error);
+        throw new NetworkError(`OpenCode Zen request timed out after ${timeout}ms`, this.id, error);
       }
-      throw new NetworkError(`Z.ai network error: ${error.message}`, this.id, error);
+      throw new NetworkError(`OpenCode Zen network error: ${error.message}`, this.id, error);
     }
   }
 
@@ -154,17 +160,17 @@ export class ZaiProvider extends BaseAIProvider {
         if (response.status === 429) {
           const retryAfter = this.parseRetryAfter(response);
           throw new RateLimitError(
-            `Z.ai stream rate-limited: ${errBody}`,
+            `OpenCode Zen stream rate-limited: ${errBody}`,
             this.id,
             undefined,
             retryAfter,
           );
         }
-        throw new ProviderError(`Z.ai stream error: ${errBody}`, this.id, response.status);
+        throw new ProviderError(`OpenCode Zen stream error: ${errBody}`, this.id, response.status);
       }
 
       if (!response.body) {
-        throw new ProviderError('Z.ai stream response body is null', this.id);
+        throw new ProviderError('OpenCode Zen stream response body is null', this.id);
       }
 
       this.recordSuccess(performance.now() - start);
@@ -173,9 +179,9 @@ export class ZaiProvider extends BaseAIProvider {
       this.recordFailure();
       if (error instanceof ProviderError || error instanceof ConfigurationError || error instanceof RateLimitError) throw error;
       if (error.name === 'TimeoutError' || error.name === 'AbortError') {
-        throw new NetworkError(`Z.ai stream timed out after ${timeout}ms`, this.id, error);
+        throw new NetworkError(`OpenCode Zen stream timed out after ${timeout}ms`, this.id, error);
       }
-      throw new NetworkError(`Z.ai streaming network error: ${error.message}`, this.id, error);
+      throw new NetworkError(`OpenCode Zen streaming network error: ${error.message}`, this.id, error);
     }
   }
 

@@ -1,7 +1,7 @@
 import { BaseAIProvider, Message, ProviderOptions } from '../providers/base';
 import { GeminiProvider } from '../providers/gemini';
 import { GroqProvider } from '../providers/groq';
-import { ZaiProvider } from '../providers/zai';
+import { OpenCodeZenProvider } from '../providers/opencode-zen';
 import { OpenRouterProvider } from '../providers/openrouter';
 import { HuggingFaceProvider } from '../providers/huggingface';
 import { isTransientError, TimeoutError, RateLimitError, ProviderError, NetworkError } from '../errors';
@@ -40,7 +40,7 @@ const BACKOFF_BASE_MS = 100;
 const BACKOFF_MULTIPLIER = 2;
 const MAX_BACKOFF_MS = 1_600;
 
-const DEFAULT_FALLBACK_ORDER = ['openrouter', 'gemini', 'groq', 'zai', 'huggingface'];
+const DEFAULT_FALLBACK_ORDER = ['opencode-zen', 'openrouter', 'gemini', 'groq', 'huggingface'];
 
 // ─────────────────────────────────────────────────────────
 // State
@@ -49,7 +49,7 @@ const DEFAULT_FALLBACK_ORDER = ['openrouter', 'gemini', 'groq', 'zai', 'huggingf
 const providers: Record<string, BaseAIProvider> = {
   gemini: new GeminiProvider(),
   groq: new GroqProvider(),
-  zai: new ZaiProvider(),
+  'opencode-zen': new OpenCodeZenProvider(),
   openrouter: new OpenRouterProvider(),
   huggingface: new HuggingFaceProvider(),
 };

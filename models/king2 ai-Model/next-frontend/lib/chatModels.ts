@@ -11,10 +11,10 @@ export interface ChatModelOption {
 
 export const CHAT_MODELS: ChatModelOption[] = [
   { id: 'auto', name: 'KING2 تلقائي', desc: 'يختار أفضل نموذج لكل سؤال', badge: 'موصى به' },
+  { id: 'opencode-zen', name: 'OpenCode Zen', desc: 'Claude / GPT / Gemini — جودة عالية', badge: 'الأقوى' },
   { id: 'gemini', name: 'Gemini 2.5 Flash', desc: 'قوي ويفهم الصور', badge: 'رؤية', vision: true },
   { id: 'groq', name: 'Groq Llama', desc: 'استجابة فائقة السرعة', badge: 'سريع' },
   { id: 'openrouter', name: 'GLM 4.5 Air', desc: 'إبداعي ومتوازن' },
-  { id: 'zai', name: 'Z.ai GLM', desc: 'كتابة إبداعية' },
   { id: 'qwen', name: 'Qwen المحلي', desc: 'نموذج KING2 المدرّب' },
   { id: 'huggingface', name: 'HuggingFace', desc: 'متعدد اللغات' },
 ];
