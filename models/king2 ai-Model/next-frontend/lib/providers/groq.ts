@@ -2,11 +2,11 @@ import { BaseAIProvider, Message, ProviderOptions, RateLimitInfo } from './base'
 import { ConfigurationError, ProviderError, NetworkError, RateLimitError } from '../errors';
 
 const GROQ_MODELS = [
-  'llama-4-scout-17b-16e-instruct',
   'llama-3.3-70b-versatile',
-  'mixtral-8x7b-32768',
+  'meta-llama/llama-4-scout-17b-16e-instruct',
+  'llama-3.1-8b-instant',
 ];
-const DEFAULT_MODEL = process.env.GROQ_MODEL || 'llama-4-scout-17b-16e-instruct';
+const DEFAULT_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 const BASE_URL = 'https://api.groq.com/openai/v1';
 const TIMEOUT_MS = 15_000;
 const MAX_RETRIES = 2;
