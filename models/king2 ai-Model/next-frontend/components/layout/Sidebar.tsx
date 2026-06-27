@@ -95,7 +95,7 @@ export function Sidebar({ isOpen = true, onToggle }: SidebarProps) {
         <div className="flex items-center justify-between p-4 border-b border-zinc-800/50">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="w-9 h-9 rounded-xl overflow-hidden bg-gradient-to-br from-king-500 to-king-700 flex items-center justify-center ring-1 ring-white/10 group-hover:ring-king-400/30 transition-all">
-              <Image src="/logo.png" alt="KING2" width={36} height={36} className="w-full h-full object-cover" />
+              <Image src="/logo.svg" alt="KING2" width={36} height={36} className="w-full h-full object-contain p-1" />
             </div>
             <div>
               <div className="text-sm font-bold text-white">KING2 AI</div>

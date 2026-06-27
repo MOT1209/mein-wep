@@ -83,7 +83,7 @@ export default function SignUpPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-20 h-20 mx-auto rounded-2xl overflow-hidden bg-gradient-to-br from-king-500 to-king-700 flex items-center justify-center mb-4">
-            <Image src="/logo.png" alt="KING2" width={80} height={80} className="w-full h-full object-cover" />
+            <Image src="/logo.svg" alt="KING2" width={80} height={80} className="w-full h-full object-contain p-2.5" />
           </div>
           <h1 className="text-3xl font-bold text-white">أنشئ حسابك</h1>
           <p className="text-zinc-400 mt-2">انضم إلى منصة KING2 الذكية</p>

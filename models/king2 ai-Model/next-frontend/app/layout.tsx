@@ -20,8 +20,11 @@ export const metadata: Metadata = {
   keywords: ['AI', 'ChatGPT', 'King2', 'Arabic AI', 'ذكاء اصطناعي'],
   authors: [{ name: 'KING2 Team' }],
   icons: {
-    icon: '/favicon.ico',
-    apple: '/logo.png',
+    icon: [
+      { url: '/logo.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico' },
+    ],
+    apple: '/logo.svg',
   },
 };
 

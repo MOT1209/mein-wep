@@ -25,11 +25,14 @@ import {
   Globe,
   Cpu,
   Loader2,
+  Paperclip,
+  ChevronDown,
 } from 'lucide-react';
 
 import NextImage from 'next/image';
 import { useKing2Chat, Message } from '@/lib/useKing2Chat';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { CHAT_MODELS, getChatModel } from '@/lib/chatModels';
 
 interface ChatInterfaceProps {
   conversationId?: string;
@@ -123,6 +126,7 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [localError, setLocalError] = useState<string | null>(null);
   const [input, setInput] = useState('');
@@ -132,6 +136,8 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
   const [currentProvider] = useState<string>('KING2 AI');
   const [pastedImage, setPastedImage] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedModel, setSelectedModel] = useState<string>('auto');
+  const [modelMenuOpen, setModelMenuOpen] = useState(false);
 
   const {
     messages,
@@ -144,7 +150,7 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
     reload,
   } = useKing2Chat({
     api: '/king2/api/chat',
-    body: { model: 'auto', conversationId },
+    body: { model: selectedModel, conversationId },
     onFinish: () => {
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
       if (streamStartTime) {
@@ -313,6 +319,34 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
     }
   }, []);
 
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow re-selecting the same file
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setToast('يُدعم رفع الصور فقط حالياً (الفيديو والمستندات قريباً)');
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setToast('حجم الصورة كبير جداً (الحد 10 ميجابايت)');
+      setTimeout(() => setToast(null), 4000);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => setPastedImage(ev.target?.result as string);
+    reader.readAsDataURL(file);
+  }, []);
+
+  // Persist the user's model choice across sessions.
+  useEffect(() => {
+    const saved = localStorage.getItem('king2_selected_model');
+    if (saved && CHAT_MODELS.some((m) => m.id === saved)) setSelectedModel(saved);
+  }, []);
+  useEffect(() => {
+    localStorage.setItem('king2_selected_model', selectedModel);
+  }, [selectedModel]);
+
   const clearChat = useCallback(() => {
     setMessages([]);
     setInput('');
@@ -357,7 +391,7 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
                 transition={{ type: 'spring', stiffness: 200, damping: 15 }}
                 className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl overflow-hidden bg-gradient-to-br from-king-600 via-king-500 to-king-700 shadow-2xl shadow-king-900/40 ring-1 ring-white/10"
               >
-                <NextImage src="/logo.png" alt="KING2" width={64} height={64} className="w-full h-full object-cover" />
+                <NextImage src="/logo.svg" alt="KING2" width={64} height={64} className="w-full h-full object-contain p-2" />
               </motion.div>
 
               <motion.h2
@@ -420,7 +454,7 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
                 <div className={`flex max-w-[88%] gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
                   {message.role !== 'user' ? (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg overflow-hidden bg-gradient-to-br from-king-500 to-king-700 shadow-lg shadow-king-900/30">
-                      <NextImage src="/logo.png" alt="KING2" width={32} height={32} className="w-full h-full object-cover" />
+                      <NextImage src="/logo.svg" alt="KING2" width={32} height={32} className="w-full h-full object-contain p-1" />
                     </div>
                   ) : (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-surface-elevated">
@@ -551,7 +585,73 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
               </motion.div>
             )}
           </AnimatePresence>
+          {/* Model selector */}
+          <div className="mb-2 flex items-center gap-2">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setModelMenuOpen((v) => !v)}
+                className="flex items-center gap-1.5 rounded-xl border border-zinc-800/60 bg-surface-tertiary px-3 py-1.5 text-xs font-medium text-zinc-300 transition-all hover:border-king-500/40 hover:text-white"
+              >
+                <Cpu className="h-3.5 w-3.5 text-king-400" />
+                <span>{getChatModel(selectedModel).name}</span>
+                <ChevronDown className={`h-3.5 w-3.5 text-zinc-500 transition-transform ${modelMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+              <AnimatePresence>
+                {modelMenuOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setModelMenuOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.97 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.97 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute bottom-full right-0 z-50 mb-2 w-64 overflow-hidden rounded-2xl border border-zinc-800/60 bg-surface-secondary p-1.5 shadow-2xl shadow-black/40 ring-1 ring-white/5"
+                    >
+                      {CHAT_MODELS.map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => { setSelectedModel(m.id); setModelMenuOpen(false); }}
+                          className={`flex w-full items-start gap-2 rounded-xl px-3 py-2 text-right transition-colors ${selectedModel === m.id ? 'bg-king-600/15 ring-1 ring-king-500/30' : 'hover:bg-surface-tertiary'}`}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <span className="text-sm font-medium text-white">{m.name}</span>
+                              {m.badge && (
+                                <span className="rounded-full bg-king-500/15 px-1.5 py-0.5 text-[9px] font-semibold text-king-300">{m.badge}</span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-500">{m.desc}</p>
+                          </div>
+                          {selectedModel === m.id && <Check className="mt-0.5 h-4 w-4 shrink-0 text-king-400" />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
+
           <div className="flex items-end gap-2 rounded-2xl border border-zinc-800/50 bg-surface-secondary p-1.5 ring-1 ring-transparent transition-all focus-within:border-king-500/40 focus-within:ring-king-500/10">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading || isAnalyzing || isLimitReached}
+              title="إرفاق صورة"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-zinc-400 transition-all hover:bg-surface-tertiary hover:text-king-300 disabled:opacity-40"
+            >
+              <Paperclip className="h-4 w-4" />
+            </button>
             <textarea
               ref={textareaRef}
               value={input}

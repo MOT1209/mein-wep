@@ -86,7 +86,7 @@ export function HeroSection() {
           <div className="relative">
             <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-king-600 via-king-500 to-accent-gold opacity-30 blur-2xl" />
             <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl overflow-hidden bg-gradient-to-br from-king-600 via-king-700 to-king-950 shadow-2xl shadow-king-900/40 ring-1 ring-white/10 sm:h-28 sm:w-28">
-              <Image src="/logo.png" alt="KING2" width={112} height={112} className="w-full h-full object-cover" />
+              <Image src="/logo.svg" alt="KING2" width={112} height={112} className="w-full h-full object-contain p-3" />
             </div>
           </div>
         </motion.div>
