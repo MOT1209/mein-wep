@@ -42,14 +42,6 @@ const nextConfig = {
           ? 'http://127.0.0.1:8001/:path*'
           : 'https://alking-ai-king2-1.onrender.com/:path*',
       },
-      // NextAuth v4 + basePath: Next strips '/king2' before the handler, so the
-      // OAuth redirect_uri NextAuth sends omits it. Make the un-prefixed auth
-      // callback reachable so Google's redirect lands on the real handler.
-      {
-        source: '/api/auth/:path*',
-        destination: '/king2/api/auth/:path*',
-        basePath: false,
-      },
     ];
   },
 };

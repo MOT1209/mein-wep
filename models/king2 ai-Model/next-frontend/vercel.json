@@ -24,8 +24,12 @@
   ],
   "rewrites": [
     {
+      "source": "/api/auth/:path*",
+      "destination": "/king2/api/auth/:path*"
+    },
+    {
       "source": "/api/py/:path*",
-      "destination": "https://@backend_url/:path*"
+      "destination": "https://alking-ai-king2-1.onrender.com/:path*"
     }
   ]
 }
