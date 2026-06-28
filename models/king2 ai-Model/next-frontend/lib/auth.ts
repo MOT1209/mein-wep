@@ -185,6 +185,25 @@ export const authOptions: NextAuthOptions = {
     },
   },
   callbacks: {
+    // The app is served under basePath '/king2'. NextAuth derives URLs without it,
+    // so default redirects land on the bare root ('/') which 404s. Force every
+    // post-login redirect to stay inside '/king2'.
+    async redirect({ url, baseUrl }) {
+      const bp = '/king2';
+      const origin = (() => { try { return new URL(baseUrl).origin; } catch { return baseUrl; } })();
+      if (url.startsWith('/')) {
+        const path = url.startsWith(bp) ? url : `${bp}${url === '/' ? '' : url}`;
+        return `${origin}${path}`;
+      }
+      try {
+        const u = new URL(url);
+        if (u.origin === origin) {
+          if (!u.pathname.startsWith(bp)) u.pathname = `${bp}${u.pathname === '/' ? '' : u.pathname}`;
+          return u.toString();
+        }
+      } catch { /* fall through */ }
+      return `${origin}${bp}`;
+    },
     async signIn({ user, account, profile }) {
       if (account?.provider === 'google') {
         console.log(`[KING2] OAuth signIn success: ${account.provider} - ${user.email}`);

@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Served under /king2 on the main site (rashid-wep.vercel.app/king2) via a
+  // Vercel rewrite. basePath auto-prefixes pages, API routes, _next assets,
+  // next/link, next/image and NextAuth. (Raw fetch('/api/...') calls are NOT
+  // auto-prefixed and are updated to '/king2/api/...' in the client code.)
   basePath: '/king2',
   experimental: {
     serverComponentsExternalPackages: ['bcryptjs'],
@@ -8,7 +12,6 @@ const nextConfig = {
   env: {
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
-    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://alking-ai-king2-1.onrender.com',
   },
   async headers() {
     return [
@@ -32,13 +35,20 @@ const nextConfig = {
     ];
   },
   async rewrites() {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://alking-ai-king2-1.onrender.com';
     return [
       {
         source: '/api/py/:path*',
-        destination: process.env.NODE_ENV === 'development' 
+        destination: process.env.NODE_ENV === 'development'
           ? 'http://127.0.0.1:8001/:path*'
-          : `${backendUrl}/:path*`,
+          : 'https://alking-ai-king2-1.onrender.com/:path*',
+      },
+      // NextAuth v4 + basePath: Next strips '/king2' before the handler, so the
+      // OAuth redirect_uri NextAuth sends omits it. Make the un-prefixed auth
+      // callback reachable so Google's redirect lands on the real handler.
+      {
+        source: '/api/auth/:path*',
+        destination: '/king2/api/auth/:path*',
+        basePath: false,
       },
     ];
   },
