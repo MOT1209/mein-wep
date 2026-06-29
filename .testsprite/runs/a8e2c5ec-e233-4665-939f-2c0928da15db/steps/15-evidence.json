@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 15,
+    "summary": "Step 15 'Click the 'Home' link in the page header to return to the homepage and check whether the cookie banner appears there' passed.",
+    "path": "steps/15-snapshot.html"
+  }
+]

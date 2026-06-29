@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import {
   Accordion,
   AccordionContent,
@@ -214,7 +215,7 @@ export default function HelpPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             {quickGuides.map((guide) => (
-              <a
+              <Link
                 key={guide.title}
                 href={guide.href}
                 className="king-card group flex items-start gap-4 rounded-2xl border border-zinc-800/60 bg-surface-secondary p-5 transition-all hover:border-king-600/30 hover:shadow-lg hover:shadow-king-900/20"
@@ -229,7 +230,7 @@ export default function HelpPage() {
                 <svg className="mr-auto mt-1 h-5 w-5 shrink-0 text-zinc-600 transition-colors group-hover:text-accent-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-              </a>
+              </Link>
             ))}
           </div>
         </section>

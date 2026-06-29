@@ -25,6 +25,39 @@ function hasArabic(text: string): boolean {
   return /[؀-ۿ]/.test(text);
 }
 
+// Generate with the custom KING2-IMAGE model via HuggingFace Inference API.
+// Returns a base64 data URI, or null on any failure so the caller can fall back.
+async function generateWithKing2(prompt: string): Promise<string | null> {
+  const key = process.env.HF_TOKEN;
+  if (!key) return null;
+  const model = process.env.KING2_IMAGE_MODEL || 'RASHID778/king2-image';
+  try {
+    const resp = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        Accept: 'image/png',
+      },
+      body: JSON.stringify({
+        inputs: prompt,
+        parameters: { num_inference_steps: 30, guidance_scale: 7.0 },
+      }),
+      signal: AbortSignal.timeout(90_000),
+    });
+    if (!resp.ok) {
+      console.error(`[Image] KING2 model HTTP ${resp.status}:`, await resp.text().catch(() => ''));
+      return null;
+    }
+    const buf = Buffer.from(await resp.arrayBuffer());
+    if (buf.length < 1000) return null; // too small to be a real image
+    return `data:image/png;base64,${buf.toString('base64')}`;
+  } catch (e) {
+    console.error('[Image] KING2 model error:', e);
+    return null;
+  }
+}
+
 // Translate + enrich the (often Arabic) description into a detailed English prompt.
 // Falls back to the original text when no key is set or the call fails.
 async function enhancePrompt(prompt: string): Promise<string> {
@@ -80,6 +113,24 @@ export async function POST(req: Request) {
     const enhanced = await enhancePrompt(cleanPrompt);
     const styleKeywords = STYLE_KEYWORDS[style] || STYLE_KEYWORDS['photorealistic'];
     const finalPrompt = `${enhanced}, ${styleKeywords}, ${QUALITY_SUFFIX}`;
+    const altText = cleanPrompt.replace(/[[\]()]/g, '');
+
+    // Prefer the custom KING2-IMAGE model when enabled; fall back to Pollinations.
+    const preferKing2 = (process.env.IMAGE_PROVIDER || '').toLowerCase() === 'king2';
+    if (preferKing2) {
+      const dataUri = await generateWithKing2(finalPrompt);
+      if (dataUri) {
+        return NextResponse.json({
+          success: true,
+          result: `![${altText}](${dataUri})`,
+          imageUrl: dataUri,
+          prompt: cleanPrompt,
+          style,
+          model: 'king2-image',
+        });
+      }
+      // fall through to Pollinations on failure
+    }
 
     // Pollinations generates the image on first fetch of this URL (no API key needed).
     const seed = Math.floor(Math.random() * 1_000_000);
@@ -88,14 +139,13 @@ export async function POST(req: Request) {
       `?width=1024&height=1024&nologo=true&nofeed=true&seed=${seed}`;
 
     // The /image page extracts the URL from this markdown and renders the <img>.
-    const altText = cleanPrompt.replace(/[[\]()]/g, '');
-
     return NextResponse.json({
       success: true,
       result: `![${altText}](${imageUrl})`,
       imageUrl,
       prompt: cleanPrompt,
       style,
+      model: 'pollinations',
     });
   } catch (error) {
     console.error('[Image Gen] Error:', error);

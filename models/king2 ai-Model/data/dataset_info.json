@@ -1,6 +1,6 @@
 {
-  "king2_training": {
-    "file_name": "king2_training.json",
+  "king2_training_clean": {
+    "file_name": "king2_training_clean.json",
     "formatting": "sharegpt",
     "columns": {
       "messages": "conversations"

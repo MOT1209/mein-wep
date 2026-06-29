@@ -27,7 +27,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Validate required API keys at startup
-REQUIRED_KEYS = ["GEMINI_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY", "ZAI_API_KEY"]
+REQUIRED_KEYS = ["GEMINI_API_KEY", "GROQ_API_KEY", "OPENROUTER_API_KEY", "OPENCODE_API_KEY"]
 for key in REQUIRED_KEYS:
     val = os.getenv(key)
     if not val or val == "your_api_key_here":
@@ -729,33 +729,65 @@ async def chat(m: Msg, background_tasks: BackgroundTasks):
                 full_response = ""
                 provider_used = "fallback"
                 import asyncio
-                loop = asyncio.get_event_loop()
-                def sync_stream():
+                from asyncio import Queue
+                
+                chunk_queue = Queue()
+                stream_done = asyncio.Event()
+                
+                def sync_stream_producer():
+                    """Run the sync generator and push chunks to the async queue."""
                     nonlocal full_response, provider_used
-                    for chunk, prov in engine.get_response_stream(full_message):
-                        full_response += chunk
-                        provider_used = prov
-                    return full_response, provider_used
-                full_response, provider_used = await loop.run_in_executor(None, sync_stream)
-                response_text = full_response if full_response.strip() else "⚠️ عذراً، لم أتلقى رداً واضحاً."
-                response_time = time.time() - start_time
-                # Try to save to DB
-                try:
-                    db_inst = get_db()
-                    if db_inst:
-                        db_inst.add_chat(
-                            username=m.username,
-                            user_message=m.message,
-                            ai_response=response_text,
-                            model=provider_used,
-                            api_provider=provider_used,
-                            response_time=response_time
+                    try:
+                        for chunk, prov in engine.get_response_stream(full_message):
+                            full_response += chunk
+                            provider_used = prov
+                            # Schedule chunk push to the async queue
+                            asyncio.run_coroutine_threadsafe(
+                                chunk_queue.put(("chunk", chunk, provider_used)), loop
+                            )
+                        asyncio.run_coroutine_threadsafe(
+                            chunk_queue.put(("done", full_response, provider_used)), loop
                         )
-                except Exception as e:
-                    print(f"[DB ERROR] Failed to save streaming chat: {e}")
-                    
-                yield f"data: {json.dumps({'response': response_text, 'provider': provider_used, 'response_time': round(response_time, 3), 'kaggle_search': kaggle_search_triggered})}\n\n"
-                yield f"data: [DONE]\n\n"
+                    except Exception as e:
+                        print(f"[STREAM ERROR] {str(e)[:200]}")
+                        asyncio.run_coroutine_threadsafe(
+                            chunk_queue.put(("error", str(e), "error")), loop
+                        )
+                
+                loop = asyncio.get_event_loop()
+                # Start the sync producer in a thread pool
+                exec_future = loop.run_in_executor(None, sync_stream_producer)
+                
+                # Stream chunks to the client as they arrive
+                while True:
+                    msg_type, data, prov = await chunk_queue.get()
+                    if msg_type == "chunk":
+                        yield f"data: {json.dumps({'chunk': data, 'provider': prov})}\n\n"
+                    elif msg_type == "done":
+                        response_text = data if data.strip() else "⚠️ عذراً، لم أتلقى رداً واضحاً."
+                        response_time = time.time() - start_time
+                        # Save to DB
+                        try:
+                            db_inst = get_db()
+                            if db_inst:
+                                db_inst.add_chat(
+                                    username=m.username,
+                                    user_message=m.message,
+                                    ai_response=response_text,
+                                    model=provider_used,
+                                    api_provider=provider_used,
+                                    response_time=response_time
+                                )
+                        except Exception as e:
+                            print(f"[DB ERROR] Failed to save streaming chat: {e}")
+                        yield f"data: {json.dumps({'response': response_text, 'provider': provider_used, 'response_time': round(response_time, 3), 'kaggle_search': kaggle_search_triggered})}\n\n"
+                        yield f"data: [DONE]\n\n"
+                        break
+                    elif msg_type == "error":
+                        response_time = time.time() - start_time
+                        yield f"data: {json.dumps({'response': '⚠️ حدث خطأ أثناء التوليد. يرجى المحاولة مرة أخرى.', 'provider': 'error', 'response_time': round(response_time, 3)})}\n\n"
+                        yield f"data: [DONE]\n\n"
+                        break
             
             return StreamingResponse(event_stream(), media_type="text/event-stream",
                                       headers={"Cache-Control": "no-cache", "Connection": "keep-alive"})

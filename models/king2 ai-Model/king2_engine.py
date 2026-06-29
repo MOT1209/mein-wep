@@ -98,8 +98,8 @@ class King2Engine:
                 return self._groq(message)
             elif provider == "openrouter":
                 return self._openrouter(message)
-            elif provider == "zai":
-                return self._zai(message)
+            elif provider == "opencode-zen":
+                return self._opencode_zen(message)
             elif provider == "gemma":
                 return self._gemma(message)
             elif provider == "qwen":
@@ -160,8 +160,9 @@ class King2Engine:
 
     def get_fallback_chain(self):
         """Build the provider fallback chain from config or default.
-        يتضمن النماذج المحلية المدربة (fine-tuned) في التسلسل."""
-        primary = self.config.get("routing", {}).get("primary", "zai")
+        الترتيب: النماذج المحلية → Gemini → Groq → OpenRouter → OpenCode/Zen
+        عند فشل أي مزود، ينتقل تلقائياً للمزود التالي."""
+        primary = self.config.get("routing", {}).get("primary", "gemini")
         fallback_order = self.config.get("routing", {}).get("fallback_order", [])
 
         # Check for fine-tuned models first
@@ -180,7 +181,7 @@ class King2Engine:
             local_models.append("ollama-gemma")
 
         if not fallback_order:
-            fallback_order = ["gemini", "groq", "openrouter", "zai"]
+            fallback_order = ["gemini", "groq", "openrouter", "opencode-zen"]
 
         # Prioritize: fine-tuned models first, then API fallback
         chain = local_models + fallback_order
@@ -415,19 +416,20 @@ class King2Engine:
                     except json.JSONDecodeError:
                         continue
 
-    def _zai(self, message):
-        api_key = self._get_key("zai")
+    def _opencode_zen(self, message):
+        """OpenCode/Zen API - direct chat completion."""
+        api_key = self._get_key("opencode")
         if not api_key:
             return None
-        url = "https://api.z.ai/api/paas/v4/chat/completions"
+        url = "https://api.opencode.ai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         
         system_prompt = "أنت KING2، مساعد ذكاء اصطناعي ملكي. أجب بالعربية."
         
-        timeout = self._get_provider_timeout("zai")
+        timeout = self._get_provider_timeout("opencode")
         
         payload = {
-            "model": "glm-5.1",
+            "model": "zen",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": message}
@@ -441,18 +443,18 @@ class King2Engine:
             return resp.json()["choices"][0]["message"]["content"]
         return None
 
-    def _zai_stream(self, message):
-        """Streaming Z.ai. Yields text chunks."""
-        api_key = self._get_key("zai")
+    def _opencode_zen_stream(self, message):
+        """Streaming OpenCode/Zen API. Yields text chunks."""
+        api_key = self._get_key("opencode")
         if not api_key:
             return
-        url = "https://api.z.ai/api/paas/v4/chat/completions"
+        url = "https://api.opencode.ai/v1/chat/completions"
         headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
         
         system_prompt = "أنت KING2، مساعد ذكي. أجب بالعربية."
         
         payload = {
-            "model": "glm-5.1",
+            "model": "zen",
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": message}
@@ -462,7 +464,7 @@ class King2Engine:
             "stream": True
         }
         
-        timeout = self._get_provider_timeout("zai")
+        timeout = self._get_provider_timeout("opencode")
         resp = requests.post(url, headers=headers, json=payload, timeout=timeout, stream=True)
         if resp.status_code != 200:
             return
@@ -1100,10 +1102,8 @@ class King2Engine:
         
         # 4. Ultimate fallback with smart message
         import requests
-        return "أعتذر، لا يمكنني الإجابة الآن بسبب مشاكل تقنية. يرجى التحقق من:\n" \
-               "1️⃣ مفتاح API متصل بالإنترنت (Groq, Gemini, OpenRouter, Z.ai)\n" \
-               "2️⃣ المحاولة مرة أخرى بعد قليل\n" \
-               "3️⃣ الاتصال بفريق الدعم", "fallback"
+        return "أعتذر، لا يمكنني الإجابة الآن بسبب مشاكل تقنية. يرجى المحاولة مرة أخرى بعد قليل.\n" \
+               "تعذر الوصول إلى المزود الحالي، يتم التبديل تلقائياً...", "fallback"
 
     def get_response_stream(self, message, image_data=None):
         """
@@ -1123,7 +1123,7 @@ class King2Engine:
             "gemini": self._gemini_stream,
             "groq": self._groq_stream,
             "openrouter": self._openrouter_stream,
-            "zai": self._zai_stream,
+            "opencode-zen": self._opencode_zen_stream,
             "gemma": self._gemma_stream,
             "qwen": self._qwen_stream,
             "king2-qwen": self._king2_qwen_stream,

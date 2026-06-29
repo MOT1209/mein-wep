@@ -449,8 +449,7 @@ body::before {
 }
 
 .sidebar-footer {
-    padding: 12px;
-    border-top: 1px solid var(--glass-border);
+    padding: 8px 4px;
     flex-shrink: 0;
 }
 
@@ -471,65 +470,14 @@ body::before {
     font-size: 0.9rem;
 }
 
-/* Style for the عن KING2 AI link (settings-btn used as link) */
-.settings-btn[href="/about"] {
-    justify-content: flex-start;
-    padding: 10px 14px;
-    border-radius: var(--radius-md);
-    margin: 8px 0;
-}
-.settings-btn[href="/about"]:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--glass-border);
-}
 
-/* Style for the help link */
-.settings-btn[href="/help"] {
-    justify-content: flex-start;
-    padding: 10px 14px;
-    border-radius: var(--radius-md);
-    margin: 8px 0;
-    display: block;
-}
-.settings-btn[href="/help"]:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--glass-border);
-}
-
-/* Style for AIAGENT button (new-chat-btn used as link) */
-.new-chat-btn[onclick*="/agent"] {
-    justify-content: flex-start;
-    padding: 10px 14px;
-    margin: 8px 0;
-    background: transparent;
-    border: 1px solid var(--glass-border);
-    color: var(--text-secondary);
-}
-.new-chat-btn[onclick*="/agent"]:hover {
-    background: var(--glass-bg);
-    border-color: var(--gold-border);
-    color: var(--text-primary);
-    transform: translateY(-1px);
-}
-.new-chat-btn[onclick*="/agent"]:active {
-    transform: translateY(0);
-}
-
-/* Style for the account personal buttons */
-#account-personal .settings-btn {
+/* Settings buttons in sidebar */
+.settings-btn {
     width: 100%;
     margin: 4px 0;
     border-radius: var(--radius-md);
     padding: 10px 14px;
 }
-#account-personal .settings-btn:hover {
-    background: rgba(255, 255, 255, 0.04);
-    border-color: var(--glass-border);
-}
-#account-personal .settings-btn#sidebar-logout-btn {
-    display: block !important;
-}
-
 .settings-btn {
     width: 100%;
     padding: 10px 14px;
@@ -574,10 +522,10 @@ body::before {
     flex: 1;
     display: flex;
     flex-direction: column;
-    max-width: 800px;
+    max-width: 900px;
     width: 100%;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 16px;
     overflow: hidden;
     position: relative;
 }
@@ -736,10 +684,10 @@ body::before {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 20px 0 140px;
+    padding: 12px 0 120px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 16px;
     scroll-behavior: smooth;
 }
 
@@ -750,7 +698,7 @@ body::before {
 
 .message {
     display: flex;
-    gap: 14px;
+    gap: 10px;
     max-width: 100%;
     animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     padding: 0 4px;
@@ -1259,28 +1207,43 @@ body::before {
 }
 
 /* ==========================================================================
-   13. STATUS BAR
+    13. SIDEBAR NAV ITEMS
    ========================================================================== */
 
-.status-bar {
+.sidebar-nav-item {
     display: flex;
-    justify-content: center;
-    gap: 20px;
-    padding: 8px;
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    background: transparent;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 14px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all var(--transition-base);
+    border-radius: var(--radius-md);
+}
+.sidebar-nav-item:hover {
+    background: rgba(255,255,255,0.04);
+    color: var(--text-primary);
+}
+.sidebar-nav-item i {
+    width: 20px;
+    text-align: center;
+    color: var(--gold);
 }
 
-.status-bar .api-status { color: var(--gold); font-weight: 600; }
-.status-bar .response-time { color: var(--success); }
+.sidebar-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 8px 12px;
+}
 
 /* ==========================================================================
-    13. CHAT HISTORY SEARCH & CONTEXT MENU
+    14. CHAT HISTORY SEARCH & CONTEXT MENU
     ========================================================================== */
 .chat-history-search {
     margin: 8px 0;

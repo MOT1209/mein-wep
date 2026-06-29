@@ -5,7 +5,10 @@ let supabase = null;
 
 (async function initConfig() {
     try {
-        const res = await fetch(API_BASE + '/api/config');
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(API_BASE + '/api/config', { signal: controller.signal });
+        clearTimeout(timeout);
         const config = await res.json();
         SUPABASE_URL = config.supabaseUrl;
         SUPABASE_ANON_KEY = config.supabaseAnonKey;
@@ -13,7 +16,7 @@ let supabase = null;
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
     } catch (e) {
-        console.warn('[Config] Failed to load:', e);
+        console.warn('[Config] Failed to load (non-critical):', e);
     }
 })();
 
@@ -25,8 +28,6 @@ const welcomeScreen = document.getElementById('welcome-screen');
 const chatMessages = document.getElementById('chat-messages');
 const messageInput = document.getElementById('message-input');
 const sendBtn = document.getElementById('send-btn');
-const apiStatus = document.getElementById('api-status');
-const responseTimeEl = document.getElementById('response-time');
 const sidebar = document.getElementById('sidebar');
 const sidebarOverlay = document.querySelector('.sidebar-overlay');
 const imagePreviewContainer = document.getElementById('image-preview-container');
@@ -113,6 +114,16 @@ window.closeSettings = function() {
     document.getElementById('settings-modal').classList.remove('open');
 };
 
+window.openHelp = function() {
+    const modal = document.getElementById('help-modal');
+    if (modal) modal.style.display = 'flex';
+};
+
+window.closeHelp = function() {
+    const modal = document.getElementById('help-modal');
+    if (modal) modal.style.display = 'none';
+};
+
 window.openRegisterModal = function() {
     document.getElementById('login-modal').style.display = 'none';
     document.getElementById('register-modal').style.display = 'flex';
@@ -168,14 +179,10 @@ window.doLogin = async function() {
             isRashidAdmin = d.isAdmin || false;
             document.getElementById('sidebar-login-btn').style.display = 'none';
             document.getElementById('sidebar-register-btn').style.display = 'none';
+            document.getElementById('sidebar-user-info').style.display = 'block';
             document.getElementById('sidebar-logout-btn').style.display = 'flex';
-            document.getElementById('nav-login-btn').style.display = 'none';
-            document.getElementById('nav-register-btn').style.display = 'none';
-            document.getElementById('nav-logout-btn').style.display = 'flex';
-            document.getElementById('nav-user-display').style.display = 'flex';
-            document.getElementById('nav-username').textContent = d.username;
+            document.getElementById('sidebar-username').textContent = d.username;
             if (d.isAdmin) {
-                document.getElementById('admin-mode-btn').style.display = 'flex';
                 document.getElementById('settings-modal').classList.add('open');
                 loadSettingsAll();
             } else {
@@ -199,14 +206,10 @@ window.doLogout = async function() {
     } catch(e) {}
     isAuthenticated = false;
     isRashidAdmin = false;
-    document.getElementById('admin-mode-btn').style.display = 'none';
     document.getElementById('sidebar-login-btn').style.display = 'flex';
     document.getElementById('sidebar-register-btn').style.display = 'flex';
+    document.getElementById('sidebar-user-info').style.display = 'none';
     document.getElementById('sidebar-logout-btn').style.display = 'none';
-    document.getElementById('nav-login-btn').style.display = 'flex';
-    document.getElementById('nav-register-btn').style.display = 'flex';
-    document.getElementById('nav-logout-btn').style.display = 'none';
-    document.getElementById('nav-user-display').style.display = 'none';
     closeSettings();
 };
 
@@ -273,8 +276,15 @@ window.doRegister = async function() {
 async function checkAuthStatus() {
     try {
         console.log('[AuthCheck] Checking auth status...');
-        const r = await fetch(API_BASE + '/auth/status', {credentials: 'same-origin'});
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const r = await fetch(API_BASE + '/auth/status', {credentials: 'same-origin', signal: controller.signal});
+        clearTimeout(timeout);
         console.log('[AuthCheck] Status:', r.status);
+        if (!r.ok) {
+            console.warn('[AuthCheck] Server returned', r.status);
+            return;
+        }
         const d = await r.json();
         console.log('[AuthCheck] Response:', d);
         if (d.authenticated) {
@@ -282,20 +292,16 @@ async function checkAuthStatus() {
             isRashidAdmin = d.isAdmin || false;
             document.getElementById('sidebar-login-btn').style.display = 'none';
             document.getElementById('sidebar-register-btn').style.display = 'none';
+            document.getElementById('sidebar-user-info').style.display = 'block';
             document.getElementById('sidebar-logout-btn').style.display = 'flex';
-            document.getElementById('nav-login-btn').style.display = 'none';
-            document.getElementById('nav-register-btn').style.display = 'none';
-            document.getElementById('nav-logout-btn').style.display = 'flex';
-            document.getElementById('nav-user-display').style.display = 'flex';
-            document.getElementById('nav-username').textContent = d.username;
-            if (d.isAdmin) {
-                const btn = document.getElementById('admin-mode-btn');
-                if (btn) btn.style.display = 'flex';
-            }
+            document.getElementById('sidebar-username').textContent = d.username;
         }
-    } catch(e) {}
+    } catch(e) {
+        console.warn('[AuthCheck] Failed - showing default state:', e);
+        // Keep default UI - user can login manually
+    }
 }
-checkAuthStatus();
+setTimeout(checkAuthStatus, 500); // Delay auth check to prioritize page render
 
 async function loadSettingsAll() {
     await Promise.all([loadSettingsHealth(), loadSettingsStats(), loadSettingsChats(), loadSettingsKaggle()]);
@@ -628,12 +634,7 @@ function updateStatus(provider, time) {
         'error': '❌ خطأ',
         'stopped': '⏹️ تم الإيقاف'
     };
-    if (apiStatus) {
-        apiStatus.textContent = providers[provider] || '🟢 جاهز';
-    }
-    if (time && responseTimeEl) {
-        responseTimeEl.textContent = `⏱️ ${time}s`;
-    }
+
 }
 
 // ============ Image Functions ============
@@ -719,13 +720,18 @@ function detectDrawPrompt(msg) {
 async function generateImageRequest(prompt) {
     const formData = new FormData();
     formData.append('prompt', prompt);
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 45000);
     try {
         const r = await fetch(`${API_BASE}/generate-image`, {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
+        clearTimeout(timeout);
         return await r.json();
     } catch (e) {
+        clearTimeout(timeout);
         console.error('Generate error:', e);
         return null;
     }
@@ -737,36 +743,56 @@ async function analyzeImageRequest(imageFile, text) {
     const formData = new FormData();
     formData.append('file', imageFile);
     formData.append('message', text || '');
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 60000);
     try {
         const r = await fetch(`${API_BASE}/analyze-image`, {
             method: 'POST',
-            body: formData
+            body: formData,
+            signal: controller.signal
         });
+        clearTimeout(timeout);
         const data = await r.json();
         console.log('[Analyze] Response:', r.status, data);
         return data;
     } catch (e) {
+        clearTimeout(timeout);
         console.error('[Analyze] Fetch error:', e);
         return null;
     }
 }
 
-// Send chat text message
+// Send chat text message with timeout
 async function sendChatRequest(message) {
     const currentUsername = isAuthenticated ? document.getElementById('nav-username').textContent : 'guest';
     abortController = new AbortController();
-    const r = await fetch(`${API_BASE}/chat`, {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            message: message,
-            username: currentUsername,
-            model: currentModel
-        }),
-        signal: abortController.signal
-    });
-    const d = await r.json();
-    return d;
+    
+    // Add timeout - 60 seconds max
+    const timeoutId = setTimeout(() => {
+        if (abortController) {
+            abortController.abort();
+            abortController = null;
+        }
+    }, 60000);
+    
+    try {
+        const r = await fetch(`${API_BASE}/chat`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                message: message,
+                username: currentUsername,
+                model: currentModel
+            }),
+            signal: abortController.signal
+        });
+        clearTimeout(timeoutId);
+        const d = await r.json();
+        return d;
+    } catch (e) {
+        clearTimeout(timeoutId);
+        throw e;
+    }
 }
 
 // Save chat to history (local)
@@ -893,7 +919,6 @@ window.sendMessage = async function() {
         hideStopButton();
 
         if (d === null || d === undefined) {
-            // Request was aborted
             updateStatus('stopped', '');
             return;
         }
@@ -905,7 +930,7 @@ window.sendMessage = async function() {
             updateStatus(d.provider || 'system', d.response_time || '');
             saveChatToHistory(msg, d.response);
         } else {
-            addMessage('🤔 لم أتلقى رداً. حاول مرة أخرى.', false);
+            addErrorWithRetry('🤔 لم أتلقى رداً من الخادم.', msg, d);
             updateStatus('error', responseTime);
         }
     } catch (e) {
@@ -916,7 +941,15 @@ window.sendMessage = async function() {
             return;
         }
         console.error('Chat error:', e);
-        addMessage('⚠️ عذراً، لا يمكن الاتصال بالخادم. تحقق من اتصالك.', false);
+        let errorMsg;
+        if (e.message && (e.message.includes('NetworkError') || e.message.includes('Failed to fetch') || e.message.includes('network'))) {
+            errorMsg = '⚠️ تعذر الاتصال بالخادم. تحقق من اتصالك بالإنترنت.';
+        } else if (e.message && e.message.includes('timeout') || e.name === 'TimeoutError') {
+            errorMsg = '⏰ استغرق الرد وقتاً طويلاً. تم إلغاء الطلب تلقائياً.';
+        } else {
+            errorMsg = '⚠️ عذراً، واجهت مشكلة تقنية.';
+        }
+        addErrorWithRetry(errorMsg, msg);
         updateStatus('error', '0');
     }
 };
@@ -1088,9 +1121,17 @@ function streamMessage(element, text, speed = 15) {
 }
 
 // ============ NEW FEATURE #8: Loading Skeletons ============
+let skeletonTimeout = null;
+
 function showSkeleton() {
     const chatMsgs = document.getElementById('chat-messages');
     if (!chatMsgs) return;
+    
+    // Clear any existing skeleton timeout
+    if (skeletonTimeout) {
+        clearTimeout(skeletonTimeout);
+        skeletonTimeout = null;
+    }
     
     const skeleton = document.createElement('div');
     skeleton.className = 'message bot skeleton-animate';
@@ -1107,9 +1148,26 @@ function showSkeleton() {
     `;
     chatMsgs.appendChild(skeleton);
     chatMsgs.scrollTop = chatMsgs.scrollHeight;
+    
+    // Auto-hide after 45 seconds (loading timeout)
+    skeletonTimeout = setTimeout(() => {
+        hideSkeleton();
+        hideStopButton();
+        const lastMsg = chatMsgs.querySelector('.message:last-child');
+        if (lastMsg && lastMsg.classList.contains('bot')) {
+            // Already has a response, don't add error
+        } else if (!lastMsg || lastMsg.classList.contains('user')) {
+            addMessage('⏰ عذراً، استغرق الرد وقتاً طويلاً. يرجى المحاولة مرة أخرى.', false);
+        }
+        updateStatus('timeout', '');
+    }, 45000);
 }
 
 function hideSkeleton() {
+    if (skeletonTimeout) {
+        clearTimeout(skeletonTimeout);
+        skeletonTimeout = null;
+    }
     const skeleton = document.getElementById('loading-skeleton');
     if (skeleton) skeleton.remove();
 }

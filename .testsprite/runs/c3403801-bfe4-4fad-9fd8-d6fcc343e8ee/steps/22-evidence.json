@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 22,
+    "summary": "Step 22 'The main navigation link reads 'Home' in English.' failed. (no captured error text on the test row)",
+    "path": "steps/22-snapshot.html"
+  }
+]

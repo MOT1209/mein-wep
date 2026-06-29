@@ -48,42 +48,69 @@
                  <span>محادثة جديدة</span>
              </button>
 
-              <!-- Chat History (سجل الدردشات) -->
-              <div class="sidebar-section">
-                  <div class="sidebar-section-title">
-                      <i class="fas fa-comments"></i>
-                      <span>سجل الدردشات</span>
-                  </div>
-                  <div class="chat-history-search">
-                      <input type="text" placeholder="بحث في السجل..." id="chat-history-search" oninput="searchChats(this.value)" aria-label="بحث في سجل الدردشات">
-                  </div>
-                  <div class="chat-history" id="chat-history" role="list" aria-label="سجل الدردشات">
-                      <!-- Chat history items will be rendered here -->
-                  </div>
-              </div>
+             <!-- سجل الدردشات (Chat History) -->
+             <div class="sidebar-section">
+                 <div class="sidebar-section-title">
+                     <i class="fas fa-comments"></i>
+                     <span>سجل الدردشات</span>
+                 </div>
+                 <div class="chat-history-search">
+                     <input type="text" placeholder="بحث..." id="chat-history-search" oninput="searchChats(this.value)" aria-label="بحث في سجل الدردشات">
+                 </div>
+                 <div class="chat-history" id="chat-history" role="list" aria-label="سجل الدردشات">
+                     <!-- Chat history items will be rendered here -->
+                 </div>
+             </div>
 
-            <!-- Sidebar Footer -->
+            <!-- Sidebar Divider -->
+            <div class="sidebar-divider"></div>
+
+            <!-- عن KING2 AI -->
+            <a href="/about" class="sidebar-nav-item" aria-label="عن KING2 AI">
+                <i class="fas fa-circle-info"></i>
+                <span>عن KING2 AI</span>
+            </a>
+
+            <!-- Sidebar Divider -->
+            <div class="sidebar-divider"></div>
+
+            <!-- الإعدادات + المساعدة -->
+            <button class="sidebar-nav-item" onclick="openSettings()" aria-label="الإعدادات">
+                <i class="fas fa-gear"></i>
+                <span>الإعدادات</span>
+            </button>
+            <button class="sidebar-nav-item" onclick="openHelp()" aria-label="المساعدة">
+                <i class="fas fa-question-circle"></i>
+                <span>المساعدة</span>
+            </button>
+
+            <!-- Sidebar Divider -->
+            <div class="sidebar-divider"></div>
+
+            <!-- Sidebar Footer: الحساب الشخصي -->
             <div class="sidebar-footer">
+                <div class="sidebar-section-title" style="padding:0 12px 8px">
+                    <i class="fas fa-user"></i>
+                    <span>الحساب الشخصي</span>
+                </div>
                 <button class="settings-btn" id="sidebar-login-btn" onclick="openLoginModal()" aria-label="تسجيل الدخول">
                     <i class="fas fa-right-to-bracket"></i>
                     <span>دخول</span>
                 </button>
-                <button class="settings-btn" id="sidebar-register-btn" onclick="openRegisterModal()" style="margin-top:8px" aria-label="إنشاء حساب">
+                <button class="settings-btn" id="sidebar-register-btn" onclick="openRegisterModal()" aria-label="إنشاء حساب">
                     <i class="fas fa-user-plus"></i>
                     <span>تسجيل</span>
                 </button>
-                <button class="settings-btn" id="sidebar-logout-btn" onclick="doLogout()" style="margin-top:8px;display:none" aria-label="تسجيل الخروج">
-                    <i class="fas fa-right-from-bracket"></i>
-                    <span>خروج</span>
-                </button>
-                <a href="/about" class="settings-btn" style="text-decoration:none;color:inherit;margin-top:16px" aria-label="تعريف بالمشروع">
-                    <i class="fas fa-circle-info"></i>
-                    <span>تعريف</span>
-                </a>
-                <button class="settings-btn" onclick="openSettings()" style="margin-top:8px" aria-label="الإعدادات">
-                    <i class="fas fa-gear"></i>
-                    <span>الإعدادات</span>
-                </button>
+                <div id="sidebar-user-info" style="display:none;padding:0 12px">
+                    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                        <span style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:14px">👤</span>
+                        <span style="flex:1;font-size:13px;color:#e2e8f0" id="sidebar-username">مستخدم</span>
+                    </div>
+                    <button class="settings-btn" id="sidebar-logout-btn" onclick="doLogout()" style="display:none;margin-top:4px">
+                        <i class="fas fa-right-from-bracket"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
             </div>
         </aside>
 
@@ -137,12 +164,6 @@
 
                 <!-- Chat Messages -->
                 <div class="chat-messages hidden" id="chat-messages" role="log" aria-label="رسائل المحادثة" aria-live="polite"></div>
-
-                <!-- Status Bar -->
-                <div class="status-bar" id="status-bar" aria-label="حالة النظام">
-                    <span class="api-status" id="api-status"><i class="fas fa-circle" style="color:#10b981;font-size:0.5rem"></i> جاهز</span>
-                    <span class="response-time" id="response-time"></span>
-                </div>
             </div>
 
             <!-- ═══════════════════════════════════ -->
@@ -419,6 +440,45 @@
                             <h4 style="color:#d4af37;margin-bottom:16px;font-size:0.9rem"><i class="fas fa-chart-bar"></i> إحصائيات شاملة</h4>
                             <div id="admin-stats-detail">جاري التحميل...</div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- HELP MODAL                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="login-modal-overlay" id="help-modal" style="display:none" onclick="if(event.target===this)closeHelp()" role="dialog" aria-modal="true">
+        <div class="login-modal" style="max-width:500px;padding:0;overflow:hidden">
+            <button class="modal-close-btn" onclick="closeHelp()" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
+            <div style="padding:40px 32px 32px">
+                <div style="text-align:center;margin-bottom:24px">
+                    <div style="font-size:48px;margin-bottom:8px">👑</div>
+                    <h2 style="color:#e2e8f0;margin:0">المساعدة</h2>
+                    <p style="color:#64748b;font-size:0.85rem;margin-top:8px">كيف يمكننا مساعدتك؟</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="background:rgba(15,20,40,0.6);border-radius:12px;padding:16px;border:1px solid rgba(212,175,55,0.1)">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                            <i class="fas fa-comment" style="color:#d4af37;font-size:1.2rem"></i>
+                            <span style="color:#e2e8f0;font-weight:600">كيف أستخدم KING2 AI؟</span>
+                        </div>
+                        <p style="color:#94a3b8;font-size:0.85rem;margin:0;line-height:1.6">ما عليك سوى كتابة سؤالك في مربع النص والضغط على إرسال. يمكنك أيضاً إرفاق الصور لتحليلها، أو طلب إنشاء صور.</p>
+                    </div>
+                    <div style="background:rgba(15,20,40,0.6);border-radius:12px;padding:16px;border:1px solid rgba(212,175,55,0.1)">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                            <i class="fas fa-robot" style="color:#d4af37;font-size:1.2rem"></i>
+                            <span style="color:#e2e8f0;font-weight:600">ما هي النماذج المستخدمة؟</span>
+                        </div>
+                        <p style="color:#94a3b8;font-size:0.85rem;margin:0;line-height:1.6">يدعم KING2 AI عدة مزودين: Gemini، Groq، OpenRouter، و OpenCode لضمان أفضل استجابة ممكنة.</p>
+                    </div>
+                    <div style="background:rgba(15,20,40,0.6);border-radius:12px;padding:16px;border:1px solid rgba(212,175,55,0.1)">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                            <i class="fas fa-image" style="color:#d4af37;font-size:1.2rem"></i>
+                            <span style="color:#e2e8f0;font-weight:600">هل يمكنني إنشاء صور؟</span>
+                        </div>
+                        <p style="color:#94a3b8;font-size:0.85rem;margin:0;line-height:1.6">نعم، يمكنك طلب إنشاء صور وسيقوم النظام بتوليدها تلقائياً باستخدام أفضل نماذج توليد الصور.</p>
                     </div>
                 </div>
             </div>

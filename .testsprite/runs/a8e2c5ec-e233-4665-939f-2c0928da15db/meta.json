@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "cli-v1",
+  "snapshotId": "snap_be953d3330f58109",
+  "testId": "f1b285db-c02e-4656-b482-bf358434f8bf",
+  "projectId": "235a1c2e-954e-4292-a41c-f474aa6cbf4d",
+  "codeVersion": "v1",
+  "runIdIfAvailable": "a8e2c5ec-e233-4665-939f-2c0928da15db",
+  "targetUrl": "https://rashid-wep.vercel.app/",
+  "failedStepIndex": 16,
+  "failureKind": "unknown",
+  "capturedAt": "2026-06-27T12:56:52.023Z",
+  "fetchedAt": "2026-06-27T12:56:57.243Z"
+}

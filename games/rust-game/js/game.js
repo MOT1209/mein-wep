@@ -38,6 +38,7 @@ const state = {
     buildMode: false,
     viewMode: 'first',
     controls: { forward: false, backward: false, left: false, right: false, jump: false, canJump: false, crouch: false },
+    selectedBeltSlot: 0,
     selectedCategory: 'common',
     selectedItem: null,
     craftQty: 1,
@@ -112,7 +113,6 @@ const ITEMS_DATA = {
 
     // Construction
     'building_plan': { name: 'Building Plan', category: 'tools', icon: 'fa-scroll', color: '#64b5f6', rarity: 'common', recipe: { wood: 20 }, desc: 'Select building pieces to place.' },
-    'hammer': { name: 'Building Hammer', category: 'tools', icon: 'fa-hammer', color: '#1e88e5', rarity: 'common', recipe: { wood: 100 }, desc: 'Construct and upgrade your base.' },
     'door': { name: 'Wood Door', category: 'construction', icon: 'fa-door-closed', color: '#8d6e63', rarity: 'common', recipe: { wood: 300 }, desc: 'Access point with minimal security.' },
     'lock': { name: 'Key Lock', category: 'construction', icon: 'fa-lock', color: '#546e7a', rarity: 'common', recipe: { iron: 100 }, desc: 'Basic protection for your base.' },
 
@@ -289,12 +289,49 @@ class NPC {
         }
 
         this.mesh.position.copy(position);
+        this.mesh.userData = { npc: this, radius: 0.6 };
         scene.add(this.mesh);
         this.velocity = new THREE.Vector3();
         this.health = type === 'bear' ? 120 : (type === 'scientist' ? 80 : 50);
+        this.maxHealth = this.health;
         this.lastAttack = 0;
+        this.dead = false;
+    }
+    takeDamage(amount) {
+        if (this.dead) return;
+        this.health -= amount;
+        // Flash red
+        this.mesh.children.forEach(c => { if (c.isMesh) c.material.emissive.setHex(0xff0000); c.material.emissiveIntensity = 0.5; });
+        setTimeout(() => {
+            this.mesh.children.forEach(c => { if (c.isMesh) { c.material.emissiveIntensity = 0; } });
+        }, 100);
+        if (this.health <= 0) this.die();
+    }
+    die() {
+        this.dead = true;
+        // Drop loot
+        const lootMap = { wolf: { cloth: 10, leather: 5 }, bear: { cloth: 15, leather: 10 }, scientist: { scrap: 15, frag: 10 } };
+        const loot = lootMap[this.type] || { cloth: 5 };
+        Object.entries(loot).forEach(([id, count]) => addItem(id, count));
+        showNotification(`${this.type} killed! +${Object.values(loot).reduce((a,b)=>a+b,0)} resources`, '#e74c3c');
+        // Remove from collision
+        const idx = collisionObjects.indexOf(this.mesh);
+        if (idx !== -1) collisionObjects.splice(idx, 1);
+        // Fade out and remove
+        const interval = setInterval(() => {
+            this.mesh.scale.multiplyScalar(0.9);
+            this.mesh.position.y -= 0.05;
+            if (this.mesh.scale.x < 0.1) {
+                clearInterval(interval);
+                scene.remove(this.mesh);
+                // Remove from npcs array
+                const npcIdx = npcs.indexOf(this);
+                if (npcIdx !== -1) npcs.splice(npcIdx, 1);
+            }
+        }, 30);
     }
     update(delta, playerPos) {
+        if (this.dead) return;
         const dist = this.mesh.position.distanceTo(playerPos);
         const agroRange = this.type === 'scientist' ? 30 : 18;
         const attackRange = this.type === 'scientist' ? 12 : 2.5;
@@ -308,7 +345,7 @@ class NPC {
             if (dist < attackRange && performance.now() - this.lastAttack > (this.type === 'scientist' ? 800 : 1200)) {
                 state.stats.health -= (this.type === 'bear' ? 20 : (this.type === 'scientist' ? 8 : 12));
                 updateHUD(); this.lastAttack = performance.now();
-                if (this.type === 'scientist') console.log("SHOT FIRED BY SCIENTIST!");
+                SoundFX.hit();
             }
         }
     }
@@ -411,7 +448,6 @@ try {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    let previewMesh = null;
     const isTouchDevice = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
     const interactables = [];
     const collisionObjects = [];
@@ -604,6 +640,7 @@ try {
 
             // Build Sound/VFX
             screenFlash('rgba(255,255,255,0.1)');
+            SoundFX.build();
             console.log(`Placed ${blueprint}`);
         }
     }
@@ -648,6 +685,7 @@ try {
         structure.material.color.setHex(BUILDING_TIERS[nextTier].color);
 
         updateHUD();
+        SoundFX.upgrade();
         console.log(`Upgraded to ${nextTier}`);
     }
 
@@ -806,11 +844,108 @@ try {
         const x = (Math.random() - 0.5) * CONFIG.WORLD_SIZE;
         const z = (Math.random() - 0.5) * CONFIG.WORLD_SIZE;
         const type = Math.random() > 0.3 ? 'wolf' : 'bear';
-        npcs.push(new NPC(scene, type, new THREE.Vector3(x, getTerrainHeight(x, z), z)));
+        const npc = new NPC(scene, type, new THREE.Vector3(x, getTerrainHeight(x, z), z));
+        npcs.push(npc);
+        collisionObjects.push(npc.mesh);
     }
 
     const builtObjects = [];
 
+    // Respawn system
+    const respawnQueue = [];
+    const RESPAWN_DELAY = 30000; // 30 seconds
+
+    function scheduleRespawn(obj, pos, type, worldData) {
+        const data = { pos: { x: pos.x, y: pos.y, z: pos.z }, type, worldData, time: Date.now() };
+        respawnQueue.push(data);
+    }
+
+    function processRespawns() {
+        const now = Date.now();
+        for (let i = respawnQueue.length - 1; i >= 0; i--) {
+            const r = respawnQueue[i];
+            if (now - r.time >= RESPAWN_DELAY) {
+                respawnObject(r);
+                respawnQueue.splice(i, 1);
+            }
+        }
+    }
+
+    function respawnObject(data) {
+        const { pos, type } = data;
+        let obj;
+        const y = getTerrainHeight(pos.x, pos.z);
+
+        switch (type) {
+            case 'tree': {
+                const tree = new THREE.Group();
+                const trunk = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.15, 0.4, 3, 8),
+                    new THREE.MeshStandardMaterial({ color: 0x4e342e, roughness: 0.9 })
+                );
+                trunk.position.y = 1.5; trunk.castShadow = true; tree.add(trunk);
+                const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e7d32, roughness: 0.8 });
+                for (let j = 0; j < 3; j++) {
+                    const cluster = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2 - j * 0.2, 1), leafMat);
+                    cluster.position.y = 2.5 + j * 0.8;
+                    cluster.position.x = (Math.random() - 0.5) * 0.5;
+                    cluster.position.z = (Math.random() - 0.5) * 0.5;
+                    cluster.castShadow = true; tree.add(cluster);
+                }
+                tree.position.set(pos.x, y, pos.z);
+                tree.userData = { type: 'tree', health: 4, radius: 0.5 };
+                obj = tree;
+                break;
+            }
+            case 'rock': {
+                const rockMat = new THREE.MeshStandardMaterial({ color: 0x757575, roughness: 1.0 });
+                obj = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2, 0), rockMat);
+                obj.position.set(pos.x, y + 0.3, pos.z);
+                const scale = 0.6 + Math.random();
+                obj.scale.set(scale, scale * 0.8, scale);
+                obj.rotation.set(Math.random(), Math.random(), Math.random());
+                obj.castShadow = true;
+                obj.userData = { type: 'rock', health: 5, radius: scale };
+                break;
+            }
+            case 'iron': {
+                const ironMat = new THREE.MeshStandardMaterial({ color: 0x90a4ae, metalness: 0.4, roughness: 0.7 });
+                obj = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2, 0), ironMat);
+                obj.position.set(pos.x, y + 0.3, pos.z);
+                const s = 0.6 + Math.random();
+                obj.scale.set(s, s * 0.8, s);
+                obj.rotation.set(Math.random(), Math.random(), Math.random());
+                obj.castShadow = true;
+                obj.userData = { type: 'iron', health: 5, radius: s };
+                break;
+            }
+            case 'sulfur': {
+                const sulfurMat = new THREE.MeshStandardMaterial({ color: 0xfdd835, roughness: 0.9, emissive: 0x444400, emissiveIntensity: 0.1 });
+                obj = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2, 0), sulfurMat);
+                obj.position.set(pos.x, y + 0.3, pos.z);
+                const s2 = 0.6 + Math.random();
+                obj.scale.set(s2, s2 * 0.8, s2);
+                obj.rotation.set(Math.random(), Math.random(), Math.random());
+                obj.castShadow = true;
+                obj.userData = { type: 'sulfur', health: 5, radius: s2 };
+                break;
+            }
+            case 'barrel': {
+                const barrelMat = new THREE.MeshStandardMaterial({ color: 0x0277bd, metalness: 0.6, roughness: 0.4 });
+                obj = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 1.2, 12), barrelMat);
+                obj.position.set(pos.x, y + 0.6, pos.z);
+                obj.castShadow = true;
+                obj.userData = { type: 'barrel', health: 3, radius: 0.5 };
+                break;
+            }
+        }
+
+        if (obj) {
+            scene.add(obj);
+            interactables.push(obj);
+            collisionObjects.push(obj);
+        }
+    }
 
     // Animation & Logic Functions
     let ghostMesh = null;
@@ -827,8 +962,13 @@ try {
         const blueprint = state.building.selectedBlueprint;
         const buildData = BUILDING_TYPES[blueprint];
 
-        // Create ghost if doesn't exist
-        if (!ghostMesh) {
+        // Create or recreate ghost if blueprint type changed
+        if (!ghostMesh || ghostMesh.userData.blueprintType !== blueprint) {
+            if (ghostMesh) {
+                scene.remove(ghostMesh);
+                ghostMesh.geometry.dispose();
+                ghostMesh.material.dispose();
+            }
             const geometry = new THREE.BoxGeometry(...buildData.geometry);
             const material = new THREE.MeshBasicMaterial({
                 color: 0x00ff00,
@@ -837,6 +977,7 @@ try {
                 wireframe: false
             });
             ghostMesh = new THREE.Mesh(geometry, material);
+            ghostMesh.userData.blueprintType = blueprint;
             scene.add(ghostMesh);
         }
 
@@ -901,7 +1042,8 @@ try {
         }
 
         raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-        const hits = raycaster.intersectObjects([...interactables, ...builtStructures], true);
+        const npcMeshes = npcs.filter(n => !n.dead).map(n => n.mesh);
+        const hits = raycaster.intersectObjects([...interactables, ...builtStructures, ...npcMeshes], true);
 
         if (hits.length > 0 && hits[0].distance < CONFIG.INTERACT_DISTANCE) {
             let obj = hits[0].object;
@@ -912,6 +1054,7 @@ try {
                 obj.userData.isOpen = !obj.userData.isOpen;
                 obj.rotation.y = obj.userData.isOpen ? Math.PI / 2 : 0;
                 showHitMarker();
+                SoundFX.door();
                 return;
             }
 
@@ -926,11 +1069,22 @@ try {
                 return;
             }
 
+            // NPC Damage
+            const hitNpc = obj.userData.npc || (obj.parent && obj.parent.userData && obj.parent.userData.npc);
+            if (hitNpc && !hitNpc.dead) {
+                hitNpc.takeDamage(15);
+                showHitMarker();
+                screenFlash('rgba(255,0,0,0.1)');
+                SoundFX.hit();
+                return;
+            }
+
             if (!obj.userData.type) return;
 
             // Combat / Gathering
             showHitMarker();
             screenFlash('rgba(255,255,255,0.05)');
+            SoundFX.harvest();
 
             camera.position.x += (Math.random() - 0.5) * 0.05;
             camera.position.z += (Math.random() - 0.5) * 0.05;
@@ -946,6 +1100,13 @@ try {
             else if (type === 'barrel') { addItem('scrap', 3); addItem('lgf', 2); }
 
             if (obj.userData.health <= 0) {
+                const pos = obj.position.clone();
+                const objType = obj.userData.type;
+                // Determine actual type for respawn
+                let worldType = objType;
+                if (objType === 'tree' || objType === 'rock' || objType === 'iron' || objType === 'sulfur' || objType === 'barrel') {
+                    scheduleRespawn(obj, pos, worldType, null);
+                }
                 scene.remove(obj);
                 if (interactables.includes(obj)) interactables.splice(interactables.indexOf(obj), 1);
                 if (builtStructures.includes(obj)) builtStructures.splice(builtStructures.indexOf(obj), 1);
@@ -1040,6 +1201,18 @@ try {
                 if (data) {
                     slot.classList.add(`rarity-${data.rarity || 'common'}`);
                     slot.innerHTML = `<i class="fas ${data.icon}" style="color:${data.color}; font-size: 1.2rem;"></i><span style="position:absolute;bottom:2px;right:4px;font-size:0.65rem;font-weight:900;color:#fff;">${item.count}</span>`;
+                    slot.title = `Click to equip to belt slot ${state.selectedBeltSlot + 1}`;
+                    // Highlight if already in belt
+                    if (state.belt.includes(item.id)) {
+                        slot.style.borderColor = 'var(--primary)';
+                        slot.style.background = 'rgba(205,92,44,0.15)';
+                    }
+                    slot.onclick = () => {
+                        state.belt[state.selectedBeltSlot] = item.id;
+                        renderBelt();
+                        updateHotbarUI();
+                        renderInventoryGrid();
+                    };
                 }
             }
             grid.appendChild(slot);
@@ -1069,14 +1242,22 @@ try {
             if (itemId) {
                 const item = ITEMS_DATA[itemId];
                 slot.innerHTML = `<i class="fas ${item.icon}" style="color:${item.color}"></i>`;
+                slot.title = 'Right-click to unequip';
             } else {
                 // Default placeholders
                 if (i === 0) slot.innerHTML = `<i class="fas fa-hand-fist" style="opacity:0.2"></i>`;
                 if (i === 1) slot.innerHTML = `<i class="fas fa-axe" style="opacity:0.2"></i>`;
+                slot.title = 'Click inventory item to equip';
             }
 
             slot.onclick = () => {
                 state.selectedBeltSlot = i;
+                renderBelt();
+                updateHotbarUI();
+            };
+            slot.oncontextmenu = (e) => {
+                e.preventDefault();
+                state.belt[i] = null;
                 renderBelt();
                 updateHotbarUI();
             };
@@ -1085,6 +1266,7 @@ try {
     }
 
     function updateHotbarUI() {
+        const defaultIcons = ['fa-hand-fist', 'fa-axe', 'fa-hammer', 'fa-shield', 'fa-pizza-slice', 'fa-bottle-water'];
         const slots = document.querySelectorAll('.hotbar-slot');
         slots.forEach((s, idx) => {
             s.classList.toggle('active', state.selectedBeltSlot === idx);
@@ -1093,7 +1275,8 @@ try {
                 const item = ITEMS_DATA[itemId];
                 s.innerHTML = `<i class="fas ${item.icon}"></i>`;
             } else {
-                s.innerHTML = idx === 0 ? '<i class="fas fa-hand-fist"></i>' : (idx === 1 ? '<i class="fas fa-axe"></i>' : (idx === 2 ? '<i class="fas fa-hammer"></i>' : ''));
+                const icon = defaultIcons[idx] || 'fa-circle';
+                s.innerHTML = `<i class="fas ${icon}" style="opacity:0.2"></i>`;
             }
         });
     }
@@ -1101,6 +1284,7 @@ try {
 
     // ==================== KEYBOARD/MOUSE OVERRIDES ====================
     // These handle specific game logic not covered by the generic GameControls layer
+    window.addEventListener('contextmenu', (e) => e.preventDefault());
     window.addEventListener('keydown', (e) => {
         if (document.activeElement.tagName === 'INPUT') return;
 
@@ -1195,7 +1379,6 @@ try {
                     if (radialMenu.style.display === 'flex') {
                         radialMenu.style.display = 'none';
                         state.building.selectedBlueprint = null;
-                        if (previewMesh) { scene.remove(previewMesh); previewMesh = null; }
                         if (!isTouchDevice) pointerControls.lock();
                     } else {
                         radialMenu.style.display = 'flex';
@@ -1241,6 +1424,17 @@ try {
     });
     
     gameControls.init();
+
+    // Init sound on first user interaction
+    function initSoundOnInteraction() {
+        SoundFX.init();
+        document.removeEventListener('click', initSoundOnInteraction);
+        document.removeEventListener('keydown', initSoundOnInteraction);
+        document.removeEventListener('touchstart', initSoundOnInteraction);
+    }
+    document.addEventListener('click', initSoundOnInteraction);
+    document.addEventListener('keydown', initSoundOnInteraction);
+    document.addEventListener('touchstart', initSoundOnInteraction);
 
     const startBtn = document.getElementById('start-button');
     if (startBtn) {
@@ -1309,7 +1503,7 @@ try {
             velocity.y -= CONFIG.GRAVITY * delta;
             direction.z = Number(state.controls.forward) - Number(state.controls.backward);
             direction.x = Number(state.controls.right) - Number(state.controls.left);
-            direction.normalize();
+            if (direction.lengthSq() > 0) direction.normalize();
             if (state.controls.forward || state.controls.backward) velocity.z -= direction.z * CONFIG.PLAYER_SPEED * delta;
             if (state.controls.left || state.controls.right) velocity.x -= direction.x * CONFIG.PLAYER_SPEED * delta;
             pointerControls.moveRight(-velocity.x * delta);
@@ -1400,6 +1594,9 @@ try {
 
             // Restore Player
             camera.position.set(data.player.position.x, data.player.position.y, data.player.position.z);
+            if (data.player.rotation && data.player.rotation.y !== undefined) {
+                camera.rotation.y = data.player.rotation.y;
+            }
             if (playerMesh) playerMesh.position.set(data.player.position.x, data.player.position.y - 1.6, data.player.position.z);
 
             // Restore State
@@ -1482,6 +1679,9 @@ try {
     // Auto-Save every 60 seconds
     setInterval(saveGame, 60000);
 
+    // Respawn check every 5 seconds
+    setInterval(processRespawns, 5000);
+
     // Initial Load
     loadGame();
 
@@ -1505,6 +1705,50 @@ try {
     alert("Game Crash: " + err.message);
 }
 
+// ==================== SOUND SYSTEM ====================
+const SoundFX = {
+    ctx: null,
+    init() {
+        try {
+            this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        } catch(e) { console.warn('Audio not available'); }
+    },
+    _ensure() {
+        if (!this.ctx) this.init();
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+    },
+    _noise(duration, volume = 0.15) {
+        this._ensure(); if (!this.ctx) return;
+        const bufferSize = this.ctx.sampleRate * duration;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+        const src = this.ctx.createBufferSource();
+        src.buffer = buffer;
+        const gain = this.ctx.createGain();
+        gain.gain.value = volume;
+        src.connect(gain).connect(this.ctx.destination);
+        src.start();
+    },
+    _tone(freq, duration, volume = 0.1, type = 'sine') {
+        this._ensure(); if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        osc.type = type;
+        osc.frequency.value = freq;
+        const gain = this.ctx.createGain();
+        gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + duration);
+        osc.connect(gain).connect(this.ctx.destination);
+        osc.start(); osc.stop(this.ctx.currentTime + duration);
+    },
+    harvest() { this._noise(0.12, 0.12); this._tone(200, 0.08, 0.08, 'square'); },
+    build() { this._noise(0.2, 0.18); this._tone(80, 0.15, 0.2, 'sine'); this._tone(120, 0.1, 0.1, 'square'); },
+    hit() { this._noise(0.08, 0.1); this._tone(300, 0.06, 0.06, 'sawtooth'); },
+    upgrade() { this._tone(400, 0.2, 0.12, 'sine'); this._tone(600, 0.15, 0.08, 'sine'); },
+    ui_click() { this._tone(800, 0.05, 0.05); },
+    door() { this._noise(0.1, 0.1); this._tone(150, 0.15, 0.1, 'triangle'); }
+};
+
 // ==================== INVENTORY 3D PREVIEW ====================
 let previewRenderer, previewScene, previewCamera, previewPlayer;
 
@@ -1512,6 +1756,11 @@ function initPlayerPreview() {
     const container = document.getElementById('player-3d-preview');
     if (!container) return;
     container.innerHTML = '';
+    // Dispose old renderer/scene to prevent memory leak
+    if (previewRenderer) {
+        previewRenderer.dispose();
+        previewRenderer = null;
+    }
     previewScene = new THREE.Scene();
     previewCamera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
     previewCamera.position.set(0, 1.2, 3.5);
