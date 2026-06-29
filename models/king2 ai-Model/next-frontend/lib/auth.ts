@@ -234,8 +234,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/auth/signin',
-    error: '/auth/signin',
+    signIn: '/king2/auth/signin',
+    error: '/king2/auth/signin',
   },
   debug: process.env.NODE_ENV === 'development',
   events: {
