@@ -5,8 +5,8 @@
  * 
  * Usage:
  *   const controls = new UnifiedGameControls({
- *       onMove: (dx, dy) => { /* Movement */ },
- *       onAction: (action) => { /* Actions: 'attack', 'jump', 'interact', 'inventory', 'build', 'crouch', 'sprint' */ },
+ *       onMove: (dx, dy) => { // Movement },
+ *       onAction: (action) => { // Actions: 'attack', 'jump', 'interact', 'inventory', 'build', 'crouch', 'sprint' },
  *       config: { keyboard: true, touch: true, gamepad: true }
  *   });
  *   controls.init();
