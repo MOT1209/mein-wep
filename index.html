@@ -586,17 +586,38 @@
 <script>
 (function() {
   var banner = document.getElementById('cookie-consent');
-  if (localStorage.getItem('cookieConsent')) { return; }
-  setTimeout(function() { banner.classList.add('visible'); }, 500);
-  document.getElementById('cookie-accept').addEventListener('click', function() {
-    localStorage.setItem('cookieConsent', 'accepted');
+  if (!banner) return;
+  // Safe localStorage access (works in private browsing)
+  var getConsent, setConsent;
+  try {
+    getConsent = function() { return localStorage.getItem('cookieConsent'); };
+    setConsent = function(v) { localStorage.setItem('cookieConsent', v); };
+  } catch(e) {
+    getConsent = function() { return null; };
+    setConsent = function() {};
+  }
+  // Check existing consent
+  if (getConsent()) { banner.style.display = 'none'; return; }
+  // Show banner after short delay
+  setTimeout(function() {
+    banner.style.display = 'flex';
+    requestAnimationFrame(function() {
+      banner.classList.add('visible');
+    });
+  }, 500);
+  // Accept
+  document.getElementById('cookie-accept').addEventListener('click', function accept() {
+    setConsent('accepted');
     banner.classList.remove('visible');
-    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
+    setTimeout(function() { banner.style.display = 'none'; }, 500);
+    try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' }); } catch(e) {}
   });
-  document.getElementById('cookie-decline').addEventListener('click', function() {
-    localStorage.setItem('cookieConsent', 'declined');
+  // Decline
+  document.getElementById('cookie-decline').addEventListener('click', function decline() {
+    setConsent('declined');
     banner.classList.remove('visible');
-    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
+    setTimeout(function() { banner.style.display = 'none'; }, 500);
+    try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' }); } catch(e) {}
   });
 })();
 </script>
