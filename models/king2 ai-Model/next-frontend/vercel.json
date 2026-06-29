@@ -28,6 +28,10 @@
       "destination": "/king2/api/auth/:path*"
     },
     {
+      "source": "/auth/:path*",
+      "destination": "/king2/auth/:path*"
+    },
+    {
       "source": "/api/py/:path*",
       "destination": "https://alking-ai-king2-1.onrender.com/:path*"
     }
