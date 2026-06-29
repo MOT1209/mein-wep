@@ -15,11 +15,11 @@
       ]
     }
   ],
+  "redirects": [
+    { "source": "/king2", "destination": "https://alking-ai-king2-f4rr.vercel.app/king2", "permanent": false },
+    { "source": "/king2/:path*", "destination": "https://alking-ai-king2-f4rr.vercel.app/king2/:path*", "permanent": false }
+  ],
   "rewrites": [
-    { "source": "/api/auth/:path*", "destination": "https://alking-ai-king2-f4rr.vercel.app/king2/api/auth/:path*" },
-    { "source": "/auth/:path*", "destination": "https://alking-ai-king2-f4rr.vercel.app/king2/auth/:path*" },
-    { "source": "/king2", "destination": "https://alking-ai-king2-f4rr.vercel.app/king2" },
-    { "source": "/king2/:path*", "destination": "https://alking-ai-king2-f4rr.vercel.app/king2/:path*" },
     { "source": "/api/gemini", "destination": "/api/gemini" }
   ]
 }
