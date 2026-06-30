@@ -7,6 +7,10 @@
     <meta name="robots" content="index, follow">
     <meta name="author" content="Rashid (MOT1209)">
     <link rel="canonical" href="https://rashid-wep.vercel.app/">
+    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/">
+    <link rel="alternate" hreflang="ar" href="https://rashid-wep.vercel.app/?lang=ar">
+    <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/?lang=de">
+    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://www.google-analytics.com https://generativelanguage.googleapis.com https://openrouter.ai https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com; frame-src 'self' https://*.supabase.co https://pagead2.googlesyndication.com https://www.youtube.com https://youtube.com; worker-src 'self' blob:; media-src 'self' https:; object-src 'none'; base-uri 'self'">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Rashid — Full-Stack Developer & AI Engineer">
@@ -67,6 +71,19 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="css/style.css?v=9.1">
+    <style>
+        .blog-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .blog-preview-card { display: flex; flex-direction: column; gap: 14px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; text-decoration: none; transition: var(--transition); position: relative; overflow: hidden; }
+        .blog-preview-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: 0; transition: var(--transition); }
+        .blog-preview-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+        .blog-preview-card:hover::before { opacity: 1; }
+        .blog-preview-card .bpc-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.1rem; }
+        .blog-preview-card h3 { color: var(--text-high); font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.35; }
+        .blog-preview-card p { color: var(--text-med); font-size: 0.82rem; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .blog-preview-card .bpc-meta { display: flex; gap: 10px; font-size: 0.75rem; color: var(--text-muted); }
+        .blog-preview-card .bpc-meta span { display: flex; align-items: center; gap: 4px; }
+        @media (max-width: 768px) { .blog-preview-grid { grid-template-columns: 1fr; } }
+    </style>
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -82,9 +99,7 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-W139X3X20X"></script>
     <script>gtag('js',new Date());gtag('config','G-W139X3X20X',{'anonymize_ip':true});</script>
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
-</head>
+    </head>
 <body class="dark-mode">
 
     <!-- Skip Link -->
@@ -163,18 +178,8 @@
         </div>
     </section>
 
-    <!-- AdSense Ad Unit -->
-    <div class="container" style="padding: 20px 20px 0;">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-4804302403615958"
-             data-ad-slot="5604153803"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
+    <!-- AdSense Ad Unit (loaded after consent) -->
+    <div id="adsense-container" class="container" style="padding: 20px 20px 0; display:none;"></div>
 
     <div class="section-divider"></div>
 
@@ -437,6 +442,24 @@
 
     <div class="section-divider"></div>
 
+    <!-- Blog Preview -->
+    <section id="blog" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Latest from the <span style="color:var(--accent);">Blog</span></h2>
+                <p>Tutorials, deep dives, and dev logs on web, game dev, AI, and open-source.</p>
+            </div>
+            <div class="blog-preview-grid" id="blog-preview-grid">
+                <div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <div style="text-align:center;margin-top:30px;">
+                <a href="blog/" class="btn btn-primary">View All Articles <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
     <!-- Contact — Final Section -->
     <section id="contact" class="section reveal">
         <div class="container">
@@ -605,12 +628,45 @@
       banner.classList.add('visible');
     });
   }, 500);
+  var AD_CLIENT = 'ca-pub-4804302403615958';
+  var AD_SLOT = '5604153803';
+  var ADSENSE_URL = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + AD_CLIENT;
+
+  function loadAdSense() {
+    var container = document.getElementById('adsense-container');
+    if (!container) return;
+    // Create ad unit markup
+    var ins = document.createElement('ins');
+    ins.className = 'adsbygoogle';
+    ins.style.cssText = 'display:block';
+    ins.setAttribute('data-ad-client', AD_CLIENT);
+    ins.setAttribute('data-ad-slot', AD_SLOT);
+    ins.setAttribute('data-ad-format', 'auto');
+    ins.setAttribute('data-full-width-responsive', 'true');
+    container.appendChild(ins);
+    container.style.display = '';
+    // Load AdSense script if not already loaded
+    if (!window.adsbygoogle) {
+      var s = document.createElement('script');
+      s.src = ADSENSE_URL;
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      s.onload = function() {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      };
+      document.head.appendChild(s);
+    } else {
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    }
+  }
+
   // Accept
   document.getElementById('cookie-accept').addEventListener('click', function accept() {
     setConsent('accepted');
     banner.classList.remove('visible');
     setTimeout(function() { banner.style.display = 'none'; }, 500);
     try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' }); } catch(e) {}
+    loadAdSense();
   });
   // Decline
   document.getElementById('cookie-decline').addEventListener('click', function decline() {
@@ -618,6 +674,9 @@
     banner.classList.remove('visible');
     setTimeout(function() { banner.style.display = 'none'; }, 500);
     try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' }); } catch(e) {}
+    // Remove ad container completely
+    var c = document.getElementById('adsense-container');
+    if (c) c.remove();
   });
 })();
 </script>
@@ -655,6 +714,29 @@
     document.addEventListener('keydown',function(e){
       if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();window.open('admin/login.html','_blank');}
     });
+    </script>
+    <script>
+    (function() {
+        var grid = document.getElementById('blog-preview-grid');
+        if (!grid) return;
+        fetch('blog/posts.json?_=' + Date.now())
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+                var sorted = posts.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+                var top = sorted.slice(0, 3);
+                grid.innerHTML = top.map(function(p) {
+                    var d = new Date(p.date + 'T00:00:00Z');
+                    var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return '<a href="blog/' + p.id + '.html" class="blog-preview-card">' +
+                        '<div class="bpc-icon" style="background:' + p.iconBg + ';color:' + p.iconColor + ';"><i class="fas fa-' + p.icon + '"></i></div>' +
+                        '<h3>' + p.title + '</h3>' +
+                        '<p>' + p.description + '</p>' +
+                        '<div class="bpc-meta"><span><i class="fas fa-calendar"></i> ' + ds + '</span><span><i class="fas fa-clock"></i> ' + p.readTime + ' min</span></div>' +
+                    '</a>';
+                }).join('');
+            })
+            .catch(function() { grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">Could not load articles.</div>'; });
+    })();
     </script>
 </body>
 </html>

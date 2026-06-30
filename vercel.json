@@ -22,6 +22,7 @@
     { "source": "/king2/:path*", "destination": "https://alking-ai-king2-f4rr.vercel.app/king2/:path*", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/api/gemini", "destination": "/api/gemini" }
+    { "source": "/api/gemini", "destination": "/api/gemini" },
+    { "source": "/api/rss", "destination": "/api/rss" }
   ]
 }

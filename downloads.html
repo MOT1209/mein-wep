@@ -6,6 +6,10 @@
     <meta name="description" content="Download APK files for Rashid's apps and games — Quran App, Calculator Vault, Quiz App, KingCraft, Rust Survival, Farm Empire">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://rashid-wep.vercel.app/downloads.html">
+    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/downloads.html">
+    <link rel="alternate" hreflang="ar" href="https://rashid-wep.vercel.app/downloads.html?lang=ar">
+    <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/downloads.html?lang=de">
+    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/downloads.html">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Downloads — Rashid Apps & Games APK">
     <meta property="og:description" content="Download Android APK files for all Rashid apps and games.">
@@ -470,7 +474,9 @@
                 <div class="phone-screen">
                     <div class="phone-loader" id="phone-loader"><span class="phone-spinner"></span></div>
                     <iframe id="preview-iframe" title="App live preview" loading="lazy"
-                        src="apps/maarifah-web/index.html" allow="fullscreen; autoplay; gyroscope"></iframe>
+                        src="apps/maarifah-web/index.html"
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                        allow="fullscreen; autoplay; gyroscope"></iframe>
                 </div>
                 <div class="phone-bar"></div>
             </div>
