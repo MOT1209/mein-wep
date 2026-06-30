@@ -66,11 +66,8 @@
             const { outcome } = await storedPrompt.userChoice;
 
             if (outcome === 'accepted') {
-                console.log('[PWA] User accepted the install prompt');
                 btn.innerHTML = '<i class="fas fa-check"></i> تم التثبيت';
                 btn.disabled = true;
-            } else {
-                console.log('[PWA] User dismissed the install prompt');
             }
         } catch (err) {
             console.warn('[PWA] Install prompt error:', err);
@@ -78,8 +75,7 @@
     };
 
     // Check if app is installed
-    window.addEventListener('appinstalled', (e) => {
-        console.log('PWA was installed');
+    window.addEventListener('appinstalled', () => {
         // Hide all install buttons
         document.querySelectorAll('.install-btn').forEach(btn => {
             btn.style.display = 'none';
@@ -89,7 +85,6 @@
     // Check if running in standalone mode (already installed)
     if (window.matchMedia('(display-mode: standalone)').matches || 
         window.navigator.standalone === true) {
-        console.log('Running in standalone mode');
         document.body.classList.add('pwa-standalone');
     }
 

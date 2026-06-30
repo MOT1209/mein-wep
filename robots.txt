@@ -1,7 +1,6 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
-Disallow: /game-vault/
 Disallow: /src/
 
 Sitemap: https://rashid-wep.vercel.app/sitemap.xml

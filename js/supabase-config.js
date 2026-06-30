@@ -15,7 +15,6 @@ if (typeof supabase !== 'undefined') {
         Rashid_SUPABASE.url,
         Rashid_SUPABASE.anonKey
     );
-    console.log('Supabase client initialized with anon key');
 } else {
-    console.error('Supabase library not found. Make sure to include the CDN in your HTML.');
+    console.warn('Supabase library not found.');
 }

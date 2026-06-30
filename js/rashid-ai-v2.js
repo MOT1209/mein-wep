@@ -287,7 +287,7 @@ class RashidAI {
         this.loadVoices();
         this.checkGeminiAvailability();
         await this.loadRemoteKnowledge();
-        console.log("🚀 Rashid-AI v3.0 Ready");
+        // Rashid-AI v3.0 Ready
     }
 
     async setupAvatar() {
@@ -306,7 +306,7 @@ class RashidAI {
                 this.avatar = new RobotAvatar('ai-avatar-container');
                 window.__rashidAvatar = this.avatar; // expose for performance-mode control
             } catch (e) {
-                console.warn('3D Avatar disabled:', e.message);
+                console.warn('3D Avatar disabled');
             }
         }
     }
@@ -317,9 +317,9 @@ class RashidAI {
             if (cfg.proxyUrl && cfg.proxyUrl !== '') {
                 this.geminiEnabled = true;
                 this.useProxy = true;
-                console.log('✅ Gemini API enabled via /api/gemini (Vercel proxy)');
+                // Gemini API enabled via /api/gemini (Vercel proxy)
             } else {
-                console.warn('⚠️ Gemini API not configured — using keyword fallback only');
+                // Gemini API not configured — using keyword fallback only
             }
         }
     }
