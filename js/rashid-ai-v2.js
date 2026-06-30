@@ -292,22 +292,24 @@ class RashidAI {
 
     async setupAvatar() {
         const visualizer = document.querySelector('.visualizer-container');
-        if (visualizer) {
-            const avatarDiv = document.createElement('div');
-            avatarDiv.id = 'ai-avatar-container';
-            avatarDiv.style.width = '100%';
-            avatarDiv.style.height = '100%';
-            avatarDiv.style.position = 'absolute';
-            avatarDiv.style.top = '0';
-            avatarDiv.style.left = '0';
-            visualizer.appendChild(avatarDiv);
-            try {
-                await loadThreeJS();
-                this.avatar = new RobotAvatar('ai-avatar-container');
-                window.__rashidAvatar = this.avatar; // expose for performance-mode control
-            } catch (e) {
-                console.warn('3D Avatar disabled');
-            }
+        if (!visualizer) return;
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        const conn = navigator.connection;
+        if (conn && (conn.effectiveType === 'slow-2g' || conn.effectiveType === '2g')) return;
+        const avatarDiv = document.createElement('div');
+        avatarDiv.id = 'ai-avatar-container';
+        avatarDiv.style.width = '100%';
+        avatarDiv.style.height = '100%';
+        avatarDiv.style.position = 'absolute';
+        avatarDiv.style.top = '0';
+        avatarDiv.style.left = '0';
+        visualizer.appendChild(avatarDiv);
+        try {
+            await loadThreeJS();
+            this.avatar = new RobotAvatar('ai-avatar-container');
+            window.__rashidAvatar = this.avatar;
+        } catch (e) {
+            // 3D Avatar disabled
         }
     }
 
