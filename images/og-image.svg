@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a1a"/>
+      <stop offset="100%" stop-color="#1a0a2e"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Grid pattern -->
+  <g opacity="0.04">
+    <line x1="0" y1="0" x2="0" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="80" y1="0" x2="80" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="160" y1="0" x2="160" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="240" y1="0" x2="240" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="320" y1="0" x2="320" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="400" y1="0" x2="400" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="480" y1="0" x2="480" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="560" y1="0" x2="560" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="640" y1="0" x2="640" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="720" y1="0" x2="720" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="800" y1="0" x2="800" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="880" y1="0" x2="880" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="960" y1="0" x2="960" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="1040" y1="0" x2="1040" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="1120" y1="0" x2="1120" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="1200" y1="0" x2="1200" y2="630" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="0" x2="1200" y2="0" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="63" x2="1200" y2="63" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="126" x2="1200" y2="126" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="189" x2="1200" y2="189" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="252" x2="1200" y2="252" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="315" x2="1200" y2="315" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="378" x2="1200" y2="378" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="441" x2="1200" y2="441" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="504" x2="1200" y2="504" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="567" x2="1200" y2="567" stroke="#fff" stroke-width="0.5"/>
+    <line x1="0" y1="630" x2="1200" y2="630" stroke="#fff" stroke-width="0.5"/>
+  </g>
+  <!-- Decorative circles -->
+  <circle cx="1050" cy="120" r="180" fill="none" stroke="#38bdf8" stroke-width="0.5" opacity="0.08"/>
+  <circle cx="1050" cy="120" r="250" fill="none" stroke="#818cf8" stroke-width="0.5" opacity="0.05"/>
+  <!-- Monogram "R" -->
+  <text x="250" y="370" font-family="'JetBrains Mono', monospace, sans-serif" font-size="200" font-weight="700" fill="url(#glow)" text-anchor="middle" dominant-baseline="central">R</text>
+  <!-- Name -->
+  <text x="440" y="310" font-family="'Inter', -apple-system, sans-serif" font-size="72" font-weight="700" fill="#ffffff">Rashid</text>
+  <!-- Subtitle -->
+  <text x="440" y="370" font-family="'Inter', -apple-system, sans-serif" font-size="28" font-weight="400" fill="#94a3b8">Full-Stack Developer &amp; AI Engineer</text>
+  <!-- Decorative line -->
+  <line x1="440" y1="400" x2="750" y2="400" stroke="#38bdf8" stroke-width="2" opacity="0.5"/>
+  <!-- URL -->
+  <text x="440" y="440" font-family="'JetBrains Mono', monospace, sans-serif" font-size="16" fill="#64748b">rashid-wep.vercel.app</text>
+  <!-- Bottom bar -->
+  <rect x="0" y="610" width="1200" height="20" fill="#38bdf8" opacity="0.1"/>
+</svg>

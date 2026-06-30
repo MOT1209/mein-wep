@@ -15,12 +15,12 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Rashid — Full-Stack Developer & AI Engineer">
     <meta property="og:description" content="Building AI-powered platforms, 3D games, and open-source tools. Creator of KingCraft, Alking, and Rashid AI.">
-    <meta property="og:image" content="https://rashid-wep.vercel.app/images/logo.webp">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
     <meta property="og:url" content="https://rashid-wep.vercel.app/">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Rashid — Full-Stack Developer & AI Engineer">
     <meta name="twitter:description" content="Building AI-powered platforms, 3D games, and open-source tools.">
-    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/logo.webp">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
     <meta name="twitter:creator" content="@MOT1209">
     <title>Rashid — Full-Stack Developer & AI Engineer</title>
 
@@ -32,7 +32,7 @@
       "name": "Rashid",
       "alternateName": "MOT1209",
       "url": "https://rashid-wep.vercel.app",
-      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "image": "https://rashid-wep.vercel.app/images/og-image.svg",
       "jobTitle": "Full-Stack Developer & AI Engineer",
       "description": "Building AI-powered platforms, 3D games with Three.js, and open-source tools. Creator of KingCraft and Alking AI.",
       "knowsAbout": ["JavaScript","TypeScript","Python","Next.js","Three.js","Supabase","React","Node.js","AI","PWA","PostgreSQL","Gemini"],
@@ -179,7 +179,7 @@
     </section>
 
     <!-- AdSense Ad Unit (loaded after consent) -->
-    <div id="adsense-container" class="container" style="padding: 20px 20px 0; display:none;"></div>
+    <div id="adsense-container" class="container" style="padding: 20px 20px 0; min-height: 90px; display:none;"></div>
 
     <div class="section-divider"></div>
 
@@ -619,8 +619,13 @@
     getConsent = function() { return null; };
     setConsent = function() {};
   }
-  // Check existing consent
-  if (getConsent()) { banner.style.display = 'none'; return; }
+  // Check existing consent (accepted/declined)
+  var existingConsent = getConsent();
+  if (existingConsent) {
+    banner.style.display = 'none';
+    if (existingConsent === 'accepted') loadAdSense();
+    return;
+  }
   // Show banner after short delay
   setTimeout(function() {
     banner.style.display = 'flex';

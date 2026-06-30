@@ -13,7 +13,7 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Downloads — Rashid Apps & Games APK">
     <meta property="og:description" content="Download Android APK files for all Rashid apps and games.">
-    <meta property="og:image" content="https://rashid-wep.vercel.app/images/logo.webp">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
     <meta property="og:url" content="https://rashid-wep.vercel.app/downloads.html">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Downloads — Rashid Apps & Games APK">
@@ -497,16 +497,21 @@
                 </div>
                 <div class="step">
                     <div class="step-num">2</div>
+                    <h4>Verify File Integrity</h4>
+                    <p>Compare the APK's SHA-256 hash (click to copy on each card) with a hash checker app to ensure the file hasn't been modified.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
                     <h4>Open App</h4>
                     <p>Launch the app. It checks for updates automatically.</p>
                 </div>
                 <div class="step">
-                    <div class="step-num">3</div>
+                    <div class="step-num">4</div>
                     <h4>Update Available</h4>
                     <p>When a new version is released, a banner appears: "Update Available".</p>
                 </div>
                 <div class="step">
-                    <div class="step-num">4</div>
+                    <div class="step-num">5</div>
                     <h4>Download Update</h4>
                     <p>Tap the button to download and install the new APK at your convenience.</p>
                 </div>
@@ -534,19 +539,26 @@
                 <li class="guide-step">
                     <span class="num">2</span>
                     <div class="body">
+                        <h4>Verify the file (optional but recommended)</h4>
+                        <p>Each APK page shows its <strong>SHA-256 fingerprint</strong>. Click it to copy the full hash. Use a hash checker app like <strong>Hash Droid</strong> to confirm the file matches — this guarantees the file hasn't been tampered with.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">3</span>
+                    <div class="body">
                         <h4>Open the file</h4>
                         <p>Tap the download notification, or find the file in your <strong>Downloads</strong> / Files app and open it.</p>
                     </div>
                 </li>
                 <li class="guide-step">
-                    <span class="num">3</span>
+                    <span class="num">4</span>
                     <div class="body">
                         <h4>Allow "Unknown Sources"</h4>
                         <p>Android may warn that installing is blocked. Tap <strong>Settings</strong>, then enable <strong>Allow from this source</strong> (also called "Install unknown apps") for your browser or file manager.</p>
                     </div>
                 </li>
                 <li class="guide-step">
-                    <span class="num">4</span>
+                    <span class="num">5</span>
                     <div class="body">
                         <h4>Tap Install</h4>
                         <p>Go back and press <strong>Install</strong>. Once it finishes, open the app and you're ready to go!</p>
@@ -571,7 +583,8 @@
                 type: 'app',
                 desc: 'Read and listen to the Holy Quran with multiple reciters, tafsir, translation, and offline bookmarks.',
                 version: '1.0.0',
-                apkUrl: BASE + '/apks/quran-app-v1.0.0.apk'
+                apkUrl: BASE + '/apks/quran-app-v1.0.0.apk',
+                sha256: '6255871c9900e8f006d51b7de1cbae1a1f2a499cc47a8864498433dbee7ebf3a'
             },
             {
                 name: 'Smart Vault',
@@ -579,15 +592,17 @@
                 type: 'app',
                 desc: 'A calculator that doubles as a secret vault. Hide files and data behind a working calculator.',
                 version: '1.0.0',
-                apkUrl: BASE + '/apks/calculator-app-v1.0.0.apk'
+                apkUrl: BASE + '/apks/calculator-app-v1.0.0.apk',
+                sha256: 'b405af3fbd11f6b3dcc1959829b243f4b060788e949aa80cc8466c692bbbd13a'
             },
             {
                 name: 'Quiz Master',
                 icon: '<i class="fas fa-brain" style="color:#a855f7"></i>',
                 type: 'app',
                 desc: 'Multi-category quiz platform with timers, scoring, and progress tracking across various topics.',
-                version: '1.0.0',
-                apkUrl: BASE + '/apks/quiz-app-v1.0.0.apk'
+                version: '1.4.0',
+                apkUrl: BASE + '/apks/quiz-app-v1.4.0.apk',
+                sha256: 'ea127caab38bab72e568e1dac11eb46ec27a88bc63c8fb7e444ccbd9552c39ee'
             },
             {
                 name: 'KingCraft',
@@ -595,7 +610,8 @@
                 type: 'game',
                 desc: 'A 3D voxel sandbox game. Mine resources, craft tools, build structures, and survive nights.',
                 version: '0.6.0',
-                apkUrl: BASE + '/apks/kingcraft-game-v0.6.0.apk'
+                apkUrl: BASE + '/apks/kingcraft-game-v0.6.0.apk',
+                sha256: '140d0cf548758affac55d64af80ae3008f1259e11857451a416e73d6047dde85'
             },
             {
                 name: 'Rust Survival 3D',
@@ -603,7 +619,8 @@
                 type: 'game',
                 desc: 'Physics-driven sandbox survival game. Mine, craft, and build structures in 3D.',
                 version: '1.1.0',
-                apkUrl: BASE + '/apks/rust-game-v1.1.0.apk'
+                apkUrl: BASE + '/apks/rust-game-v1.1.0.apk',
+                sha256: '9ec61c3adbac2f3eebcd4ed287e22d769f5160949f9c6b7cc21a649d17425294'
             },
             {
                 name: 'Farm Empire',
@@ -611,7 +628,8 @@
                 type: 'game',
                 desc: 'Build and expand your dream farming empire with crop simulations and real-time weather.',
                 version: '2.0.0',
-                apkUrl: BASE + '/apks/farm-game-v2.0.0.apk'
+                apkUrl: BASE + '/apks/farm-game-v2.0.0.apk',
+                sha256: '09fc1b8946f6bca1fe91033f12cef528d9682960dfa462a4399d902b4feb091f'
             }
         ];
 
@@ -647,6 +665,12 @@
                         <span>${exists ? '<span class="update-badge"><i class="fas fa-circle"></i> Ready</span>' : '<span style="color:var(--text-low)"><i class="fas fa-spinner fa-spin"></i> Pending first build</span>'}</span>
                     </div>
                     ${btnHtml}
+                    <div class="sha-block" style="margin:10px 0 6px;font-size:11px;">
+                        <span style="color:var(--text-low);font-family:'JetBrains Mono',monospace;cursor:pointer;"
+                              onclick="copySha('${p.sha256}',this)" title="Click to copy SHA-256">
+                            <i class="fas fa-fingerprint"></i> SHA-256: ${p.sha256.substring(0,16)}&hellip;${p.sha256.substring(48)}
+                        </span>
+                    </div>
                     <button class="install-help" type="button" data-open-guide><i class="fas fa-circle-question"></i> How do I install this?</button>
                 `;
                 grid.appendChild(card);
@@ -701,6 +725,20 @@
                 if (openBtn) openBtn.href = src;
             }));
         })();
+
+        /* ===== SHA-256 copy helper ===== */
+        function copySha(hash, el) {
+            if (!navigator.clipboard) return;
+            navigator.clipboard.writeText(hash).then(function() {
+                var orig = el.innerHTML;
+                el.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Copied!';
+                el.style.color = '#22c55e';
+                setTimeout(function() {
+                    el.innerHTML = orig;
+                    el.style.color = '';
+                }, 2000);
+            }).catch(function() {});
+        }
     </script>
 
     <!-- Footer -->
