@@ -347,6 +347,13 @@ class RashidAI {
                     const welcome = this.userLang === 'ar' ? "أهلاً بك! ربي يسعد يومك، شلون أقدر أساعدك اليوم؟" : "Welcome! I'm Rashid-AI. How can I assist you today?";
                     this.speak(welcome);
                     this.addChatMessage(welcome, 'bot');
+                    // Voice support notice
+                    var hasSpeech = 'webkitSpeechRecognition' in window;
+                    if (!hasSpeech) {
+                        var micBtn = document.getElementById('voice-mic-btn');
+                        if (micBtn) { micBtn.disabled = true; micBtn.style.opacity = '0.4'; micBtn.title = 'Speech not supported in this browser' }
+                        this.addChatMessage('Voice input works best in Chrome/Edge. You can type your message below.', 'bot');
+                    }
                 }
             };
         }
@@ -505,7 +512,12 @@ class RashidAI {
     }
 
     toggleListening() {
-        if (!this.recognition) return alert("Speech recognition not supported.");
+        if (!this.recognition) {
+            this.addChatMessage('Voice input requires Chrome or Edge on desktop/Android. You can still type your message below.', 'bot');
+            var micBtn = document.getElementById('voice-mic-btn');
+            if (micBtn) { micBtn.disabled = true; micBtn.style.opacity = '0.4'; micBtn.title = 'Speech not supported in this browser' }
+            return;
+        }
         this.isListening ? this.recognition.stop() : this.recognition.start();
     }
 
