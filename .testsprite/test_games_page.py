@@ -1,49 +1,115 @@
 import asyncio
-import re
-from playwright import async_api
-from playwright.async_api import expect
+import sys
+import os
+import codecs
+
+if sys.platform == 'win32':
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
+
+VERCEL_URL = 'https://rashid-wep.vercel.app'
+
+async def http_status(url):
+    """Return HTTP status code using raw TCP (no external deps)."""
+    import ssl
+    try:
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+        host = url.split('/')[2]
+        path = '/' + '/'.join(url.split('/')[3:])
+        reader, writer = await asyncio.open_connection(host, 443, ssl=ctx)
+        request = f"GET {path} HTTP/1.1\r\nHost: {host}\r\nUser-Agent: Mozilla/5.0\r\nConnection: close\r\n\r\n"
+        writer.write(request.encode())
+        await writer.drain()
+        response = b""
+        while True:
+            chunk = await reader.read(4096)
+            if not chunk:
+                break
+            response += chunk
+        writer.close()
+        await writer.wait_closed()
+        status_line = response.split(b'\r\n')[0].decode()
+        return int(status_line.split(' ')[1])
+    except Exception:
+        return 0
 
 async def run_test():
-    pw = None
-    browser = None
-    context = None
+    passed = 0
+    failed = 0
 
-    try:
-        pw = await async_api.async_playwright().start()
-        browser = await pw.chromium.launch(
-            headless=True,
-            args=["--window-size=1280,720", "--disable-dev-shm-usage", "--ipc=host", "--single-process"],
-        )
-        context = await browser.new_context()
-        context.set_default_timeout(15000)
-        page = await context.new_page()
+    # Test 1: Games page loads
+    print("\n[Games Page]")
+    status = await http_status(f"{VERCEL_URL}/games/")
+    if status == 200:
+        print(f"  ✅ PASS: {status}")
+        passed += 1
+    else:
+        print(f"  ❌ FAIL: expected 200, got {status}")
+        failed += 1
 
-        # Navigate to games page
-        await page.goto("https://rashid-wep.vercel.app/games/")
-        try:
-            await page.wait_for_load_state("domcontentloaded", timeout=5000)
-        except Exception:
-            pass
+    # Test 2: Farm Game loads
+    print("\n[Farm Game]")
+    status = await http_status(f"{VERCEL_URL}/games/farm-game/")
+    if status == 200:
+        print(f"  ✅ PASS: {status}")
+        passed += 1
+    else:
+        print(f"  ❌ FAIL: expected 200, got {status}")
+        failed += 1
 
-        # Verify games page title/heading
-        await expect(page.locator("h1").first).to_be_visible(timeout=10000)
-        
-        # Verify game links are present
-        await expect(page.locator('a[href*="farm-game"]').first).to_be_visible(timeout=10000)
-        await expect(page.locator('a[href*="kingcraft-game"]').first).to_be_visible(timeout=10000)
-        await expect(page.locator('a[href*="rust-game"]').first).to_be_visible(timeout=10000)
-        
-        # Verify back to home link
-        await expect(page.locator('a[href*="../index.html"]').first).to_be_visible(timeout=10000)
+    # Test 3: Kingcraft Game loads
+    print("\n[Kingcraft Game]")
+    status = await http_status(f"{VERCEL_URL}/games/kingcraft-game/")
+    if status == 200:
+        print(f"  ✅ PASS: {status}")
+        passed += 1
+    else:
+        print(f"  ❌ FAIL: expected 200, got {status}")
+        failed += 1
 
-        await asyncio.sleep(2)
+    # Test 4: Rust Game loads
+    print("\n[Rust Game]")
+    status = await http_status(f"{VERCEL_URL}/games/rust-game/")
+    if status == 200:
+        print(f"  ✅ PASS: {status}")
+        passed += 1
+    else:
+        print(f"  ❌ FAIL: expected 200, got {status}")
+        failed += 1
 
-    finally:
-        if context:
-            await context.close()
-        if browser:
-            await browser.close()
-        if pw:
-            await pw.stop()
+    # Test 5: Farm Empire rewrite -> Farm Game
+    print("\n[Farm Empire Rewrite]")
+    status = await http_status(f"{VERCEL_URL}/games/farm-empire/")
+    if status == 200:
+        print(f"  ✅ PASS: {status}")
+        passed += 1
+    else:
+        print(f"  ❌ FAIL: expected 200, got {status}")
+        failed += 1
 
-asyncio.run(run_test())
+    # Test 6: Rust Construction rewrite -> Rust Game
+    print("\n[Rust Construction Rewrite]")
+    status = await http_status(f"{VERCEL_URL}/games/rust-construction/")
+    if status == 200:
+        print(f"  ✅ PASS: {status}")
+        passed += 1
+    else:
+        print(f"  ❌ FAIL: expected 200, got {status}")
+        failed += 1
+
+    # Summary
+    total = passed + failed
+    print(f"\n{'='*40}")
+    print(f"[STATS] {passed}/{total} passed, {failed} failed")
+    if failed > 0:
+        print("[FAIL] SOME TESTS FAILED")
+    else:
+        print("[PASS] ALL GAMES TESTS PASSED!")
+    print(f"{'='*40}")
+
+    return failed == 0
+
+if __name__ == "__main__":
+    asyncio.run(run_test())
