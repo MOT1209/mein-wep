@@ -202,26 +202,46 @@
                     return;
                 }
                 lastSubmit = now;
-                fetch('https://formsubmit.co/ajax/zwnt45602@gmail.com', {
+                // Try Vercel API first, fallback to FormSubmit
+                fetch('/api/contact', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 })
                 .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    if (data.success) {
+                .then(function(resp) {
+                    if (resp.success) {
                         feedback.className = 'success';
                         feedback.textContent = 'Message sent successfully! I will get back to you soon.';
                         feedback.style.display = 'block';
                         form.reset();
                     } else {
-                        throw new Error('Send failed');
+                        throw new Error(resp.error || 'Send failed');
                     }
                 })
                 .catch(function() {
-                    feedback.className = 'error';
-                    feedback.textContent = 'Failed to send message. Please email me directly at zwnt45602@gmail.com.';
-                    feedback.style.display = 'block';
+                    // Fallback to FormSubmit
+                    return fetch('https://formsubmit.co/ajax/zwnt45602@gmail.com', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(fsData) {
+                        if (fsData.success) {
+                            feedback.className = 'success';
+                            feedback.textContent = 'Message sent successfully! I will get back to you soon.';
+                            feedback.style.display = 'block';
+                            form.reset();
+                        } else {
+                            throw new Error('FormSubmit failed');
+                        }
+                    })
+                    .catch(function() {
+                        feedback.className = 'error';
+                        feedback.textContent = 'Failed to send message. Please email me directly at zwnt45602@gmail.com.';
+                        feedback.style.display = 'block';
+                    });
                 })
                 .finally(function() {
                     submitBtn.disabled = false;
