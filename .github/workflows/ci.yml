@@ -44,9 +44,26 @@ jobs:
         run: |
           echo "🔍 Run Lighthouse locally: npx lighthouse https://rashid-wep.vercel.app/ --output=json"
 
+  test:
+    name: 🧪 API & Pages Tests
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run test3.py (24 API & page checks)
+        run: python .testsprite/test3.py
+      - name: Run games tests
+        run: python .testsprite/test_games_page.py
+      - name: Run apps tests
+        run: python .testsprite/test_maarifah_web.py
+
   deploy:
     name: 🚀 Deploy
-    needs: [lint]
+    needs: [test]
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

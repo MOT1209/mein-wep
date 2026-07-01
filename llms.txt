@@ -1,0 +1,34 @@
+# Rashid — Full-Stack Developer & AI Engineer
+> Building the future with code & AI.
+
+## Docs
+- About: https://rashid-wep.vercel.app/about.html
+- Privacy Policy: https://rashid-wep.vercel.app/privacy.html
+- Terms of Service: https://rashid-wep.vercel.app/terms.html
+
+## Projects
+
+### Games
+- Farm Game (3D farming simulation): https://rashid-wep.vercel.app/games/farm-game/
+- Kingcraft Game: https://rashid-wep.vercel.app/games/kingcraft-game/
+- Rust Construction (3D building): https://rashid-wep.vercel.app/games/rust-game/
+
+### Apps
+- Calculator App: https://rashid-wep.vercel.app/apps/calculator-app/
+- Quran App (digital Quran reader): https://rashid-wep.vercel.app/apps/quran-app/
+- Quiz App (interactive quizzes): https://rashid-wep.vercel.app/apps/quiz-app/
+- Maarifah Web (knowledge platform): https://rashid-wep.vercel.app/apps/maarifah-web/
+
+### AI Models
+- Rashid Model: https://rashid-wep.vercel.app/models/Rashid-Model/
+
+### Vault (Knowledge Repository)
+- Prompts: https://rashid-wep.vercel.app/vault/prompts/
+
+## Blog
+- Blog index: https://rashid-wep.vercel.app/blog/
+- RSS Feed: https://rashid-wep.vercel.app/blog/rss.xml
+
+## Contact
+- Contact form: https://rashid-wep.vercel.app/contact.html
+- GitHub: https://github.com/MOT1209
