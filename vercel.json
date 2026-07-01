@@ -25,6 +25,7 @@
     { "source": "/api/gemini", "destination": "/api/gemini" },
     { "source": "/api/rss", "destination": "/api/rss" },
     { "source": "/api/contact", "destination": "/api/contact" },
+    { "source": "/contact", "destination": "/api/contact" },
     { "source": "/apps/calculator-vault", "destination": "/apps/calculator-app" },
     { "source": "/apps/calculator-vault/", "destination": "/apps/calculator-app/" },
     { "source": "/apps/calculator-vault/:path*", "destination": "/apps/calculator-app/:path*" },
