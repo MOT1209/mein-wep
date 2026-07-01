@@ -1,27 +1,88 @@
 var GAME = GAME || {};
+
+// ============================================================
+// 🌍 Farm Game — World Generator v3.0 (Terrain + Grass + Wind)
+// ============================================================
 GAME.world = {
   scene: null,
   objects: [],
+  windTime: 0,
+  windStrength: 0.4,
+  grassInst: null,
+  grassPhases: null,
+  treeGroups: [],
 
   init: function(scene) {
     this.scene = scene;
     if (GAME.collision) GAME.collision.clear();
-    // 🛡️ بناء العالم خطوة بخطوة — فشل أي قطعة لا يوقف بناء البقية
-    var steps = ['createSky', 'createGround', 'createPlayerHouse', 'createBarn',
+    var steps = ['createSky', 'createTerrain', 'createPlayerHouse', 'createBarn',
       'createMarket', 'createFarmPlots', 'createTrees', 'createFences', 'createPond',
       'createFlowers', 'createAnimalPens', 'createFeedingTrough', 'createDirtPath',
-      'createScarecrow', 'createWell'];
+      'createScarecrow', 'createWell', 'createGrass', 'createBushes'];
     for (var i = 0; i < steps.length; i++) {
       try { this[steps[i]](); }
       catch (e) { console.error('[FarmGame] world.' + steps[i] + ' failed:', e.message); }
     }
   },
 
+  // ---- Height function for terrain ----
+  _getHeight: function(x, z) {
+    // Flat centre 40x40 للعب السلس
+    var dist = Math.sqrt(x * x + z * z);
+    if (dist < 20) return 0;
+    var blend = Math.min(1, (dist - 20) / 20);
+
+    // Multi-octave layered noise (sin/cos pseudo-noise)
+    var h = 0;
+    h += Math.sin(x * 0.025 + z * 0.018) * 0.7;
+    h += Math.sin(x * 0.050 - z * 0.035) * 0.4;
+    h += Math.cos(x * 0.080 + z * 0.060) * 0.25;
+    h += Math.sin(x * 0.015 + z * 0.028) * 0.5;
+    // تلال جهة الغابة
+    if (x > 25 || x < -25 || z > 25 || z < -25) {
+      h += Math.sin(x * 0.040) * Math.cos(z * 0.035) * 0.6;
+    }
+    // منخفض قرب البركة
+    var pondDist = Math.sqrt((x + 10) * (x + 10) + (z + 27) * (z + 27));
+    if (pondDist < 6) h -= (1 - pondDist / 6) * 0.5;
+
+    return h * blend;
+  },
+
+  // ---- Terrain colour based on height ----
+  _terrainColor: function(h, x, z) {
+    var r, g, b;
+    if (h < -0.3) {
+      // Low — near water, dark rich soil
+      r = 0.30; g = 0.42; b = 0.20;
+    } else if (h < 0.2) {
+      // Normal grass
+      var t = (h + 0.3) / 0.5;
+      r = 0.30 + t * 0.18;
+      g = 0.42 + t * 0.32;
+      b = 0.20 + t * 0.10;
+    } else if (h < 0.8) {
+      // Higher — lighter grass
+      var t = (h - 0.2) / 0.6;
+      r = 0.48 + t * 0.10;
+      g = 0.74 + t * 0.05;
+      b = 0.30 + t * 0.05;
+    } else {
+      // Peaks — rocky brown
+      r = 0.55; g = 0.52; b = 0.35;
+    }
+    // Random micro-variation
+    var v = 0.92 + (Math.sin(x * 3.7 + z * 5.1) * 0.08);
+    return { r: r * v, g: g * v, b: b * v };
+  },
+
+  // ============================================================
+  // 🌄 Sky (unchanged from v2 — dynamic day/night shader)
+  // ============================================================
   createSky: function() {
     var s = this.scene;
-    s.background = null; // قبة السماء تتولى الخلفية
+    s.background = null;
 
-    // 🌌 قبة سماء بتدرج لوني ديناميكي (ShaderMaterial)
     var skyGeo = new THREE.SphereGeometry(180, 20, 10);
     var skyMat = new THREE.ShaderMaterial({
       uniforms: {
@@ -55,15 +116,12 @@ GAME.world = {
     this.sky = sky;
     this.skyMat = skyMat;
 
-    // 🌫️ ضباب يتغير مع الوقت
     s.fog = new THREE.Fog(0x87CEEB, 70, 120);
 
-    // 💡 إضاءة نصف الكرة (سماء + أرض)
     var hemi = new THREE.HemisphereLight(0x87CEEB, 0x7ec850, 0.6);
     s.add(hemi);
     this.hemiLight = hemi;
 
-    // ☀️ ضوء الشمس الاتجاهي
     var sun = new THREE.DirectionalLight(0xffeedd, 1.0);
     sun.position.set(30, 40, 20);
     sun.castShadow = true;
@@ -78,12 +136,11 @@ GAME.world = {
     s.add(sun);
     this.sunLight = sun;
 
-    // 🌙 ضوء محيط
     var amb = new THREE.AmbientLight(0x404060, 0.3);
     s.add(amb);
     this.ambLight = amb;
 
-    // ☀️ كرة الشمس (Sprite بتدرج إشعاعي)
+    // Sun sprite
     var sunCv = document.createElement('canvas'); sunCv.width = sunCv.height = 128;
     var sc = sunCv.getContext('2d');
     var sg = sc.createRadialGradient(64,64,0, 64,64,64);
@@ -100,7 +157,7 @@ GAME.world = {
     this.sunSprite.scale.set(24, 24, 1);
     s.add(this.sunSprite);
 
-    // 🌕 كرة القمر (Sprite أزرق فضي)
+    // Moon sprite
     var moonCv = document.createElement('canvas'); moonCv.width = moonCv.height = 128;
     var mc = moonCv.getContext('2d');
     var mg = mc.createRadialGradient(64,64,0, 64,64,64);
@@ -117,7 +174,7 @@ GAME.world = {
     this.moonSprite.scale.set(14, 14, 1);
     s.add(this.moonSprite);
 
-    // ✨ حقل النجوم (Points فوق الأفق)
+    // Stars
     var starCount = 600;
     var sGeo = new THREE.BufferGeometry();
     var sPos = new Float32Array(starCount * 3);
@@ -137,26 +194,43 @@ GAME.world = {
     s.add(this.stars);
   },
 
-  createGround: function() {
-    var geo = new THREE.PlaneGeometry(120, 120, 60, 60);
+  // ============================================================
+  // 🏔️ Enhanced Terrain — height + vertex colors + grass blend
+  // ============================================================
+  createTerrain: function() {
+    var geo = new THREE.PlaneGeometry(120, 120, 80, 80);
     var pos = geo.attributes.position;
+    var colors = new Float32Array(pos.count * 3);
+
     for (var i = 0; i < pos.count; i++) {
       var x = pos.getX(i), z = pos.getY(i);
-      var dist = Math.sqrt(x * x + z * z);
-      var h = Math.sin(x * 0.05) * Math.cos(z * 0.05) * 0.15;
-      if (dist < 8) h = 0;
+      var h = this._getHeight(x, z);
       pos.setZ(i, h);
+      var c = this._terrainColor(h, x, z);
+      colors[i*3]   = c.r;
+      colors[i*3+1] = c.g;
+      colors[i*3+2] = c.b;
     }
+
     pos.needsUpdate = true;
+    geo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     geo.computeVertexNormals();
-    var mat = new THREE.MeshLambertMaterial({ color: 0x7ec850 });
+
+    var mat = new THREE.MeshLambertMaterial({
+      vertexColors: true,
+      flatShading: false
+    });
     var mesh = new THREE.Mesh(geo, mat);
     mesh.rotation.x = -Math.PI / 2;
     mesh.receiveShadow = true;
     this.scene.add(mesh);
     this.objects.push(mesh);
+    this.terrainMesh = mesh;
   },
 
+  // ============================================================
+  // 🏠 Buildings
+  // ============================================================
   createBuilding: function(x, z, w, d, wallColor, roofColor, height) {
     if (!height) height = 3;
     var group = new THREE.Group();
@@ -186,11 +260,22 @@ GAME.world = {
     var door = new THREE.Mesh(new THREE.BoxGeometry(1, 1.8, 0.1), doorMat);
     door.position.set(-15, 0.9, -12.3);
     this.scene.add(door); this.objects.push(door);
+
+    // النوافذ تضيء ليلاً
     var winMat = new THREE.MeshLambertMaterial({ color: 0x88ccff });
     var win1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.1), winMat);
     win1.position.set(-16.5, 1.6, -12.3); this.scene.add(win1); this.objects.push(win1);
     var win2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.1), winMat);
     win2.position.set(-13.5, 1.6, -12.3); this.scene.add(win2); this.objects.push(win2);
+
+    // 🏠 ضوء داخلي دافئ ليلاً
+    var glowMat = new THREE.MeshBasicMaterial({
+      color: 0xffaa44, transparent: true, opacity: 0.15
+    });
+    var glow = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 1.5), glowMat);
+    glow.position.set(-15, 1.2, -12.1);
+    this.scene.add(glow); this.objects.push(glow);
+    this.houseGlow = glow;
   },
 
   createBarn: function() {
@@ -239,7 +324,6 @@ GAME.world = {
     var spacing = 2.8;
     var startX = -(plotsPerRow - 1) * spacing / 2;
     var startZ = 2;
-    // ⚡ دمج بلاطات المزرعة في InstancedMesh (36 بلاطة × 2 = 72 ميش → 2 فقط)
     var plotCount = 6 * plotsPerRow;
     var _d = new THREE.Object3D();
     var dirtInst = new THREE.InstancedMesh(new THREE.BoxGeometry(2.4, 0.15, 2.4), dirtMat, plotCount);
@@ -259,6 +343,8 @@ GAME.world = {
     edgeInst.instanceMatrix.needsUpdate = true;
     this.scene.add(dirtInst); this.objects.push(dirtInst);
     this.scene.add(edgeInst); this.objects.push(edgeInst);
+
+    // Fence around plots
     var fenceMat = new THREE.MeshLambertMaterial({ color: 0x8B7355 });
     var fw = (plotsPerRow) * spacing / 2 + 2.2;
     var fd = (6) * spacing / 2 + 2.2;
@@ -277,40 +363,55 @@ GAME.world = {
     }
   },
 
+  // ============================================================
+  // 🌳 Trees v2 — more varieties + wind support
+  // ============================================================
   createTrees: function() {
     var trunkColors = [0x8B5A2B, 0x6b4423, 0x5d3a1a, 0x7a4a2a];
-    var leafColors = [0x3a7d2c, 0x2d6b1e, 0x4a8c3f, 0x5a9a4a, 0x228B22];
-    var treeTypes = [
-      // [positions]
+    var leafColors = [0x3a7d2c, 0x2d6b1e, 0x4a8c3f, 0x5a9a4a, 0x228B22,
+                      0x6aB84a, 0x3d8c37, 0x5ca050];
+    var autumnColors = [0xc94c2c, 0xd4743a, 0xe8a040, 0xbf5b2a];
+
+    // Positions — many more trees spread across the world
+    var positions = [
+      // Original trees
       [-25, -25], [22, -28], [26, 5], [-28, 8], [-22, 22], [20, 20],
       [30, -15], [-30, -5], [-8, -28], [10, -30], [-35, 18], [35, -22],
       [-20, -8], [24, -5], [15, -32], [-32, -2], [-5, 25], [28, -20],
-      // Extra trees for more forest feel
       [-27, -20], [27, -18], [-25, 10], [30, 18], [18, -26], [-18, -30],
-      [30, -28], [-30, 28], [10, 28], [-10, 28]
+      [30, -28], [-30, 28], [10, 28], [-10, 28],
+      // 🌳 New trees (more density at edges)
+      [-33, -25], [33, -25], [-33, 25], [33, 25],
+      [-28, -32], [28, -32], [-35, -8], [35, -8],
+      [-38, 10], [38, 10], [-15, 32], [15, 32],
+      [-5, -32], [5, -32], [-28, 15], [28, 15],
+      [-18, 28], [18, 28], [-24, -28], [24, -28],
+      [-30, -15], [30, -15], [-22, -18], [22, -18],
+      [35, 5], [-35, 5], [10, -22], [-10, -22],
+      [8, 25], [-8, 25], [32, -10], [-32, -10]
     ];
-    for (var i = 0; i < treeTypes.length; i++) {
+
+    for (var i = 0; i < positions.length; i++) {
       var group = new THREE.Group();
       var trunkMat = new THREE.MeshLambertMaterial({ color: trunkColors[Math.floor(Math.random() * trunkColors.length)] });
-      var trunkH = 1.5 + Math.random() * 1.2;
-      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.25, trunkH), trunkMat);
+      var trunkH = 1.5 + Math.random() * 1.5;
+      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.10, 0.22, trunkH), trunkMat);
       trunk.position.y = trunkH / 2;
       trunk.castShadow = true;
       group.add(trunk);
-      
-      // Random tree shape: round (sphere) or cone (pine)
-      var isPine = Math.random() < 0.2;
-      var leafMat = new THREE.MeshLambertMaterial({ color: leafColors[Math.floor(Math.random() * leafColors.length)] });
-      if (isPine) {
-        // Pine tree shape with stacked cones
-        var cone1 = new THREE.Mesh(new THREE.ConeGeometry(0.8, 0.8, 6), leafMat);
-        cone1.position.y = trunkH + 0.4; cone1.castShadow = true; group.add(cone1);
-        var cone2 = new THREE.Mesh(new THREE.ConeGeometry(0.6, 0.7, 6), leafMat);
-        cone2.position.y = trunkH + 0.9; cone2.castShadow = true; group.add(cone2);
-        var cone3 = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.6, 6), leafMat);
-        cone3.position.y = trunkH + 1.3; cone3.castShadow = true; group.add(cone3);
-      } else {
-        // Round tree - one or two spheres
+
+      var isAutumn = Math.random() < 0.12;
+      var pal = isAutumn ? autumnColors : leafColors;
+      var leafMat = new THREE.MeshLambertMaterial({ color: pal[Math.floor(Math.random() * pal.length)] });
+
+      // 🌲 4 tree types
+      var type = Math.floor(Math.random() * 4);
+
+      // Store wind phase and trunk height for animation
+      group.userData = { windPhase: Math.random() * Math.PI * 2, trunkH: trunkH, type: type };
+
+      if (type === 0) {
+        // Round tree (original)
         var leafR = 0.8 + Math.random() * 0.8;
         var leaf = new THREE.Mesh(new THREE.SphereGeometry(leafR, 6, 6), leafMat);
         leaf.position.y = trunkH + 0.2 + Math.random() * 0.5;
@@ -323,12 +424,231 @@ GAME.world = {
           leaf2.castShadow = true;
           group.add(leaf2);
         }
+      } else if (type === 1) {
+        // Pine (original)
+        var cone1 = new THREE.Mesh(new THREE.ConeGeometry(1.0, 0.9, 6), leafMat);
+        cone1.position.y = trunkH + 0.4; cone1.castShadow = true; group.add(cone1);
+        var cone2 = new THREE.Mesh(new THREE.ConeGeometry(0.75, 0.8, 6), leafMat);
+        cone2.position.y = trunkH + 1.0; cone2.castShadow = true; group.add(cone2);
+        var cone3 = new THREE.Mesh(new THREE.ConeGeometry(0.50, 0.7, 6), leafMat);
+        cone3.position.y = trunkH + 1.5; cone3.castShadow = true; group.add(cone3);
+      } else if (type === 2) {
+        // 🌳 Oak/bushy — wide canopy, short trunk
+        var crown = new THREE.Mesh(new THREE.DodecahedronGeometry(1.2, 0), leafMat);
+        crown.position.y = trunkH + 0.6;
+        crown.castShadow = true;
+        group.add(crown);
+        // Small extra puffs
+        for (var p = 0; p < 3; p++) {
+          var puff = new THREE.Mesh(new THREE.SphereGeometry(0.4 + Math.random()*0.3, 5, 5), leafMat);
+          puff.position.set(
+            (Math.random() - 0.5) * 1.4,
+            trunkH + 0.2 + Math.random() * 0.8,
+            (Math.random() - 0.5) * 1.4
+          );
+          puff.castShadow = true;
+          group.add(puff);
+        }
+      } else {
+        // 🌴 Palm-like — tall trunk, small crown at top
+        var trunk2 = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.18, trunkH * 1.2), trunkMat);
+        trunk2.position.y = trunkH * 0.6;
+        trunk2.castShadow = true;
+        group.remove(trunk);
+        group.add(trunk2);
+        var crown2 = new THREE.Mesh(new THREE.SphereGeometry(0.6, 5, 5), leafMat);
+        crown2.position.y = trunkH * 1.2 + 0.2;
+        crown2.scale.set(1.5, 0.6, 1.5);
+        crown2.castShadow = true;
+        group.add(crown2);
+        // Fronds (small cones sticking out)
+        for (var f = 0; f < 5; f++) {
+          var fa = (f / 5) * Math.PI * 2 + Math.random() * 0.3;
+          var frond = new THREE.Mesh(new THREE.ConeGeometry(0.4, 0.6, 4), leafMat);
+          frond.position.set(Math.sin(fa) * 0.5, trunkH * 1.2, Math.cos(fa) * 0.5);
+          frond.rotation.z = Math.sin(fa) * 0.5;
+          frond.rotation.x = Math.cos(fa) * 0.5;
+          frond.castShadow = true;
+          group.add(frond);
+        }
       }
-      group.position.set(treeTypes[i][0], 0, treeTypes[i][1]);
+
+      group.position.set(positions[i][0], 0, positions[i][1]);
       group.rotation.y = Math.random() * Math.PI * 2;
+      // Random scale variation
+      var s = 0.7 + Math.random() * 0.6;
+      group.scale.set(s, s, s);
       this.scene.add(group);
       this.objects.push(group);
+      this.treeGroups.push(group);
     }
+  },
+
+  // ============================================================
+  // 🌿 Grass Field — InstancedMesh blades with wind phase
+  // ============================================================
+  createGrass: function() {
+    // Generate positions for grass tufts
+    var count = 3000;
+    var positions = [];
+    var colors = [];
+    var phases = [];
+
+    for (var i = 0; i < count; i++) {
+      var x = (Math.random() - 0.5) * 90;
+      var z = (Math.random() - 0.5) * 90;
+
+      // Avoid: buildings area, farm plots, pond, animal pens, paths
+      if (Math.abs(x + 15) < 5 && Math.abs(z + 15) < 5) continue; // House
+      if (Math.abs(x - 16) < 5 && Math.abs(z + 12) < 5) continue; // Barn
+      if (Math.abs(x) < 9 && Math.abs(z - 10) < 10) continue; // Farm plots
+      if (Math.abs(x - 0) < 5 && Math.abs(z + 22) < 5) continue; // Market
+      if (Math.abs(x + 10) < 6 && Math.abs(z + 27) < 6) continue; // Pond
+      if (Math.abs(x - 16) < 6 && Math.abs(z + 7) < 10) continue; // Animal pens
+      if (Math.abs(x + 12) < 3 && Math.abs(z + 20) < 3) continue; // Well
+      // Paths
+      if (Math.abs(x + 10) < 2 && Math.abs(z + 10) < 10) continue;
+      if (Math.abs(x - 16) < 2 && Math.abs(z + 8) < 4) continue;
+
+      // Height check — don't place on steep terrain
+      var h = this._getHeight(x, z);
+      if (Math.abs(h) > 1.2) continue;
+
+      positions.push([x, z]);
+      colors.push([
+        0.30 + Math.random() * 0.40,
+        0.55 + Math.random() * 0.30,
+        0.15 + Math.random() * 0.20
+      ]);
+      phases.push(Math.random() * Math.PI * 2);
+    }
+
+    var n = positions.length;
+    if (n === 0) return;
+
+    // Grass blade geometry: thin triangle
+    var bladeGeo = new THREE.BufferGeometry();
+    var verts = new Float32Array([
+      -0.03, 0, 0,
+       0.03, 0, 0,
+       0,    0.35, 0,
+      // Second face for thickness
+       0.03, 0, 0.02,
+      -0.03, 0, 0.02,
+       0,    0.35, 0.02
+    ]);
+    bladeGeo.setAttribute('position', new THREE.BufferAttribute(verts, 3));
+    bladeGeo.computeVertexNormals();
+
+    var bladeMat = new THREE.MeshLambertMaterial({ vertexColors: false });
+    this.grassInst = new THREE.InstancedMesh(bladeGeo, bladeMat, n);
+    this.grassInst.castShadow = true;
+
+    var _d = new THREE.Object3D();
+    var _c = new THREE.Color();
+    this.grassColors = new Float32Array(n * 3);
+
+    for (var j = 0; j < n; j++) {
+      var p = positions[j];
+      var clr = colors[j];
+      _d.position.set(p[0], 0.05, p[1]);
+      _d.scale.set(1, 0.6 + Math.random() * 0.6, 1);
+      _d.rotation.y = Math.random() * Math.PI * 2;
+      _d.updateMatrix();
+      this.grassInst.setMatrixAt(j, _d.matrix);
+      this.grassColors[j*3]   = clr[0];
+      this.grassColors[j*3+1] = clr[1];
+      this.grassColors[j*3+2] = clr[2];
+    }
+
+    this.grassInst.instanceMatrix.needsUpdate = true;
+    this.scene.add(this.grassInst);
+    this.objects.push(this.grassInst);
+    this.grassPhases = phases;
+    this.grassPositions = positions;
+
+    // Also add scattered small grass tufts (ConeGeometry) for variety
+    var tuftGeo = new THREE.ConeGeometry(0.15, 0.25, 4);
+    var tuftCount = Math.min(n / 3, 800);
+    this.grassTufts = new THREE.InstancedMesh(tuftGeo, new THREE.MeshLambertMaterial({ color: 0x5a9a4a }), tuftCount);
+    var tIdx = 0;
+    for (var k = 0; k < positions.length && tIdx < tuftCount; k += 3) {
+      var tp = positions[k];
+      _d.position.set(tp[0], 0.05, tp[1]);
+      _d.scale.set(1, 0.3 + Math.random() * 0.5, 1);
+      _d.rotation.y = Math.random() * Math.PI * 2;
+      _d.updateMatrix();
+      this.grassTufts.setMatrixAt(tIdx, _d.matrix);
+      tIdx++;
+    }
+    this.grassTufts.instanceMatrix.needsUpdate = true;
+    this.grassTufts.castShadow = true;
+    this.scene.add(this.grassTufts);
+    this.objects.push(this.grassTufts);
+  },
+
+  // ============================================================
+  // 🌿 Bushes — decorative shrubbery
+  // ============================================================
+  createBushes: function() {
+    var bushMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
+    var bushPositions = [
+      [-12, -18], [-18, -12], [12, -18], [18, -12],
+      [6, 18], [-6, 18], [0, 18], [-14, 18],
+      [14, 18], [-20, -2], [20, -2], [-22, 5],
+      [22, 5], [-8, -5], [8, -5]
+    ];
+    for (var i = 0; i < bushPositions.length; i++) {
+      var bush = new THREE.Mesh(
+        new THREE.SphereGeometry(0.4 + Math.random() * 0.3, 5, 5),
+        new THREE.MeshLambertMaterial({
+          color: 0x2d6b1e + Math.floor(Math.random() * 0x307020)
+        })
+      );
+      bush.position.set(bushPositions[i][0], 0.2, bushPositions[i][1]);
+      bush.scale.set(1, 0.4 + Math.random() * 0.3, 1);
+      bush.castShadow = true;
+      this.scene.add(bush);
+      this.objects.push(bush);
+    }
+  },
+
+  // ============================================================
+  // 🌸 Flowers (v2 — richer colors, more density)
+  // ============================================================
+  createFlowers: function() {
+    var colors = [0xff6b6b, 0xffd93d, 0xff8a5c, 0xc084fc, 0xf472b6, 0x60a5fa, 0x34d399, 0xfb923c];
+    var spots = [];
+    for (var i = 0; i < 200; i++) {
+      var x = (Math.random() - 0.5) * 90;
+      var z = (Math.random() - 0.5) * 90;
+      // Keep away from buildings/farm area
+      if (Math.abs(x) < 10 && Math.abs(z) < 22) continue;
+      if (Math.abs(x - (-10)) < 5 && Math.abs(z - (-27)) < 5) continue;
+      if (Math.abs(x - 16) < 7 && Math.abs(z + 10) < 10) continue;
+      spots.push([x, z, colors[Math.floor(Math.random() * colors.length)]]);
+    }
+    var n = spots.length;
+    if (n === 0) return;
+    var _d = new THREE.Object3D();
+    var stems = new THREE.InstancedMesh(
+      new THREE.CylinderGeometry(0.02, 0.02, 0.3),
+      new THREE.MeshLambertMaterial({ color: 0x3a7d2c }), n);
+    var heads = new THREE.InstancedMesh(
+      new THREE.SphereGeometry(0.12, 5, 5),
+      new THREE.MeshLambertMaterial({ color: 0xffffff }), n);
+    var _c = new THREE.Color();
+    for (var j = 0; j < n; j++) {
+      var s = spots[j];
+      _d.position.set(s[0], 0.15, s[1]); _d.updateMatrix(); stems.setMatrixAt(j, _d.matrix);
+      _d.position.set(s[0], 0.38, s[1]); _d.updateMatrix(); heads.setMatrixAt(j, _d.matrix);
+      heads.setColorAt(j, _c.setHex(s[2]));
+    }
+    stems.instanceMatrix.needsUpdate = true;
+    heads.instanceMatrix.needsUpdate = true;
+    if (heads.instanceColor) heads.instanceColor.needsUpdate = true;
+    this.scene.add(stems); this.objects.push(stems);
+    this.scene.add(heads); this.objects.push(heads);
   },
 
   createFences: function() {
@@ -365,57 +685,62 @@ GAME.world = {
     }
   },
 
+  // ============================================================
+  // 💧 Water v2 — animated pond with ripples
+  // ============================================================
   createPond: function() {
-    var waterMat = new THREE.MeshLambertMaterial({ color: 0x4a90d9, transparent: true, opacity: 0.7 });
-    var water = new THREE.Mesh(new THREE.CircleGeometry(4, 24), waterMat);
+    var waterMat = new THREE.MeshLambertMaterial({
+      color: 0x4a90d9,
+      transparent: true,
+      opacity: 0.7,
+      emissive: 0x2a70b9,
+      emissiveIntensity: 0.08
+    });
+    var water = new THREE.Mesh(new THREE.CircleGeometry(4.5, 28), waterMat);
     water.position.set(-10, 0.02, -27);
     water.rotation.x = -Math.PI / 2;
     water.receiveShadow = true;
     this.scene.add(water); this.objects.push(water);
+    this.pondMesh = water;
+    this.pondMat = waterMat;
+
+    // Rocks around pond — bigger, more natural
     var rockMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
-    var rockPos = [[-13, -29], [-7, -29], [-8, -24], [-13, -25], [-11, -31], [-8, -27]];
+    var rockPos = [
+      [-13.5, -29.5], [-6.5, -29.5], [-7.5, -24], [-13.5, -24.5],
+      [-11.5, -31.5], [-7.5, -27.5], [-14, -27], [-6, -27],
+      [-12, -23], [-8.5, -31]
+    ];
     for (var i = 0; i < rockPos.length; i++) {
-      var rock = new THREE.Mesh(new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.4), rockMat);
-      rock.position.set(rockPos[i][0], 0.1, rockPos[i][1]);
+      var rock = new THREE.Mesh(
+        new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.5),
+        new THREE.MeshLambertMaterial({
+          color: 0x777777 + Math.floor(Math.random() * 0x444444)
+        })
+      );
+      rock.position.set(rockPos[i][0], 0.08, rockPos[i][1]);
       rock.rotation.set(Math.random(), Math.random(), Math.random());
       rock.castShadow = true;
       this.scene.add(rock); this.objects.push(rock);
     }
-    GAME.collision.addBox([-14, 0, -31], [-6, 1, -23]);
-  },
 
-  createFlowers: function() {
-    var colors = [0xff6b6b, 0xffd93d, 0xff8a5c, 0xc084fc, 0xf472b6];
-    // ⚡ جمع المواضع أولاً ثم رسمها كـ InstancedMesh (≈240 ميش → 2 فقط)
-    var spots = [];
-    for (var i = 0; i < 120; i++) {
-      var x = (Math.random() - 0.5) * 100;
-      var z = (Math.random() - 0.5) * 100;
-      if (Math.abs(x) < 35 && Math.abs(z) < 35) continue;
-      if (Math.abs(x - (-10)) < 5 && Math.abs(z - (-27)) < 5) continue;
-      spots.push([x, z, colors[Math.floor(Math.random() * colors.length)]]);
+    // 🌿 Water plants
+    var plantMat = new THREE.MeshLambertMaterial({ color: 0x2d8a4e });
+    for (var k = 0; k < 6; k++) {
+      var angle = (k / 6) * Math.PI * 2 + Math.random() * 0.5;
+      var dist = 3.0 + Math.random() * 1.5;
+      var plant = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.04, 0.5), plantMat);
+      plant.position.set(
+        -10 + Math.sin(angle) * dist,
+        0.2,
+        -27 + Math.cos(angle) * dist
+      );
+      plant.rotation.z = (Math.random() - 0.5) * 0.3;
+      plant.rotation.x = (Math.random() - 0.5) * 0.3;
+      this.scene.add(plant); this.objects.push(plant);
     }
-    var n = spots.length;
-    if (n === 0) return;
-    var _d = new THREE.Object3D();
-    var stems = new THREE.InstancedMesh(
-      new THREE.CylinderGeometry(0.02, 0.02, 0.3),
-      new THREE.MeshLambertMaterial({ color: 0x3a7d2c }), n);
-    var heads = new THREE.InstancedMesh(
-      new THREE.SphereGeometry(0.1, 4, 4),
-      new THREE.MeshLambertMaterial({ color: 0xffffff }), n);
-    var _c = new THREE.Color();
-    for (var j = 0; j < n; j++) {
-      var s = spots[j];
-      _d.position.set(s[0], 0.15, s[1]); _d.updateMatrix(); stems.setMatrixAt(j, _d.matrix);
-      _d.position.set(s[0], 0.35, s[1]); _d.updateMatrix(); heads.setMatrixAt(j, _d.matrix);
-      heads.setColorAt(j, _c.setHex(s[2]));
-    }
-    stems.instanceMatrix.needsUpdate = true;
-    heads.instanceMatrix.needsUpdate = true;
-    if (heads.instanceColor) heads.instanceColor.needsUpdate = true;
-    this.scene.add(stems); this.objects.push(stems);
-    this.scene.add(heads); this.objects.push(heads);
+
+    GAME.collision.addBox([-14, 0, -31], [-6, 1, -23]);
   },
 
   createAnimalPens: function() {
@@ -567,87 +892,118 @@ GAME.world = {
     hay2.rotation.y = 0.5;
     hay2.castShadow = true;
     this.scene.add(hay2); this.objects.push(hay2);
-  }
-};
+  },
 
-// ===== دورة الإضاءة الديناميكية (نهار/ليل) =====
-GAME.world.updateLighting = function(time) {
-  if (!this.skyMat) return;
+  // ============================================================
+  // 🌬️ Wind animation — trees sway + grass rustle
+  // ============================================================
+  updateWind: function(delta) {
+    this.windTime += delta * 0.6; // Slow oscillation
 
-  // 9 كيفريمات تغطي 24 ساعة
-  var kf = [
-    { t:  0,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
-    { t:  4.5,top:0x0a0a25, hor:0x0f1030, fog:0x08081a, sC:0x3355bb, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
-    { t:  5.5,top:0x1a2255, hor:0xff7733, fog:0xff9944, sC:0xff8800, sI:0.25, aI:0.08, hS:0x2233aa, hG:0x220e00, hI:0.25 },
-    { t:  7,  top:0x1a66cc, hor:0x88bbff, fog:0x99ccff, sC:0xffd090, sI:0.75, aI:0.20, hS:0x55aadd, hG:0x3d6020, hI:0.50 },
-    { t: 12,  top:0x004fbb, hor:0x44aaff, fog:0x87ceeb, sC:0xffffff, sI:1.00, aI:0.30, hS:0x87ceeb, hG:0x7ec850, hI:0.65 },
-    { t: 17,  top:0x0d4499, hor:0x66aaff, fog:0x88bbdd, sC:0xffe0aa, sI:0.85, aI:0.25, hS:0x77aabb, hG:0x508030, hI:0.55 },
-    { t: 19,  top:0x110022, hor:0xff5500, fog:0xff6622, sC:0xff4400, sI:0.30, aI:0.08, hS:0x220033, hG:0x110500, hI:0.18 },
-    { t: 21,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
-    { t: 24,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 }
-  ];
+    // 🌲 Tree sway
+    var windAmp = this.windStrength * (0.5 + 0.5 * Math.sin(this.windTime * 0.3));
+    for (var i = 0; i < this.treeGroups.length; i++) {
+      var tree = this.treeGroups[i];
+      var phase = tree.userData.windPhase || 0;
+      var sway = Math.sin(this.windTime * 0.8 + phase) * windAmp * 0.04;
+      tree.rotation.z = sway;
+      // Slight lean with wind
+      tree.rotation.x = Math.sin(this.windTime * 0.6 + phase + 1.5) * windAmp * 0.02;
+    }
 
-  // إيجاد الكيفريمين المحيطين
-  var k0 = kf[0], k1 = kf[1];
-  for (var i = 0; i < kf.length - 1; i++) {
-    if (time >= kf[i].t && time <= kf[i+1].t) { k0 = kf[i]; k1 = kf[i+1]; break; }
-  }
-  var f = (k1.t === k0.t) ? 0 : (time - k0.t) / (k1.t - k0.t);
-  f = f * f * (3 - 2 * f); // smoothstep
+    // 🌿 Grass rustle (subtle scale/opacity pulse — not full matrix update for perf)
+    if (this.pondMesh && this.windTime) {
+      // Ripple pond slightly
+      var ripple = 0.97 + Math.sin(this.windTime * 1.5) * 0.03;
+      if (this.pondMat) this.pondMat.opacity = 0.65 + Math.sin(this.windTime * 0.7) * 0.05;
+    }
 
-  var _t = new THREE.Color(); // مؤقت مشترك — لا تخصيص كائنات كل إطار
-  function ln(a, b) { return a + (b - a) * f; }
+    // 🏠 Window glow pulsing slowly
+    if (this.houseGlow) {
+      var pulse = 0.12 + Math.sin(this.windTime * 0.5) * 0.05;
+      this.houseGlow.material.opacity = pulse;
+    }
+  },
 
-  // قبة السماء
-  this.skyMat.uniforms.uTopColor.value.setHex(k0.top).lerp(_t.setHex(k1.top), f);
-  this.skyMat.uniforms.uHorizonColor.value.setHex(k0.hor).lerp(_t.setHex(k1.hor), f);
+  // ============================================================
+  // 💡 Day/Night lighting (unchanged from v2)
+  // ============================================================
+  updateLighting: function(time) {
+    if (!this.skyMat) return;
 
-  // ضباب
-  if (this.scene.fog) this.scene.fog.color.setHex(k0.fog).lerp(_t.setHex(k1.fog), f);
+    var kf = [
+      { t:  0,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
+      { t:  4.5,top:0x0a0a25, hor:0x0f1030, fog:0x08081a, sC:0x3355bb, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
+      { t:  5.5,top:0x1a2255, hor:0xff7733, fog:0xff9944, sC:0xff8800, sI:0.25, aI:0.08, hS:0x2233aa, hG:0x220e00, hI:0.25 },
+      { t:  7,  top:0x1a66cc, hor:0x88bbff, fog:0x99ccff, sC:0xffd090, sI:0.75, aI:0.20, hS:0x55aadd, hG:0x3d6020, hI:0.50 },
+      { t: 12,  top:0x004fbb, hor:0x44aaff, fog:0x87ceeb, sC:0xffffff, sI:1.00, aI:0.30, hS:0x87ceeb, hG:0x7ec850, hI:0.65 },
+      { t: 17,  top:0x0d4499, hor:0x66aaff, fog:0x88bbdd, sC:0xffe0aa, sI:0.85, aI:0.25, hS:0x77aabb, hG:0x508030, hI:0.55 },
+      { t: 19,  top:0x110022, hor:0xff5500, fog:0xff6622, sC:0xff4400, sI:0.30, aI:0.08, hS:0x220033, hG:0x110500, hI:0.18 },
+      { t: 21,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
+      { t: 24,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 }
+    ];
 
-  // ---- موضع الشمس (قوس فوق العالم) ----
-  var sunAngle = ((time - 6) / 12) * Math.PI; // 0 عند الشروق → π عند الغروب
-  var sX = Math.cos(sunAngle) * 90;
-  var sY = Math.max(-40, Math.sin(sunAngle) * 75 + 5);
+    var k0 = kf[0], k1 = kf[1];
+    for (var i = 0; i < kf.length - 1; i++) {
+      if (time >= kf[i].t && time <= kf[i+1].t) { k0 = kf[i]; k1 = kf[i+1]; break; }
+    }
+    var f = (k1.t === k0.t) ? 0 : (time - k0.t) / (k1.t - k0.t);
+    f = f * f * (3 - 2 * f);
 
-  if (this.sunLight) {
-    this.sunLight.color.setHex(k0.sC).lerp(_t.setHex(k1.sC), f);
-    this.sunLight.intensity = ln(k0.sI, k1.sI);
-    this.sunLight.position.set(sX, Math.max(5, sY), -20);
-  }
-  if (this.ambLight)  this.ambLight.intensity = ln(k0.aI, k1.aI);
-  if (this.hemiLight) {
-    this.hemiLight.color.setHex(k0.hS).lerp(_t.setHex(k1.hS), f);
-    this.hemiLight.groundColor.setHex(k0.hG).lerp(_t.setHex(k1.hG), f);
-    this.hemiLight.intensity = ln(k0.hI, k1.hI);
-  }
+    var _t = new THREE.Color();
+    function ln(a, b) { return a + (b - a) * f; }
 
-  // ---- Sprite الشمس ----
-  if (this.sunSprite) {
-    this.sunSprite.position.set(sX, sY, -60);
-    var sOp = (time >= 5 && time <= 19) ? Math.min(1, Math.min((time-5)/1.5, (19-time)/1.5)) : 0;
-    this.sunSprite.material.opacity = sOp;
-  }
+    this.skyMat.uniforms.uTopColor.value.setHex(k0.top).lerp(_t.setHex(k1.top), f);
+    this.skyMat.uniforms.uHorizonColor.value.setHex(k0.hor).lerp(_t.setHex(k1.hor), f);
 
-  // ---- Sprite القمر (الجانب المعاكس) ----
-  var mAngle = sunAngle + Math.PI;
-  var mX = Math.cos(mAngle) * 90;
-  var mY = Math.max(-40, Math.sin(mAngle) * 75 + 5);
-  if (this.moonSprite) {
-    this.moonSprite.position.set(mX, mY, -60);
-    var mOp = 0;
-    if (time >= 21 || time <= 3)       mOp = 1;
-    else if (time > 19 && time < 21)   mOp = (time - 19) / 2;
-    else if (time > 3  && time < 5)    mOp = 1 - (time - 3) / 2;
-    this.moonSprite.material.opacity = Math.min(1, Math.max(0, mOp)) * 0.9;
-  }
+    if (this.scene.fog) this.scene.fog.color.setHex(k0.fog).lerp(_t.setHex(k1.fog), f);
 
-  // ---- النجوم ----
-  if (this.stars) {
-    var stOp = 0;
-    if (time >= 21 || time <= 4)      stOp = 0.9;
-    else if (time > 19 && time < 21)  stOp = (time - 19) / 2 * 0.9;
-    else if (time > 4  && time < 6)   stOp = Math.max(0, (1 - (time - 4) / 2) * 0.9);
-    this.stars.material.opacity = stOp;
+    var sunAngle = ((time - 6) / 12) * Math.PI;
+    var sX = Math.cos(sunAngle) * 90;
+    var sY = Math.max(-40, Math.sin(sunAngle) * 75 + 5);
+
+    if (this.sunLight) {
+      this.sunLight.color.setHex(k0.sC).lerp(_t.setHex(k1.sC), f);
+      this.sunLight.intensity = ln(k0.sI, k1.sI);
+      this.sunLight.position.set(sX, Math.max(5, sY), -20);
+    }
+    if (this.ambLight)  this.ambLight.intensity = ln(k0.aI, k1.aI);
+    if (this.hemiLight) {
+      this.hemiLight.color.setHex(k0.hS).lerp(_t.setHex(k1.hS), f);
+      this.hemiLight.groundColor.setHex(k0.hG).lerp(_t.setHex(k1.hG), f);
+      this.hemiLight.intensity = ln(k0.hI, k1.hI);
+    }
+
+    if (this.sunSprite) {
+      this.sunSprite.position.set(sX, sY, -60);
+      var sOp = (time >= 5 && time <= 19) ? Math.min(1, Math.min((time-5)/1.5, (19-time)/1.5)) : 0;
+      this.sunSprite.material.opacity = sOp;
+    }
+
+    var mAngle = sunAngle + Math.PI;
+    var mX = Math.cos(mAngle) * 90;
+    var mY = Math.max(-40, Math.sin(mAngle) * 75 + 5);
+    if (this.moonSprite) {
+      this.moonSprite.position.set(mX, mY, -60);
+      var mOp = 0;
+      if (time >= 21 || time <= 3)       mOp = 1;
+      else if (time > 19 && time < 21)   mOp = (time - 19) / 2;
+      else if (time > 3  && time < 5)    mOp = 1 - (time - 3) / 2;
+      this.moonSprite.material.opacity = Math.min(1, Math.max(0, mOp)) * 0.9;
+    }
+
+    if (this.stars) {
+      var stOp = 0;
+      if (time >= 21 || time <= 4)      stOp = 0.9;
+      else if (time > 19 && time < 21)  stOp = (time - 19) / 2 * 0.9;
+      else if (time > 4  && time < 6)   stOp = Math.max(0, (1 - (time - 4) / 2) * 0.9);
+      this.stars.material.opacity = stOp;
+    }
+
+    // ضوء النوافذ ليلاً
+    if (this.houseGlow) {
+      var isNight = (time >= 20 || time <= 5);
+      this.houseGlow.material.opacity = isNight ? 0.15 : 0;
+    }
   }
 };

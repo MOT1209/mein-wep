@@ -1,7 +1,7 @@
 {
-  "version": "2.0.1",
-  "buildNumber": 21,
-  "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.0.1.apk",
-  "changelog": "Three.js r152 local, FPS-based auto quality, save protection, main.js modularized, memory leak fixes, world scenery, daily quests",
-  "releaseDate": "2026-06-24"
+  "version": "2.1.0",
+  "buildNumber": 22,
+  "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.1.0.apk",
+  "changelog": "Terrain v3: height-based multi-octave terrain + vertex colors, grass field (3000+ blades InstancedMesh), tree v2 (4 types, 62 trees), wind animation on trees, animated pond ripples, more flowers/bushes, window glow",
+  "releaseDate": "2026-07-01"
 }

@@ -874,6 +874,7 @@ Object.assign(GAME.game, {
     if (GAME.animals) this._safe('animals', function() { GAME.animals.update(delta); });
     if (GAME.weather) this._safe('weather', function() { GAME.weather.update(delta); });
     if (GAME.world && GAME.world.updateLighting) this._safe('world.lighting', function() { GAME.world.updateLighting(state.time); });
+    if (GAME.world && GAME.world.updateWind) this._safe('world.wind', function() { GAME.world.updateWind(delta); });
     if (GAME.AIAgent) this._safe('AIAgent', function() { GAME.AIAgent.update(delta); });
     this._safe('particles', function() { self.updateParticles(delta); }); // 🎆
     this._safe('minimap', function() { self.renderMinimap(); }); // 🗺️
