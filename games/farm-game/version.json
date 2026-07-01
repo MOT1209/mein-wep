@@ -1,6 +1,6 @@
 {
   "version": "2.3.0",
-  "buildNumber": 24,
+  "buildNumber": 25,
   "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.3.0.apk",
   "changelog": "Buildings v3: chimney + smoke particles, garden fence around house, window frames + door step, barn hay loft + weather vane, market striped awning + goods crates; Water v3: ShaderMaterial pond wave displacement + fresnel; Clouds: 14 drifting sphere-group clouds",
   "releaseDate": "2026-07-01"
