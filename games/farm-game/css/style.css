@@ -106,22 +106,39 @@ canvas { display: block; }
 .menu-btn:not(.primary):hover { background: rgba(255, 255, 255, 0.14); }
 .menu-version { margin-top: 32px; font-size: 13px; color: var(--text-dim); }
 
-/* ===== HUD ===== */
+/* ===== HUD v2 — Glassmorphism ===== */
 #hud { position: fixed; inset: 0; pointer-events: none; z-index: 100; opacity: 0; transition: opacity 0.5s ease; }
+#hud.day   { --hud-bg: rgba(15, 23, 15, 0.75); --hud-border: rgba(255,255,255,0.10); --hud-accent: var(--green-bright); }
+#hud.night { --hud-bg: rgba(5, 8, 18, 0.80); --hud-border: rgba(100,140,255,0.10); --hud-accent: #6688ff; }
+
 .hud-top {
   position: absolute; top: 12px; left: 12px; right: 12px;
   display: flex; justify-content: space-between; align-items: flex-start;
   gap: 8px;
 }
+.hud-top-left { display: flex; align-items: center; gap: 8px; }
 .hud-stats { display: flex; gap: 8px; }
+
+/* ===== Compass ===== */
+.hud-compass {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--hud-bg, rgba(0,0,0,0.55));
+  padding: 5px 10px; border-radius: var(--radius-sm);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--hud-border, rgba(255,255,255,0.06));
+  color: var(--text-muted); font-size: 12px; font-weight: 600;
+  letter-spacing: 1px;
+}
+.compass-arrow { font-size: 14px; margin-right: 2px; }
+
 .stat {
   display: flex; align-items: center; gap: 6px;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--hud-bg, rgba(0,0,0,0.55));
   padding: 6px 10px; border-radius: var(--radius-sm);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--hud-border, rgba(255,255,255,0.06));
 }
-.stat-svg { flex-shrink: 0; }
+.stat-icon { font-size: 15px; filter: drop-shadow(0 0 2px rgba(0,0,0,0.5)); }
 .stat-bar-wrap {
   width: 60px; height: 6px;
   background: rgba(255, 255, 255, 0.12);
@@ -131,18 +148,37 @@ canvas { display: block; }
 .stat-bar-fill {
   height: 100%; border-radius: 4px;
   transition: width 0.3s ease;
+  position: relative;
 }
+.stat-bar-fill::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.25) 50%, transparent 100%);
+  animation: barShine 2s ease-in-out infinite;
+}
+@keyframes barShine { 0%,100% { transform: translateX(-100%); } 50% { transform: translateX(100%); } }
 .health-fill { background: linear-gradient(90deg, #ff6b6b, var(--red)); }
 .energy-fill { background: linear-gradient(90deg, var(--gold-dark), var(--gold)); }
 .stat-val { font-size: 14px; font-weight: 700; color: #fff; min-width: 28px; text-align: right; }
+
+.hud-top-right {
+  display: flex; align-items: flex-start; gap: 8px;
+}
 .hud-time {
-  text-align: right; background: rgba(0,0,0,0.55); padding: 6px 14px;
-  border-radius: var(--radius-sm); backdrop-filter: blur(6px);
+  text-align: right; background: var(--hud-bg, rgba(0,0,0,0.55)); padding: 6px 14px;
+  border-radius: var(--radius-sm); backdrop-filter: blur(8px);
   color: #fff; font-size: 13px; font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--hud-border, rgba(255,255,255,0.06));
 }
 .hud-time span { display: block; line-height: 1.4; }
 .hud-time span:last-child { font-size: 11px; opacity: 0.7; }
+
+.hud-weather {
+  background: var(--hud-bg, rgba(0,0,0,0.55));
+  padding: 6px 10px; border-radius: var(--radius-sm);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--hud-border, rgba(255,255,255,0.06));
+  color: #fff; font-size: 18px;
+}
 
 .hud-bottom {
   position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
@@ -150,10 +186,10 @@ canvas { display: block; }
 }
 .toolbar {
   display: flex; gap: 4px;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--hud-bg, rgba(0,0,0,0.55));
   padding: 5px; border-radius: var(--radius);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--hud-border, rgba(255,255,255,0.08));
 }
 .tool-slot {
   width: 60px; height: 60px;
@@ -172,7 +208,7 @@ canvas { display: block; }
   box-shadow: 0 0 16px rgba(250, 202, 21, 0.2);
   transform: scale(1.05);
 }
-.tool-slot:focus-visible { outline: 2px solid var(--green-bright); outline-offset: 2px; }
+.tool-slot:focus-visible { outline: 2px solid var(--hud-accent, var(--green-bright)); outline-offset: 2px; }
 .tool-key {
   position: absolute; top: 3px; left: 5px;
   font-size: 10px; font-weight: 700;
@@ -181,10 +217,10 @@ canvas { display: block; }
 .tool-icon { font-size: 22px; line-height: 1; }
 .tool-label { font-size: 8px; color: rgba(255, 255, 255, 0.6); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
 .hud-controls-hint {
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--hud-bg, rgba(0,0,0,0.4));
   padding: 5px 14px; border-radius: 6px;
   color: rgba(255,255,255,0.45);
-  font-size: 11px; backdrop-filter: blur(4px);
+  font-size: 11px; backdrop-filter: blur(6px);
   text-align: center; font-weight: 500;
 }
 .interaction-hint {
@@ -196,6 +232,27 @@ canvas { display: block; }
   pointer-events: none;
   transition: opacity 0.25s ease;
 }
+
+/* ===== Notifications v2 ===== */
+.notification-container {
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+  z-index: 500; display: flex; flex-direction: column; gap: 6px;
+  pointer-events: none;
+}
+.notification {
+  padding: 10px 22px; border-radius: var(--radius-sm);
+  font-size: 14px; font-weight: 600;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  animation: notifIn 0.3s ease;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.10);
+}
+.notification.info    { background: rgba(40, 80, 160, 0.85); color: #fff; }
+.notification.success { background: rgba(40, 140, 60, 0.85); color: #fff; }
+.notification.error   { background: rgba(180, 40, 40, 0.85);  color: #fff; }
+.notification.quest   { background: rgba(160, 120, 30, 0.85); color: #fff; border-color: var(--gold); }
+@keyframes notifIn { from { opacity: 0; transform: translateY(-16px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .interaction-hint.hidden { opacity: 0; }
 
 /* ===== Crosshair ===== */

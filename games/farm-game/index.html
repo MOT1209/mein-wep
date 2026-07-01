@@ -95,29 +95,40 @@
   <!-- HUD -->
   <div id="hud" aria-hidden="true">
     <div class="hud-top">
-      <div class="hud-stats">
-        <div class="stat health-stat">
-          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ff4757" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-          <div class="stat-bar-wrap"><div class="stat-bar-fill health-fill" id="health-fill" style="width:100%"></div></div>
-          <span class="stat-val" id="health-val">100</span>
+      <div class="hud-top-left">
+        <div class="hud-stats">
+          <div class="stat health-stat">
+            <span class="stat-icon">❤️</span>
+            <div class="stat-bar-wrap"><div class="stat-bar-fill health-fill" id="health-fill" style="width:100%"></div></div>
+            <span class="stat-val" id="health-val">100</span>
+          </div>
+          <div class="stat energy-stat">
+            <span class="stat-icon">⚡</span>
+            <div class="stat-bar-wrap"><div class="stat-bar-fill energy-fill" id="energy-fill" style="width:100%"></div></div>
+            <span class="stat-val" id="energy-val">100</span>
+          </div>
+          <div class="stat money-stat">
+            <span class="stat-icon">💰</span>
+            <span class="stat-val" id="money-val">200</span>
+          </div>
+          <div class="stat level-stat">
+            <span class="stat-icon">⭐</span>
+            <span class="stat-val" id="level-val">Lv.1</span>
+          </div>
         </div>
-        <div class="stat energy-stat">
-          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#faca15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          <div class="stat-bar-wrap"><div class="stat-bar-fill energy-fill" id="energy-fill" style="width:100%"></div></div>
-          <span class="stat-val" id="energy-val">100</span>
-        </div>
-        <div class="stat money-stat">
-          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#faca15" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 18V6"/></svg>
-          <span class="stat-val" id="money-val">200</span>
-        </div>
-        <div class="stat level-stat">
-          <svg class="stat-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7ec850" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          <span class="stat-val" id="level-val">Lv.1</span>
+        <div class="hud-compass">
+          <span class="compass-arrow">🧭</span>
+          <span id="compass-dir">N</span>
         </div>
       </div>
-      <div class="hud-time">
-        <span id="day-val">Day 1</span>
-        <span id="time-val">☀️ 06:00 AM</span>
+      <div class="hud-top-right">
+        <div class="hud-weather">
+          <span id="weather-icon">☀️</span>
+        </div>
+        <div class="hud-time">
+          <span id="day-val">Day 1</span>
+          <span id="time-val">06:00 AM</span>
+        </div>
       </div>
     </div>
 
@@ -288,8 +299,8 @@
     </div>
   </div>
 
-  <!-- Notification -->
-  <div id="notif" class="notification hidden" role="alert" aria-live="polite"></div>
+  <!-- Notification Container -->
+  <div id="notif-container" class="notification-container"></div>
 
   <!-- Crosshair -->
   <div id="crosshair"><div class="crosshair-dot"></div></div>

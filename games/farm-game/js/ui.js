@@ -148,6 +148,16 @@ GAME.ui = {
     var moneyVal = document.getElementById('money-val');
     var dayEl = document.getElementById('day-val');
     var timeEl = document.getElementById('time-val');
+    var compassEl = document.getElementById('compass-dir');
+    var weatherIcon = document.getElementById('weather-icon');
+
+    // 🎨 Day/night HUD theme
+    var hudEl = document.getElementById('hud');
+    if (state.time >= 19 || state.time <= 6) {
+      if (hudEl) hudEl.className = 'night';
+    } else {
+      if (hudEl) hudEl.className = 'day';
+    }
 
     var hp = Math.round(state.health);
     var ep = Math.round(state.energy);
@@ -157,20 +167,37 @@ GAME.ui = {
     if (energyVal) energyVal.textContent = ep;
     if (moneyVal) moneyVal.textContent = Math.round(state.money);
     if (dayEl) dayEl.textContent = 'Day ' + state.day;
+
+    // ⏰ Time + weather icon
     if (timeEl) {
       var hours = Math.floor(state.time);
       var mins = Math.floor((state.time % 1) * 60);
       var ampm = hours >= 12 ? 'PM' : 'AM';
       var h12 = hours % 12 || 12;
-      // أيقونة تعكس الوقت والطقس الفعلي
-      var icon;
       var w = (GAME.weather && GAME.weather.current) ? GAME.weather.current : 'sunny';
-      if (hours < 6 || hours >= 18) icon = '🌙';
+      if (hours < 6 || hours >= 18) var icon = '🌙';
       else if (w === 'rainy') icon = '🌧️';
       else if (w === 'stormy') icon = '⛈️';
       else if (w === 'cloudy') icon = '⛅';
       else icon = '☀️';
       timeEl.textContent = icon + ' ' + h12.toString().padStart(2, '0') + ':' + mins.toString().padStart(2, '0') + ' ' + ampm;
+    }
+
+    // 🧭 Compass
+    if (compassEl && GAME.camera && GAME.camera.camera) {
+      var forward = new THREE.Vector3();
+      GAME.camera.camera.getWorldDirection(forward);
+      var heading = Math.atan2(forward.x, forward.z) * (180 / Math.PI);
+      if (heading < 0) heading += 360;
+      var dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+      var idx = Math.round(heading / 45) % 8;
+      compassEl.textContent = dirs[idx];
+    }
+
+    // 🌤️ Weather icon separate
+    if (weatherIcon && GAME.weather && GAME.weather.current) {
+      var map = { sunny: '☀️', cloudy: '⛅', rainy: '🌧️', stormy: '⛈️', snow: '❄️' };
+      weatherIcon.textContent = map[GAME.weather.current] || '☀️';
     }
 
     var levelEl = document.getElementById('level-val');
@@ -185,14 +212,16 @@ GAME.ui = {
   },
 
   showNotification: function(text, type) {
-    var el = document.getElementById('notif');
-    if (!el) return;
+    var container = document.getElementById('notif-container');
+    if (!container) return;
+    var el = document.createElement('div');
+    el.className = 'notification ' + (type || 'info');
     el.textContent = text;
-    el.className = 'notification ' + (type === 'success' ? 'success' : type === 'error' ? 'error' : '');
+    container.appendChild(el);
     if (this.notificationTimeout) clearTimeout(this.notificationTimeout);
     this.notificationTimeout = setTimeout(function() {
-      el.className = 'notification hidden';
-    }, 2500);
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 2800);
   },
 
   showInteractionHint: function(text) {
