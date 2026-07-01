@@ -256,19 +256,44 @@ GAME.world = {
 
   createPlayerHouse: function() {
     this.createBuilding(-15, -15, 7, 5.5, 0xd4a574, 0x8b4513, 2.8);
+
+    // 🚪 Door step
+    var stepMat = new THREE.MeshLambertMaterial({ color: 0x8a7a6a });
+    var step = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.15, 0.6), stepMat);
+    step.position.set(-15, 0.08, -11.95);
+    this.scene.add(step); this.objects.push(step);
+
+    // 🚪 Door
     var doorMat = new THREE.MeshLambertMaterial({ color: 0x5d3a1a });
     var door = new THREE.Mesh(new THREE.BoxGeometry(1, 1.8, 0.1), doorMat);
     door.position.set(-15, 0.9, -12.3);
     this.scene.add(door); this.objects.push(door);
 
-    // النوافذ تضيء ليلاً
-    var winMat = new THREE.MeshLambertMaterial({ color: 0x88ccff });
-    var win1 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.1), winMat);
-    win1.position.set(-16.5, 1.6, -12.3); this.scene.add(win1); this.objects.push(win1);
-    var win2 = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.1), winMat);
-    win2.position.set(-13.5, 1.6, -12.3); this.scene.add(win2); this.objects.push(win2);
+    // 🪟 Door frame
+    var frameMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
+    var fL = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.9, 0.06), frameMat);
+    fL.position.set(-15.52, 0.95, -12.33); this.scene.add(fL); this.objects.push(fL);
+    var fR = new THREE.Mesh(new THREE.BoxGeometry(0.06, 1.9, 0.06), frameMat);
+    fR.position.set(-14.48, 0.95, -12.33); this.scene.add(fR); this.objects.push(fR);
+    var fT = new THREE.Mesh(new THREE.BoxGeometry(1.06, 0.06, 0.06), frameMat);
+    fT.position.set(-15, 1.85, -12.33); this.scene.add(fT); this.objects.push(fT);
 
-    // 🏠 ضوء داخلي دافئ ليلاً
+    // 🪟 Windows with frame
+    var winGlowMat = new THREE.MeshLambertMaterial({ color: 0x88ccff });
+    var winFrameMat = new THREE.MeshLambertMaterial({ color: 0x6b4423 });
+    var winPositions = [[-16.5, 1.6, -12.3], [-13.5, 1.6, -12.3]];
+    for (var wi = 0; wi < winPositions.length; wi++) {
+      var wp = winPositions[wi];
+      var wg = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.1), winGlowMat);
+      wg.position.set(wp[0], wp[1], wp[2]); this.scene.add(wg); this.objects.push(wg);
+      // Cross frame
+      var wf = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.04, 0.12), winFrameMat);
+      wf.position.set(wp[0], wp[1], wp[2] - 0.02); this.scene.add(wf); this.objects.push(wf);
+      var wfv = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.85, 0.12), winFrameMat);
+      wfv.position.set(wp[0], wp[1], wp[2] - 0.02); this.scene.add(wfv); this.objects.push(wfv);
+    }
+
+    // 🏠 Window interior glow (night)
     var glowMat = new THREE.MeshBasicMaterial({
       color: 0xffaa44, transparent: true, opacity: 0.15
     });
@@ -276,6 +301,155 @@ GAME.world = {
     glow.position.set(-15, 1.2, -12.1);
     this.scene.add(glow); this.objects.push(glow);
     this.houseGlow = glow;
+
+    // 🏭 Chimney
+    var chimMat = new THREE.MeshLambertMaterial({ color: 0xaa5533 });
+    var chimney = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.4, 0.5), chimMat);
+    chimney.position.set(-14.5, 2.6, -13.8);
+    chimney.castShadow = true;
+    this.scene.add(chimney); this.objects.push(chimney);
+    // Chimney cap
+    var capMat = new THREE.MeshLambertMaterial({ color: 0x664422 });
+    var cap = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.08, 0.6), capMat);
+    cap.position.set(-14.5, 3.35, -13.8);
+    this.scene.add(cap); this.objects.push(cap);
+
+    // 💨 Smoke particles
+    var smokeCount = 25;
+    var sPos = new Float32Array(smokeCount * 3);
+    this.smokeVelocities = new Float32Array(smokeCount);
+    for (var si = 0; si < smokeCount; si++) {
+      sPos[si*3]   = -14.5 + (Math.random() - 0.5) * 0.25;
+      sPos[si*3+1] = 3.0 + Math.random() * 2.5;
+      sPos[si*3+2] = -13.8 + (Math.random() - 0.5) * 0.25;
+      this.smokeVelocities[si] = 0.1 + Math.random() * 0.2;
+    }
+    var sGeo = new THREE.BufferGeometry();
+    sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
+    var sMat = new THREE.PointsMaterial({
+      color: 0xcccccc, transparent: true, opacity: 0.25,
+      size: 0.18, blending: THREE.AdditiveBlending, depthWrite: false
+    });
+    this.smokeParticles = new THREE.Points(sGeo, sMat);
+    this.scene.add(this.smokeParticles);
+    this.objects.push(this.smokeParticles);
+
+    // 🌸 Garden fence around house
+    var gfMat = new THREE.MeshLambertMaterial({ color: 0x7a6a5a });
+    var gardenBounds = [
+      { x1: -19, z1: -18, x2: -11, z2: -18 },
+      { x1: -19, z1: -12, x2: -11, z2: -12 },
+      { x1: -19, z1: -18, x2: -19, z2: -12 },
+      { x1: -11, z1: -18, x2: -11, z2: -12 }
+    ];
+    for (var gb = 0; gb < gardenBounds.length; gb++) {
+      var g = gardenBounds[gb];
+      var gmx = (g.x1 + g.x2) / 2, gmz = (g.z1 + g.z2) / 2;
+      var gdx = g.x2 - g.x1, gdz = g.z2 - g.z1;
+      var glen = Math.sqrt(gdx*gdx + gdz*gdz);
+      var gang = Math.atan2(gdx, gdz);
+      var gRail = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.3, glen), gfMat);
+      gRail.position.set(gmx, 0.15, gmz);
+      gRail.rotation.y = gang;
+      this.scene.add(gRail); this.objects.push(gRail);
+      var gSteps = Math.floor(glen / 1.2);
+      for (var gp = 0; gp <= gSteps; gp++) {
+        var gt = gSteps > 0 ? gp / gSteps : 0.5;
+        var gPost = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.4, 0.06), gfMat);
+        gPost.position.set(g.x1 + gt*gdx, 0.2, g.z1 + gt*gdz);
+        this.scene.add(gPost); this.objects.push(gPost);
+      }
+    }
+  },
+
+  createBarn: function() {
+    this.createBuilding(16, -12, 8, 6, 0xa83232, 0x5c1a1a, 3.5);
+
+    // 🚪 Barn double doors
+    var doorMat = new THREE.MeshLambertMaterial({ color: 0x4a2800 });
+    var door = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2.2, 0.1), doorMat);
+    door.position.set(16, 1.1, -8.7);
+    this.scene.add(door); this.objects.push(door);
+    // Door hardware
+    var hwMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
+    var handle = new THREE.Mesh(new THREE.SphereGeometry(0.04, 4, 4), hwMat);
+    handle.position.set(16.3, 0.9, -8.75); this.scene.add(handle); this.objects.push(handle);
+
+    // 🌾 Hay loft door
+    var loftMat = new THREE.MeshLambertMaterial({ color: 0x3a1a0a });
+    var loft = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.6, 0.08), loftMat);
+    loft.position.set(16, 3.2, -8.65);
+    this.scene.add(loft); this.objects.push(loft);
+    var loftFrame = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.65, 0.10), doorMat);
+    loftFrame.position.set(15.38, 3.2, -8.66); this.scene.add(loftFrame); this.objects.push(loftFrame);
+    loftFrame = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.65, 0.10), doorMat);
+    loftFrame.position.set(16.62, 3.2, -8.66); this.scene.add(loftFrame); this.objects.push(loftFrame);
+
+    // 🏠 Weather vane on roof
+    var vaneMat = new THREE.MeshLambertMaterial({ color: 0x444444 });
+    var pole = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 0.6), vaneMat);
+    pole.position.set(16, 4.8, -12); this.scene.add(pole); this.objects.push(pole);
+    var arrow = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.02, 0.05), vaneMat);
+    arrow.position.set(16, 5.1, -12); this.scene.add(arrow); this.objects.push(arrow);
+    var tail = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.12, 0.02), vaneMat);
+    tail.position.set(15.85, 5.1, -12); this.scene.add(tail); this.objects.push(tail);
+  },
+
+  createMarket: function() {
+    var group = new THREE.Group();
+    var postMat = new THREE.MeshLambertMaterial({ color: 0x8B7355 });
+    var roofMat = new THREE.MeshLambertMaterial({ color: 0xe67e22 });
+    for (var i = -2; i <= 2; i += 2) {
+      for (var j = -2; j <= 2; j += 2) {
+        var post = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 2.5), postMat);
+        post.position.set(i, 1.25, j);
+        post.castShadow = true;
+        group.add(post);
+      }
+    }
+    var roof = new THREE.Mesh(new THREE.BoxGeometry(5, 0.15, 5), roofMat);
+    roof.position.y = 2.6; roof.castShadow = true; roof.receiveShadow = true;
+    group.add(roof);
+
+    // 🎨 Striped awning
+    var stripeColors = [0xe67e22, 0xffd700, 0xe67e22, 0xffd700, 0xe67e22];
+    for (var st = 0; st < stripeColors.length; st++) {
+      var strip = new THREE.Mesh(
+        new THREE.PlaneGeometry(4.8, 0.3),
+        new THREE.MeshLambertMaterial({ color: stripeColors[st], transparent: true, opacity: 0.35 })
+      );
+      strip.position.set(0, 2.6 - st * 0.31, -2.5);
+      strip.rotation.x = -0.15;
+      group.add(strip);
+    }
+
+    // Cloth side drops
+    var clothMat = new THREE.MeshLambertMaterial({ color: 0xffdd77, transparent: true, opacity: 0.25 });
+    for (var s = 0; s < 4; s++) {
+      var side = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.8), clothMat);
+      var angle = (s / 4) * Math.PI * 2;
+      side.position.set(Math.sin(angle) * 2.3, 2.2, Math.cos(angle) * 2.3);
+      side.rotation.y = -angle;
+      group.add(side);
+    }
+
+    // 🪑 Counter + goods
+    var counter = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 0.8), new THREE.MeshLambertMaterial({ color: 0x8B7355 }));
+    counter.position.set(0, 0.4, 0.5);
+    group.add(counter);
+    // Crates / goods
+    var crateMat = new THREE.MeshLambertMaterial({ color: 0x7a6a4a });
+    var crate = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, 0.4), crateMat);
+    crate.position.set(0, 0.65, 0.9); group.add(crate);
+    var appleMat = new THREE.MeshLambertMaterial({ color: 0xcc3333 });
+    for (var a = 0; a < 3; a++) {
+      var apple = new THREE.Mesh(new THREE.SphereGeometry(0.05, 4, 4), appleMat);
+      apple.position.set(-0.1 + a * 0.1, 0.82, 0.9); group.add(apple);
+    }
+
+    group.position.set(0, 0, -22);
+    this.scene.add(group); this.objects.push(group);
+    GAME.collision.addBox([-3, 0, -25], [3, 3, -19]);
   },
 
   createBarn: function() {
@@ -1022,6 +1196,23 @@ GAME.world = {
     if (this.houseGlow) {
       var pulse = 0.12 + Math.sin(this.windTime * 0.5) * 0.05;
       this.houseGlow.material.opacity = pulse;
+    }
+
+    // 💨 Chimney smoke
+    if (this.smokeParticles) {
+      var sPos = this.smokeParticles.geometry.attributes.position;
+      for (var si = 0; si < sPos.count; si++) {
+        var sx = sPos.getX(si) + Math.sin(this.windTime * 2.0 + si * 0.7) * 0.002;
+        var sy = sPos.getY(si) + delta * (0.08 + this.smokeVelocities[si] * 0.15);
+        var sz = sPos.getZ(si) + Math.cos(this.windTime * 1.8 + si * 0.5) * 0.002;
+        if (sy > 6.0) {
+          sx = -14.5 + (Math.random() - 0.5) * 0.2;
+          sy = 3.0 + Math.random() * 0.3;
+          sz = -13.8 + (Math.random() - 0.5) * 0.2;
+        }
+        sPos.setXYZ(si, sx, sy, sz);
+      }
+      sPos.needsUpdate = true;
     }
   },
 
