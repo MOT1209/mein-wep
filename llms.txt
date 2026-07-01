@@ -29,6 +29,9 @@
 - Blog index: https://rashid-wep.vercel.app/blog/
 - RSS Feed: https://rashid-wep.vercel.app/blog/rss.xml
 
+## Knowledge Bundle
+- OKF (Open Knowledge Format) bundle — agent-readable content: https://rashid-wep.vercel.app/okf/
+
 ## Contact
 - Contact form: https://rashid-wep.vercel.app/contact.html
 - GitHub: https://github.com/MOT1209
