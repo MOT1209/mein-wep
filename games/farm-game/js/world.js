@@ -18,7 +18,7 @@ GAME.world = {
     var steps = ['createSky', 'createTerrain', 'createPlayerHouse', 'createBarn',
       'createMarket', 'createFarmPlots', 'createTrees', 'createFences', 'createPond',
       'createFlowers', 'createAnimalPens', 'createFeedingTrough', 'createDirtPath',
-      'createScarecrow', 'createWell', 'createGrass', 'createBushes'];
+      'createScarecrow', 'createWell', 'createGrass', 'createBushes', 'createClouds'];
     for (var i = 0; i < steps.length; i++) {
       try { this[steps[i]](); }
       catch (e) { console.error('[FarmGame] world.' + steps[i] + ' failed:', e.message); }
@@ -686,17 +686,67 @@ GAME.world = {
   },
 
   // ============================================================
-  // 💧 Water v2 — animated pond with ripples
+  // 💧 Water v3 — ShaderMaterial pond with animated waves + fresnel
   // ============================================================
   createPond: function() {
-    var waterMat = new THREE.MeshLambertMaterial({
-      color: 0x4a90d9,
+    var wGeo = new THREE.CircleGeometry(4.5, 48);
+
+    var waterVertShader = [
+      'uniform float uTime;',
+      'varying vec2  vUv;',
+      'varying float vHeight;',
+      'void main() {',
+      '  vUv = uv;',
+      '  vec3 pos = position;',
+      '  float wave1 = sin(pos.x * 0.6 + uTime * 1.2) * 0.08;',
+      '  float wave2 = cos(pos.y * 0.8 + uTime * 0.9) * 0.06;',
+      '  float wave3 = sin((pos.x + pos.y) * 0.35 + uTime * 0.5) * 0.04;',
+      '  float dist  = length(pos.xy) / 4.5;',
+      '  float shoreWave = (1.0 - dist) * sin(dist * 8.0 + uTime * 0.6) * 0.03;',
+      '  pos.z += wave1 + wave2 + wave3 + shoreWave;',
+      '  vHeight = pos.z;',
+      '  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);',
+      '}'
+    ].join('\n');
+
+    var waterFragShader = [
+      'uniform vec3  uDeep;',
+      'uniform vec3  uShallow;',
+      'uniform vec3  uFoam;',
+      'uniform float uTime;',
+      'varying vec2  vUv;',
+      'varying float vHeight;',
+      'void main() {',
+      '  float depth = smoothstep(-0.15, 0.15, vHeight);',
+      '  vec3 col = mix(uDeep, uShallow, depth);',
+      '  // Foam ring near shore',
+      '  float d = distance(vUv, vec2(0.5, 0.5));',
+      '  float foam = smoothstep(0.50, 0.42, abs(vUv.x - 0.5)) * 0.2;',
+      '  foam += smoothstep(0.50, 0.42, abs(vUv.y - 0.5)) * 0.2;',
+      '  col = mix(col, uFoam, foam * 0.5);',
+      '  // Specular glint',
+      '  float glint = pow(max(0.0, sin(vUv.x * 40.0 + uTime) * sin(vUv.y * 40.0 + uTime * 0.7)), 6.0);',
+      '  col += vec3(1.0, 0.95, 0.8) * glint * 0.15;',
+      '  // Edge foam',
+      '  float edge = smoothstep(0.5, 0.45, d);',
+      '  col = mix(col, uFoam, edge * 0.6);',
+      '  gl_FragColor = vec4(col, 0.75);',
+      '}'
+    ].join('\n');
+
+    var waterMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime:    { value: 0 },
+        uDeep:    { value: new THREE.Color(0x1a5276) },
+        uShallow: { value: new THREE.Color(0x48c9b0) },
+        uFoam:    { value: new THREE.Color(0xd4eaf7) }
+      },
+      vertexShader:   waterVertShader,
+      fragmentShader: waterFragShader,
       transparent: true,
-      opacity: 0.7,
-      emissive: 0x2a70b9,
-      emissiveIntensity: 0.08
+      side: THREE.DoubleSide
     });
-    var water = new THREE.Mesh(new THREE.CircleGeometry(4.5, 28), waterMat);
+    var water = new THREE.Mesh(wGeo, waterMat);
     water.position.set(-10, 0.02, -27);
     water.rotation.x = -Math.PI / 2;
     water.receiveShadow = true;
@@ -895,10 +945,54 @@ GAME.world = {
   },
 
   // ============================================================
-  // 🌬️ Wind animation — trees sway + grass rustle
+  // ☁️ Clouds — drifting sphere groups
+  // ============================================================
+  createClouds: function() {
+    var cloudMat = new THREE.MeshLambertMaterial({
+      color: 0xffffff,
+      transparent: true,
+      opacity: 0.55
+    });
+    this.clouds = [];
+    var cloudCount = 14;
+    for (var i = 0; i < cloudCount; i++) {
+      var group = new THREE.Group();
+      var numPuffs = 3 + Math.floor(Math.random() * 6);
+      for (var j = 0; j < numPuffs; j++) {
+        var puff = new THREE.Mesh(
+          new THREE.SphereGeometry(0.8 + Math.random() * 2.2, 6, 5),
+          cloudMat
+        );
+        puff.position.set(
+          (Math.random() - 0.5) * 5,
+          (Math.random() - 0.5) * 0.6,
+          (Math.random() - 0.5) * 3
+        );
+        puff.scale.set(1, 0.35 + Math.random() * 0.25, 0.6 + Math.random() * 0.4);
+        puff.castShadow = false;
+        group.add(puff);
+      }
+      group.position.set(
+        (Math.random() - 0.5) * 240,
+        16 + Math.random() * 14,
+        (Math.random() - 0.5) * 200 - 30
+      );
+      var spd = 0.12 + Math.random() * 0.25;
+      group.userData = {
+        speed: spd,
+        baseX: group.position.x
+      };
+      this.scene.add(group);
+      this.objects.push(group);
+      this.clouds.push(group);
+    }
+  },
+
+  // ============================================================
+  // 🌬️ Wind animation — trees sway + clouds drift + water waves
   // ============================================================
   updateWind: function(delta) {
-    this.windTime += delta * 0.6; // Slow oscillation
+    this.windTime += delta * 0.6;
 
     // 🌲 Tree sway
     var windAmp = this.windStrength * (0.5 + 0.5 * Math.sin(this.windTime * 0.3));
@@ -907,18 +1001,24 @@ GAME.world = {
       var phase = tree.userData.windPhase || 0;
       var sway = Math.sin(this.windTime * 0.8 + phase) * windAmp * 0.04;
       tree.rotation.z = sway;
-      // Slight lean with wind
       tree.rotation.x = Math.sin(this.windTime * 0.6 + phase + 1.5) * windAmp * 0.02;
     }
 
-    // 🌿 Grass rustle (subtle scale/opacity pulse — not full matrix update for perf)
-    if (this.pondMesh && this.windTime) {
-      // Ripple pond slightly
-      var ripple = 0.97 + Math.sin(this.windTime * 1.5) * 0.03;
-      if (this.pondMat) this.pondMat.opacity = 0.65 + Math.sin(this.windTime * 0.7) * 0.05;
+    // ☁️ Cloud drift
+    if (this.clouds) {
+      for (var ci = 0; ci < this.clouds.length; ci++) {
+        var c = this.clouds[ci];
+        c.position.x += c.userData.speed * delta * 0.5;
+        if (c.position.x > 130) c.position.x = -130;
+      }
     }
 
-    // 🏠 Window glow pulsing slowly
+    // 💧 Water shader animated
+    if (this.pondMesh && this.pondMat && this.pondMat.uniforms) {
+      this.pondMat.uniforms.uTime.value = this.windTime * 2.0;
+    }
+
+    // 🏠 Window glow pulsing
     if (this.houseGlow) {
       var pulse = 0.12 + Math.sin(this.windTime * 0.5) * 0.05;
       this.houseGlow.material.opacity = pulse;
