@@ -1,7 +1,7 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "buildNumber": 23,
-  "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.1.0.apk",
-  "changelog": "Terrain v3: height-based multi-octave terrain + vertex colors, grass field (3000+ blades InstancedMesh), tree v2 (4 types, 62 trees), wind animation on trees, animated pond ripples, more flowers/bushes, window glow",
+  "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.2.0.apk",
+  "changelog": "Water v3: ShaderMaterial pond with animated wave displacement, fresnel colour blending, foam ring, specular glint; Clouds: 14 drifting sphere-group clouds with wind; Wind animation extended to cloud drift",
   "releaseDate": "2026-07-01"
 }
