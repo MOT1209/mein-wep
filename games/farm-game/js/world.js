@@ -18,7 +18,8 @@ GAME.world = {
     var steps = ['createSky', 'createTerrain', 'createPlayerHouse', 'createBarn',
       'createMarket', 'createFarmPlots', 'createTrees', 'createFences', 'createPond',
       'createFlowers', 'createAnimalPens', 'createFeedingTrough', 'createDirtPath',
-      'createScarecrow', 'createWell', 'createGrass', 'createBushes', 'createClouds'];
+      'createScarecrow', 'createWell', 'createGrass', 'createBushes', 'createClouds',
+      'createCloudShadows', 'createAmbientParticles'];
     for (var i = 0; i < steps.length; i++) {
       try { this[steps[i]](); }
       catch (e) { console.error('[FarmGame] world.' + steps[i] + ' failed:', e.message); }
@@ -1163,6 +1164,76 @@ GAME.world = {
   },
 
   // ============================================================
+  // 🌑 Cloud shadows — dark patches drifting on ground
+  // ============================================================
+  createCloudShadows: function() {
+    var shadowCount = 6;
+    this.cloudShadows = [];
+    var can = document.createElement('canvas'); can.width = 128; can.height = 128;
+    var ctx = can.getContext('2d');
+    var grd = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    grd.addColorStop(0,    'rgba(0,0,0,0.12)');
+    grd.addColorStop(0.4,  'rgba(0,0,0,0.08)');
+    grd.addColorStop(0.8,  'rgba(0,0,0,0.02)');
+    grd.addColorStop(1,    'rgba(0,0,0,0)');
+    ctx.fillStyle = grd; ctx.fillRect(0, 0, 128, 128);
+    var tex = new THREE.CanvasTexture(can);
+    var shadowMat = new THREE.SpriteMaterial({
+      map: tex, transparent: true, depthWrite: false,
+      blending: THREE.MultiplyBlending
+    });
+    for (var si = 0; si < shadowCount; si++) {
+      var spr = new THREE.Sprite(shadowMat.clone());
+      var size = 15 + Math.random() * 20;
+      spr.scale.set(size, size, 1);
+      spr.position.set(
+        (Math.random() - 0.5) * 120,
+        0.5,
+        (Math.random() - 0.5) * 120
+      );
+      spr.userData = {
+        speed: 0.08 + Math.random() * 0.12,
+        phase: Math.random() * Math.PI * 2
+      };
+      this.scene.add(spr);
+      this.objects.push(spr);
+      this.cloudShadows.push(spr);
+    }
+  },
+
+  // ============================================================
+  // ✨ Ambient particles — dust motes (day) / fireflies (night)
+  // ============================================================
+  createAmbientParticles: function() {
+    var count = 120;
+    var positions = new Float32Array(count * 3);
+    var sizes = new Float32Array(count);
+    for (var i = 0; i < count; i++) {
+      positions[i*3]   = (Math.random() - 0.5) * 60;
+      positions[i*3+1] = 0.5 + Math.random() * 2.5;
+      positions[i*3+2] = (Math.random() - 0.5) * 60;
+      sizes[i] = 0.04 + Math.random() * 0.08;
+    }
+    var geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+    var mat = new THREE.PointsMaterial({
+      color: 0xffdd88,
+      size: 0.06,
+      transparent: true,
+      opacity: 0.5,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    this.ambientParticles = new THREE.Points(geo, mat);
+    this.scene.add(this.ambientParticles);
+    this.objects.push(this.ambientParticles);
+    this.ambientParticleMat = mat;
+    this.ambientParticlePositions = positions;
+  },
+
+  // ============================================================
   // 🌬️ Wind animation — trees sway + clouds drift + water waves
   // ============================================================
   updateWind: function(delta) {
@@ -1183,8 +1254,54 @@ GAME.world = {
       for (var ci = 0; ci < this.clouds.length; ci++) {
         var c = this.clouds[ci];
         c.position.x += c.userData.speed * delta * 0.5;
-        if (c.position.x > 130) c.position.x = -130;
+        if (c.position.x > 140) c.position.x = -140;
       }
+    }
+
+    // 🌑 Cloud shadows move with wind
+    if (this.cloudShadows) {
+      for (var csi = 0; csi < this.cloudShadows.length; csi++) {
+        var sh = this.cloudShadows[csi];
+        sh.position.x += sh.userData.speed * delta * 0.5;
+        if (sh.position.x > 70) sh.position.x = -70;
+      }
+    }
+
+    // ✨ Ambient particles (dust/fireflies)
+    if (this.ambientParticles) {
+      var ap = this.ambientParticlePositions;
+      for (var pi = 0; pi < ap.length; pi += 3) {
+        ap[pi]   += Math.sin(this.windTime * 0.3 + pi) * 0.002;
+        ap[pi+1] += Math.sin(this.windTime * 0.5 + pi * 1.5) * 0.001;
+        ap[pi+2] += Math.cos(this.windTime * 0.4 + pi) * 0.002;
+        if (ap[pi] > 35) ap[pi] = -35;
+        if (ap[pi] < -35) ap[pi] = 35;
+        if (ap[pi+1] > 3.5) ap[pi+1] = 0.5;
+        if (ap[pi+1] < 0.3) ap[pi+1] = 2.5;
+        if (ap[pi+2] > 35) ap[pi+2] = -35;
+        if (ap[pi+2] < -35) ap[pi+2] = 35;
+      }
+      this.ambientParticles.geometry.attributes.position.needsUpdate = true;
+    }
+
+    // ⭐ Star twinkle
+    if (this.stars && this.stars.geometry.attributes.position) {
+      var sPos = this.stars.geometry.attributes.position;
+      if (!this._starPhases) {
+        this._starPhases = new Float32Array(sPos.count);
+        for (var si = 0; si < sPos.count; si++) this._starPhases[si] = Math.random() * Math.PI * 2;
+      }
+      if (!this.stars.geometry.attributes.size) {
+        var sz = new Float32Array(sPos.count);
+        for (var si = 0; si < sPos.count; si++) sz[si] = 0.3 + Math.random() * 0.6;
+        this.stars.geometry.setAttribute('size', new THREE.BufferAttribute(sz, 1));
+      }
+      var szAttr = this.stars.geometry.attributes.size;
+      for (var si = 0; si < szAttr.count; si++) {
+        var twinkle = 0.5 + 0.5 * Math.sin(this.windTime * 2.0 + this._starPhases[si]);
+        szAttr.array[si] = (0.3 + Math.random() * 0.1) * twinkle;
+      }
+      szAttr.needsUpdate = true;
     }
 
     // 💧 Water shader animated
@@ -1295,6 +1412,28 @@ GAME.world = {
     if (this.houseGlow) {
       var isNight = (time >= 20 || time <= 5);
       this.houseGlow.material.opacity = isNight ? 0.15 : 0;
+    }
+
+    // ✨ Ambient particles: dust (day) → fireflies (night)
+    if (this.ambientParticleMat) {
+      var isNight = (time >= 19.5 || time <= 5.5);
+      var isDusk = (time >= 18 && time < 19.5) || (time > 5 && time <= 6.5);
+      if (isNight) {
+        // Firefly mode — green glow, pulsing
+        this.ambientParticleMat.color.setHex(0x88ff66);
+        this.ambientParticleMat.opacity = 0.35 + Math.sin(this.windTime * 1.5) * 0.15;
+        this.ambientParticleMat.size = 0.08;
+      } else if (isDusk) {
+        // Golden dust
+        this.ambientParticleMat.color.setHex(0xffaa44);
+        this.ambientParticleMat.opacity = 0.3;
+        this.ambientParticleMat.size = 0.05;
+      } else {
+        // Day — faint dust motes
+        this.ambientParticleMat.color.setHex(0xffffcc);
+        this.ambientParticleMat.opacity = 0.12;
+        this.ambientParticleMat.size = 0.04;
+      }
     }
   }
 };
