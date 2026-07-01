@@ -1,6 +1,6 @@
 {
   "version": "2.0.1",
-  "buildNumber": 20,
+  "buildNumber": 21,
   "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.0.1.apk",
   "changelog": "Three.js r152 local, FPS-based auto quality, save protection, main.js modularized, memory leak fixes, world scenery, daily quests",
   "releaseDate": "2026-06-24"
