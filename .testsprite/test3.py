@@ -3,15 +3,37 @@ import json
 import sys
 import os
 import codecs
+import re
 
 # Fix Windows console encoding
 if sys.platform == 'win32':
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
+# Read Supabase config from shared JS file (single source of truth)
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(SCRIPT_DIR)  # parent of .testsprite/
+SUPABASE_CONFIG_PATH = os.path.join(PROJECT_DIR, 'js', 'supabase-config.js')
+
+def read_supabase_config():
+    """Extract url and anonKey from js/supabase-config.js"""
+    try:
+        with open(SUPABASE_CONFIG_PATH, 'r', encoding='utf-8') as f:
+            content = f.read()
+        url_match = re.search(r"url:\s*'([^']+)'", content)
+        key_match = re.search(r"anonKey:\s*'([^']+)'", content)
+        if url_match and key_match:
+            return url_match.group(1), key_match.group(1)
+    except Exception as e:
+        print(f"Warning: Could not read {SUPABASE_CONFIG_PATH}: {e}", file=sys.stderr)
+    # Fallback defaults
+    return (
+        'https://kcltollasghlvuoxvjqa.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjbHRvbGxhc2dobHZ1b3h2anFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODI5NDksImV4cCI6MjA5Njg1ODk0OX0.w-op2d4THYCrKjql9t1j7BiBZM2krDEkw-vdOwFzXFE'
+    )
+
+SUPABASE_URL, SUPABASE_ANON_KEY = read_supabase_config()
 VERCEL_URL = 'https://rashid-wep.vercel.app'
-SUPABASE_URL = 'https://kcltollasghlvuoxvjqa.supabase.co'
-SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjbHRvbGxhc2dobHZ1b3h2anFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODI5NDksImV4cCI6MjA5Njg1ODk0OX0.w-op2d4THYCrKjql9t1j7BiBZM2krDEkw-vdOwFzXFE'
 
 async def http_get(url):
     """Fetch URL using asyncio and return status + body."""

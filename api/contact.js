@@ -5,10 +5,16 @@
  * and inserts into Supabase contact_messages table.
  *
  * POST /api/contact  { name, email, message }
+ *
+ * Environment variables (set in Vercel dashboard):
+ *   SUPABASE_URL       — Supabase project URL
+ *   SUPABASE_ANON_KEY  — Supabase anon/public key
+ *
+ * Fallback values are provided for local dev convenience.
  */
 
-const SUPABASE_URL = 'https://kcltollasghlvuoxvjqa.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjbHRvbGxhc2dobHZ1b3h2anFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODI5NDksImV4cCI6MjA5Njg1ODk0OX0.w-op2d4THYCrKjql9t1j7BiBZM2krDEkw-vdOwFzXFE';
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://kcltollasghlvuoxvjqa.supabase.co';
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjbHRvbGxhc2dobHZ1b3h2anFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODI5NDksImV4cCI6MjA5Njg1ODk0OX0.w-op2d4THYCrKjql9t1j7BiBZM2krDEkw-vdOwFzXFE';
 
 module.exports = async (req, res) => {
   // CORS

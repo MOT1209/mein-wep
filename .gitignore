@@ -49,3 +49,8 @@ games/kingcraft-game/dist/
 
 # king2 model: tracked in main repo; secrets are committed only as encrypted .enc
 # (plaintext .env* stay ignored via models/king2 ai-Model/.gitignore)
+
+# king2 training data files (large generated artifacts, not source)
+models/king2\ ai-Model/data/*.json
+models/king2\ ai-Model/data/*colab*.ipynb
+models/king2\ ai-Model/data/*TEST*
