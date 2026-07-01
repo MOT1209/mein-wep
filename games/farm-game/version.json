@@ -1,6 +1,6 @@
 {
   "version": "2.2.0",
-  "buildNumber": 23,
+  "buildNumber": 24,
   "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.2.0.apk",
   "changelog": "Water v3: ShaderMaterial pond with animated wave displacement, fresnel colour blending, foam ring, specular glint; Clouds: 14 drifting sphere-group clouds with wind; Wind animation extended to cloud drift",
   "releaseDate": "2026-07-01"
