@@ -516,11 +516,13 @@ GAME.ui.refreshInventory = function() {
     var el = document.getElementById(map[key]);
     if (el) {
       if (s.inventory[key] !== undefined) el.textContent = s.inventory[key];
-      else if (s.crafted[key] !== undefined) el.textContent = s.crafted[key];
+      else       if (s.crafted[key] !== undefined) el.textContent = s.crafted[key];
     }
   }
   // Refresh quests list
   GAME.ui.refreshQuests();
+  // Refresh achievements
+  GAME.ui.refreshAchievements();
 };
 
 GAME.ui.refreshQuests = function() {
@@ -542,6 +544,32 @@ GAME.ui.refreshQuests = function() {
         '<span class="quest-reward">+' + q.rewardXP + ' XP</span>' +
       '</div>' +
       '<div class="quest-bar-wrap"><div class="quest-bar-fill" style="width:' + pct + '%"></div></div>' +
+    '</div>';
+  }
+  container.innerHTML = html;
+};
+
+GAME.ui.refreshAchievements = function() {
+  var container = document.getElementById('inv-achievements');
+  if (!container) return;
+  var state = GAME.game && GAME.game.state;
+  if (!state || !state.achievements) {
+    container.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Loading achievements...</p>';
+    return;
+  }
+  var unlocked = state.achievements || [];
+  var html = '';
+  for (var i = 0; i < GAME.achievements.list.length; i++) {
+    var ach = GAME.achievements.list[i];
+    var isUnlocked = unlocked.indexOf(ach.id) !== -1;
+    var canUnlock = !isUnlocked && ach.check(state);
+    html += '<div class="ach-row' + (isUnlocked ? ' ach-unlocked' : '') + (canUnlock ? ' ach-ready' : '') + '">' +
+      '<div class="ach-icon">' + ach.icon + '</div>' +
+      '<div class="ach-info">' +
+        '<div class="ach-title">' + (isUnlocked ? '✅ ' : '🔒 ') + ach.title + '</div>' +
+        '<div class="ach-desc">' + ach.desc + '</div>' +
+      '</div>' +
+      '<div class="ach-reward">+' + ach.rewardXP + ' XP<br/>+$' + ach.rewardMoney + '</div>' +
     '</div>';
   }
   container.innerHTML = html;

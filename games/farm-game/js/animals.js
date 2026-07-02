@@ -149,6 +149,8 @@ GAME.animals = {
     }
     GAME.game.state.money -= t.cost;
     this.createAnimal(type);
+    GAME.game.state.stats.totalAnimals++;
+    GAME.achievements.checkAll();
     GAME.ui.showNotification('🐑 Bought a ' + type + '!', 'success');
     return true;
   },

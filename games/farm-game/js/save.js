@@ -21,6 +21,14 @@ GAME.game.loadGame = function() {
       this.state.xp = (typeof data.xp === 'number') ? data.xp : 0;
       this.state.level = (typeof data.level === 'number') ? data.level : 1;
       this.state.selectedTool = (typeof data.selectedTool === 'number') ? data.selectedTool : 0;
+      this.state.achievements = (data.achievements && Array.isArray(data.achievements)) ? data.achievements : [];
+      this.state.stats = (data.stats && typeof data.stats === 'object') ?
+        { totalPlanted: data.stats.totalPlanted || 0, totalHarvested: data.stats.totalHarvested || 0,
+          totalEarned: data.stats.totalEarned || 0, totalCrafted: data.stats.totalCrafted || 0,
+          totalWatered: data.stats.totalWatered || 0, totalFertilized: data.stats.totalFertilized || 0,
+          totalSlept: data.stats.totalSlept || 0, totalAnimals: data.stats.totalAnimals || 0, totalApples: data.stats.totalApples || 0 } :
+        { totalPlanted: 0, totalHarvested: 0, totalEarned: 0, totalCrafted: 0,
+          totalWatered: 0, totalFertilized: 0, totalSlept: 0, totalAnimals: 0, totalApples: 0 };
       GAME.game.selectTool(this.state.selectedTool);
       this._atMenu = false;
       GAME.ui.hideMenu();
@@ -47,7 +55,9 @@ GAME.game.saveGame = function() {
       crafted: this.state.crafted,
       selectedTool: this.state.selectedTool,
       xp: this.state.xp,
-      level: this.state.level
+      level: this.state.level,
+      achievements: this.state.achievements,
+      stats: this.state.stats
     };
     localStorage.setItem('farmGameSave', JSON.stringify(data));
     GAME.ui.showNotification('\uD83D\uDCBE Game saved!', 'success');

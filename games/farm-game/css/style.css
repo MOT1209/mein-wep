@@ -581,6 +581,37 @@ canvas { display: block; }
   transition: width 0.4s ease;
 }
 
+/* ===== Achievements ===== */
+.ach-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  transition: var(--transition);
+  font-size: 13px;
+}
+.ach-row.ach-unlocked {
+  background: rgba(250, 202, 21, 0.12);
+  border: 1px solid rgba(250, 202, 21, 0.25);
+}
+.ach-row.ach-ready {
+  background: rgba(126, 200, 80, 0.1);
+  border: 1px solid rgba(126, 200, 80, 0.3);
+  animation: ach-pulse 1.5s ease-in-out infinite;
+}
+@keyframes ach-pulse {
+  0%, 100% { border-color: rgba(126, 200, 80, 0.3); }
+  50% { border-color: rgba(126, 200, 80, 0.7); }
+}
+.ach-icon { font-size: 20px; width: 30px; text-align: center; }
+.ach-info { flex: 1; min-width: 0; }
+.ach-title { font-weight: 600; color: var(--text); font-size: 13px; }
+.ach-desc { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.ach-reward { font-size: 11px; color: var(--green-bright); text-align: right; white-space: nowrap; font-weight: 600; line-height: 1.4; }
+
 /* ===== Mini Map ===== */
 #minimap {
   position: fixed;

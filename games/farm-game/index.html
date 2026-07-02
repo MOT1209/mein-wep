@@ -198,6 +198,7 @@
         <button class="inv-tab active" onclick="switchInvTab('items')" data-tab="items">📦 Items</button>
         <button class="inv-tab" onclick="switchInvTab('crafting')" data-tab="crafting">🔨 Craft</button>
         <button class="inv-tab" onclick="switchInvTab('quests')" data-tab="quests">📋 Daily</button>
+        <button class="inv-tab" onclick="switchInvTab('achievements')" data-tab="achievements">🏆 Achievements</button>
       </div>
       <div class="modal-body">
         <!-- Items Tab -->
@@ -247,6 +248,8 @@
             <button class="craft-btn" onclick="craftItem('juice')">Craft</button>
           </div>
         </div>
+        <!-- Achievements Tab -->
+        <div class="inv-panel" id="inv-achievements"></div>
         <!-- Quests Tab -->
         <div class="inv-panel" id="inv-quests">
           <div id="quests-list">
@@ -344,6 +347,7 @@
   <script src="js/ui.js?v=2.0.9"></script>
   <script src="js/save.js?v=2.0.9"></script>
   <script src="js/aiAgent.js?v=2.0.9"></script>
+  <script src="js/achievements.js?v=2.1.0"></script>
   <script src="js/main.js?v=2.0.9"></script>
   <!-- OTA update checker -->
   <script>window.RASHID_APP={id:'com.rashid.farmempire',version:'2.0.1',name:'Farm Empire'};</script>

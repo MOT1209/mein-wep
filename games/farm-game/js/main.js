@@ -106,6 +106,7 @@ Object.assign(GAME.game, {
       this._safe('weather.init', function() { GAME.weather.init(self.scene); });
       this._safe('audio.init', function() { GAME.audio.init(); });
       this._safe('AIAgent.init', function() { GAME.AIAgent.init(self.scene); });
+      this._safe('achievements.init', function() { GAME.achievements.init(); });
 
       this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
 
@@ -155,7 +156,13 @@ Object.assign(GAME.game, {
       timeScale: 60,
       xp: 0,
       level: 1,
-      quests: []
+      quests: [],
+      achievements: [],
+      stats: {
+        totalPlanted: 0, totalHarvested: 0, totalEarned: 0,
+        totalCrafted: 0, totalWatered: 0, totalFertilized: 0,
+        totalSlept: 0, totalAnimals: 0, totalApples: 0
+      }
     };
     this.initPlots();
     GAME.quests.generateDaily();
@@ -281,6 +288,8 @@ Object.assign(GAME.game, {
 
     this.addXP(4);
     GAME.quests.track('fertilize', 1);
+    this.state.stats.totalFertilized++;
+    GAME.achievements.checkAll();
     GAME.ui.showNotification('🌱 Fertilized! Growth boosted. +4 XP', 'success');
     GAME.ui.refreshInventory();
   },
@@ -566,6 +575,8 @@ Object.assign(GAME.game, {
     this.state.energy -= cost;
     this.addXP(3);
     GAME.quests.track('water', 1);
+    this.state.stats.totalWatered++;
+    GAME.achievements.checkAll();
     GAME.ui.showNotification('💧 Watered crops! +3 XP', 'success');
     var plot = this.state.plots[idx];
     this.spawnWaterParticles(plot.x, plot.z); // 🎆 جسيمات الماء
@@ -626,6 +637,8 @@ Object.assign(GAME.game, {
     }
     this.addXP(8);
     GAME.quests.track('plant', 1);
+    this.state.stats.totalPlanted++;
+    GAME.achievements.checkAll();
     GAME.ui.showNotification('🌱 Planted ' + crop + '! +8 XP', 'success');
     // 🎆 جسيمات الزراعة
     var plantColors = { wheat: 0x228B22, tomato: 0x228B22, carrot: 0x228B22, apple: 0x8B5A2B };
@@ -684,6 +697,9 @@ Object.assign(GAME.game, {
     }
     this.addXP(15);
     GAME.quests.track('harvest', 1);
+    this.state.stats.totalHarvested++;
+    if (cropType === 'apple') this.state.stats.totalApples++;
+    GAME.achievements.checkAll();
   },
 
   craftItem: function(recipeId) {
@@ -703,6 +719,8 @@ Object.assign(GAME.game, {
     this.state.crafted[recipeId] = (this.state.crafted[recipeId] || 0) + 1;
     this.addXP(recipe.xpReward);
     GAME.quests.track('craft', 1);
+    this.state.stats.totalCrafted++;
+    GAME.achievements.checkAll();
     GAME.ui.showNotification('🔨 Crafted ' + recipe.name + '! +' + recipe.xpReward + ' XP', 'success');
     GAME.audio.play('chime');
     GAME.ui.refreshInventory();
@@ -735,6 +753,8 @@ Object.assign(GAME.game, {
       this.state.money += price * amt;
       this.state.crafted[type] = 0;
       GAME.quests.track('earn', price * amt);
+      this.state.stats.totalEarned += price * amt;
+      GAME.achievements.checkAll();
       GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
       return;
     }
@@ -749,6 +769,8 @@ Object.assign(GAME.game, {
     this.state.money += price * amt;
     this.state.inventory[type] = 0;
     GAME.quests.track('earn', price * amt);
+    this.state.stats.totalEarned += price * amt;
+    GAME.achievements.checkAll();
     GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
   },
 
@@ -770,6 +792,8 @@ Object.assign(GAME.game, {
     this.state.time = 6;
     this.state.quests = GAME.quests.generateDaily();
     this.addXP(5);
+    this.state.stats.totalSlept++;
+    GAME.achievements.checkAll();
     GAME.ui.showNotification('🌙 Slept! Day ' + this.state.day + ' ☀️ +5 XP', 'success');
   },
 

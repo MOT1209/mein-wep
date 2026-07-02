@@ -15,7 +15,13 @@ GAME.game.state = {
   timeScale: 60,
   xp: 0,
   level: 1,
-  quests: []
+  quests: [],
+  achievements: [],
+  stats: {
+    totalPlanted: 0, totalHarvested: 0, totalEarned: 0,
+    totalCrafted: 0, totalWatered: 0, totalFertilized: 0,
+    totalSlept: 0, totalAnimals: 0, totalApples: 0
+  }
 };
 
 GAME.game.recipes = {
