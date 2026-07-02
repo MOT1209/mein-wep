@@ -2,6 +2,7 @@
 description: مختبر ألعاب KingCraft — يفتح اللعبة في المتصفح ويختبرها كإنسان حقيقي (حركة، تعدين، بناء، F3، مخزون)
 mode: subagent
 color: "#ff6b6b"
+workflow: اختبر بعد الـ Build و الـ Lint — أبلغ main-workflow agent بالنتائج
 permission:
   read: allow
   edit: deny

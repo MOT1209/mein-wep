@@ -1,7 +1,8 @@
 ---
 description: متخصص في واجهات مستخدم KingCraft — HUD، المخزون، التصنيع، الأفران، القوائم
 mode: subagent
-color: "#fb923c"
+color: "#ec4899"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

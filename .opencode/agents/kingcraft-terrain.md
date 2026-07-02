@@ -1,7 +1,8 @@
 ---
 description: متخصص في توليد تضاريس KingCraft — البايموز، الكهوف، الضوضاء، وتوليد العالم (TerrainGen.js, Noise.js, BlockData.js)
 mode: subagent
-color: "#4ade80"
+color: "#8b5cf6"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

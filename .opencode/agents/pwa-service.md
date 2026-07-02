@@ -2,6 +2,7 @@
 description: متخصص في PWA و Service Worker — sw.js, manifest.json, offline support, caching
 mode: subagent
 color: "#6366f1"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

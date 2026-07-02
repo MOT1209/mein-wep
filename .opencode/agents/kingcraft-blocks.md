@@ -1,7 +1,8 @@
 ---
 description: متخصص في بلوكات KingCraft وأنسجتها وعرضها البصري — BlockTexture.js, BlockData.js, Chunk.js
 mode: subagent
-color: "#fbbf24"
+color: "#84cc16"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

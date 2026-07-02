@@ -1,7 +1,8 @@
 ---
 description: متخصص في SEO وتحسين محركات البحث لموقع راشد — meta tags, sitemap, structured data, performance
 mode: subagent
-color: "#22c55e"
+color: "#14b8a6"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

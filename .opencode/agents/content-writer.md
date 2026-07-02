@@ -2,6 +2,7 @@
 description: كاتب محتوى — مقالات المدونة، README، التوثيق، النصوص التسويقية
 mode: subagent
 color: "#eab308"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

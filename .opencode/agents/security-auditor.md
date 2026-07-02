@@ -2,6 +2,7 @@
 description: متخصص في مراجعة أمان المشروع — XSS, CSP, headers, vulnerabilities
 mode: subagent
 color: "#dc2626"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

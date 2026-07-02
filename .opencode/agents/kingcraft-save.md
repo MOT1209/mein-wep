@@ -1,7 +1,8 @@
 ---
 description: متخصص في حفظ وتحميل عالم KingCraft — SaveLoad.js, World.js, IndexedDB
 mode: subagent
-color: "#38bdf8"
+color: "#06b6d4"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

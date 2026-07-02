@@ -2,6 +2,7 @@
 description: مهندس معماري — تخطيط هيكل المشروع، code review, best practices, patterns
 mode: subagent
 color: "#a855f7"
+workflow: استشر main-workflow agent للطلبات الكبيرة — اتبع الـ 10 خطوات في التنفيذ
 permission:
   read: allow
   edit: deny

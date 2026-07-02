@@ -2,6 +2,7 @@
 description: متخصص في لوحة الإدارة — Admin panel, user management, analytics dashboard
 mode: subagent
 color: "#ef4444"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

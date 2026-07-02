@@ -1,7 +1,8 @@
 ---
 description: متخصص في الصوتيات بلعبة KingCraft — SoundManager.js, Web Audio API
 mode: subagent
-color: "#a78bfa"
+color: "#f59e0b"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

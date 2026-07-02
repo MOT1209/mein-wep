@@ -2,6 +2,7 @@
 description: متخصص في قاعدة بيانات Supabase — SQL, RLS, authentication, schema design
 mode: subagent
 color: "#3b82f6"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

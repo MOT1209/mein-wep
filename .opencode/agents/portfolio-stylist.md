@@ -2,6 +2,7 @@
 description: متخصص في تصميم وتنسيق موقع راشد الشخصي — CSS، responsive، accessibility، design system
 mode: subagent
 color: "#2dd4bf"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny

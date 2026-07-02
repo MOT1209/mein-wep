@@ -1,7 +1,8 @@
 ---
 description: متخصص في ميكانيكيات اللعب — Player.js, EntityManager.js, Mob.js, Inventory.js
 mode: subagent
-color: "#f472b6"
+color: "#10b981"
+workflow: اتبع الـ 10 خطوات في CLAUDE.md — راجع main-workflow agent للتنسيق
 permission:
   read: allow
   edit: deny
