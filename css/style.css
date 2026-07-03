@@ -5222,3 +5222,181 @@ select.admin-input { cursor: pointer; }
   .container { max-width: 1400px; }
 }
 
+/* =========================================
+   v10.0 — DEEP SIGNAL REFINED
+   Evolution layer over the merged redesign:
+   indigo identity, grid texture, floating nav,
+   Sora display font. Placed last so it governs.
+   Keeps every JS-facing class name & variable.
+   ========================================= */
+:root {
+  --accent: #6366f1;
+  --accent-rgb: 99, 102, 241;
+  --accent-subtle: rgba(99, 102, 241, 0.12);
+  --accent-glow: rgba(99, 102, 241, 0.3);
+  --accent-2: #22d3ee;
+  --bg: #060609;
+  --bg-surface: #0d0d14;
+  --bg-elevated: #14141d;
+  --bg-hover: #1b1b26;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(129, 140, 248, 0.35);
+  --font-display: 'Sora', var(--font);
+  --radius-lg: 18px;
+}
+body.light-mode {
+  --accent: #4f46e5;
+  --accent-rgb: 79, 70, 229;
+  --accent-subtle: rgba(79, 70, 229, 0.1);
+  --accent-glow: rgba(79, 70, 229, 0.22);
+  --bg: #fafaf8;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f2f1ee;
+  --bg-hover: #e8e7e3;
+  --border: rgba(17, 19, 24, 0.09);
+  --border-hover: rgba(79, 70, 229, 0.35);
+}
+
+/* Background: tight glow + fine grid fading from the top */
+body {
+  background:
+    radial-gradient(ellipse 800px 480px at 70% -10%, rgba(var(--accent-rgb), 0.13), transparent 60%),
+    radial-gradient(ellipse 500px 380px at 10% 25%, rgba(34, 211, 238, 0.05), transparent 60%),
+    var(--bg);
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 30%, transparent 75%);
+  mask-image: radial-gradient(ellipse 90% 60% at 50% 0%, black 30%, transparent 75%);
+  animation: none;
+  z-index: -1;
+  pointer-events: none;
+}
+body.light-mode::before {
+  background:
+    linear-gradient(rgba(17, 19, 24, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(17, 19, 24, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Display typography */
+h1, h2, h3, h4, .nav-logo, .stat-num { font-family: var(--font-display); }
+
+/* Floating pill navbar */
+.navbar {
+  top: 14px;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: min(var(--max-width), calc(100% - 28px));
+  background: rgba(10, 10, 16, 0.72);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+.navbar.scrolled { background: rgba(8, 8, 13, 0.9); }
+body.light-mode .navbar { background: rgba(250, 250, 248, 0.82); }
+body.light-mode .navbar.scrolled { background: rgba(250, 250, 248, 0.94); }
+.nav-inner { padding: 0 18px; }
+.mobile-menu { top: 0; padding-top: calc(var(--nav-height) + 40px); }
+@supports (padding-top: env(safe-area-inset-top)) {
+  .navbar { padding-top: 0; top: calc(14px + env(safe-area-inset-top)); }
+}
+
+/* Hero */
+.hero h1 {
+  font-size: clamp(2rem, 5.2vw, 4rem);
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+}
+.hero h1 span {
+  background: linear-gradient(100deg, color-mix(in srgb, var(--accent) 75%, #c7d2fe), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-tag {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+}
+.hero-tag::before { box-shadow: 0 0 10px var(--accent); }
+
+/* Hero status → terminal card */
+.hero-status {
+  font-family: var(--font-mono);
+  background: rgba(13, 13, 20, 0.88);
+  border-radius: 14px;
+  padding: 12px 16px 14px;
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.hero-status::before {
+  content: '';
+  display: block;
+  height: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 14px;
+  background:
+    radial-gradient(circle at 5px 5px, #f87171 0 4px, transparent 4.5px),
+    radial-gradient(circle at 22px 5px, #fbbf24 0 4px, transparent 4.5px),
+    radial-gradient(circle at 39px 5px, #34d399 0 4px, transparent 4.5px);
+  background-repeat: no-repeat;
+}
+body.light-mode .hero-status { background: var(--bg-surface); }
+.hero-status-item { font-size: 0.75rem; }
+
+/* Buttons */
+.btn { border-radius: 12px; }
+.btn-primary {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 82%, #000), var(--accent));
+  color: #fff;
+  box-shadow: 0 8px 28px -8px var(--accent-glow);
+}
+.btn-primary:hover {
+  opacity: 1;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px -8px var(--accent-glow);
+}
+.project-actions .btn-primary { color: #fff; }
+
+/* Badges */
+.tech-badge {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  border-radius: 8px;
+}
+
+/* Cards: lift on hover */
+.project-card:hover,
+.about-card:hover,
+.ai-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-hover) !important;
+}
+.project-card,
+.about-card,
+.ai-card {
+  transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+@media (hover: none) and (pointer: coarse) {
+  .project-card:hover, .about-card:hover, .ai-card:hover { transform: none; }
+}
+
+/* Mobile: status card wraps below the hero image instead of overflowing */
+@media (max-width: 1024px) {
+  .hero-visual { flex-wrap: wrap; gap: 16px; }
+  .hero-status { width: min(100%, 320px); margin: 8px auto 0; }
+}
+

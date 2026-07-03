@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Proposal C — Daylight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fafaf8; --bg-alt:#ffffff; --panel:#ffffff;
+  --border:#e6e4df; --border-hi:#c7d2fe;
+  --text-hi:#111318; --text-md:#4b5263; --text-lo:#8a90a0;
+  --indigo:#4f46e5; --indigo-soft:#eef2ff; --cyan:#0891b2;
+  --font-body:'Inter',sans-serif; --font-mono:'JetBrains Mono',monospace;
+  --shadow-sm:0 1px 2px rgba(17,19,24,0.05);
+  --shadow-md:0 12px 32px -12px rgba(17,19,24,0.14);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text-md);line-height:1.7;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:-1;
+  background-image:linear-gradient(#eceae5 1px,transparent 1px),linear-gradient(90deg,#eceae5 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 55% at 50% 0%,black 20%,transparent 72%)}
+.container{max-width:1120px;margin:0 auto;padding:0 28px}
+/* NAV */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:50;background:rgba(250,250,248,0.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1120px;margin:0 auto;padding:15px 28px;display:flex;align-items:center;justify-content:space-between}
+.nav-logo{font-weight:800;font-size:1.15rem;color:var(--text-hi);text-decoration:none;letter-spacing:-0.02em}
+.nav-logo span{color:var(--indigo)}
+.nav-links{display:flex;gap:4px}
+.nav-links a{color:var(--text-md);text-decoration:none;font-size:0.87rem;font-weight:500;padding:7px 13px;border-radius:9px;transition:all .2s}
+.nav-links a:hover{color:var(--text-hi);background:#f0efec}
+.nav-links a.active{color:var(--indigo);background:var(--indigo-soft)}
+.nav-cta{font-size:0.85rem;font-weight:600;color:#fff;background:var(--text-hi);padding:9px 20px;border-radius:10px;text-decoration:none;transition:all .2s}
+.nav-cta:hover{background:var(--indigo)}
+/* HERO */
+.hero{padding:160px 0 90px}
+.hero-grid{display:grid;grid-template-columns:1.2fr 0.8fr;gap:60px;align-items:center}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;font-size:0.8rem;font-weight:600;color:var(--indigo);
+  background:var(--indigo-soft);border:1px solid var(--border-hi);padding:6px 15px;border-radius:100px;margin-bottom:26px}
+.hero-tag::before{content:'';width:7px;height:7px;border-radius:50%;background:#22c55e}
+h1{font-size:clamp(2.6rem,5.4vw,4rem);font-weight:800;line-height:1.07;letter-spacing:-0.035em;color:var(--text-hi);margin-bottom:22px}
+h1 span{color:var(--indigo)}
+.hero p{font-size:1.08rem;max-width:520px;margin-bottom:34px}
+.hero p strong{color:var(--text-hi)}
+.hero-cta{display:flex;gap:13px;margin-bottom:42px}
+.btn{font-weight:600;font-size:0.94rem;padding:13px 26px;border-radius:12px;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:9px}
+.btn-primary{background:var(--indigo);color:#fff;box-shadow:0 10px 26px -10px rgba(79,70,229,0.5)}
+.btn-primary:hover{background:#4338ca;transform:translateY(-2px)}
+.btn-ghost{color:var(--text-hi);border:1px solid var(--border);background:var(--panel);box-shadow:var(--shadow-sm)}
+.btn-ghost:hover{border-color:var(--indigo);color:var(--indigo)}
+.hero-tech{display:flex;gap:9px;flex-wrap:wrap}
+.tech-badge{font-family:var(--font-mono);font-size:0.72rem;color:var(--text-md);border:1px solid var(--border);background:var(--panel);padding:5px 12px;border-radius:8px;box-shadow:var(--shadow-sm)}
+/* hero status card */
+.status-card{background:var(--panel);border:1px solid var(--border);border-radius:20px;box-shadow:var(--shadow-md);overflow:hidden}
+.status-head{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.status-head b{font-size:0.9rem;color:var(--text-hi);font-weight:600}
+.status-head span{font-family:var(--font-mono);font-size:0.68rem;color:#16a34a;background:#f0fdf4;border:1px solid #bbf7d0;padding:3px 10px;border-radius:100px}
+.status-body{padding:10px 22px 20px}
+.status-row{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px dashed var(--border);font-size:0.86rem}
+.status-row:last-child{border-bottom:none}
+.status-row .k{color:var(--text-lo)} .status-row .v{color:var(--text-hi);font-weight:600;font-family:var(--font-mono);font-size:0.8rem}
+/* SECTION */
+.section{padding:88px 0}
+.section-head{margin-bottom:46px}
+.kicker{font-family:var(--font-mono);font-size:0.72rem;color:var(--indigo);letter-spacing:0.16em;text-transform:uppercase;display:block;margin-bottom:10px}
+.section-head h2{font-size:2.1rem;font-weight:800;letter-spacing:-0.03em;color:var(--text-hi);margin-bottom:8px}
+.section-head p{max-width:520px;font-size:0.95rem}
+/* CARDS */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:28px;box-shadow:var(--shadow-sm);transition:all .3s}
+.card:hover{box-shadow:var(--shadow-md);transform:translateY(-4px);border-color:var(--border-hi)}
+.card .icon{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;margin-bottom:20px;background:var(--indigo-soft);border:1px solid var(--border-hi)}
+.card h3{font-size:1.08rem;font-weight:700;color:var(--text-hi);margin-bottom:10px;letter-spacing:-0.01em}
+.card p{font-size:0.88rem;margin-bottom:18px}
+.card .meta{display:flex;gap:8px}
+.card .meta span{font-family:var(--font-mono);font-size:0.68rem;color:var(--text-md);background:var(--bg);border:1px solid var(--border);padding:3px 10px;border-radius:6px}
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.stat{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:28px;text-align:center;box-shadow:var(--shadow-sm)}
+.stat b{font-size:2rem;font-weight:800;color:var(--text-hi);display:block;letter-spacing:-0.02em}
+.stat b em{color:var(--indigo);font-style:normal}
+.stat span{font-size:0.78rem;color:var(--text-lo)}
+footer{border-top:1px solid var(--border);padding:34px 0;text-align:center;font-size:0.84rem;color:var(--text-lo);background:var(--bg-alt)}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr}.grid-3{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.nav-links{display:none}}
+</style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Rashid<span>.</span></a>
+    <div class="nav-links">
+      <a href="#" class="active">Home</a><a href="#">Projects</a><a href="#">Skills</a><a href="#">Vault</a><a href="#">Blog</a>
+    </div>
+    <a href="#" class="nav-cta">Get in Touch</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="hero-tag">Available for collaboration</div>
+      <h1>Building the future with <span>code &amp; AI</span></h1>
+      <p>I'm <strong>Rashid</strong> — a Full-Stack Developer and AI Engineer. I build AI-powered platforms, 3D games, and open-source tools that push the boundaries of the web.</p>
+      <div class="hero-cta">
+        <a href="#" class="btn btn-primary">View Projects →</a>
+        <a href="#" class="btn btn-ghost">Get in Touch</a>
+      </div>
+      <div class="hero-tech">
+        <span class="tech-badge">Next.js</span><span class="tech-badge">Python</span><span class="tech-badge">Supabase</span><span class="tech-badge">Three.js</span><span class="tech-badge">React</span>
+      </div>
+    </div>
+    <div class="status-card">
+      <div class="status-head"><b>Developer Status</b><span>● ACTIVE</span></div>
+      <div class="status-body">
+        <div class="status-row"><span class="k">Name</span><span class="v">Rashid (MOT1209)</span></div>
+        <div class="status-row"><span class="k">Role</span><span class="v">Full-Stack · AI</span></div>
+        <div class="status-row"><span class="k">Projects</span><span class="v">13+</span></div>
+        <div class="status-row"><span class="k">Repos</span><span class="v">15</span></div>
+        <div class="status-row"><span class="k">AI Model</span><span class="v">Rashid-AI v3.0</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <span class="kicker">Portfolio</span>
+      <h2>Projects</h2>
+      <p>Games, apps, AI models, and tools — each one installable, offline-ready, and fast.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card"><div class="icon">🎮</div><h3>KingCraft</h3><p>Browser-based 3D voxel sandbox built with Three.js and a custom engine.</p><div class="meta"><span>Three.js</span><span>Game</span></div></div>
+      <div class="card"><div class="icon">🤖</div><h3>Rashid AI v3.0</h3><p>Multimodal assistant with voice, 3D avatar, and 10+ languages via Gemini.</p><div class="meta"><span>AI</span><span>Gemini</span></div></div>
+      <div class="card"><div class="icon">⚡</div><h3>Alking Platform</h3><p>Full-stack AI platform with Next.js 15, Supabase, and real-time features.</p><div class="meta"><span>Next.js</span><span>Supabase</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:0">
+  <div class="container">
+    <div class="stats">
+      <div class="stat"><b>15<em>+</em></b><span>Repos</span></div>
+      <div class="stat"><b>13<em>+</em></b><span>Projects</span></div>
+      <div class="stat"><b>24/7</b><span>Live</span></div>
+      <div class="stat"><b>v3.0</b><span>AI Model</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>© 2026 Rashid — Proposal C · Daylight</footer>
+</body>
+</html>
