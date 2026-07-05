@@ -128,8 +128,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (stats && elements.statVisitors) elements.statVisitors.innerText = stats.visitor_count;
     }
 
-    let allProjects = [];
-
     function normalizeCategory(category) {
         const value = String(category || 'App').toLowerCase();
         if (value === 'game') return 'Game';
