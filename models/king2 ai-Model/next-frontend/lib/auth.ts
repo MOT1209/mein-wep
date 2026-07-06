@@ -38,54 +38,6 @@ export const KING2_SYSTEM_PROMPT = `أنت KING2، المساعد الذكي ا�
 هل فهمت؟ ابدأ بالإجابة على سؤالي.`;
 
 const ADMIN_USERNAME = 'Rashid2010';
-const E2E_TEST_EMAIL = (process.env.E2E_TEST_EMAIL || 'zwnt45602@gmail.com').toLowerCase();
-const E2E_TEST_PASSWORD = process.env.E2E_TEST_PASSWORD || 'RASHID123456789';
-
-async function ensureE2ETestUser(email: string, password: string) {
-  if (email !== E2E_TEST_EMAIL || password !== E2E_TEST_PASSWORD) {
-    return null;
-  }
-
-  const passwordHash = await bcrypt.hash(password, 12);
-
-  const { data: existing } = await supabase
-    .from('users')
-    .select('*')
-    .eq('email', email)
-    .maybeSingle();
-
-  if (existing) {
-    const { data } = await supabase
-      .from('users')
-      .update({
-        password_hash: passwordHash,
-        password: passwordHash,
-        is_active: true,
-        name: 'KING2 E2E Test User',
-        display_name: 'KING2 E2E Test User',
-      })
-      .eq('email', email)
-      .select()
-      .single();
-    return data || null;
-  }
-
-  const { data } = await supabase
-    .from('users')
-    .insert({
-      email,
-      name: 'KING2 E2E Test User',
-      username: email.split('@')[0],
-      password_hash: passwordHash,
-      password: passwordHash,
-      display_name: 'KING2 E2E Test User',
-      role: 'USER',
-      is_active: true,
-    })
-    .select()
-    .single();
-  return data || null;
-}
 
 // NextAuth v4 builds each OAuth redirect_uri from the request's own path, which
 // Next.js has already stripped of basePath ('/king2') by the time our route
@@ -147,33 +99,22 @@ export const authOptions: NextAuthOptions = {
           user = found;
 
           if (!user) {
-            user = await ensureE2ETestUser(email, password);
-            if (!user) {
-              console.log(`[KING2] User not found: ${email}`);
-              return null;
-            }
+            console.log(`[KING2] User not found: ${email}`);
+            return null;
           }
 
           const hasPassword = (hash: string | null | undefined) => hash && hash !== 'OAUTH_NO_PASSWORD';
 
           if (!hasPassword(user.password_hash) && !hasPassword(user.password)) {
-            const syncedUser = await ensureE2ETestUser(email, password);
-            if (!syncedUser) {
-              console.log(`[KING2] User has no password (OAuth-only account): ${email}`);
-              return null;
-            }
-            user = syncedUser;
+            console.log(`[KING2] User has no password (OAuth-only account): ${email}`);
+            return null;
           }
 
           const passwordHash = (user.password_hash || user.password) as string;
           const isValid = await bcrypt.compare(password, passwordHash);
           if (!isValid) {
-            const syncedUser = await ensureE2ETestUser(email, password);
-            if (!syncedUser) {
-              console.log(`[KING2] Invalid password for: ${email}`);
-              return null;
-            }
-            user = syncedUser;
+            console.log(`[KING2] Invalid password for: ${email}`);
+            return null;
           }
 
           return {
