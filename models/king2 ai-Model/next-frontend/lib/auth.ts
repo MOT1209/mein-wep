@@ -1,6 +1,7 @@
 import { NextAuthOptions } from 'next-auth';
 import { getServerSession } from 'next-auth';
 import GoogleProvider from 'next-auth/providers/google';
+import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import { SupabaseAdapter } from './supabase-adapter';
@@ -86,6 +87,15 @@ async function ensureE2ETestUser(email: string, password: string) {
   return data || null;
 }
 
+// NextAuth v4 builds each OAuth redirect_uri from the request's own path, which
+// Next.js has already stripped of basePath ('/king2') by the time our route
+// handler sees it — so the URL sent to Google/GitHub omits '/king2' and the
+// provider rejects it (or worse, redirects back to a path our rewrite doesn't
+// proxy). Forcing redirect_uri explicitly keeps it inside '/king2'; Next.js's
+// basePath still strips '/king2' transparently when the provider redirects
+// back, so the same [...nextauth] route handles it without further changes.
+const PUBLIC_BASE_URL = (process.env.NEXTAUTH_URL || '').replace(/\/$/, '');
+
 export const authOptions: NextAuthOptions = {
   adapter: SupabaseAdapter() as any,
   secret: process.env.NEXTAUTH_SECRET,
@@ -97,8 +107,17 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           prompt: 'select_account',
-          access_type: 'offline',
-          response_type: 'code',
+          redirect_uri: `${PUBLIC_BASE_URL}/api/auth/callback/google`,
+        },
+      },
+    }),
+    GitHubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID ?? '',
+      clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
+      allowDangerousEmailAccountLinking: true,
+      authorization: {
+        params: {
+          redirect_uri: `${PUBLIC_BASE_URL}/api/auth/callback/github`,
         },
       },
     }),
@@ -234,8 +253,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   pages: {
-    signIn: '/king2/auth/signin',
-    error: '/king2/auth/signin',
+    signIn: '/auth/signin',
+    error: '/auth/signin',
   },
   debug: process.env.NODE_ENV === 'development',
   events: {
