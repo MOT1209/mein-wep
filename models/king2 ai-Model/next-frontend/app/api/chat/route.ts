@@ -155,9 +155,10 @@ export async function POST(req: Request) {
     if (userId) {
       try {
         if (!conversationId) {
+          const autoTitle = userMessage.trim().slice(0, 60) || 'محادثة جديدة';
           const { data: conversation } = await supabase
             .from('conversations')
-            .insert({ user_id: userId, type: 'PRIVATE' })
+            .insert({ user_id: userId, type: 'PRIVATE', title: autoTitle })
             .select()
             .single();
 
@@ -293,6 +294,72 @@ export async function GET(req: Request) {
     });
   } catch (error) {
     log.error('GET conversations error', error);
+    return createErrorResponse(error, { status: 500 });
+  }
+}
+
+// ─────────────────────────────────────────────────────────
+//  PATCH  –  rename or pin/unpin a conversation
+// ─────────────────────────────────────────────────────────
+export async function PATCH(req: Request) {
+  try {
+    const session = await auth();
+    if (!session?.user) {
+      return createErrorResponse(
+        Object.assign(new Error('غير مصرح'), { statusCode: 401 }),
+        { status: 401 },
+      );
+    }
+
+    const userId = (session.user as any).id;
+    const { searchParams } = new URL(req.url);
+    const conversationId = searchParams.get('conversationId');
+
+    if (!conversationId) {
+      return createErrorResponse(
+        Object.assign(new Error('معرّف المحادثة مطلوب'), { statusCode: 400 }),
+        { status: 400 },
+      );
+    }
+
+    const body = await req.json().catch(() => ({}));
+    const updates: Record<string, unknown> = {};
+    if (typeof body.title === 'string') updates.title = body.title.trim().slice(0, 200);
+    if (typeof body.isPinned === 'boolean') updates.is_pinned = body.isPinned;
+
+    if (Object.keys(updates).length === 0) {
+      return createErrorResponse(
+        Object.assign(new Error('لا توجد بيانات للتحديث'), { statusCode: 400 }),
+        { status: 400 },
+      );
+    }
+
+    updates.updated_at = new Date().toISOString();
+
+    const { data: conversation, error } = await supabase
+      .from('conversations')
+      .update(updates)
+      .eq('id', conversationId)
+      .eq('user_id', userId)
+      .select('id, title, is_pinned')
+      .maybeSingle();
+
+    if (error) {
+      log.error('PATCH conversation error', error);
+      return createErrorResponse(error, { status: 500 });
+    }
+    if (!conversation) {
+      return createErrorResponse(
+        Object.assign(new Error('المحادثة غير موجودة'), { statusCode: 404 }),
+        { status: 404 },
+      );
+    }
+
+    return new Response(JSON.stringify(conversation), {
+      headers: { 'Content-Type': 'application/json' },
+    });
+  } catch (error) {
+    log.error('PATCH conversation error', error);
     return createErrorResponse(error, { status: 500 });
   }
 }

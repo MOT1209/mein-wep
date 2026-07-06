@@ -36,6 +36,8 @@ import { CHAT_MODELS, getChatModel } from '@/lib/chatModels';
 
 interface ChatInterfaceProps {
   conversationId?: string;
+  /** Pre-loaded messages when resuming a saved conversation from history */
+  initialMessages?: Message[];
   onNewConversation?: () => void;
   isGuest?: boolean;
 }
@@ -122,7 +124,7 @@ function SpeedBadge({ charsPerSecond }: { charsPerSecond: number | null }) {
   );
 }
 
-export function ChatInterface({ conversationId, onNewConversation, isGuest }: ChatInterfaceProps) {
+export function ChatInterface({ conversationId, initialMessages, onNewConversation, isGuest }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -148,9 +150,12 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
     append,
     stop,
     reload,
+    clearGuestData,
   } = useKing2Chat({
     api: '/king2/api/chat',
     body: { model: selectedModel, conversationId },
+    initialMessages,
+    initialConversationId: conversationId,
     onFinish: () => {
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
       if (streamStartTime) {
@@ -387,12 +392,14 @@ export function ChatInterface({ conversationId, onNewConversation, isGuest }: Ch
   }, [selectedModel]);
 
   const clearChat = useCallback(() => {
-    setMessages([]);
+    // Resets messages AND the hook's tracked conversationId — without this,
+    // the next message would silently continue appending to the old
+    // conversation even though the UI looks empty.
+    clearGuestData();
     setInput('');
     setCharsPerSecond(null);
-    if (isGuest) localStorage.removeItem('king2_guest_messages');
     onNewConversation?.();
-  }, [setMessages, onNewConversation, isGuest]);
+  }, [clearGuestData, onNewConversation]);
 
   const handleRetry = useCallback(() => reload(), [reload]);
 

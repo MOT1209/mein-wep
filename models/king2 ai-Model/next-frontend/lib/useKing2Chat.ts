@@ -31,6 +31,10 @@ interface UseKing2ChatOptions {
   credentials?: RequestCredentials;
   /** Extra HTTP headers */
   headers?: Record<string, string>;
+  /** Pre-loaded messages when resuming a saved conversation */
+  initialMessages?: Message[];
+  /** The conversation these initialMessages belong to; skips guest-id restore */
+  initialConversationId?: string | null;
 }
 
 // ── Internal helpers ──────────────────────────────────────
@@ -104,13 +108,17 @@ export function useKing2Chat({
   onError,
   credentials,
   headers: extraHeaders,
+  initialMessages,
+  initialConversationId,
 }: UseKing2ChatOptions) {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(initialMessages ?? []);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingStatus, setStreamingStatus] =
     useState<StreamingStatus>('idle');
   const [error, setError] = useState<string | null>(null);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(
+    initialConversationId ?? null,
+  );
   const [guestMessageCount, setGuestMessageCount] = useState(0);
 
   const abortRef = useRef<AbortController | null>(null);
@@ -124,14 +132,19 @@ export function useKing2Chat({
   // ── Restore guest data on mount ───────────────────────
   useEffect(() => {
     // Only restore guest messages on explicit request via setMessages
-    // Auto-loading from localStorage is handled by ChatInterface component
-    const storedConvId = getStoredConversationId();
-    if (storedConvId) {
-      setConversationId(storedConvId);
+    // Auto-loading from localStorage is handled by ChatInterface component.
+    // Skip when a specific saved conversation was explicitly requested
+    // (e.g. opened from chat history) — that id must win instead.
+    if (!initialConversationId) {
+      const storedConvId = getStoredConversationId();
+      if (storedConvId) {
+        setConversationId(storedConvId);
+      }
     }
     return () => {
       isMountedRef.current = false;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist messages to localStorage on every change (guest mode)
