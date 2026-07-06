@@ -193,9 +193,12 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
+  // Same basePath issue as the OAuth redirect_uri fix: these paths were missing
+  // '/king2' — NextAuth uses them verbatim, so redirects landed on the outer
+  // static site (rashid-wep) and 404'd instead of showing app/auth/signin/page.tsx.
   pages: {
-    signIn: '/auth/signin',
-    error: '/auth/signin',
+    signIn: '/king2/auth/signin',
+    error: '/king2/auth/signin',
   },
   debug: process.env.NODE_ENV === 'development',
   events: {

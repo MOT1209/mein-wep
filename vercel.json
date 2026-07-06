@@ -20,6 +20,8 @@
   "rewrites": [
     { "source": "/king2", "destination": "https://king2-platform.vercel.app/king2" },
     { "source": "/king2/:path*", "destination": "https://king2-platform.vercel.app/king2/:path*" },
+    { "source": "/auth/:path*", "destination": "https://king2-platform.vercel.app/king2/auth/:path*" },
+    { "source": "/api/auth/:path*", "destination": "https://king2-platform.vercel.app/king2/api/auth/:path*" },
     { "source": "/api/gemini", "destination": "/api/gemini" },
     { "source": "/api/rss", "destination": "/api/rss" },
     { "source": "/api/contact", "destination": "/api/contact" },
