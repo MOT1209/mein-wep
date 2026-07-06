@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 // Style → extra prompt keywords for the image model.
 const STYLE_KEYWORDS: Record<string, string> = {
@@ -23,39 +24,6 @@ const ENHANCE_SYSTEM =
 
 function hasArabic(text: string): boolean {
   return /[؀-ۿ]/.test(text);
-}
-
-// Generate with the custom KING2-IMAGE model via HuggingFace Inference API.
-// Returns a base64 data URI, or null on any failure so the caller can fall back.
-async function generateWithKing2(prompt: string): Promise<string | null> {
-  const key = process.env.HF_TOKEN;
-  if (!key) return null;
-  const model = process.env.KING2_IMAGE_MODEL || 'RASHID778/king2-image';
-  try {
-    const resp = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${key}`,
-        'Content-Type': 'application/json',
-        Accept: 'image/png',
-      },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: { num_inference_steps: 30, guidance_scale: 7.0 },
-      }),
-      signal: AbortSignal.timeout(90_000),
-    });
-    if (!resp.ok) {
-      console.error(`[Image] KING2 model HTTP ${resp.status}:`, await resp.text().catch(() => ''));
-      return null;
-    }
-    const buf = Buffer.from(await resp.arrayBuffer());
-    if (buf.length < 1000) return null; // too small to be a real image
-    return `data:image/png;base64,${buf.toString('base64')}`;
-  } catch (e) {
-    console.error('[Image] KING2 model error:', e);
-    return null;
-  }
 }
 
 // Translate + enrich the (often Arabic) description into a detailed English prompt.
@@ -96,6 +64,81 @@ async function enhancePrompt(prompt: string): Promise<string> {
   return prompt;
 }
 
+// Generate with the custom KING2-IMAGE model (SDXL LoRA) via the HF Inference
+// Providers router. Returns a data URI, or null on any failure so the caller
+// can fall back to Pollinations.
+const KING2_LORA_URL =
+  'https://huggingface.co/RASHID778/king2-image/resolve/main/pytorch_lora_weights.safetensors';
+
+async function fetchAsDataUri(url: string): Promise<string | null> {
+  if (url.startsWith('data:')) return url;
+  const resp = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+  if (!resp.ok) return null;
+  const type = resp.headers.get('content-type') || 'image/png';
+  const buf = Buffer.from(await resp.arrayBuffer());
+  return `data:${type};base64,${buf.toString('base64')}`;
+}
+
+async function generateWithKing2(prompt: string): Promise<string | null> {
+  const key = process.env.HF_TOKEN;
+  if (!key) return null;
+  const model = process.env.KING2_IMAGE_MODEL || 'RASHID778/king2-image';
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${key}`,
+  };
+
+  // 1) OpenAI-compatible images endpoint on the HF router (provider-agnostic).
+  try {
+    const resp = await fetch('https://router.huggingface.co/v1/images/generations', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ model, prompt, response_format: 'b64_json' }),
+      signal: AbortSignal.timeout(55_000),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const b64 = data?.data?.[0]?.b64_json;
+      if (b64) return `data:image/png;base64,${b64}`;
+      const url = data?.data?.[0]?.url;
+      if (url) return await fetchAsDataUri(url);
+    } else {
+      console.error('[Image] king2 router error:', resp.status, await resp.text());
+    }
+  } catch (e) {
+    console.error('[Image] king2 router error:', e);
+  }
+
+  // 2) Provider-direct: fal-ai serves the LoRA on top of fast-sdxl
+  //    (mapping from https://huggingface.co/api/models/RASHID778/king2-image).
+  try {
+    const resp = await fetch('https://router.huggingface.co/fal-ai/fal-ai/fast-sdxl', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        prompt,
+        loras: [{ path: KING2_LORA_URL, scale: 1 }],
+        image_size: 'square_hd',
+        num_inference_steps: 28,
+        guidance_scale: 7,
+        sync_mode: true,
+      }),
+      signal: AbortSignal.timeout(55_000),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      const url = data?.images?.[0]?.url;
+      if (url) return await fetchAsDataUri(url);
+    } else {
+      console.error('[Image] king2 fal error:', resp.status, await resp.text());
+    }
+  } catch (e) {
+    console.error('[Image] king2 fal error:', e);
+  }
+
+  return null;
+}
+
 export async function POST(req: Request) {
   try {
     const session = await auth();
@@ -113,6 +156,8 @@ export async function POST(req: Request) {
     const enhanced = await enhancePrompt(cleanPrompt);
     const styleKeywords = STYLE_KEYWORDS[style] || STYLE_KEYWORDS['photorealistic'];
     const finalPrompt = `${enhanced}, ${styleKeywords}, ${QUALITY_SUFFIX}`;
+
+    // The /image page extracts the URL from this markdown and renders the <img>.
     const altText = cleanPrompt.replace(/[[\]()]/g, '');
 
     // Prefer the custom KING2-IMAGE model when enabled; fall back to Pollinations.
@@ -138,14 +183,12 @@ export async function POST(req: Request) {
       `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}` +
       `?width=1024&height=1024&nologo=true&nofeed=true&seed=${seed}`;
 
-    // The /image page extracts the URL from this markdown and renders the <img>.
     return NextResponse.json({
       success: true,
       result: `![${altText}](${imageUrl})`,
       imageUrl,
       prompt: cleanPrompt,
       style,
-      model: 'pollinations',
     });
   } catch (error) {
     console.error('[Image Gen] Error:', error);
