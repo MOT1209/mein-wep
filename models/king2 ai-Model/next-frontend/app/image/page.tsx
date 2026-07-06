@@ -94,6 +94,29 @@ export default function ImagePage() {
           </div>
           <h1 className="text-3xl font-bold text-white">صانع الصور بالذكاء الاصطناعي</h1>
           <p className="mt-2 text-zinc-400">حوّل أفكارك إلى صور مذهلة باستخدام KING2 AI</p>
+
+          {/* Model badge */}
+          <div className="mt-4 flex items-center justify-center gap-3">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-400 ring-1 ring-amber-500/20">
+              🎨 KING2-IMAGE SDXL
+            </span>
+            <a
+              href="https://huggingface.co/RASHID778/king2-image"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-surface-tertiary px-3 py-1 text-xs text-zinc-400 ring-1 ring-zinc-800/50 transition-all hover:text-zinc-200 hover:ring-zinc-600/50"
+            >
+              🤗 تفاصيل النموذج
+            </a>
+            <a
+              href="https://RASHID778-king2-image-demo.hf.space"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full bg-surface-tertiary px-3 py-1 text-xs text-zinc-400 ring-1 ring-zinc-800/50 transition-all hover:text-zinc-200 hover:ring-zinc-600/50"
+            >
+              🚀 جرب على HF Space
+            </a>
+          </div>
         </div>
 
         {/* Style Selector */}

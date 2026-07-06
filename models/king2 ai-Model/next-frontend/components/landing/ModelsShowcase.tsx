@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Sparkles, Cpu, Zap, Shield } from 'lucide-react';
+import { Sparkles, Cpu, Zap, Shield, Image as ImageIcon, ExternalLink } from 'lucide-react';
 
 interface Provider {
   name: string;
@@ -44,6 +44,14 @@ const providers: Provider[] = [
     color: 'text-rose-400',
     borderColor: 'border-rose-500/20',
     gradient: 'from-rose-500/10 to-transparent',
+  },
+  {
+    name: 'KING2-IMAGE',
+    model: 'SDXL LoRA',
+    description: 'نموذج توليد الصور المدرب خصيصاً بأسلوب KING2 الفريد',
+    color: 'text-amber-400',
+    borderColor: 'border-amber-500/20',
+    gradient: 'from-amber-500/10 to-transparent',
   },
 ];
 
@@ -100,7 +108,7 @@ export function ModelsShowcase() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-50px' }}
-          className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          className="mb-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-5"
         >
           {providers.map((provider) => (
             <motion.div
@@ -132,6 +140,30 @@ export function ModelsShowcase() {
               <p className="relative text-sm leading-7 text-zinc-400">
                 {provider.description}
               </p>
+
+              {/* KING2-IMAGE special badge */}
+              {provider.name === 'KING2-IMAGE' && (
+                <div className="relative mt-3 flex items-center gap-2">
+                  <a
+                    href="https://huggingface.co/RASHID778/king2-image"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-400 ring-1 ring-amber-500/20 transition-all hover:bg-amber-500/20"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    التفاصيل على 🤗 Hub
+                  </a>
+                  <a
+                    href="https://RASHID778-king2-image-demo.hf.space"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-king-500/10 px-3 py-1 text-xs text-king-400 ring-1 ring-king-500/20 transition-all hover:bg-king-500/20"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    جرب النموذج
+                  </a>
+                </div>
+              )}
             </motion.div>
           ))}
         </motion.div>

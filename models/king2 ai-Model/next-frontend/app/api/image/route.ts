@@ -189,6 +189,12 @@ export async function POST(req: Request) {
       imageUrl,
       prompt: cleanPrompt,
       style,
+      model: 'king2-image',
+      modelInfo: {
+        name: 'KING2-IMAGE SDXL LoRA',
+        hfHub: 'https://huggingface.co/RASHID778/king2-image',
+        hfSpace: 'https://RASHID778-king2-image-demo.hf.space',
+      },
     });
   } catch (error) {
     console.error('[Image Gen] Error:', error);
