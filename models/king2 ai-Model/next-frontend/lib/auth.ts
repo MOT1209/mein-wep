@@ -41,12 +41,14 @@ const ADMIN_USERNAME = 'Rashid2010';
 
 // NextAuth v4 builds each OAuth redirect_uri from the request's own path, which
 // Next.js has already stripped of basePath ('/king2') by the time our route
-// handler sees it — so the URL sent to Google/GitHub omits '/king2' and the
-// provider rejects it (or worse, redirects back to a path our rewrite doesn't
-// proxy). Forcing redirect_uri explicitly keeps it inside '/king2'; Next.js's
-// basePath still strips '/king2' transparently when the provider redirects
-// back, so the same [...nextauth] route handles it without further changes.
-const PUBLIC_BASE_URL = (process.env.NEXTAUTH_URL || '').replace(/\/$/, '');
+// handler sees it. Forcing authorization.params.redirect_uri alone is not
+// enough: NextAuth's own token-exchange step derives its redirect_uri
+// separately from `options.url` (parsed from NEXTAUTH_URL), so the two steps
+// disagreed and providers rejected the exchange with "no access token
+// provided". The real fix is making NEXTAUTH_URL itself resolve to the
+// actual route base (.../king2/api/auth) so every internal computation
+// (authorize, token exchange, error-page fallback) agrees — see
+// NEXTAUTH_URL in Vercel env, which must end in '/king2/api/auth'.
 
 export const authOptions: NextAuthOptions = {
   adapter: SupabaseAdapter() as any,
@@ -57,21 +59,13 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? '',
       allowDangerousEmailAccountLinking: true,
       authorization: {
-        params: {
-          prompt: 'select_account',
-          redirect_uri: `${PUBLIC_BASE_URL}/api/auth/callback/google`,
-        },
+        params: { prompt: 'select_account' },
       },
     }),
     GitHubProvider({
       clientId: process.env.GITHUB_CLIENT_ID ?? '',
       clientSecret: process.env.GITHUB_CLIENT_SECRET ?? '',
       allowDangerousEmailAccountLinking: true,
-      authorization: {
-        params: {
-          redirect_uri: `${PUBLIC_BASE_URL}/api/auth/callback/github`,
-        },
-      },
     }),
     CredentialsProvider({
       id: 'credentials',
