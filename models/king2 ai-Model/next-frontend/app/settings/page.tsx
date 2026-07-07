@@ -118,6 +118,8 @@ export default function SettingsPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
   const [sessions, setSessions] = useState<Session[]>(MOCK_SESSIONS);
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Load settings from API
   useEffect(() => {

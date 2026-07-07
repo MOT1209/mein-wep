@@ -7,11 +7,12 @@ export const dynamic = 'force-dynamic';
 export async function DELETE() {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
+    const user = session?.user as { id?: string; name?: string; email?: string } | undefined;
+    if (!user?.id) {
       return NextResponse.json({ error: 'غير مصرح' }, { status: 401 });
     }
 
-    const userId = session.user.id;
+    const userId = user.id;
 
     // Create admin client to bypass RLS
     const supabase = createClient(
