@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useLocale } from '@/components/LocaleProvider';
 
@@ -193,6 +195,12 @@ export default function SettingsPage() {
             className="flex-1 sm:flex-none rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-400 data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0B0C10] data-[state=active]:shadow-lg transition-all"
           >
             الأمان
+          </TabsTrigger>
+          <TabsTrigger
+            value="account"
+            className="flex-1 sm:flex-none rounded-xl px-5 py-2.5 text-sm font-medium text-zinc-400 data-[state=active]:bg-[#D4AF37] data-[state=active]:text-[#0B0C10] data-[state=active]:shadow-lg transition-all"
+          >
+            الحساب
           </TabsTrigger>
         </TabsList>
 
@@ -497,6 +505,90 @@ export default function SettingsPage() {
                 ))}
               </div>
             )}
+          </div>
+        </TabsContent>
+
+        {/* ════════════════════════════════════════
+           ACCOUNT TAB
+           ════════════════════════════════════════ */}
+        <TabsContent value="account" className="mt-6">
+          <div className="rounded-2xl border border-red-900/30 bg-surface-secondary p-6 space-y-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-red-500/10 ring-1 ring-red-500/20">
+                <svg className="h-5 w-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-white">منطقة الخطر</h3>
+                <p className="text-sm text-zinc-400">إجراءات حساسة خاصة بالحساب — لا يمكن التراجع عنها</p>
+              </div>
+            </div>
+
+            <div className="border-t border-red-900/20 pt-6 space-y-4">
+              {/* Logout */}
+              <div className="flex items-center justify-between rounded-xl bg-surface-tertiary p-4">
+                <div>
+                  <p className="text-sm font-medium text-white">تسجيل الخروج</p>
+                  <p className="text-xs text-zinc-500">تسجيل الخروج من جميع الأجهزة</p>
+                </div>
+                <button
+                  onClick={() => signOut({ callbackUrl: '/king2' })}
+                  className="rounded-xl px-4 py-2 text-sm font-medium text-zinc-300 hover:text-white border border-zinc-700 hover:border-zinc-500 transition-all"
+                >
+                  تسجيل الخروج
+                </button>
+              </div>
+
+              {/* Delete Account */}
+              <div className="rounded-xl bg-red-500/5 border border-red-500/10 p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-red-400">حذف الحساب</p>
+                    <p className="text-xs text-zinc-500">حذف الحساب وجميع البيانات بشكل نهائي</p>
+                  </div>
+                  {!deleteConfirm ? (
+                    <button
+                      onClick={() => setDeleteConfirm(true)}
+                      className="rounded-xl px-4 py-2 text-sm font-medium text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-500/50 transition-all"
+                    >
+                      حذف الحساب
+                    </button>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setDeleteConfirm(false)}
+                        className="rounded-xl px-3 py-2 text-xs font-medium text-zinc-400 hover:text-white border border-zinc-700 transition-all"
+                      >
+                        إلغاء
+                      </button>
+                      <button
+                        onClick={async () => {
+                          setDeleting(true);
+                          try {
+                            const res = await fetch('/king2/api/user/delete', { method: 'DELETE' });
+                            if (res.ok) {
+                              await signOut({ callbackUrl: '/king2' });
+                            } else {
+                              const data = await res.json();
+                              alert(data.error || 'فشل حذف الحساب');
+                            }
+                          } catch {
+                            alert('حدث خطأ في الاتصال');
+                          } finally {
+                            setDeleting(false);
+                          }
+                        }}
+                        disabled={deleting}
+                        className="rounded-xl px-3 py-2 text-xs font-medium text-white bg-red-600 hover:bg-red-500 disabled:opacity-50 transition-all"
+                      >
+                        {deleting ? 'جاري الحذف...' : 'تأكيد الحذف'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </TabsContent>
       </Tabs>
