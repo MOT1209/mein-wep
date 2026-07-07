@@ -2,9 +2,21 @@
 .env
 .env.local
 .env.*.local
+.env.vercel
 
 # Kaggle Credentials
 kaggle.json
+
+# Secrets / tokens / cookies — never commit
+token*.txt
+_token*.txt
+cookies*.txt
+_cookies*.txt
+_g.txt
+_gh.txt
+_ght.txt
+_gt.txt
+king2-signin-*.json
 
 # Python
 __pycache__/
