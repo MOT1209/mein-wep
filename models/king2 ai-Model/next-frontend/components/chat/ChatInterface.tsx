@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 
 import NextImage from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useKing2Chat, Message } from '@/lib/useKing2Chat';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { CHAT_MODELS, getChatModel } from '@/lib/chatModels';
@@ -125,6 +126,7 @@ function SpeedBadge({ charsPerSecond }: { charsPerSecond: number | null }) {
 }
 
 export function ChatInterface({ conversationId, initialMessages, onNewConversation, isGuest }: ChatInterfaceProps) {
+  const router = useRouter();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -658,7 +660,7 @@ export function ChatInterface({ conversationId, initialMessages, onNewConversati
                         <button
                           key={m.id}
                           type="button"
-                          onClick={() => { setSelectedModel(m.id); setModelMenuOpen(false); }}
+                          onClick={() => { if (m.action === 'navigate' && m.actionUrl) { setModelMenuOpen(false); router.push(m.actionUrl); } else { setSelectedModel(m.id); setModelMenuOpen(false); } }}
                           className={`flex w-full items-start gap-2 rounded-xl px-3 py-2 text-right transition-colors ${selectedModel === m.id ? 'bg-king-600/15 ring-1 ring-king-500/30' : 'hover:bg-surface-tertiary'}`}
                         >
                           <div className="flex-1">

@@ -7,6 +7,8 @@ export interface ChatModelOption {
   desc: string;
   badge?: string;
   vision?: boolean;
+  action?: 'navigate'; // if set, selecting this model triggers an action instead of switching model
+  actionUrl?: string;
 }
 
 export const CHAT_MODELS: ChatModelOption[] = [
@@ -15,6 +17,7 @@ export const CHAT_MODELS: ChatModelOption[] = [
   { id: 'gemini', name: 'Gemini 2.5 Flash', desc: 'قوي ويفهم الصور', badge: 'رؤية', vision: true },
   { id: 'groq', name: 'Groq Llama', desc: 'استجابة فائقة السرعة', badge: 'سريع' },
   { id: 'openrouter', name: 'GLM 4.5 Air', desc: 'إبداعي ومتوازن' },
+  { id: 'king2-image', name: '🎨 KING2-IMAGE', desc: 'توليد الصور بـ SDXL LoRA', badge: 'جديد', action: 'navigate', actionUrl: '/image' },
 ];
 
 export function getChatModel(id: string): ChatModelOption {
