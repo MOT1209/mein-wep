@@ -1,0 +1,8 @@
+{
+  "sequences": 29228,
+  "frames_total": 832864,
+  "scored": 29228,
+  "near_duplicates_removed": 5936,
+  "final": 10000,
+  "candidates_scored_ge8": 29228
+}

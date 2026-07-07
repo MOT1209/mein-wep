@@ -1,0 +1,21 @@
+# Heavy data, downloads, and generated artifacts — keep code/docs only.
+raw/
+raw5f/
+raw_hassan/
+texts/
+candidates/
+dataset/images/
+dataset/captions/
+kaggle_ds/*.zip
+kernel_out/
+kernel_out2/
+kernel_out3/
+kernel_out4/
+kout_live/
+kernel_final/
+__pycache__/
+*.png
+*.zip
+*.parquet
+log_plain.txt
+dataset/metadata.jsonl

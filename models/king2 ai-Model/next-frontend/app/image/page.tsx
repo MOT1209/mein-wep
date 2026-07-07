@@ -3,7 +3,7 @@
 import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-type ImageStyle = 'photorealistic' | '3d-render' | 'cinematic' | 'anime' | 'oil-painting' | 'pixel-art';
+type ImageStyle = 'photorealistic' | '3d-render' | 'cinematic' | 'anime' | 'oil-painting' | 'pixel-art' | 'stickman';
 
 const STYLES: { id: ImageStyle; label: string }[] = [
   { id: 'photorealistic', label: 'واقعي' },
@@ -12,6 +12,7 @@ const STYLES: { id: ImageStyle; label: string }[] = [
   { id: 'anime', label: 'أنمي' },
   { id: 'oil-painting', label: 'زيتي' },
   { id: 'pixel-art', label: 'بكسل' },
+  { id: 'stickman', label: 'ستيكمان' },
 ];
 
 const SUGGESTIONS = [

@@ -13,6 +13,13 @@ const STYLE_KEYWORDS: Record<string, string> = {
   'anime': 'anime style, studio anime, vibrant colors, clean lines',
   'oil-painting': 'oil painting, classical fine art, textured brush strokes',
   'pixel-art': 'pixel art, 8-bit, retro game sprite',
+  'stickman': 'simple black and white stick figure line drawing, minimal, clean lines, plain white background',
+};
+
+// Styles served by a dedicated LoRA adapter inside RASHID778/king2-image.
+// The key is the requested style; the value is the adapter's weight path in the repo.
+const STYLE_LORA_WEIGHT: Record<string, string> = {
+  'stickman': 'stickman/pytorch_lora_weights.safetensors',
 };
 const QUALITY_SUFFIX = 'highly detailed, 4k, high quality';
 
@@ -67,8 +74,16 @@ async function enhancePrompt(prompt: string): Promise<string> {
 // Generate with the custom KING2-IMAGE model (SDXL LoRA) via the HF Inference
 // Providers router. Returns a data URI, or null on any failure so the caller
 // can fall back to Pollinations.
+const KING2_REPO = 'RASHID778/king2-image';
 const KING2_LORA_URL =
-  'https://huggingface.co/RASHID778/king2-image/resolve/main/pytorch_lora_weights.safetensors';
+  `https://huggingface.co/${KING2_REPO}/resolve/main/pytorch_lora_weights.safetensors`;
+
+function loraUrlForStyle(style: string): string {
+  const weight = STYLE_LORA_WEIGHT[style];
+  return weight
+    ? `https://huggingface.co/${KING2_REPO}/resolve/main/${weight}`
+    : KING2_LORA_URL;
+}
 
 async function fetchAsDataUri(url: string): Promise<string | null> {
   if (url.startsWith('data:')) return url;
@@ -79,45 +94,51 @@ async function fetchAsDataUri(url: string): Promise<string | null> {
   return `data:${type};base64,${buf.toString('base64')}`;
 }
 
-async function generateWithKing2(prompt: string): Promise<string | null> {
+async function generateWithKing2(prompt: string, style: string): Promise<string | null> {
   const key = process.env.HF_TOKEN;
   if (!key) return null;
-  const model = process.env.KING2_IMAGE_MODEL || 'RASHID778/king2-image';
+  const model = process.env.KING2_IMAGE_MODEL || KING2_REPO;
+  const loraUrl = loraUrlForStyle(style);
+  const usesAdapter = loraUrl !== KING2_LORA_URL;
   const headers = {
     'Content-Type': 'application/json',
     Authorization: `Bearer ${key}`,
   };
 
   // 1) OpenAI-compatible images endpoint on the HF router (provider-agnostic).
-  try {
-    const resp = await fetch('https://router.huggingface.co/v1/images/generations', {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ model, prompt, response_format: 'b64_json' }),
-      signal: AbortSignal.timeout(55_000),
-    });
-    if (resp.ok) {
-      const data = await resp.json();
-      const b64 = data?.data?.[0]?.b64_json;
-      if (b64) return `data:image/png;base64,${b64}`;
-      const url = data?.data?.[0]?.url;
-      if (url) return await fetchAsDataUri(url);
-    } else {
-      console.error('[Image] king2 router error:', resp.status, await resp.text());
+  //    Skip for adapter styles: this endpoint always serves the repo's default
+  //    LoRA and can't target a sub-path adapter, so it would ignore the style.
+  if (!usesAdapter) {
+    try {
+      const resp = await fetch('https://router.huggingface.co/v1/images/generations', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ model, prompt, response_format: 'b64_json' }),
+        signal: AbortSignal.timeout(55_000),
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        const b64 = data?.data?.[0]?.b64_json;
+        if (b64) return `data:image/png;base64,${b64}`;
+        const url = data?.data?.[0]?.url;
+        if (url) return await fetchAsDataUri(url);
+      } else {
+        console.error('[Image] king2 router error:', resp.status, await resp.text());
+      }
+    } catch (e) {
+      console.error('[Image] king2 router error:', e);
     }
-  } catch (e) {
-    console.error('[Image] king2 router error:', e);
   }
 
-  // 2) Provider-direct: fal-ai serves the LoRA on top of fast-sdxl
-  //    (mapping from https://huggingface.co/api/models/RASHID778/king2-image).
+  // 2) Provider-direct: fal-ai serves the LoRA on top of fast-sdxl, letting us
+  //    point at a specific adapter weight (default or stickman/…).
   try {
     const resp = await fetch('https://router.huggingface.co/fal-ai/fal-ai/fast-sdxl', {
       method: 'POST',
       headers,
       body: JSON.stringify({
         prompt,
-        loras: [{ path: KING2_LORA_URL, scale: 1 }],
+        loras: [{ path: loraUrl, scale: 1 }],
         image_size: 'square_hd',
         num_inference_steps: 28,
         guidance_scale: 7,
@@ -155,7 +176,11 @@ export async function POST(req: Request) {
     const cleanPrompt = prompt.trim();
     const enhanced = await enhancePrompt(cleanPrompt);
     const styleKeywords = STYLE_KEYWORDS[style] || STYLE_KEYWORDS['photorealistic'];
-    const finalPrompt = `${enhanced}, ${styleKeywords}, ${QUALITY_SUFFIX}`;
+    // The "4k / highly detailed" suffix fights minimal line-art styles, so skip
+    // it for adapter styles like stickman.
+    const finalPrompt = STYLE_LORA_WEIGHT[style]
+      ? `${enhanced}, ${styleKeywords}`
+      : `${enhanced}, ${styleKeywords}, ${QUALITY_SUFFIX}`;
 
     // The /image page extracts the URL from this markdown and renders the <img>.
     const altText = cleanPrompt.replace(/[[\]()]/g, '');
@@ -163,7 +188,7 @@ export async function POST(req: Request) {
     // Prefer the custom KING2-IMAGE model when enabled; fall back to Pollinations.
     const preferKing2 = (process.env.IMAGE_PROVIDER || '').toLowerCase() === 'king2';
     if (preferKing2) {
-      const dataUri = await generateWithKing2(finalPrompt);
+      const dataUri = await generateWithKing2(finalPrompt, style);
       if (dataUri) {
         return NextResponse.json({
           success: true,
