@@ -36,8 +36,10 @@ image = pipe(
 - Keep the trigger phrasing the model saw in training:
   `… , simple black and white stick figure line drawing`.
 - Best at: **single-figure body poses/actions** (run, jump, kick, sit, climb, dance…).
-- LoRA scale **0.8–1.0**. Lower it toward 0.6 if the pose collapses.
-- Guidance 6–8, 25–35 steps.
+- **LoRA scale 0.6** — important. At full strength (1.0) the model collapses ~half
+  the prompts into a field of parallel line segments; a scale sweep confirmed
+  0.5–0.7 renders clean single figures. The KING2 platform calls it at 0.6.
+- Guidance 8, ~25 steps.
 
 ## Known limitations
 - **One visual style** — no head circle, no color, no props, no backgrounds.

@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "cli-v1",
+  "snapshotId": "snap_e4031d831e9b5085",
+  "testId": "fd788e1a-4d47-4d08-8384-6d64be40229b",
+  "projectId": "93615cd9-0ce9-4f87-89d2-38ad909df831",
+  "codeVersion": "v1",
+  "runIdIfAvailable": "79fbb789-fe62-4e23-97f2-7e74dfd2b524",
+  "targetUrl": "https://rashid-wep.vercel.app/king2",
+  "failedStepIndex": 9,
+  "failureKind": "routing_404",
+  "capturedAt": "2026-07-06T14:05:33.172Z",
+  "fetchedAt": "2026-07-06T14:05:50.474Z"
+}

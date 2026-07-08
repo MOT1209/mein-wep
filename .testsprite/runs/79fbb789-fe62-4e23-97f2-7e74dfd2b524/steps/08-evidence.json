@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 8,
+    "summary": "Step 8 'Scroll the 'تسجيل الدخول' (Sign in) page and search the page for the text 'GitHub' to reveal any 'تسجيل الدخول بـ GitHub' (Sign in with GitHub) button' passed.",
+    "path": "steps/08-snapshot.html"
+  }
+]

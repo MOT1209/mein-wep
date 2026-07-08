@@ -1,0 +1,16 @@
+{
+  "id": "alking77/king2-stickman-lora-v2",
+  "title": "KING2 Stickman LoRA v2",
+  "code_file": "king2_stickman_train_v2.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": ["alking77/king2-stickman-dataset"],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

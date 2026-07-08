@@ -1,0 +1,16 @@
+{
+  "projectId": "93615cd9-0ce9-4f87-89d2-38ad909df831",
+  "type": "frontend",
+  "name": "King2: OAuth sign-in buttons present and redirect to providers",
+  "description": "Ì Õﬁﬁ √‰ ’›Õ…  ”ÃÌ· «·œŒÊ· ·‹ King2  ŸÂ— „‰ Œ·«· «·‹ rewrite Ê ⁄—÷ √“—«— Google Ê GitHub „⁄ —Ê«»ÿ ’ÕÌÕ… ·„“ÊœÌ OAuth",
+  "priority": "p0",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to https://rashid-wep.vercel.app/king2" },
+    { "type": "action", "description": "Click on the sign-in button or link to open the sign-in page" },
+    { "type": "assertion", "description": "Verify the sign-in page URL contains /king2/auth/signin" },
+    { "type": "assertion", "description": "Verify a Google OAuth button is visible on the page" },
+    { "type": "assertion", "description": "Verify the Google button links to or redirects towards accounts.google.com" },
+    { "type": "assertion", "description": "Verify a GitHub OAuth button is visible on the page" },
+    { "type": "assertion", "description": "Verify the GitHub button links to or redirects towards github.com" }
+  ]
+}

@@ -1,0 +1,488 @@
+description: "سير عمل التطوير الكامل: Planning → Analysis → Implementation → Self Review → Auto Fix → Build & Lint → TestSprite → Auto Fix Loop → Summary → Git"
+maxTransitions: 50
+
+phases:
+  # ──────────────────────────────────────────────
+  # 1. Planning - فهم الطلب ووضع خطة تنفيذ
+  # ──────────────────────────────────────────────
+  - id: planning
+    thinking: high
+    output:
+      type: text
+      description: "خطة تنفيذ مفصلة بصيغة Markdown."
+    tools:
+      - read
+      - find
+      - ls
+      - web_search
+      - web_fetch
+    system: |
+      أنت مهندس برمجيات خبير في فهم المتطلبات ووضع خطط التنفيذ.
+      ركز على التحليل الدقيق والخطوات الواضحة.
+    prompt: |
+      # المرحلة 1: Planning (التخطيط)
+
+      ## المهمة
+      {{input}}
+
+      ## المطلوب منك
+      1. **فهم الطلب**: حلل ما هو مطلوب بالضبط من الناحية الفنية.
+      2. **وضع خطة تنفيذ**: اكتب خطة واضحة ومفصلة خطوة بخطوة تغطي:
+         - الملفات التي سيتم إنشاؤها أو تعديلها
+         - التغييرات المطلوبة لكل ملف
+         - الترتيب المنطقي للتنفيذ
+         - أي اختبارات مطلوبة
+         - أي اعتبارات أمنية أو أداء
+
+  # ──────────────────────────────────────────────
+  # 2. Analysis - تحليل المتطلبات والتبعيات والمخاطر
+  # ──────────────────────────────────────────────
+  - id: analysis
+    thinking: high
+    output:
+      type: text
+      description: "تقرير تحليل مفصل بصيغة Markdown."
+    tools:
+      - read
+      - find
+      - ls
+      - bash
+    system: |
+      أنت محلل تقني دقيق ومحترف. ركز على تحديد كل الاعتماديات والمخاطر المحتملة.
+    prompt: |
+      # المرحلة 2: Analysis (التحليل)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## الخطة المقترحة
+      {{phase.planning.output}}
+
+      ## المطلوب منك
+      1. **تحليل المتطلبات**: حلل المتطلبات الفنية بالتفصيل.
+      2. **تحديد الملفات**: اذكر بالضبط كل ملف سيحتاج تعديلاً أو إنشاءً.
+      3. **التبعيات (Dependencies)**:
+         - المكتبات والحزم المطلوبة
+         - الخدمات الخارجية
+         - الاعتماديات بين الملفات
+      4. **المخاطر (Risks)**:
+         - مخاطر أمنية
+         - مخاطر أداء
+         - نقاط فشل محتملة
+         - صعوبات متوقعة
+      5. **استراتيجية التنفيذ**: كيف ستتعامل مع كل خطر أو تحدي.
+
+  # ──────────────────────────────────────────────
+  # 3. Implementation - كتابة الكود وبناء الميزة
+  # ──────────────────────────────────────────────
+  - id: implementation
+    thinking: high
+    output:
+      type: text
+      description: "تقرير التنفيذ شامل جميع التغييرات التي تم إجراؤها."
+    tools:
+      - read
+      - edit
+      - write
+      - bash
+      - find
+      - ls
+    system: |
+      أنت مبرمج خبير. التزم بالخطة والتحليل السابقين. اكتب كوداً نظيفاً وآمناً.
+    prompt: |
+      # المرحلة 3: Implementation (التنفيذ)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## الخطة
+      {{phase.planning.output}}
+
+      ## التحليل الفني
+      {{phase.analysis.output}}
+
+      ## المطلوب منك
+      1. نفذ كل خطوة من خطة التنفيذ بدقة.
+      2. اكتب كوداً نظيفاً مع التعليقات عند الضرورة.
+      3. طبق أفضل ممارسات الأمان والأداء.
+      4. احرص على معالجة الأخطاء (error handling) بشكل مناسب.
+      5. بعد كل تغيير، تأكد من أن الكود متسق ولا يكسر أي شيء آخر.
+      6. سجل كل ملف قمت بإنشائه أو تعديله مع وصف موجز للتغيير.
+
+  # ──────────────────────────────────────────────
+  # 4. Self Review - مراجعة ذاتية للتعديلات
+  # ──────────────────────────────────────────────
+  - id: self-review
+    thinking: high
+    output:
+      type: structured
+      status:
+        enum:
+          - HAS_ISSUES
+          - CLEAN
+        description: "HAS_ISSUES إذا وجدت مشاكل تستحق الإصلاح، CLEAN إذا كان كل شيء جيداً."
+      report: "تقرير مراجعة الكود الشامل بصيغة Markdown."
+      data:
+        description: "بيانات المراجعة الكمية."
+        fields:
+          issuesCount:
+            type: integer
+            description: "عدد المشاكل المكتشفة."
+          hasCriticalIssues:
+            type: boolean
+            description: "هل توجد مشاكل حرجة تتطلب إصلاحاً فورياً؟"
+          categories:
+            type: array
+            description: "تصنيفات المشاكل (security, performance, quality, style, logic)."
+    tools:
+      - read
+      - find
+      - ls
+      - bash
+    next:
+      - if:
+          status: HAS_ISSUES
+        goto: auto-fix
+      - if:
+          status: CLEAN
+        goto: build-lint
+      - end: true
+    prompt: |
+      # المرحلة 4: Self Review (مراجعة ذاتية)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## الخطة
+      {{phase.planning.output}}
+
+      ## نتائج التنفيذ
+      {{phase.implementation.output}}
+
+      ## المطلوب منك
+      1. **راجع كل تعديل** تم إجراؤه في مرحلة التنفيذ.
+      2. **افحص بدقة** ما يلي:
+         - **الأمان (Security)**: ثغرات، تسريب بيانات، صلاحيات
+         - **الأداء (Performance)**: استعلامات بطيئة، تكرار غير ضروري
+         - **الجودة (Quality)**: كود مكرر، تعقيد زائد، نقص في التعليقات
+         - **المنطق (Logic)**: أخطاء منطقية، حالات حافة غير معالجة
+         - **الأسلوب (Style)**: اتساق التنسيق، أسماء المتغيرات
+      3. **حدد العدد الإجمالي للمشاكل** في issuesCount.
+      4. **حدد** HAS_ISSUES إذا وجدت أي مشكلة، أو CLEAN إذا كان الكود جاهزاً.
+
+  # ──────────────────────────────────────────────
+  # 5. Auto Fix - إصلاح المشاكل المكتشفة
+  # ──────────────────────────────────────────────
+  - id: auto-fix
+    thinking: medium
+    output:
+      type: text
+      description: "تقرير الإصلاحات التي تم إجراؤها."
+    tools:
+      - read
+      - edit
+      - write
+      - bash
+      - find
+      - ls
+    prompt: |
+      # المرحلة 5: Auto Fix (الإصلاح التلقائي)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## تقرير المراجعة
+      {{phase.self-review.report}}
+
+      ## حالة المراجعة: {{phase.self-review.status}}
+
+      ## المطلوب منك
+      1. **أصلح كل المشاكل** المكتشفة في تقرير المراجعة أعلاه.
+      2. لكل مشكلة:
+         - افهم المشكلة جيداً
+         - طبق الإصلاح المناسب
+         - تأكد من أن الإصلاح لا يكسر أي شيء آخر
+      3. سجل جميع الإصلاحات التي قمت بها.
+      4. **ملاحظة**: بعد الإصلاح، ستتم إعادة المراجعة تلقائياً للتأكد من أن كل المشاكل قد حُلّت.
+
+  # ──────────────────────────────────────────────
+  # 6. Build & Lint - بناء المشروع وفحص الكود
+  # ──────────────────────────────────────────────
+  - id: build-lint
+    thinking: medium
+    output:
+      type: structured
+      status:
+        enum:
+          - PASS
+          - FAIL
+        description: "PASS إذا نجح البناء والفحص، FAIL إذا فشل أي منهما."
+      report: "تقرير البناء وفحص الكود مع أي أخطاء أو تحذيرات."
+      data:
+        description: "تفاصيل البناء والفحص."
+        fields:
+          buildPassed:
+            type: boolean
+            description: "هل نجح الـ Build؟"
+          lintPassed:
+            type: boolean
+            description: "هل نجح الـ Lint؟"
+          errorCount:
+            type: integer
+            description: "عدد الأخطاء."
+          warningCount:
+            type: integer
+            description: "عدد التحذيرات."
+    tools:
+      - read
+      - bash
+      - find
+      - ls
+      - edit
+      - write
+    next:
+      - if:
+          status: FAIL
+        goto: auto-fix
+      - if:
+          status: PASS
+        goto: test-sprite
+      - end: true
+    prompt: |
+      # المرحلة 6: Build & Lint (بناء وفحص الكود)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## المطلوب منك
+      1. **اكتشف نظام البناء**: ابحث عن ملفات الإعدادات package.json, Makefile, pyproject.toml, إلخ.
+      2. **شغّل Build**:
+         - استخدم الأمر المناسب (npm run build, make, python -m build، إلخ)
+         - سجل المخرجات بالكامل
+      3. **شغّل Lint**:
+         - استخدم الأمر المناسب (npm run lint, flake8, eslint، إلخ)
+         - سجل المخرجات بالكامل
+      4. **حاول إصلاح الأخطاء**:
+         - إذا وجدت أخطاء في البناء أو الفحص، أصلحها بنفسك
+         - أعد تشغيل البناء والفحص بعد الإصلاح
+         - كرر حتى تنجح أو تتيقن من عدم القدرة على الإصلاح
+      5. **النتيجة النهائية**:
+         - PASS: البناء والفحص ناجحان
+         - FAIL: لا تزال هناك مشاكل (مع ذكر التفاصيل)
+
+  # ──────────────────────────────────────────────
+  # 7. TestSprite - تشغيل الاختبارات
+  # ──────────────────────────────────────────────
+  - id: test-sprite
+    thinking: medium
+    output:
+      type: structured
+      status:
+        enum:
+          - ALL_PASS
+          - SOME_FAILED
+          - BLOCKED
+        description: "ALL_PASS إذا نجحت كل الاختبارات، SOME_FAILED إذا فشل بعضها، BLOCKED إذا تعذر تشغيل الاختبارات."
+      report: "تقرير شامل لنتائج الاختبارات."
+      data:
+        description: "إحصائيات الاختبارات."
+        fields:
+          totalTests:
+            type: integer
+            description: "إجمالي عدد الاختبارات."
+          passedTests:
+            type: integer
+            description: "عدد الاختبارات الناجحة."
+          failedTests:
+            type: integer
+            description: "عدد الاختبارات الفاشلة."
+          frontendStatus:
+            type: string
+            description: "حالة اختبارات الواجهة الأمامية (PASS/FAIL/SKIPPED)."
+          backendStatus:
+            type: string
+            description: "حالة اختبارات الخلفية (PASS/FAIL/SKIPPED)."
+    tools:
+      - read
+      - bash
+      - find
+      - ls
+      - edit
+      - write
+    next:
+      - if:
+          status: SOME_FAILED
+        goto: auto-fix-loop
+      - if:
+          status: BLOCKED
+        goto: auto-fix-loop
+      - if:
+          status: ALL_PASS
+        goto: summary
+      - end: true
+    prompt: |
+      # المرحلة 7: TestSprite (تشغيل الاختبارات)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## المطلوب منك
+      1. **ابحث عن إطار الاختبارات** المستخدم في المشروع (Jest, pytest, Vitest، إلخ).
+
+      2. **شغّل TestSprite** إذا كان موجوداً في المشروع:
+         - ابحث عن TestSprite أو اختبارات Sprite
+         - شغّل الأمر المناسب
+
+      3. **اختبار الواجهة الأمامية (Frontend)**:
+         - ابحث عن اختبارات frontend
+         - شغّلها وسجل النتائج
+
+      4. **اختبار الخلفية (Backend)**:
+         - ابحث عن اختبارات backend
+         - شغّلها وسجل النتائج
+
+      5. **حلل النتائج**:
+         - ALL_PASS: كل الاختبارات نجحت
+         - SOME_FAILED: بعض الاختبارات فشلت (اذكر التفاصيل)
+         - BLOCKED: تعذر تشغيل الاختبارات (اذكر السبب)
+
+  # ──────────────────────────────────────────────
+  # 8. Auto Fix Loop - حلقة إصلاح فشل الاختبارات
+  # ──────────────────────────────────────────────
+  - id: auto-fix-loop
+    thinking: medium
+    output:
+      type: structured
+      status:
+        enum:
+          - FIXED
+          - UNRESOLVED
+        description: "FIXED إذا تم إصلاح المشاكل بنجاح، UNRESOLVED إذا بقيت مشاكل لم تحل."
+      report: "تقرير الإصلاحات في حلقة الإصلاح التلقائي."
+      data:
+        description: "إحصائيات الإصلاح."
+        fields:
+          fixCount:
+            type: integer
+            description: "عدد المشاكل التي تم إصلاحها."
+          remainingCount:
+            type: integer
+            description: "عدد المشاكل المتبقية (0 إذا FIXED)."
+          categories:
+            type: array
+            description: "تصنيفات المشاكل التي تم إصلاحها."
+    tools:
+      - read
+      - edit
+      - write
+      - bash
+      - find
+      - ls
+    next:
+      - if:
+          status: FIXED
+        goto: build-lint
+      - if:
+          status: UNRESOLVED
+        end: true
+      - end: true
+    prompt: |
+      # المرحلة 8: Auto Fix Loop (حلقة الإصلاح التلقائي)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## تقرير الاختبارات الفاشلة
+      {{phase.test-sprite.report}}
+
+      ## تقرير البناء السابق (إن وجد في دورة سابقة)
+      {{phase.build-lint.output?}}
+
+      ## المطلوب منك
+      1. **حلل أسباب فشل الاختبارات** بدقة.
+      2. لكل اختبار فاشل:
+         - افهم سبب الفشل
+         - أصلح المشكلة في الكود
+         - لا تكتفِ بتعديل الاختبار نفسه
+      3. **سجل**:
+         - كم مشكلة أصلحت (fixCount)
+         - كم مشكلة متبقية (remainingCount)
+         - أنواع المشاكل التي أصلحتها
+      4. **النتيجة**:
+         - FIXED: أصلحت كل المشاكل و remainingCount = 0
+         - UNRESOLVED: لا تزال هناك مشاكل لم أتمكن من حلها
+
+  # ──────────────────────────────────────────────
+  # 9. Summary - ملخص نهائي
+  # ──────────────────────────────────────────────
+  - id: summary
+    thinking: low
+    output:
+      type: text
+      description: "ملخص نهائي بالعربية لكل ما تم إنجازه."
+    tools:
+      - read
+      - ls
+    prompt: |
+      # المرحلة 9: Summary (الملخص النهائي)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## خطة التنفيذ
+      {{phase.planning.output}}
+
+      ## نتائج التنفيذ
+      {{phase.implementation.output}}
+
+      ## نتائج البناء والفحص
+      {{phase.build-lint.report}}
+
+      ## نتائج الاختبارات
+      {{phase.test-sprite.report}}
+
+      ## المطلوب منك
+      اكتب ملخصاً قصيراً ومباشراً بالعربية يتضمن:
+
+      ### ✅ ما الذي تم؟
+      وصف مختصر (2-3 جمل) للإنجازات الرئيسية.
+
+      ### 📁 الملفات المعدلة
+      قائمة بالملفات التي تم إنشاؤها أو تعديلها.
+
+      ### 🧪 نتائج الاختبارات
+      - إجمالي الاختبارات:
+      - الناجحة:
+      - الفاشلة:
+
+      ### 📊 حالة المشروع
+      هل اكتمل كل شيء بنجاح؟ هل توجد أي ملاحظات؟
+
+  # ──────────────────────────────────────────────
+  # 10. Git - رفع التغييرات
+  # ──────────────────────────────────────────────
+  - id: git
+    thinking: low
+    output:
+      type: text
+      description: "تقرير عملية Git والرفع."
+    tools:
+      - bash
+    prompt: |
+      # المرحلة 10: Git (رفع التغييرات)
+
+      ## المهمة الأصلية
+      {{input}}
+
+      ## الملخص النهائي
+      {{phase.summary.output}}
+
+      ## المطلوب منك
+      نفذ بالترتيب التالي:
+
+      1. **git status** - افحص حالة الملفات أولاً
+      2. **git add .** - أضف جميع الملفات المعدلة
+      3. **git commit -m "<رسالة>"** - أنشئ commit برسالة واضحة تصف التغييرات
+      4. **git push** - ارفع التغييرات إلى المستودع البعيد
+
+      سجل خرج كل أمر للتأكيد على نجاح العملية.

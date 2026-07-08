@@ -1,0 +1,16 @@
+{
+  "id": "alking77/king2-stickman-infer",
+  "title": "KING2 Stickman Infer",
+  "code_file": "king2_stickman_infer.py",
+  "language": "python",
+  "kernel_type": "script",
+  "is_private": true,
+  "enable_gpu": true,
+  "machine_shape": "NvidiaTeslaT4",
+  "enable_tpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

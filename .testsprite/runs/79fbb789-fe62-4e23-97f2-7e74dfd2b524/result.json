@@ -1,0 +1,18 @@
+{
+  "testId": "fd788e1a-4d47-4d08-8384-6d64be40229b",
+  "status": "failed",
+  "startedAt": "2026-07-06T14:01:07.481Z",
+  "finishedAt": "2026-07-06T14:05:33.172Z",
+  "videoUrl": "https://testsprite-videos.s3.us-east-1.amazonaws.com/a4b88408-60d1-702b-14de-e4429e915731/1783346730577434//tmp/41401a8a-7936-4f37-8d4f-8eee8212b9fc/result.webm",
+  "failureAnalysisUrl": null,
+  "snapshotId": "snap_e4031d831e9b5085",
+  "runIdIfAvailable": "79fbb789-fe62-4e23-97f2-7e74dfd2b524",
+  "codeVersion": "v1",
+  "targetUrl": "https://rashid-wep.vercel.app/king2",
+  "targetUrlSource": "run",
+  "failedStepIndex": 9,
+  "failureKind": "routing_404",
+  "verdict": "failed",
+  "executionStatus": "completed",
+  "summary": "Failed (routing_404): TEST FAILURE\n\nThe sign-in page was inspected but the GitHub OAuth button was not found, so the GitHub OAuth redirect could not be verified.\n\nObservations:\n- The sign-in page loaded at URL containing '/king2/auth/signin'.\n- A Google OAuth button labeled 'تسجيل الدخول بـ Google' is visible and was verified to redirect to accounts.google.com.\n- No visible or clickable 'تسجيل الدخول بـ GitHub' (Sign in with GitHub) button was found in the page interactive elements or screensho…"
+}

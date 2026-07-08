@@ -16,6 +16,7 @@ export const initTheme = (cached) => {
     body.classList.toggle('light-mode', isLight);
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
     updateThemeIcon();
+    updateThemeOptions();
   };
   const updateThemeIcon = () => {
     const icon = themeToggle?.querySelector('i');
@@ -23,6 +24,13 @@ export const initTheme = (cached) => {
     icon.className = body.classList.contains('light-mode')
       ? 'fas fa-moon'
       : 'fas fa-sun';
+  };
+  // Sync the Dark/Light buttons inside the settings modal
+  const updateThemeOptions = () => {
+    const current = body.classList.contains('light-mode') ? 'light' : 'dark';
+    qsa('.theme-opt').forEach((opt) => {
+      opt.classList.toggle('active', opt.dataset.theme === current);
+    });
   };
   const setAccent = (color) => {
     root.style.setProperty('--accent', color);
@@ -34,9 +42,18 @@ export const initTheme = (cached) => {
   };
   const setPerfMode = (enabled) => {
     body.classList.toggle('performance-mode', enabled);
+    if (perfToggle) perfToggle.checked = enabled;
     localStorage.setItem('perfMode', String(enabled));
     // If you have a Three.js avatar, pause/resume here:
     // if (window.__rashidAvatar) window.__rashidAvatar[enabled ? 'pause' : 'resume']();
+  };
+
+  // ---------- Reduce Motion ----------
+  const motionToggle = qs('#reduce-motion');
+  const setReduceMotion = (enabled) => {
+    body.classList.toggle('reduce-motion', enabled);
+    if (motionToggle) motionToggle.checked = enabled;
+    localStorage.setItem('reduceMotion', String(enabled));
   };
 
   // ---------- Nano Banana 2 ----------
@@ -51,15 +68,24 @@ export const initTheme = (cached) => {
   const savedTheme = localStorage.getItem('theme') === 'light';
   const savedAccent = localStorage.getItem('accentColor');
   const savedPerf = localStorage.getItem('perfMode') === 'true';
+  const savedMotion = localStorage.getItem('reduceMotion') === 'true';
   const savedBanana = localStorage.getItem('nanoBanana') === 'true';
 
   if (savedBanana) setNanoBanana(true);
   if (savedAccent) setAccent(savedAccent);
   setTheme(savedTheme);
   setPerfMode(savedPerf);
+  setReduceMotion(savedMotion);
 
   // ---------- event listeners ----------
   themeToggle?.addEventListener('click', () => setTheme(!body.classList.contains('light-mode')));
+
+  // Dark/Light buttons inside the settings modal
+  qsa('.theme-opt').forEach((opt) => {
+    opt.addEventListener('click', () => setTheme(opt.dataset.theme === 'light'));
+  });
+
+  motionToggle?.addEventListener('change', (e) => setReduceMotion(e.target.checked));
 
   accentDots.forEach((dot) => {
     dot.addEventListener('click', () => {

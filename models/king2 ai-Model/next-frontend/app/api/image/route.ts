@@ -17,9 +17,10 @@ const STYLE_KEYWORDS: Record<string, string> = {
 };
 
 // Styles served by a dedicated LoRA adapter inside RASHID778/king2-image.
-// The key is the requested style; the value is the adapter's weight path in the repo.
-const STYLE_LORA_WEIGHT: Record<string, string> = {
-  'stickman': 'stickman/pytorch_lora_weights.safetensors',
+// weight = adapter path in the repo; scale = LoRA strength. Stickman collapses
+// into line-texture at full strength, so it renders clean figures at 0.6.
+const STYLE_LORA: Record<string, { weight: string; scale: number }> = {
+  'stickman': { weight: 'stickman/pytorch_lora_weights.safetensors', scale: 0.6 },
 };
 const QUALITY_SUFFIX = 'highly detailed, 4k, high quality';
 
@@ -78,11 +79,11 @@ const KING2_REPO = 'RASHID778/king2-image';
 const KING2_LORA_URL =
   `https://huggingface.co/${KING2_REPO}/resolve/main/pytorch_lora_weights.safetensors`;
 
-function loraUrlForStyle(style: string): string {
-  const weight = STYLE_LORA_WEIGHT[style];
-  return weight
-    ? `https://huggingface.co/${KING2_REPO}/resolve/main/${weight}`
-    : KING2_LORA_URL;
+function loraForStyle(style: string): { url: string; scale: number } {
+  const adapter = STYLE_LORA[style];
+  return adapter
+    ? { url: `https://huggingface.co/${KING2_REPO}/resolve/main/${adapter.weight}`, scale: adapter.scale }
+    : { url: KING2_LORA_URL, scale: 1 };
 }
 
 async function fetchAsDataUri(url: string): Promise<string | null> {
@@ -98,7 +99,7 @@ async function generateWithKing2(prompt: string, style: string): Promise<string 
   const key = process.env.HF_TOKEN;
   if (!key) return null;
   const model = process.env.KING2_IMAGE_MODEL || KING2_REPO;
-  const loraUrl = loraUrlForStyle(style);
+  const { url: loraUrl, scale: loraScale } = loraForStyle(style);
   const usesAdapter = loraUrl !== KING2_LORA_URL;
   const headers = {
     'Content-Type': 'application/json',
@@ -138,7 +139,7 @@ async function generateWithKing2(prompt: string, style: string): Promise<string 
       headers,
       body: JSON.stringify({
         prompt,
-        loras: [{ path: loraUrl, scale: 1 }],
+        loras: [{ path: loraUrl, scale: loraScale }],
         image_size: 'square_hd',
         num_inference_steps: 28,
         guidance_scale: 7,
@@ -178,7 +179,7 @@ export async function POST(req: Request) {
     const styleKeywords = STYLE_KEYWORDS[style] || STYLE_KEYWORDS['photorealistic'];
     // The "4k / highly detailed" suffix fights minimal line-art styles, so skip
     // it for adapter styles like stickman.
-    const finalPrompt = STYLE_LORA_WEIGHT[style]
+    const finalPrompt = STYLE_LORA[style]
       ? `${enhanced}, ${styleKeywords}`
       : `${enhanced}, ${styleKeywords}, ${QUALITY_SUFFIX}`;
 

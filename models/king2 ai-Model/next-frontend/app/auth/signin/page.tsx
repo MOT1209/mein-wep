@@ -70,6 +70,12 @@ function SignInContent() {
     signIn('google', { callbackUrl });
   };
 
+  const handleGitHub = () => {
+    setOauthLoading('github');
+    setErrorMsg('');
+    signIn('github', { callbackUrl });
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface-primary p-4">
       <div className="w-full max-w-md">
@@ -195,9 +201,9 @@ function SignInContent() {
             </button>
 
             <button
-              onClick={() => {}}
+              onClick={handleGitHub}
               disabled={isLoading || oauthLoading !== null}
-              className="hidden"
+              className="king-btn king-btn-secondary w-full"
             >
               {oauthLoading === 'github' ? (
                 <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">

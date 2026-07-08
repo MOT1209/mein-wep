@@ -13,6 +13,8 @@ kernel_out3/
 kernel_out4/
 kout_live/
 kernel_final/
+kfail/
+*.safetensors
 __pycache__/
 *.png
 *.zip
