@@ -204,10 +204,11 @@ export async function POST(req: Request) {
     }
 
     // Pollinations generates the image on first fetch of this URL (no API key needed).
+    // model=flux is its highest-quality free model — sharper than the default.
     const seed = Math.floor(Math.random() * 1_000_000);
     const imageUrl =
       `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}` +
-      `?width=1024&height=1024&nologo=true&nofeed=true&seed=${seed}`;
+      `?width=1024&height=1024&model=flux&nologo=true&nofeed=true&seed=${seed}`;
 
     return NextResponse.json({
       success: true,
