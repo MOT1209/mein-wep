@@ -59,3 +59,6 @@ models/king2\ ai-Model/data/*TEST*
 google-skills/
 flutter-skills/
 dart-skills/
+
+# Environment-injected agent skills (not project code)
+.agents/
