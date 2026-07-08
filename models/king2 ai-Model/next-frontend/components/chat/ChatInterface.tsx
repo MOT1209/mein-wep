@@ -282,16 +282,50 @@ export function ChatInterface({ conversationId, initialMessages, onNewConversati
     }
   }, [pastedImage, input, append]);
 
+  // KING2-IMAGE stays in the conversation: generate the image via /api/image
+  // and append it as an assistant message instead of streaming from the chat API.
+  const generateImageInChat = useCallback(async (prompt: string) => {
+    setMessages((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), role: 'user', content: prompt, createdAt: new Date() },
+    ]);
+    setIsAnalyzing(true);
+    try {
+      const res = await fetch('/king2/api/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'فشل توليد الصورة');
+      setMessages((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), role: 'assistant', content: data.result, createdAt: new Date() },
+      ]);
+    } catch (err: any) {
+      setToast(err.message || 'فشل توليد الصورة');
+      setTimeout(() => setToast(null), 4000);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  }, [setMessages]);
+
   const handleFormSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (isLoading || isAnalyzing) return;
     if (pastedImage) { analyzeImage(); return; }
     if (!input.trim()) return;
     setCharsPerSecond(null);
+    if (selectedModel === 'king2-image') {
+      generateImageInChat(input.trim());
+      setInput('');
+      if (textareaRef.current) textareaRef.current.style.height = 'auto';
+      return;
+    }
     append({ role: 'user', content: input });
     setInput('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
-  }, [input, isLoading, isAnalyzing, pastedImage, analyzeImage, append]);
+  }, [input, isLoading, isAnalyzing, pastedImage, analyzeImage, append, selectedModel, generateImageInChat]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -300,12 +334,18 @@ export function ChatInterface({ conversationId, initialMessages, onNewConversati
       if (pastedImage) { analyzeImage(); return; }
       if (!input.trim()) return;
       setCharsPerSecond(null);
+      if (selectedModel === 'king2-image') {
+        generateImageInChat(input.trim());
+        setInput('');
+        if (textareaRef.current) textareaRef.current.style.height = 'auto';
+        return;
+      }
       append({ role: 'user', content: input });
       setInput('');
       if (textareaRef.current) textareaRef.current.style.height = 'auto';
     }
     if (localError) setLocalError(null);
-  }, [input, isLoading, isAnalyzing, pastedImage, analyzeImage, append, localError]);
+  }, [input, isLoading, isAnalyzing, pastedImage, analyzeImage, append, localError, selectedModel, generateImageInChat]);
 
   const handlePaste = useCallback((e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = e.clipboardData?.items;
@@ -706,7 +746,7 @@ export function ChatInterface({ conversationId, initialMessages, onNewConversati
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
-              placeholder={isLoading ? 'KING2 يكتب...' : isLimitReached ? 'وصلت للحد الأقصى' : pastedImage ? 'أضف سؤالاً عن الصورة...' : 'اكتب رسالتك هنا...'}
+              placeholder={isAnalyzing && selectedModel === 'king2-image' ? 'KING2 يرسم صورتك...' : isLoading ? 'KING2 يكتب...' : isLimitReached ? 'وصلت للحد الأقصى' : pastedImage ? 'أضف سؤالاً عن الصورة...' : selectedModel === 'king2-image' ? 'صف الصورة التي تريد إنشاءها...' : 'اكتب رسالتك هنا...'}
               rows={1}
               disabled={isLoading || isLimitReached || isAnalyzing}
               className="flex-1 resize-none bg-transparent px-3 py-2.5 text-white placeholder-zinc-500 outline-none disabled:opacity-50 text-sm"

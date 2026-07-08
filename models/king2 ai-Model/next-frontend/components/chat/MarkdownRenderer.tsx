@@ -28,6 +28,8 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
       // Italic
       .replace(/\*([^*]+)\*/g, '<em class="italic text-zinc-200">$1</em>')
+      // Images (must come before links — same [..](..) shape with a leading !)
+      .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" class="my-2 max-h-[420px] w-auto max-w-full rounded-xl ring-1 ring-zinc-800/50" />')
       // Links
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-king-400 underline decoration-king-500/30 underline-offset-2 hover:text-king-300 transition-colors">$1</a>')
       // Blockquotes

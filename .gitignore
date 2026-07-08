@@ -54,3 +54,8 @@ games/kingcraft-game/dist/
 models/king2\ ai-Model/data/*.json
 models/king2\ ai-Model/data/*colab*.ipynb
 models/king2\ ai-Model/data/*TEST*
+
+# Cloned skill repos (skills extracted to .agents/skills/)
+google-skills/
+flutter-skills/
+dart-skills/
