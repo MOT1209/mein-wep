@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:maarifah_app/core/constants/app_constants.dart';
 import 'package:maarifah_app/domain/entities/achievement.dart';
 import 'package:maarifah_app/domain/entities/app_notification.dart';
 import 'package:maarifah_app/domain/entities/article.dart';

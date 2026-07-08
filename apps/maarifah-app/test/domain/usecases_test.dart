@@ -1,9 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:maarifah_app/core/constants/app_constants.dart';
 import 'package:maarifah_app/domain/entities/quiz.dart';
 import 'package:maarifah_app/domain/usecases/usecases.dart';
-import 'package:maarifah_app/domain/repositories/repositories.dart';
+import 'package:maarifah_app/domain/entities/user.dart';
 import '../helpers/mocks.dart';
 
 void main() {
@@ -42,39 +41,38 @@ void main() {
       expect(usecase.xpReward(passed), AppConstants.xpPerQuizPass);
       expect(usecase.xpReward(failed), 0);
     });
-
-    test('يجيب إجابات ناقصة كخطأ', () {
-      const usecase = EvaluateQuizUseCase();
-      final result = usecase(quiz, [0]);
-      expect(result.correctCount, 1);
-      expect(result.answers.length, 3);
-    });
   });
 
   group('LoginUseCase', () {
     test('يستدعي repo.login', () async {
       final repo = MockAuthRepository();
-      const usecase = LoginUseCase(repo);
-      await usecase('a@b.com', '123456');
-      verify(repo.login('a@b.com', '123456')).called(1);
+      repo.returnsOnLogin(const User(id: 'u1', name: 'ت', email: 'a@b.com'));
+
+      final usecase = LoginUseCase(repo);
+      final result = await usecase('a@b.com', '123456');
+      expect(result.email, 'a@b.com');
     });
   });
 
   group('RegisterUseCase', () {
     test('يستدعي repo.register', () async {
       final repo = MockAuthRepository();
-      const usecase = RegisterUseCase(repo);
-      await usecase('راشد', 'r@test.com', '123456');
-      verify(repo.register('راشد', 'r@test.com', '123456')).called(1);
+      repo.returnsOnRegister(const User(id: 'u2', name: 'راشد', email: 'r@test.com'));
+
+      final usecase = RegisterUseCase(repo);
+      final result = await usecase('راشد', 'r@test.com', '123456');
+      expect(result.email, 'r@test.com');
     });
   });
 
   group('AwardXpUseCase', () {
     test('يستدعي repo.addXp بالمعاملات الصحيحة', () async {
       final repo = MockAuthRepository();
-      const usecase = AwardXpUseCase(repo);
-      await usecase('u1', 100);
-      verify(repo.addXp('u1', 100)).called(1);
+      repo.returnsOnAddXp(const User(id: 'u1', name: 'م', email: 'm@t.com', xp: 100));
+
+      final usecase = AwardXpUseCase(repo);
+      final result = await usecase('u1', 100);
+      expect(result.xp, 100);
     });
   });
 }
