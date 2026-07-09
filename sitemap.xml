@@ -55,12 +55,6 @@
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/icon-generator.html</loc>
-        <lastmod>2026-06-15</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.3</priority>
-    </url>
-    <url>
         <loc>https://rashid-wep.vercel.app/404.html</loc>
         <lastmod>2026-06-15</lastmod>
         <changefreq>yearly</changefreq>

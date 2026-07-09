@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-19",
+  "updatedAt": "2026-07-09",
   "apps": {
     "com.rashid.kingcraft": {
       "name": "KingCraft",
@@ -17,10 +17,10 @@
     },
     "com.rashid.farmempire": {
       "name": "Farm Empire",
-      "version": "2.0.0",
-      "url": "/apks/farm-game-v2.0.0.apk",
-      "date": "2026-06-16",
-      "notes": ["عالم ثلاثي الأبعاد، زراعة، حيوانات، وطقس."]
+      "version": "2.5.0",
+      "url": "/apks/farm-game-v2.5.0.apk",
+      "date": "2026-07-01",
+      "notes": ["واجهة HUD زجاجية جديدة مع سمة نهار/ليل.", "بوصلة وأيقونة طقس وأشرطة إحصائيات متحركة.", "نظام إشعارات داخل اللعبة."]
     },
     "com.rashid.quranpro": {
       "name": "Quran Pro",
@@ -38,10 +38,10 @@
     },
     "com.rashid.quizmaster": {
       "name": "Quiz Master",
-      "version": "1.0.0",
-      "url": "/apks/quiz-app-v1.0.0.apk",
-      "date": "2026-06-16",
-      "notes": ["الإصدار الأول."]
+      "version": "1.4.0",
+      "url": "/apks/quiz-app-v1.4.0.apk",
+      "date": "2026-06-22",
+      "notes": ["شاشة دخول باسم اللاعب + شعار.", "لوحة متصدرين.", "توسعة بنك الأسئلة إلى 260 سؤالاً."]
     }
   }
 }

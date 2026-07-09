@@ -94,8 +94,7 @@ root/
 │
 ├── css/                       # Root stylesheets
 ├── js/                        # Root scripts
-├── images/                    # Logo, avatar, profile
-└── design-concepts/           # SVG mockups
+└── images/                    # Logo, avatar, profile
 ```
 
 ---
