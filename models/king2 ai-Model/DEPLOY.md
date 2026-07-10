@@ -31,32 +31,35 @@ git push origin main
 ## الخطوة 3: ربط GitHub
 
 1. اختر repository يحتوي على KING2
-2. اسم المشروع: `king2-ai`
-3. الإعدادات:
-   - **Root Directory**: `Alking_AI_Platform/backend`
+2. اسم المشروع: `king2-backend` (يطابق `render.yaml`)
+3. الإعدادات (استخدم `render.yaml` في جذر هذا المجلد مباشرة — Render يقرأها تلقائيًا كـ Blueprint):
+   - **Root Directory**: جذر هذا المستودع (يحتوي `app.py` و`requirements.txt` مباشرة، بدون مسار فرعي)
    - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+   - **Start Command**: `python -m uvicorn app:app --host 0.0.0.0 --port $PORT`
+   - **Health Check Path**: `/api/keep-alive`
 
 ---
 
 ## الخطوة 4: إضافة مفاتيح API
 
-في لوحة Render، اذهب إلى **Environment Variables** وأضف:
+⚠️ القائمة الفعلية للمتغيرات المطلوبة موجودة في `render.yaml` (جذر هذا المجلد) —
+اعتبره المصدر الوحيد للحقيقة بدل نسخ القائمة هنا (لتفادي تعارض الملفين مستقبلًا).
+حاليًا (راجع `render.yaml` للتأكد من عدم تغييرها):
 
 ```
-PIXABAY_API_KEY=<من Pixabay>
-YOUTUBE_API_KEY=<من Google Cloud Console>
-GOOGLE_SEARCH_API_KEY=<من Google Cloud Console>
-GOOGLE_SEARCH_ENGINE_ID=<من Google Custom Search>
-KAGGLE_USERNAME=<من Kaggle>
-KAGGLE_KEY=<من Kaggle>
+GEMINI_API_KEY=<مطلوب — Gemini>
+GROQ_API_KEY=<مطلوب — Groq>
+OPENROUTER_API_KEY=<مطلوب — OpenRouter>
+ZAI_API_KEY=<مطلوب — Z.ai>
+RASHID_USERNAME=admin
+RASHID_PASSWORD=<كلمة مرور الأدمن>
+SUPABASE_URL=<اختياري — من Supabase Dashboard>
+SUPABASE_ANON_KEY=<اختياري — من Supabase Dashboard>
 ```
 
-### مفاتيح الذكاء الاصطناعي (اختياري):
-```
-GROQ_API_KEY=gsk_YOUR_KEY_HERE
-GEMINI_API_KEY=AIzaSy_YOUR_KEY_HERE
-```
+ملاحظة: `app.py` يتحقق أيضًا من `OPENCODE_API_KEY` عند الإقلاع، لكنه غير موجود في
+`render.yaml` الحالي — غيابه لا يوقف الخدمة، فقط يطبع تحذيرًا في السجلات. أضفه
+يدويًا في Render إذا كانت الميزة التي يعتمد عليها مستخدمة فعليًا.
 
 ---
 
@@ -71,17 +74,8 @@ GEMINI_API_KEY=AIzaSy_YOUR_KEY_HERE
 ## 🔧 ملفات التكوين
 
 ### render.yaml
-```yaml
-services:
-  - type: web
-    name: king2-ai
-    env: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
-    envVars:
-      - key: PYTHON_VERSION
-        value: "3.11"
-```
+انظر الملف الفعلي `render.yaml` في جذر هذا المجلد — يحدَّث مباشرة هناك عند
+تغيير الخدمة، بدل نسخة مكررة هنا قد تفقد التزامن معه.
 
 ### .gitignore (مهم!)
 ```

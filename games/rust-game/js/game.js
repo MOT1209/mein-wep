@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 
-console.log("Rust Survival Engine v2.5: Initializing with Collision Physics...");
+// Rust Survival Engine v2.5: Initializing with Collision Physics...
 
 // ==================== CONFIGURATION ====================
 const CONFIG = {
@@ -471,7 +471,6 @@ try {
         document.getElementById('radial-menu').style.display = 'none';
 
         updateBlueprintIndicator();
-        console.log(`✅ Blueprint selected: ${type}`);
 
         // Lock controls back if we came from radial/blueprint menu
         pointerControls.lock();
@@ -641,7 +640,6 @@ try {
             // Build Sound/VFX
             screenFlash('rgba(255,255,255,0.1)');
             SoundFX.build();
-            console.log(`Placed ${blueprint}`);
         }
     }
 
@@ -651,7 +649,6 @@ try {
         const currentIndex = tierOrder.indexOf(currentTier);
 
         if (currentIndex >= tierOrder.length - 1) {
-            console.log('Structure already at max tier');
             return;
         }
 
@@ -668,7 +665,6 @@ try {
         }
 
         if (!canAfford) {
-            console.log('Not enough resources for upgrade');
             return;
         }
 
@@ -686,12 +682,10 @@ try {
 
         updateHUD();
         SoundFX.upgrade();
-        console.log(`Upgraded to ${nextTier}`);
     }
 
     function repairStructure(structure) {
         if (structure.userData.health >= structure.userData.maxHealth) {
-            console.log('Structure at full health');
             return;
         }
 
@@ -711,7 +705,6 @@ try {
             }
 
             if (!canAfford) {
-                console.log('Not enough resources for repair');
                 return;
             }
 
@@ -725,7 +718,6 @@ try {
 
         structure.userData.health = Math.min(structure.userData.maxHealth, structure.userData.health + repairAmount);
         updateHUD();
-        console.log(`Repaired structure to ${structure.userData.health}/${structure.userData.maxHealth}`);
     }
 
     function updateBuildInfo(structure) {
@@ -1581,7 +1573,6 @@ try {
 
         localStorage.setItem('rust_survival_save', JSON.stringify(saveData));
         showNotification("Game Saved");
-        console.log("💾 Game Saved!", saveData);
     }
 
     function loadGame() {
@@ -1590,7 +1581,6 @@ try {
 
         try {
             const data = JSON.parse(json);
-            console.log("📂 Loading Game...", data);
 
             // Restore Player
             camera.position.set(data.player.position.x, data.player.position.y, data.player.position.z);
@@ -1643,7 +1633,6 @@ try {
             });
 
             updateHUD();
-            console.log("✅ Game Loaded Successfully");
 
         } catch (e) {
             console.error("Failed to load save:", e);

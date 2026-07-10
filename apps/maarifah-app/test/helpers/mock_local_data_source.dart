@@ -1,4 +1,3 @@
-import 'package:mockito/mockito.dart';
 import 'package:maarifah_app/data/datasources/local_data_source.dart';
 import 'package:maarifah_app/data/models/user_model.dart';
 

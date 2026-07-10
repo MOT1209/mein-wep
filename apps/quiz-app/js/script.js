@@ -997,8 +997,6 @@ async function showLevelComplete() {
         level: currentLevel + 1,
         ts: Date.now()
     });
-    saveHighScore(playerName, score, currentCategory, currentLevel + 1); // best-effort online sync
-
     const totalLevels = quizDatabase[currentCategory].length;
     const isLastLevel = currentLevel + 1 >= totalLevels;
 
@@ -1023,18 +1021,5 @@ async function showLevelComplete() {
         resultMessage.innerHTML = `نقاطك غير كافية للمرور (تحتاج ${PASS_THRESHOLD}/${currentQuestions.length}). حاول مرة أخرى!`;
         restartBtn.textContent = "إعادة المحاولة";
         restartBtn.onclick = () => startQuiz();
-    }
-}
-
-async function saveHighScore(name, score, cat, lvl) {
-    try {
-        if (typeof supabaseClient !== 'undefined') {
-            await supabaseClient.from('quiz_leaderboard').insert([
-                { player_name: name, score: score, category: cat, level: lvl }
-            ]);
-            console.log("Score saved to Supabase");
-        }
-    } catch (e) {
-        console.warn("Failed to save score:", e);
     }
 }

@@ -93,21 +93,21 @@ export const authOptions: NextAuthOptions = {
           user = found;
 
           if (!user) {
-            console.log(`[KING2] User not found: ${email}`);
+            console.log('[KING2] User not found');
             return null;
           }
 
           const hasPassword = (hash: string | null | undefined) => hash && hash !== 'OAUTH_NO_PASSWORD';
 
           if (!hasPassword(user.password_hash) && !hasPassword(user.password)) {
-            console.log(`[KING2] User has no password (OAuth-only account): ${email}`);
+            console.log('[KING2] User has no password (OAuth-only account)');
             return null;
           }
 
           const passwordHash = (user.password_hash || user.password) as string;
           const isValid = await bcrypt.compare(password, passwordHash);
           if (!isValid) {
-            console.log(`[KING2] Invalid password for: ${email}`);
+            console.log('[KING2] Invalid password');
             return null;
           }
 
@@ -160,7 +160,7 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user, account, profile }) {
       if (account?.provider === 'google') {
-        console.log(`[KING2] OAuth signIn success: ${account.provider} - ${user.email}`);
+        console.log(`[KING2] OAuth signIn success: ${account.provider}`);
       }
       return true;
     },
@@ -173,7 +173,7 @@ export const authOptions: NextAuthOptions = {
       }
       if (account) {
         token.provider = account.provider;
-        console.log(`[KING2] JWT updated for ${account.provider}: ${token.email}`);
+        console.log(`[KING2] JWT updated for ${account.provider}`);
       }
       return token;
     },
@@ -196,14 +196,14 @@ export const authOptions: NextAuthOptions = {
   },
   debug: process.env.NODE_ENV === 'development',
   events: {
-    async createUser({ user }) {
-      console.log(`[KING2] New user created: ${user.email}`);
+    async createUser() {
+      console.log('[KING2] New user created');
     },
-    async signIn({ user, account }) {
-      console.log(`[KING2] Sign in event: ${account?.provider} - ${user.email}`);
+    async signIn({ account }) {
+      console.log(`[KING2] Sign in event: ${account?.provider}`);
     },
-    async linkAccount({ user, account }) {
-      console.log(`[KING2] Account linked: ${account?.provider} - ${user.email}`);
+    async linkAccount({ account }) {
+      console.log(`[KING2] Account linked: ${account?.provider}`);
     },
   },
 };

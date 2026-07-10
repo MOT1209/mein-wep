@@ -33,7 +33,7 @@ for key in REQUIRED_KEYS:
     if not val or val == "your_api_key_here":
         print(f"[WARN] {key} is missing or invalid in .env")
     else:
-        print(f"[OK] {key} is configured ({val[:8]}...)")
+        print(f"[OK] {key} is configured")
 
 # Gemma 4 and Qwen3.5-9B are local via ModelManager (llama.cpp server)
 print("[KING2] Gemma 4 / Qwen3.5-9B (local) via ModelManager (llama.cpp server)")
@@ -1063,7 +1063,7 @@ async def auth_login(request: Request, response: Response):
         
         _auth_manager.clear_failed_attempts(client_ip)
         session_token = _auth_manager.create_session()
-        print(f"[Login] Created session for Rashid, token={session_token[:20]}...")
+        print("[Login] Created session for Rashid")
         response.set_cookie(key="king_session", value=session_token, httponly=True, max_age=86400, samesite="lax")
         return JSONResponse(content={"success": True, "username": RASHID_USERNAME, "isAdmin": True, "message": "مرحباً بك يا الملك"})
     
@@ -1103,7 +1103,7 @@ async def auth_logout(request: Request, session_token: Optional[str] = Cookie(No
 @app.get("/auth/status")
 async def auth_status(session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[AuthStatus] session_token={session_token[:20] if session_token else None}, username={username}")
+    print(f"[AuthStatus] username={username}")
     if username:
         return JSONResponse(content={
             "authenticated": True,
@@ -1120,7 +1120,7 @@ def _safe_val(row, idx, fallback=None):
 @app.get("/api/admin/stats")
 async def admin_stats(session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[AdminStats API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[AdminStats API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1149,7 +1149,7 @@ async def admin_stats(session_token: Optional[str] = Cookie(None)):
 @app.get("/api/settings/stats")
 async def settings_stats(session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[Stats API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[Stats API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1196,7 +1196,7 @@ async def settings_stats(session_token: Optional[str] = Cookie(None)):
 @app.get("/api/settings/chats")
 async def settings_chats(limit: int = 20, offset: int = 0, search: str = "", session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[Chats API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[Chats API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1248,7 +1248,7 @@ async def settings_chats(limit: int = 20, offset: int = 0, search: str = "", ses
 @app.get("/api/settings/kaggle")
 async def settings_kaggle(session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[Kaggle API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[Kaggle API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     return {
@@ -1264,7 +1264,7 @@ async def settings_kaggle(session_token: Optional[str] = Cookie(None)):
 @app.get("/api/settings/db-health")
 async def settings_db_health(session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[DBHealth API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[DBHealth API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     db = get_db()
@@ -1425,7 +1425,7 @@ def get_ve():
 @app.post("/api/video/create-project")
 async def video_create_project(name: str = Form(""), session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[VideoCreate API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[VideoCreate API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1439,7 +1439,7 @@ async def video_create_project(name: str = Form(""), session_token: Optional[str
 @app.post("/api/video/add-video")
 async def video_add_video(file: UploadFile = File(...), session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[VideoAdd API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[VideoAdd API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1458,7 +1458,7 @@ async def video_add_video(file: UploadFile = File(...), session_token: Optional[
 @app.get("/api/video/status")
 async def video_status(session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[VideoStatus API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[VideoStatus API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1471,7 +1471,7 @@ async def video_status(session_token: Optional[str] = Cookie(None)):
 @app.post("/api/video/detect-scenes")
 async def video_detect_scenes(video_path: str = Form(""), session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[VideoDetect API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[VideoDetect API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1483,7 +1483,7 @@ async def video_detect_scenes(video_path: str = Form(""), session_token: Optiona
 @app.post("/api/video/generate-montage")
 async def video_generate_montage(videos: str = Form(""), music: str = Form(""), session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[VideoMontage API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[VideoMontage API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     
@@ -1503,7 +1503,7 @@ async def video_generate_montage(videos: str = Form(""), music: str = Form(""), 
 @app.get("/api/video/export-edl")
 async def video_export_edl(session_token: Optional[str] = Cookie(None)):
     username = _auth_manager.validate_session(session_token)
-    print(f"[VideoEDL API] session_token={session_token[:20] if session_token else None}, username={username}, expected={RASHID_USERNAME}")
+    print(f"[VideoEDL API] username={username}, expected={RASHID_USERNAME}")
     if username != RASHID_USERNAME:
         return JSONResponse(status_code=403, content={"error": "غير مصرح"})
     

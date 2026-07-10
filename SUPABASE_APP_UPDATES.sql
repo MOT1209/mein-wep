@@ -23,11 +23,11 @@ create policy "anon_read_app_updates"
   on public.app_updates for select
   to anon, authenticated using (true);
 
--- فقط المسجّل دخوله (أنت في لوحة الإدارة) ينشر/يعدّل التحديثات
+-- فقط الأدمن (أنت في لوحة الإدارة) ينشر/يعدّل التحديثات — وليس أي مستخدم مسجّل
 drop policy if exists "auth_write_app_updates" on public.app_updates;
 create policy "auth_write_app_updates"
   on public.app_updates for all
-  to authenticated using (true) with check (true);
+  to authenticated using (public.is_admin()) with check (public.is_admin());
 
 -- القيم الابتدائية (الإصدارات الحالية)
 insert into public.app_updates (app_id, name, version, url, notes, release_date) values

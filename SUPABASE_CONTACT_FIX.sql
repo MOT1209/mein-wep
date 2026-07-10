@@ -22,16 +22,16 @@ create policy "anon_insert_contact"
   to anon, authenticated
   with check (true);
 
--- فقط المسجّل دخوله (أنت في لوحة الإدارة) يرى الرسائل
+-- فقط الأدمن (أنت في لوحة الإدارة) يرى الرسائل — وليس أي مستخدم مسجّل
 drop policy if exists "auth_read_contact" on public.contact_messages;
 create policy "auth_read_contact"
   on public.contact_messages for select
   to authenticated
-  using (true);
+  using (public.is_admin());
 
--- فقط المسجّل دخوله يحذف الرسائل
+-- فقط الأدمن يحذف الرسائل
 drop policy if exists "auth_delete_contact" on public.contact_messages;
 create policy "auth_delete_contact"
   on public.contact_messages for delete
   to authenticated
-  using (true);
+  using (public.is_admin());

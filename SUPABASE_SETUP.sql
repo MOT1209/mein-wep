@@ -1,6 +1,16 @@
 -- ==============================================================================
 -- SUPABASE SETUP SCRIPT FOR Rashid
 -- Run this in your Supabase SQL Editor to create all necessary tables and policies.
+--
+-- ⚠️ DESTRUCTIVE: this script DROPS and recreates media/images/codes/prompts/
+-- vault_items/models/lessons/bot_knowledge/site_stats/admin_users/projects —
+-- all real content in those tables is wiped. This is meant for FIRST-TIME setup
+-- only, never for re-running against a live database with real data.
+--
+-- Six other SUPABASE_*.sql files in this repo are later, idempotent patches on
+-- top of this base (safe to re-run anytime): SUPABASE_SETUP_FIXED.sql →
+-- SUPABASE_SECURITY_FIX.sql → SUPABASE_CONTACT_FIX.sql → SUPABASE_VAULT_UPDATE.sql
+-- → SUPABASE_APP_UPDATES.sql. They don't touch this file's DROP list.
 -- ==============================================================================
 
 -- Clean slate: drop everything first to avoid schema mismatch from failed runs
@@ -110,9 +120,10 @@ on public.admin_users for select
 to authenticated
 using ((select auth.uid()) = user_id);
 
+-- استبدل القيمة أدناه ببريد حسابك الحقيقي قبل تشغيل السكربت (لا تُثبّت بريدًا حقيقيًا هنا)
 insert into public.admin_users (user_id, email)
 select id, email from auth.users
-where email in ('zwnt45602@gmail.com', 'zwnt45602@gamil.com')
+where email = 'OWNER_EMAIL_PLACEHOLDER@example.com'
 on conflict (user_id) do update set email = excluded.email;
 
 revoke all on table public.admin_users from anon;

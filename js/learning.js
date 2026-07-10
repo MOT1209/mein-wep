@@ -44,34 +44,43 @@ async function fetchLessons() {
     }
 }
 
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
 function createLessonCard(lesson) {
     const div = document.createElement('div');
     div.className = 'course-card';
 
-    const tagsHTML = (lesson.tags || []).map(tag => `<span>${tag}</span>`).join('');
+    const tagsHTML = (lesson.tags || []).map(tag => `<span>${escapeHtml(tag)}</span>`).join('');
 
     div.innerHTML = `
-        <i class="${lesson.icon_class || 'fas fa-book'} course-icon"></i>
-        <h2 class="course-title">${lesson.title}</h2>
+        <i class="${escapeHtml(lesson.icon_class || 'fas fa-book')} course-icon"></i>
+        <h2 class="course-title">${escapeHtml(lesson.title)}</h2>
         <div class="course-progress">
             <div class="progress-bar" style="width: ${lesson.progress || 0}%"></div>
         </div>
-        <p class="course-desc">${lesson.description || 'No description provided.'}</p>
+        <p class="course-desc">${escapeHtml(lesson.description || 'No description provided.')}</p>
         <div class="tags">
             ${tagsHTML}
         </div>
-        <button class="btn btn-primary" onclick="startLesson('${lesson.content_url || '#'}')">
-            ${lesson.progress > 0 ? 'Continue' : 'Start Reading'}
-        </button>
     `;
+
+    const button = document.createElement('button');
+    button.className = 'btn btn-primary';
+    button.textContent = lesson.progress > 0 ? 'Continue' : 'Start Reading';
+    button.addEventListener('click', () => startLesson(lesson.content_url));
+    div.appendChild(button);
 
     return div;
 }
 
-window.startLesson = function (url) {
-    if (url === '#' || !url) {
+function startLesson(url) {
+    if (!url || url === '#') {
         alert('This lesson content is not available yet. Stay tuned!');
     } else {
         window.location.href = url;
     }
-};
+}

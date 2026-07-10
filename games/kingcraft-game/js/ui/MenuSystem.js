@@ -80,12 +80,15 @@ export class MenuSystem {
       card.innerHTML = `
         <div class="world-icon">🌍</div>
         <div class="world-info">
-          <div class="world-name">${w.name}</div>
-          <div class="world-meta">${w.gameMode} • ${w.difficulty} • ${this.fmtTime(w.playTime)}</div>
+          <div class="world-name"></div>
+          <div class="world-meta"></div>
         </div>
-        <button class="world-delete" data-id="${w.id}" title="Delete">🗑</button>
+        <button class="world-delete" title="Delete">🗑</button>
         <span class="world-play">▶</span>
       `;
+      card.querySelector(".world-name").textContent = w.name;
+      card.querySelector(".world-meta").textContent = `${w.gameMode} • ${w.difficulty} • ${this.fmtTime(w.playTime)}`;
+      card.querySelector(".world-delete").dataset.id = w.id;
       card.addEventListener("click", (e) => {
         if (e.target.closest(".world-delete")) return;
         if (this._onStartGame) this._onStartGame(w);

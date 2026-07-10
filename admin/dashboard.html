@@ -680,9 +680,14 @@
       const { data: { session } } = await window.supabaseClient.auth.getSession();
       if (!session) {
         window.location.replace('login.html');
-      } else {
-        document.body.classList.add('auth-ok');
+        return;
       }
+      const { data: isAdmin, error: adminCheckError } = await window.supabaseClient.rpc('is_admin');
+      if (adminCheckError || !isAdmin) {
+        window.location.replace('login.html');
+        return;
+      }
+      document.body.classList.add('auth-ok');
     })();
     </script>
 

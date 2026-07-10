@@ -1,13 +1,18 @@
 /**
  * إعلانات AdMob — Capacitor Community AdMob Plugin
- * 
+ *
  * التوثيق: https://github.com/capacitor-community/admob
- * 
- * Ad Unit IDs (اختبارية من Google — استبدلها قبل الإطلاق):
- *   Android Banner:        ca-app-pub-3940256099942544/6300978111
- *   Android Interstitial:  ca-app-pub-3940256099942544/1033173712
- *   Android Rewarded:      ca-app-pub-3940256099942544/5224354917
+ *
+ * ⚠️ قبل النشر على المتجر: أنشئ تطبيقًا ووحدات إعلانية حقيقية في حساب AdMob،
+ * ثم استبدل القيم في AD_UNIT_IDS أدناه وغيّر IS_PRODUCTION إلى true.
+ * المعرّفات الحالية هي معرّفات اختبار رسمية من Google ولا تُحقق أي أرباح.
  */
+const IS_PRODUCTION = false; // ← بدّلها إلى true بعد وضع معرّفات AdMob حقيقية
+const AD_UNIT_IDS = {
+  banner: 'ca-app-pub-3940256099942544/6300978111',
+  interstitial: 'ca-app-pub-3940256099942544/1033173712',
+  rewarded: 'ca-app-pub-3940256099942544/5224354917',
+};
 
 window.MaarifahAds = {
   initialized: false,
@@ -25,7 +30,7 @@ window.MaarifahAds = {
       await this.AdMob.initialize({
         requestTrackingAuthorization: true,
         testingDevices: [],
-        initializeForTesting: true, // ← false للإنتاج
+        initializeForTesting: !IS_PRODUCTION,
       });
 
       this.initialized = true;
@@ -42,7 +47,7 @@ window.MaarifahAds = {
     if (!this.AdMob) return;
     try {
       await this.AdMob.showBanner({
-        adId: 'ca-app-pub-3940256099942544/6300978111',
+        adId: AD_UNIT_IDS.banner,
         adSize: this.bannerSize.ADAPTIVE_BANNER,
         position: this.position.BOTTOM_CENTER,
         margin: 0,
@@ -65,7 +70,7 @@ window.MaarifahAds = {
     if (!this.AdMob) return;
     try {
       await this.AdMob.prepareInterstitial({
-        adId: 'ca-app-pub-3940256099942544/1033173712',
+        adId: AD_UNIT_IDS.interstitial,
       });
       await this.AdMob.showInterstitial();
     } catch (e) {
@@ -78,7 +83,7 @@ window.MaarifahAds = {
     if (!this.AdMob) return;
     try {
       await this.AdMob.prepareRewardVideoAd({
-        adId: 'ca-app-pub-3940256099942544/5224354917',
+        adId: AD_UNIT_IDS.rewarded,
       });
       return await this.AdMob.showRewardVideoAd();
     } catch (e) {
