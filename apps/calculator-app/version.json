@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "buildNumber": 5,
+  "buildNumber": 6,
   "apkUrl": "https://rashid-wep.vercel.app/apks/calculator-app-v1.0.0.apk",
   "changelog": "Initial release",
   "releaseDate": "2026-06-16"
