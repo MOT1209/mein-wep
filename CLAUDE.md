@@ -4,7 +4,8 @@
 موقع راشد الشخصي — بورتفوليو، ألعاب، تطبيقات، ذكاء اصطناعي، خزينة معرفة.
 - **Vercel**: `https://rashid-wep.vercel.app`
 - **Supabase**: للتواصل + تسجيل الدخول
-- **Sub-agents**: 15 agent متخصص في `.opencode/agents/`
+- **Sub-agents**: 25 agent متخصص في `.opencode/agents/`
+- **Skills**: 20+ skill في `.claude/skills/`
 
 ## الـ 10 خطوات الإجبارية
 

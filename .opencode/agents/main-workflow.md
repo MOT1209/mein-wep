@@ -40,6 +40,15 @@ permission:
   - **Admin Panel**: `admin-panel`
   - **Architecture**: `code-architect`
   - **Game Testing**: `game-tester`
+  - **API Development**: `api-developer`
+  - **Mobile Apps**: `mobile-apps`
+  - **Performance**: `performance-monitor`
+  - **Documentation**: `docs-manager`
+  - **Testing**: `test-engineer`
+  - **DevOps/CI**: `devops-ci`
+  - **Accessibility**: `accessibility-auditor`
+  - **i18n/Localization**: `i18n-specialist`
+  - **Data Analytics**: `data-analytics`
 
 ### 4. Implementation
 - كل sub-agent يكتب الكود في تخصصه.

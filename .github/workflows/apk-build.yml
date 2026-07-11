@@ -137,6 +137,25 @@ jobs:
         working-directory: ${{ matrix.project }}
         run: npx cap sync android 2>&1 | tail -10
 
+      - name: Configure AdMob App ID
+        working-directory: ${{ matrix.project }}
+        run: |
+          case "${{ matrix.project }}" in
+            apps/calculator-app) ADMOB_APP_ID="ca-app-pub-6142754371257083~9020699769" ;;
+            apps/quiz-app)       ADMOB_APP_ID="ca-app-pub-6142754371257083~1920938942" ;;
+            apps/quran-app)      ADMOB_APP_ID="ca-app-pub-6142754371257083~8322283070" ;;
+            *) ADMOB_APP_ID="" ;;
+          esac
+          if [ -n "$ADMOB_APP_ID" ]; then
+            STRINGS_FILE="android/app/src/main/res/values/strings.xml"
+            MANIFEST="android/app/src/main/AndroidManifest.xml"
+            sed -i "s#</resources>#    <string name=\"admob_app_id\">${ADMOB_APP_ID}</string>\n</resources>#" "$STRINGS_FILE"
+            sed -i "s#</application>#    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"@string/admob_app_id\"/>\n    </application>#" "$MANIFEST"
+            echo "AdMob App ID configured: $ADMOB_APP_ID"
+          else
+            echo "No AdMob App ID for this project — skipping (games don't use AdMob)"
+          fi
+
       - name: Get current version
         id: version
         run: |
