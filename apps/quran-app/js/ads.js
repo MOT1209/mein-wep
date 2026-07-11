@@ -3,15 +3,16 @@
  *
  * التوثيق: https://github.com/capacitor-community/admob
  *
- * ⚠️ قبل النشر على المتجر: أنشئ تطبيقًا ووحدات إعلانية حقيقية في حساب AdMob،
- * ثم استبدل القيم في AD_UNIT_IDS أدناه وغيّر IS_PRODUCTION إلى true.
- * المعرّفات الحالية هي معرّفات اختبار رسمية من Google ولا تُحقق أي أرباح.
+ * ⚠️ قبل بناء الـ APK: أضف AdMob App ID التالي في
+ * android/app/src/main/res/values/strings.xml (بعد تشغيل npx cap sync android):
+ *   <string name="admob_app_id">ca-app-pub-6142754371257083~8322283070</string>
+ * (مجلد android/ مستبعد من git ويُولَّد محليًا، فلا يمكن تضمينه هنا مباشرة)
  */
-const IS_PRODUCTION = false; // ← بدّلها إلى true بعد وضع معرّفات AdMob حقيقية
+const IS_PRODUCTION = true;
 const AD_UNIT_IDS = {
-  banner: 'ca-app-pub-3940256099942544/6300978111',
-  interstitial: 'ca-app-pub-3940256099942544/1033173712',
-  rewarded: 'ca-app-pub-3940256099942544/5224354917',
+  banner: 'ca-app-pub-6142754371257083/3780815522',
+  interstitial: 'ca-app-pub-6142754371257083/9845293908',
+  rewarded: 'ca-app-pub-6142754371257083/3999894684',
 };
 
 window.MaarifahAds = {
