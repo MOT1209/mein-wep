@@ -2,6 +2,7 @@
 -- جدول تحديثات التطبيقات (OTA) — يُنشر منه إشعار التحديث
 -- الصق هذا كاملاً في: Supabase → SQL Editor → New query → Run
 -- آمن وقابل لإعادة التشغيل.
+-- (راجع SUPABASE_MIGRATIONS.md لترتيب التطبيق الكامل)
 -- ============================================================
 
 create table if not exists public.app_updates (

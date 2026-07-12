@@ -1,5 +1,5 @@
 -- ==============================================================================
--- SUPABASE_SETUP_FIXED.sql
+-- SUPABASE_SETUP_FIXED.sql (راجع SUPABASE_MIGRATIONS.md لترتيب التطبيق الكامل)
 -- المرحلة 1: إصلاح صلاحيات RLS لجدولَي projects و bot_knowledge
 --
 -- المشكلة: سياسات INSERT/UPDATE/DELETE لهذين الجدولين كانت تستخدم

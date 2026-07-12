@@ -1,6 +1,6 @@
 -- ==============================================================================
 -- Update vault_items table for the new tab-based vault
--- Run this in Supabase SQL Editor
+-- Run this in Supabase SQL Editor (see SUPABASE_MIGRATIONS.md for full apply order)
 -- ==============================================================================
 
 -- Add new columns (safe to run multiple times)

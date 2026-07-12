@@ -44,6 +44,26 @@ jobs:
         run: |
           echo "🔍 Run Lighthouse locally: npx lighthouse https://rashid-wep.vercel.app/ --output=json"
 
+  flutter-test:
+    name: 🎯 Maarifah App Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.19.0'
+      - name: Install dependencies
+        working-directory: apps/maarifah-app
+        run: flutter pub get
+      - name: Run flutter test (unit + widget — the 84 tests referenced in commit history)
+        working-directory: apps/maarifah-app
+        run: flutter test
+      # integration_test/app_test.dart needs a device/emulator per its own header
+      # comment — not wired into CI here to avoid an unverified, possibly-flaky
+      # Android emulator setup; run it locally with `flutter test integration_test`.
+
   test:
     name: 🧪 API & Pages Tests
     needs: [lint]

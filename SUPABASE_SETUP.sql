@@ -7,10 +7,9 @@
 -- all real content in those tables is wiped. This is meant for FIRST-TIME setup
 -- only, never for re-running against a live database with real data.
 --
--- Six other SUPABASE_*.sql files in this repo are later, idempotent patches on
--- top of this base (safe to re-run anytime): SUPABASE_SETUP_FIXED.sql →
--- SUPABASE_SECURITY_FIX.sql → SUPABASE_CONTACT_FIX.sql → SUPABASE_VAULT_UPDATE.sql
--- → SUPABASE_APP_UPDATES.sql. They don't touch this file's DROP list.
+-- Five other SUPABASE_*.sql files in this repo are later, idempotent patches on
+-- top of this base (safe to re-run anytime) — see SUPABASE_MIGRATIONS.md for the
+-- verified apply order. They don't touch this file's DROP list.
 -- ==============================================================================
 
 -- Clean slate: drop everything first to avoid schema mismatch from failed runs

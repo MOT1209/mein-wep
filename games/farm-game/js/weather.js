@@ -97,6 +97,12 @@ GAME.weather = {
     if (!this.scene) return;
     var game = GAME.game;
     if (!game || !game.state) return;
+    // 🛡️ scene.background may still be null (Three.js default) if this runs
+    // before main.js sets it, or after a context-loss reset — every branch
+    // below calls .setHSL()/.copy() on it, so guarantee a Color exists first.
+    if (!this.scene.background || !this.scene.background.isColor) {
+      this.scene.background = new THREE.Color(0x87CEEB);
+    }
     var t = game.state.time;
 
     var dayFactor = Math.sin((t - 6) / 24 * Math.PI * 2);
