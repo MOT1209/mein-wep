@@ -1,160 +1,174 @@
-// Gemini AI Judge for Draw Battle
-// Uses Gemini 2.5 Flash to evaluate drawings via server-side API route
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// Encrypted AI Client Library - Obfuscated
 
-// Types
+// ─────────────────────────────────────────────────────────────────────────────
+// Types (public interface)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export interface AIEvaluation {
-  score: number        // 0-100 overall score
-  accuracy: number     // 0-100 how well it matches the word
-  creativity: number   // 0-100 creative interpretation
-  clarity: number      // 0-100 visual clarity
-  comment: string      // Short friendly feedback
+  score: number
+  accuracy: number
+  creativity: number
+  clarity: number
+  comment: string
 }
 
 export interface DrawingToEvaluate {
   word: string
-  drawingData: string  // base64 image data
+  drawingData: string
   category: string
-  drawingTime: number  // seconds spent drawing
+  drawingTime: number
 }
 
-// System prompt for the AI Judge
-const JUDGE_PROMPT = `You are a friendly and encouraging art judge for a drawing game called "Draw Battle".
+// ─────────────────────────────────────────────────────────────────────────────
+// Internal Obfuscated Helpers
+// ─────────────────────────────────────────────────────────────────────────────
 
-Your task is to evaluate a player's drawing based on:
-1. The secret word they were supposed to draw
-2. The category of the word
-3. How much time they had to draw
-
-EVALUATION CRITERIA:
-- ACCURACY (0-100): How well does the drawing represent the word?
-- CREATIVITY (0-100): How creative and unique is the interpretation?
-- CLARITY (0-100): How clear and recognizable is the drawing?
-- OVERALL SCORE (0-100): Combined quality considering all factors
-
-SCORING GUIDELINES:
-- 90-100: Exceptional - instantly recognizable, creative, detailed
-- 70-89: Great - clearly represents the word, good effort
-- 50-69: Good - somewhat recognizable, decent attempt
-- 30-49: Fair - hard to recognize but shows effort
-- 0-29: Needs work - doesn't clearly represent the word
-
-IMPORTANT RULES:
-- Be encouraging and positive, even for poor drawings
-- Focus on effort and creativity, not just accuracy
-- Give constructive feedback
-- Consider the drawing time (less time = more forgiving)
-- Never be harsh or discouraging
-- If the drawing is completely unrelated, score it low but kindly
-
-RESPONSE FORMAT (JSON only, no markdown):
-{
-  "score": <number 0-100>,
-  "accuracy": <number 0-100>,
-  "creativity": <number 0-100>,
-  "clarity": <number 0-100>,
-  "comment": "<short encouraging feedback, 1-2 sentences>"
-}`
-
-/**
- * Evaluate a single drawing using server-side API route
- */
-export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEvaluation> {
-  try {
-    const response = await fetch('/api/evaluate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        word: drawing.word,
-        drawingData: drawing.drawingData,
-        category: drawing.category,
-        drawingTime: drawing.drawingTime,
-      }),
-    })
-
-    if (response.ok) {
-      return await response.json()
-    }
-  } catch (error) {
-    console.error('AI Evaluation failed:', error)
-  }
-
-  return getDefaultEvaluation(drawing.word)
+const _0x = {
+  _api: '/api/evaluate',
+  _timeout: 30000,
+  _retries: 2,
+  _retryDelay: 1000
 }
 
-/**
- * Evaluate multiple drawings in parallel
- */
-export async function evaluateDrawings(drawings: DrawingToEvaluate[]): Promise<Map<string, AIEvaluation>> {
-  const evaluations = new Map<string, AIEvaluation>()
-
-  // Evaluate all drawings in parallel
-  const promises = drawings.map(async (drawing, index) => {
-    const evaluation = await evaluateDrawing(drawing)
-    evaluations.set(`drawing-${index}`, evaluation)
-  })
-
-  await Promise.allSettled(promises)
-  return evaluations
+async function _sleep(ms: number): Promise<void> {
+  return new Promise(r => setTimeout(r, ms))
 }
 
-/**
- * Get default evaluation when AI is unavailable
- */
-function getDefaultEvaluation(word?: string): AIEvaluation {
-  const baseScore = 60 + Math.floor(Math.random() * 20) // 60-79
-  return {
-    score: baseScore,
-    accuracy: baseScore - 5 + Math.floor(Math.random() * 10),
-    creativity: baseScore + Math.floor(Math.random() * 15),
-    clarity: baseScore - 10 + Math.floor(Math.random() * 20),
-    comment: getRandomEncouragement()
-  }
-}
-
-/**
- * Get random encouraging comment
- */
-function getRandomEncouragement(): string {
-  const comments = [
-    "Great effort! Keep drawing! 🎨",
-    "Nice try! I can see what you were going for! ✨",
-    "Creative interpretation! Well done! 🌟",
-    "Good job! Every drawing tells a story! 🎭",
-    "Keep it up! You're improving! 💪",
-    "That's a fun take on it! 🎉",
-    "I love the creativity! 🎨",
-    "Well done! The effort shows! ⭐",
+function _defaultEval(word?: string): AIEvaluation {
+  const b = 60 + Math.floor(Math.random() * 20)
+  const c = [
+    'Great effort! Keep drawing! 🎨',
+    'Nice try! I can see what you were going for! ✨',
+    'Creative interpretation! Well done! 🌟',
+    'Good job! Every drawing tells a story! 🎭',
+    'Keep it up! You\'re improving! 💪',
+    'That\'s a fun take on it! 🎉',
+    'I love the creativity! 🎨',
+    'Well done! The effort shows! ⭐',
   ]
-  return comments[Math.floor(Math.random() * comments.length)]
+  return {
+    score: b,
+    accuracy: Math.min(Math.max(b - 5 + Math.floor(Math.random() * 10), 0), 100),
+    creativity: Math.min(Math.max(b + Math.floor(Math.random() * 15), 0), 100),
+    clarity: Math.min(Math.max(b - 10 + Math.floor(Math.random() * 20), 0), 100),
+    comment: c[Math.floor(Math.random() * c.length)]
+  }
 }
 
-/**
- * Clamp a number between min and max
- */
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max)
+// ─────────────────────────────────────────────────────────────────────────────
+// Core Evaluation Function (with retry logic)
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEvaluation> {
+  let lastError: Error | null = null
+
+  for (let attempt = 0; attempt <= _0x._retries; attempt++) {
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), _0x._timeout)
+
+      const response = await fetch(_0x._api, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          word: drawing.word,
+          drawingData: drawing.drawingData,
+          category: drawing.category,
+          drawingTime: drawing.drawingTime
+        }),
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+
+      if (response.ok) {
+        const data = await response.json()
+        if (data && typeof data.score === 'number') {
+          return {
+            score: Math.min(Math.max(data.score, 0), 100),
+            accuracy: Math.min(Math.max(data.accuracy, 0), 100),
+            creativity: Math.min(Math.max(data.creativity, 0), 100),
+            clarity: Math.min(Math.max(data.clarity, 0), 100),
+            comment: typeof data.comment === 'string' ? data.comment : 'Good effort!'
+          }
+        }
+      }
+
+      // Rate limited - wait and retry
+      if (response.status === 429) {
+        await _sleep(_0x._retryDelay * (attempt + 1))
+        continue
+      }
+
+      // Server error - retry
+      if (response.status >= 500) {
+        await _sleep(_0x._retryDelay)
+        continue
+      }
+
+      break // Client error - don't retry
+
+    } catch (err: any) {
+      lastError = err
+      if (attempt < _0x._retries) {
+        await _sleep(_0x._retryDelay)
+        continue
+      }
+    }
+  }
+
+  // All retries failed - return default
+  console.warn('[AI] Evaluation failed:', lastError?.message || 'unknown')
+  return _defaultEval(drawing.word)
 }
 
-/**
- * Calculate final score combining votes and AI evaluation
- * 70% votes + 30% AI score
- */
+// ─────────────────────────────────────────────────────────────────────────────
+// Batch Evaluation
+// ─────────────────────────────────────────────────────────────────────────────
+
+export async function evaluateDrawings(
+  drawings: DrawingToEvaluate[]
+): Promise<Map<string, AIEvaluation>> {
+  const results = new Map<string, AIEvaluation>()
+  
+  // Evaluate in parallel with concurrency limit
+  const CONCURRENT = 3
+  const chunks: DrawingToEvaluate[][] = []
+  
+  for (let i = 0; i < drawings.length; i += CONCURRENT) {
+    chunks.push(drawings.slice(i, i + CONCURRENT))
+  }
+
+  for (const chunk of chunks) {
+    const promises = chunk.map(async (drawing, idx) => {
+      const eval_ = await evaluateDrawing(drawing)
+      results.set(`drawing-${idx}`, eval_)
+    })
+    await Promise.allSettled(promises)
+  }
+
+  return results
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Score Calculator (votes + AI = final)
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function calculateFinalScoreWithBreakdown(
   voteScore: number,
   aiScore: number
 ): { finalScore: number; breakdown: { votes: number; ai: number } } {
-  const normalizedVotes = Math.min(voteScore, 100)
-  
-  const votesContribution = normalizedVotes * 0.7
-  const aiContribution = aiScore * 0.3
-  
-  const finalScore = Math.round(votesContribution + aiContribution)
-  
+  const v = Math.min(voteScore, 100)
+  const vc = v * 0.7
+  const ac = aiScore * 0.3
+  const fs = Math.round(vc + ac)
+
   return {
-    finalScore: clamp(finalScore, 0, 100),
+    finalScore: Math.min(Math.max(fs, 0), 100),
     breakdown: {
-      votes: Math.round(votesContribution),
-      ai: Math.round(aiContribution)
+      votes: Math.round(vc),
+      ai: Math.round(ac)
     }
   }
 }
