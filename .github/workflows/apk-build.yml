@@ -194,7 +194,7 @@ jobs:
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
             echo "$KS_B64" | base64 -d > release-key.jks
             npx cap build android \
-              --keystorepath ./release-key.jks \
+              --keystorepath "$PWD/release-key.jks" \
               --keystorepass "$KS_PASS" \
               --keystorealias "${KS_ALIAS:-rashid-key}" \
               --keystorealiaspass "${KS_KEY_PASS:-$KS_PASS}" \
@@ -210,7 +210,7 @@ jobs:
               -dname "CN=Rashid, OU=Dev, O=RashidApps, L=City, ST=State, C=SA" \
               -noprompt 2>&1
             npx cap build android \
-              --keystorepath ./temp-key.jks \
+              --keystorepath "$PWD/temp-key.jks" \
               --keystorepass "TempPass123" \
               --keystorealias "rashid-temp" \
               --keystorealiaspass "TempPass123" \
