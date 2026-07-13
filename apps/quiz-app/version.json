@@ -1,6 +1,6 @@
 {
   "version": "1.4.0",
-  "buildNumber": 11,
+  "buildNumber": 12,
   "apkUrl": "https://rashid-wep.vercel.app/apks/quiz-app-v1.4.0.apk",
   "changelog": "شاشة دخول باسم اللاعب + شعار · لوحة متصدرين · توسعة بنك الأسئلة إلى 260 سؤالاً (مستويات جديدة لكل تصنيف)",
   "releaseDate": "2026-06-22"
