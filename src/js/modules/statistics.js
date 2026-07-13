@@ -67,8 +67,7 @@ async function loadStats() {
   let techCount = 10;
 
   try {
-    const client = window.supabaseClient ||
-      (window.__supabase?.fetchPublic ? null : null);
+    const client = window.supabaseClient;
 
     if (client) {
       const { count: pCount, error: pErr } = await client

@@ -1,4 +1,4 @@
-import { qs, qsa, on } from '../utils/dom.js';
+import { qs, qsa, on, escapeHTML as escapeHtml } from '../utils/dom.js';
 import { fetchVaultItems, saveVaultItemToDB, deleteVaultItemFromDB } from '../services/supabase.js';
 
 /* ── Supabase field mapper ── */
@@ -138,13 +138,6 @@ const FALLBACK_DATA = [
 ];
 
 /* ── Render ── */
-function escapeHtml(str) {
-  if (!str) return '';
-  const d = document.createElement('div');
-  d.textContent = str;
-  return d.innerHTML;
-}
-
 function truncate(str, len = 120) {
   if (!str || str.length <= len) return str || '';
   return str.slice(0, len) + '…';

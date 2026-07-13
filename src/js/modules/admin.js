@@ -1,6 +1,5 @@
 import { getSupabaseClient, isCurrentUserAdmin } from '../services/supabase.js';
-import { qs, qsa, on } from '../utils/dom.js';
-import { escapeHtml } from '../utils/security.js';
+import { qs, qsa, on, escapeHTML } from '../utils/dom.js';
 import { addVaultItem, updateVaultItem, deleteVaultItem, getVaultStore, openEditVaultModal } from './vault.js';
 
 const VAULT_PIN_KEY = 'rashid_vault_pin';
@@ -38,7 +37,7 @@ function injectAdminBar() {
   bar.innerHTML = `
     <span class="admin-bar-icon"><i class="fas fa-shield-halved"></i></span>
     <span class="admin-bar-label">Admin</span>
-    <span class="admin-bar-user">${escapeHtml(adminUser?.email || '')}</span>
+    <span class="admin-bar-user">${escapeHTML(adminUser?.email || '')}</span>
     <span class="admin-bar-sep"></span>
     <button class="admin-bar-btn" data-action="logout" title="Sign out"><i class="fas fa-right-from-bracket"></i></button>
   `;

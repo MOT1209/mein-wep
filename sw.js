@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'Rashid-v15';
+﻿const CACHE_NAME = 'Rashid-v16';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -37,10 +37,6 @@ const ASSETS_TO_CACHE = [
     './src/js/modules/updates.js',
     './src/js/modules/statistics.js',
     './src/js/modules/vault.js',
-    './src/vault/prompts.js',
-    './src/vault/images.js',
-    './src/vault/codes.js',
-    './src/vault/media.js',
     './models/Rashid-Model/index.html',
     './images/logo.webp',
     './images/avatar.webp',

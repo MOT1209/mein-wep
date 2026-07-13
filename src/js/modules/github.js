@@ -2,6 +2,8 @@
  * GitHub Stats & Activity Module
  * Fetches real data from GitHub API for the portfolio
  */
+import { escapeHTML } from '../utils/dom.js';
+
 export async function fetchGitHubStats(username = 'MOT1209') {
     try {
         const proxy = '/api/github?endpoint=';
@@ -102,7 +104,7 @@ export async function renderGitHubStats(container) {
 
     const langBars = data.languages.map(l => `
         <div class="lang-bar-item">
-            <span class="lang-name">${l.lang}</span>
+            <span class="lang-name">${escapeHTML(l.lang)}</span>
             <div class="lang-bar-track">
                 <div class="lang-bar-fill" style="width:${l.percentage}%"></div>
             </div>
@@ -116,11 +118,11 @@ export async function renderGitHubStats(container) {
             <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="github-repo-card">
                 <div class="repo-header">
                     <i class="fas fa-book" aria-hidden="true"></i>
-                    <span class="repo-name">${r.name}</span>
+                    <span class="repo-name">${escapeHTML(r.name)}</span>
                 </div>
-                <p class="repo-desc">${r.description}</p>
+                <p class="repo-desc">${escapeHTML(r.description)}</p>
                 <div class="repo-meta">
-                    <span class="repo-lang"><span class="lang-dot" style="background:${getLangColor(r.language)}"></span> ${r.language}</span>
+                    <span class="repo-lang"><span class="lang-dot" style="background:${getLangColor(r.language)}"></span> ${escapeHTML(r.language)}</span>
                     <span><i class="fas fa-star" aria-hidden="true"></i> ${r.stars}</span>
                     <span><i class="fas fa-code-branch" aria-hidden="true"></i> ${r.forks}</span>
                     <span class="repo-updated">${updated}</span>
@@ -136,8 +138,8 @@ export async function renderGitHubStats(container) {
             <div class="activity-item">
                 <div class="activity-icon"><i class="${icon}" aria-hidden="true"></i></div>
                 <div class="activity-info">
-                    <span class="activity-type">${formatEventType(e.type)}</span>
-                    <span class="activity-repo">${e.repo}</span>
+                    <span class="activity-type">${escapeHTML(formatEventType(e.type))}</span>
+                    <span class="activity-repo">${escapeHTML(e.repo)}</span>
                 </div>
                 <span class="activity-date">${date}</span>
             </div>
@@ -148,10 +150,10 @@ export async function renderGitHubStats(container) {
         <div class="github-section-content">
             <!-- Profile Header -->
             <div class="github-profile">
-                <img src="${data.avatar}" alt="${data.name}" class="github-avatar" width="80" height="80" loading="lazy">
+                <img src="${data.avatar}" alt="${escapeHTML(data.name)}" class="github-avatar" width="80" height="80" loading="lazy">
                 <div class="github-profile-info">
-                    <h3>${data.name}</h3>
-                    <p class="github-bio">${data.bio}</p>
+                    <h3>${escapeHTML(data.name)}</h3>
+                    <p class="github-bio">${escapeHTML(data.bio)}</p>
                     <a href="${data.profileUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm">
                         <i class="fab fa-github" aria-hidden="true"></i> @MOT1209
                     </a>
