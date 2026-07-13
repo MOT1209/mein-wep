@@ -99,6 +99,16 @@ jobs:
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
           yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses 2>/dev/null || true
 
+      - name: Add apksigner (build-tools) to PATH
+        run: |
+          BT_DIR="$ANDROID_HOME/build-tools"
+          if [ ! -d "$BT_DIR" ] || [ -z "$(ls -A "$BT_DIR" 2>/dev/null)" ]; then
+            yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0"
+          fi
+          LATEST_BT=$(ls "$BT_DIR" | sort -V | tail -1)
+          echo "$BT_DIR/$LATEST_BT" >> $GITHUB_PATH
+          echo "build-tools on PATH: $LATEST_BT"
+
       - name: Extract project info
         id: info
         run: |
@@ -180,6 +190,7 @@ jobs:
           KS_ALIAS: ${{ secrets.KEY_ALIAS }}
           KS_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
         run: |
+          set -o pipefail
           if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
             echo "$KS_B64" | base64 -d > release-key.jks
             npx cap build android \
@@ -188,7 +199,7 @@ jobs:
               --keystorealias "${KS_ALIAS:-rashid-key}" \
               --keystorealiaspass "${KS_KEY_PASS:-$KS_PASS}" \
               --androidreleasetype APK \
-              --signing-type apksigner 2>&1 | tail -20
+              --signing-type apksigner 2>&1 | tee build.log | tail -40
           else
             keytool -genkey -v \
               -keystore temp-key.jks \
@@ -204,7 +215,7 @@ jobs:
               --keystorealias "rashid-temp" \
               --keystorealiaspass "TempPass123" \
               --androidreleasetype APK \
-              --signing-type apksigner 2>&1 | tail -20
+              --signing-type apksigner 2>&1 | tee build.log | tail -40
           fi
 
       - name: Copy APK to site folder
@@ -221,6 +232,14 @@ jobs:
           else
             echo "path=" >> $GITHUB_OUTPUT
             echo "::error::No APK produced for ${{ matrix.project }} — Capacitor/Gradle build failed"
+            exit 1
+          fi
+
+      - name: Verify APK is signed
+        if: steps.apk.outputs.path != ''
+        run: |
+          if jarsigner -verify "${{ steps.apk.outputs.path }}" 2>&1 | grep -q "jar is unsigned"; then
+            echo "::error::${{ steps.apk.outputs.path }} is UNSIGNED — refusing to publish it. Check the 'Build APK' step log for a signing failure (e.g. apksigner not found)."
             exit 1
           fi
 
