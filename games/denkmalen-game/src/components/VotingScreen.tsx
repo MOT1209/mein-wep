@@ -4,12 +4,14 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, calculateScore } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
+import { useSocket } from '@/components/SocketProvider'
 import { FaVoteYea, FaCheck, FaStar, FaTrophy } from 'react-icons/fa'
 
 export function VotingScreen() {
-  const { drawings, votes, hasVoted, currentPlayer, players, addVote, setPhase, updatePlayerScore, gameType, currentLetter, creativePrompt } = useGameStore()
+  const { mode, drawings, votes, hasVoted, currentPlayer, players, addVote, setPhase, updatePlayerScore, gameType, currentLetter, creativePrompt } = useGameStore()
   const { playSound, vibrate } = useGame()
-  
+  const { submitVote: socketSubmitVote } = useSocket()
+
   const [selectedDrawing, setSelectedDrawing] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   
@@ -39,18 +41,26 @@ export function VotingScreen() {
   
   const handleSubmitVote = () => {
     if (!currentPlayer || !selectedDrawing) return
-    
-    addVote({
-      voterId: currentPlayer.id,
-      drawingId: selectedDrawing,
-      rank: votes.filter(v => v.drawingId === selectedDrawing).length + 1,
-    })
-    
+
+    if (mode === 'online') {
+      socketSubmitVote({ drawingId: selectedDrawing, rank: 1 })
+    } else {
+      addVote({
+        voterId: currentPlayer.id,
+        drawingId: selectedDrawing,
+        rank: votes.filter(v => v.drawingId === selectedDrawing).length + 1,
+      })
+    }
+
     setSubmitted(true)
     playSound('success')
   }
-  
+
   const handleNext = () => {
+    // Online mode: the server computes and broadcasts results (round-results),
+    // which flips the phase to 'results' on its own — nothing to do here.
+    if (mode === 'online') return
+
     if (allPlayersVoted) {
       // Calculate scores
       const drawingVotes: Record<string, number> = {}
@@ -217,6 +227,12 @@ export function VotingScreen() {
             <FaVoteYea />
             Submit Vote
           </motion.button>
+        ) : allPlayersVoted && mode === 'online' ? (
+          <div className="px-8 py-4 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300
+                          rounded-2xl font-bold text-lg flex items-center gap-3">
+            <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Calculating results...
+          </div>
         ) : allPlayersVoted ? (
           <motion.button
             whileHover={{ scale: 1.05 }}

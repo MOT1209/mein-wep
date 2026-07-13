@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGameStore, calculateScore, calculateFinalScore } from '@/store/gameStore'
+import { useGameStore, calculateFinalScore, getRandomWord } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
+import { useSocket } from '@/components/SocketProvider'
+import { evaluateDrawings } from '@/lib/gemini'
 import { AIJudge, CombinedScoreDisplay } from './AIJudge'
 import { FaTrophy, FaMedal, FaStar, FaRedo, FaHome, FaRobot } from 'react-icons/fa'
 
@@ -23,21 +25,22 @@ interface Result {
 }
 
 export function ResultsScreen() {
-  const { drawings, votes, players, setPhase, resetGame, currentRound, aiEvaluations, gameType, currentLetter, creativePrompt } = useGameStore()
+  const { mode, drawings, votes, players, currentRound, totalRounds, setPhase, resetGame, nextRound, setPlayer, gameType, currentLetter, creativePrompt, selectedCategory } = useGameStore()
   const { playSound, vibrate } = useGame()
-  
+  const { nextRound: socketNextRound } = useSocket()
+
   const [showResults, setShowResults] = useState(false)
   const [results, setResults] = useState<Result[]>([])
   const [evaluatingAI, setEvaluatingAI] = useState(true)
   const [selectedDrawing, setSelectedDrawing] = useState<string | null>(null)
 
   useEffect(() => {
-    evaluateDrawings()
+    runEvaluation()
   }, [])
 
-  const evaluateDrawings = async () => {
+  const runEvaluation = async () => {
     setEvaluatingAI(true)
-    
+
     // Calculate vote scores first
     const drawingVotes: Record<string, number> = {}
     votes.forEach(vote => {
@@ -45,7 +48,7 @@ export function ResultsScreen() {
     })
 
     const resultsData: Result[] = []
-    
+
     // Create temporary results with vote scores
     drawings.forEach(drawing => {
       const player = players.find(p => p.id === drawing.playerId)
@@ -53,7 +56,7 @@ export function ResultsScreen() {
         const voteCount = drawingVotes[drawing.id] || 0
         const maxVotes = Math.max(...Object.values(drawingVotes), 1)
         const voteScore = Math.round((voteCount / maxVotes) * 100)
-        
+
         resultsData.push({
           rank: 0,
           playerId: drawing.playerId,
@@ -70,51 +73,29 @@ export function ResultsScreen() {
       }
     })
 
-    // Get AI evaluations for each drawing
-    let anyAIFailed = false
-    for (const drawing of drawings) {
-      try {
-        const response = await fetch('/api/evaluate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            word: drawing.word,
-            drawingData: drawing.canvasData,
-            category: drawing.category,
-            drawingTime: 60,
-          }),
-        })
+    // Get AI evaluations for all drawings concurrently
+    const aiResults = await evaluateDrawings(drawings.map(d => ({
+      id: d.id,
+      word: d.word,
+      drawingData: d.canvasData,
+      category: d.category,
+      drawingTime: 60,
+    })))
 
-        if (response.ok) {
-          const aiEval = await response.json()
-          const result = resultsData.find(r => r.drawingId === drawing.id)
-          if (result) {
-            result.aiScore = aiEval.score
-            result.aiComment = aiEval.comment
-          }
-        } else {
-          // AI evaluation API returned error — mark as failed
-          const result = resultsData.find(r => r.drawingId === drawing.id)
-          if (result) {
-            result.aiFailed = true
-            result.aiScore = 50 // neutral default
-            result.aiComment = 'AI evaluation unavailable'
-          }
-          anyAIFailed = true
-        }
-      } catch (error) {
-        console.error('AI evaluation failed for drawing:', error)
-        const result = resultsData.find(r => r.drawingId === drawing.id)
-        if (result) {
-          result.aiFailed = true
-          result.aiScore = 50
-          result.aiComment = 'AI evaluation unavailable'
-        }
+    let anyAIFailed = false
+    resultsData.forEach(result => {
+      const aiEval = aiResults.get(result.drawingId)
+      if (aiEval) {
+        result.aiScore = aiEval.score
+        result.aiComment = aiEval.comment
+      } else {
+        result.aiFailed = true
+        result.aiScore = 50 // neutral default
+        result.aiComment = 'AI evaluation unavailable'
         anyAIFailed = true
       }
-    }
+    })
 
-    // If all AI evaluations failed, set all scores to neutral
     if (anyAIFailed) {
       console.warn('Some AI evaluations failed — using vote-based ranking only')
     }
@@ -132,13 +113,29 @@ export function ResultsScreen() {
 
     setResults(resultsData)
     setEvaluatingAI(false)
-    
+
     // Animate results
     setTimeout(() => {
       setShowResults(true)
       playSound('winner')
       vibrate([100, 50, 100, 50, 200])
     }, 500)
+  }
+
+  const hasMoreRounds = currentRound < totalRounds
+
+  const handleNextRound = () => {
+    playSound('click')
+    if (mode === 'online') {
+      const room = useGameStore.getState().room
+      const playerCount = room?.players.length || players.length || 1
+      const words = Array.from({ length: playerCount }, () => getRandomWord(selectedCategory))
+      socketNextRound(words)
+    } else {
+      nextRound()
+      if (players.length > 0) setPlayer(players[0])
+      setPhase('drawing')
+    }
   }
 
   const getRankColor = (rank: number) => {
@@ -363,14 +360,41 @@ export function ResultsScreen() {
           </div>
           {results[0].aiComment && !results[0].aiFailed && (
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400 italic max-w-md">
-              🤖 "{results[0].aiComment}"
+              🤖 &quot;{results[0].aiComment}&quot;
             </p>
           )}
         </motion.div>
       )}
       
       {/* Actions */}
-      <div className="flex gap-4">
+      <div className="flex flex-wrap justify-center gap-4">
+        {hasMoreRounds && !evaluatingAI ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleNextRound}
+            className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500
+                       text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
+          >
+            <FaRedo />
+            Next Round ({currentRound + 1}/{totalRounds})
+          </motion.button>
+        ) : (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
+              playSound('click')
+              setPhase('leaderboard')
+            }}
+            className="px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500
+                       text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
+          >
+            <FaTrophy />
+            Leaderboard
+          </motion.button>
+        )}
+
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -379,26 +403,12 @@ export function ResultsScreen() {
             resetGame()
             setPhase('menu')
           }}
-          className="px-6 py-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white 
-                     font-bold rounded-xl shadow-lg flex items-center gap-2 border-2 
+          className="px-6 py-3 bg-white dark:bg-slate-800 text-slate-700 dark:text-white
+                     font-bold rounded-xl shadow-lg flex items-center gap-2 border-2
                      border-slate-200 dark:border-slate-700"
         >
           <FaHome />
           Home
-        </motion.button>
-        
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => {
-            playSound('click')
-            setPhase('leaderboard')
-          }}
-          className="px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 
-                     text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
-        >
-          <FaTrophy />
-          Leaderboard
         </motion.button>
       </div>
     </motion.div>

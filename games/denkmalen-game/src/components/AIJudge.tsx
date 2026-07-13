@@ -194,7 +194,7 @@ export function AIJudge({
       <div className="bg-white dark:bg-slate-800 rounded-xl p-3 flex items-start gap-2">
         <FaComment className="text-purple-400 mt-0.5" />
         <p className="text-sm text-slate-700 dark:text-slate-300 italic">
-          "{evaluation.comment}"
+          &quot;{evaluation.comment}&quot;
         </p>
       </div>
     </motion.div>
@@ -300,7 +300,7 @@ export function CombinedScoreDisplay({
       {aiComment && (
         <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3 text-center">
           <p className="text-sm text-purple-600 dark:text-purple-300 italic">
-            🤖 "{aiComment}"
+            🤖 &quot;{aiComment}&quot;
           </p>
         </div>
       )}

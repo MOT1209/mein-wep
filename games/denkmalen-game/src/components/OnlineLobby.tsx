@@ -1,13 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGameStore, Category, GameType, LETTERS } from '@/store/gameStore'
+import { useGameStore, Category, GameType, LETTERS, getRandomWord, getRandomCreativePrompt } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
+import { useSocket } from '@/components/SocketProvider'
 import { QRCodeSVG } from 'qrcode.react'
-import { 
-  FaArrowLeft, FaCopy, FaShare, FaUsers, FaPlus, 
-  FaTimes, FaPlay, FaCog, FaQrcode, FaLink
+import {
+  FaArrowLeft, FaCopy, FaShare, FaUsers, FaPlus,
+  FaTimes, FaPlay, FaCog, FaQrcode, FaLink, FaExclamationTriangle
 } from 'react-icons/fa'
 
 const CATEGORIES: { id: Category; name: string; emoji: string }[] = [
@@ -34,14 +35,15 @@ const GAME_TYPES: { id: GameType; name: string; emoji: string; description: stri
 
 export function OnlineLobby() {
   const {
-    setPhase, room, currentPlayer, players,
-    createRoom, setCategory, selectedCategory,
+    setPhase, room, currentPlayer,
+    setCategory, selectedCategory,
     totalRounds, drawingTime, gameType, setGameType,
     currentLetter: storeLetter, setCurrentLetter
   } = useGameStore()
   const { playSound, vibrate } = useGame()
-  
-  const [isHost, setIsHost] = useState(true)
+  const { createRoom: socketCreateRoom, joinRoom: socketJoinRoom, startGame: socketStartGame, connected, error, clearError } = useSocket()
+
+  const [wantsToHost, setWantsToHost] = useState(true)
   const [showSettings, setShowSettings] = useState(false)
   const [playerName, setPlayerName] = useState('')
   const [joinCode, setJoinCode] = useState('')
@@ -50,6 +52,13 @@ export function OnlineLobby() {
   const [time, setTime] = useState(drawingTime)
   const [selectedGameType, setSelectedGameType] = useState<GameType>(gameType)
   const [selectedLetter, setSelectedLetter] = useState(storeLetter || 'A')
+  const [joining, setJoining] = useState(false)
+
+  const isRoomHost = !!(room && currentPlayer && room.hostId === currentPlayer.id)
+
+  useEffect(() => {
+    if (room || error) setJoining(false)
+  }, [room, error])
 
   const handleGameTypeChange = (type: GameType) => {
     playSound('click')
@@ -68,16 +77,8 @@ export function OnlineLobby() {
     setCurrentLetter(letter)
   }
 
-  // Create room if host
-  useState(() => {
-    if (isHost && !room) {
-      createRoom({
-        rounds,
-        drawingTime: time,
-        category: selectedCategory,
-      })
-    }
-  })
+  const shareUrl = (code: string) =>
+    `${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')}/join/${code}`
 
   const handleCopyCode = () => {
     if (room?.code) {
@@ -94,7 +95,7 @@ export function OnlineLobby() {
         await navigator.share({
           title: 'Draw Battle - Join My Game!',
           text: `Join my Draw Battle game! Use code: ${room.code}`,
-          url: `https://draw-battle.vercel.app/join/${room.code}`,
+          url: shareUrl(room.code),
         })
       } catch (err) {
         console.log('Share cancelled')
@@ -102,13 +103,36 @@ export function OnlineLobby() {
     }
   }
 
+  const handleCreateRoom = () => {
+    if (!playerName.trim()) return
+    clearError()
+    playSound('click')
+    setJoining(true)
+    socketCreateRoom({
+      playerName: playerName.trim(),
+      rounds,
+      drawingTime: time,
+      category: selectedCategory,
+    })
+  }
+
   const handleJoin = () => {
     if (joinCode.length === 6 && playerName.trim()) {
-      playSound('success')
-      vibrate()
-      // In real app, this would connect to the server
-      setPhase('playing')
+      clearError()
+      playSound('click')
+      setJoining(true)
+      socketJoinRoom({ roomCode: joinCode, playerName: playerName.trim() })
     }
+  }
+
+  const handleStartGame = () => {
+    if (!room || room.players.length < 2) return
+    playSound('success')
+    vibrate([100, 50, 100])
+    const words = Array.from({ length: room.players.length }, () => getRandomWord(selectedCategory))
+    const letter = selectedGameType === 'letter' ? selectedLetter : null
+    const prompt = selectedGameType === 'creative' ? getRandomCreativePrompt() : null
+    socketStartGame(words, selectedGameType, letter, prompt)
   }
 
   return (
@@ -140,8 +164,19 @@ export function OnlineLobby() {
       </div>
 
       <div className="flex-1 flex flex-col gap-6 max-w-lg mx-auto w-full">
-        {/* Host Section */}
-        {isHost && room && (
+        {/* Error banner */}
+        {error && (
+          <div className="card bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-center gap-3">
+            <FaExclamationTriangle className="text-red-500 shrink-0" />
+            <p className="text-sm text-red-700 dark:text-red-300 flex-1">{error}</p>
+            <button onClick={clearError} className="text-red-500">
+              <FaTimes />
+            </button>
+          </div>
+        )}
+
+        {/* In a room (host or joined) */}
+        {room && (
           <>
             {/* Room Code - Big Display */}
             <div className="card text-center">
@@ -182,7 +217,7 @@ export function OnlineLobby() {
                 <div className="flex justify-center">
                   <div className="p-4 bg-white rounded-xl shadow-lg">
                     <QRCodeSVG
-                      value={`https://draw-battle.vercel.app/join/${room.code}`}
+                      value={shareUrl(room.code)}
                       size={180}
                     />
                   </div>
@@ -195,12 +230,12 @@ export function OnlineLobby() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <FaUsers className="text-primary-500" />
-                  Players ({players.length}/8)
+                  Players ({room.players.length}/{room.maxPlayers})
                 </h2>
               </div>
-              
+
               <div className="space-y-3">
-                {players.length === 0 ? (
+                {room.players.length === 0 ? (
                   <div className="text-center py-8">
                     <div className="text-4xl mb-3">⏳</div>
                     <p className="text-slate-500 dark:text-slate-400">
@@ -211,7 +246,7 @@ export function OnlineLobby() {
                     </p>
                   </div>
                 ) : (
-                  players.map((player, index) => (
+                  room.players.map((player, index) => (
                     <motion.div
                       key={player.id}
                       initial={{ opacity: 0, y: -20 }}
@@ -237,7 +272,8 @@ export function OnlineLobby() {
               </div>
             </div>
 
-            {/* Game Settings */}
+            {/* Game Settings (host only) */}
+            {isRoomHost && (
             <div className="card">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
@@ -390,100 +426,145 @@ export function OnlineLobby() {
                 )}
               </AnimatePresence>
             </div>
+            )}
           </>
         )}
 
-        {/* Join Section (if not host) */}
-        {!isHost && (
-          <div className="card">
-            <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
-              <FaLink className="text-secondary-500" />
-              Join a Game
-            </h2>
-            
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-              Enter the room code from your friend's screen
-            </p>
-            
-            <input
-              type="text"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Your Name"
-              className="input mb-4"
-              maxLength={20}
-            />
-            
-            <input
-              type="text"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              placeholder="Enter Room Code"
-              className="input mb-4 text-center text-3xl tracking-[0.3em] uppercase font-bold"
-              maxLength={6}
-            />
-            
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={handleJoin}
-              disabled={joinCode.length !== 6 || !playerName.trim()}
-              className={`w-full py-4 rounded-2xl font-bold text-xl transition-all ${
-                joinCode.length === 6 && playerName.trim()
-                  ? 'bg-gradient-to-r from-secondary-500 to-secondary-600 text-white shadow-lg'
-                  : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
-              }`}
-            >
-              Join Game
-            </motion.button>
-          </div>
+        {/* Setup (before joining/creating a room) */}
+        {!room && (
+          <>
+            {wantsToHost ? (
+              <div className="card">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                  <FaQrcode className="text-primary-500" />
+                  Host a Game
+                </h2>
+
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Your Name"
+                  className="input mb-4"
+                  maxLength={20}
+                />
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleCreateRoom}
+                  disabled={!playerName.trim() || joining}
+                  className={`w-full py-4 rounded-2xl font-bold text-xl transition-all ${
+                    playerName.trim() && !joining
+                      ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
+                      : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  {joining ? 'Creating Room...' : 'Create Room'}
+                </motion.button>
+              </div>
+            ) : (
+              <div className="card">
+                <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+                  <FaLink className="text-secondary-500" />
+                  Join a Game
+                </h2>
+
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+                  Enter the room code from your friend&apos;s screen
+                </p>
+
+                <input
+                  type="text"
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Your Name"
+                  className="input mb-4"
+                  maxLength={20}
+                />
+
+                <input
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                  placeholder="Enter Room Code"
+                  className="input mb-4 text-center text-3xl tracking-[0.3em] uppercase font-bold"
+                  maxLength={6}
+                />
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={handleJoin}
+                  disabled={joinCode.length !== 6 || !playerName.trim() || joining}
+                  className={`w-full py-4 rounded-2xl font-bold text-xl transition-all ${
+                    joinCode.length === 6 && playerName.trim() && !joining
+                      ? 'bg-gradient-to-r from-secondary-500 to-secondary-600 text-white shadow-lg'
+                      : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
+                  }`}
+                >
+                  {joining ? 'Joining Room...' : 'Join Game'}
+                </motion.button>
+              </div>
+            )}
+
+            {/* Toggle Host/Join */}
+            <div className="flex gap-3">
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { playSound('click'); setWantsToHost(true) }}
+                className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                  wantsToHost
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white'
+                }`}
+              >
+                <FaQrcode />
+                Host Game
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.95 }}
+                onClick={() => { playSound('click'); setWantsToHost(false) }}
+                className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                  !wantsToHost
+                    ? 'bg-secondary-500 text-white'
+                    : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white'
+                }`}
+              >
+                <FaLink />
+                Join Game
+              </motion.button>
+            </div>
+
+            {!connected && (
+              <p className="text-center text-sm text-slate-400 dark:text-slate-500">
+                Connecting to game server...
+              </p>
+            )}
+          </>
         )}
 
-        {/* Toggle Host/Join */}
-        <div className="flex gap-3">
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { playSound('click'); setIsHost(true) }}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-              isHost
-                ? 'bg-primary-500 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white'
-            }`}
-          >
-            <FaQrcode />
-            Host Game
-          </motion.button>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { playSound('click'); setIsHost(false) }}
-            className={`flex-1 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-              !isHost
-                ? 'bg-secondary-500 text-white'
-                : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white'
-            }`}
-          >
-            <FaLink />
-            Join Game
-          </motion.button>
-        </div>
-
         {/* Start Button (Host Only) */}
-        {isHost && players.length >= 2 && (
+        {room && isRoomHost && room.players.length >= 2 && (
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => {
-              playSound('success')
-              vibrate([100, 50, 100])
-              setPhase('playing')
-            }}
-            className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 
-                       text-white font-bold text-xl rounded-2xl shadow-lg 
+            onClick={handleStartGame}
+            className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500
+                       text-white font-bold text-xl rounded-2xl shadow-lg
                        flex items-center justify-center gap-3"
           >
             <FaPlay />
-            Start Game ({players.length} players)
+            Start Game ({room.players.length} players)
           </motion.button>
+        )}
+
+        {/* Waiting message (joined players, not host) */}
+        {room && !isRoomHost && (
+          <div className="card text-center text-slate-500 dark:text-slate-400">
+            <div className="w-6 h-6 mx-auto mb-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+            Waiting for the host to start the game...
+          </div>
         )}
       </div>
     </motion.div>

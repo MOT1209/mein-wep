@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, getRandomWord, getRandomCreativePrompt, LETTERS } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
+import { useSocket } from '@/components/SocketProvider'
 import { 
   FaArrowLeft, FaUndo, FaRedo, FaEraser, FaPaintBrush,
   FaMarker, FaFillDrip, FaTrash, FaCheck, FaEye, FaSearchPlus, FaSearchMinus, FaUndoAlt
@@ -28,21 +29,23 @@ export function DrawingScreen() {
   const containerRef = useRef<HTMLDivElement>(null)
   const { 
     currentWord, currentRound, totalRounds, timeLeft, 
-    mode, currentPlayer, players, phase,
+    mode, currentPlayer, players, phase, room,
     gameType, currentLetter, creativePrompt,
     setPhase, setTimeLeft, decrementTime, nextRound,
     setWord, setCurrentLetter, setCreativePrompt, addDrawing, setDrawing, drawingHistory, historyIndex,
     saveDrawingToHistory, undo, redo, clearCanvas, setPlayer
   } = useGameStore()
   const { playSound, vibrate } = useGame()
-  
+  const { submitDrawing: socketSubmitDrawing, submittedCount } = useSocket()
+
   const [isDrawing, setIsDrawing] = useState(false)
   const [tool, setTool] = useState<Tool>('pencil')
   const [color, setColor] = useState('#000000')
   const [brushSize, setBrushSize] = useState(4)
   const [showColorPicker, setShowColorPicker] = useState(false)
   const [showBrushSizes, setShowBrushSizes] = useState(false)
-  const [showWarning, setShowWarning] = useState(true)
+  const [showWarning, setShowWarning] = useState(() => mode !== 'online')
+  const [waitingForOthers, setWaitingForOthers] = useState(false)
   const [showWord, setShowWord] = useState(false)
   const [canvasReady, setCanvasReady] = useState(false)
   const [zoom, setZoom] = useState(1)
@@ -312,7 +315,11 @@ export function DrawingScreen() {
   // Handle word/prompt assignment based on game type
   useEffect(() => {
     const state = useGameStore.getState()
-    
+
+    // Online mode: the server assigns the word (per player) and the shared
+    // letter/creative prompt when the round starts — never generate locally.
+    if (state.mode === 'online') return
+
     if (state.gameType === 'letter') {
       // Letter Mode: pick a random letter and show it
       if (!state.currentLetter) {
@@ -362,29 +369,44 @@ export function DrawingScreen() {
     return () => clearInterval(timer)
   }, [phase, timeLeft, showWarning])
   
+  const getWordAndCategory = () => {
+    const state = useGameStore.getState()
+    const wordText = state.gameType === 'letter'
+      ? (state.currentLetter || '')
+      : state.gameType === 'creative'
+        ? (state.creativePrompt || '')
+        : (currentWord?.word || '')
+    const wordCategory = state.gameType === 'category' || state.gameType === 'classic'
+      ? (currentWord?.category || 'random')
+      : state.gameType === 'letter' ? 'letter' : 'creative'
+    return { wordText, wordCategory }
+  }
+
+  const submitForOnline = (dataUrl: string) => {
+    const { wordText, wordCategory } = getWordAndCategory()
+    socketSubmitDrawing({ word: wordText, canvasData: dataUrl, category: wordCategory })
+    setWaitingForOthers(true)
+  }
+
   const handleTimeUp = () => {
-    // Save current drawing
-    if (canvasRef.current) {
-      const dataUrl = canvasRef.current.toDataURL('image/png')
-      const state = useGameStore.getState()
-      const wordText = state.gameType === 'letter' 
-        ? (state.currentLetter || '')
-        : state.gameType === 'creative'
-          ? (state.creativePrompt || '')
-          : (currentWord?.word || '')
-      const wordCategory = state.gameType === 'category' || state.gameType === 'classic'
-        ? (currentWord?.category || 'random')
-        : state.gameType === 'letter' ? 'letter' : 'creative'
-      addDrawing({
-        id: Date.now().toString(),
-        playerId: currentPlayer?.id || '',
-        word: wordText,
-        canvasData: dataUrl,
-        category: wordCategory,
-        timestamp: Date.now(),
-      })
+    if (!canvasRef.current) return
+    const dataUrl = canvasRef.current.toDataURL('image/png')
+
+    if (mode === 'online') {
+      if (!waitingForOthers) submitForOnline(dataUrl)
+      return
     }
-    
+
+    const { wordText, wordCategory } = getWordAndCategory()
+    addDrawing({
+      id: Date.now().toString(),
+      playerId: currentPlayer?.id || '',
+      word: wordText,
+      canvasData: dataUrl,
+      category: wordCategory,
+      timestamp: Date.now(),
+    })
+
     // Check if more rounds
     if (currentRound < totalRounds) {
       nextRound()
@@ -395,30 +417,29 @@ export function DrawingScreen() {
       setPhase('voting')
     }
   }
-  
+
   const handleRevealWord = () => {
     setShowWarning(false)
     setShowWord(true)
     playSound('success')
     vibrate()
   }
-  
+
   const handleSubmit = () => {
     if (!canvasRef.current) return
-    
+
     playSound('success')
     vibrate([100, 50, 100])
-    
+
     const dataUrl = canvasRef.current.toDataURL('image/png')
-    const state = useGameStore.getState()
-    const wordText = state.gameType === 'letter' 
-      ? (state.currentLetter || '')
-      : state.gameType === 'creative'
-        ? (state.creativePrompt || '')
-        : (currentWord?.word || '')
-    const wordCategory = state.gameType === 'category' || state.gameType === 'classic'
-      ? (currentWord?.category || 'random')
-      : state.gameType === 'letter' ? 'letter' : 'creative'
+
+    if (mode === 'online') {
+      if (waitingForOthers) return
+      submitForOnline(dataUrl)
+      return
+    }
+
+    const { wordText, wordCategory } = getWordAndCategory()
     addDrawing({
       id: Date.now().toString(),
       playerId: currentPlayer?.id || '',
@@ -427,12 +448,12 @@ export function DrawingScreen() {
       category: wordCategory,
       timestamp: Date.now(),
     })
-    
+
     // In offline mode, move to next player or next round
     if (mode === 'offline') {
       const playerIndex = players.findIndex(p => p.id === currentPlayer?.id)
       const nextPlayerIndex = playerIndex + 1
-      
+
       if (nextPlayerIndex < players.length) {
         // More players to draw
         setPlayer(players[nextPlayerIndex])
@@ -454,7 +475,7 @@ export function DrawingScreen() {
       }
     }
   }
-  
+
   // Undo/Redo
   useEffect(() => {
     if (!canvasRef.current || historyIndex < 0) return
@@ -566,7 +587,27 @@ export function DrawingScreen() {
             </motion.div>
           )}
         </AnimatePresence>
-        
+
+        {/* Waiting for other players (online mode) */}
+        <AnimatePresence>
+          {waitingForOthers && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-8 z-20"
+            >
+              <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-6" />
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 text-center">
+                Drawing submitted!
+              </h2>
+              <p className="text-slate-300 text-lg">
+                Waiting for other players{room ? ` (${submittedCount}/${room.players.length})` : '...'}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Word Reveal */}
         <AnimatePresence>
           {showWord && !showWarning && (

@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { GameProvider } from '@/components/GameProvider'
+import { SocketProvider } from '@/components/SocketProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,9 +27,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <GameProvider>
-            {children}
-          </GameProvider>
+          <SocketProvider>
+            <GameProvider>
+              {children}
+            </GameProvider>
+          </SocketProvider>
         </ThemeProvider>
       </body>
     </html>

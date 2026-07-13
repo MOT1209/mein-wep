@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, ReactNode } from 'react'
 import { useGameStore } from '@/store/gameStore'
+import { useSocket } from '@/components/SocketProvider'
 
 interface GameContextType {
   // Helper functions
@@ -59,6 +60,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     currentLetter,
     creativePrompt,
   } = useGameStore()
+  const { connect: connectSocket } = useSocket()
 
   const playSound = (sound: string) => {
     if (!settings.sound) return
@@ -148,6 +150,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const startOnlineGame = () => {
     setMode('online')
     setPhase('lobby')
+    connectSocket()
     playSound('success')
     vibrate()
   }

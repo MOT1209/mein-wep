@@ -1,68 +1,74 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Encrypted AI Evaluation Engine
+// AI Evaluation Engine (server-side only — GEMINI_API_KEY never reaches the client)
 // ─────────────────────────────────────────────────────────────────────────────
 
-// Obfuscated configuration - do not modify
-const _0x1a2b = (() => {
-  const _0x3c4d = [0x47,0x45,0x4d,0x49,0x4e,0x49]
-  const _0x5e6f = [0x5f,0x41,0x50,0x49,0x5f,0x4b,0x45,0x59]
-  return String.fromCharCode(..._0x3c4d) + String.fromCharCode(..._0x5e6f)
-})()
-
-const _0x7890 = process.env[_0x1a2b] || ''
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
 
 // Dynamic import to avoid client-side bundle
-let _genAI: any = null
-const _initAI = async () => {
-  if (_genAI || !_0x7890) return
+let genAI: any = null
+const initAI = async () => {
+  if (genAI || !GEMINI_API_KEY) return
   try {
     const mod = await import('@google/generative-ai')
-    _genAI = new mod.GoogleGenerativeAI(_0x7890)
+    genAI = new mod.GoogleGenerativeAI(GEMINI_API_KEY)
   } catch { /* silent */ }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Encrypted Prompt System
-// ─────────────────────────────────────────────────────────────────────────────
-
-const _0xprompt = (() => {
-  const _a = 'You are a friendly and encouraging art judge for a drawing game.'
-  const _b = ' Evaluate drawings based on: accuracy, creativity, clarity.'
-  const _c = ' Score 0-100 for each. Be positive and constructive.'
-  const _d = ' Return JSON: {"score":N,"accuracy":N,"creativity":N,"clarity":N,"comment":"text"}'
-  return _a + _b + _c + _d
-})()
+const JUDGE_PROMPT = 'You are a friendly and encouraging art judge for a drawing game.'
+  + ' Evaluate drawings based on: accuracy, creativity, clarity.'
+  + ' Score 0-100 for each. Be positive and constructive.'
+  + ' Return JSON: {"score":N,"accuracy":N,"creativity":N,"clarity":N,"comment":"text"}'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Rate Limiting & Security
+// Rate Limiting
+//
+// This holds state in-memory, which requires this route to run on a
+// long-lived Node process (this project ships its own server.js for that
+// reason — Socket.io needs the same thing). It would NOT work correctly on
+// a stateless/serverless deployment (state resets every cold start, and
+// wouldn't be shared across instances) — don't deploy this route to a
+// serverless platform without swapping this for a shared store (e.g. Redis).
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _rateLimit = new Map<string, { count: number; resetAt: number }>()
-const _RATE_WINDOW = 60000 // 1 minute
-const _RATE_MAX = 10 // requests per window
+const rateLimitStore = new Map<string, { count: number; resetAt: number }>()
+const RATE_WINDOW_MS = 60000 // 1 minute
+const RATE_MAX = 10 // requests per window
+const CLEANUP_INTERVAL_MS = 5 * 60000 // sweep stale entries every 5 minutes so this doesn't grow forever
 
-function _checkRate(ip: string): boolean {
+let lastCleanup = Date.now()
+
+function cleanupRateLimitStore() {
   const now = Date.now()
-  const entry = _rateLimit.get(ip)
-  
+  if (now - lastCleanup < CLEANUP_INTERVAL_MS) return
+  lastCleanup = now
+  rateLimitStore.forEach((entry, key) => {
+    if (now > entry.resetAt) rateLimitStore.delete(key)
+  })
+}
+
+function checkRateLimit(ip: string): boolean {
+  cleanupRateLimitStore()
+
+  const now = Date.now()
+  const entry = rateLimitStore.get(ip)
+
   if (!entry || now > entry.resetAt) {
-    _rateLimit.set(ip, { count: 1, resetAt: now + _RATE_WINDOW })
+    rateLimitStore.set(ip, { count: 1, resetAt: now + RATE_WINDOW_MS })
     return true
   }
-  
-  if (entry.count >= _RATE_MAX) return false
+
+  if (entry.count >= RATE_MAX) return false
   entry.count++
   return true
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Validation Layer
+// Validation
 // ─────────────────────────────────────────────────────────────────────────────
 
-function _validate(data: any): { valid: boolean; error?: string } {
+function validatePayload(data: any): { valid: boolean; error?: string } {
   if (!data || typeof data !== 'object') return { valid: false, error: 'Invalid payload' }
   if (!data.word || typeof data.word !== 'string') return { valid: false, error: 'Missing word' }
   if (!data.drawingData || typeof data.drawingData !== 'string') return { valid: false, error: 'Missing drawing' }
@@ -72,7 +78,7 @@ function _validate(data: any): { valid: boolean; error?: string } {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Evaluation Engine
+// Evaluation
 // ─────────────────────────────────────────────────────────────────────────────
 
 interface EvalResult {
@@ -81,14 +87,13 @@ interface EvalResult {
   creativity: number
   clarity: number
   comment: string
-  _v: string // version hash
 }
 
-function _clamp(v: number, min: number, max: number): number {
+function clamp(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max)
 }
 
-function _getMock(word?: string): EvalResult {
+function getMockEvaluation(): EvalResult {
   const base = 60 + Math.floor(Math.random() * 20)
   const comments = [
     'Great effort! Keep drawing! 🎨',
@@ -102,27 +107,25 @@ function _getMock(word?: string): EvalResult {
   ]
   return {
     score: base,
-    accuracy: _clamp(base - 5 + Math.floor(Math.random() * 10), 0, 100),
-    creativity: _clamp(base + Math.floor(Math.random() * 15), 0, 100),
-    clarity: _clamp(base - 10 + Math.floor(Math.random() * 20), 0, 100),
+    accuracy: clamp(base - 5 + Math.floor(Math.random() * 10), 0, 100),
+    creativity: clamp(base + Math.floor(Math.random() * 15), 0, 100),
+    clarity: clamp(base - 10 + Math.floor(Math.random() * 20), 0, 100),
     comment: comments[Math.floor(Math.random() * comments.length)],
-    _v: 'm1'
   }
 }
 
-function _parseResponse(text: string): EvalResult | null {
+function parseGeminiResponse(text: string): EvalResult | null {
   try {
     const match = text.match(/\{[\s\S]*?\}/)
     if (!match) return null
-    
+
     const data = JSON.parse(match[0])
     return {
-      score: _clamp(Number(data.score) || 50, 0, 100),
-      accuracy: _clamp(Number(data.accuracy) || 50, 0, 100),
-      creativity: _clamp(Number(data.creativity) || 50, 0, 100),
-      clarity: _clamp(Number(data.clarity) || 50, 0, 100),
+      score: clamp(Number(data.score) || 50, 0, 100),
+      accuracy: clamp(Number(data.accuracy) || 50, 0, 100),
+      creativity: clamp(Number(data.creativity) || 50, 0, 100),
+      clarity: clamp(Number(data.clarity) || 50, 0, 100),
       comment: typeof data.comment === 'string' ? data.comment.slice(0, 500) : 'Good effort!',
-      _v: 'm1'
     }
   } catch {
     return null
@@ -130,61 +133,57 @@ function _parseResponse(text: string): EvalResult | null {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Main Handler
+// Handler
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function POST(request: NextRequest) {
+  let body: any = null
   try {
-    // Rate limit check
     const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
-    if (!_checkRate(ip)) {
+    if (!checkRateLimit(ip)) {
       return NextResponse.json({ error: 'Rate limit exceeded' }, { status: 429 })
     }
 
-    // Parse and validate
-    const body = await request.json()
-    const validation = _validate(body)
+    body = await request.json()
+    const validation = validatePayload(body)
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
     const { word, drawingData, category, drawingTime } = body
 
-    // Initialize AI (lazy load)
-    await _initAI()
+    await initAI()
 
     // If no API key, return mock
-    if (!_genAI || !_0x7890) {
+    if (!genAI || !GEMINI_API_KEY) {
       console.warn('[AI] No API key configured')
-      return NextResponse.json(_getMock(word))
+      return NextResponse.json(getMockEvaluation())
     }
 
-    // Call Gemini
     try {
-      const model = _genAI.getGenerativeModel({
+      const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: { temperature: 0.7, maxOutputTokens: 200 }
       })
 
       const base64 = drawingData.replace(/^data:image\/\w+;base64,/, '')
       const img = [{ inlineData: { mimeType: 'image/png', data: base64 } }]
-      
-      const prompt = `${_0xprompt}\n\nWord: "${word}" | Category: ${category || 'general'} | Time: ${drawingTime || 60}s\n\nReturn JSON:`
-      
+
+      const prompt = `${JUDGE_PROMPT}\n\nWord: "${word}" | Category: ${category || 'general'} | Time: ${drawingTime || 60}s\n\nReturn JSON:`
+
       const result = await model.generateContent([prompt, ...img])
       const text = result.response.text()
-      
-      const parsed = _parseResponse(text)
-      return NextResponse.json(parsed || _getMock(word))
-      
+
+      const parsed = parseGeminiResponse(text)
+      return NextResponse.json(parsed || getMockEvaluation())
+
     } catch (err: any) {
       console.error('[AI] Gemini error:', err?.message || err)
-      return NextResponse.json(_getMock(word))
+      return NextResponse.json(getMockEvaluation())
     }
 
   } catch (err: any) {
     console.error('[API] Fatal error:', err?.message || err)
-    const body = await request.json().catch(() => ({}))
-    return NextResponse.json(_getMock(body?.word))
+    return NextResponse.json(getMockEvaluation())
   }
 }

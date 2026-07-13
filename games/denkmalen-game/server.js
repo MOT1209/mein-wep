@@ -13,6 +13,72 @@ const handle = app.getRequestHandler()
 // Room storage
 const rooms = new Map()
 
+// Simple per-socket rate limit for room creation (prevents a single client from
+// spamming the server with rooms).
+const CREATE_ROOM_WINDOW_MS = 60000
+const CREATE_ROOM_MAX = 5
+const createRoomAttempts = new Map()
+
+function isRateLimited(key, windowMs, max, store) {
+  const now = Date.now()
+  const entry = store.get(key)
+  if (!entry || now > entry.resetAt) {
+    store.set(key, { count: 1, resetAt: now + windowMs })
+    return false
+  }
+  if (entry.count >= max) return true
+  entry.count++
+  return false
+}
+
+// ── Validation helpers ──
+const VALID_CATEGORIES = new Set([
+  'food', 'animals', 'nature', 'objects', 'vehicles', 'sports', 'jobs',
+  'fantasy', 'technology', 'space', 'history', 'random', 'custom',
+])
+const VALID_GAME_TYPES = new Set(['classic', 'letter', 'category', 'daily', 'creative'])
+const ROOM_CODE_RE = /^[A-Z0-9]{6}$/
+
+function sanitizeName(name) {
+  if (typeof name !== 'string') return null
+  const trimmed = name.trim().slice(0, 20)
+  return trimmed.length > 0 ? trimmed : null
+}
+
+function sanitizeAvatar(avatar, fallback) {
+  if (typeof avatar !== 'string' || avatar.length === 0 || avatar.length > 8) return fallback
+  return avatar
+}
+
+function clamp(value, min, max, fallback) {
+  const n = Number(value)
+  if (!Number.isFinite(n)) return fallback
+  return Math.min(max, Math.max(min, Math.round(n)))
+}
+
+function sanitizeCategory(category) {
+  return typeof category === 'string' && VALID_CATEGORIES.has(category) ? category : 'random'
+}
+
+function sanitizeGameType(gameType) {
+  return typeof gameType === 'string' && VALID_GAME_TYPES.has(gameType) ? gameType : 'classic'
+}
+
+function sanitizeWords(words, count) {
+  const safeCount = Math.max(1, Math.min(count, 8))
+  if (!Array.isArray(words) || words.length === 0) {
+    return Array.from({ length: safeCount }, () => ({ word: 'Object', emoji: '❓', category: 'random' }))
+  }
+  return words
+    .filter(w => w && typeof w.word === 'string')
+    .slice(0, 50)
+    .map(w => ({
+      word: w.word.slice(0, 100),
+      emoji: typeof w.emoji === 'string' ? w.emoji.slice(0, 8) : '',
+      category: sanitizeCategory(w.category),
+    }))
+}
+
 app.prepare().then(() => {
   const server = createServer(async (req, res) => {
     try {
@@ -25,9 +91,14 @@ app.prepare().then(() => {
     }
   })
 
+  // In production, only allow the configured origin(s) to open a socket
+  // connection — an unset ALLOWED_ORIGIN disables cross-origin access rather
+  // than falling back to a wildcard.
+  const corsOrigin = dev ? '*' : (process.env.ALLOWED_ORIGIN || false)
+
   const io = new Server(server, {
     cors: {
-      origin: '*',
+      origin: corsOrigin,
       methods: ['GET', 'POST']
     }
   })
@@ -38,6 +109,20 @@ app.prepare().then(() => {
 
     // Create room
     socket.on('create-room', (data) => {
+      if (!data || typeof data !== 'object') return
+
+      const clientIp = socket.handshake.address || socket.id
+      if (isRateLimited(clientIp, CREATE_ROOM_WINDOW_MS, CREATE_ROOM_MAX, createRoomAttempts)) {
+        socket.emit('error', { message: 'Too many rooms created. Please wait a moment.' })
+        return
+      }
+
+      const playerName = sanitizeName(data.playerName)
+      if (!playerName) {
+        socket.emit('error', { message: 'A valid player name is required' })
+        return
+      }
+
       const roomCode = generateRoomCode()
       const room = {
         id: roomCode,
@@ -45,8 +130,8 @@ app.prepare().then(() => {
         hostId: socket.id,
         players: [{
           id: socket.id,
-          name: data.playerName,
-          avatar: data.avatar || '🎨',
+          name: playerName,
+          avatar: sanitizeAvatar(data.avatar, '🎨'),
           score: 0,
           roundWins: 0,
           totalVotes: 0,
@@ -55,10 +140,10 @@ app.prepare().then(() => {
           isHost: true
         }],
         settings: {
-          maxPlayers: data.maxPlayers || 8,
-          rounds: data.rounds || 3,
-          drawingTime: data.drawingTime || 60,
-          category: data.category || 'random'
+          maxPlayers: clamp(data.maxPlayers, 2, 8, 8),
+          rounds: clamp(data.rounds, 2, 10, 3),
+          drawingTime: clamp(data.drawingTime, 10, 300, 60),
+          category: sanitizeCategory(data.category)
         },
         currentRound: 1,
         phase: 'lobby',
@@ -71,13 +156,27 @@ app.prepare().then(() => {
       socket.roomCode = roomCode
 
       socket.emit('room-created', { room })
-      console.log(`Room ${roomCode} created by ${data.playerName}`)
+      console.log(`Room ${roomCode} created by ${playerName}`)
     })
 
     // Join room
     socket.on('join-room', (data) => {
-      const room = rooms.get(data.roomCode.toUpperCase())
-      
+      if (!data || typeof data !== 'object') return
+
+      const roomCode = typeof data.roomCode === 'string' ? data.roomCode.toUpperCase() : ''
+      if (!ROOM_CODE_RE.test(roomCode)) {
+        socket.emit('error', { message: 'Invalid room code' })
+        return
+      }
+
+      const playerName = sanitizeName(data.playerName)
+      if (!playerName) {
+        socket.emit('error', { message: 'A valid player name is required' })
+        return
+      }
+
+      const room = rooms.get(roomCode)
+
       if (!room) {
         socket.emit('error', { message: 'Room not found' })
         return
@@ -95,8 +194,8 @@ app.prepare().then(() => {
 
       const player = {
         id: socket.id,
-        name: data.playerName,
-        avatar: data.avatar || '🎮',
+        name: playerName,
+        avatar: sanitizeAvatar(data.avatar, '🎮'),
         score: 0,
         roundWins: 0,
         totalVotes: 0,
@@ -106,41 +205,50 @@ app.prepare().then(() => {
       }
 
       room.players.push(player)
-      socket.join(data.roomCode.toUpperCase())
-      socket.roomCode = data.roomCode.toUpperCase()
+      socket.join(roomCode)
+      socket.roomCode = roomCode
 
       // Notify all players
-      io.to(data.roomCode.toUpperCase()).emit('player-joined', { 
-        player, 
-        players: room.players 
+      io.to(roomCode).emit('player-joined', {
+        player,
+        players: room.players
       })
 
       socket.emit('room-joined', { room })
-      console.log(`${data.playerName} joined room ${data.roomCode}`)
+      console.log(`${playerName} joined room ${roomCode}`)
     })
 
     // Start game
     socket.on('start-game', (data) => {
       const room = rooms.get(socket.roomCode)
-      if (!room || room.hostId !== socket.id) return
+      if (!room || room.hostId !== socket.id || room.phase !== 'lobby') return
+      if (!data || typeof data !== 'object') return
 
       room.phase = 'playing'
       room.currentRound = 1
 
-      // Assign word to each player
-      const words = data.words || []
+      const gameType = sanitizeGameType(data.gameType)
+      const currentLetter = typeof data.currentLetter === 'string' ? data.currentLetter.slice(0, 1) : null
+      const creativePrompt = typeof data.creativePrompt === 'string' ? data.creativePrompt.slice(0, 300) : null
+
+      // Assign a word to each player
+      const words = sanitizeWords(data.words, room.players.length)
       room.players.forEach((player, index) => {
         player.currentWord = words[index % words.length]
       })
 
-      io.to(socket.roomCode).emit('game-started', { 
+      io.to(socket.roomCode).emit('game-started', {
         room,
-        round: 1 
+        round: 1,
+        gameType,
+        currentLetter,
+        creativePrompt,
       })
     })
 
     // Drawing update
     socket.on('drawing-update', (data) => {
+      if (!socket.roomCode || !data || typeof data.drawingData !== 'string') return
       socket.to(socket.roomCode).emit('drawing-progress', {
         playerId: socket.id,
         drawingData: data.drawingData
@@ -150,14 +258,19 @@ app.prepare().then(() => {
     // Submit drawing
     socket.on('submit-drawing', (data) => {
       const room = rooms.get(socket.roomCode)
-      if (!room) return
+      if (!room || !data) return
+      if (room.drawings.some(d => d.playerId === socket.id)) return // already submitted
+
+      const word = typeof data.word === 'string' ? data.word.slice(0, 100) : ''
+      const canvasData = typeof data.canvasData === 'string' ? data.canvasData : ''
+      if (!canvasData) return
 
       const drawing = {
         id: `${socket.id}-${Date.now()}`,
         playerId: socket.id,
-        word: data.word,
-        canvasData: data.canvasData,
-        category: data.category,
+        word,
+        canvasData,
+        category: sanitizeCategory(data.category),
         timestamp: Date.now()
       }
 
@@ -172,10 +285,7 @@ app.prepare().then(() => {
       if (room.drawings.length >= room.players.length) {
         room.phase = 'voting'
         io.to(socket.roomCode).emit('all-drawings-submitted', {
-          drawings: room.drawings.map(d => ({
-            ...d,
-            canvasData: undefined // Hide who drew what
-          }))
+          drawings: room.drawings
         })
       }
     })
@@ -183,12 +293,14 @@ app.prepare().then(() => {
     // Submit vote
     socket.on('submit-vote', (data) => {
       const room = rooms.get(socket.roomCode)
-      if (!room) return
+      if (!room || !data || typeof data.drawingId !== 'string') return
+      if (room.votes.some(v => v.voterId === socket.id)) return // already voted
+      if (!room.drawings.some(d => d.id === data.drawingId)) return // unknown drawing
 
       const vote = {
         voterId: socket.id,
         drawingId: data.drawingId,
-        rank: data.rank
+        rank: clamp(data.rank, 1, room.players.length, 1)
       }
 
       room.votes.push(vote)
@@ -204,36 +316,42 @@ app.prepare().then(() => {
         // Calculate results
         const results = calculateResults(room)
         room.phase = 'results'
-        
+
         io.to(socket.roomCode).emit('round-results', { results })
       }
     })
 
     // Next round
-    socket.on('next-round', () => {
+    socket.on('next-round', (data) => {
       const room = rooms.get(socket.roomCode)
-      if (!room) return
+      if (!room || room.hostId !== socket.id) return
 
       room.currentRound++
       room.drawings = []
       room.votes = []
       room.phase = 'playing'
 
+      const words = sanitizeWords(data && data.words, room.players.length)
+      room.players.forEach((player, index) => {
+        player.currentWord = words[index % words.length]
+      })
+
       io.to(socket.roomCode).emit('next-round-started', {
-        round: room.currentRound
+        round: room.currentRound,
+        room,
       })
     })
 
     // Disconnect
     socket.on('disconnect', () => {
       console.log('User disconnected:', socket.id)
-      
+
       if (socket.roomCode) {
         const room = rooms.get(socket.roomCode)
         if (room) {
           // Remove player
           room.players = room.players.filter(p => p.socketId !== socket.id)
-          
+
           if (room.players.length === 0) {
             rooms.delete(socket.roomCode)
           } else {
@@ -242,7 +360,7 @@ app.prepare().then(() => {
               room.hostId = room.players[0].socketId
               room.players[0].isHost = true
             }
-            
+
             io.to(socket.roomCode).emit('player-left', {
               playerId: socket.id,
               players: room.players,

@@ -58,7 +58,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </h2>
             
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              We encountered an unexpected error. Don't worry, it's not your fault!
+              We encountered an unexpected error. Don&apos;t worry, it&apos;s not your fault!
             </p>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (

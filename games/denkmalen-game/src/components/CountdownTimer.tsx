@@ -142,7 +142,7 @@ export function CountdownTimer({
             exit={{ scale: 0, opacity: 0 }}
             className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-2xl"
           >
-            <span className="text-4xl font-bold text-white">TIME'S UP!</span>
+            <span className="text-4xl font-bold text-white">TIME&apos;S UP!</span>
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,9 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// Encrypted AI Client Library - Obfuscated
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Types (public interface)
-// ─────────────────────────────────────────────────────────────────────────────
+// AI Judge client — calls the server-side /api/evaluate route (which holds the Gemini key).
 
 export interface AIEvaluation {
   score: number
@@ -14,30 +9,25 @@ export interface AIEvaluation {
 }
 
 export interface DrawingToEvaluate {
+  id: string
   word: string
   drawingData: string
   category: string
   drawingTime: number
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Internal Obfuscated Helpers
-// ─────────────────────────────────────────────────────────────────────────────
+const EVALUATE_ENDPOINT = '/api/evaluate'
+const REQUEST_TIMEOUT_MS = 30000
+const MAX_RETRIES = 2
+const RETRY_DELAY_MS = 1000
 
-const _0x = {
-  _api: '/api/evaluate',
-  _timeout: 30000,
-  _retries: 2,
-  _retryDelay: 1000
+function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-async function _sleep(ms: number): Promise<void> {
-  return new Promise(r => setTimeout(r, ms))
-}
-
-function _defaultEval(word?: string): AIEvaluation {
-  const b = 60 + Math.floor(Math.random() * 20)
-  const c = [
+function defaultEvaluation(): AIEvaluation {
+  const base = 60 + Math.floor(Math.random() * 20)
+  const comments = [
     'Great effort! Keep drawing! 🎨',
     'Nice try! I can see what you were going for! ✨',
     'Creative interpretation! Well done! 🌟',
@@ -48,27 +38,24 @@ function _defaultEval(word?: string): AIEvaluation {
     'Well done! The effort shows! ⭐',
   ]
   return {
-    score: b,
-    accuracy: Math.min(Math.max(b - 5 + Math.floor(Math.random() * 10), 0), 100),
-    creativity: Math.min(Math.max(b + Math.floor(Math.random() * 15), 0), 100),
-    clarity: Math.min(Math.max(b - 10 + Math.floor(Math.random() * 20), 0), 100),
-    comment: c[Math.floor(Math.random() * c.length)]
+    score: base,
+    accuracy: Math.min(Math.max(base - 5 + Math.floor(Math.random() * 10), 0), 100),
+    creativity: Math.min(Math.max(base + Math.floor(Math.random() * 15), 0), 100),
+    clarity: Math.min(Math.max(base - 10 + Math.floor(Math.random() * 20), 0), 100),
+    comment: comments[Math.floor(Math.random() * comments.length)]
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Core Evaluation Function (with retry logic)
-// ─────────────────────────────────────────────────────────────────────────────
-
+// Evaluates a single drawing, with retry on rate limit / server error.
 export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEvaluation> {
   let lastError: Error | null = null
 
-  for (let attempt = 0; attempt <= _0x._retries; attempt++) {
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), _0x._timeout)
+      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
-      const response = await fetch(_0x._api, {
+      const response = await fetch(EVALUATE_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -97,22 +84,22 @@ export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEva
 
       // Rate limited - wait and retry
       if (response.status === 429) {
-        await _sleep(_0x._retryDelay * (attempt + 1))
+        await sleep(RETRY_DELAY_MS * (attempt + 1))
         continue
       }
 
       // Server error - retry
       if (response.status >= 500) {
-        await _sleep(_0x._retryDelay)
+        await sleep(RETRY_DELAY_MS)
         continue
       }
 
       break // Client error - don't retry
 
-    } catch (err: any) {
-      lastError = err
-      if (attempt < _0x._retries) {
-        await _sleep(_0x._retryDelay)
+    } catch (err) {
+      lastError = err instanceof Error ? err : new Error(String(err))
+      if (attempt < MAX_RETRIES) {
+        await sleep(RETRY_DELAY_MS)
         continue
       }
     }
@@ -120,30 +107,26 @@ export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEva
 
   // All retries failed - return default
   console.warn('[AI] Evaluation failed:', lastError?.message || 'unknown')
-  return _defaultEval(drawing.word)
+  return defaultEvaluation()
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Batch Evaluation
-// ─────────────────────────────────────────────────────────────────────────────
-
+// Evaluates several drawings concurrently (bounded), keyed by drawing id.
 export async function evaluateDrawings(
   drawings: DrawingToEvaluate[]
 ): Promise<Map<string, AIEvaluation>> {
   const results = new Map<string, AIEvaluation>()
-  
-  // Evaluate in parallel with concurrency limit
+
   const CONCURRENT = 3
   const chunks: DrawingToEvaluate[][] = []
-  
+
   for (let i = 0; i < drawings.length; i += CONCURRENT) {
     chunks.push(drawings.slice(i, i + CONCURRENT))
   }
 
   for (const chunk of chunks) {
-    const promises = chunk.map(async (drawing, idx) => {
-      const eval_ = await evaluateDrawing(drawing)
-      results.set(`drawing-${idx}`, eval_)
+    const promises = chunk.map(async (drawing) => {
+      const evaluation = await evaluateDrawing(drawing)
+      results.set(drawing.id, evaluation)
     })
     await Promise.allSettled(promises)
   }
@@ -151,10 +134,7 @@ export async function evaluateDrawings(
   return results
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Score Calculator (votes + AI = final)
-// ─────────────────────────────────────────────────────────────────────────────
-
+// Combines vote score (70%) and AI score (30%) into a final score.
 export function calculateFinalScoreWithBreakdown(
   voteScore: number,
   aiScore: number

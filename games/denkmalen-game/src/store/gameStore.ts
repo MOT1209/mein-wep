@@ -17,6 +17,8 @@ export interface Player {
   totalVotes: number
   isOnline?: boolean
   socketId?: string
+  isHost?: boolean
+  currentWord?: Word
 }
 
 export interface Drawing {
@@ -48,6 +50,16 @@ export interface RoundResult {
   votes: Vote[]
   scores: Record<string, number>
   aiEvaluations: Record<string, AIEvaluation>
+}
+
+// Server-computed round result (online mode, from server.js calculateResults)
+export interface Result {
+  playerId: string
+  playerName: string
+  playerAvatar: string
+  votes: number
+  score: number
+  rank: number
 }
 
 export interface Room {
@@ -383,6 +395,7 @@ interface GameState {
   createRoom: (settings: Partial<Room>) => Room
   joinRoom: (code: string, player: Player) => void
   updateRoom: (updates: Partial<Room>) => void
+  setRoom: (room: Room) => void
   
   setWord: (word: Word) => void
   setDrawing: (drawing: string) => void
@@ -496,20 +509,24 @@ export const useGameStore = create<GameState>()(
           phase: 'lobby',
           ...roomSettings,
         }
-        set({ room })
+        set({ room, players: room.players })
         return room
       },
-      
-      joinRoom: (code, player) => set((state) => ({
-        room: state.room ? {
+
+      joinRoom: (code, player) => set((state) => {
+        const room = state.room ? {
           ...state.room,
           players: [...state.room.players, player]
         } : null
-      })),
-      
-      updateRoom: (updates) => set((state) => ({
-        room: state.room ? { ...state.room, ...updates } : null
-      })),
+        return { room, players: room ? room.players : state.players }
+      }),
+
+      updateRoom: (updates) => set((state) => {
+        const room = state.room ? { ...state.room, ...updates } : null
+        return { room, players: room ? room.players : state.players }
+      }),
+
+      setRoom: (room) => set({ room, players: room.players }),
       
       setWord: (word) => set({ currentWord: word }),
       

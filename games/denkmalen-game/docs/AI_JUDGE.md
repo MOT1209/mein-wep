@@ -77,11 +77,9 @@ The AI Judge feature uses Google Gemini 2.5 Flash to evaluate drawings after eac
 ## Environment Variables
 
 ```env
-# Required for AI Judge
+# Required for AI Judge — server-side only, never expose this with a
+# NEXT_PUBLIC_ prefix (that would bundle the key into client-side JS).
 GEMINI_API_KEY=your_gemini_api_key_here
-
-# Optional (for client-side usage)
-NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
 ```
 
 ## Setup
@@ -111,7 +109,7 @@ NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key_here
 ## Technical Details
 
 ### Gemini Model
-- Model: `gemini-2.0-flash`
+- Model: `gemini-2.5-flash`
 - Temperature: 0.7 (for varied responses)
 - Max tokens: 200 (for concise feedback)
 

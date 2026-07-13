@@ -6,7 +6,7 @@ import { useGame } from '@/components/GameProvider'
 import { useTheme } from '@/components/ThemeProvider'
 import { 
   FaArrowLeft, FaMoon, FaSun, FaVolumeUp, FaVolumeMute,
-  FaMusic, FaVibrate, FaGlobe, FaPalette, FaUser
+  FaMusic, FaMobileAlt, FaGlobe, FaPalette, FaUser
 } from 'react-icons/fa'
 import { t, LANGUAGE_OPTIONS } from '@/lib/i18n'
 
@@ -166,7 +166,7 @@ export function SettingsScreen() {
             {/* Vibration */}
             <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
               <div className="flex items-center gap-3">
-                <FaVibrate className={`text-xl ${settings.vibration ? 'text-accent-500' : 'text-slate-400'}`} />
+                <FaMobileAlt className={`text-xl ${settings.vibration ? 'text-accent-500' : 'text-slate-400'}`} />
                 <span className="font-medium text-slate-800 dark:text-white">{t('settings.vibration', lang)}</span>
               </div>
               <motion.button
