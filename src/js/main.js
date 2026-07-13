@@ -179,15 +179,10 @@ const boot = async () => {
 
   // 9️⃣ Dynamic numbers — replace hardcoded stats
   (async () => {
-    const { count: projectCount } = await countProjects();
+    const { count } = await countProjects();
     const repoCountEls = document.querySelectorAll('.hero-status-item:nth-child(3) span:last-child, .stat-box:nth-child(1) .stat-num');
     const projectCountEls = document.querySelectorAll('.hero-status-item:nth-child(2) span:last-child, .stat-box:nth-child(2) .stat-num');
-    const hasRealProjectCount = await (async () => {
-      const { count } = await countProjects();
-      return count !== null && count > 0;
-    })();
-    if (hasRealProjectCount) {
-      const { count } = await countProjects();
+    if (count !== null && count > 0) {
       projectCountEls.forEach(el => el.textContent = count + '+');
     }
     try {
