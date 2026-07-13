@@ -537,6 +537,74 @@ document.addEventListener("pointerlockchange", () => {
   if (!started) { _lastMouseX = null; _lastMouseY = null; }
 });
 
+// ===== ضوابط اللمس (الهاتف) =====
+// Reuses the existing keydown/keyup and mousedown/mouseup handlers above by
+// dispatching synthetic events, so every action (mining, placing, entity
+// attack, inventory toggle, farming, crafting-table/furnace interaction...)
+// keeps going through the same, already-tested code paths as a real keyboard/mouse.
+function synthKey(type, code) {
+  window.dispatchEvent(new KeyboardEvent(type, { code, bubbles: true }));
+}
+function synthMouse(type, button) {
+  document.getElementById("game").dispatchEvent(new MouseEvent(type, { button, bubbles: true }));
+}
+const _moveKeyState = { KeyW: false, KeyS: false, KeyA: false, KeyD: false };
+function setMoveKey(code, pressed) {
+  if (_moveKeyState[code] === pressed) return;
+  _moveKeyState[code] = pressed;
+  synthKey(pressed ? "keydown" : "keyup", code);
+}
+
+const gameControls = new UnifiedGameControls({
+  keyboard: false, // native keyboard handling above already covers desktop
+  touch: true,
+  gamepad: false,
+  mouse: false,    // native pointer-lock mouse handling above already covers desktop
+  requireLandscape: true,
+  showCameraControls: true,
+  mouseSensitivity: 0.002,
+  actionButtons: [
+    { id: "mine", label: "⛏️", action: "mine", color: "#e74c3c" },
+    { id: "place", label: "📦", action: "place", color: "#f39c12" },
+    { id: "jump", label: "⬆️", action: "jump", color: "#3498db" },
+    { id: "inventory", label: "🎒", action: "inventory", color: "#9b59b6" },
+    { id: "crouch", label: "🔽", action: "crouch", color: "#34495e" },
+    { id: "view", label: "👁️", action: "view", color: "#1abc9c" },
+  ],
+  onMove: (dx, dy) => {
+    setMoveKey("KeyW", dy < -0.15);
+    setMoveKey("KeyS", dy > 0.15);
+    setMoveKey("KeyA", dx < -0.15);
+    setMoveKey("KeyD", dx > 0.15);
+  },
+  onCamera: (dx, dy) => {
+    yaw -= dx * 0.05;
+    pitch -= dy * 0.05 * (INVERT_Y ? -1 : 1);
+    const lim = Math.PI / 2 - 0.01;
+    pitch = Math.max(-lim, Math.min(lim, pitch));
+    player._yaw = yaw; player._pitch = pitch;
+  },
+  onAction: (action) => {
+    switch (action) {
+      case "mine": synthMouse("mousedown", 0); break;
+      case "place": synthMouse("mousedown", 2); break;
+      case "jump": synthKey("keydown", "Space"); break;
+      case "crouch": synthKey("keydown", "ShiftLeft"); break;
+      case "inventory": synthKey("keydown", "KeyE"); break;
+      case "view": synthKey("keydown", "KeyV"); break;
+    }
+  },
+  onActionEnd: (action) => {
+    switch (action) {
+      case "mine": synthMouse("mouseup", 0); break;
+      case "jump": synthKey("keyup", "Space"); break;
+      case "crouch": synthKey("keyup", "ShiftLeft"); break;
+    }
+  },
+  debug: false,
+});
+gameControls.init();
+
 // ===== حلقة اللعبة =====
 let last = performance.now();
 let frames = 0, fpsTime = 0, fps = 0, debugTimer = 0;

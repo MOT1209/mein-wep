@@ -18,6 +18,7 @@ class UnifiedGameControls {
             // Actions
             onMove: options.onMove || (() => {}),
             onAction: options.onAction || (() => {}),
+            onActionEnd: options.onActionEnd || (() => {}), // Fires on release, for hold-style actions (e.g. mining)
             onCamera: options.onCamera || (() => {}), // For camera/look control
             
             // Control types
@@ -170,6 +171,7 @@ class UnifiedGameControls {
         this.log('Setting up touch controls');
         this.createTouchUI();
         this.setupJoystick();
+        this.setupActionButtons();
         if (this.config.showCameraControls) this.setupCameraTouch();
     }
     
@@ -535,15 +537,20 @@ class UnifiedGameControls {
                     this.triggerAction(btn.action);
                     element.style.transform = 'scale(0.85)';
                 }, { passive: false });
-                
-                element.addEventListener('touchend', () => {
+
+                const release = () => {
                     element.style.transform = 'scale(1)';
-                });
-                
+                    this.config.onActionEnd(btn.action);
+                };
+                element.addEventListener('touchend', release);
+                element.addEventListener('touchcancel', release);
+
                 // Mouse (for testing on desktop)
                 element.addEventListener('mousedown', () => {
                     this.triggerAction(btn.action);
                 });
+                element.addEventListener('mouseup', release);
+                element.addEventListener('mouseleave', release);
             }
         });
     }

@@ -59,5 +59,12 @@ export class Hotbar {
       const n = (this.inv.selectedHotbar + dir + this.inv.hotbarSize) % this.inv.hotbarSize;
       this.select(n);
     }, { passive: true });
+    // Tap/click a slot to select it (works for both mouse and touch).
+    this.el.addEventListener("click", (e) => {
+      const slot = e.target.closest(".slot");
+      if (!slot) return;
+      const i = Array.from(this.el.children).indexOf(slot);
+      if (i >= 0) this.select(i);
+    });
   }
 }

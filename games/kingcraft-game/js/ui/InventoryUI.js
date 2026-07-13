@@ -18,6 +18,9 @@ export class InventoryUI {
     this.overlay.className = "inv-overlay hidden";
     this.overlay.addEventListener("contextmenu", (e) => e.preventDefault());
     this.overlay.addEventListener("mousemove", (e) => this._moveHeld(e));
+    this.overlay.addEventListener("touchmove", (e) => {
+      if (e.touches[0]) this._moveHeld(e.touches[0]);
+    }, { passive: true });
     document.body.appendChild(this.overlay);
 
     this.heldEl = document.createElement("div");
@@ -224,6 +227,10 @@ export class InventoryUI {
       e.preventDefault();
       this._click(zone, index, e.button === 2);
     });
+    el.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      this._click(zone, index, false);
+    }, { passive: false });
     this.slotEls.push({ el, zone, index });
     return el;
   }
