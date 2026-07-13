@@ -60,7 +60,6 @@ async def scan():
         "/apps/calculator-app/",
         "/apps/quran-app/",
         "/apps/quiz-app/",
-        "/apps/maarifah-web/",
         "/apps/calculator-vault/",
         "/apps/quiz-master/",
         "/apps/quran-pro/",
