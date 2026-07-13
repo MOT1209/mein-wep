@@ -1,6 +1,6 @@
 {
   "version": "2.5.0",
-  "buildNumber": 31,
+  "buildNumber": 32,
   "apkUrl": "https://rashid-wep.vercel.app/apks/farm-game-v2.5.0.apk",
   "changelog": "UI v2: glassmorphism HUD with day/night theme, compass (N/NE/E/SE/S/SW/W/NW), weather icon, animated stat bars with shine effect, notification container system, time-based HUD color transitions",
   "releaseDate": "2026-07-01"
