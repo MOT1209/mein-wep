@@ -62,7 +62,7 @@ body {
 }
 
 .drawing-canvas.eraser {
-  cursor: url('/eraser-cursor.png') 10 10, auto;
+  cursor: url('/eraser-cursor.svg') 16 16, auto;
 }
 
 /* Animations */

@@ -90,6 +90,22 @@ export type Category =
   | 'random' 
   | 'custom'
 
+// Categories metadata for UI display
+export const CATEGORIES: Array<{ id: Category; name: string; emoji: string; color: string }> = [
+  { id: 'food', name: 'Food', emoji: '🍔', color: '#F59E0B' },
+  { id: 'animals', name: 'Animals', emoji: '🐾', color: '#10B981' },
+  { id: 'nature', name: 'Nature', emoji: '🌿', color: '#22C55E' },
+  { id: 'objects', name: 'Objects', emoji: '📦', color: '#3B82F6' },
+  { id: 'vehicles', name: 'Vehicles', emoji: '🚗', color: '#8B5CF6' },
+  { id: 'sports', name: 'Sports', emoji: '⚽', color: '#EF4444' },
+  { id: 'jobs', name: 'Jobs', emoji: '👷', color: '#6366F1' },
+  { id: 'fantasy', name: 'Fantasy', emoji: '🧙', color: '#EC4899' },
+  { id: 'technology', name: 'Technology', emoji: '💻', color: '#06B6D4' },
+  { id: 'space', name: 'Space', emoji: '🚀', color: '#1F2937' },
+  { id: 'history', name: 'History', emoji: '🏛️', color: '#92400E' },
+  { id: 'random', name: 'Random', emoji: '🎲', color: '#6B7280' },
+]
+
 export interface Word {
   word: string
   emoji: string
