@@ -28,12 +28,20 @@ jobs:
       
       - name: Check for exposed API keys
         run: |
-          EXPOSED=$(grep -r "AIza" --include="*.js" --include="*.html" . 2>/dev/null | grep -v node_modules | grep -v ".git" | grep -v "gemini-config.example" | wc -l)
-          if [ "$EXPOSED" -gt "0" ]; then
-            echo "⚠️  $EXPOSED potential API keys found!"
-          else
-            echo "✅ No exposed API keys"
+          set -o pipefail
+          KEY_PATTERN='AIza[0-9A-Za-z_-]{35}|sk-(proj|ant)-[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}'
+          SECRET_ASSIGN_PATTERN='(SERVICE_ROLE|SECRET)[A-Za-z_]*[[:space:]]*[:=][[:space:]]*['"'"'"]'
+          MATCHES=$( { grep -rEn "$KEY_PATTERN" --include="*.js" --include="*.html" \
+              --exclude-dir=node_modules --exclude-dir=.git .
+            grep -rEn "$SECRET_ASSIGN_PATTERN" --include="*.js" --include="*.html" \
+              --exclude-dir=node_modules --exclude-dir=.git . ; } 2>/dev/null \
+            | grep -v "gemini-config.example" || true)
+          if [ -n "$MATCHES" ]; then
+            echo "$MATCHES"
+            echo "::error::Potential exposed secret(s) found in client-side code — see matches above"
+            exit 1
           fi
+          echo "✅ No exposed API keys"
 
   lighthouse:
     name: 📊 Lighthouse CI
