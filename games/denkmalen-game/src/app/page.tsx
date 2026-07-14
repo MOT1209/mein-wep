@@ -36,6 +36,8 @@ export default function Home() {
         return <Leaderboard key="leaderboard" />
       case 'stats':
         return <StatsScreen key="stats" />
+      case 'settings':
+        return <SettingsScreen key="settings" />
       default:
         return <MainMenu key="menu" />
     }

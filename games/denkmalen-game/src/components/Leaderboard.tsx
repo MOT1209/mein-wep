@@ -150,6 +150,22 @@ export function Leaderboard() {
       
       {/* All Players List */}
       <div className="flex-1 max-w-md mx-auto w-full space-y-3">
+        {sortedPlayers.length === 0 && (
+          <div className="text-center py-12">
+            <FaTrophy className="text-6xl text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">No players yet</p>
+            <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">Play a game to see the leaderboard!</p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { playSound('click'); setPhase('setup') }}
+              className="mt-6 px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 
+                         text-white font-bold rounded-xl shadow-lg"
+            >
+              Start Playing
+            </motion.button>
+          </div>
+        )}
         {sortedPlayers.map((player, index) => (
           <motion.div
             key={player.id}

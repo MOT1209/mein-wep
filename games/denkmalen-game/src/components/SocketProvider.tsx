@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback, Re
 import { io, Socket } from 'socket.io-client'
 import { useGameStore, Player, Room, Word, GameType, Vote, Result, Drawing } from '@/store/gameStore'
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:3000'
+const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || ''
 
 // Shape the server actually sends (nested settings), vs. the flat client Room type
 interface ServerRoom {

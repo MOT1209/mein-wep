@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid'
 
 // Types
 export type GameMode = 'offline' | 'online' | null
-export type GamePhase = 'menu' | 'setup' | 'lobby' | 'playing' | 'drawing' | 'voting' | 'results' | 'leaderboard' | 'stats'
+export type GamePhase = 'menu' | 'setup' | 'lobby' | 'playing' | 'drawing' | 'voting' | 'results' | 'leaderboard' | 'stats' | 'settings'
 
 export type GameType = 'classic' | 'letter' | 'category' | 'daily' | 'creative'
 

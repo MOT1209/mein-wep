@@ -101,21 +101,18 @@ export function MainMenu() {
           </div>
         </motion.button>
 
-        {/* Online Mode - Big Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleOnlineMode}
-          className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-secondary-500 to-secondary-600 
-                     text-white font-bold text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
+        {/* Online Mode - Big Button (Coming Soon) */}
+        <motion.div
+          className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-slate-400 to-slate-500 
+                     text-white font-bold text-xl rounded-2xl shadow-lg opacity-60 cursor-not-allowed"
         >
           <div className="absolute inset-0 bg-white/10" />
           <FaQrcode className="text-3xl relative z-10" />
           <div className="text-left relative z-10">
             <div className="text-xl">Online Mode</div>
-            <div className="text-sm opacity-80 font-normal">QR Code - Different Devices</div>
+            <div className="text-sm opacity-80 font-normal">Coming Soon - Multiplayer Server</div>
           </div>
-        </motion.button>
+        </motion.div>
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           <motion.button
@@ -146,7 +143,7 @@ export function MainMenu() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={() => { playSound('click'); setPhase('leaderboard') }}
+          onClick={() => { playSound('click'); setPhase('settings') }}
           className="flex items-center justify-center gap-3 py-3 px-6 bg-white dark:bg-slate-800 
                      text-slate-700 dark:text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all
                      border-2 border-slate-200 dark:border-slate-700 mt-2"
