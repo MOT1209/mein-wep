@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'export',
-  basePath: '/games/denkmalen-game',
+  basePath: '/denkmalen',
   images: {
     unoptimized: true,
   },
