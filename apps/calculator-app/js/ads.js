@@ -1,12 +1,18 @@
-/**
+﻿/**
  * إعلانات AdMob — Capacitor Community AdMob Plugin
  *
  * التوثيق: https://github.com/capacitor-community/admob
  *
- * ⚠️ قبل بناء الـ APK: أضف AdMob App ID التالي في
- * android/app/src/main/res/values/strings.xml (بعد تشغيل npx cap sync android):
- *   <string name="admob_app_id">ca-app-pub-6142754371257083~9020699769</string>
- * (مجلد android/ مستبعد من git ويُولَّد محليًا، فلا يمكن تضمينه هنا مباشرة)
+ * يعتمد على النسخ المرفقة بدون bundler (تُحمَّل قبل هذا الملف في index.html):
+ *   js/vendor/capacitor.js  → يعرّف window.Capacitor (registerPlugin/isNativePlatform)
+ *   js/vendor/admob.js      → UMD للحزمة @capacitor-community/admob
+ *     (اسم الـ global فيها "capacitorStripe" — اسم موروث من إعداد البناء في الحزمة نفسها)
+ *
+ * ملاحظة: الاستيراد الديناميكي import('@capacitor-community/admob') لا يعمل
+ * داخل WebView بدون bundler (bare specifier) — لذلك نستخدم الـ globals أعلاه.
+ *
+ * ⚠️ AdMob App ID يُحقن في AndroidManifest عبر CI (.github/workflows/apk-build.yml):
+ *   ca-app-pub-6142754371257083~9020699769
  */
 const IS_PRODUCTION = true;
 const AD_UNIT_IDS = {
@@ -22,14 +28,21 @@ window.MaarifahAds = {
   /** تهيئة AdMob */
   async init() {
     try {
-      // Dynamic import لتفادي الخطأ في Web
-      const module = await import('@capacitor-community/admob');
-      this.AdMob = module.AdMob;
-      this.bannerSize = module.AdMobBannerSize;
-      this.position = module.AdMobPosition;
+      const cap = window.Capacitor;
+      if (!cap || typeof cap.isNativePlatform !== 'function' || !cap.isNativePlatform()) {
+        console.log('[AdMob] Web — الإعلانات داخل التطبيق فقط');
+        return false;
+      }
+      const lib = window.capacitorStripe || window.capacitorAdMob;
+      if (!lib || !lib.AdMob) {
+        console.warn('[AdMob] ⚠️ مكتبة AdMob غير محمّلة (js/vendor/admob.js)');
+        return false;
+      }
+      this.AdMob = lib.AdMob;
+      this.bannerSize = lib.BannerAdSize;
+      this.position = lib.BannerAdPosition;
 
       await this.AdMob.initialize({
-        requestTrackingAuthorization: true,
         testingDevices: [],
         initializeForTesting: !IS_PRODUCTION,
       });
@@ -38,7 +51,7 @@ window.MaarifahAds = {
       console.log('[AdMob] ✅ تم التهيئة');
       return true;
     } catch (e) {
-      console.warn('[AdMob] ⚠️ غير متاح (Web):', e.message);
+      console.warn('[AdMob] ⚠️ فشلت التهيئة:', e.message);
       return false;
     }
   },
@@ -52,6 +65,7 @@ window.MaarifahAds = {
         adSize: this.bannerSize.ADAPTIVE_BANNER,
         position: this.position.BOTTOM_CENTER,
         margin: 0,
+        isTesting: !IS_PRODUCTION,
       });
     } catch (e) {
       console.warn('[AdMob] Banner فشل:', e.message);
@@ -72,6 +86,7 @@ window.MaarifahAds = {
     try {
       await this.AdMob.prepareInterstitial({
         adId: AD_UNIT_IDS.interstitial,
+        isTesting: !IS_PRODUCTION,
       });
       await this.AdMob.showInterstitial();
     } catch (e) {
@@ -85,6 +100,7 @@ window.MaarifahAds = {
     try {
       await this.AdMob.prepareRewardVideoAd({
         adId: AD_UNIT_IDS.rewarded,
+        isTesting: !IS_PRODUCTION,
       });
       return await this.AdMob.showRewardVideoAd();
     } catch (e) {

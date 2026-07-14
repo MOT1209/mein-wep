@@ -1,5 +1,5 @@
-// Quran App Service Worker - Offline Support
-const CACHE_NAME = 'quran-app-v2';
+﻿// Quran App Service Worker - Offline Support
+const CACHE_NAME = 'quran-app-v3';
 const STATIC_ASSETS = [
     '/apps/quran-app/',
     '/apps/quran-app/index.html',

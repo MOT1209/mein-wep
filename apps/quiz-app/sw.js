@@ -1,5 +1,5 @@
-// Quiz App Service Worker
-const CACHE_NAME = 'quiz-app-v1.4.0';
+﻿// Quiz App Service Worker
+const CACHE_NAME = 'quiz-app-v1.4.1';
 const STATIC_ASSETS = [
     '/apps/quiz-app/',
     '/apps/quiz-app/index.html',

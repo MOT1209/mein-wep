@@ -1,7 +1,7 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "buildNumber": 12,
-  "apkUrl": "https://rashid-wep.vercel.app/apks/quiz-app-v1.4.0.apk",
-  "changelog": "شاشة دخول باسم اللاعب + شعار · لوحة متصدرين · توسعة بنك الأسئلة إلى 260 سؤالاً (مستويات جديدة لكل تصنيف)",
-  "releaseDate": "2026-06-22"
+  "apkUrl": "https://rashid-wep.vercel.app/apks/quiz-app-v1.4.1.apk",
+  "changelog": "تفعيل إعلانات AdMob داخل التطبيق · إصلاح تحميل السكربتات المشتركة",
+  "releaseDate": "2026-07-14"
 }

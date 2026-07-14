@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-09",
+  "updatedAt": "2026-07-14",
   "apps": {
     "com.rashid.kingcraft": {
       "name": "KingCraft",
@@ -24,24 +24,24 @@
     },
     "com.rashid.quranpro": {
       "name": "Quran Pro",
-      "version": "1.0.0",
-      "url": "/apks/quran-app-v1.0.0.apk",
-      "date": "2026-06-16",
-      "notes": ["الإصدار الأول."]
+      "version": "1.0.1",
+      "url": "/apks/quran-app-v1.0.1.apk",
+      "date": "2026-07-14",
+      "notes": ["تفعيل إعلانات AdMob داخل التطبيق."]
     },
     "com.rashid.smartvault": {
       "name": "Calculator Vault",
-      "version": "1.0.0",
-      "url": "/apks/calculator-app-v1.0.0.apk",
-      "date": "2026-06-16",
-      "notes": ["الإصدار الأول."]
+      "version": "1.0.1",
+      "url": "/apks/calculator-app-v1.0.1.apk",
+      "date": "2026-07-14",
+      "notes": ["تفعيل إعلانات AdMob داخل التطبيق."]
     },
     "com.rashid.quizmaster": {
       "name": "Quiz Master",
-      "version": "1.4.0",
-      "url": "/apks/quiz-app-v1.4.0.apk",
-      "date": "2026-06-22",
-      "notes": ["شاشة دخول باسم اللاعب + شعار.", "لوحة متصدرين.", "توسعة بنك الأسئلة إلى 260 سؤالاً."]
+      "version": "1.4.1",
+      "url": "/apks/quiz-app-v1.4.1.apk",
+      "date": "2026-07-14",
+      "notes": ["تفعيل إعلانات AdMob داخل التطبيق.", "إصلاح تحميل السكربتات المشتركة."]
     }
   }
 }

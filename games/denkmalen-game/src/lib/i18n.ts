@@ -1,5 +1,5 @@
 /**
- * i18n – lightweight translation helper for Draw Battle AI.
+ * i18n – lightweight translation helper for Denkmalen.
  *
  * Usage:
  *   import { t } from '@/lib/i18n'
