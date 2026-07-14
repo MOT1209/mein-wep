@@ -133,6 +133,15 @@ export function ResultsScreen() {
       socketNextRound(words)
     } else {
       nextRound()
+      // Fresh word / letter / prompt for the new round
+      useGameStore.setState({
+        currentWord: null,
+        currentLetter: null,
+        creativePrompt: null,
+        currentDrawing: null,
+        drawingHistory: [],
+        historyIndex: -1,
+      })
       if (players.length > 0) setPlayer(players[0])
       setPhase('drawing')
     }

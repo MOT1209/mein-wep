@@ -1,7 +1,7 @@
 {
-  "name": "Draw Battle",
-  "short_name": "DrawBattle",
-  "description": "A modern multiplayer drawing game with offline and online modes",
+  "name": "Denkmalen",
+  "short_name": "Denkmalen",
+  "description": "Drawing battle game with AI judge. Draw words, vote, and compete with friends!",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0a0a",

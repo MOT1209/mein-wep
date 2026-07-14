@@ -41,7 +41,7 @@ export function MainMenu() {
         <div className="flex items-center justify-center gap-3 mb-2">
           <FaPaintBrush className="text-5xl text-primary-500" />
           <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 bg-clip-text text-transparent">
-            Draw Battle
+            Denkmalen
           </h1>
         </div>
         <p className="text-slate-600 dark:text-slate-400 text-lg">

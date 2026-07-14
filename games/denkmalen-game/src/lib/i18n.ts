@@ -11,7 +11,7 @@ export type Lang = 'en' | 'ar' | 'de'
 // ── Translation dictionary ──────────────────────────────────────────
 const translations: Record<string, Record<Lang, string>> = {
   // ── Main Menu ──────────────────────────────────────────────────────
-  'menu.title':        { en: 'Draw Battle AI',      ar: 'معركة الرسم بالذكاء الاصطناعي',   de: 'Draw Battle KI' },
+  'menu.title':        { en: 'Denkmalen',           ar: 'دنكمالن',                          de: 'Denkmalen' },
   'menu.offline':      { en: 'Offline Mode',        ar: 'وضع بدون إنترنت',                   de: 'Offline-Modus' },
   'menu.online':       { en: 'Online Mode',         ar: 'وضع إنترنت',                        de: 'Online-Modus' },
   'menu.leaderboard':  { en: 'Leaderboard',         ar: 'لوحة المتصدرين',                    de: 'Bestenliste' },
@@ -114,7 +114,7 @@ const translations: Record<string, Record<Lang, string>> = {
   'category.custom':     { en: 'Custom',         ar: 'مخصص',          de: 'Benutzerdefiniert' },
 
   // ── Misc ───────────────────────────────────────────────────────────
-  'misc.version':     { en: 'Draw Battle v1.0.0', ar: 'معركة الرسم v1.0.0',             de: 'Draw Battle v1.0.0' },
+  'misc.version':     { en: 'Denkmalen v1.0.0',   ar: 'دنكمالن v1.0.0',                  de: 'Denkmalen v1.0.0' },
   'misc.madeWith':    { en: 'Made with ❤️ for creative minds', ar: 'صنع بـ ❤️ للأذهان الإبداعية', de: 'Mit ❤️ für kreative Köpfe gemacht' },
 }
 

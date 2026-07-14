@@ -31,7 +31,7 @@ export function DrawingScreen() {
     currentWord, currentRound, totalRounds, timeLeft, 
     mode, currentPlayer, players, phase, room,
     gameType, currentLetter, creativePrompt,
-    setPhase, setTimeLeft, decrementTime, nextRound,
+    setPhase, setTimeLeft, decrementTime,
     setWord, setCurrentLetter, setCreativePrompt, addDrawing, setDrawing, drawingHistory, historyIndex,
     saveDrawingToHistory, undo, redo, clearCanvas, setPlayer
   } = useGameStore()
@@ -61,23 +61,28 @@ export function DrawingScreen() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     
-    // Save current drawing
-    const imageData = canvas.width > 0 && canvas.height > 0 
-      ? ctx.getImageData(0, 0, canvas.width, canvas.height) 
-      : null
-    
+    // Save current drawing (drawImage composites over the white fill,
+    // unlike putImageData which would stamp the initial transparent pixels)
+    let snapshot: HTMLCanvasElement | null = null
+    if (canvas.width > 0 && canvas.height > 0) {
+      snapshot = document.createElement('canvas')
+      snapshot.width = canvas.width
+      snapshot.height = canvas.height
+      snapshot.getContext('2d')?.drawImage(canvas, 0, 0)
+    }
+
     // Set canvas size
     const rect = container.getBoundingClientRect()
     canvas.width = rect.width
     canvas.height = rect.height
-    
+
     // Fill with white
     ctx.fillStyle = '#FFFFFF'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    
+
     // Restore drawing
-    if (imageData) {
-      ctx.putImageData(imageData, 0, 0)
+    if (snapshot) {
+      ctx.drawImage(snapshot, 0, 0)
     }
     
     setCanvasReady(true)
@@ -388,15 +393,18 @@ export function DrawingScreen() {
     setWaitingForOthers(true)
   }
 
-  const handleTimeUp = () => {
-    if (!canvasRef.current) return
-    const dataUrl = canvasRef.current.toDataURL('image/png')
+  // Wipe the actual canvas pixels (the store's clearCanvas only resets history)
+  const clearCanvasPixels = () => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return
+    ctx.fillStyle = '#FFFFFF'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  }
 
-    if (mode === 'online') {
-      if (!waitingForOthers) submitForOnline(dataUrl)
-      return
-    }
-
+  // Offline: record the drawing, then hand the device to the next player,
+  // or move to voting once every player in this round has drawn.
+  const submitOfflineTurn = (dataUrl: string) => {
     const { wordText, wordCategory } = getWordAndCategory()
     addDrawing({
       id: Date.now().toString(),
@@ -407,15 +415,33 @@ export function DrawingScreen() {
       timestamp: Date.now(),
     })
 
-    // Check if more rounds
-    if (currentRound < totalRounds) {
-      nextRound()
+    const playerIndex = players.findIndex(p => p.id === currentPlayer?.id)
+    const nextPlayerIndex = playerIndex + 1
+
+    if (nextPlayerIndex < players.length) {
+      // More players to draw this round
+      setPlayer(players[nextPlayerIndex])
       setShowWarning(true)
       setShowWord(false)
       clearCanvas()
+      clearCanvasPixels()
+      useGameStore.setState({ timeLeft: useGameStore.getState().drawingTime })
     } else {
+      // Everyone drew — vote on this round's drawings
       setPhase('voting')
     }
+  }
+
+  const handleTimeUp = () => {
+    if (!canvasRef.current) return
+    const dataUrl = canvasRef.current.toDataURL('image/png')
+
+    if (mode === 'online') {
+      if (!waitingForOthers) submitForOnline(dataUrl)
+      return
+    }
+
+    submitOfflineTurn(dataUrl)
   }
 
   const handleRevealWord = () => {
@@ -427,6 +453,8 @@ export function DrawingScreen() {
 
   const handleSubmit = () => {
     if (!canvasRef.current) return
+    // The pass-device overlay is up — the current player hasn't drawn yet
+    if (showWarning) return
 
     playSound('success')
     vibrate([100, 50, 100])
@@ -439,41 +467,7 @@ export function DrawingScreen() {
       return
     }
 
-    const { wordText, wordCategory } = getWordAndCategory()
-    addDrawing({
-      id: Date.now().toString(),
-      playerId: currentPlayer?.id || '',
-      word: wordText,
-      canvasData: dataUrl,
-      category: wordCategory,
-      timestamp: Date.now(),
-    })
-
-    // In offline mode, move to next player or next round
-    if (mode === 'offline') {
-      const playerIndex = players.findIndex(p => p.id === currentPlayer?.id)
-      const nextPlayerIndex = playerIndex + 1
-
-      if (nextPlayerIndex < players.length) {
-        // More players to draw
-        setPlayer(players[nextPlayerIndex])
-        setShowWarning(true)
-        setShowWord(false)
-        clearCanvas()
-        useGameStore.setState({ timeLeft: useGameStore.getState().drawingTime })
-      } else if (currentRound < totalRounds) {
-        // Next round
-        nextRound()
-        setPlayer(players[0])
-        setShowWarning(true)
-        setShowWord(false)
-        clearCanvas()
-        useGameStore.setState({ timeLeft: useGameStore.getState().drawingTime })
-      } else {
-        // Game over - go to voting
-        setPhase('voting')
-      }
-    }
+    submitOfflineTurn(dataUrl)
   }
 
   // Undo/Redo
@@ -559,7 +553,7 @@ export function DrawingScreen() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-8 z-20"
+              className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center p-8 z-20 select-none"
             >
               <motion.div
                 initial={{ scale: 0.5 }}
@@ -806,11 +800,13 @@ export function DrawingScreen() {
           
           {/* Submit */}
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ scale: showWarning ? 1 : 1.05 }}
+            whileTap={{ scale: showWarning ? 1 : 0.95 }}
             onClick={handleSubmit}
-            className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 
-                       text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
+            disabled={showWarning}
+            className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500
+                       text-white font-bold rounded-xl shadow-lg flex items-center gap-2
+                       disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <FaCheck />
             Done

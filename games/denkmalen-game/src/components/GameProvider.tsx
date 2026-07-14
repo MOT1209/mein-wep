@@ -117,7 +117,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   const startOfflineGame = (players: { name: string }[]) => {
     const avatars = ['🎨', '🎭', '🎪', '🎯', '🎲', '🎮', '🎸', '🎹']
-    
+
     const gamePlayers = players.map((p, i) => ({
       id: v4(),
       name: p.name,
@@ -126,13 +126,23 @@ export function GameProvider({ children }: { children: ReactNode }) {
       roundWins: 0,
       totalVotes: 0,
     }))
-    
+
+    // Wipe any leftovers from a previous game (players would otherwise
+    // accumulate, and stale round/word/votes would leak into this game)
+    useGameStore.getState().resetGame()
+    useGameStore.setState({
+      players: [],
+      currentLetter: null,
+      creativePrompt: null,
+      timeLeft: useGameStore.getState().drawingTime,
+    })
+
     setMode('offline')
-    setPhase('playing')
-    
+    setPhase('drawing')
+
     // Set all players
     gamePlayers.forEach(p => addPlayer(p))
-    
+
     // Set first player as current
     if (gamePlayers.length > 0) {
       setPlayer(gamePlayers[0])

@@ -8,13 +8,14 @@ import { SocketProvider } from '@/components/SocketProvider'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Draw Battle - Multiplayer Drawing Game',
-  description: 'A modern multiplayer drawing game with offline and online modes',
-  manifest: '/manifest.json',
+  title: 'Denkmalen - Drawing Battle Game',
+  description: 'Drawing battle game with AI judge. Draw words, vote, and compete with friends!',
+  // next.config.js basePath is not applied to metadata URLs, so prefix manually
+  manifest: '/denkmalen/manifest.json',
   themeColor: '#0ea5e9',
   icons: {
-    icon: '/favicon.svg',
-    apple: '/favicon.svg',
+    icon: '/denkmalen/favicon.svg',
+    apple: '/denkmalen/favicon.svg',
   },
 }
 
@@ -24,7 +25,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" translate="no" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
           <SocketProvider>

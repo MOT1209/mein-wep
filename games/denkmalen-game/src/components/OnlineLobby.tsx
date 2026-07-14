@@ -93,8 +93,8 @@ export function OnlineLobby() {
     if (navigator.share && room?.code) {
       try {
         await navigator.share({
-          title: 'Draw Battle - Join My Game!',
-          text: `Join my Draw Battle game! Use code: ${room.code}`,
+          title: 'Denkmalen - Join My Game!',
+          text: `Join my Denkmalen game! Use code: ${room.code}`,
           url: shareUrl(room.code),
         })
       } catch (err) {
