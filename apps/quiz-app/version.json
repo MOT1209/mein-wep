@@ -1,6 +1,6 @@
 {
   "version": "1.4.1",
-  "buildNumber": 12,
+  "buildNumber": 13,
   "apkUrl": "https://rashid-wep.vercel.app/apks/quiz-app-v1.4.1.apk",
   "changelog": "تفعيل إعلانات AdMob داخل التطبيق · إصلاح تحميل السكربتات المشتركة",
   "releaseDate": "2026-07-14"
