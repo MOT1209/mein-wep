@@ -1,17 +1,23 @@
 const { createServer } = require('http')
 const { parse } = require('url')
-const next = require('next')
 const { Server } = require('socket.io')
 
 const dev = process.env.NODE_ENV !== 'production'
 // Bind 0.0.0.0 so containerized hosts (Railway, Render, etc.) can reach the
-// server on their assigned network interface — 'localhost' only accepts
-// loopback connections and would make the app unreachable from outside.
-const hostname = process.env.HOSTNAME || '0.0.0.0'
+// server on their assigned network interface. Deliberately NOT
+// process.env.HOSTNAME: Windows and Docker set that to the machine/container
+// name, which binds the wrong interface. Override with BIND_HOST if needed.
+const hostname = process.env.BIND_HOST || '0.0.0.0'
 const port = parseInt(process.env.PORT || '3000', 10)
 
-const app = next({ dev, hostname, port })
-const handle = app.getRequestHandler()
+// SOCKET_ONLY=1 runs just the Socket.io game server (no Next app). This is the
+// mode for Render/Railway: the frontend is a static export served by Vercel,
+// and `output: 'export'` in next.config.js cannot run under a custom Next
+// server in production anyway.
+const socketOnly = process.env.SOCKET_ONLY === '1'
+
+const app = socketOnly ? null : require('next')({ dev, hostname, port })
+const handle = app ? app.getRequestHandler() : null
 
 // Room storage
 const rooms = new Map()
@@ -82,8 +88,38 @@ function sanitizeWords(words, count) {
     }))
 }
 
-app.prepare().then(() => {
+// In production, only allow the configured origin(s) to open a socket
+// connection — an unset ALLOWED_ORIGIN disables cross-origin access rather
+// than falling back to a wildcard. Comma-separated list supported.
+const allowedOrigins = (process.env.ALLOWED_ORIGIN || '')
+  .split(',')
+  .map(o => o.trim())
+  .filter(Boolean)
+
+function startServer() {
   const server = createServer(async (req, res) => {
+    const { pathname } = parse(req.url, true)
+
+    // Health endpoint (used by the client to detect whether online mode is
+    // available, and by the host's health checks). CORS-enabled so the
+    // static frontend on another origin can probe it.
+    if (pathname === '/healthz' || (socketOnly && pathname === '/')) {
+      const origin = req.headers.origin
+      if (origin && (dev || allowedOrigins.includes(origin))) {
+        res.setHeader('Access-Control-Allow-Origin', origin)
+      }
+      res.setHeader('Content-Type', 'application/json')
+      res.statusCode = 200
+      res.end(JSON.stringify({ ok: true, service: 'denkmalen-socket', rooms: rooms.size }))
+      return
+    }
+
+    if (!handle) {
+      res.statusCode = 404
+      res.end('Not found')
+      return
+    }
+
     try {
       const parsedUrl = parse(req.url, true)
       await handle(req, res, parsedUrl)
@@ -94,10 +130,7 @@ app.prepare().then(() => {
     }
   })
 
-  // In production, only allow the configured origin(s) to open a socket
-  // connection — an unset ALLOWED_ORIGIN disables cross-origin access rather
-  // than falling back to a wildcard.
-  const corsOrigin = dev ? '*' : (process.env.ALLOWED_ORIGIN || false)
+  const corsOrigin = dev ? '*' : (allowedOrigins.length > 0 ? allowedOrigins : false)
 
   const io = new Server(server, {
     cors: {
@@ -376,9 +409,15 @@ app.prepare().then(() => {
   })
 
   server.listen(port, hostname, () => {
-    console.log(`> Ready on http://${hostname}:${port}`)
+    console.log(`> Ready on http://${hostname}:${port}${socketOnly ? ' (socket-only mode)' : ''}`)
   })
-})
+}
+
+if (socketOnly) {
+  startServer()
+} else {
+  app.prepare().then(startServer)
+}
 
 // Helper functions
 function generateRoomCode() {
