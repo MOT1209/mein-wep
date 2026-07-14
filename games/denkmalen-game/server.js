@@ -4,7 +4,10 @@ const next = require('next')
 const { Server } = require('socket.io')
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = 'localhost'
+// Bind 0.0.0.0 so containerized hosts (Railway, Render, etc.) can reach the
+// server on their assigned network interface — 'localhost' only accepts
+// loopback connections and would make the app unreachable from outside.
+const hostname = process.env.HOSTNAME || '0.0.0.0'
 const port = parseInt(process.env.PORT || '3000', 10)
 
 const app = next({ dev, hostname, port })
