@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, Category, GameType, LETTERS, getRandomCreativePrompt } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
+import { t } from '@/lib/i18n'
 import { FaArrowLeft, FaPlus, FaTimes, FaPlay, FaUsers, FaMobile } from 'react-icons/fa'
 
 const CATEGORIES: { id: Category; name: string; emoji: string }[] = [
@@ -60,7 +61,7 @@ const GAME_TYPES: { id: GameType; title: string; description: string; icon: stri
 ]
 
 export function OfflineSetup() {
-  const { setPhase, setCategory, setGameType, setCurrentLetter, setCreativePrompt, selectedCategory, totalRounds, drawingTime } = useGameStore()
+  const { setPhase, setCategory, setGameType, setCurrentLetter, setCreativePrompt, selectedCategory, totalRounds, drawingTime, settings } = useGameStore()
   const { startOfflineGame, playSound, vibrate } = useGame()
   
   const [players, setPlayers] = useState<{ name: string }[]>([
@@ -427,7 +428,7 @@ export function OfflineSetup() {
             {/* Drawing Time */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                Drawing Time: {time} seconds
+                {t('setup.time', settings.language)}: {time}s
               </label>
               <input
                 type="range"
@@ -450,7 +451,7 @@ export function OfflineSetup() {
             {(localGameType === 'category' || localGameType === 'classic') && (
               <div>
                 <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                  Word Category
+                  {t('setup.category', settings.language)}
                 </label>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
@@ -480,7 +481,7 @@ export function OfflineSetup() {
               className="flex-1 py-4 rounded-2xl font-bold text-lg bg-slate-200 dark:bg-slate-700 
                          text-slate-700 dark:text-white"
             >
-              Back
+              {t('common.back', settings.language)}
             </motion.button>
           )}
           
@@ -492,7 +493,7 @@ export function OfflineSetup() {
               className="flex-1 py-4 rounded-2xl font-bold text-lg bg-slate-200 dark:bg-slate-700 
                          text-slate-700 dark:text-white"
             >
-              Back
+              {t('common.back', settings.language)}
             </motion.button>
           )}
 
@@ -508,7 +509,7 @@ export function OfflineSetup() {
                   : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
               }`}
             >
-              Next: Game Type →
+              {t('setup.nextGameType', settings.language)}
             </motion.button>
           ) : step === 'gametype' ? (
             <motion.button
@@ -523,7 +524,7 @@ export function OfflineSetup() {
               }`}
             >
               <FaPlay />
-              Start Game!
+              {t('common.startGame', settings.language)}
             </motion.button>
           ) : (
             <motion.button
@@ -538,7 +539,7 @@ export function OfflineSetup() {
               }`}
             >
               <FaPlay />
-              Start Game!
+              {t('common.startGame', settings.language)}
             </motion.button>
           )}
         </div>

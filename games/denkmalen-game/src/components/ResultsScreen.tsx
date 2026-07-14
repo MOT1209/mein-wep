@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, calculateFinalScore, getRandomWord } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { useSocket } from '@/components/SocketProvider'
 import { evaluateDrawings } from '@/lib/gemini'
@@ -25,7 +26,7 @@ interface Result {
 }
 
 export function ResultsScreen() {
-  const { mode, drawings, votes, players, currentRound, totalRounds, setPhase, resetGame, nextRound, setPlayer, gameType, currentLetter, creativePrompt, selectedCategory } = useGameStore()
+  const { mode, drawings, votes, players, currentRound, totalRounds, setPhase, resetGame, nextRound, setPlayer, gameType, currentLetter, creativePrompt, selectedCategory, settings } = useGameStore()
   const { playSound, vibrate } = useGame()
   const { nextRound: socketNextRound } = useSocket()
 
@@ -417,7 +418,7 @@ export function ResultsScreen() {
                      border-slate-200 dark:border-slate-700"
         >
           <FaHome />
-          Home
+          {t('common.home', settings.language)}
         </motion.button>
       </div>
     </motion.div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, Category, GameType, LETTERS, getRandomWord, getRandomCreativePrompt } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { useSocket } from '@/components/SocketProvider'
 import { QRCodeSVG } from 'qrcode.react'
@@ -38,7 +39,7 @@ export function OnlineLobby() {
     setPhase, room, currentPlayer,
     setCategory, selectedCategory,
     totalRounds, drawingTime, gameType, setGameType,
-    currentLetter: storeLetter, setCurrentLetter
+    currentLetter: storeLetter, setCurrentLetter, settings
   } = useGameStore()
   const { playSound, vibrate } = useGame()
   const { createRoom: socketCreateRoom, joinRoom: socketJoinRoom, startGame: socketStartGame, connected, error, clearError } = useSocket()
@@ -278,7 +279,7 @@ export function OnlineLobby() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <FaCog className="text-primary-500" />
-                  Game Settings
+                  {t('lobby.gameSettings', settings.language)}
                 </h2>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
@@ -300,7 +301,7 @@ export function OnlineLobby() {
                     {/* Game Type */}
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        Game Mode
+                        {t('lobby.gameMode', settings.language)}
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         {GAME_TYPES.map((type) => (
@@ -337,7 +338,7 @@ export function OnlineLobby() {
                         className="mb-4"
                       >
                         <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                          Starting Letter
+                          {t('lobby.startingLetter', settings.language)}
                         </label>
                         <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
                           {LETTERS.map((letter) => (
@@ -361,7 +362,7 @@ export function OnlineLobby() {
                     {/* Rounds */}
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        Rounds
+                        {t('lobby.rounds', settings.language)}
                       </label>
                       <div className="flex gap-2">
                         {[2, 3, 4, 5].map((r) => (
@@ -384,7 +385,7 @@ export function OnlineLobby() {
                     {/* Time */}
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        Drawing Time: {time}s
+                        {t('lobby.drawingTime', settings.language)}: {time}s
                       </label>
                       <input
                         type="range"
@@ -400,7 +401,7 @@ export function OnlineLobby() {
                     {/* Category */}
                     <div>
                       <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                        Category
+                        {t('lobby.category', settings.language)}
                       </label>
                       <div className="grid grid-cols-3 gap-2">
                         {CATEGORIES.map((cat) => (
@@ -437,7 +438,7 @@ export function OnlineLobby() {
               <div className="card">
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                   <FaQrcode className="text-primary-500" />
-                  Host a Game
+                  {t('lobby.hostGame', settings.language)}
                 </h2>
 
                 <input
@@ -460,18 +461,18 @@ export function OnlineLobby() {
                       : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
                   }`}
                 >
-                  {joining ? 'Creating Room...' : 'Create Room'}
+                  {joining ? t('lobby.creatingRoom', settings.language) : t('lobby.create', settings.language)}
                 </motion.button>
               </div>
             ) : (
               <div className="card">
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
                   <FaLink className="text-secondary-500" />
-                  Join a Game
+                  {t('lobby.joinGame', settings.language)}
                 </h2>
 
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                  Enter the room code from your friend&apos;s screen
+                  {t('lobby.enterCodeFriend', settings.language)}
                 </p>
 
                 <input
@@ -503,7 +504,7 @@ export function OnlineLobby() {
                       : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
                   }`}
                 >
-                  {joining ? 'Joining Room...' : 'Join Game'}
+                  {joining ? t('lobby.joiningRoom', settings.language) : t('lobby.joinGame', settings.language)}
                 </motion.button>
               </div>
             )}
@@ -520,7 +521,7 @@ export function OnlineLobby() {
                 }`}
               >
                 <FaQrcode />
-                Host Game
+                {t('lobby.hostGame', settings.language)}
               </motion.button>
               <motion.button
                 whileTap={{ scale: 0.95 }}
@@ -532,13 +533,13 @@ export function OnlineLobby() {
                 }`}
               >
                 <FaLink />
-                Join Game
+                {t('lobby.joinGame', settings.language)}
               </motion.button>
             </div>
 
             {!connected && (
               <p className="text-center text-sm text-slate-400 dark:text-slate-500">
-                Connecting to game server...
+                {t('lobby.connecting', settings.language)}
               </p>
             )}
           </>
@@ -555,7 +556,7 @@ export function OnlineLobby() {
                        flex items-center justify-center gap-3"
           >
             <FaPlay />
-            Start Game ({room.players.length} players)
+            {t('lobby.startGamePlayers', settings.language)} ({room.players.length} {t('lobby.players', settings.language)})
           </motion.button>
         )}
 
@@ -563,7 +564,7 @@ export function OnlineLobby() {
         {room && !isRoomHost && (
           <div className="card text-center text-slate-500 dark:text-slate-400">
             <div className="w-6 h-6 mx-auto mb-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            Waiting for the host to start the game...
+            {t('lobby.waitingHost', settings.language)}
           </div>
         )}
       </div>

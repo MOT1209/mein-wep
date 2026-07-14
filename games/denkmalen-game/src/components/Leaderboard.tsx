@@ -2,11 +2,12 @@
 
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { FaArrowLeft, FaTrophy, FaMedal, FaRedo, FaHome, FaCog } from 'react-icons/fa'
 
 export function Leaderboard() {
-  const { players, setPhase, resetGame, currentRound, totalRounds } = useGameStore()
+  const { players, setPhase, resetGame, currentRound, totalRounds, settings } = useGameStore()
   const { playSound, vibrate } = useGame()
   
   // Sort players by score
@@ -55,11 +56,11 @@ export function Leaderboard() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <FaTrophy className="text-yellow-500" />
-            Leaderboard
+            {t('leader.title', settings.language)}
           </h1>
           {currentRound > 0 && (
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Round {currentRound} / {totalRounds}
+              {t('leader.round', settings.language)} {currentRound} / {totalRounds}
             </p>
           )}
         </div>
@@ -92,7 +93,7 @@ export function Leaderboard() {
               {sortedPlayers[1].name}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
-              {sortedPlayers[1].score} pts
+              {sortedPlayers[1].score} {t('leader.pts', settings.language)}
             </p>
             <div className="w-20 h-24 bg-gradient-to-t from-gray-400 to-gray-300 rounded-t-lg 
                             flex items-center justify-center text-4xl shadow-lg">
@@ -115,7 +116,7 @@ export function Leaderboard() {
               {sortedPlayers[0].name}
             </p>
             <p className="text-sm text-yellow-600 dark:text-yellow-400 mb-2 font-bold">
-              {sortedPlayers[0].score} pts
+              {sortedPlayers[0].score} {t('leader.pts', settings.language)}
             </p>
             <div className="w-24 h-32 bg-gradient-to-t from-amber-500 to-yellow-400 rounded-t-lg 
                             flex items-center justify-center text-5xl shadow-lg shadow-yellow-500/30">
@@ -138,7 +139,7 @@ export function Leaderboard() {
               {sortedPlayers[2].name}
             </p>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
-              {sortedPlayers[2].score} pts
+              {sortedPlayers[2].score} {t('leader.pts', settings.language)}
             </p>
             <div className="w-20 h-20 bg-gradient-to-t from-orange-500 to-orange-400 rounded-t-lg 
                             flex items-center justify-center text-4xl shadow-lg">
@@ -153,8 +154,8 @@ export function Leaderboard() {
         {sortedPlayers.length === 0 && (
           <div className="text-center py-12">
             <FaTrophy className="text-6xl text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-            <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">No players yet</p>
-            <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">Play a game to see the leaderboard!</p>
+            <p className="text-slate-500 dark:text-slate-400 text-lg font-medium">{t('leader.noPlayers', settings.language)}</p>
+            <p className="text-slate-400 dark:text-slate-500 text-sm mt-2">{t('leader.playToSee', settings.language)}</p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -162,7 +163,7 @@ export function Leaderboard() {
               className="mt-6 px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 
                          text-white font-bold rounded-xl shadow-lg"
             >
-              Start Playing
+              {t('leader.startPlaying', settings.language)}
             </motion.button>
           </div>
         )}
@@ -188,15 +189,15 @@ export function Leaderboard() {
             <div className="flex-1">
               <p className="font-bold text-lg">{player.name}</p>
               <div className="flex items-center gap-3 text-sm opacity-80">
-                <span>🏆 {player.roundWins} wins</span>
-                <span>⭐ {player.totalVotes} votes</span>
+                <span>🏆 {player.roundWins} {t('leader.wins', settings.language)}</span>
+                <span>⭐ {player.totalVotes} {t('leader.votes', settings.language)}</span>
               </div>
             </div>
             
             {/* Score */}
             <div className="text-right">
               <p className="text-2xl font-bold">{player.score}</p>
-              <p className="text-sm opacity-80">points</p>
+              <p className="text-sm opacity-80">{t('leader.points', settings.language)}</p>
             </div>
           </motion.div>
         ))}
@@ -217,7 +218,7 @@ export function Leaderboard() {
                      border-slate-200 dark:border-slate-700"
         >
           <FaHome />
-          Home
+          {t('common.home', settings.language)}
         </motion.button>
         
         {currentRound < totalRounds && (
@@ -232,7 +233,7 @@ export function Leaderboard() {
                        text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
           >
             <FaRedo />
-            Play Again
+            {t('common.playAgain', settings.language)}
           </motion.button>
         )}
       </div>

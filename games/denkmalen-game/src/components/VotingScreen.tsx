@@ -3,12 +3,13 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, calculateScore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { useSocket } from '@/components/SocketProvider'
 import { FaVoteYea, FaCheck, FaStar, FaTrophy, FaEye } from 'react-icons/fa'
 
 export function VotingScreen() {
-  const { mode, drawings, votes, hasVoted, currentPlayer, players, addVote, setPhase, updatePlayerScore, gameType, currentLetter, creativePrompt } = useGameStore()
+  const { mode, drawings, votes, hasVoted, currentPlayer, players, addVote, setPhase, updatePlayerScore, gameType, currentLetter, creativePrompt, settings } = useGameStore()
   const { playSound, vibrate } = useGame()
   const { submitVote: socketSubmitVote } = useSocket()
 
@@ -137,7 +138,7 @@ export function VotingScreen() {
                 {voter?.name}&apos;s turn to vote!
               </h2>
               <p className="text-slate-300 mb-8 text-lg">
-                Pass the device to {voter?.name}
+                {t('draw.passDevice', settings.language)} {voter?.name}
               </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -147,7 +148,7 @@ export function VotingScreen() {
                            text-white font-bold text-xl rounded-2xl shadow-lg"
               >
                 <FaEye className="inline mr-2" />
-                Start Voting
+                {t('vote.startVoting', settings.language)}
               </motion.button>
             </motion.div>
           </motion.div>
@@ -163,13 +164,13 @@ export function VotingScreen() {
                      text-white rounded-full shadow-lg"
         >
           <FaVoteYea className="text-xl" />
-          <span className="font-bold text-lg">Vote for the Best Drawing!</span>
+          <span className="font-bold text-lg">{t('vote.title', settings.language)}!</span>
         </motion.div>
         <p className="text-slate-600 dark:text-slate-400 mt-3">
           {allPlayersVoted
-            ? 'All votes are in!'
+            ? t('vote.allVotesIn', settings.language)
             : hasVoterVoted
-              ? `Waiting for other players... (${votedPlayers.length}/${players.length})`
+              ? `${t('vote.waiting', settings.language)} (${votedPlayers.length}/${players.length})`
               : gameType === 'letter'
                 ? `${voter ? voter.name + ', vote' : 'Vote'} for the best drawing starting with "${currentLetter}"!`
                 : gameType === 'creative'
@@ -227,7 +228,7 @@ export function VotingScreen() {
                   </div>
                   {isOwn && (
                     <span className="px-2 py-1 bg-primary-500 text-white text-xs rounded-full">
-                      Your Drawing
+                      {t('vote.yourDrawing', settings.language)}
                     </span>
                   )}
                 </div>
@@ -278,13 +279,13 @@ export function VotingScreen() {
             }`}
           >
             <FaVoteYea />
-            Submit Vote
+            {t('vote.submit', settings.language)}
           </motion.button>
         ) : allPlayersVoted && isOnline ? (
           <div className="px-8 py-4 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300
                           rounded-2xl font-bold text-lg flex items-center gap-3">
             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            Calculating results...
+            {t('vote.calculating', settings.language)}
           </div>
         ) : allPlayersVoted ? (
           <motion.button
@@ -296,13 +297,13 @@ export function VotingScreen() {
                        flex items-center gap-3"
           >
             <FaTrophy />
-            See Results
+            {t('vote.seeResults', settings.language)}
           </motion.button>
         ) : (
           <div className="px-8 py-4 bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300
                           rounded-2xl font-bold text-lg flex items-center gap-3">
             <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-            Waiting for votes...
+            {t('vote.waiting', settings.language)}
           </div>
         )}
       </div>
@@ -310,7 +311,7 @@ export function VotingScreen() {
       {/* Progress */}
       <div className="mt-4 max-w-md mx-auto w-full">
         <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400 mb-2">
-          <span>Votes Collected</span>
+          <span>{t('vote.votesCollected', settings.language)}</span>
           <span>{votedPlayers.length} / {players.length}</span>
         </div>
         <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">

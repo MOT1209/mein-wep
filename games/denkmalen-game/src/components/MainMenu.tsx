@@ -1,16 +1,31 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
-import { 
-  FaUsers, FaGlobe, FaCog, FaChartBar, FaPaintBrush, 
+import { SOCKET_URL } from '@/components/SocketProvider'
+import {
+  FaUsers, FaGlobe, FaCog, FaChartBar, FaPaintBrush,
   FaGamepad, FaTrophy, FaStar, FaMobileAlt, FaQrcode
 } from 'react-icons/fa'
 
 export function MainMenu() {
   const { setPhase, stats } = useGameStore()
   const { startOnlineGame, playSound, vibrate } = useGame()
+
+  // Online mode self-activates once the game server is reachable — no rebuild
+  // needed after deploying it. Until then the button stays "Coming Soon".
+  const [onlineAvailable, setOnlineAvailable] = useState(false)
+  useEffect(() => {
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 5000)
+    fetch(`${SOCKET_URL}/healthz`, { signal: controller.signal })
+      .then(res => { if (res.ok) setOnlineAvailable(true) })
+      .catch(() => { /* server not deployed / asleep — keep Coming Soon */ })
+      .finally(() => clearTimeout(timeout))
+    return () => { clearTimeout(timeout); controller.abort() }
+  }, [])
 
   const handleOfflineMode = () => {
     playSound('click')
@@ -101,18 +116,35 @@ export function MainMenu() {
           </div>
         </motion.button>
 
-        {/* Online Mode - Big Button (Coming Soon) */}
-        <motion.div
-          className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-slate-400 to-slate-500 
-                     text-white font-bold text-xl rounded-2xl shadow-lg opacity-60 cursor-not-allowed"
-        >
-          <div className="absolute inset-0 bg-white/10" />
-          <FaQrcode className="text-3xl relative z-10" />
-          <div className="text-left relative z-10">
-            <div className="text-xl">Online Mode</div>
-            <div className="text-sm opacity-80 font-normal">Coming Soon - Multiplayer Server</div>
-          </div>
-        </motion.div>
+        {/* Online Mode - enabled automatically once the game server responds */}
+        {onlineAvailable ? (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleOnlineMode}
+            className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-secondary-500 to-secondary-600
+                       text-white font-bold text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
+          >
+            <div className="absolute inset-0 bg-white/10" />
+            <FaQrcode className="text-3xl relative z-10" />
+            <div className="text-left relative z-10">
+              <div className="text-xl">Online Mode</div>
+              <div className="text-sm opacity-80 font-normal">QR Code - Different Devices</div>
+            </div>
+          </motion.button>
+        ) : (
+          <motion.div
+            className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-slate-400 to-slate-500
+                       text-white font-bold text-xl rounded-2xl shadow-lg opacity-60 cursor-not-allowed"
+          >
+            <div className="absolute inset-0 bg-white/10" />
+            <FaQrcode className="text-3xl relative z-10" />
+            <div className="text-left relative z-10">
+              <div className="text-xl">Online Mode</div>
+              <div className="text-sm opacity-80 font-normal">Coming Soon - Multiplayer Server</div>
+            </div>
+          </motion.div>
+        )}
 
         <div className="grid grid-cols-2 gap-4 mt-4">
           <motion.button

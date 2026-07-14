@@ -4,7 +4,13 @@ import { createContext, useContext, useEffect, useRef, useState, useCallback, Re
 import { io, Socket } from 'socket.io-client'
 import { useGameStore, Player, Room, Word, GameType, Vote, Result, Drawing } from '@/store/gameStore'
 
-const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || ''
+// Build-time env wins; otherwise use the deployed game server in production
+// (never localhost — that would point every visitor at their own machine).
+export const SOCKET_URL =
+  process.env.NEXT_PUBLIC_SOCKET_URL ||
+  (process.env.NODE_ENV === 'production'
+    ? 'https://denkmalen-server.onrender.com'
+    : 'http://localhost:3000')
 
 // Shape the server actually sends (nested settings), vs. the flat client Room type
 interface ServerRoom {

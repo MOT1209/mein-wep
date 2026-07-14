@@ -2,19 +2,21 @@
 
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { FaArrowLeft, FaChartBar, FaGamepad, FaTrophy, FaStar, FaClock, FaPaintBrush, FaHome } from 'react-icons/fa'
 
 export function StatsScreen() {
   const { stats, setPhase, settings } = useGameStore()
+  const lang = settings.language
   const { playSound, vibrate } = useGame()
 
   const statItems = [
-    { icon: FaGamepad, label: 'Games Played', value: stats.gamesPlayed, color: 'text-blue-500', bg: 'from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20' },
-    { icon: FaTrophy, label: 'Wins', value: stats.wins, color: 'text-yellow-500', bg: 'from-yellow-50 to-amber-100 dark:from-yellow-900/20 dark:to-amber-800/20' },
-    { icon: FaStar, label: 'Highest Score', value: stats.highestScore, color: 'text-purple-500', bg: 'from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20' },
-    { icon: FaPaintBrush, label: 'Total Votes Given', value: stats.totalVotes, color: 'text-green-500', bg: 'from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20' },
-    { icon: FaClock, label: 'Drawing Time (s)', value: stats.totalDrawingTime, color: 'text-orange-500', bg: 'from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20' },
+    { icon: FaGamepad, label: t('stats.gamesPlayed', lang), value: stats.gamesPlayed, color: 'text-blue-500', bg: 'from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20' },
+    { icon: FaTrophy, label: t('leader.wins', lang), value: stats.wins, color: 'text-yellow-500', bg: 'from-yellow-50 to-amber-100 dark:from-yellow-900/20 dark:to-amber-800/20' },
+    { icon: FaStar, label: t('stats.highestScore', lang), value: stats.highestScore, color: 'text-purple-500', bg: 'from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20' },
+    { icon: FaPaintBrush, label: t('stats.totalVotes', lang), value: stats.totalVotes, color: 'text-green-500', bg: 'from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20' },
+    { icon: FaClock, label: t('stats.drawingTime', lang), value: stats.totalDrawingTime, color: 'text-orange-500', bg: 'from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20' },
   ]
 
   const gameTypeLabels: Record<string, { label: string; emoji: string }> = {
@@ -50,10 +52,10 @@ export function StatsScreen() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
             <FaChartBar className="text-green-500" />
-            Statistics
+            {t('menu.statistics', lang)}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            Your drawing journey
+            {t('stats.yourJourney', lang)}
           </p>
         </div>
         
@@ -81,7 +83,7 @@ export function StatsScreen() {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-3xl font-bold text-slate-800 dark:text-white">{winRate}%</span>
-            <span className="text-xs text-slate-500 dark:text-slate-400">Win Rate</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">{t('stats.winRate', lang)}</span>
           </div>
         </div>
       </motion.div>
@@ -120,7 +122,7 @@ export function StatsScreen() {
               🎮
             </div>
             <div className="flex-1">
-              <p className="text-sm text-slate-500 dark:text-slate-400">Favorite Game Type</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('stats.favoriteGameType', lang)}</p>
               <p className="text-2xl font-bold text-slate-800 dark:text-white">
                 {gameTypeLabels[stats.favoriteGameType]?.emoji || '🎮'}{' '}
                 {gameTypeLabels[stats.favoriteGameType]?.label || stats.favoriteGameType}
@@ -142,7 +144,7 @@ export function StatsScreen() {
                 ❤️
               </div>
               <div className="flex-1">
-                <p className="text-sm text-slate-500 dark:text-slate-400">Favorite Category</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{t('stats.favoriteCategory', lang)}</p>
                 <p className="text-2xl font-bold text-slate-800 dark:text-white capitalize">{stats.favoriteCategory}</p>
               </div>
             </div>
@@ -165,7 +167,7 @@ export function StatsScreen() {
                      border-slate-200 dark:border-slate-700"
         >
           <FaHome />
-          Home
+          {t('common.home', lang)}
         </motion.button>
       </div>
     </motion.div>

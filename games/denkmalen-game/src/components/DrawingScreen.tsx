@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, getRandomWord, getRandomCreativePrompt, LETTERS } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { useSocket } from '@/components/SocketProvider'
 import { 
@@ -33,7 +34,8 @@ export function DrawingScreen() {
     gameType, currentLetter, creativePrompt,
     setPhase, setTimeLeft, decrementTime,
     setWord, setCurrentLetter, setCreativePrompt, addDrawing, setDrawing, drawingHistory, historyIndex,
-    saveDrawingToHistory, undo, redo, clearCanvas, setPlayer
+    saveDrawingToHistory, undo, redo, clearCanvas, setPlayer,
+    settings
   } = useGameStore()
   const { playSound, vibrate } = useGame()
   const { submitDrawing: socketSubmitDrawing, submittedCount } = useSocket()
@@ -505,7 +507,7 @@ export function DrawingScreen() {
           </motion.button>
           <div>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Round {currentRound}/{totalRounds}
+              {t('draw.round', settings.language)} {currentRound}/{totalRounds}
             </p>
             <p className="font-bold text-slate-800 dark:text-white">
               {currentPlayer?.name}
@@ -524,9 +526,9 @@ export function DrawingScreen() {
         {/* Word Display */}
         <div className="text-right">
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            {gameType === 'letter' ? 'Letter:' : 
-             gameType === 'creative' ? 'Challenge:' : 
-             gameType === 'category' ? 'Drawing:' : 'Drawing:'}
+            {gameType === 'letter' ? t('draw.letter', settings.language) : 
+             gameType === 'creative' ? t('draw.challenge', settings.language) : 
+             t('draw.label', settings.language)}
           </p>
           <p className="font-bold text-slate-800 dark:text-white">
             {!showWord ? '❓ ???' : 
@@ -562,10 +564,10 @@ export function DrawingScreen() {
               >
                 <div className="text-6xl mb-6">👀</div>
                 <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                  Only {currentPlayer?.name} should look!
+                  {currentPlayer?.name} {t('draw.onlyPlayer', settings.language)}
                 </h2>
                 <p className="text-slate-300 mb-8 text-lg">
-                  Pass the device to the current player
+                  {t('draw.passDevice', settings.language)}
                 </p>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
@@ -575,7 +577,7 @@ export function DrawingScreen() {
                              text-white font-bold text-xl rounded-2xl shadow-lg"
                 >
                   <FaEye className="inline mr-2" />
-                  Reveal Word
+                  {t('draw.reveal', settings.language)}
                 </motion.button>
               </motion.div>
             </motion.div>
@@ -593,10 +595,10 @@ export function DrawingScreen() {
             >
               <div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin mb-6" />
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-2 text-center">
-                Drawing submitted!
+                {t('draw.submitted', settings.language)}
               </h2>
               <p className="text-slate-300 text-lg">
-                Waiting for other players{room ? ` (${submittedCount}/${room.players.length})` : '...'}
+                {t('draw.waitingOthers', settings.language)}{room ? ` (${submittedCount}/${room.players.length})` : '...'}
               </p>
             </motion.div>
           )}
@@ -614,13 +616,13 @@ export function DrawingScreen() {
               {gameType === 'letter' ? (
                 <div className="bg-gradient-to-r from-primary-500 to-secondary-500 text-white 
                                 px-8 py-4 rounded-full shadow-lg text-center">
-                  <p className="text-sm opacity-80">Draw something starting with</p>
+                  <p className="text-sm opacity-80">{t('draw.drawStartsWith', settings.language)}</p>
                   <p className="text-4xl font-black mt-1">{currentLetter || ''}</p>
                 </div>
               ) : gameType === 'creative' ? (
                 <div className="bg-gradient-to-r from-pink-500 to-purple-600 text-white 
                                 px-6 py-3 rounded-2xl shadow-lg text-center max-w-xs">
-                  <p className="text-sm opacity-80 mb-1">Creative Challenge</p>
+                  <p className="text-sm opacity-80 mb-1">{t('gametype.creative', settings.language)}</p>
                   <p className="text-base font-bold leading-tight">{creativePrompt || ''}</p>
                 </div>
               ) : (
@@ -809,7 +811,7 @@ export function DrawingScreen() {
                        disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <FaCheck />
-            Done
+            {t('draw.done', settings.language)}
           </motion.button>
         </div>
       </div>
@@ -832,7 +834,7 @@ export function DrawingScreen() {
               className="bg-white dark:bg-slate-800 rounded-2xl p-4 w-full"
             >
               <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-3">
-                Select Color
+                {t('draw.selectColor', settings.language)}
               </h3>
               <div className="grid grid-cols-6 gap-2">
                 {COLORS.map((c) => (
@@ -877,10 +879,10 @@ export function DrawingScreen() {
                   <FaTrash className="text-2xl text-red-500" />
                 </div>
                 <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-                  Clear Canvas?
+                  {t('draw.clearCanvas', settings.language)}
                 </h3>
                 <p className="text-slate-500 dark:text-slate-400 mb-6">
-                  This action cannot be undone. Your current drawing will be erased.
+                  {t('draw.clearWarning', settings.language)}
                 </p>
                 <div className="flex gap-3">
                   <motion.button
@@ -889,7 +891,7 @@ export function DrawingScreen() {
                     className="flex-1 px-4 py-3 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white 
                                font-semibold rounded-xl hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                   >
-                    Cancel
+                    {t('common.cancel', settings.language)}
                   </motion.button>
                   <motion.button
                     whileTap={{ scale: 0.95 }}
@@ -909,7 +911,7 @@ export function DrawingScreen() {
                     className="flex-1 px-4 py-3 bg-red-500 text-white font-semibold rounded-xl 
                                hover:bg-red-600 transition-colors"
                   >
-                    Clear
+                    {t('draw.clear', settings.language)}
                   </motion.button>
                 </div>
               </div>
@@ -936,7 +938,7 @@ export function DrawingScreen() {
               className="bg-white dark:bg-slate-800 rounded-2xl p-4 w-full"
             >
               <h3 className="text-lg font-bold text-slate-800 dark:text-white mb-3">
-                Brush Size
+                {t('draw.brushSize', settings.language)}
               </h3>
               <div className="flex items-center justify-around">
                 {BRUSH_SIZES.map((size) => (
