@@ -82,27 +82,6 @@ function main() {
     copyDir(srcDir, destDir);
   }
 
-  // Shared cross-project scripts (e.g. js/unified-game-controls.js) live at
-  // the repo root and are referenced from game HTML as "../../js/<name>.js" —
-  // that resolves fine on the live site, but www/ is bundled as a
-  // self-contained root for the native app, so "../../" has nothing above it
-  // to point at. Copy the referenced shared file into www/js/ and rewrite the
-  // reference to match, for the packaged build only (source HTML is untouched).
-  const indexHtmlDest = path.join(wwwDir, 'index.html');
-  if (fs.existsSync(indexHtmlDest)) {
-    let html = fs.readFileSync(indexHtmlDest, 'utf8');
-    const sharedRefs = [...html.matchAll(/(?:src|href)="\.\.\/\.\.\/js\/([\w.-]+\.js)"/g)];
-    if (sharedRefs.length) {
-      for (const [, filename] of sharedRefs) {
-        const sharedSrc = path.join(ROOT, 'js', filename);
-        copyFile(sharedSrc, path.join(wwwDir, 'js', filename));
-      }
-      html = html.replace(/((?:src|href)=")\.\.\/\.\.\/js\/([\w.-]+\.js)"/g, '$1js/$2"');
-      fs.writeFileSync(indexHtmlDest, html);
-      console.log(`🔗 Rewrote ${sharedRefs.length} shared js/ reference(s) for native bundling`);
-    }
-  }
-
   // Special handling: for KingCraft, also copy dist/ assets
   const distDir = path.join(projectDir, 'dist');
   if (fs.existsSync(distDir)) {
@@ -115,6 +94,29 @@ function main() {
       if (f.endsWith('.html')) {
         copyFile(path.join(distDir, f), path.join(wwwDir, f));
       }
+    }
+  }
+
+  // Shared cross-project scripts (e.g. js/unified-game-controls.js) live at
+  // the repo root and are referenced from game HTML as "../../js/<name>.js" —
+  // that resolves fine on the live site, but www/ is bundled as a
+  // self-contained root for the native app, so "../../" has nothing above it
+  // to point at. Copy the referenced shared file into www/js/ and rewrite the
+  // reference to match, for the packaged build only (source HTML is untouched).
+  // Runs last so it processes the final index.html, including KingCraft's
+  // dist/-generated one from the block above.
+  const indexHtmlDest = path.join(wwwDir, 'index.html');
+  if (fs.existsSync(indexHtmlDest)) {
+    let html = fs.readFileSync(indexHtmlDest, 'utf8');
+    const sharedRefs = [...html.matchAll(/(?:src|href)="\.\.\/\.\.\/js\/([\w.-]+\.js)"/g)];
+    if (sharedRefs.length) {
+      for (const [, filename] of sharedRefs) {
+        const sharedSrc = path.join(ROOT, 'js', filename);
+        copyFile(sharedSrc, path.join(wwwDir, 'js', filename));
+      }
+      html = html.replace(/((?:src|href)=")\.\.\/\.\.\/js\/([\w.-]+\.js)"/g, '$1js/$2"');
+      fs.writeFileSync(indexHtmlDest, html);
+      console.log(`🔗 Rewrote ${sharedRefs.length} shared js/ reference(s) for native bundling`);
     }
   }
 
