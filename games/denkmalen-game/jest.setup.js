@@ -59,6 +59,8 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
   stroke: jest.fn(),
   fill: jest.fn(),
   arc: jest.fn(),
+  roundRect: jest.fn(),
+  drawImage: jest.fn(),
   measureText: jest.fn(() => ({ width: 0 })),
   save: jest.fn(),
   restore: jest.fn(),
@@ -66,3 +68,9 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
     addColorStop: jest.fn(),
   })),
 }))
+
+// jsdom doesn't implement canvas rendering, so toBlob is missing entirely
+// (unlike getContext, which exists as a no-op stub) — tests overwrite this
+// per-case via mockImplementation, e.g. to simulate the Blob a real canvas
+// would produce.
+HTMLCanvasElement.prototype.toBlob = jest.fn()
