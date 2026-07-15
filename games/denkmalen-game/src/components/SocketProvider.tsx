@@ -9,7 +9,7 @@ import { useGameStore, Player, Room, Word, GameType, Vote, Result, Drawing } fro
 export const SOCKET_URL =
   process.env.NEXT_PUBLIC_SOCKET_URL ||
   (process.env.NODE_ENV === 'production'
-    ? 'https://denkmalen-server.onrender.com'
+    ? 'https://denkmalen-server-hntw.onrender.com'
     : 'http://localhost:3000')
 
 // Shape the server actually sends (nested settings), vs. the flat client Room type

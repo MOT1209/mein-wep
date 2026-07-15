@@ -3,8 +3,9 @@
 # pick this repo. The frontend stays on Vercel; this service only hosts the
 # realtime socket server.
 #
-# Expected URL: https://denkmalen-server.onrender.com
-# If Render assigns a different name, rebuild the game with
+# Deployed URL: https://denkmalen-server-hntw.onrender.com (Render appended
+# the -hntw suffix at creation; the client default in SocketProvider.tsx
+# matches it). If the URL ever changes, rebuild the game with
 #   NEXT_PUBLIC_SOCKET_URL=https://<actual-name>.onrender.com
 services:
   - type: web
