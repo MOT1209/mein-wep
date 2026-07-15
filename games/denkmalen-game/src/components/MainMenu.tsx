@@ -6,17 +6,23 @@ import { useGame } from '@/components/GameProvider'
 import { FEATURES } from '@/lib/flags'
 import {
   FaCog, FaPaintBrush, FaChartBar, FaPlay,
-  FaGamepad, FaTrophy, FaStar
+  FaGamepad, FaTrophy, FaStar, FaUsers
 } from 'react-icons/fa'
 
 export function MainMenu() {
   const { setPhase, stats } = useGameStore()
-  const { playSound, vibrate } = useGame()
+  const { playSound, vibrate, startOnlineGame } = useGame()
 
   const handlePlayNow = () => {
     playSound('click')
     vibrate()
     setPhase('setup')
+  }
+
+  const handleOnlineMode = () => {
+    playSound('click')
+    vibrate()
+    startOnlineGame()
   }
 
   return (
@@ -80,9 +86,24 @@ export function MainMenu() {
       </motion.button>
 
       {/* Secondary link */}
-      <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+      <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
         No download needed • Works on any device
       </p>
+
+      {/* Online multiplayer entry point (finished & live — see FEATURES.onlineMode) */}
+      {FEATURES.onlineMode && (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleOnlineMode}
+          className="flex items-center gap-2 py-3 px-6 mb-6 bg-secondary-50 dark:bg-secondary-900/30
+                     text-secondary-600 dark:text-secondary-300 font-semibold rounded-xl
+                     border-2 border-secondary-200 dark:border-secondary-800 hover:shadow-lg transition-all"
+        >
+          <FaUsers />
+          <span>Play Online with Friends</span>
+        </motion.button>
+      )}
 
       {/* Secondary buttons - only show if there's data */}
       {(FEATURES.leaderboard && stats.gamesPlayed > 0) || (FEATURES.statistics && stats.gamesPlayed > 0) ? (
