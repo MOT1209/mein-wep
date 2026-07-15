@@ -349,7 +349,10 @@ interface GameState {
   
   // Room (online mode)
   room: Room | null
-  
+  // Room code carried in from a "?join=CODE" URL (QR scan / shared link),
+  // consumed once by OnlineLobby to pre-fill the join form.
+  pendingJoinCode: string | null
+
   // Drawing
   currentWord: Word | null
   currentDrawing: string | null
@@ -412,7 +415,8 @@ interface GameState {
   joinRoom: (code: string, player: Player) => void
   updateRoom: (updates: Partial<Room>) => void
   setRoom: (room: Room) => void
-  
+  setPendingJoinCode: (code: string | null) => void
+
   setWord: (word: Word) => void
   setDrawing: (drawing: string) => void
   addDrawing: (drawing: Drawing) => void
@@ -452,6 +456,7 @@ export const useGameStore = create<GameState>()(
       currentPlayer: null,
       players: [],
       room: null,
+      pendingJoinCode: null,
       currentWord: null,
       currentDrawing: null,
       drawings: [],
@@ -543,6 +548,8 @@ export const useGameStore = create<GameState>()(
       }),
 
       setRoom: (room) => set({ room, players: room.players }),
+
+      setPendingJoinCode: (code) => set({ pendingJoinCode: code }),
       
       setWord: (word) => set({ currentWord: word }),
       

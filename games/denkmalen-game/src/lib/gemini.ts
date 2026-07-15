@@ -1,5 +1,7 @@
 // AI Judge client — calls the server-side /api/evaluate route (which holds the Gemini key).
 
+import { hasQuota, incrementQuota } from './aiQuota'
+
 export interface AIEvaluation {
   score: number
   accuracy: number
@@ -14,6 +16,7 @@ export interface DrawingToEvaluate {
   drawingData: string
   category: string
   drawingTime: number
+  locale?: string
 }
 
 const EVALUATE_ENDPOINT = '/api/evaluate'
@@ -46,8 +49,21 @@ function defaultEvaluation(): AIEvaluation {
   }
 }
 
+// Check quota and return default if exceeded
+function checkQuotaOrFallback(): AIEvaluation | null {
+  if (!hasQuota()) {
+    console.warn('[AI] Quota exceeded — using template evaluation')
+    return defaultEvaluation()
+  }
+  return null // quota available, proceed with API call
+}
+
 // Evaluates a single drawing, with retry on rate limit / server error.
 export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEvaluation> {
+  // Check quota first
+  const quotaFallback = checkQuotaOrFallback()
+  if (quotaFallback) return quotaFallback
+
   let lastError: Error | null = null
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -62,7 +78,8 @@ export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEva
           word: drawing.word,
           drawingData: drawing.drawingData,
           category: drawing.category,
-          drawingTime: drawing.drawingTime
+          drawingTime: drawing.drawingTime,
+          locale: drawing.locale || 'en'
         }),
         signal: controller.signal
       })
@@ -72,6 +89,8 @@ export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEva
       if (response.ok) {
         const data = await response.json()
         if (data && typeof data.score === 'number') {
+          // Increment quota on successful API call
+          incrementQuota()
           return {
             score: Math.min(Math.max(data.score, 0), 100),
             accuracy: Math.min(Math.max(data.accuracy, 0), 100),

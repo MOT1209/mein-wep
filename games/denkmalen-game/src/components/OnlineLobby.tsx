@@ -39,15 +39,23 @@ export function OnlineLobby() {
     setPhase, room, currentPlayer,
     setCategory, selectedCategory,
     totalRounds, drawingTime, gameType, setGameType,
-    currentLetter: storeLetter, setCurrentLetter, settings
+    currentLetter: storeLetter, setCurrentLetter, settings,
+    pendingJoinCode, setPendingJoinCode,
   } = useGameStore()
   const { playSound, vibrate } = useGame()
   const { createRoom: socketCreateRoom, joinRoom: socketJoinRoom, startGame: socketStartGame, connected, error, clearError } = useSocket()
 
-  const [wantsToHost, setWantsToHost] = useState(true)
+  // Arrived via a shared link/QR (?join=CODE, captured by GameProvider into
+  // the store) — land straight on the Join tab with the code pre-filled.
+  const [wantsToHost, setWantsToHost] = useState(!pendingJoinCode)
   const [showSettings, setShowSettings] = useState(false)
   const [playerName, setPlayerName] = useState('')
-  const [joinCode, setJoinCode] = useState('')
+  const [joinCode, setJoinCode] = useState(pendingJoinCode || '')
+
+  useEffect(() => {
+    if (pendingJoinCode) setPendingJoinCode(null) // consume once
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [copied, setCopied] = useState(false)
   const [rounds, setRounds] = useState(totalRounds)
   const [time, setTime] = useState(drawingTime)
@@ -78,8 +86,19 @@ export function OnlineLobby() {
     setCurrentLetter(letter)
   }
 
-  const shareUrl = (code: string) =>
-    `${process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')}/join/${code}`
+  // Built from the page's own origin+path (already includes next.config.js's
+  // basePath, e.g. /denkmalen/) rather than a build-time env var — that env
+  // var previously defaulted to http://localhost:3000 and got baked into
+  // production, which is why scanning the QR code did nothing. There is no
+  // /join/:code route (this is a static single-page app), so the code is
+  // passed as a query param that GameProvider reads on load.
+  const shareUrl = (code: string) => {
+    if (typeof window === 'undefined') return ''
+    const path = window.location.pathname.endsWith('/')
+      ? window.location.pathname
+      : `${window.location.pathname}/`
+    return `${window.location.origin}${path}?join=${code}`
+  }
 
   const handleCopyCode = () => {
     if (room?.code) {

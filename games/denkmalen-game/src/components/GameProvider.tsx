@@ -48,19 +48,37 @@ function playTone(frequency: number, duration: number, type: OscillatorType = 's
 }
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const { 
-    settings, 
-    setMode, 
-    setPhase, 
-    setPlayer, 
-    addPlayer, 
+  const {
+    settings,
+    setMode,
+    setPhase,
+    setPlayer,
+    addPlayer,
     currentPlayer,
     updateStats,
     gameType,
     currentLetter,
     creativePrompt,
+    setPendingJoinCode,
   } = useGameStore()
   const { connect: connectSocket } = useSocket()
+
+  // Land directly in the online lobby with the code pre-filled when opened
+  // via a "Share Link" / QR code (?join=CODE) — e.g. from another player's
+  // scan. Runs once on mount; the query string is stripped afterward so a
+  // page refresh doesn't re-trigger it.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const code = new URLSearchParams(window.location.search).get('join')?.toUpperCase()
+    if (!code || !/^[A-Z0-9]{6}$/.test(code)) return
+
+    setPendingJoinCode(code)
+    setMode('online')
+    setPhase('lobby')
+    connectSocket()
+    window.history.replaceState({}, '', window.location.pathname)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const playSound = (sound: string) => {
     if (!settings.sound) return

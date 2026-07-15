@@ -16,10 +16,23 @@ const initAI = async () => {
   } catch { /* silent */ }
 }
 
-const JUDGE_PROMPT = 'You are a friendly and encouraging art judge for a drawing game.'
-  + ' Evaluate drawings based on: accuracy, creativity, clarity.'
-  + ' Score 0-100 for each. Be positive and constructive.'
-  + ' Return JSON: {"score":N,"accuracy":N,"creativity":N,"clarity":N,"comment":"text"}'
+function getJudgePrompt(locale: string = 'en'): string {
+  const basePrompt = 'You are a friendly and encouraging art judge for a drawing game.'
+    + ' Evaluate drawings based on: accuracy, creativity, clarity.'
+    + ' Score 0-100 for each. Be positive and constructive.'
+
+  // Language-specific instructions
+  const languageInstructions: Record<string, string> = {
+    en: ' Respond in English. Be witty and fun!',
+    de: ' Antworte auf Deutsch. Sei lustig und locker!',
+    ar: ' اكتب بالعامية المصرية (مش فصحى). كن م забавным وخفيف الظل!',
+  }
+
+  const langInstruction = languageInstructions[locale] || languageInstructions.en
+
+  return basePrompt + langInstruction
+    + ' Return JSON: {"score":N,"accuracy":N,"creativity":N,"clarity":N,"comment":"text"}'
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Rate Limiting
@@ -150,7 +163,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 })
     }
 
-    const { word, drawingData, category, drawingTime } = body
+    const { word, drawingData, category, drawingTime, locale = 'en' } = body
 
     await initAI()
 
@@ -169,7 +182,7 @@ export async function POST(request: NextRequest) {
       const base64 = drawingData.replace(/^data:image\/\w+;base64,/, '')
       const img = [{ inlineData: { mimeType: 'image/png', data: base64 } }]
 
-      const prompt = `${JUDGE_PROMPT}\n\nWord: "${word}" | Category: ${category || 'general'} | Time: ${drawingTime || 60}s\n\nReturn JSON:`
+      const prompt = `${getJudgePrompt(locale)}\n\nWord: "${word}" | Category: ${category || 'general'} | Time: ${drawingTime || 60}s\n\nReturn JSON:`
 
       const result = await model.generateContent([prompt, ...img])
       const text = result.response.text()

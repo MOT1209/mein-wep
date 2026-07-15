@@ -9,6 +9,7 @@ import { useSocket } from '@/components/SocketProvider'
 import { evaluateDrawings } from '@/lib/gemini'
 import { AIJudge, CombinedScoreDisplay } from './AIJudge'
 import { FaTrophy, FaMedal, FaStar, FaRedo, FaHome, FaRobot } from 'react-icons/fa'
+import { ResultCard } from './ResultCard'
 
 interface Result {
   rank: number
@@ -373,6 +374,24 @@ export function ResultsScreen() {
               🤖 &quot;{results[0].aiComment}&quot;
             </p>
           )}
+        </motion.div>
+      )}
+
+      {/* Share Card */}
+      {results.length > 0 && !evaluatingAI && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.5 }}
+          className="mb-6"
+        >
+          <ResultCard
+            drawing={drawings.find(d => d.id === results[0].drawingId)?.canvasData || ''}
+            word={results[0].word}
+            aiComment={results[0].aiComment}
+            score={results[0].finalScore}
+            playerName={results[0].playerName}
+          />
         </motion.div>
       )}
       

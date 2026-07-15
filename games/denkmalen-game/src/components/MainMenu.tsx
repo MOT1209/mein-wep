@@ -1,42 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
-import { SOCKET_URL } from '@/components/SocketProvider'
+import { FEATURES } from '@/lib/flags'
 import {
-  FaUsers, FaGlobe, FaCog, FaChartBar, FaPaintBrush,
-  FaGamepad, FaTrophy, FaStar, FaMobileAlt, FaQrcode
+  FaCog, FaPaintBrush, FaChartBar, FaPlay,
+  FaGamepad, FaTrophy, FaStar
 } from 'react-icons/fa'
 
 export function MainMenu() {
   const { setPhase, stats } = useGameStore()
-  const { startOnlineGame, playSound, vibrate } = useGame()
+  const { playSound, vibrate } = useGame()
 
-  // Online mode self-activates once the game server is reachable — no rebuild
-  // needed after deploying it. Until then the button stays "Coming Soon".
-  const [onlineAvailable, setOnlineAvailable] = useState(false)
-  useEffect(() => {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 5000)
-    fetch(`${SOCKET_URL}/healthz`, { signal: controller.signal })
-      .then(res => { if (res.ok) setOnlineAvailable(true) })
-      .catch(() => { /* server not deployed / asleep — keep Coming Soon */ })
-      .finally(() => clearTimeout(timeout))
-    return () => { clearTimeout(timeout); controller.abort() }
-  }, [])
-
-  const handleOfflineMode = () => {
+  const handlePlayNow = () => {
     playSound('click')
     vibrate()
     setPhase('setup')
-  }
-
-  const handleOnlineMode = () => {
-    playSound('click')
-    vibrate()
-    startOnlineGame()
   }
 
   return (
@@ -46,146 +26,109 @@ export function MainMenu() {
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col items-center justify-center p-4"
     >
-      {/* Logo */}
+      {/* Hero Section */}
       <motion.div
-        initial={{ y: -50, opacity: 0 }}
+        initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, type: 'spring', stiffness: 100 }}
-        className="text-center mb-8"
+        className="text-center mb-8 max-w-lg"
       >
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <FaPaintBrush className="text-5xl text-primary-500" />
-          <h1 className="text-5xl md:text-7xl font-bold bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 bg-clip-text text-transparent">
+        {/* Logo */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <FaPaintBrush className="text-4xl text-primary-500" />
+          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary-500 via-secondary-500 to-accent-500 bg-clip-text text-transparent">
             Denkmalen
           </h1>
         </div>
-        <p className="text-slate-600 dark:text-slate-400 text-lg">
-          Draw, Vote, Win! 🎨
+
+        {/* Headline - One sentence explaining the game */}
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-2">
+          Draw words, challenge friends, and let AI judge your art!
+        </h2>
+
+        {/* Subline - AI as differentiator */}
+        <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg">
+          Powered by AI that gives instant, fun feedback on every drawing 🤖
         </p>
       </motion.div>
 
-      {/* Animated Art Elements */}
-      <div className="relative w-64 h-32 mb-8">
-        <motion.div
-          animate={{ 
-            y: [0, -10, 0],
-            rotate: [0, 5, -5, 0]
-          }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="absolute left-0 top-0 text-4xl"
-        >
-          🎨
-        </motion.div>
-        <motion.div
-          animate={{ 
-            y: [0, -15, 0],
-            rotate: [0, -5, 5, 0]
-          }}
-          transition={{ duration: 2.5, repeat: Infinity, delay: 0.5 }}
-          className="absolute left-1/3 top-0 text-4xl"
-        >
-          ✏️
-        </motion.div>
-        <motion.div
-          animate={{ 
-            y: [0, -8, 0],
-            rotate: [0, 10, -10, 0]
-          }}
-          transition={{ duration: 2.8, repeat: Infinity, delay: 1 }}
-          className="absolute right-0 top-0 text-4xl"
-        >
-          🖌️
-        </motion.div>
-      </div>
-
-      {/* Main Menu Buttons */}
-      <div className="flex flex-col gap-4 w-full max-w-md">
-        {/* Offline Mode - Big Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={handleOfflineMode}
-          className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-primary-500 to-primary-600 
-                     text-white font-bold text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
-        >
-          <div className="absolute inset-0 bg-white/10" />
-          <FaMobileAlt className="text-3xl relative z-10" />
-          <div className="text-left relative z-10">
-            <div className="text-xl">Offline Mode</div>
-            <div className="text-sm opacity-80 font-normal">Same Device - Pass & Play</div>
-          </div>
-        </motion.button>
-
-        {/* Online Mode - enabled automatically once the game server responds */}
-        {onlineAvailable ? (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleOnlineMode}
-            className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-secondary-500 to-secondary-600
-                       text-white font-bold text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all"
-          >
-            <div className="absolute inset-0 bg-white/10" />
-            <FaQrcode className="text-3xl relative z-10" />
-            <div className="text-left relative z-10">
-              <div className="text-xl">Online Mode</div>
-              <div className="text-sm opacity-80 font-normal">QR Code - Different Devices</div>
-            </div>
-          </motion.button>
-        ) : (
-          <motion.div
-            className="relative overflow-hidden flex items-center justify-center gap-4 py-6 px-6 bg-gradient-to-r from-slate-400 to-slate-500
-                       text-white font-bold text-xl rounded-2xl shadow-lg opacity-60 cursor-not-allowed"
-          >
-            <div className="absolute inset-0 bg-white/10" />
-            <FaQrcode className="text-3xl relative z-10" />
-            <div className="text-left relative z-10">
-              <div className="text-xl">Online Mode</div>
-              <div className="text-sm opacity-80 font-normal">Coming Soon - Multiplayer Server</div>
-            </div>
-          </motion.div>
-        )}
-
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { playSound('click'); setPhase('leaderboard') }}
-            className="flex flex-col items-center justify-center gap-2 py-4 px-4 bg-white dark:bg-slate-800 
-                       text-slate-700 dark:text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all
-                       border-2 border-slate-200 dark:border-slate-700"
-          >
-            <FaTrophy className="text-2xl text-yellow-500" />
-            <span>Leaderboard</span>
-          </motion.button>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => { playSound('click'); setPhase('stats') }}
-            className="flex flex-col items-center justify-center gap-2 py-4 px-4 bg-white dark:bg-slate-800 
-                       text-slate-700 dark:text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all
-                       border-2 border-slate-200 dark:border-slate-700"
-          >
-            <FaChartBar className="text-2xl text-green-500" />
-            <span>Statistics</span>
-          </motion.button>
+      {/* Demo Video Placeholder */}
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="w-full max-w-md mb-8 rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 aspect-video flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600"
+      >
+        <div className="text-center p-4">
+          <div className="text-5xl mb-3">🎬</div>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Demo video coming soon</p>
+          <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">6 seconds of gameplay</p>
         </div>
+      </motion.div>
 
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => { playSound('click'); setPhase('settings') }}
-          className="flex items-center justify-center gap-3 py-3 px-6 bg-white dark:bg-slate-800 
-                     text-slate-700 dark:text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl transition-all
-                     border-2 border-slate-200 dark:border-slate-700 mt-2"
-        >
-          <FaCog className="text-xl" />
-          Settings
-        </motion.button>
-      </div>
+      {/* Primary CTA Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={handlePlayNow}
+        className="relative overflow-hidden flex items-center justify-center gap-3 py-5 px-10 bg-gradient-to-r from-primary-500 to-primary-600 
+                   text-white font-bold text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all mb-6"
+      >
+        <div className="absolute inset-0 bg-white/10" />
+        <FaPlay className="text-xl relative z-10" />
+        <span className="relative z-10">Play Now</span>
+      </motion.button>
 
-      {/* Stats Preview */}
+      {/* Secondary link */}
+      <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">
+        No download needed • Works on any device
+      </p>
+
+      {/* Secondary buttons - only show if there's data */}
+      {(FEATURES.leaderboard && stats.gamesPlayed > 0) || (FEATURES.statistics && stats.gamesPlayed > 0) ? (
+        <div className="flex gap-4 mb-4">
+          {FEATURES.leaderboard && stats.gamesPlayed > 0 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { playSound('click'); setPhase('leaderboard') }}
+              className="flex items-center gap-2 py-3 px-5 bg-white dark:bg-slate-800 
+                         text-slate-700 dark:text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all
+                         border-2 border-slate-200 dark:border-slate-700"
+            >
+              <FaTrophy className="text-yellow-500" />
+              <span>Leaderboard</span>
+            </motion.button>
+          )}
+
+          {FEATURES.statistics && stats.gamesPlayed > 0 && (
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => { playSound('click'); setPhase('stats') }}
+              className="flex items-center gap-2 py-3 px-5 bg-white dark:bg-slate-800 
+                         text-slate-700 dark:text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all
+                         border-2 border-slate-200 dark:border-slate-700"
+            >
+              <FaChartBar className="text-green-500" />
+              <span>Statistics</span>
+            </motion.button>
+          )}
+        </div>
+      ) : null}
+
+      {/* Settings link */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => { playSound('click'); setPhase('settings') }}
+        className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
+      >
+        <FaCog className="text-sm" />
+        <span className="text-sm">Settings</span>
+      </motion.button>
+
+      {/* Stats Preview - only if player has played */}
       {stats.gamesPlayed > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
