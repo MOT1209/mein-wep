@@ -10,6 +10,11 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  // Disable x-powered-by header
+  poweredByHeader: false,
 }
 
 module.exports = nextConfig

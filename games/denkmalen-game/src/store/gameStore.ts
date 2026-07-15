@@ -1,6 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { v4 as uuidv4 } from 'uuid'
+import { getRandomWordFromList, getAllCategories } from '@/lib/words'
+import type { Lang } from '@/lib/i18n'
 
 // Types
 export type GameMode = 'offline' | 'online' | null
@@ -281,14 +283,26 @@ export function getRandomCreativePrompt(): string {
   return CREATIVE_PROMPTS[Math.floor(Math.random() * CREATIVE_PROMPTS.length)]
 }
 
-// Get random word
-export function getRandomWord(category: Category): Word {
-  if (category === 'random') {
-    const allCategories = Object.keys(WORDS).filter(c => c !== 'random' && c !== 'custom') as Category[]
-    const randomCat = allCategories[Math.floor(Math.random() * allCategories.length)]
-    return getRandomWord(randomCat)
+// Get random word. Sources from the per-language word database (src/lib/words.ts)
+// so the word matches the player's chosen language — falls back to the
+// English-only WORDS table above only for categories/languages that
+// database doesn't cover (custom, or a future language added there but not
+// wired up here).
+export function getRandomWord(category: Category, lang?: Lang): Word {
+  const language = lang ?? useGameStore.getState().settings.language
+
+  if (category === 'random' || category === 'custom') {
+    const available = getAllCategories(language) as Category[]
+    const randomCat = available[Math.floor(Math.random() * available.length)]
+    return getRandomWord(randomCat, language)
   }
-  
+
+  const entry = getRandomWordFromList(language, category)
+  if (entry) {
+    return { word: entry.word, emoji: entry.emoji, category }
+  }
+
+  // Fallback: category not present in the language database
   const words = WORDS[category] || WORDS.random
   return words[Math.floor(Math.random() * words.length)]
 }
