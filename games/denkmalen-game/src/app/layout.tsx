@@ -4,6 +4,7 @@ import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import { GameProvider } from '@/components/GameProvider'
 import { SocketProvider } from '@/components/SocketProvider'
+import { AuthProvider } from '@/components/AuthProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' })
@@ -64,11 +65,13 @@ export default function RootLayout({
     <html lang={lang} dir={dir} translate="no" suppressHydrationWarning>
       <body className={`${inter.className} ${cairo.variable}`}>
         <ThemeProvider>
-          <SocketProvider>
-            <GameProvider>
-              {children}
-            </GameProvider>
-          </SocketProvider>
+          <AuthProvider>
+            <SocketProvider>
+              <GameProvider>
+                {children}
+              </GameProvider>
+            </SocketProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

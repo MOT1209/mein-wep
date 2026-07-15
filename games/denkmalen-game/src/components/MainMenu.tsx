@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
 import { FEATURES } from '@/lib/flags'
+import { AuthWidget } from '@/components/AuthWidget'
 import {
   FaCog, FaPaintBrush, FaChartBar, FaPlay,
   FaGamepad, FaTrophy, FaStar, FaUsers
@@ -32,6 +33,9 @@ export function MainMenu() {
       exit={{ opacity: 0 }}
       className="min-h-screen flex flex-col items-center justify-center p-4"
     >
+      {/* Optional account sign-in — never blocks play, just sync stats when used */}
+      <AuthWidget />
+
       {/* Hero Section */}
       <motion.div
         initial={{ y: -30, opacity: 0 }}
