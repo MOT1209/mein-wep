@@ -4,9 +4,10 @@ import { motion } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
 import { useTheme } from '@/components/ThemeProvider'
-import { 
+import { useAuth } from '@/components/AuthProvider'
+import {
   FaArrowLeft, FaMoon, FaSun, FaVolumeUp, FaVolumeMute,
-  FaMusic, FaMobileAlt, FaGlobe, FaPalette, FaUser
+  FaMusic, FaMobileAlt, FaGlobe, FaPalette, FaUser, FaSignOutAlt
 } from 'react-icons/fa'
 import { t, LANGUAGE_OPTIONS } from '@/lib/i18n'
 
@@ -14,6 +15,7 @@ export function SettingsScreen() {
   const { settings, setSettings, setPhase } = useGameStore()
   const { playSound, vibrate } = useGame()
   const { theme, setTheme, resolvedTheme } = useTheme()
+  const { user, loading: authLoading, signIn, signOut } = useAuth()
   const lang = settings.language
 
   const toggleSetting = (key: keyof typeof settings) => {
@@ -195,44 +197,72 @@ export function SettingsScreen() {
           </h2>
 
           <div className="space-y-3">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl 
-                         flex items-center gap-3 text-left"
-            >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-secondary-400 
-                              flex items-center justify-center text-white font-bold">
-                G
-              </div>
-              <div>
-                <p className="font-medium text-slate-800 dark:text-white">{t('settings.guest', lang)}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{t('settings.noAccount', lang)}</p>
-              </div>
-            </motion.button>
+            {authLoading ? (
+              <div className="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl h-16 animate-pulse" />
+            ) : user ? (
+              <>
+                <div className="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl flex items-center gap-3 text-left">
+                  {user.user_metadata?.avatar_url ? (
+                    <img
+                      src={user.user_metadata.avatar_url}
+                      alt=""
+                      className="w-10 h-10 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-secondary-400
+                                    flex items-center justify-center text-white font-bold">
+                      {(user.user_metadata?.full_name || user.email || '?').charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-medium text-slate-800 dark:text-white">
+                      {user.user_metadata?.full_name || user.email}
+                    </p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('settings.signedIn', lang)}</p>
+                  </div>
+                </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full p-3 bg-white dark:bg-slate-600 border-2 border-slate-200 
-                         dark:border-slate-500 rounded-xl flex items-center gap-3"
-            >
-              <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-xl">
-                🔑
-              </div>
-              <span className="font-medium text-slate-800 dark:text-white">{t('settings.signInGoogle', lang)}</span>
-            </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => { playSound('click'); vibrate(); signOut() }}
+                  className="w-full p-3 bg-white dark:bg-slate-600 border-2 border-slate-200
+                             dark:border-slate-500 rounded-xl flex items-center gap-3"
+                >
+                  <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-500 flex items-center justify-center text-lg text-slate-600 dark:text-white">
+                    <FaSignOutAlt />
+                  </div>
+                  <span className="font-medium text-slate-800 dark:text-white">{t('auth.signOut', lang)}</span>
+                </motion.button>
+              </>
+            ) : (
+              <>
+                <div className="w-full p-3 bg-slate-50 dark:bg-slate-700 rounded-xl
+                                 flex items-center gap-3 text-left">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-secondary-400
+                                  flex items-center justify-center text-white font-bold">
+                    G
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-800 dark:text-white">{t('settings.guest', lang)}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">{t('settings.noAccount', lang)}</p>
+                  </div>
+                </div>
 
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full p-3 bg-black dark:bg-slate-600 rounded-xl flex items-center gap-3"
-            >
-              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white text-xl">
-                
-              </div>
-              <span className="font-medium text-white">{t('settings.signInApple', lang)}</span>
-            </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => { playSound('click'); vibrate(); signIn() }}
+                  className="w-full p-3 bg-white dark:bg-slate-600 border-2 border-slate-200
+                             dark:border-slate-500 rounded-xl flex items-center gap-3"
+                >
+                  <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-xl">
+                    🔑
+                  </div>
+                  <span className="font-medium text-slate-800 dark:text-white">{t('settings.signInGoogle', lang)}</span>
+                </motion.button>
+              </>
+            )}
           </div>
         </div>
 

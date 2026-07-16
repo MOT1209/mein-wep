@@ -60,6 +60,12 @@ const GAME_TYPES: { id: GameType; title: string; description: string; icon: stri
   },
 ]
 
+// GAME_TYPES above carries id/icon/color only as stable metadata; title and
+// description are looked up through these so every language stays in sync
+// with the shared gametype.* / gametype.*.desc dictionary entries.
+const gameTypeTitle = (id: GameType, lang: 'en' | 'ar' | 'de') => t(`gametype.${id}`, lang)
+const gameTypeDesc = (id: GameType, lang: 'en' | 'ar' | 'de') => t(`gametype.${id}.desc`, lang)
+
 export function OfflineSetup() {
   const { setPhase, setCategory, setGameType, setCurrentLetter, setCreativePrompt, selectedCategory, totalRounds, drawingTime, settings } = useGameStore()
   const { startOfflineGame, playSound, vibrate } = useGame()
@@ -187,11 +193,11 @@ export function OfflineSetup() {
         </motion.button>
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
-            Offline Mode
+            {t('setup.offlineMode', settings.language)}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
             <FaMobile className="text-primary-500" />
-            Same Device - Pass the phone between players
+            {t('setup.sameDevice', settings.language)}
           </p>
         </div>
       </div>
@@ -201,15 +207,15 @@ export function OfflineSetup() {
         {(['names', 'gametype', 'settings'] as const).map((s, i) => (
           <div key={s} className="flex items-center gap-2">
             <div className={`flex items-center gap-2 px-3 py-2 rounded-full text-sm transition-all ${
-              step === s 
-                ? 'bg-primary-500 text-white shadow-lg scale-105' 
+              step === s
+                ? 'bg-primary-500 text-white shadow-lg scale-105'
                 : getStepNumber(step) > getStepNumber(s)
                   ? 'bg-green-500 text-white'
                   : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
             }`}>
               <span className="font-bold">{getStepNumber(s) > getStepNumber(s) ? '✓' : getStepNumber(s)}</span>
               <span className="hidden sm:inline">
-                {s === 'names' ? 'Players' : s === 'gametype' ? 'Game Type' : 'Settings'}
+                {s === 'names' ? t('setup.playersCount', settings.language) : s === 'gametype' ? t('setup.gameType', settings.language) : t('settings.title', settings.language)}
               </span>
             </div>
             {i < 2 && (
@@ -235,7 +241,7 @@ export function OfflineSetup() {
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                 <FaUsers className="text-primary-500" />
-                Players ({players.length}/8)
+                {t('setup.playersCount', settings.language)} ({players.length}/8)
               </h2>
               <motion.button
                 whileHover={{ scale: 1.1 }}
@@ -249,7 +255,7 @@ export function OfflineSetup() {
             </div>
 
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-              Enter names of players who will share this phone
+              {t('setup.enterNames', settings.language)}
             </p>
 
             <div className="space-y-3">
@@ -270,7 +276,7 @@ export function OfflineSetup() {
                       type="text"
                       value={player.name}
                       onChange={(e) => updatePlayerName(index, e.target.value)}
-                      placeholder={`Player ${index + 1} name`}
+                      placeholder={`${t('setup.playerName', settings.language)} ${index + 1}`}
                       className="input flex-1"
                       maxLength={20}
                     />
@@ -291,7 +297,7 @@ export function OfflineSetup() {
 
             {players.filter(p => p.name.trim()).length < 2 && (
               <p className="text-sm text-amber-500 mt-4 text-center">
-                ⚠️ Add at least 2 players to start
+                ⚠️ {t('setup.minPlayersWarning', settings.language)}
               </p>
             )}
           </motion.div>
@@ -306,10 +312,10 @@ export function OfflineSetup() {
             className="card"
           >
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-              Choose Game Type
+              {t('setup.chooseGameType', settings.language)}
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-              Select how you want to play
+              {t('setup.selectHow', settings.language)}
             </p>
 
             <div className="grid grid-cols-1 gap-3">
@@ -332,10 +338,10 @@ export function OfflineSetup() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-lg text-slate-800 dark:text-white">
-                        {type.title}
+                        {gameTypeTitle(type.id, settings.language)}
                       </h3>
                       <p className="text-sm text-slate-500 dark:text-slate-400">
-                        {type.description}
+                        {gameTypeDesc(type.id, settings.language)}
                       </p>
                     </div>
                     <div className="shrink-0">
@@ -366,32 +372,32 @@ export function OfflineSetup() {
             className="card"
           >
             <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-4">
-              Game Settings
+              {t('setup.gameSettings', settings.language)}
             </h2>
 
             {/* Selected Game Type Badge */}
             <div className="mb-4 p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
-              <span className="text-sm text-slate-500 dark:text-slate-400">Game Mode: </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{t('setup.gameMode', settings.language)}: </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gradient-to-r from-primary-500 to-secondary-500 text-white rounded-full text-sm font-bold">
                 {GAME_TYPES.find(g => g.id === localGameType)?.icon}{' '}
-                {GAME_TYPES.find(g => g.id === localGameType)?.title}
+                {gameTypeTitle(localGameType, settings.language)}
               </span>
               {localGameType === 'letter' && localLetter && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-purple-500 text-white rounded-full text-sm font-bold ml-2">
-                  Letter: {localLetter}
+                  {t('draw.letter', settings.language)} {localLetter}
                 </span>
               )}
               {localGameType === 'category' && (
                 <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-500 text-white rounded-full text-sm font-bold ml-2">
                   {CATEGORIES.find(c => c.id === localCategory)?.emoji}{' '}
-                  {CATEGORIES.find(c => c.id === localCategory)?.name}
+                  {t(`category.${localCategory}`, settings.language)}
                 </span>
               )}
             </div>
 
             {/* Players Preview */}
             <div className="flex items-center gap-2 mb-4 p-3 bg-slate-50 dark:bg-slate-700 rounded-xl">
-              <span className="text-sm text-slate-500 dark:text-slate-400">Players:</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">{t('setup.playersCount', settings.language)}:</span>
               <div className="flex flex-wrap gap-1">
                 {players.filter(p => p.name.trim()).map((p, i) => (
                   <span key={i} className="px-2 py-1 bg-primary-100 dark:bg-primary-900 text-primary-700 dark:text-primary-300 rounded-full text-sm">
@@ -404,7 +410,7 @@ export function OfflineSetup() {
             {/* Rounds */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">
-                Number of Rounds
+                {t('setup.rounds', settings.language)}
               </label>
               <div className="flex gap-2">
                 {[2, 3, 4, 5].map((r) => (
@@ -462,7 +468,7 @@ export function OfflineSetup() {
                 >
                   <span className="text-slate-700 dark:text-white font-medium">
                     {CATEGORIES.find(c => c.id === (localGameType === 'category' ? localCategory : selectedCategory))?.emoji}{' '}
-                    {CATEGORIES.find(c => c.id === (localGameType === 'category' ? localCategory : selectedCategory))?.name}
+                    {t(`category.${localGameType === 'category' ? localCategory : selectedCategory}`, settings.language)}
                   </span>
                   <span className="text-slate-400">▼</span>
                 </motion.button>
@@ -569,11 +575,11 @@ export function OfflineSetup() {
               className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl"
             >
               <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-                Select Category
+                {t('setup.selectCategory', settings.language)}
               </h3>
               {localGameType === 'category' && (
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                  Choose a category for this game
+                  {t('setup.chooseCategory', settings.language)}
                 </p>
               )}
               <div className="grid grid-cols-3 gap-3">
@@ -598,7 +604,7 @@ export function OfflineSetup() {
                     }`}
                   >
                     <span className="text-2xl">{cat.emoji}</span>
-                    <span className="text-sm font-medium">{cat.name}</span>
+                    <span className="text-sm font-medium">{t(`category.${cat.id}`, settings.language)}</span>
                   </motion.button>
                 ))}
               </div>
@@ -625,10 +631,10 @@ export function OfflineSetup() {
               className="bg-white dark:bg-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl"
             >
               <h3 className="text-xl font-bold text-slate-800 dark:text-white mb-2">
-                Choose a Letter
+                {t('setup.chooseLetter', settings.language)}
               </h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-                Every word you draw must start with this letter
+                {t('setup.letterHint', settings.language)}
               </p>
               <div className="grid grid-cols-6 gap-2">
                 {LETTERS.map((letter) => (

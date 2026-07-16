@@ -2,6 +2,8 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 
 interface DrawingTimerProps {
   timeLeft: number
@@ -15,7 +17,8 @@ interface DrawingTimerProps {
  */
 export function DrawingTimer({ timeLeft, totalTime, onWarning, onTimeUp }: DrawingTimerProps) {
   const [hasWarned, setHasWarned] = useState(false)
-  
+  const lang = useGameStore((s) => s.settings.language)
+
   const percentage = (timeLeft / totalTime) * 100
   
   const getColor = () => {
@@ -95,7 +98,7 @@ export function DrawingTimer({ timeLeft, totalTime, onWarning, onTimeUp }: Drawi
       
       {/* Label */}
       <div className="hidden sm:block">
-        <p className="text-xs text-slate-500 dark:text-slate-400">Time Left</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{t('draw.timeLeft', lang)}</p>
         <p className={`text-sm font-medium ${getColor()}`}>{timeLeft}s</p>
       </div>
     </div>

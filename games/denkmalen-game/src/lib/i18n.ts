@@ -18,6 +18,26 @@ const translations: Record<string, Record<Lang, string>> = {
   'menu.statistics':   { en: 'Statistics',          ar: 'الإحصائيات',                        de: 'Statistiken' },
   'menu.settings':     { en: 'Settings',            ar: 'الإعدادات',                         de: 'Einstellungen' },
   'menu.play':         { en: 'Play',                ar: 'العب',                              de: 'Spielen' },
+  'menu.headline':     { en: 'Draw words, challenge friends, and let AI judge your art!', ar: 'ارسم الكلمات، تحدَّ أصدقاءك، ودع الذكاء الاصطناعي يحكم على فنك!', de: 'Zeichne Wörter, fordere Freunde heraus und lass die KI deine Kunst bewerten!' },
+  'menu.subline':      { en: 'Powered by AI that gives instant, fun feedback on every drawing 🤖', ar: 'مدعوم بذكاء اصطناعي يقدّم ملاحظات فورية وممتعة على كل رسمة 🤖', de: 'Angetrieben von KI, die sofortiges, unterhaltsames Feedback zu jeder Zeichnung gibt 🤖' },
+  'menu.demoSoon':     { en: 'Demo video coming soon', ar: 'فيديو تجريبي قريبًا', de: 'Demo-Video kommt bald' },
+  'menu.demoLength':   { en: '6 seconds of gameplay', ar: '6 ثوانٍ من اللعب', de: '6 Sekunden Gameplay' },
+  'menu.playNow':      { en: 'Play Now',             ar: 'العب الآن',                         de: 'Jetzt spielen' },
+  'menu.noDownload':   { en: 'No download needed • Works on any device', ar: 'بدون تحميل • يعمل على أي جهاز', de: 'Kein Download nötig • Funktioniert auf jedem Gerät' },
+  'menu.playOnline':   { en: 'Play Online with Friends', ar: 'العب أونلاين مع الأصدقاء',       de: 'Online mit Freunden spielen' },
+  'menu.games':        { en: 'Games',                ar: 'ألعاب',                             de: 'Spiele' },
+  'menu.wins':         { en: 'Wins',                 ar: 'انتصارات',                          de: 'Siege' },
+  'menu.best':         { en: 'Best:',                ar: 'الأفضل:',                           de: 'Beste:' },
+  'menu.signInGoogle': { en: 'Sign in with Google',  ar: 'تسجيل الدخول بجوجل',                de: 'Mit Google anmelden' },
+
+  // ── Auth Widget ────────────────────────────────────────────────────
+  'auth.signOut':      { en: 'Sign out',             ar: 'تسجيل الخروج',                     de: 'Abmelden' },
+
+  // ── Error Boundary ─────────────────────────────────────────────────
+  'error.title':       { en: 'Oops! Something went wrong', ar: 'عذرًا! حدث خطأ ما',            de: 'Hoppla! Etwas ist schiefgelaufen' },
+  'error.message':     { en: "We encountered an unexpected error. Don't worry, it's not your fault!", ar: 'واجهنا خطأ غير متوقع. لا تقلق، الأمر ليس خطأك!', de: 'Ein unerwarteter Fehler ist aufgetreten. Keine Sorge, das ist nicht deine Schuld!' },
+  'error.tryAgain':    { en: 'Try Again',             ar: 'أعد المحاولة',                     de: 'Erneut versuchen' },
+  'error.goHome':      { en: 'Go Home',               ar: 'العودة للرئيسية',                  de: 'Zur Startseite' },
 
   // ── Game Types ─────────────────────────────────────────────────────
   'gametype.classic':      { en: 'Classic',           ar: 'كلاسيكي',                     de: 'Klassisch' },
@@ -25,6 +45,11 @@ const translations: Record<string, Record<Lang, string>> = {
   'gametype.category':     { en: 'Category Mode',     ar: 'وضع التصنيف',                  de: 'Kategoriemodus' },
   'gametype.creative':     { en: 'Creative Challenge', ar: 'تحدي إبداعي',                 de: 'Kreative Herausforderung' },
   'gametype.daily':        { en: 'Daily Challenge',   ar: 'تحدي يومي',                    de: 'Tägliche Herausforderung' },
+  'gametype.classic.desc':  { en: 'Draw the secret word!', ar: 'ارسم الكلمة السرية!', de: 'Zeichne das geheime Wort!' },
+  'gametype.letter.desc':   { en: 'Draw anything starting with a letter!', ar: 'ارسم أي شيء يبدأ بحرف معين!', de: 'Zeichne etwas, das mit einem Buchstaben beginnt!' },
+  'gametype.category.desc': { en: 'Draw from a specific category!', ar: 'ارسم من تصنيف معين!', de: 'Zeichne aus einer bestimmten Kategorie!' },
+  'gametype.daily.desc':    { en: 'Same prompt for everyone today!', ar: 'نفس التحدي للجميع اليوم!', de: 'Der gleiche Prompt für alle heute!' },
+  'gametype.creative.desc': { en: 'AI-generated creative prompts!', ar: 'تحديات إبداعية من الذكاء الاصطناعي!', de: 'KI-generierte kreative Prompts!' },
 
   // ── Drawing Screen ─────────────────────────────────────────────────
   'draw.round':        { en: 'Round',             ar: 'الجولة',                          de: 'Runde' },
@@ -59,6 +84,9 @@ const translations: Record<string, Record<Lang, string>> = {
   'vote.seeResults':   { en: 'See Results',        ar: 'عرض النتائج',                     de: 'Ergebnisse ansehen' },
   'vote.votesCollected': { en: 'Votes Collected',  ar: 'الأصوات المجمعة',                 de: 'Stimmen gesammelt' },
   'vote.yourDrawing':  { en: 'Your Drawing',       ar: 'رسمتك',                           de: 'Deine Zeichnung' },
+  'vote.tapFavorite':  { en: 'Tap on your favorite drawing to vote', ar: 'اضغط على رسمتك المفضلة للتصويت', de: 'Tippe auf deine Lieblingszeichnung, um abzustimmen' },
+  'vote.voteFor':      { en: 'vote for the best drawing starting with', ar: 'صوّت لأفضل رسمة تبدأ بـ',  de: 'stimme für die beste Zeichnung, die beginnt mit' },
+  'vote.voteForCreative': { en: 'vote for the best creative drawing!', ar: 'صوّت لأفضل رسمة إبداعية!', de: 'stimme für die beste kreative Zeichnung!' },
 
   // ── Results Screen ─────────────────────────────────────────────────
   'results.round':     { en: 'Round Results',      ar: 'نتائج الجولة',                    de: 'Ergebnisse der Runde' },
@@ -78,6 +106,9 @@ const translations: Record<string, Record<Lang, string>> = {
   'results.letterMode': { en: 'Letter:',           ar: 'الحرف:',                          de: 'Buchstabe:' },
   'results.creativeChallenge': { en: 'Creative Challenge', ar: 'تحدي إبداعي',             de: 'Kreative Herausforderung' },
   'results.categoryMode': { en: 'Category Mode',   ar: 'وضع التصنيف',                     de: 'Kategoriemodus' },
+  'results.fromVotes':  { en: 'from Votes (70%)', ar: 'من التصويت (70%)',                de: 'von Stimmen (70%)' },
+  'results.fromAI':     { en: 'from AI (30%)',    ar: 'من الذكاء الاصطناعي (30%)',        de: 'von KI (30%)' },
+  'results.finalScoreShort': { en: 'Final Score', ar: 'النتيجة النهائية',                de: 'Endergebnis' },
 
   // ── Leaderboard ────────────────────────────────────────────────────
   'leader.title':      { en: 'Leaderboard',        ar: 'لوحة المتصدرين',                  de: 'Bestenliste' },
@@ -103,7 +134,7 @@ const translations: Record<string, Record<Lang, string>> = {
   'settings.guest':        { en: 'Continue as Guest',   ar: 'المتابعة كضيف',                de: 'Als Gast fortfahren' },
   'settings.noAccount':    { en: 'No account needed',   ar: 'لا حاجة لحساب',                 de: 'Kein Konto nötig' },
   'settings.signInGoogle': { en: 'Sign In with Google', ar: 'تسجيل الدخول بجوجل',           de: 'Mit Google anmelden' },
-  'settings.signInApple':  { en: 'Sign In with Apple',  ar: 'تسجيل الدخول بأبل',            de: 'Mit Apple anmelden' },
+  'settings.signedIn':     { en: 'Signed in',           ar: 'تم تسجيل الدخول',              de: 'Angemeldet' },
 
   // ── Setup Screen ───────────────────────────────────────────────────
   'setup.title':       { en: 'Game Setup',         ar: 'إعداد اللعبة',                    de: 'Spieleinstellungen' },
@@ -126,6 +157,11 @@ const translations: Record<string, Record<Lang, string>> = {
   'setup.chooseLetter': { en: 'Choose a Letter',   ar: 'اختر حرفاً',                      de: 'Wähle einen Buchstaben' },
   'setup.letterHint':  { en: 'Every word you draw must start with this letter', ar: 'كل كلمة ترسمها يجب أن تبدأ بهذا الحرف', de: 'Jedes Wort das du zeichnest muss mit diesem Buchstaben beginnen' },
   'setup.nextGameType': { en: 'Next: Game Type →', ar: 'التالي: نوع اللعبة →',             de: 'Weiter: Spieltyp →' },
+  'setup.gameType':    { en: 'Game Type',          ar: 'نوع اللعبة',                       de: 'Spieltyp' },
+  'setup.minPlayersWarning': { en: 'Add at least 2 players to start', ar: 'أضف لاعبين اثنين على الأقل للبدء', de: 'Füge mindestens 2 Spieler hinzu, um zu starten' },
+  'setup.playerName':  { en: 'Player',             ar: 'اللاعب',                           de: 'Spieler' },
+  'setup.gameModeLabel': { en: 'Game Mode:',       ar: 'وضع اللعبة:',                     de: 'Spielmodus:' },
+  'setup.playersLabel': { en: 'Players:',          ar: 'اللاعبون:',                       de: 'Spieler:' },
 
   // ── Online Lobby ───────────────────────────────────────────────────
   'lobby.title':       { en: 'Online Lobby',       ar: 'غرفة الانتظار',                   de: 'Online-Lobby' },

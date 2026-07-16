@@ -1,24 +1,17 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from 'next/server'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Word Generation API — Uses Gemini to generate creative words
 // ─────────────────────────────────────────────────────────────────────────────
 
-const _0x1a2b = (() => {
-  const _0x3c4d = [0x47,0x45,0x4d,0x49,0x4e,0x49]
-  const _0x5e6f = [0x5f,0x41,0x50,0x49,0x5f,0x4b,0x45,0x59]
-  return String.fromCharCode(..._0x3c4d) + String.fromCharCode(..._0x5e6f)
-})()
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || ''
+let genAI: import('@google/generative-ai').GoogleGenerativeAI | null = null
 
-const _0x7890 = process.env[_0x1a2b] || ''
-let _genAI: any = null
-
-const _initAI = async () => {
-  if (_genAI || !_0x7890) return
+const initAI = async () => {
+  if (genAI || !GEMINI_API_KEY) return
   try {
     const mod = await import('@google/generative-ai')
-    _genAI = new mod.GoogleGenerativeAI(_0x7890)
+    genAI = new mod.GoogleGenerativeAI(GEMINI_API_KEY)
   } catch { /* silent */ }
 }
 
@@ -63,16 +56,16 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get('x-forwarded-for') || 'unknown'
     
     // Initialize AI
-    await _initAI()
+    await initAI()
 
-    if (!_genAI || !_0x7890) {
+    if (!genAI || !GEMINI_API_KEY) {
       // Return random words from our database
       const words = Array.from({ length: Math.min(count, 10) }, () => getRandomWord(category))
       return NextResponse.json({ words, source: 'database' })
     }
 
     try {
-      const model = _genAI.getGenerativeModel({
+      const model = genAI.getGenerativeModel({
         model: 'gemini-2.5-flash',
         generationConfig: { temperature: 0.9, maxOutputTokens: 200 }
       })

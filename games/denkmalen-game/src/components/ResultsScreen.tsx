@@ -28,6 +28,7 @@ interface Result {
 
 export function ResultsScreen() {
   const { mode, drawings, votes, players, currentRound, totalRounds, setPhase, resetGame, nextRound, setPlayer, gameType, currentLetter, creativePrompt, selectedCategory, settings } = useGameStore()
+  const lang = settings.language
   const { playSound, vibrate } = useGame()
   const { nextRound: socketNextRound } = useSocket()
 
@@ -213,10 +214,10 @@ export function ResultsScreen() {
       >
         <div className="text-6xl mb-4">🏆</div>
         <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 bg-clip-text text-transparent">
-          Round Results!
+          {t('results.round', lang)}!
         </h1>
         <p className="text-slate-600 dark:text-slate-400 mt-2">
-          Round {currentRound} - {gameType === 'letter' ? `Letter: ${currentLetter}` : gameType === 'creative' ? 'Creative Challenge' : gameType === 'category' ? 'Category Mode' : 'Classic Mode'}
+          {t('draw.round', lang)} {currentRound} - {gameType === 'letter' ? `${t('draw.letter', lang)} ${currentLetter}` : gameType === 'creative' ? t('results.creativeChallenge', lang) : gameType === 'category' ? t('results.categoryMode', lang) : t('results.classicMode', lang)}
         </p>
       </motion.div>
 
@@ -236,10 +237,10 @@ export function ResultsScreen() {
             <FaRobot className="text-4xl text-purple-500" />
           </motion.div>
           <h3 className="text-lg font-bold text-purple-700 dark:text-purple-300">
-            AI Judge is Analyzing Drawings...
+            {t('results.aiAnalyzing', lang)}
           </h3>
           <p className="text-sm text-purple-500 dark:text-purple-400 mt-1">
-            Evaluating accuracy, creativity, and clarity ✨
+            {t('results.evaluating', lang)} ✨
           </p>
           <div className="flex justify-center gap-1 mt-3">
             {[0, 1, 2].map((i) => (
@@ -294,11 +295,11 @@ export function ResultsScreen() {
                   <p className={`text-sm ${
                     result.rank <= 3 ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
                   }`}>
-                    {result.votes} vote{result.votes !== 1 ? 's' : ''} • {gameType === 'letter' ? `Letter: ${currentLetter}` : gameType === 'creative' ? result.word : result.word}
+                    {result.votes} {t('leader.votes', lang)} • {gameType === 'letter' ? `${t('draw.letter', lang)} ${currentLetter}` : result.word}
                   </p>
                   {result.aiFailed && (
                     <span className="inline-block mt-1 px-2 py-0.5 bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 text-xs rounded-full">
-                      ⚠️ AI score unavailable
+                      ⚠️ {t('results.aiUnavailable', lang)}
                     </span>
                   )}
                 </div>
@@ -335,7 +336,7 @@ export function ResultsScreen() {
                         voteScore={result.voteScore}
                         aiScore={result.aiFailed ? -1 : result.aiScore}
                         finalScore={result.finalScore}
-                        aiComment={result.aiFailed ? 'AI evaluation was unavailable for this round. Score is based on votes only.' : result.aiComment}
+                        aiComment={result.aiFailed ? t('results.aiEvalUnavailable', lang) : result.aiComment}
                       />
                     </div>
                   </motion.div>
@@ -355,17 +356,17 @@ export function ResultsScreen() {
           className="mb-6 text-center"
         >
           <div className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-            🎉 {results[0].playerName} wins this round! 🎉
+            🎉 {results[0].playerName} {t('results.winnerWins', lang)} 🎉
           </div>
           <div className="flex items-center justify-center gap-4 text-sm">
             <div className="flex items-center gap-1 text-yellow-500">
               <FaStar />
-              <span className="font-bold">+{results[0].finalScore} points</span>
+              <span className="font-bold">+{results[0].finalScore} {t('results.points', lang)}</span>
             </div>
             {!results[0].aiFailed && (
               <div className="flex items-center gap-1 text-purple-500">
                 <FaRobot />
-                <span>AI: {results[0].aiScore}</span>
+                <span>{t('results.aiScore', lang)} {results[0].aiScore}</span>
               </div>
             )}
           </div>
@@ -406,7 +407,7 @@ export function ResultsScreen() {
                        text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
           >
             <FaRedo />
-            Next Round ({currentRound + 1}/{totalRounds})
+            {t('results.nextRound', lang)} ({currentRound + 1}/{totalRounds})
           </motion.button>
         ) : (
           <motion.button
@@ -420,7 +421,7 @@ export function ResultsScreen() {
                        text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
           >
             <FaTrophy />
-            Leaderboard
+            {t('leader.title', lang)}
           </motion.button>
         )}
 
@@ -437,7 +438,7 @@ export function ResultsScreen() {
                      border-slate-200 dark:border-slate-700"
         >
           <FaHome />
-          {t('common.home', settings.language)}
+          {t('common.home', lang)}
         </motion.button>
       </div>
     </motion.div>

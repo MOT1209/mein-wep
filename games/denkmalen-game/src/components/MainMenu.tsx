@@ -5,14 +5,16 @@ import { useGameStore } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
 import { FEATURES } from '@/lib/flags'
 import { AuthWidget } from '@/components/AuthWidget'
+import { t } from '@/lib/i18n'
 import {
   FaCog, FaPaintBrush, FaChartBar, FaPlay,
   FaGamepad, FaTrophy, FaStar, FaUsers
 } from 'react-icons/fa'
 
 export function MainMenu() {
-  const { setPhase, stats } = useGameStore()
+  const { setPhase, stats, settings } = useGameStore()
   const { playSound, vibrate, startOnlineGame } = useGame()
+  const lang = settings.language
 
   const handlePlayNow = () => {
     playSound('click')
@@ -53,12 +55,12 @@ export function MainMenu() {
 
         {/* Headline - One sentence explaining the game */}
         <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white mb-2">
-          Draw words, challenge friends, and let AI judge your art!
+          {t('menu.headline', lang)}
         </h2>
 
         {/* Subline - AI as differentiator */}
         <p className="text-slate-600 dark:text-slate-400 text-base md:text-lg">
-          Powered by AI that gives instant, fun feedback on every drawing 🤖
+          {t('menu.subline', lang)}
         </p>
       </motion.div>
 
@@ -71,8 +73,8 @@ export function MainMenu() {
       >
         <div className="text-center p-4">
           <div className="text-5xl mb-3">🎬</div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Demo video coming soon</p>
-          <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">6 seconds of gameplay</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('menu.demoSoon', lang)}</p>
+          <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">{t('menu.demoLength', lang)}</p>
         </div>
       </motion.div>
 
@@ -81,17 +83,17 @@ export function MainMenu() {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={handlePlayNow}
-        className="relative overflow-hidden flex items-center justify-center gap-3 py-5 px-10 bg-gradient-to-r from-primary-500 to-primary-600 
+        className="relative overflow-hidden flex items-center justify-center gap-3 py-5 px-10 bg-gradient-to-r from-primary-500 to-primary-600
                    text-white font-bold text-xl rounded-2xl shadow-lg hover:shadow-xl transition-all mb-6"
       >
         <div className="absolute inset-0 bg-white/10" />
         <FaPlay className="text-xl relative z-10" />
-        <span className="relative z-10">Play Now</span>
+        <span className="relative z-10">{t('menu.playNow', lang)}</span>
       </motion.button>
 
       {/* Secondary link */}
       <p className="text-slate-500 dark:text-slate-400 text-sm mb-4">
-        No download needed • Works on any device
+        {t('menu.noDownload', lang)}
       </p>
 
       {/* Online multiplayer entry point (finished & live — see FEATURES.onlineMode) */}
@@ -105,7 +107,7 @@ export function MainMenu() {
                      border-2 border-secondary-200 dark:border-secondary-800 hover:shadow-lg transition-all"
         >
           <FaUsers />
-          <span>Play Online with Friends</span>
+          <span>{t('menu.playOnline', lang)}</span>
         </motion.button>
       )}
 
@@ -122,7 +124,7 @@ export function MainMenu() {
                          border-2 border-slate-200 dark:border-slate-700"
             >
               <FaTrophy className="text-yellow-500" />
-              <span>Leaderboard</span>
+              <span>{t('menu.leaderboard', lang)}</span>
             </motion.button>
           )}
 
@@ -131,12 +133,12 @@ export function MainMenu() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => { playSound('click'); setPhase('stats') }}
-              className="flex items-center gap-2 py-3 px-5 bg-white dark:bg-slate-800 
+              className="flex items-center gap-2 py-3 px-5 bg-white dark:bg-slate-800
                          text-slate-700 dark:text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all
                          border-2 border-slate-200 dark:border-slate-700"
             >
               <FaChartBar className="text-green-500" />
-              <span>Statistics</span>
+              <span>{t('menu.statistics', lang)}</span>
             </motion.button>
           )}
         </div>
@@ -150,7 +152,7 @@ export function MainMenu() {
         className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-white transition-colors"
       >
         <FaCog className="text-sm" />
-        <span className="text-sm">Settings</span>
+        <span className="text-sm">{t('menu.settings', lang)}</span>
       </motion.button>
 
       {/* Stats Preview - only if player has played */}
@@ -163,15 +165,15 @@ export function MainMenu() {
         >
           <div className="flex items-center gap-1">
             <FaGamepad />
-            <span>{stats.gamesPlayed} Games</span>
+            <span>{stats.gamesPlayed} {t('menu.games', lang)}</span>
           </div>
           <div className="flex items-center gap-1">
             <FaTrophy className="text-yellow-500" />
-            <span>{stats.wins} Wins</span>
+            <span>{stats.wins} {t('menu.wins', lang)}</span>
           </div>
           <div className="flex items-center gap-1">
             <FaStar className="text-purple-500" />
-            <span>Best: {stats.highestScore}</span>
+            <span>{t('menu.best', lang)} {stats.highestScore}</span>
           </div>
         </motion.div>
       )}

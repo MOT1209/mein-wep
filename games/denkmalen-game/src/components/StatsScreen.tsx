@@ -19,12 +19,12 @@ export function StatsScreen() {
     { icon: FaClock, label: t('stats.drawingTime', lang), value: stats.totalDrawingTime, color: 'text-orange-500', bg: 'from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20' },
   ]
 
-  const gameTypeLabels: Record<string, { label: string; emoji: string }> = {
-    classic: { label: 'Classic', emoji: '✏️' },
-    letter: { label: 'Letter Mode', emoji: '🔤' },
-    category: { label: 'Category Mode', emoji: '📂' },
-    creative: { label: 'Creative Challenge', emoji: '🎨' },
-    daily: { label: 'Daily Challenge', emoji: '📅' },
+  const gameTypeEmoji: Record<string, string> = {
+    classic: '✏️',
+    letter: '🔤',
+    category: '📂',
+    creative: '🎨',
+    daily: '📅',
   }
 
   const winRate = stats.gamesPlayed > 0 
@@ -124,8 +124,8 @@ export function StatsScreen() {
             <div className="flex-1">
               <p className="text-sm text-slate-500 dark:text-slate-400">{t('stats.favoriteGameType', lang)}</p>
               <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                {gameTypeLabels[stats.favoriteGameType]?.emoji || '🎮'}{' '}
-                {gameTypeLabels[stats.favoriteGameType]?.label || stats.favoriteGameType}
+                {gameTypeEmoji[stats.favoriteGameType] || '🎮'}{' '}
+                {t(`gametype.${stats.favoriteGameType}`, lang)}
               </p>
             </div>
           </div>
@@ -145,7 +145,7 @@ export function StatsScreen() {
               </div>
               <div className="flex-1">
                 <p className="text-sm text-slate-500 dark:text-slate-400">{t('stats.favoriteCategory', lang)}</p>
-                <p className="text-2xl font-bold text-slate-800 dark:text-white capitalize">{stats.favoriteCategory}</p>
+                <p className="text-2xl font-bold text-slate-800 dark:text-white capitalize">{t(`category.${stats.favoriteCategory}`, lang)}</p>
               </div>
             </div>
           </motion.div>

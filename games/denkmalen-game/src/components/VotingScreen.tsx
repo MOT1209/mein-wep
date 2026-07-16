@@ -172,10 +172,10 @@ export function VotingScreen() {
             : hasVoterVoted
               ? `${t('vote.waiting', settings.language)} (${votedPlayers.length}/${players.length})`
               : gameType === 'letter'
-                ? `${voter ? voter.name + ', vote' : 'Vote'} for the best drawing starting with "${currentLetter}"!`
+                ? `${voter ? voter.name + ', ' : ''}${t('vote.voteFor', settings.language)} "${currentLetter}"!`
                 : gameType === 'creative'
-                  ? `${voter ? voter.name + ', vote' : 'Vote'} for the best creative drawing!`
-                  : `${voter ? voter.name + ', tap' : 'Tap'} on your favorite drawing to vote`
+                  ? `${voter ? voter.name + ', ' : ''}${t('vote.voteForCreative', settings.language)}`
+                  : `${voter ? voter.name + ' — ' : ''}${t('vote.tapFavorite', settings.language)}`
           }
         </p>
       </div>

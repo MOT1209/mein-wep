@@ -4,6 +4,8 @@ import { motion } from 'framer-motion'
 import { FaGoogle, FaSignOutAlt } from 'react-icons/fa'
 import { useAuth } from '@/components/AuthProvider'
 import { useGame } from '@/components/GameProvider'
+import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 
 /**
  * Optional account sign-in, shown as a small row at the top of the main
@@ -13,6 +15,7 @@ import { useGame } from '@/components/GameProvider'
 export function AuthWidget() {
   const { user, loading, signIn, signOut } = useAuth()
   const { playSound } = useGame()
+  const lang = useGameStore((s) => s.settings.language)
 
   if (loading) return <div className="h-9" />
 
@@ -37,7 +40,7 @@ export function AuthWidget() {
         <button
           onClick={() => { playSound('click'); signOut() }}
           className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-          aria-label="Sign out"
+          aria-label={t('auth.signOut', lang)}
         >
           <FaSignOutAlt className="text-sm" />
         </button>
@@ -57,7 +60,7 @@ export function AuthWidget() {
                  hover:shadow-md transition-all mb-4"
     >
       <FaGoogle className="text-red-500" />
-      <span>Sign in with Google</span>
+      <span>{t('menu.signInGoogle', lang)}</span>
     </motion.button>
   )
 }

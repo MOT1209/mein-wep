@@ -174,11 +174,11 @@ export function OnlineLobby() {
         </motion.button>
         <div>
           <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
-            Online Mode
+            {t('lobby.onlineMode', settings.language)}
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-2">
             <FaQrcode className="text-secondary-500" />
-            Different Devices - Use QR Code or Room Code
+            {t('lobby.differentDevices', settings.language)}
           </p>
         </div>
       </div>
@@ -200,7 +200,7 @@ export function OnlineLobby() {
           <>
             {/* Room Code - Big Display */}
             <div className="card text-center">
-              <p className="text-slate-600 dark:text-slate-400 mb-2">Share this code with friends:</p>
+              <p className="text-slate-600 dark:text-slate-400 mb-2">{t('lobby.shareCode', settings.language)}</p>
               <div className="text-6xl font-bold tracking-[0.3em] text-primary-500 mb-4 bg-slate-50 dark:bg-slate-700 py-4 rounded-xl">
                 {room.code}
               </div>
@@ -215,24 +215,24 @@ export function OnlineLobby() {
                              flex items-center gap-2 text-slate-700 dark:text-white"
                 >
                   <FaCopy />
-                  {copied ? '✓ Copied!' : 'Copy Code'}
+                  {copied ? t('lobby.copied', settings.language) : t('lobby.copyCode', settings.language)}
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={handleShare}
-                  className="px-4 py-2 bg-secondary-500 text-white rounded-xl 
+                  className="px-4 py-2 bg-secondary-500 text-white rounded-xl
                              flex items-center gap-2"
                 >
                   <FaShare />
-                  Share Link
+                  {t('lobby.shareLink', settings.language)}
                 </motion.button>
               </div>
 
               {/* QR Code */}
               <div className="border-t border-slate-200 dark:border-slate-600 pt-4">
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-3">
-                  Or scan QR Code to join:
+                  {t('lobby.orScanQR', settings.language)}
                 </p>
                 <div className="flex justify-center">
                   <div className="p-4 bg-white rounded-xl shadow-lg">
@@ -250,7 +250,7 @@ export function OnlineLobby() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
                   <FaUsers className="text-primary-500" />
-                  Players ({room.players.length}/{room.maxPlayers})
+                  {t('lobby.players', settings.language)} ({room.players.length}/{room.maxPlayers})
                 </h2>
               </div>
 
@@ -259,10 +259,10 @@ export function OnlineLobby() {
                   <div className="text-center py-8">
                     <div className="text-4xl mb-3">⏳</div>
                     <p className="text-slate-500 dark:text-slate-400">
-                      Waiting for players to join...
+                      {t('lobby.waitingJoin', settings.language)}
                     </p>
                     <p className="text-sm text-slate-400 dark:text-slate-500 mt-2">
-                      Share the code or QR code above
+                      {t('lobby.shareCodeQR', settings.language)}
                     </p>
                   </div>
                 ) : (
@@ -281,9 +281,9 @@ export function OnlineLobby() {
                         {player.name}
                       </span>
                       {player.id === room.hostId && (
-                        <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 
+                        <span className="px-2 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700
                                          dark:text-yellow-300 text-xs rounded-full font-medium">
-                          Host
+                          {t('lobby.host', settings.language)}
                         </span>
                       )}
                     </motion.div>
@@ -336,12 +336,12 @@ export function OnlineLobby() {
                           >
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-lg">{type.emoji}</span>
-                              <span className="font-bold text-sm">{type.name}</span>
+                              <span className="font-bold text-sm">{t(`gametype.${type.id}`, settings.language)}</span>
                             </div>
                             <p className={`text-xs ${
                               selectedGameType === type.id ? 'text-white/80' : 'text-slate-500 dark:text-slate-400'
                             }`}>
-                              {type.description}
+                              {t(`gametype.${type.id}.desc`, settings.language)}
                             </p>
                           </motion.button>
                         ))}
@@ -437,7 +437,7 @@ export function OnlineLobby() {
                                 : 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-white'
                             }`}
                           >
-                            {cat.emoji} {cat.name}
+                            {cat.emoji} {t(`category.${cat.id}`, settings.language)}
                           </motion.button>
                         ))}
                       </div>
@@ -464,7 +464,7 @@ export function OnlineLobby() {
                   type="text"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Your Name"
+                  placeholder={t('lobby.yourName', settings.language)}
                   className="input mb-4"
                   maxLength={20}
                 />
@@ -498,7 +498,7 @@ export function OnlineLobby() {
                   type="text"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Your Name"
+                  placeholder={t('lobby.yourName', settings.language)}
                   className="input mb-4"
                   maxLength={20}
                 />
@@ -507,7 +507,7 @@ export function OnlineLobby() {
                   type="text"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  placeholder="Enter Room Code"
+                  placeholder={t('lobby.enterRoomCode', settings.language)}
                   className="input mb-4 text-center text-3xl tracking-[0.3em] uppercase font-bold"
                   maxLength={6}
                 />

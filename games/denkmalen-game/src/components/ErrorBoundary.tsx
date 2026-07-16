@@ -3,6 +3,8 @@
 import { Component, ReactNode } from 'react'
 import { motion } from 'framer-motion'
 import { FaExclamationTriangle, FaRedo } from 'react-icons/fa'
+import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 
 interface Props {
   children: ReactNode
@@ -42,6 +44,8 @@ export class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback
       }
 
+      const lang = useGameStore.getState().settings.language
+
       return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
           <motion.div
@@ -62,11 +66,11 @@ export class ErrorBoundary extends Component<Props, State> {
             </motion.div>
 
             <h2 className="text-2xl font-bold text-slate-800 dark:text-white mb-2">
-              Oops! Something went wrong
+              {t('error.title', lang)}
             </h2>
-            
+
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              We encountered an unexpected error. Don&apos;t worry, it&apos;s not your fault!
+              {t('error.message', lang)}
             </p>
 
             {process.env.NODE_ENV === 'development' && this.state.error && (
@@ -86,17 +90,17 @@ export class ErrorBoundary extends Component<Props, State> {
                            text-white font-bold rounded-xl shadow-lg flex items-center gap-2"
               >
                 <FaRedo />
-                Try Again
+                {t('error.tryAgain', lang)}
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => window.location.href = '/'}
-                className="px-6 py-3 bg-slate-200 dark:bg-slate-700 
+                className="px-6 py-3 bg-slate-200 dark:bg-slate-700
                            text-slate-700 dark:text-white font-bold rounded-xl"
               >
-                Go Home
+                {t('error.goHome', lang)}
               </motion.button>
             </div>
           </motion.div>

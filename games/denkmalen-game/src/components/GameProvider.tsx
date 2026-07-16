@@ -80,6 +80,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Keep the document's dir/lang attributes in sync with the chosen
+  // language — layout.tsx can only render a static 'ltr'/'en' default at
+  // build time (static export has no per-request server), so Arabic's
+  // right-to-left layout has to be applied client-side once the store
+  // hydrates from localStorage, same treatment as ThemeProvider's dark class.
+  useEffect(() => {
+    document.documentElement.dir = settings.language === 'ar' ? 'rtl' : 'ltr'
+    document.documentElement.lang = settings.language
+  }, [settings.language])
+
   const playSound = (sound: string) => {
     if (!settings.sound) return
     

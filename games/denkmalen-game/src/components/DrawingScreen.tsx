@@ -48,7 +48,10 @@ export function DrawingScreen() {
   const [showBrushSizes, setShowBrushSizes] = useState(false)
   const [showWarning, setShowWarning] = useState(() => mode !== 'online')
   const [waitingForOthers, setWaitingForOthers] = useState(false)
-  const [showWord, setShowWord] = useState(false)
+  // Online mode has no pass-device gate — the word is that player's own
+  // secret from the start, so show it immediately instead of waiting for
+  // handleRevealWord (which only the offline pass-and-play overlay triggers).
+  const [showWord, setShowWord] = useState(() => mode === 'online')
   const [canvasReady, setCanvasReady] = useState(false)
   const [zoom, setZoom] = useState(1)
   const [showClearModal, setShowClearModal] = useState(false)

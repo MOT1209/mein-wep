@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FaRobot, FaStar, FaPalette, FaEye, FaLightbulb, FaComment } from 'react-icons/fa'
+import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 
 interface AIEvaluation {
   score: number
@@ -253,6 +255,7 @@ export function CombinedScoreDisplay({
 }) {
   const votesWeight = Math.round(voteScore * 0.7)
   const aiWeight = Math.round(aiScore * 0.3)
+  const lang = useGameStore((s) => s.settings.language)
 
   return (
     <motion.div
@@ -261,14 +264,14 @@ export function CombinedScoreDisplay({
       className="bg-white dark:bg-slate-800 rounded-2xl p-4 shadow-lg"
     >
       <h3 className="font-bold text-slate-800 dark:text-white mb-3 text-center">
-        Final Score Breakdown
+        {t('results.final', lang)}
       </h3>
 
       <div className="flex items-center justify-center gap-4 mb-4">
         {/* Votes Score */}
         <div className="text-center">
           <div className="text-2xl font-bold text-blue-500">{votesWeight}</div>
-          <div className="text-xs text-slate-500">from Votes (70%)</div>
+          <div className="text-xs text-slate-500">{t('results.fromVotes', lang)}</div>
         </div>
 
         <div className="text-2xl text-slate-400">+</div>
@@ -276,7 +279,7 @@ export function CombinedScoreDisplay({
         {/* AI Score */}
         <div className="text-center">
           <div className="text-2xl font-bold text-purple-500">{aiWeight}</div>
-          <div className="text-xs text-slate-500">from AI (30%)</div>
+          <div className="text-xs text-slate-500">{t('results.fromAI', lang)}</div>
         </div>
 
         <div className="text-2xl text-slate-400">=</div>
@@ -287,12 +290,12 @@ export function CombinedScoreDisplay({
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.3 }}
-            className="text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500 
+            className="text-3xl font-bold bg-gradient-to-r from-primary-500 to-secondary-500
                        bg-clip-text text-transparent"
           >
             {finalScore}
           </motion.div>
-          <div className="text-xs text-slate-500">Final Score</div>
+          <div className="text-xs text-slate-500">{t('results.finalScoreShort', lang)}</div>
         </div>
       </div>
 
