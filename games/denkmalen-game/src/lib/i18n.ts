@@ -229,6 +229,37 @@ const translations: Record<string, Record<Lang, string>> = {
   'misc.version':     { en: 'Denkmalen v1.0.0',   ar: 'دنكمالن v1.0.0',                  de: 'Denkmalen v1.0.0' },
   'misc.madeWith':    { en: 'Made with ❤️ for creative minds', ar: 'صنع بـ ❤️ للأذهان الإبداعية', de: 'Mit ❤️ für kreative Köpfe gemacht' },
 
+  // ── AI Judge ────────────────────────────────────────────────────────
+  'ai.evaluating':   { en: 'AI Judge is evaluating...', ar: 'الحكم الذكي يقيّم…',              de: 'KI-Richter bewertet…' },
+  'ai.analyzing':    { en: 'Analyzing your drawing ✨', ar: 'يحلّل رسمتك ✨',                  de: 'Deine Zeichnung wird analysiert ✨' },
+  'ai.judgeScore':   { en: 'AI Judge Score',            ar: 'نتيجة الحكم الذكي',              de: 'KI-Richter-Bewertung' },
+  'ai.outOf100':     { en: 'out of 100',                ar: 'من 100',                          de: 'von 100' },
+  'ai.accuracy':     { en: 'Accuracy',                  ar: 'الدقة',                           de: 'Genauigkeit' },
+  'ai.creativity':   { en: 'Creativity',                ar: 'الإبداع',                         de: 'Kreativität' },
+  'ai.clarity':      { en: 'Clarity',                   ar: 'الوضوح',                          de: 'Klarheit' },
+
+  // ── Result Card ─────────────────────────────────────────────────────
+  'result.share':      { en: 'Share',    ar: 'مشاركة', de: 'Teilen' },
+  'result.download':   { en: 'Download', ar: 'تحميل',  de: 'Herunterladen' },
+  'result.shareTitle': { en: 'Denkmalen Result', ar: 'نتيجة دنكمالن', de: 'Denkmalen-Ergebnis' },
+  'result.shareText':  { en: 'I scored {score} points drawing "{word}" in Denkmalen! 🎨', ar: 'حصلت على {score} نقطة برسم "{word}" في دنكمالن! 🎨', de: 'Ich habe {score} Punkte für "{word}" in Denkmalen bekommen! 🎨' },
+
+  // ── Lobby sharing ───────────────────────────────────────────────────
+  'lobby.shareTitle': { en: 'Denkmalen - Join My Game!', ar: 'دنكمالن - انضم للعبتي!', de: 'Denkmalen - Tritt meinem Spiel bei!' },
+  'lobby.shareText':  { en: 'Join my Denkmalen game! Use code: {code}', ar: 'انضم للعبتي في دنكمالن! استخدم الكود: {code}', de: 'Tritt meinem Denkmalen-Spiel bei! Code: {code}' },
+
+  // ── Accessibility ───────────────────────────────────────────────────
+  'a11y.skipToContent': { en: 'Skip to main content', ar: 'تخطَّ إلى المحتوى الرئيسي', de: 'Zum Hauptinhalt springen' },
+
+  // ── Socket / server errors ──────────────────────────────────────────
+  'socket.connectionFailed': { en: 'Could not reach the game server. Check your connection and try again.', ar: 'تعذّر الوصول إلى خادم اللعبة. تحقق من اتصالك وحاول مرة أخرى.', de: 'Der Spielserver ist nicht erreichbar. Prüfe deine Verbindung und versuche es erneut.' },
+  'socket.tooManyRooms':     { en: 'Too many rooms created. Please wait a moment.', ar: 'تم إنشاء غرف كثيرة. انتظر لحظة من فضلك.', de: 'Zu viele Räume erstellt. Bitte warte einen Moment.' },
+  'socket.nameRequired':     { en: 'A valid player name is required', ar: 'يجب إدخال اسم لاعب صالح', de: 'Ein gültiger Spielername ist erforderlich' },
+  'socket.invalidCode':      { en: 'Invalid room code',    ar: 'كود الغرفة غير صالح',      de: 'Ungültiger Raumcode' },
+  'socket.roomNotFound':     { en: 'Room not found',       ar: 'الغرفة غير موجودة',        de: 'Raum nicht gefunden' },
+  'socket.roomFull':         { en: 'Room is full',         ar: 'الغرفة ممتلئة',            de: 'Raum ist voll' },
+  'socket.gameInProgress':   { en: 'Game already in progress', ar: 'اللعبة بدأت بالفعل',   de: 'Spiel läuft bereits' },
+
   // ── Statistics ──────────────────────────────────────────────────────
   'stats.yourJourney':  { en: 'Your drawing journey', ar: 'رحلتك في الرسم',              de: 'Deine Zeichenreise' },
   'stats.winRate':      { en: 'Win Rate',             ar: 'نسبة الفوز',                   de: 'Gewinnrate' },

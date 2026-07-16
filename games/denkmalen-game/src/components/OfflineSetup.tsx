@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGameStore, Category, GameType, LETTERS, getRandomCreativePrompt } from '@/store/gameStore'
+import { useGameStore, Category, GameType, getLetters, getRandomCreativePrompt } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
 import { t } from '@/lib/i18n'
 import { FaArrowLeft, FaPlus, FaTimes, FaPlay, FaUsers, FaMobile } from 'react-icons/fa'
@@ -148,7 +148,7 @@ export function OfflineSetup() {
       // Creative mode: set prompt and go to settings
       setGameType(type)
       setCurrentLetter(null)
-      setCreativePrompt(getRandomCreativePrompt())
+      setCreativePrompt(getRandomCreativePrompt(settings.language))
       setStep('settings')
     }
   }
@@ -637,7 +637,7 @@ export function OfflineSetup() {
                 {t('setup.letterHint', settings.language)}
               </p>
               <div className="grid grid-cols-6 gap-2">
-                {LETTERS.map((letter) => (
+                {getLetters(settings.language).map((letter) => (
                   <motion.button
                     key={letter}
                     whileHover={{ scale: 1.1 }}

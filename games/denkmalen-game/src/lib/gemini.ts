@@ -28,9 +28,8 @@ function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-function defaultEvaluation(): AIEvaluation {
-  const base = 60 + Math.floor(Math.random() * 20)
-  const comments = [
+const FALLBACK_COMMENTS: Record<string, string[]> = {
+  en: [
     'Great effort! Keep drawing! 🎨',
     'Nice try! I can see what you were going for! ✨',
     'Creative interpretation! Well done! 🌟',
@@ -39,7 +38,32 @@ function defaultEvaluation(): AIEvaluation {
     'That\'s a fun take on it! 🎉',
     'I love the creativity! 🎨',
     'Well done! The effort shows! ⭐',
-  ]
+  ],
+  ar: [
+    'مجهود رائع! واصل الرسم! 🎨',
+    'محاولة جميلة! فهمت ما كنت تقصده! ✨',
+    'تفسير مبدع! أحسنت! 🌟',
+    'عمل جيد! كل رسمة تحكي قصة! 🎭',
+    'استمر! أنت تتحسن! 💪',
+    'لمسة ممتعة منك! 🎉',
+    'أحببت الإبداع! 🎨',
+    'أحسنت! المجهود واضح! ⭐',
+  ],
+  de: [
+    'Tolle Leistung! Zeichne weiter! 🎨',
+    'Guter Versuch! Ich sehe, was du wolltest! ✨',
+    'Kreative Interpretation! Gut gemacht! 🌟',
+    'Gute Arbeit! Jede Zeichnung erzählt eine Geschichte! 🎭',
+    'Weiter so! Du wirst immer besser! 💪',
+    'Eine lustige Umsetzung! 🎉',
+    'Ich liebe die Kreativität! 🎨',
+    'Gut gemacht! Die Mühe zeigt sich! ⭐',
+  ],
+}
+
+function defaultEvaluation(locale: string = 'en'): AIEvaluation {
+  const base = 60 + Math.floor(Math.random() * 20)
+  const comments = FALLBACK_COMMENTS[locale] ?? FALLBACK_COMMENTS.en
   return {
     score: base,
     accuracy: Math.min(Math.max(base - 5 + Math.floor(Math.random() * 10), 0), 100),
@@ -50,10 +74,10 @@ function defaultEvaluation(): AIEvaluation {
 }
 
 // Check quota and return default if exceeded
-function checkQuotaOrFallback(): AIEvaluation | null {
+function checkQuotaOrFallback(locale: string = 'en'): AIEvaluation | null {
   if (!hasQuota()) {
     console.warn('[AI] Quota exceeded — using template evaluation')
-    return defaultEvaluation()
+    return defaultEvaluation(locale)
   }
   return null // quota available, proceed with API call
 }
@@ -61,7 +85,7 @@ function checkQuotaOrFallback(): AIEvaluation | null {
 // Evaluates a single drawing, with retry on rate limit / server error.
 export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEvaluation> {
   // Check quota first
-  const quotaFallback = checkQuotaOrFallback()
+  const quotaFallback = checkQuotaOrFallback(drawing.locale || 'en')
   if (quotaFallback) return quotaFallback
 
   let lastError: Error | null = null
@@ -96,7 +120,7 @@ export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEva
             accuracy: Math.min(Math.max(data.accuracy, 0), 100),
             creativity: Math.min(Math.max(data.creativity, 0), 100),
             clarity: Math.min(Math.max(data.clarity, 0), 100),
-            comment: typeof data.comment === 'string' ? data.comment : 'Good effort!'
+            comment: typeof data.comment === 'string' ? data.comment : defaultEvaluation(drawing.locale || 'en').comment
           }
         }
       }
@@ -126,7 +150,7 @@ export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEva
 
   // All retries failed - return default
   console.warn('[AI] Evaluation failed:', lastError?.message || 'unknown')
-  return defaultEvaluation()
+  return defaultEvaluation(drawing.locale || 'en')
 }
 
 // Evaluates several drawings concurrently (bounded), keyed by drawing id.

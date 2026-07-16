@@ -29,6 +29,7 @@ export function AIJudge({
   drawingTime,
   onEvaluationComplete 
 }: AIJudgeProps) {
+  const lang = useGameStore((s) => s.settings.language)
   const [evaluation, setEvaluation] = useState<AIEvaluation | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -50,6 +51,7 @@ export function AIJudge({
           drawingData,
           category,
           drawingTime,
+          locale: lang,
         }),
       })
 
@@ -97,10 +99,10 @@ export function AIJudge({
           </motion.div>
           <div>
             <p className="font-bold text-purple-700 dark:text-purple-300">
-              AI Judge is evaluating...
+              {t('ai.evaluating', lang)}
             </p>
             <p className="text-sm text-purple-500 dark:text-purple-400">
-              Analyzing your drawing ✨
+              {t('ai.analyzing', lang)}
             </p>
           </div>
         </div>
@@ -152,7 +154,7 @@ export function AIJudge({
       <div className="flex items-center gap-2 mb-3">
         <FaRobot className="text-purple-500 text-xl" />
         <span className="font-bold text-purple-700 dark:text-purple-300">
-          AI Judge Score
+          {t('ai.judgeScore', lang)}
         </span>
       </div>
 
@@ -167,28 +169,28 @@ export function AIJudge({
         >
           {evaluation.score}
         </motion.div>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">out of 100</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">{t('ai.outOf100', lang)}</p>
       </div>
 
       {/* Score Breakdown */}
       <div className="space-y-2 mb-4">
-        <ScoreBar 
-          icon={<FaEye />} 
-          label="Accuracy" 
-          value={evaluation.accuracy} 
-          color="blue" 
+        <ScoreBar
+          icon={<FaEye />}
+          label={t('ai.accuracy', lang)}
+          value={evaluation.accuracy}
+          color="blue"
         />
-        <ScoreBar 
-          icon={<FaLightbulb />} 
-          label="Creativity" 
-          value={evaluation.creativity} 
-          color="yellow" 
+        <ScoreBar
+          icon={<FaLightbulb />}
+          label={t('ai.creativity', lang)}
+          value={evaluation.creativity}
+          color="yellow"
         />
-        <ScoreBar 
-          icon={<FaPalette />} 
-          label="Clarity" 
-          value={evaluation.clarity} 
-          color="green" 
+        <ScoreBar
+          icon={<FaPalette />}
+          label={t('ai.clarity', lang)}
+          value={evaluation.clarity}
+          color="green"
         />
       </div>
 

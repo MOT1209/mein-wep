@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGameStore, Category, GameType, LETTERS, getRandomWord, getRandomCreativePrompt } from '@/store/gameStore'
+import { useGameStore, Category, GameType, getLetters, getRandomWord, getRandomCreativePrompt } from '@/store/gameStore'
 import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { useSocket } from '@/components/SocketProvider'
@@ -113,8 +113,8 @@ export function OnlineLobby() {
     if (navigator.share && room?.code) {
       try {
         await navigator.share({
-          title: 'Denkmalen - Join My Game!',
-          text: `Join my Denkmalen game! Use code: ${room.code}`,
+          title: t('lobby.shareTitle', settings.language),
+          text: t('lobby.shareText', settings.language).replace('{code}', room.code),
           url: shareUrl(room.code),
         })
       } catch (err) {
@@ -151,7 +151,7 @@ export function OnlineLobby() {
     vibrate([100, 50, 100])
     const words = Array.from({ length: room.players.length }, () => getRandomWord(selectedCategory))
     const letter = selectedGameType === 'letter' ? selectedLetter : null
-    const prompt = selectedGameType === 'creative' ? getRandomCreativePrompt() : null
+    const prompt = selectedGameType === 'creative' ? getRandomCreativePrompt(settings.language) : null
     socketStartGame(words, selectedGameType, letter, prompt)
   }
 
@@ -360,7 +360,7 @@ export function OnlineLobby() {
                           {t('lobby.startingLetter', settings.language)}
                         </label>
                         <div className="flex gap-1 overflow-x-auto pb-2 scrollbar-hide">
-                          {LETTERS.map((letter) => (
+                          {getLetters(settings.language).map((letter) => (
                             <motion.button
                               key={letter}
                               whileTap={{ scale: 0.9 }}

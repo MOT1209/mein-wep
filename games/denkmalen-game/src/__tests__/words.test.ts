@@ -1,4 +1,39 @@
 import { getWordList, getRandomWordFromList, getAllCategories } from '@/lib/words'
+import { getLetters, getRandomCreativePrompt, CREATIVE_PROMPTS } from '@/store/gameStore'
+
+describe('language-aware game content', () => {
+  describe('getLetters', () => {
+    it('returns Arabic alphabet for Arabic', () => {
+      const letters = getLetters('ar')
+      expect(letters).toContain('ب')
+      expect(letters).not.toContain('A')
+    })
+
+    it('returns Latin alphabet for English and German', () => {
+      expect(getLetters('en')).toContain('A')
+      expect(getLetters('de')).toContain('Z')
+    })
+  })
+
+  describe('creative prompts', () => {
+    it('has 20 native prompts per language', () => {
+      expect(CREATIVE_PROMPTS.en).toHaveLength(20)
+      expect(CREATIVE_PROMPTS.ar).toHaveLength(20)
+      expect(CREATIVE_PROMPTS.de).toHaveLength(20)
+    })
+
+    it('returns an Arabic prompt when Arabic is requested', () => {
+      const prompt = getRandomCreativePrompt('ar')
+      expect(CREATIVE_PROMPTS.ar).toContain(prompt)
+      expect(/[؀-ۿ]/.test(prompt)).toBe(true)
+    })
+
+    it('returns a German prompt when German is requested', () => {
+      const prompt = getRandomCreativePrompt('de')
+      expect(CREATIVE_PROMPTS.de).toContain(prompt)
+    })
+  })
+})
 
 describe('words', () => {
   describe('getWordList', () => {

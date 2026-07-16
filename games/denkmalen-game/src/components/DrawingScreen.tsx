@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useGameStore, getRandomWord, getRandomCreativePrompt, LETTERS } from '@/store/gameStore'
+import { useGameStore, getRandomWord, getRandomCreativePrompt, getLetters } from '@/store/gameStore'
 import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
 import { useSocket } from '@/components/SocketProvider'
@@ -333,13 +333,14 @@ export function DrawingScreen() {
     if (state.gameType === 'letter') {
       // Letter Mode: pick a random letter and show it
       if (!state.currentLetter) {
-        const randomLetter = LETTERS[Math.floor(Math.random() * LETTERS.length)]
+        const letters = getLetters(state.settings.language)
+        const randomLetter = letters[Math.floor(Math.random() * letters.length)]
         setCurrentLetter(randomLetter)
       }
     } else if (state.gameType === 'creative') {
       // Creative Challenge: use a random creative prompt
       if (!state.creativePrompt) {
-        const prompt = getRandomCreativePrompt()
+        const prompt = getRandomCreativePrompt(state.settings.language)
         setCreativePrompt(prompt)
       }
     } else if (state.gameType === 'category') {

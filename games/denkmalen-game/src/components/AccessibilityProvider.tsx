@@ -1,6 +1,8 @@
 'use client'
 
 import { createContext, useContext, useEffect, ReactNode } from 'react'
+import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 
 interface AccessibilityContextType {
   prefersReducedMotion: boolean
@@ -87,13 +89,14 @@ export function AccessibilityProvider({ children }: Props) {
  * Skip to main content link for keyboard navigation
  */
 export function SkipToContent() {
+  const lang = useGameStore((s) => s.settings.language)
   return (
     <a
       href="#main-content"
-      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 
+      className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4
                  bg-primary-500 text-white px-4 py-2 rounded-lg z-50"
     >
-      Skip to main content
+      {t('a11y.skipToContent', lang)}
     </a>
   )
 }

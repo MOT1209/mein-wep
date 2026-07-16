@@ -83,6 +83,7 @@ export function ResultsScreen() {
       drawingData: d.canvasData,
       category: d.category,
       drawingTime: 60,
+      locale: settings.language,
     })))
 
     let anyAIFailed = false
@@ -94,7 +95,7 @@ export function ResultsScreen() {
       } else {
         result.aiFailed = true
         result.aiScore = 50 // neutral default
-        result.aiComment = 'AI evaluation unavailable'
+        result.aiComment = t('results.aiUnavailable', settings.language)
         anyAIFailed = true
       }
     })

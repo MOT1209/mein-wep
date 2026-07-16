@@ -3,6 +3,24 @@
 import { createContext, useContext, useEffect, useRef, useState, useCallback, ReactNode } from 'react'
 import { io, Socket } from 'socket.io-client'
 import { useGameStore, Player, Room, Word, GameType, Vote, Result, Drawing } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
+
+// Known server error messages → i18n keys, so socket errors show in the
+// player's language. Unknown messages fall back to the raw server text.
+const SERVER_ERROR_KEYS: Record<string, string> = {
+  'Too many rooms created. Please wait a moment.': 'socket.tooManyRooms',
+  'A valid player name is required': 'socket.nameRequired',
+  'Invalid room code': 'socket.invalidCode',
+  'Room not found': 'socket.roomNotFound',
+  'Room is full': 'socket.roomFull',
+  'Game already in progress': 'socket.gameInProgress',
+}
+
+function localizeServerError(message: string): string {
+  const key = SERVER_ERROR_KEYS[message]
+  const lang = useGameStore.getState().settings.language
+  return key ? t(key, lang) : message
+}
 
 // Build-time env wins; otherwise use the deployed game server in production
 // (never localhost — that would point every visitor at their own machine).
@@ -87,7 +105,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     })
 
     socket.on('connect_error', () => {
-      setError('Could not reach the game server. Check your connection and try again.')
+      setError(t('socket.connectionFailed', useGameStore.getState().settings.language))
     })
 
     socket.on('room-created', (data: { room: ServerRoom }) => {
@@ -207,7 +225,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     })
 
     socket.on('error', (data: { message: string }) => {
-      setError(data.message)
+      setError(localizeServerError(data.message))
     })
 
     return () => {

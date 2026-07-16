@@ -252,35 +252,89 @@ export const WORDS: Record<Category, Word[]> = {
   custom: [],
 }
 
-// Letters for Letter Mode
+// Letters for Letter Mode — per language so Arabic players draw Arabic letters
 export const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+const LETTERS_AR = 'ابتثجحخدذرزسشصضطظعغفقكلمنهوي'.split('')
 
-// Creative Prompts for Creative Mode
-export const CREATIVE_PROMPTS: string[] = [
-  'A flying elephant wearing sunglasses',
-  'A robot cooking pizza on Mars',
-  'A castle made of chocolate under the sea',
-  'A cat riding a skateboard in space',
-  'A dinosaur playing basketball',
-  'A wizard brewing potions in a treehouse',
-  'A pirate ship sailing on clouds',
-  'A snowman sunbathing on a tropical beach',
-  'A unicorn racing a sports car',
-  'A giant octopus playing piano',
-  'A dragon delivering mail by parachute',
-  'A frog wearing a top hat at a tea party',
-  'A whale flying through a rainbow',
-  'A panda DJing at a nightclub',
-  'A snail winning a Formula 1 race',
-  'An owl teaching math to baby chickens',
-  'A shark lifeguarding at a public pool',
-  'A bear baking a cake in a tiny kitchen',
-  'A penguin performing magic tricks on stage',
-  'A turtle winning a marathon against rabbits',
-]
+export function getLetters(lang?: Lang): string[] {
+  const language = lang ?? useGameStore.getState().settings.language
+  return language === 'ar' ? LETTERS_AR : LETTERS
+}
 
-export function getRandomCreativePrompt(): string {
-  return CREATIVE_PROMPTS[Math.floor(Math.random() * CREATIVE_PROMPTS.length)]
+// Creative Prompts for Creative Mode — native prompts per language
+export const CREATIVE_PROMPTS: Record<Lang, string[]> = {
+  en: [
+    'A flying elephant wearing sunglasses',
+    'A robot cooking pizza on Mars',
+    'A castle made of chocolate under the sea',
+    'A cat riding a skateboard in space',
+    'A dinosaur playing basketball',
+    'A wizard brewing potions in a treehouse',
+    'A pirate ship sailing on clouds',
+    'A snowman sunbathing on a tropical beach',
+    'A unicorn racing a sports car',
+    'A giant octopus playing piano',
+    'A dragon delivering mail by parachute',
+    'A frog wearing a top hat at a tea party',
+    'A whale flying through a rainbow',
+    'A panda DJing at a nightclub',
+    'A snail winning a Formula 1 race',
+    'An owl teaching math to baby chickens',
+    'A shark lifeguarding at a public pool',
+    'A bear baking a cake in a tiny kitchen',
+    'A penguin performing magic tricks on stage',
+    'A turtle winning a marathon against rabbits',
+  ],
+  ar: [
+    'فيل طائر يرتدي نظارة شمسية',
+    'روبوت يطبخ البيتزا على المريخ',
+    'قلعة من الشوكولاتة تحت البحر',
+    'قطة تركب لوح تزلج في الفضاء',
+    'ديناصور يلعب كرة السلة',
+    'ساحر يحضّر الجرعات في بيت فوق شجرة',
+    'سفينة قراصنة تبحر فوق الغيوم',
+    'رجل ثلج يتشمّس على شاطئ استوائي',
+    'حصان وحيد القرن يتسابق مع سيارة رياضية',
+    'أخطبوط عملاق يعزف البيانو',
+    'تنين يوصل البريد بالمظلة',
+    'ضفدع يرتدي قبعة أنيقة في حفلة شاي',
+    'حوت يطير عبر قوس قزح',
+    'باندا تشغّل الموسيقى في حفلة',
+    'حلزون يفوز بسباق فورمولا 1',
+    'بومة تعلّم الرياضيات لصغار الدجاج',
+    'قرش ينقذ السباحين في مسبح عام',
+    'دب يخبز كعكة في مطبخ صغير جداً',
+    'بطريق يقدّم عروض الخفة على المسرح',
+    'سلحفاة تفوز بالماراثون على الأرانب',
+  ],
+  de: [
+    'Ein fliegender Elefant mit Sonnenbrille',
+    'Ein Roboter, der auf dem Mars Pizza kocht',
+    'Ein Schloss aus Schokolade unter dem Meer',
+    'Eine Katze auf einem Skateboard im Weltall',
+    'Ein Dinosaurier, der Basketball spielt',
+    'Ein Zauberer, der im Baumhaus Tränke braut',
+    'Ein Piratenschiff, das auf Wolken segelt',
+    'Ein Schneemann beim Sonnenbaden am Tropenstrand',
+    'Ein Einhorn im Wettrennen mit einem Sportwagen',
+    'Ein riesiger Oktopus, der Klavier spielt',
+    'Ein Drache, der Post per Fallschirm liefert',
+    'Ein Frosch mit Zylinder bei einer Teeparty',
+    'Ein Wal, der durch einen Regenbogen fliegt',
+    'Ein Panda, der im Nachtclub auflegt',
+    'Eine Schnecke, die ein Formel-1-Rennen gewinnt',
+    'Eine Eule, die Küken Mathe beibringt',
+    'Ein Hai als Rettungsschwimmer im Freibad',
+    'Ein Bär, der in einer winzigen Küche Kuchen backt',
+    'Ein Pinguin, der auf der Bühne zaubert',
+    'Eine Schildkröte, die den Marathon gegen Hasen gewinnt',
+  ],
+}
+
+export function getRandomCreativePrompt(lang?: Lang): string {
+  const language = lang ?? useGameStore.getState().settings.language
+  const prompts = CREATIVE_PROMPTS[language] ?? CREATIVE_PROMPTS.en
+  return prompts[Math.floor(Math.random() * prompts.length)]
 }
 
 // Get random word. Sources from the per-language word database (src/lib/words.ts)

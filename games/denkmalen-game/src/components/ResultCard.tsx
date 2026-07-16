@@ -2,6 +2,8 @@
 
 import { useRef, useCallback } from 'react'
 import { FaShare, FaDownload } from 'react-icons/fa'
+import { useGameStore } from '@/store/gameStore'
+import { t } from '@/lib/i18n'
 
 interface ResultCardProps {
   drawing: string // base64 image
@@ -12,6 +14,7 @@ interface ResultCardProps {
 }
 
 export function ResultCard({ drawing, word, aiComment, score, playerName }: ResultCardProps) {
+  const lang = useGameStore((s) => s.settings.language)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const generateCard = useCallback(async (): Promise<Blob | null> => {
@@ -158,8 +161,8 @@ export function ResultCard({ drawing, word, aiComment, score, playerName }: Resu
       if (navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
-            title: 'Denkmalen Result',
-            text: `I scored ${score} points drawing "${word}" in Denkmalen! 🎨`,
+            title: t('result.shareTitle', lang),
+            text: t('result.shareText', lang).replace('{score}', String(score)).replace('{word}', word),
             files: [file],
           })
           return
@@ -182,7 +185,7 @@ export function ResultCard({ drawing, word, aiComment, score, playerName }: Resu
                    text-sm"
       >
         <FaShare />
-        Share
+        {t('result.share', lang)}
       </button>
       <button
         onClick={handleDownload}
@@ -191,7 +194,7 @@ export function ResultCard({ drawing, word, aiComment, score, playerName }: Resu
                    border border-slate-200 dark:border-slate-600 text-sm"
       >
         <FaDownload />
-        Download
+        {t('result.download', lang)}
       </button>
     </div>
   )

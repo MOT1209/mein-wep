@@ -74,6 +74,26 @@ describe('i18n', () => {
     })
   })
 
+  describe('new UI keys are translated in all languages', () => {
+    it('covers AI judge, result card, socket errors, and a11y keys', () => {
+      const keys = [
+        'ai.evaluating', 'ai.judgeScore', 'ai.accuracy', 'ai.creativity', 'ai.clarity',
+        'result.share', 'result.download', 'result.shareTitle', 'result.shareText',
+        'lobby.shareTitle', 'lobby.shareText',
+        'a11y.skipToContent',
+        'socket.connectionFailed', 'socket.roomNotFound', 'socket.roomFull',
+        'socket.invalidCode', 'socket.gameInProgress', 'socket.nameRequired', 'socket.tooManyRooms',
+      ]
+      keys.forEach(key => {
+        expect(t(key, 'en')).not.toBe(key)
+        expect(t(key, 'ar')).not.toBe(key)
+        expect(t(key, 'de')).not.toBe(key)
+        // Arabic must differ from English (actually translated, not copied)
+        expect(t(key, 'ar')).not.toBe(t(key, 'en'))
+      })
+    })
+  })
+
   describe('LANGUAGE_OPTIONS', () => {
     it('contains 3 languages', () => {
       expect(LANGUAGE_OPTIONS).toHaveLength(3)

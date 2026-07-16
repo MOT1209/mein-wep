@@ -25,7 +25,7 @@ function getJudgePrompt(locale: string = 'en'): string {
   const languageInstructions: Record<string, string> = {
     en: ' Respond in English. Be witty and fun!',
     de: ' Antworte auf Deutsch. Sei lustig und locker!',
-    ar: ' اكتب بالعامية المصرية (مش فصحى). كن م забавным وخفيف الظل!',
+    ar: ' اكتب تعليقك باللغة العربية بأسلوب بسيط وواضح. كن مرحاً وخفيف الظل!',
   }
 
   const langInstruction = languageInstructions[locale] || languageInstructions.en
@@ -106,9 +106,8 @@ function clamp(v: number, min: number, max: number): number {
   return Math.min(Math.max(v, min), max)
 }
 
-function getMockEvaluation(): EvalResult {
-  const base = 60 + Math.floor(Math.random() * 20)
-  const comments = [
+const MOCK_COMMENTS: Record<string, string[]> = {
+  en: [
     'Great effort! Keep drawing! 🎨',
     'Nice try! I can see what you were going for! ✨',
     'Creative interpretation! Well done! 🌟',
@@ -117,7 +116,32 @@ function getMockEvaluation(): EvalResult {
     'That\'s a fun take on it! 🎉',
     'I love the creativity! 🎨',
     'Well done! The effort shows! ⭐',
-  ]
+  ],
+  ar: [
+    'مجهود رائع! واصل الرسم! 🎨',
+    'محاولة جميلة! فهمت ما كنت تقصده! ✨',
+    'تفسير مبدع! أحسنت! 🌟',
+    'عمل جيد! كل رسمة تحكي قصة! 🎭',
+    'استمر! أنت تتحسن! 💪',
+    'لمسة ممتعة منك! 🎉',
+    'أحببت الإبداع! 🎨',
+    'أحسنت! المجهود واضح! ⭐',
+  ],
+  de: [
+    'Tolle Leistung! Zeichne weiter! 🎨',
+    'Guter Versuch! Ich sehe, was du wolltest! ✨',
+    'Kreative Interpretation! Gut gemacht! 🌟',
+    'Gute Arbeit! Jede Zeichnung erzählt eine Geschichte! 🎭',
+    'Weiter so! Du wirst immer besser! 💪',
+    'Eine lustige Umsetzung! 🎉',
+    'Ich liebe die Kreativität! 🎨',
+    'Gut gemacht! Die Mühe zeigt sich! ⭐',
+  ],
+}
+
+function getMockEvaluation(locale: string = 'en'): EvalResult {
+  const base = 60 + Math.floor(Math.random() * 20)
+  const comments = MOCK_COMMENTS[locale] ?? MOCK_COMMENTS.en
   return {
     score: base,
     accuracy: clamp(base - 5 + Math.floor(Math.random() * 10), 0, 100),
@@ -127,7 +151,7 @@ function getMockEvaluation(): EvalResult {
   }
 }
 
-function parseGeminiResponse(text: string): EvalResult | null {
+function parseGeminiResponse(text: string, locale: string = 'en'): EvalResult | null {
   try {
     const match = text.match(/\{[\s\S]*?\}/)
     if (!match) return null
@@ -138,7 +162,7 @@ function parseGeminiResponse(text: string): EvalResult | null {
       accuracy: clamp(Number(data.accuracy) || 50, 0, 100),
       creativity: clamp(Number(data.creativity) || 50, 0, 100),
       clarity: clamp(Number(data.clarity) || 50, 0, 100),
-      comment: typeof data.comment === 'string' ? data.comment.slice(0, 500) : 'Good effort!',
+      comment: typeof data.comment === 'string' ? data.comment.slice(0, 500) : getMockEvaluation(locale).comment,
     }
   } catch {
     return null
@@ -170,7 +194,7 @@ export async function POST(request: NextRequest) {
     // If no API key, return mock
     if (!genAI || !GEMINI_API_KEY) {
       console.warn('[AI] No API key configured')
-      return NextResponse.json(getMockEvaluation())
+      return NextResponse.json(getMockEvaluation(locale))
     }
 
     try {
@@ -187,16 +211,16 @@ export async function POST(request: NextRequest) {
       const result = await model.generateContent([prompt, ...img])
       const text = result.response.text()
 
-      const parsed = parseGeminiResponse(text)
-      return NextResponse.json(parsed || getMockEvaluation())
+      const parsed = parseGeminiResponse(text, locale)
+      return NextResponse.json(parsed || getMockEvaluation(locale))
 
     } catch (err: any) {
       console.error('[AI] Gemini error:', err?.message || err)
-      return NextResponse.json(getMockEvaluation())
+      return NextResponse.json(getMockEvaluation(locale))
     }
 
   } catch (err: any) {
     console.error('[API] Fatal error:', err?.message || err)
-    return NextResponse.json(getMockEvaluation())
+    return NextResponse.json(getMockEvaluation(body?.locale || 'en'))
   }
 }
