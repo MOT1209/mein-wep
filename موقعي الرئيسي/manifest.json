@@ -1,0 +1,96 @@
+{
+    "name": "Rashid - AI Workspace",
+    "short_name": "Rashid",
+    "description": "Rashid's AI workspace for models, vault resources, apps, and games.",
+    "start_url": "./",
+    "display": "standalone",
+    "background_color": "#09090b",
+    "theme_color": "#09090b",
+    "orientation": "portrait",
+    "categories": ["developer-tools", "utilities", "productivity"],
+    "lang": "en",
+    "dir": "ltr",
+    "display_override": ["window-controls-overlay", "standalone"],
+    "scope": "./",
+    "edge_side_panel": {
+        "preferred_width": 400
+    },
+    "icons": [
+        {
+            "src": "images/logo.webp",
+            "sizes": "48x48",
+            "type": "image/webp"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "72x72",
+            "type": "image/webp"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "96x96",
+            "type": "image/webp"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "128x128",
+            "type": "image/webp"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "144x144",
+            "type": "image/webp"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "152x152",
+            "type": "image/webp"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "192x192",
+            "type": "image/webp",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "384x384",
+            "type": "image/webp"
+        },
+        {
+            "src": "images/logo.webp",
+            "sizes": "512x512",
+            "type": "image/webp",
+            "purpose": "any maskable"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "images/logo.webp",
+            "sizes": "512x512",
+            "type": "image/webp",
+            "form_factor": "wide",
+            "label": "Rashid AI Workspace Dashboard"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Projects",
+            "short_name": "Projects",
+            "description": "View all projects",
+            "url": "./#projects"
+        },
+        {
+            "name": "The Vault",
+            "short_name": "Vault",
+            "description": "Knowledge repository",
+            "url": "./#vault"
+        },
+        {
+            "name": "Rashid AI",
+            "short_name": "AI",
+            "description": "Launch AI Assistant",
+            "url": "./models/Rashid-Model/index.html"
+        }
+    ]
+}

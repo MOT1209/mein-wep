@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Rashid Blog</title>
+    <link>https://rashid-wep.vercel.app/blog/</link>
+    <description>Articles on web development, game dev with Three.js, AI integration, and open-source projects.</description>
+    <language>en</language>
+    <lastBuildDate>Tue, 23 Jun 2026 00:00:00 +0000</lastBuildDate>
+    <atom:link href="https://rashid-wep.vercel.app/blog/rss.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+      <title>Aurora Backgrounds and Glassmorphism with Pure CSS</title>
+      <link>https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html</link>
+      <description>A dark, themeable design system built from CSS custom properties, animated gradient orbs, and backdrop-filter glass — no images required.</description>
+      <pubDate>Tue, 23 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html</guid>
+      <category>Web Design</category>
+      <category>CSS</category>
+    </item>
+
+    <item>
+      <title>Building a Game AI Agent in Vanilla JavaScript</title>
+      <link>https://rashid-wep.vercel.app/blog/building-a-game-ai-agent-in-javascript.html</link>
+      <description>A finite state machine plus utility scoring gives a farming-game bot that plants, waters, harvests, and sells on its own.</description>
+      <pubDate>Sun, 21 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/building-a-game-ai-agent-in-javascript.html</guid>
+      <category>Game Dev</category>
+      <category>Game AI</category>
+    </item>
+
+    <item>
+      <title>Clean Architecture in Flutter: Layers That Scale</title>
+      <link>https://rashid-wep.vercel.app/blog/flutter-clean-architecture.html</link>
+      <description>Separating presentation, domain, and data in a Flutter app so it stays testable and easy to change as it grows.</description>
+      <pubDate>Fri, 19 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/flutter-clean-architecture.html</guid>
+      <category>Mobile</category>
+      <category>Flutter</category>
+    </item>
+
+    <item>
+      <title>Fine-Tuning LLMs with LoRA: A Practical Walkthrough</title>
+      <link>https://rashid-wep.vercel.app/blog/fine-tuning-llms-with-lora.html</link>
+      <description>What low-rank adapters are, why they cut memory cost dramatically, and how I train, merge, and ship a custom language model.</description>
+      <pubDate>Wed, 17 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/fine-tuning-llms-with-lora.html</guid>
+      <category>AI &amp; ML</category>
+      <category>LoRA</category>
+    </item>
+
+    <item>
+      <title>Adding a Real Backend to a Static Site with Supabase</title>
+      <link>https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html</link>
+      <description>Contact forms, a content vault, and Row Level Security on a static site — using Supabase and Postgres without running a server.</description>
+      <pubDate>Mon, 15 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html</guid>
+      <category>Backend</category>
+      <category>Supabase</category>
+    </item>
+
+    <item>
+      <title>Building a PWA with Service Workers: Offline-First in Plain JavaScript</title>
+      <link>https://rashid-wep.vercel.app/blog/building-a-pwa-with-service-workers.html</link>
+      <description>How I made my portfolio installable and offline-capable using a Service Worker, cache strategies, and a web app manifest — no frameworks.</description>
+      <pubDate>Sat, 13 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/building-a-pwa-with-service-workers.html</guid>
+      <category>Web Dev</category>
+      <category>PWA</category>
+    </item>
+
+    <item>
+      <title>Building KingCraft: A 3D Voxel Game in the Browser</title>
+      <link>https://rashid-wep.vercel.app/blog/building-kingcraft-3d-game.html</link>
+      <description>How I built a Minecraft-like voxel game using Three.js with chunk-based rendering, block physics, and keyboard controls.</description>
+      <pubDate>Thu, 11 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/building-kingcraft-3d-game.html</guid>
+      <category>Game Dev</category>
+      <category>Three.js</category>
+    </item>
+    
+    <item>
+      <title>Portfolio Optimization: From 72 to 85 in One Day</title>
+      <link>https://rashid-wep.vercel.app/blog/portfolio-optimization-tips.html</link>
+      <description>How I optimized a portfolio site with WebP images, SEO structured data, accessibility fixes, and performance tuning.</description>
+      <pubDate>Thu, 11 Jun 2026 00:00:00 +0000</pubDate>
+      <guid>https://rashid-wep.vercel.app/blog/portfolio-optimization-tips.html</guid>
+      <category>Web Dev</category>
+      <category>SEO</category>
+    </item>
+  </channel>
+</rss>

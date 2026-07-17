@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Download APK files for Rashid's apps and games — Quran App, Calculator Vault, Quiz App, KingCraft, Rust Survival, Farm Empire">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/downloads.html">
+    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/downloads.html">
+    <link rel="alternate" hreflang="ar" href="https://rashid-wep.vercel.app/downloads.html?lang=ar">
+    <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/downloads.html?lang=de">
+    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/downloads.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Downloads — Rashid Apps & Games APK">
+    <meta property="og:description" content="Download Android APK files for all Rashid apps and games.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/downloads.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Downloads — Rashid Apps & Games APK">
+    <title>Downloads — Rashid Apps & Games APK</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/style.css?v=9.1">
+    <link rel="icon" type="image/png" href="images/logo.png">
+
+    <style>
+        .downloads-page {
+            min-height: 100vh;
+            padding: 120px 20px 60px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .downloads-page h1 {
+            font-size: clamp(28px, 5vw, 48px);
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .downloads-page .subtitle {
+            text-align: center;
+            color: var(--text-med);
+            font-size: 16px;
+            margin-bottom: 48px;
+        }
+        .downloads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+        .download-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        .download-card:hover {
+            border-color: var(--border-accent);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg), 0 0 30px rgba(var(--accent-rgb), 0.08);
+        }
+        .download-card .card-icon {
+            font-size: 36px;
+            margin-bottom: 16px;
+        }
+        .download-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-high);
+            margin: 0 0 4px;
+        }
+        .download-card .card-type {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .type-app { background: rgba(99, 102, 241, 0.2); color: #818cf8; }
+        .type-game { background: rgba(34, 211, 238, 0.2); color: #67e8f9; }
+        .card-desc {
+            font-size: 14px;
+            color: var(--text-med);
+            line-height: 1.6;
+            margin: 4px 0 16px;
+            flex: 1;
+        }
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--text-low);
+            margin-bottom: 16px;
+        }
+        .card-meta i { margin-right: 4px; }
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .download-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.4);
+        }
+        .download-btn.disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            background: var(--bg-alt);
+        }
+        .how-it-works {
+            margin-top: 60px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-intensity));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+        }
+        .how-it-works h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-high);
+        }
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+        .step {
+            text-align: center;
+            padding: 20px 12px;
+        }
+        .step-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            margin: 0 auto 12px;
+            color: #fff;
+        }
+        .step h4 {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-high);
+            margin: 0 0 6px;
+        }
+        .step p {
+            font-size: 13px;
+            color: var(--text-med);
+            margin: 0;
+            line-height: 1.5;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-med);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 32px;
+            transition: var(--transition);
+        }
+        .back-link:hover { color: var(--text-high); }
+        .update-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: #22c55e;
+        }
+        .update-badge i { font-size: 10px; }
+
+        /* "How do I install?" link inside each card */
+        .install-help {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-med);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: var(--transition);
+            align-self: flex-start;
+        }
+        .install-help:hover { color: var(--accent); }
+
+        /* Global "How to Install" CTA under subtitle */
+        .install-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: -32px auto 48px;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-high);
+            background: var(--bg-glass);
+            border: 1px solid var(--border-accent);
+            backdrop-filter: blur(var(--blur-intensity));
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .install-cta:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.18);
+            transform: translateY(-2px);
+        }
+        .install-cta-wrap { text-align: center; }
+
+        /* ===== Installation Guide Modal ===== */
+        .guide-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .guide-overlay.active { opacity: 1; visibility: visible; }
+        .guide-modal {
+            background: var(--bg-glass);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            max-width: 540px;
+            width: 100%;
+            max-height: 88vh;
+            overflow-y: auto;
+            padding: 32px;
+            box-shadow: var(--shadow-lg), 0 0 60px rgba(var(--accent-rgb), 0.12);
+            transform: translateY(20px) scale(0.98);
+            transition: transform 0.25s ease;
+        }
+        .guide-overlay.active .guide-modal { transform: translateY(0) scale(1); }
+        .guide-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 8px;
+        }
+        .guide-head h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-high);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .guide-head h2 i { color: var(--accent); }
+        .guide-close {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-med);
+            font-size: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .guide-close:hover { color: var(--text-high); border-color: var(--border-accent); }
+        .guide-intro {
+            font-size: 14px;
+            color: var(--text-med);
+            line-height: 1.6;
+            margin: 0 0 24px;
+        }
+        .guide-steps { list-style: none; padding: 0; margin: 0; }
+        .guide-step {
+            display: flex;
+            gap: 16px;
+            padding-bottom: 24px;
+            position: relative;
+        }
+        .guide-step:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            left: 17px;
+            top: 38px;
+            bottom: 4px;
+            width: 2px;
+            background: var(--border);
+        }
+        .guide-step .num {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            color: #fff;
+            font-weight: 800;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+        .guide-step .body h4 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-high);
+            margin: 6px 0 4px;
+        }
+        .guide-step .body p {
+            font-size: 14px;
+            color: var(--text-med);
+            line-height: 1.6;
+            margin: 0;
+        }
+        .guide-step .body strong { color: var(--accent); font-weight: 600; }
+        .guide-note {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            margin-top: 8px;
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            font-size: 13px;
+            color: var(--text-med);
+            line-height: 1.6;
+        }
+        .guide-note i { color: #22c55e; font-size: 16px; margin-top: 2px; }
+        @media (max-width: 600px) {
+            .guide-modal { padding: 24px 20px; }
+        }
+        @media (max-width: 600px) {
+            .downloads-page { padding: 100px 16px 40px; }
+            .downloads-grid { grid-template-columns: 1fr; }
+            .steps { grid-template-columns: 1fr; }
+        }
+
+        /* ── Live Phone Preview ── */
+        .phone-preview { margin: clamp(48px, 8vw, 80px) 0; text-align: center; }
+        .phone-preview h2 { font-size: clamp(1.4rem, 3vw, 1.9rem); margin-bottom: 8px; }
+        .preview-sub { color: var(--text-muted, #8596b0); margin-bottom: 24px; }
+        .preview-apps { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 28px; }
+        .preview-app { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 100px;
+            border: 1px solid var(--border, rgba(255,255,255,0.1)); background: var(--bg-surface, rgba(255,255,255,0.04));
+            color: var(--text-muted, #a8b5c9); font-size: 0.85rem; font-weight: 600; cursor: pointer;
+            transition: all .25s ease; font-family: inherit; }
+        .preview-app:hover { border-color: var(--accent, #6366f1); color: var(--text, #f1f5f9); }
+        .preview-app.active { background: var(--accent, #6366f1); color: #fff; border-color: var(--accent, #6366f1); }
+        .phone-frame { position: relative; width: min(330px, 86vw); aspect-ratio: 330 / 680; margin: 0 auto;
+            background: #0b0b10; border: 10px solid #16161d; border-radius: 46px; padding: 0; overflow: hidden;
+            box-shadow: 0 30px 70px -20px rgba(0,0,0,.7), inset 0 0 0 2px rgba(255,255,255,.04);
+            transition: width .3s ease, aspect-ratio .3s ease; }
+        .phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 124px; height: 22px;
+            background: #16161d; border-radius: 0 0 14px 14px; z-index: 3; }
+        .phone-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 110px; height: 4px;
+            background: rgba(255,255,255,.35); border-radius: 4px; z-index: 3; pointer-events: none; }
+
+        /* Landscape frame for games — phone rotated on its side: notch on the
+           left edge, home-bar on the right edge, both vertically centered. */
+        .phone-frame.landscape { width: min(600px, 92vw); aspect-ratio: 680 / 330; }
+        .phone-frame.landscape .phone-notch {
+            top: 50%; left: 0; bottom: auto; transform: translateY(-50%);
+            width: 22px; height: 124px; border-radius: 0 14px 14px 0;
+        }
+        .phone-frame.landscape .phone-bar {
+            top: 50%; right: 7px; bottom: auto; left: auto; transform: translateY(-50%);
+            width: 4px; height: 110px;
+        }
+        .phone-screen { position: relative; width: 100%; height: 100%; border-radius: 36px; overflow: hidden; background: #000; }
+        .phone-screen iframe { width: 100%; height: 100%; border: 0; display: block; background: #fff; }
+        .phone-loader { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: var(--bg-secondary, #0a0a0f); z-index: 2; }
+        .phone-loader.hidden { display: none; }
+        .phone-spinner { width: 34px; height: 34px; border: 3px solid rgba(255,255,255,.15);
+            border-top-color: var(--accent, #6366f1); border-radius: 50%; animation: phone-spin .8s linear infinite; }
+        @keyframes phone-spin { to { transform: rotate(360deg); } }
+        .preview-actions { margin-top: 22px; }
+        .preview-open { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 100px;
+            background: var(--bg-surface, rgba(255,255,255,.05)); border: 1px solid var(--border, rgba(255,255,255,.1));
+            color: var(--text, #f1f5f9); text-decoration: none; font-size: .9rem; font-weight: 600; transition: all .25s ease; }
+        .preview-open:hover { border-color: var(--accent, #6366f1); }
+        @media (max-width: 480px) {
+            .phone-frame { border-width: 8px; border-radius: 38px; }
+            .phone-frame.landscape { width: 94vw; }
+        }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Downloads",
+      "item": "https://rashid-wep.vercel.app/downloads.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="/" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="/">Home</a>
+                <a href="/#about">About</a>
+                <a href="/#projects">Projects</a>
+                <a href="/blog/">Blog</a>
+                <a href="downloads.html" class="active">Downloads</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        <a href="/">Home</a>
+        <a href="/#about">About</a>
+        <a href="/#projects">Projects</a>
+        <a href="/blog/">Blog</a>
+        <a href="downloads.html">Downloads</a>
+    </div>
+
+    <main class="downloads-page">
+
+        <h1>Download APK</h1>
+        <p class="subtitle">Install Rashid's apps and games directly on your Android device</p>
+
+        <div class="install-cta-wrap">
+            <button class="install-cta" id="open-guide-btn" type="button">
+                <i class="fas fa-circle-question"></i> How to install an APK?
+            </button>
+        </div>
+
+        <div class="downloads-grid" id="downloads-grid">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Live Phone Preview (real apps running inside a phone frame) -->
+        <section class="phone-preview" aria-labelledby="preview-title">
+            <h2 id="preview-title"><i class="fas fa-mobile-screen-button"></i> Live Preview — جرّبها الآن</h2>
+            <p class="preview-sub">اختر تطبيقاً وشغّله مباشرة داخل محاكي هاتف — بدون تثبيت.</p>
+            <div class="preview-apps" role="tablist" aria-label="Choose an app to preview">
+                <button class="preview-app active" type="button" data-src="apps/quran-app/index.html"><i class="fas fa-book-quran"></i> Quran</button>
+                <button class="preview-app" type="button" data-src="apps/calculator-app/index.html"><i class="fas fa-calculator"></i> Calculator</button>
+                <button class="preview-app" type="button" data-src="apps/quiz-app/index.html"><i class="fas fa-circle-question"></i> Quiz</button>
+                <button class="preview-app" type="button" data-src="games/kingcraft-game/index.html"><i class="fas fa-cube"></i> KingCraft</button>
+                <button class="preview-app" type="button" data-src="games/rust-game/index.html"><i class="fas fa-hammer"></i> Rust</button>
+                <button class="preview-app" type="button" data-src="games/farm-game/index.html"><i class="fas fa-seedling"></i> Farm</button>
+            </div>
+            <div class="phone-frame" id="phone-frame">
+                <div class="phone-notch"></div>
+                <div class="phone-screen">
+                    <div class="phone-loader" id="phone-loader"><span class="phone-spinner"></span></div>
+                    <iframe id="preview-iframe" title="App live preview" loading="lazy"
+                        src="apps/quran-app/index.html"
+                        sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                        allow="fullscreen; autoplay; gyroscope"></iframe>
+                </div>
+                <div class="phone-bar"></div>
+            </div>
+            <div class="preview-actions">
+                <a class="preview-open" id="preview-open" href="apps/quran-app/index.html" target="_blank" rel="noopener">
+                    <i class="fas fa-up-right-from-square"></i> فتح في نافذة كاملة
+                </a>
+            </div>
+        </section>
+
+        <div class="how-it-works">
+            <h2><i class="fas fa-info-circle"></i> How Updates Work</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-num">1</div>
+                    <h4>Install APK</h4>
+                    <p>Download the APK file and install it on your Android device.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">2</div>
+                    <h4>Verify File Integrity</h4>
+                    <p>Compare the APK's SHA-256 hash (click to copy on each card) with a hash checker app to ensure the file hasn't been modified.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">3</div>
+                    <h4>Open App</h4>
+                    <p>Launch the app. It checks for updates automatically.</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">4</div>
+                    <h4>Update Available</h4>
+                    <p>When a new version is released, a banner appears: "Update Available".</p>
+                </div>
+                <div class="step">
+                    <div class="step-num">5</div>
+                    <h4>Download Update</h4>
+                    <p>Tap the button to download and install the new APK at your convenience.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Installation Guide Modal -->
+    <div class="guide-overlay" id="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="guide-title" hidden>
+        <div class="guide-modal">
+            <div class="guide-head">
+                <h2 id="guide-title"><i class="fas fa-mobile-screen-button"></i> How to Install</h2>
+                <button class="guide-close" id="guide-close" aria-label="Close guide" type="button"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="guide-intro">Since these apps are distributed directly (not via Google Play), Android shows a one-time security prompt. Just follow these simple steps:</p>
+
+            <ol class="guide-steps">
+                <li class="guide-step">
+                    <span class="num">1</span>
+                    <div class="body">
+                        <h4>Download the APK</h4>
+                        <p>Tap <strong>Download APK</strong> on any app above. The file saves to your device.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">2</span>
+                    <div class="body">
+                        <h4>Verify the file (optional but recommended)</h4>
+                        <p>Each APK page shows its <strong>SHA-256 fingerprint</strong>. Click it to copy the full hash. Use a hash checker app like <strong>Hash Droid</strong> to confirm the file matches — this guarantees the file hasn't been tampered with.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">3</span>
+                    <div class="body">
+                        <h4>Open the file</h4>
+                        <p>Tap the download notification, or find the file in your <strong>Downloads</strong> / Files app and open it.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">4</span>
+                    <div class="body">
+                        <h4>Allow "Unknown Sources"</h4>
+                        <p>Android may warn that installing is blocked. Tap <strong>Settings</strong>, then enable <strong>Allow from this source</strong> (also called "Install unknown apps") for your browser or file manager.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">5</span>
+                    <div class="body">
+                        <h4>Tap Install</h4>
+                        <p>Go back and press <strong>Install</strong>. Once it finishes, open the app and you're ready to go!</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="guide-note">
+                <i class="fas fa-shield-halved"></i>
+                <span>The "Unknown Sources" warning is standard for any app installed outside Google Play — it does not mean the app is unsafe. You can turn the permission back off after installing.</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE = 'https://rashid-wep.vercel.app';
+
+        const projects = [
+            {
+                name: 'Quran App',
+                icon: '<i class="fas fa-book-quran" style="color:#059669"></i>',
+                type: 'app',
+                desc: 'Read and listen to the Holy Quran with multiple reciters, tafsir, translation, and offline bookmarks.',
+                version: '1.0.0',
+                apkUrl: BASE + '/apks/quran-app-v1.0.0.apk',
+                sha256: '19f1dc1bf301512985fdb4bcbe59cebee4b2734d6dfcdd40c3a1738b2c544bf5'
+            },
+            {
+                name: 'Smart Vault',
+                icon: '<i class="fas fa-calculator" style="color:#818cf8"></i>',
+                type: 'app',
+                desc: 'A calculator that doubles as a secret vault. Hide files and data behind a working calculator.',
+                version: '1.0.0',
+                apkUrl: BASE + '/apks/calculator-app-v1.0.0.apk',
+                sha256: 'fdbea1b56c815f83070e6519c0e44314a1ae78bb9ce269fad8916253e3596c8c'
+            },
+            {
+                name: 'Quiz Master',
+                icon: '<i class="fas fa-brain" style="color:#a855f7"></i>',
+                type: 'app',
+                desc: 'Multi-category quiz platform with timers, scoring, and progress tracking across various topics.',
+                version: '1.4.0',
+                apkUrl: BASE + '/apks/quiz-app-v1.4.0.apk',
+                sha256: '67f06d346b409a7c376d20153817e2bcb81f9e3d54a2eec77c0ef11d5a1cf9ff'
+            },
+            {
+                name: 'KingCraft',
+                icon: '<i class="fas fa-cube" style="color:#f59e0b"></i>',
+                type: 'game',
+                desc: 'A 3D voxel sandbox game. Mine resources, craft tools, build structures, and survive nights.',
+                version: '0.6.0',
+                apkUrl: BASE + '/apks/kingcraft-game-v0.6.0.apk',
+                sha256: '7e842d3b0b76c8bbc4986591087a32729ce19b52defe97268d413b0f91825656'
+            },
+            {
+                name: 'Rust Survival 3D',
+                icon: '<i class="fas fa-skull" style="color:#ef4444"></i>',
+                type: 'game',
+                desc: 'Physics-driven sandbox survival game. Mine, craft, and build structures in 3D.',
+                version: '1.1.0',
+                apkUrl: BASE + '/apks/rust-game-v1.1.0.apk',
+                sha256: 'e9df053fb6524424bccc25606bcb29768c1037b927afb808fa35c7bb4a5cb5ab'
+            },
+            {
+                name: 'Farm Empire',
+                icon: '<i class="fas fa-tractor" style="color:#22c55e"></i>',
+                type: 'game',
+                desc: 'Build and expand your dream farming empire with crop simulations and real-time weather.',
+                version: '2.5.0',
+                apkUrl: BASE + '/apks/farm-game-v2.5.0.apk',
+                sha256: '26b0a9498ea2f7e0a7ab058046e33602b6b955b56b0b1420d09bb79deb471c4b'
+            }
+        ];
+
+        const grid = document.getElementById('downloads-grid');
+
+        async function checkApkExists(url) {
+            try {
+                const res = await fetch(url, { method: 'HEAD' });
+                return res.ok;
+            } catch {
+                return false;
+            }
+        }
+
+        async function renderCards() {
+            for (const p of projects) {
+                const exists = await checkApkExists(p.apkUrl);
+
+                const card = document.createElement('div');
+                card.className = 'download-card';
+
+                const btnHtml = exists
+                    ? `<a href="${p.apkUrl}" class="download-btn" download><i class="fas fa-download"></i> Download APK</a>`
+                    : `<a href="#" class="download-btn disabled"><i class="fas fa-clock"></i> Building...</a>`;
+
+                card.innerHTML = `
+                    <div class="card-icon">${p.icon}</div>
+                    <span class="card-type type-${p.type}">${p.type === 'app' ? 'Application' : 'Game'}</span>
+                    <h3>${p.name}</h3>
+                    <div class="card-desc">${p.desc}</div>
+                    <div class="card-meta">
+                        <span><i class="fas fa-tag"></i> v${p.version}</span>
+                        <span>${exists ? '<span class="update-badge"><i class="fas fa-circle"></i> Ready</span>' : '<span style="color:var(--text-low)"><i class="fas fa-spinner fa-spin"></i> Pending first build</span>'}</span>
+                    </div>
+                    ${btnHtml}
+                    <div class="sha-block" style="margin:10px 0 6px;font-size:11px;">
+                        <span style="color:var(--text-low);font-family:'JetBrains Mono',monospace;cursor:pointer;"
+                              onclick="copySha('${p.sha256}',this)" title="Click to copy SHA-256">
+                            <i class="fas fa-fingerprint"></i> SHA-256: ${p.sha256.substring(0,16)}&hellip;${p.sha256.substring(48)}
+                        </span>
+                    </div>
+                    <button class="install-help" type="button" data-open-guide><i class="fas fa-circle-question"></i> How do I install this?</button>
+                `;
+                grid.appendChild(card);
+            }
+        }
+        renderCards();
+
+        /* ===== Installation Guide Modal control ===== */
+        const guideOverlay = document.getElementById('guide-overlay');
+        const guideClose = document.getElementById('guide-close');
+
+        function openGuide() {
+            guideOverlay.hidden = false;
+            requestAnimationFrame(() => guideOverlay.classList.add('active'));
+            document.body.style.overflow = 'hidden';
+            guideClose.focus();
+        }
+        function closeGuide() {
+            guideOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            setTimeout(() => { guideOverlay.hidden = true; }, 250);
+        }
+
+        document.getElementById('open-guide-btn').addEventListener('click', openGuide);
+        guideClose.addEventListener('click', closeGuide);
+        guideOverlay.addEventListener('click', (e) => {
+            if (e.target === guideOverlay) closeGuide();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && guideOverlay.classList.contains('active')) closeGuide();
+        });
+        // Per-card "How do I install?" buttons (delegated, since cards render async)
+        grid.addEventListener('click', (e) => {
+            if (e.target.closest('[data-open-guide]')) openGuide();
+        });
+
+        // ── Live phone preview: switch the running app inside the phone frame ──
+        (function () {
+            const iframe = document.getElementById('preview-iframe');
+            const loader = document.getElementById('phone-loader');
+            const openBtn = document.getElementById('preview-open');
+            const frame = document.getElementById('phone-frame');
+            const btns = document.querySelectorAll('.preview-app');
+            if (!iframe) return;
+            iframe.addEventListener('load', () => loader && loader.classList.add('hidden'));
+            btns.forEach((b) => b.addEventListener('click', () => {
+                btns.forEach((x) => { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+                b.classList.add('active');
+                b.setAttribute('aria-selected', 'true');
+                if (loader) loader.classList.remove('hidden');
+                const src = b.dataset.src;
+                iframe.src = src;
+                if (openBtn) openBtn.href = src;
+                // Games get a landscape phone frame; apps stay portrait.
+                if (frame) frame.classList.toggle('landscape', src.startsWith('games/'));
+            }));
+        })();
+
+        /* ===== SHA-256 copy helper ===== */
+        function copySha(hash, el) {
+            if (!navigator.clipboard) return;
+            navigator.clipboard.writeText(hash).then(function() {
+                var orig = el.innerHTML;
+                el.innerHTML = '<i class="fas fa-check" style="color:#22c55e"></i> Copied!';
+                el.style.color = '#22c55e';
+                setTimeout(function() {
+                    el.innerHTML = orig;
+                    el.style.color = '';
+                }, 2000);
+            }).catch(function() {});
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer style="text-align:center;padding:40px 20px;color:var(--text-low);font-size:13px;border-top:1px solid var(--border)">
+        <p>&copy; 2026 Rashid (MOT1209). All rights reserved.</p>
+        <p style="margin-top:4px">
+            <a href="/" style="color:var(--text-med);text-decoration:none">Home</a> &middot;
+            <a href="/privacy.html" style="color:var(--text-med);text-decoration:none">Privacy</a> &middot;
+            <a href="/terms.html" style="color:var(--text-med);text-decoration:none">Terms</a>
+        </p>
+    </footer>
+
+</body>
+</html>

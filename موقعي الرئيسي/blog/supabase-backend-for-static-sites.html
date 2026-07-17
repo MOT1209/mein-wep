@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How I added a real backend — contact forms, a content vault, and analytics — to a static portfolio using Supabase, Postgres, and Row Level Security, with no server to maintain.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Adding a Real Backend to a Static Site with Supabase">
+    <meta property="og:description" content="Contact forms, a content vault, and Row Level Security on a static site — using Supabase and Postgres without running a server.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Adding a Real Backend with Supabase">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <title>A Supabase Backend for Static Sites — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Adding a Real Backend to a Static Site with Supabase",
+      "description": "Contact forms, a content vault, and Row Level Security on a static site — using Supabase and Postgres without running a server.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-15",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html",
+      "keywords": ["Supabase","Postgres","RLS","Backend","Web Dev"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.2">
+    <link rel="stylesheet" href="../css/blog-post.css?v=1.0">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://rashid-wep.vercel.app/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Adding a Real Backend to a Static Site with Supabase",
+      "item": "https://rashid-wep.vercel.app/blog/supabase-backend-for-static-sites.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 15, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 9 min read</span>
+            <span class="post-tag">Backend</span>
+            <span class="post-tag">Supabase</span>
+        </div>
+
+        <h1>Adding a Real Backend to a Static Site with Supabase</h1>
+
+        <div class="post-content">
+            <p>A static site is wonderful right up to the moment you need it to <em>remember</em> something — a contact message, a saved snippet, a view count. The classic answer is "spin up a server," but I didn't want to maintain one. Supabase let me add a Postgres database, authentication, and instant APIs to my otherwise static portfolio without running any backend code of my own. Here is how I structured it and the mistakes I hit along the way.</p>
+
+            <h2>Why Supabase for a Static Front-End</h2>
+            <p>Supabase gives you a hosted Postgres database with an auto-generated REST and realtime API, plus a small JavaScript client you drop into the browser. For a static site that means:</p>
+            <ul>
+                <li>No server to deploy, patch, or pay for while idle.</li>
+                <li>A real relational database, not a key-value toy — I can run joins and SQL.</li>
+                <li>Security enforced at the database layer through <strong>Row Level Security</strong>, so the public anon key is safe to ship in the browser.</li>
+            </ul>
+
+            <h2>Connecting from the Browser</h2>
+            <p>The client initializes with the project URL and the public anon key. These are <em>meant</em> to be public — the security boundary is the database, not the key:</p>
+            <pre><code>import { createClient } from
+  'https://esm.sh/@supabase/supabase-js@2';
+
+const supabase = createClient(
+  'https://YOUR-PROJECT.supabase.co',
+  'YOUR-ANON-PUBLIC-KEY'
+);</code></pre>
+            <p>Loading the client straight from an ESM CDN keeps me in the no-build-step world the rest of the site lives in.</p>
+
+            <h2>A Contact Form That Persists</h2>
+            <p>The contact form was the first feature. The table is intentionally simple:</p>
+            <pre><code>create table messages (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null,
+  email       text not null,
+  body        text not null,
+  created_at  timestamptz default now()
+);</code></pre>
+            <p>Inserting a row from the form handler is a single call:</p>
+            <pre><code>const { error } = await supabase
+  .from('messages')
+  .insert({ name, email, body });
+
+if (error) showError(error.message);
+else showSuccess('Message sent!');</code></pre>
+
+            <h2>Row Level Security Is the Whole Game</h2>
+            <p>This is the part people skip and then panic about. By default, with RLS enabled and no policies, <strong>nothing</strong> is allowed — which is the safe default. For the contact form I want anonymous visitors to be able to insert a message but never to read other people's messages:</p>
+            <pre><code>alter table messages enable row level security;
+
+-- anyone may submit a message
+create policy "anon can insert"
+  on messages for insert
+  to anon
+  with check (true);
+
+-- but nobody anonymous may read them back
+-- (no SELECT policy = no read access)</code></pre>
+            <p>The mental shift is important: with RLS, you don't hide the API, you describe <em>exactly</em> who can do what at the row level. The anon key being public no longer matters because the policy, not the key, decides access.</p>
+
+            <h2>A Read-Only Content Vault</h2>
+            <p>I also wanted a "vault" of public snippets and prompts that anyone can browse but only I can edit. That's the mirror image of the contact form — public SELECT, restricted writes:</p>
+            <pre><code>create policy "public can read vault"
+  on vault_items for select
+  to anon
+  using (is_published = true);
+
+create policy "owner can write"
+  on vault_items for all
+  to authenticated
+  using (auth.uid() = owner_id);</code></pre>
+            <p>The <code>is_published</code> flag means I can save drafts that stay invisible until I flip them live — a tiny CMS, enforced entirely in SQL.</p>
+
+            <h2>Lessons From the Migrations</h2>
+            <p>I keep every schema change in a versioned <code>.sql</code> file in the repo rather than clicking around the dashboard. A few things I learned:</p>
+            <ul>
+                <li><strong>Enable RLS first, then write policies.</strong> Forgetting to enable RLS leaves a table wide open even if you wrote policies — Supabase warns you, listen to it.</li>
+                <li><strong>Test as the anon role.</strong> What works in the SQL editor (which runs as an admin) can fail in the browser. Always verify with the real anon key.</li>
+                <li><strong>Add an index on <code>created_at</code></strong> if you sort by it. Cheap, and it keeps the messages list fast as it grows.</li>
+                <li><strong>Validate on the client and constrain in SQL.</strong> A <code>check</code> constraint on email format or a <code>not null</code> is the last line of defense if the front-end validation is bypassed.</li>
+            </ul>
+
+            <h2>Rate Limiting and Spam</h2>
+            <p>A public insert policy invites spam. I added two defenses without a server: a hidden honeypot field that real users never fill, and a Postgres function that rejects more than a few inserts per minute from the same source. For anything heavier, Supabase Edge Functions can sit in front of the table — but for a portfolio, the simple measures held up fine.</p>
+
+            <h2>The Takeaway</h2>
+            <p>"Static site" and "has a database" are no longer contradictory. With Supabase I got persistence, auth, and proper authorization while keeping a zero-build, zero-server front end. The single most important concept to internalize is Row Level Security — once you think of access control as SQL policies instead of hidden endpoints, the whole architecture clicks into place.</p>
+
+            <p>The contact form on this site runs on exactly this setup — <a href="../contact.html">try sending a message</a>.</p>
+        </div>
+    </main>
+    <div id="reading-progress"></div>
+    <script src="../src/js/main.js" type="module"></script>
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        window.addEventListener('scroll', function() {
+            var h = document.documentElement;
+            var scrollTop = h.scrollTop || document.body.scrollTop;
+            var scrollHeight = h.scrollHeight - h.clientHeight;
+            bar.style.width = (scrollTop / scrollHeight) * 100 + '%';
+        });
+        document.querySelectorAll('.post-content pre').forEach(function(pre) {
+            var btn = document.createElement('button');
+            btn.className = 'copy-code-btn';
+            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+            btn.addEventListener('click', function() {
+                var code = pre.querySelector('code');
+                var text = code ? code.textContent : pre.textContent;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+                    });
+                }
+            });
+        });
+        var currentId = 'supabase-backend-for-static-sites';
+        fetch('posts.json?_=' + Date.now())
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+                var post = posts.find(function(p) { return p.id === currentId; });
+                if (!post) return;
+                var related = posts.filter(function(p) {
+                    return p.id !== currentId && p.categories.some(function(c) { return post.categories.indexOf(c) !== -1; });
+                }).slice(0, 3);
+                var main = document.querySelector('.blog-post');
+                if (!main || related.length === 0) return;
+                var section = document.createElement('div');
+                section.className = 'related-posts';
+                section.innerHTML = '<h2><i class="fas fa-link" style="color:var(--accent);"></i> Related Articles</h2><div class="related-grid">' +
+                    related.map(function(p) {
+                        var d = new Date(p.date + 'T00:00:00Z');
+                        var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        return '<a href="' + p.id + '.html" class="related-card"><h3>' + p.title + '</h3><p>' + p.description + '</p><div class="related-meta"><span>' + ds + '</span><span> · </span><span>' + p.readTime + ' min</span></div></a>';
+                    }).join('') + '</div>';
+                main.appendChild(section);
+            })
+            .catch(function() {});
+    })();
+    </script>
+
+</body>
+</html>

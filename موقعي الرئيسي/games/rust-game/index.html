@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff4444">
+    <link rel="manifest" href="manifest.json">
+    <meta name="description" content="Rashid Rust Survival 3D — Physics-driven sandbox survival game. Mine resources, craft tools, and build structures.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/games/rust-game/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rust Survival 3D - Ultra">
+    <meta property="og:description" content="Rashid Rust Survival 3D — Physics-driven sandbox survival game.">
+    <meta property="og:image" content="../../images/logo.png">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/games/rust-game/">
+    <title>Rust Survival 3D - Ultra</title>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/building.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Game Controls System -->
+    <script src="../../js/unified-game-controls.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Game",
+  "name": "Rust Construction 3D",
+  "description": "3D building and construction game. Design and assemble structures in a rust-themed environment.",
+  "url": "https://rashid-wep.vercel.app/games/rust-game/",
+  "author": {
+    "@type": "Person",
+    "name": "Rashid",
+    "alternateName": "MOT1209",
+    "url": "https://rashid-wep.vercel.app"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  },
+  "applicationCategory": "Simulation",
+  "browserRequirements": "Requires WebGL support",
+  "operatingSystem": "Any (Browser)"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Games",
+      "item": "https://rashid-wep.vercel.app/games/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Rust Construction",
+      "item": "https://rashid-wep.vercel.app/games/rust-game/"
+    }
+  ]
+}
+</script>
+</head>
+
+<body>
+    <div id="loading-screen">
+        <div class="loader"></div>
+        <h1>Loading Pro-Survival World...</h1>
+        <p id="loading-status">Initializing Game Engine...</p>
+    </div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div class="top-left">
+            <div class="stat-group">
+                <div class="stat-bar health">
+                    <div class="bar-fill" id="health-fill" style="width: 100%;"></div>
+                    <span class="bar-label"><i class="fas fa-heart"></i> Health</span>
+                </div>
+                <div class="stat-bar hunger">
+                    <div class="bar-fill" id="hunger-fill" style="width: 100%;"></div>
+                    <span class="bar-label"><i class="fas fa-utensils"></i> Hunger</span>
+                </div>
+                <div class="stat-bar thirst">
+                    <div class="bar-fill" id="thirst-fill" style="width: 100%;"></div>
+                    <span class="bar-label"><i class="fas fa-tint"></i> Thirst</span>
+                </div>
+                <div class="stat-bar radiation">
+                    <div class="bar-fill" id="rad-fill" style="width: 0%;"></div>
+                    <span class="bar-label"><i class="fas fa-biohazard"></i> Radiation</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item wood"><i class="fas fa-tree"></i> <span id="wood-count">0</span></div>
+            <div class="stat-item stone"><i class="fas fa-gem"></i> <span id="stone-count">0</span></div>
+            <div class="stat-item iron"><i class="fas fa-cube"></i> <span id="iron-count">0</span></div>
+        </div>
+
+        <div id="crosshair"></div>
+
+        <!-- Blueprint Selector -->
+        <div id="blueprint-selector" style="display:none;">
+            <div class="blueprint-title">SELECT BLUEPRINT</div>
+            <div class="blueprint-grid">
+                <div class="blueprint-item" data-type="foundation" title="Foundation - Base structure">
+                    <i class="fas fa-square"></i>
+                    <span>Foundation</span>
+                </div>
+                <div class="blueprint-item" data-type="wall" title="Wall - Vertical protection">
+                    <i class="fas fa-border-all"></i>
+                    <span>Wall</span>
+                </div>
+                <div class="blueprint-item" data-type="doorway" title="Doorway - Entry point">
+                    <i class="fas fa-door-open"></i>
+                    <span>Doorway</span>
+                </div>
+                <div class="blueprint-item" data-type="ceiling" title="Ceiling - Roof protection">
+                    <i class="fas fa-th-large"></i>
+                    <span>Ceiling</span>
+                </div>
+                <div class="blueprint-item" data-type="tool_cupboard" title="Tool Cupboard - Claim territory">
+                    <i class="fas fa-box-archive"></i>
+                    <span>Tool Cupboard</span>
+                </div>
+                <div class="blueprint-item" data-type="wooden_door" title="Wooden Door - Secure entry">
+                    <i class="fas fa-door-closed"></i>
+                    <span>Door</span>
+                </div>
+            </div>
+            <div class="blueprint-footer">Press Q or RMB to close</div>
+        </div>
+
+        <!-- Radial Menu (Rust Style) -->
+        <div id="radial-menu" style="display:none;">
+            <div class="radial-center">PIECE SELECTOR</div>
+            <div class="radial-pieces" id="radial-pieces-container">
+                <!-- Dynamically generated -->
+            </div>
+        </div>
+
+        <!-- Build Info Panel -->
+        <div id="build-info" style="display:none;">
+            <div class="build-info-line"><i class="fas fa-layer-group"></i> <span id="build-tier">Twig</span></div>
+            <div class="build-info-line"><i class="fas fa-heart"></i> <span id="build-health">10/10</span></div>
+            <div class="build-info-line"><i class="fas fa-arrow-up"></i> <span id="build-upgrade">Wood (300)</span>
+            </div>
+        </div>
+
+        <div id="interaction-hint">Press LMB to interact</div>
+        <div id="build-mode-hint">Build Mode: Active (RMB to exit)</div>
+        <div id="tc-status" style="display:none;">Building Blocked</div>
+
+        <!-- Hotkeys Display -->
+        <div id="hotkeys-display">
+            <div class="hotkey-item"><span class="key">Q</span> Blueprint</div>
+            <div class="hotkey-item"><span class="key">R</span> Rotate</div>
+            <div class="hotkey-item"><span class="key">G</span> Build Mode</div>
+            <div class="hotkey-item"><span class="key">H</span> Upgrade/Repair</div>
+        </div>
+
+        <div class="hotbar">
+            <div class="hotbar-slot active" id="slot-1"><i class="fas fa-hand-fist"></i></div>
+            <div class="hotbar-slot" id="slot-2"><i class="fas fa-axe"></i></div>
+            <div class="hotbar-slot" id="slot-3"><i class="fas fa-hammer"></i></div>
+            <div class="hotbar-slot" id="slot-4"><i class="fas fa-shield"></i></div>
+            <div class="hotbar-slot" id="slot-5"><i class="fas fa-pizza-slice"></i></div>
+            <div class="hotbar-slot" id="slot-6"><i class="fas fa-bottle-water"></i></div>
+        </div>
+
+        <!-- Mobile Controls are now handled by unified-game-controls.js -->
+    </div>
+
+    <!-- Rust Style Inventory -->
+    <div id="inventory">
+        <div class="inventory-tabs">
+            <div class="tab-item" data-tab="inventory"><i class="fas fa-box"></i> INVENTORY</div>
+            <div class="tab-item active" data-tab="crafting"><i class="fas fa-hammer"></i> CRAFTING</div>
+        </div>
+
+        <!-- Crafting Tab Content -->
+        <div id="crafting-pane" class="inventory-wrapper active">
+            <div class="inventory-sidebar">
+                <div class="category-item active" data-category="common">COMMON</div>
+                <div class="category-item" data-category="construction">CONSTRUCTION</div>
+                <div class="category-item" data-category="items">ITEMS</div>
+                <div class="category-item" data-category="resources">RESOURCES</div>
+                <div class="category-item" data-category="clothing">CLOTHING</div>
+                <div class="category-item" data-category="tools">TOOLS</div>
+                <div class="category-item" data-category="medical">MEDICAL</div>
+                <div class="category-item" data-category="weapons">WEAPONS</div>
+                <div class="category-item" data-category="ammo">AMMO</div>
+                <div class="category-item" data-category="electrical">ELECTRICAL</div>
+            </div>
+
+            <div class="inventory-center">
+                <div class="search-container">
+                    <input type="text" id="item-search" placeholder="Search...">
+                    <i class="fas fa-search"></i>
+                </div>
+                <div class="crafting-grid" id="crafting-item-grid"></div>
+                <div class="crafting-queue-label">CRAFTING QUEUE</div>
+                <div class="crafting-queue" id="crafting-queue-container"></div>
+            </div>
+
+            <div class="inventory-right" id="crafting-detail-panel">
+                <div class="detail-empty">
+                    <i class="fas fa-mouse-pointer"></i>
+                    <p>Select an item to craft</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Inventory Tab Content -->
+        <div id="inventory-pane" class="inventory-wrapper">
+            <div class="inventory-sidebar">
+                <div class="player-stats-preview">
+                    <div id="player-3d-preview"></div>
+                </div>
+                <!-- Gear Slots could go here -->
+            </div>
+
+            <div class="inventory-center">
+                <div class="inventory-main-grid" id="player-inventory-grid">
+                    <!-- 24 slots generated by JS -->
+                </div>
+            </div>
+
+            <div class="inventory-right">
+                <div class="clothing-grid">
+                    <div class="clothing-slot" data-slot="head"><i class="fas fa-hat-cowboy"></i></div>
+                    <div class="clothing-slot" data-slot="chest"><i class="fas fa-shirt"></i></div>
+                    <div class="clothing-slot" data-slot="legs"><i class="fas fa-socks"></i></div>
+                    <div class="clothing-slot" data-slot="feet"><i class="fas fa-shoe-prints"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Hotbar -->
+        <div class="inventory-bottom-bar">
+            <div class="belt-grid" id="belt-inventory-grid"></div>
+        </div>
+
+
+        <div class="inventory-footer">
+            <span>[ESC/E] CLOSE</span>
+            <span>[LMB] SELECT</span>
+        </div>
+    </div>
+
+
+
+    <!-- Instructions Overlay -->
+    <div id="instructions">
+        <h1>RUST SURVIVAL 3D</h1>
+        <div class="controls-guide">
+            <p><span>W A S D</span> Move | <span>SPACE</span> Jump | <span>V</span> Camera (1st/3rd)</p>
+            <p><span>LMB</span> Action | <span>RMB</span> Build Menu | <span>E</span> Inventory</p>
+            <p><span>R</span> Rotate | <span>G</span> Blueprint | <span>H</span> Upgrade</p>
+
+        </div>
+        <button id="start-button">START SURVIVAL</button>
+        <p style="margin-top: 20px; font-size: 0.8rem; opacity: 0.5;">Version 8.0 - Doors & Stability System
+        </p>
+    </div>
+
+    <div id="rad-overlay"
+        style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; background: radial-gradient(circle, transparent 40%, rgba(39, 174, 96, 0.4) 100%); opacity:0; z-index:90;">
+    </div>
+
+    <script type="module">
+        import './js/game.js?v=6.1';
+    </script>
+    
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('[Rust Game] SW registered:', reg))
+                .catch(err => console.log('[Rust Game] SW registration failed:', err));
+        }
+    </script>
+  <script src="js/update-checker.js"></script>
+  <!-- OTA update checker -->
+  <script>window.RASHID_APP={id:'com.rashid.rustsurvival',version:'1.1.0',name:'Rust Construction'};</script>
+  <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
+</body>
+
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>عالم الألعاب الثلاثية الأبعاد | Alking Games</title>
+    <meta name="description"
+        content="اكتشف أفضل ألعاب السرفايفل والألعاب ثلاثية الأبعاد الواقعية. العب محاكي المزارع، ماين كرافت، ريست والمزيد.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@400;600;800&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <!-- AOS Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <!-- Three.js Library -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <div class="logo">
+                <span class="logo-text">AL</span><span class="logo-accent">KING</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">الرئيسية</a></li>
+                <li><a href="#games">الألعاب</a></li>
+                <li><a href="#about">حول</a></li>
+            </ul>
+            <div class="nav-actions">
+                <button class="btn btn-outline">تسجيل الدخول</button>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section with 3D Canvas -->
+        <section id="home" class="hero">
+            <div class="hero-content container">
+                <h1 class="hero-title">Alking</h1>
+                <p class="hero-subtitle">استكشف عوالم سرفايفل مذهلة، ابنِ مزرعتك، أو قاتل من أجل البقاء في أكبر مجموعة
+                    ألعاب حديثة.</p>
+                <div class="hero-btns">
+                    <a href="#games" class="btn btn-primary">ابدأ اللعب الآن</a>
+                    <a href="#about" class="btn btn-secondary">اكتشف المزيد</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Survival Games -->
+        <section id="games" class="section games-section container" data-aos="fade-up">
+            <div class="section-header">
+                <h2 class="section-title">ألعاب السرفايفل المميزة</h2>
+                <p class="section-subtitle">أفضل تجارب البقاء الواقعية المختارة لك بعناية.</p>
+            </div>
+            <div class="game-grid">
+                <!-- Farm Simulator -->
+                <article class="game-card" data-aos="fade-up">
+                    <div class="game-img">
+                        <img src="assets/images/farm_sim.png" alt="محاكي المزارع">
+                        <div class="game-badge">3D Realistic</div>
+                    </div>
+                    <div class="game-info">
+                        <h3>محاكي المزارع (Farm Simulator)</h3>
+                        <p>عش حياة الزارع الحقيقية، ابنِ مزرعتك، واجمع المحاصيل في تجربة ثلاثية الأبعاد مذهلة.</p>
+                        <div class="game-footer">
+                            <span class="game-platform">PC / Web</span>
+                            <button class="btn btn-play" onclick="location.href='game-details.html?game=farm'">العب
+                                الآن</button>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Minecraft Clone -->
+                <!--
+                <article class="game-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="game-img">
+                        <img src="assets/images/minecraft.png" alt="ماين كرافت واقعية">
+                        <div class="game-badge">Sandbox</div>
+                    </div>
+                    <div class="game-info">
+                        <h3>عالم ماين كرافت (Minecraft Craft)</h3>
+                        <p>حرية البناء والاستكشاف بجرافيك معزز وتفاصيل واقعية تأخذك إلى آفاق جديدة.</p>
+                        <div class="game-footer">
+                            <span class="game-platform">Multiplayer</span>
+                            <button class="btn btn-play" onclick="location.href='game-details.html?game=minecraft'">العب
+                                الآن</button>
+                        </div>
+                    </div>
+                </article>
+                -->
+
+                <!-- Rust Experience -->
+                <!--
+                <article class="game-card" data-aos="fade-up" data-aos-delay="200">
+                    <div class="game-img">
+                        <img src="assets/images/rust.png" alt="Rust Survival">
+                        <div class="game-badge">Survival</div>
+                    </div>
+                    <div class="game-info">
+                        <h3>تجرية ريست (Rust Survival)</h3>
+                        <p>البقاء للأقوى. اجمع الموارد، ابنِ حصنك، وواجه التحديات في بيئة قاسية وواقعية.</p>
+                        <div class="game-footer">
+                            <span class="game-platform">PvP / Survival</span>
+                            <button class="btn btn-play" onclick="location.href='game-details.html?game=rust'">العب
+                                الآن</button>
+                        </div>
+                    </div>
+                </article>
+                -->
+
+                <!-- Island Survival -->
+                <!--
+                <article class="game-card" data-aos="fade-up" data-aos-delay="300">
+                    <div class="game-img">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80"
+                            alt="Island Survival">
+                        <div class="game-badge">New / Island</div>
+                    </div>
+                    <div class="game-info">
+                        <h3>Island Survival 3D</h3>
+                        <p>ابقَ على قيد الحياة في جزيرة مهجورة، اجمع الموارد وابنِ مأواك.</p>
+                        <div class="game-footer">
+                            <span class="game-platform">Playhop</span>
+                            <button class="btn btn-play" onclick="location.href='game-details.html?game=island'">العب
+                                الآن</button>
+                        </div>
+                    </div>
+                </article>
+                -->
+
+                <!-- Zombie Arena -->
+                <!--
+                <article class="game-card" data-aos="fade-up" data-aos-delay="400">
+                    <div class="game-img">
+                        <img src="https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&w=800&q=80"
+                            alt="Zombie Arena">
+                        <div class="game-badge">Action</div>
+                    </div>
+                    <div class="game-info">
+                        <h3>Zombie Arena</h3>
+                        <p>واجه أمواج الزومبي التي لا تنتهي في قتال مثير للبقاء.</p>
+                        <div class="game-footer">
+                            <span class="game-platform">Poki</span>
+                            <button class="btn btn-play" onclick="location.href='game-details.html?game=zombie'">العب
+                                الآن</button>
+                        </div>
+                    </div>
+                </article>
+                -->
+
+                <!-- Combat Online -->
+                <!--
+                <article class="game-card" data-aos="fade-up" data-aos-delay="500">
+                    <div class="game-img">
+                        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80"
+                            alt="Combat Online">
+                        <div class="game-badge">FPS</div>
+                    </div>
+                    <div class="game-info">
+                        <h3>Combat Online</h3>
+                        <p>قتال تكتيكي سريع عبر الإنترنت مع لاعبين من حول العالم.</p>
+                        <div class="game-footer">
+                            <span class="game-platform">Poki</span>
+                            <button class="btn btn-play" onclick="location.href='game-details.html?game=combat'">العب
+                                الآن</button>
+                        </div>
+                    </div>
+                </article>
+                -->
+
+                <!-- Forest Survival -->
+                <!--
+                <article class="game-card" data-aos="fade-up" data-aos-delay="600">
+                    <div class="game-img">
+                        <img src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80"
+                            alt="Forest Survival">
+                        <div class="game-badge">Survival</div>
+                    </div>
+                    <div class="game-info">
+                        <h3>Forest Survival</h3>
+                        <p>رحلة البقاء في قلب الغابة، اصنع أدواتك وواجه تحديات الطبيعة.</p>
+                        <div class="game-footer">
+                            <span class="game-platform">Playhop</span>
+                            <button class="btn btn-play" onclick="location.href='game-details.html?game=forest'">العب
+                                الآن</button>
+                        </div>
+                    </div>
+                </article>
+                -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- About Section -->
+    <section id="about" class="section about-section container" data-aos="fade-up">
+        <div class="section-header">
+            <h2 class="section-title">عن Alking Games</h2>
+            <p class="section-subtitle">نحن نسعى لتقديم أفضل تجربة ألعاب 3D سرفايفل في الوطن العربي.</p>
+        </div>
+        <div style="text-align: center; max-width: 800px; margin: 0 auto; line-height: 1.8; color: var(--text-muted);">
+            <p>منصة Alking هي مشروع طموح يهدف لجمع أقوى ألعاب البقاء والمغامرة في مكان واحد بجودة عالية وأداء متميز. نحن
+                نستخدم أحدث التقنيات مثل Three.js لضمان تقديم تجربة واقعية وممتعة مباشرة من خلال المتصفح دون الحاجة
+                لتحميل أي ملفات.</p>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-info">
+                <div class="logo">
+                    <span class="logo-text">AL</span><span class="logo-accent">KING</span>
+                </div>
+                <p>منصتك الأولى للألعاب ثلاثية الأبعاد والواقعية. نحن نهتم بتقديم أفضل تجربة لعب للمستخدم العربي.</p>
+            </div>
+            <div class="footer-links">
+                <h4>روابط سريعة</h4>
+                <ul>
+                    <li><a href="#home">الرئيسية</a></li>
+                    <li><a href="#games">الألعاب</a></li>
+                </ul>
+            </div>
+            <div class="footer-social">
+                <h4>تابعنا</h4>
+                <div class="social-icons">
+                    <!-- Placeholder social icons -->
+                    <a href="#">FB</a>
+                    <a href="#">TW</a>
+                    <a href="#">IG</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 Alking Games Studio. جميع الحقوق محفوظة.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+    </script>
+    <script type="module" src="js/main.js"></script>
+</body>
+
+</html>

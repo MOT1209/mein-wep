@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تفاصيل اللعبة | Alking Games</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Orbitron:wght@400;600;800&family=Cairo:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .detail-hero {
+            padding-top: 150px;
+            padding-bottom: 50px;
+            background: linear-gradient(to bottom, #111827, #070b14);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-content {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 4rem;
+            margin-top: 2rem;
+        }
+
+        .game-main-img {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid var(--primary);
+            box-shadow: 0 0 30px rgba(56, 189, 248, 0.2);
+        }
+
+        .game-specs {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .spec-label {
+            color: var(--text-muted);
+        }
+
+        .spec-value {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        @media (max-width: 992px) {
+            .detail-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Game Container for Iframe */
+        .game-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 2000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .game-overlay.active {
+            display: flex;
+        }
+
+        .game-header {
+            height: 60px;
+            background: var(--bg-card);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2rem;
+            border-bottom: 1px solid var(--primary);
+        }
+
+        .game-iframe {
+            flex: 1;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <nav class="nav container">
+            <div class="logo">
+                <a href="index.html"><span class="logo-text">AL</span><span class="logo-accent">KING</span></a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html#home">الرئيسية</a></li>
+                <li><a href="index.html#games">الألعاب</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="detail-hero">
+            <h1 id="game-title" class="hero-title gradient-text">تحميل اللعبة...</h1>
+            <p id="game-short-desc" class="hero-subtitle"></p>
+        </section>
+
+        <div class="game-station-container">
+            <!-- Left Sidebar -->
+            <aside class="game-sidebar-ads">
+                <!--
+                <div class="sidebar-item" title="Island Survival" onclick="location.href='?game=island'"><img
+                        src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=200&q=80">
+                </div>
+                <div class="sidebar-item" title="Zombie Arena" onclick="location.href='?game=zombie'"><img
+                        src="https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&w=200&q=80">
+                </div>
+                <div class="sidebar-item" title="Combat Online" onclick="location.href='?game=combat'"><img
+                        src="https://images.unsplash.com/photo-1542751371-adc38444a05e?auto=format&fit=crop&w=200&q=80">
+                </div>
+                -->
+            </aside>
+
+            <!-- Main Game Area -->
+            <div id="main-game-area" class="main-game-area">
+                <div id="game-play-overlay" class="game-play-overlay">
+                    <button class="play-station-btn" id="station-play-trigger">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                    </button>
+                    <p style="margin-top: 1rem; color: #fff; font-family: 'Orbitron'; font-weight: bold;">اضغط للبدء</p>
+                </div>
+
+                <div id="game-loading-station"
+                    style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); color: var(--primary); z-index: 5;">
+                    <div style="text-align: center;">
+                        <div class="loader-spinner"
+                            style="border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 1rem;">
+                        </div>
+                        <p>جاري تحميل اللعبة...</p>
+                        <div id="loading-fallback" style="display: none; margin-top: 1rem;">
+                            <button class="btn btn-primary" onclick="window.open(window.currentData.url, '_blank')">اضغط
+                                للفتح في نافذة جديدة</button>
+                        </div>
+                    </div>
+                </div>
+
+                <iframe id="game-iframe-station"
+                    style="width: 100%; height: 100%; border: none; opacity: 0; transition: opacity 0.5s;"
+                    allow="autoplay; fullscreen; camera; focus-without-user-activation *" loading="lazy"></iframe>
+
+                <div class="game-controls">
+                    <h4 class="full-title" id="full-title-display">Game Name</h4>
+                    <div style="display: flex; gap: 1rem;">
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;"
+                            onclick="toggleFullscreen()">ملء الشاشة ⛶</button>
+                        <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;"
+                            onclick="window.open(window.currentData.url, '_blank')">نافذة جديدة ↗</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar -->
+            <aside class="game-sidebar-ads">
+                <!--
+                <div class="sidebar-item" title="Forest Survival" onclick="location.href='?game=forest'"><img
+                        src="https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=200&q=80">
+                </div>
+                <div class="sidebar-item" title="Minecraft" onclick="location.href='?game=minecraft'"><img
+                        src="assets/images/minecraft.png"></div>
+                <div class="sidebar-item" title="Rust" onclick="location.href='?game=rust'"><img
+                        src="assets/images/rust.png"></div>
+                -->
+            </aside>
+        </div>
+
+        <div class="detail-content">
+            <div class="game-description">
+                <div style="margin-top: 2rem;">
+                    <h2 class="section-title" style="font-size: 1.8rem;">عن اللعبة</h2>
+                    <p id="game-full-desc" class="section-subtitle" style="text-align: right;"></p>
+                </div>
+                <div style="margin-top: 2rem;">
+                    <button class="btn btn-secondary" onclick="location.href='index.html'">العودة للمتجر</button>
+                </div>
+            </div>
+
+            <div class="game-sidebar">
+                <div class="game-specs">
+                    <h3 style="margin-bottom: 1.5rem; font-family: 'Orbitron';">المواصفات والمعلومات</h3>
+                    <div id="specs-container">
+                        <!-- Specs will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { checkBrowser } from './js/utils.js';
+
+        const gameData = {
+            'farm': {
+                title: 'محاكي المزارع (Farm Simulator)',
+                short: 'ابنِ مزرعتك المثالية وشاهد محاصيلك تنمو.',
+                full: 'في هذه اللعبة الواقعية ثلاثية الأبعاد، يمكنك تجربة الحياة الريفية بكل تفاصيلها. من حرث الأرض وزرع البذور إلى حصاد المحاصيل وبيعها في السوق. تتميز اللعبة بنظام طقس ديناميكي ودورة ليل ونهار.',
+                image: 'assets/images/farm_sim.png',
+                url: 'games/farm/index.html', // Native Farm Simulator
+                specs: {
+                    'النوع': 'محاكاة / واقعي',
+                    'المنصة': 'Web / PC',
+                    'الجرافيك': 'High (Three.js)',
+                    'اللاعبين': 'Single Player'
+                }
+            },
+            'minecraft': {
+                title: 'عالم ماين كرافت (Minecraft Craft)',
+                short: 'الإبداع بلا حدود في عالم من المكعبات.',
+                full: 'استكشف عوالم لا نهائية وابنِ كل شيء من أبسط البيوت إلى أروع القلاع. العب في وضع الإبداع مع موارد غير محدودة أو احفر في أعماق العالم في وضع البقاء، واصنع الأسلحة والدروع لصد الغوغاء الخطيرين.',
+                image: 'assets/images/minecraft.png',
+                url: 'https://bloxd.io/', // Working embeddable alternative
+                specs: {
+                    'النوع': 'Sandbox / survival',
+                    'المنصة': 'Multiplayer Web',
+                    'الجرافيك': 'Voxel Optimized',
+                    'اللاعبين': 'Online Coop'
+                }
+            },
+            'rust': {
+                title: 'تجربة ريست (Rust Survival)',
+                short: 'البقاء للأقوى في عالم قاسٍ.',
+                full: 'الهدف الوحيد في ريست هو البقاء على قيد الحياة. للتغلب على صراعات مثل الجوع والعطش والبرد، ستحتاج إلى إشعال النار، بناء مأوى، وقتل الحيوانات من أجل اللحوم. احمِ نفسك من اللاعبين الآخرين.',
+                image: 'assets/images/rust.png',
+                url: 'https://krunker.io/', // Fast action alternative or clone
+                specs: {
+                    'النوع': 'Action / Survival',
+                    'المنصة': 'Web / Desktop',
+                    'الجرافيك': 'Ultra Realistic',
+                    'اللاعبين': 'PvP Servers'
+                }
+            },
+            'island': {
+                title: 'Island Survival 3D',
+                short: 'بقَ على قيد الحياة في جزيرة مهجورة.',
+                full: 'استكشف الجزيرة، اجمع الموارد، وابنِ مأواك الخاص. واجه الحيوانات المفترسة وراقب احتياجاتك الحيوية للبقاء حياً في هذه التجربة الواقعية.',
+                image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+                url: 'https://playhop.com/embed/223062',
+                specs: {
+                    'النوع': 'Survival',
+                    'المنصة': 'Web',
+                    'الجرافيك': 'High 3D',
+                    'اللاعبين': 'Single Player'
+                }
+            },
+            'zombie': {
+                title: 'Zombie Arena',
+                short: 'واجه أمواج الزومبي التي لا تنتهي.',
+                full: 'ساحة قتال مفتوحة مليئة بالأخطار. استخدم مستودع أسلحتك للبقاء على قيد الحياة لأطول فترة ممكنة ضد هجمات الزومبي المتزايدة الصعوبة.',
+                image: 'https://images.unsplash.com/photo-1534067783941-51c9c23ecefd?auto=format&fit=crop&w=800&q=80',
+                url: 'https://games.crazygames.com/en_US/zombie-arena/index.html', // More embed friendly
+                specs: {
+                    'النوع': 'Action / Horror',
+                    'المنصة': 'Web',
+                    'الجرافيك': 'Dynamic',
+                    'اللاعبين': 'Multiplayer Support'
+                }
+            },
+            'combat': {
+                title: 'Combat Online',
+                short: 'قتال تكتيكي سريع عبر الإنترنت.',
+                full: 'انضم إلى ساحات القتال العالمية في هذه اللعبة القتالية المثيرة. اختر سلاحك، نسق مع فريقك، واثبت مهارتك في المواجهات المباشرة.',
+                image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+                url: 'https://games.crazygames.com/en_US/combat-online/index.html', // More embed friendly
+                specs: {
+                    'النوع': 'FPS / Action',
+                    'المنصة': 'Web',
+                    'الجرافيك': 'Competitive',
+                    'اللاعبين': 'Online PvP'
+                }
+            },
+            'forest': {
+                title: 'Forest Survival',
+                short: 'رحلة البقاء في قلب الغابة الغامضة.',
+                full: 'الغابة مليئة بالأسرار والموارد. اصنع أدواتك، ابنِ حصنك، وواجه تقلبات الطبيعة في عالم مفتوح وجميل.',
+                image: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=800&q=80',
+                url: 'https://playhop.com/embed/195150',
+                specs: {
+                    'النوع': 'Adventure / Survival',
+                    'المنصة': 'Web',
+                    'الجرافيك': 'Atmospheric',
+                    'اللاعبين': 'Single Player'
+                }
+            }
+        };
+
+        window.currentData = null;
+
+        function initGameDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const gameKey = urlParams.get('game');
+            window.currentData = gameData[gameKey];
+
+            if (window.currentData) {
+                document.title = window.currentData.title + " | Alking Games";
+                document.getElementById('game-title').innerText = window.currentData.title;
+                document.getElementById('game-short-desc').innerText = window.currentData.short;
+                document.getElementById('game-full-desc').innerText = window.currentData.full;
+                document.getElementById('game-play-overlay').style.backgroundImage = `url(${window.currentData.image})`;
+                document.getElementById('full-title-display').innerText = window.currentData.title;
+
+                const specsDiv = document.getElementById('specs-container');
+                specsDiv.innerHTML = ''; // Clear previous
+                for (const [key, value] of Object.entries(window.currentData.specs)) {
+                    specsDiv.innerHTML += `
+                        <div class="spec-item">
+                            <span class="spec-label">${key}</span>
+                            <span class="spec-value">${value}</span>
+                        </div>
+                    `;
+                }
+            } else {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Initialize when DOM is ready
+        function startup() {
+            if (checkBrowser()) {
+                initGameDetails();
+
+                // Attach click event to the entire overlay with high priority
+                const playOverlay = document.getElementById('game-play-overlay');
+                if (playOverlay) {
+                    playOverlay.style.cursor = 'pointer';
+                    playOverlay.onclick = function (e) {
+                        e.preventDefault();
+                        console.log('Explicitly launching game via onclick');
+                        launchGame();
+                    };
+                }
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startup);
+        } else {
+            startup();
+        }
+
+        window.launchGame = function () {
+            console.log('launchGame() starting...');
+            if (!window.currentData) {
+                console.error('CRITICAL: No game data found!');
+                return;
+            }
+
+            const overlay = document.getElementById('game-play-overlay');
+            const iframe = document.getElementById('game-iframe-station');
+            const loader = document.getElementById('game-loading-station');
+            const fallback = document.getElementById('loading-fallback');
+            const loaderText = loader.querySelector('p');
+
+            if (!iframe) {
+                console.error('CRITICAL: Iframe element not found!');
+                return;
+            }
+
+            // Check if external
+            const isExternal = window.currentData.url.startsWith('http');
+
+            // Show loader and hide overlay
+            loader.style.display = 'flex';
+            overlay.style.display = 'none';
+
+            console.log('Loading game URL:', window.currentData.url);
+
+            if (isExternal) {
+                loaderText.innerText = "هذه لعبة خارجية، قد لا تعمل داخل المتصفح...";
+                fallback.style.display = 'block'; // Show fallback immediately for external
+
+                // Attempt to load anyway
+                iframe.src = window.currentData.url;
+            } else {
+                // Local game
+                iframe.src = window.currentData.url;
+                fallback.style.display = 'none';
+            }
+
+            iframe.onload = () => {
+                console.log('SUCCESS: Game iframe loaded');
+                loader.style.display = 'none';
+                iframe.style.opacity = '1';
+                iframe.focus();
+            };
+
+            // Error handling/Fallback if it takes too long (8 seconds)
+            setTimeout(() => {
+                if (loader.style.display !== 'none') {
+                    console.warn('Load timeout - showing troubleshooting button');
+                    fallback.style.display = 'block';
+                    loaderText.innerText = "استغرق التحميل وقتاً طويلاً...";
+                }
+            }, 8000);
+        }
+
+        window.toggleFullscreen = function () {
+            const gameArea = document.getElementById('main-game-area');
+            gameArea.classList.toggle('fullscreen');
+            if (gameArea.classList.contains('fullscreen')) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = 'auto';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,70 @@
+/* ===== Shared Blog Post Styles ===== */
+body { padding-top: var(--nav-height); background: var(--bg-main); color: var(--text-med); font-family: var(--font-body); }
+
+/* --- Post Container --- */
+.blog-post { max-width: 800px; margin: 0 auto; padding: 40px 24px 80px; }
+.blog-post .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--accent); text-decoration: none; font-size: 0.9rem; margin-bottom: 30px; transition: var(--transition); }
+.blog-post .back-link:hover { opacity: 0.8; gap: 12px; }
+.blog-post .post-meta { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 10px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+.blog-post .post-meta span { display: flex; align-items: center; gap: 6px; }
+.blog-post h1 { font-size: clamp(1.6rem, 3vw, 2.5rem); color: var(--text-high); margin-bottom: 15px; line-height: 1.25; font-weight: 700; letter-spacing: -0.02em; }
+.post-tag { display: inline-block; background: var(--accent-subtle); color: var(--accent); padding: 4px 12px; border-radius: 100px; font-size: 0.75rem; font-weight: 600; transition: var(--transition); }
+.post-tag:hover { background: rgba(var(--accent-rgb), 0.2); }
+
+/* --- Post Content Typography --- */
+.post-content { color: var(--text-med); font-size: 1.05rem; line-height: 1.85; }
+.post-content h2 { color: var(--text-high); font-size: 1.45rem; margin: 48px 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+.post-content h3 { color: var(--accent); font-size: 1.15rem; margin: 32px 0 12px; font-weight: 600; }
+.post-content h4 { color: var(--text-high); font-size: 1.05rem; margin: 24px 0 10px; font-weight: 600; }
+.post-content p { margin-bottom: 18px; }
+.post-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.post-content a:hover { opacity: 0.85; }
+.post-content strong { color: var(--text-high); font-weight: 600; }
+.post-content blockquote { border-left: 3px solid var(--accent); margin: 24px 0; padding: 12px 20px; background: var(--bg-alt); border-radius: 0 12px 12px 0; color: var(--text-muted); font-style: italic; }
+.post-content ul, .post-content ol { margin: 16px 0; padding-left: 24px; }
+.post-content li { margin-bottom: 8px; }
+.post-content img { max-width: 100%; border-radius: var(--radius-sm); margin: 24px 0; border: 1px solid var(--border); }
+
+/* --- Code Blocks --- */
+.post-content code { background: var(--bg-alt); padding: 2px 8px; border-radius: 6px; font-size: 0.85rem; color: var(--accent); font-family: var(--font-mono); word-break: break-word; }
+.post-content pre { position: relative; background: var(--bg-alt); padding: 20px; border-radius: var(--radius-sm); overflow-x: auto; margin: 24px 0; border: 1px solid var(--border); }
+.post-content pre code { background: none; padding: 0; color: var(--text-med); font-size: 0.88rem; line-height: 1.6; }
+.copy-code-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.08); border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 8px; font-size: 0.75rem; cursor: pointer; transition: var(--transition); opacity: 0; }
+.post-content pre:hover .copy-code-btn { opacity: 1; }
+.copy-code-btn:hover { background: var(--accent-subtle); color: var(--accent); border-color: var(--accent); }
+.copy-code-btn.copied { background: rgba(16,185,129,0.15); color: #10b981; border-color: #10b981; }
+
+/* --- Tables --- */
+.post-content table { width: 100%; border-collapse: collapse; margin: 24px 0; font-size: 0.9rem; }
+.post-content th, .post-content td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); }
+.post-content th { background: var(--bg-alt); color: var(--text-high); font-weight: 600; }
+.post-content tr:hover { background: rgba(255,255,255,0.02); }
+
+/* --- Reading Progress Bar --- */
+#reading-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); z-index: 9999; width: 0%; transition: width 0.1s linear; }
+
+/* --- Related Posts --- */
+.related-posts { margin-top: 60px; padding-top: 40px; border-top: 1px solid var(--border); }
+.related-posts h2 { color: var(--text-high); font-size: 1.2rem; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.related-card { display: block; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px; text-decoration: none; transition: var(--transition); }
+.related-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.related-card h3 { color: var(--text-high); font-size: 0.95rem; margin-bottom: 6px; font-weight: 600; }
+.related-card p { color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; margin: 0; }
+.related-card .related-meta { color: var(--text-muted); font-size: 0.75rem; margin-top: 8px; display: flex; gap: 10px; }
+
+/* --- Arabic / RTL --- */
+html[dir="rtl"] .blog-post .back-link i { transform: scaleX(-1); }
+html[dir="rtl"] .post-content blockquote { border-left: none; border-right: 3px solid var(--accent); border-radius: 12px 0 0 12px; padding: 12px 20px; }
+html[dir="rtl"] .post-content ul, html[dir="rtl"] .post-content ol { padding-left: 0; padding-right: 24px; }
+html[dir="rtl"] .copy-code-btn { right: auto; left: 10px; }
+html[dir="rtl"] .post-content th, html[dir="rtl"] .post-content td { text-align: right; }
+
+/* --- Responsive --- */
+@media (max-width: 768px) {
+  .blog-post { padding: 24px 16px 60px; }
+  .post-content { font-size: 1rem; }
+  .post-content pre { font-size: 0.8rem; padding: 14px; }
+  .related-grid { grid-template-columns: 1fr; }
+  .post-meta { font-size: 0.82rem; gap: 10px; }
+}

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول - KING2 Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Cairo', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: #0f0f23;
+            padding: 50px;
+            border-radius: 25px;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            border: 2px solid #ffd700;
+        }
+        .logo {
+            font-size: 70px;
+            margin-bottom: 20px;
+            animation: crownPulse 2s ease-in-out infinite;
+        }
+        @keyframes crownPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        h1 {
+            color: #ffd700;
+            margin-bottom: 35px;
+            font-size: 28px;
+            font-weight: 900;
+        }
+        input {
+            width: 100%;
+            padding: 18px;
+            margin: 15px 0;
+            border: 3px solid #333;
+            border-radius: 15px;
+            background: #1a1a2e;
+            color: white;
+            font-size: 18px;
+            font-family: 'Cairo', sans-serif;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        input::placeholder {
+            color: #666;
+        }
+        button {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            border: none;
+            border-radius: 15px;
+            color: #1a1a2e;
+            font-size: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            margin-top: 25px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            transform: scale(1.03);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+        }
+        .error {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 16px;
+            display: none;
+            background: rgba(255, 68, 68, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        .back-link {
+            color: #888;
+            margin-top: 25px;
+            display: inline-block;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">👑</div>
+        <h1>لوحة تحكم KING2</h1>
+        <input type="password" id="password" placeholder="أدخل كلمة المرور">
+        <button onclick="login()">دخول</button>
+        <p class="error" id="error">❌ كلمة المرور غير صحيحة</p>
+        <a href="/" class="back-link">← العودة للرئيسية</a>
+    </div>
+    
+    <script>
+        async function login() {
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('error');
+            
+            if (!password) {
+                errorEl.textContent = '❌ الرجاء إدخال كلمة المرور';
+                errorEl.style.display = 'block';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/admin/auth', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({password: password})
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    localStorage.setItem('admin_token', data.token);
+                    window.location.href = '/admin/dashboard';
+                } else {
+                    errorEl.textContent = '❌ كلمة المرور غير صحيحة';
+                    errorEl.style.display = 'block';
+                }
+            } catch (e) {
+                errorEl.textContent = '❌ خطأ في الاتصال بالخادم';
+                errorEl.style.display = 'block';
+            }
+        }
+        
+        document.getElementById('password').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                login();
+            }
+        });
+        
+        // فحص إذا كان مسجلاً دخول من قبل
+        if (localStorage.getItem('admin_token')) {
+            fetch('/admin/dashboard')
+                .then(r => {
+                    if (r.ok) {
+                        window.location.href = '/admin/dashboard';
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

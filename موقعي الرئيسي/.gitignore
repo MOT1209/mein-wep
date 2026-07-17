@@ -1,0 +1,66 @@
+# Claude / local agent settings (contain API keys)
+.claude/sittings.json
+.claude/settings.local.json
+.claude/launch.json
+.claude/scheduled_tasks.lock
+
+# Gemini Configuration Files
+
+# Ignore actual config with API keys
+js/gemini-config.js
+
+# Ignore environment files (any depth — protects nested project secrets like models/king2 ai-Model/.env)
+.env
+.env.local
+**/.env
+**/.env.local
+*.key
+
+# Ignore API keys
+**/api-keys/
+**/*-key.json
+
+# Ignore temporary and workspace files
+temp_db_check.js
+package-lock.json
+*.code-workspace
+.vercel
+.playwright-mcp/
+console-errors.log
+*.log
+
+# Capacitor / Android generated files (built in CI)
+apps/*/node_modules/
+apps/*/android/
+apps/*/www/
+games/*/node_modules/
+games/*/android/
+games/*/www/
+games/kingcraft-game/dist/
+
+# Keystore (sensitive)
+**/*.jks
+**/*.keystore
+**/keystore.properties
+
+# Vendored library files (local fallback for CDN-disabled environments)
+# games/*/js/lib/
+
+# Don't ignore APK files in apks/ (they're committed for site hosting)
+!apks/*.apk
+
+# king2 model: tracked in main repo; secrets are committed only as encrypted .enc
+# (plaintext .env* stay ignored via models/king2 ai-Model/.gitignore)
+
+# king2 training data files (large generated artifacts, not source)
+models/king2\ ai-Model/data/*.json
+models/king2\ ai-Model/data/*colab*.ipynb
+models/king2\ ai-Model/data/*TEST*
+
+# Cloned skill repos (skills extracted to .agents/skills/)
+google-skills/
+flutter-skills/
+dart-skills/
+
+# Environment-injected agent skills (not project code)
+.agents/

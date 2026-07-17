@@ -1,0 +1,7 @@
+{
+  "version": "1.0.0",
+  "buildNumber": 1,
+  "apkUrl": "https://rashid-wep.vercel.app/apks/{{APP_FOLDER}}-v1.0.0.apk",
+  "changelog": "Initial release",
+  "releaseDate": "{{DATE}}"
+}

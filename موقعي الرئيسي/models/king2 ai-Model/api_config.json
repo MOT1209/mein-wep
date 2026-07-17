@@ -1,0 +1,81 @@
+{
+  "apis": {
+    "gemini": {
+      "key": "${GEMINI_API_KEY}",
+      "model": "gemini-2.5-flash",
+      "timeout": 15,
+      "enabled": true
+    },
+    "groq": {
+      "key": "${GROQ_API_KEY}",
+      "model": "llama-3.3-70b-versatile",
+      "timeout": 15,
+      "enabled": true
+    },
+    "openrouter": {
+      "key": "${OPENROUTER_API_KEY}",
+      "model": "google/gemini-2.5-flash",
+      "timeout": 20,
+      "enabled": true
+    },
+    "zai": {
+      "key": "${ZAI_API_KEY}",
+      "model": "glm-5.1",
+      "timeout": 20,
+      "enabled": true
+    },
+    "gemma": {
+      "key": "not-needed",
+      "model": "gemma-4-e4b",
+      "base_url": "http://127.0.0.1:1235/",
+      "timeout": 60,
+      "enabled": true
+    },
+    "qwen": {
+      "key": "not-needed",
+      "model": "qwen3.5-9b",
+      "base_url": "http://127.0.0.1:1236/",
+      "timeout": 90,
+      "enabled": true
+    }
+  },
+  "routing": {
+    "primary": "qwen",
+    "fallback_order": ["gemma", "zai", "gemini", "groq", "openrouter"],
+    "retry_count": 3
+  },
+  "memory": {
+    "path": "memory.json",
+    "min_match_score": 0.3,
+    "use_rag": true
+  },
+  "search": {
+    "enabled": true,
+    "fallback_on_no_api": true
+  },
+  "king2_personality": {
+    "name": "KING2",
+    "title": "الملك الذهبي للذكاء الاصطناعي",
+    "personality": "ذكي، مساند، مفيد، سريع، ودود",
+    "language": "العربية为主 (العربية أولاً)",
+    "greeting": "أهلاً بك! أنا KING2، مساعدك الذكي الملكي. تفضل بالسؤال، أنا في خدمتك! 👑",
+    "special_instructions": [
+      "أجب دائماً بالعربية أولاً",
+      "كن مختصراً ومفيداً",
+      "如果你问中文，回答中文",
+      "If you ask in English, respond in English",
+      "Use markdown للتنسيق عند الحاجة",
+      "أظهر معلوماتك بوضوح",
+      "إذا سأل عنك، قل: أنا KING2، مساعد ذكاء اصطناعي متطور",
+      "أضف لمسة ملكية لردودك"
+    ],
+    "features": [
+      "البحث في الويب",
+      "الإجابة على الأسئلة",
+      "كتابة الأكواد",
+      "التحليل والتفسير",
+      "الترجمة",
+      "إنشاء النصوص"
+    ]
+  }
+}

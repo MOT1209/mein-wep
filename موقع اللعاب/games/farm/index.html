@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكي المزارع | Alking Games</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+
+<body>
+    <div id="game-container"></div>
+
+    <!-- HUD / UI Overlay -->
+    <div class="hud">
+        <div class="hud-top">
+            <div class="stat-box">
+                <span class="label">المال:</span>
+                <span id="gold-value" class="value">100</span>
+                <span class="icon">💰</span>
+            </div>
+            <div class="stat-box xp-box">
+                <span class="label">الخبرة:</span>
+                <div class="xp-bar-container">
+                    <div id="xp-fill" class="xp-fill"></div>
+                </div>
+                <span id="xp-value" class="value">0/100</span>
+            </div>
+            <div class="stat-box">
+                <span class="label">المستوى:</span>
+                <span id="level-value" class="value">1</span>
+                <span class="icon">⭐</span>
+            </div>
+        </div>
+
+        <div id="seed-selector" class="seed-selector">
+            <div class="seed-option active" data-seed="wheat">
+                <span class="seed-icon">🌾</span>
+                <span class="seed-name">قمح</span>
+                <span class="seed-price">10💰</span>
+            </div>
+            <div class="seed-option" data-seed="carrot">
+                <span class="seed-icon">🥕</span>
+                <span class="seed-name">جزر</span>
+                <span class="seed-price">20💰</span>
+            </div>
+            <div class="seed-option" data-seed="tomato">
+                <span class="seed-icon">🍅</span>
+                <span class="seed-name">طماطم</span>
+                <span class="seed-price">40💰</span>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <button class="tool-btn active" data-tool="hoe">
+                <span class="tool-icon">⛏️</span>
+                <span class="tool-name">محراث</span>
+            </button>
+            <button class="tool-btn" data-tool="seeds">
+                <span class="tool-icon">🌱</span>
+                <span class="tool-name">بذور</span>
+            </button>
+            <button class="tool-btn" data-tool="water">
+                <span class="tool-icon">💧</span>
+                <span class="tool-name">ري</span>
+            </button>
+            <button class="tool-btn" data-tool="harvest">
+                <span class="tool-icon">🧺</span>
+                <span class="tool-name">حصاد</span>
+            </button>
+        </div>
+
+        <div id="status-msg" class="status-msg">اضغط على الأرض لحرثها...</div>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loader"></div>
+        <p>جاري تحميل المزرعة...</p>
+    </div>
+
+    <!-- Inventory Panel (Left Side) -->
+    <div class="inventory-panel">
+        <h3>المخزون</h3>
+        <div class="inv-section">
+            <h4>محاصيل</h4>
+            <div class="inv-item">
+                <span class="inv-icon">🌾</span>
+                <span id="inv-wheat" class="inv-count">0</span>
+            </div>
+            <div class="inv-item">
+                <span class="inv-icon">🥕</span>
+                <span id="inv-carrot" class="inv-count">0</span>
+            </div>
+            <div class="inv-item">
+                <span class="inv-icon">🍅</span>
+                <span id="inv-tomato" class="inv-count">0</span>
+            </div>
+        </div>
+        <div class="inv-section">
+            <h4>بذور</h4>
+            <div class="inv-item">
+                <span class="inv-icon">🌱</span>
+                <span id="seed-wheat" class="inv-count">0</span>
+            </div>
+            <div class="inv-item">
+                <span class="inv-icon">🌱</span>
+                <span id="seed-carrot" class="inv-count">0</span>
+            </div>
+            <div class="inv-item">
+                <span class="inv-icon">🌱</span>
+                <span id="seed-tomato" class="inv-count">0</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Modal -->
+    <div id="shop-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>المتجر الزراعي</h2>
+                <button id="close-shop" class="close-btn">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="shop-tabs">
+                    <button class="shop-tab active" data-tab="sell">بيع المحاصيل</button>
+                    <button class="shop-tab" data-tab="buy">شراء البذور</button>
+                </div>
+
+                <!-- Sell Section -->
+                <div id="shop-sell" class="shop-section active">
+                    <div class="shop-item">
+                        <div class="item-info">
+                            <span class="item-icon">🌾</span>
+                            <span>قمح (بيع)</span>
+                        </div>
+                        <div class="item-action">
+                            <span class="price">25💰</span>
+                            <button class="btn-sell" data-crop="wheat">بيع الكل</button>
+                        </div>
+                    </div>
+                    <div class="shop-item">
+                        <div class="item-info">
+                            <span class="item-icon">🥕</span>
+                            <span>جزر (بيع)</span>
+                        </div>
+                        <div class="item-action">
+                            <span class="price">55💰</span>
+                            <button class="btn-sell" data-crop="carrot">بيع الكل</button>
+                        </div>
+                    </div>
+                    <div class="shop-item">
+                        <div class="item-info">
+                            <span class="item-icon">🍅</span>
+                            <span>طماطم (بيع)</span>
+                        </div>
+                        <div class="item-action">
+                            <span class="price">110💰</span>
+                            <button class="btn-sell" data-crop="tomato">بيع الكل</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buy Section -->
+                <div id="shop-buy" class="shop-section" style="display: none;">
+                    <div class="shop-item">
+                        <div class="item-info">
+                            <span class="item-icon">🌾</span>
+                            <span>بذور قمح</span>
+                        </div>
+                        <div class="item-action">
+                            <span class="price">10💰</span>
+                            <button class="btn-buy" data-seed="wheat">شراء 1</button>
+                            <button class="btn-buy" data-seed="wheat" data-amount="5">شراء 5</button>
+                        </div>
+                    </div>
+                    <div class="shop-item">
+                        <div class="item-info">
+                            <span class="item-icon">🥕</span>
+                            <span>بذور جزر</span>
+                        </div>
+                        <div class="item-action">
+                            <span class="price">20💰</span>
+                            <button class="btn-buy" data-seed="carrot">شراء 1</button>
+                            <button class="btn-buy" data-seed="carrot" data-amount="5">شراء 5</button>
+                        </div>
+                    </div>
+                    <div class="shop-item">
+                        <div class="item-info">
+                            <span class="item-icon">🍅</span>
+                            <span>بذور طماطم</span>
+                        </div>
+                        <div class="item-action">
+                            <span class="price">40💰</span>
+                            <button class="btn-buy" data-seed="tomato">شراء 1</button>
+                            <button class="btn-buy" data-seed="tomato" data-amount="5">شراء 5</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.onerror = function (msg, url, line, col, error) {
+            alert("Critical Error: " + msg + "\nIn: " + url + "\nLine: " + line);
+            document.body.innerHTML += '<div style="color:red; background:black; padding:20px; font-size:20px;">CRITICAL ERROR: ' + msg + '</div>';
+            return false;
+        };
+        console.log("Global Error Handler Installed");
+    </script>
+    <script type="module" src="js/game.js?v=3"></script>
+</body>
+
+</html>

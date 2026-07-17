@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Center | Rashid</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/learning.html">
+    <meta name="description" content="Rashid Learning Center — Tutorials, resources, and guides on Next.js, Python, Supabase, Three.js, and modern web development.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Learning Center | Rashid">
+    <meta property="og:description" content="Rashid Learning Center — Tutorials, resources, and guides on Next.js, Python, Supabase, Three.js, and modern web development.">
+    <meta property="og:image" content="images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/learning.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Learning Center | Rashid">
+    <meta name="twitter:description" content="Rashid Learning Center — Tutorials, resources, and guides on Next.js, Python, Supabase, Three.js, and modern web development.">
+    <meta name="twitter:image" content="images/og-image.svg">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="css/style.css?v=9.1">
+    <style>
+.cookie-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  background: rgba(6, 8, 13, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 16px 24px;
+  transform: translateY(100%);
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.cookie-banner.visible { transform: translateY(0); }
+.cookie-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.cookie-text {
+  display: flex;
+  align-items: center;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  flex: 1;
+  min-width: 280px;
+}
+.cookie-text a { color: var(--accent, #38bdf8); text-decoration: underline; }
+.cookie-actions { display: flex; gap: 12px; flex-shrink: 0; }
+.cookie-btn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+.cookie-accept {
+  background: linear-gradient(135deg, #67e8f9, #34d399);
+  color: #061018;
+}
+.cookie-accept:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(52, 211, 153, 0.3); }
+.cookie-decline {
+  background: rgba(148, 163, 184, 0.1);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+.cookie-decline:hover { background: rgba(148, 163, 184, 0.2); }
+@media (max-width: 640px) {
+  .cookie-content { flex-direction: column; text-align: center; }
+  .cookie-btn { width: 100%; justify-content: center; }
+}
+</style>
+    <style>
+        body {
+            padding-top: 80px;
+        }
+
+        .course-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .course-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(var(--backdrop-blur));
+            border: 1px solid var(--border-color);
+            border-radius: 15px;
+            padding: 30px;
+            transition: 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow);
+        }
+
+        .course-icon {
+            font-size: 3rem;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+
+        .course-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-family: var(--font-secondary);
+        }
+
+        .course-desc {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .course-progress {
+            background: var(--bg-alt);
+            height: 6px;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+        }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Learning",
+      "item": "https://rashid-wep.vercel.app/learning.html"
+    }
+  ]
+}
+</script>
+</head>
+
+<body>
+
+    <!-- Nav -->
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Rashid<span class="accent-dot">.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="#" class="active" style="color:var(--accent)">Learning Center</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container section">
+        <div class="section-title-wrapper" style="text-align: center; margin-bottom: 50px;">
+            <h1 style="font-size: 3rem; margin-bottom: 20px;">Learning Center</h1>
+            <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto;">
+                Welcome to my personal knowledge hub. Here I share tutorials, resources, and guides on the technologies
+                I work with.
+            </p>
+        </div>
+
+        <div class="course-grid" id="lessons-container">
+            <!-- Dynamic content will be injected here -->
+            <div class="loading-state" style="text-align: center; grid-column: 1/-1; padding: 50px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--accent);"></i>
+                <p style="margin-top: 15px;">Loading knowledge...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Rashid. Learning Center Module.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/learning.js"></script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+  <div class="cookie-content">
+    <div class="cookie-text">
+      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
+      <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+    </div>
+    <div class="cookie-actions">
+      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const banner = document.getElementById('cookie-consent');
+  if (localStorage.getItem('cookieConsent')) { return; }
+  setTimeout(() => banner.classList.add('visible'), 500);
+  document.getElementById('cookie-accept').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'accepted');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
+  });
+  document.getElementById('cookie-decline').addEventListener('click', function() {
+    localStorage.setItem('cookieConsent', 'declined');
+    banner.classList.remove('visible');
+    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
+  });
+})();
+</script>
+</body>
+
+</html>

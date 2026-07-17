@@ -1,0 +1,14 @@
+{
+  "appId": "com.rashid.quranapp",
+  "appName": "Quran App",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "releaseType": "APK",
+      "signingType": "apksigner"
+    }
+  }
+}

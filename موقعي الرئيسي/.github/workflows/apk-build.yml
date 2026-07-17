@@ -1,0 +1,282 @@
+# Auto-build APKs for apps & games
+# Copies APK to apks/ folder so Vercel serves it on the site
+
+name: Build APKs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/*/index.html'
+      - 'apps/*/js/**'
+      - 'apps/*/css/**'
+      - 'games/*/index.html'
+      - 'games/*/js/**'
+      - 'games/*/css/**'
+      - 'games/kingcraft-game/src/**'
+      - 'games/kingcraft-game/js/**'
+      - 'scripts/**'
+  workflow_dispatch:
+    inputs:
+      forceAll:
+        description: 'Build APKs for ALL projects'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  detect:
+    name: Detect Changed Projects
+    runs-on: ubuntu-latest
+    outputs:
+      projects: ${{ steps.detect.outputs.projects }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - id: detect
+        run: |
+          ALL='["apps/quran-app","apps/calculator-app","apps/quiz-app","games/kingcraft-game","games/rust-game","games/farm-game"]'
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.forceAll }}" == "true" ]]; then
+            echo "projects=$ALL" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+
+          PROJECTS='[]'
+          for dir in apps/quran-app apps/calculator-app apps/quiz-app games/kingcraft-game games/rust-game games/farm-game; do
+            if echo "$CHANGED" | grep -q "^$dir/"; then
+              PROJECTS=$(echo "$PROJECTS" | jq -c --arg d "$dir" '. + [$d]')
+              echo "Changed: $dir"
+            fi
+          done
+
+          if [ "$PROJECTS" = "[]" ]; then
+            if echo "$CHANGED" | grep -q "^scripts/"; then
+              echo "projects=$ALL" >> $GITHUB_OUTPUT
+            else
+              echo "projects=[]" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "projects=$PROJECTS" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    name: Build ${{ matrix.project }}
+    needs: detect
+    if: ${{ fromJson(needs.detect.outputs.projects)[0] != '' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        project: ${{ fromJson(needs.detect.outputs.projects) }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '21'
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Accept Android SDK licenses
+        run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+          yes | $ANDROID_HOME/tools/bin/sdkmanager --licenses 2>/dev/null || true
+
+      - name: Add apksigner (build-tools) to PATH
+        run: |
+          BT_DIR="$ANDROID_HOME/build-tools"
+          if [ ! -d "$BT_DIR" ] || [ -z "$(ls -A "$BT_DIR" 2>/dev/null)" ]; then
+            yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0"
+          fi
+          LATEST_BT=$(ls "$BT_DIR" | sort -V | tail -1)
+          echo "$BT_DIR/$LATEST_BT" >> $GITHUB_PATH
+          echo "build-tools on PATH: $LATEST_BT"
+
+      - name: Extract project info
+        id: info
+        run: |
+          FOLDER=$(basename ${{ matrix.project }})
+          echo "folder=$FOLDER" >> $GITHUB_OUTPUT
+
+      - name: Install dependencies
+        working-directory: ${{ matrix.project }}
+        run: |
+          npm install 2>&1 | tail -5
+          # Capacitor reads capacitor.config.ts → needs TypeScript at build time
+          npm install --no-save typescript 2>&1 | tail -3
+
+      - name: Add Android platform
+        working-directory: ${{ matrix.project }}
+        run: |
+          if [ ! -d "android" ]; then
+            npx cap add android 2>&1 | tail -5
+          fi
+
+      - name: Build web assets
+        working-directory: ${{ matrix.project }}
+        run: |
+          if [ "${{ steps.info.outputs.folder }}" = "kingcraft-game" ]; then
+            npm run build 2>&1 | tail -5
+          fi
+          node ../../scripts/copy-to-www.mjs .
+
+      - name: Generate launcher icons
+        working-directory: ${{ matrix.project }}
+        run: |
+          npm install --no-save sharp 2>&1 | tail -3 || echo "sharp install failed — icons will be skipped"
+          node ../../scripts/gen-icons.mjs .
+
+      - name: Sync Capacitor
+        working-directory: ${{ matrix.project }}
+        run: npx cap sync android 2>&1 | tail -10
+
+      - name: Configure AdMob App ID
+        working-directory: ${{ matrix.project }}
+        run: |
+          case "${{ matrix.project }}" in
+            apps/calculator-app) ADMOB_APP_ID="ca-app-pub-6142754371257083~9020699769" ;;
+            apps/quiz-app)       ADMOB_APP_ID="ca-app-pub-6142754371257083~1920938942" ;;
+            apps/quran-app)      ADMOB_APP_ID="ca-app-pub-6142754371257083~8322283070" ;;
+            *) ADMOB_APP_ID="" ;;
+          esac
+          if [ -n "$ADMOB_APP_ID" ]; then
+            STRINGS_FILE="android/app/src/main/res/values/strings.xml"
+            MANIFEST="android/app/src/main/AndroidManifest.xml"
+            sed -i "s#</resources>#    <string name=\"admob_app_id\">${ADMOB_APP_ID}</string>\n</resources>#" "$STRINGS_FILE"
+            sed -i "s#</application>#    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"@string/admob_app_id\"/>\n    </application>#" "$MANIFEST"
+            echo "AdMob App ID configured: $ADMOB_APP_ID"
+          else
+            echo "No AdMob App ID for this project — skipping (games don't use AdMob)"
+          fi
+
+      - name: Get current version
+        id: version
+        run: |
+          VER_FILE="${{ matrix.project }}/version.json"
+          if [ -f "$VER_FILE" ]; then
+            VER=$(cat $VER_FILE)
+            BUILD=$(echo $VER | jq -r '.buildNumber // 1')
+            NEW_BUILD=$((BUILD + 1))
+            VERSION=$(echo $VER | jq -r '.version')
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+            echo "build=$NEW_BUILD" >> $GITHUB_OUTPUT
+          else
+            echo "version=1.0.0" >> $GITHUB_OUTPUT
+            echo "build=1" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build APK
+        working-directory: ${{ matrix.project }}
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KS_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -o pipefail
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+            echo "$KS_B64" | base64 -d > release-key.jks
+            npx cap build android \
+              --keystorepath "$PWD/release-key.jks" \
+              --keystorepass "$KS_PASS" \
+              --keystorealias "${KS_ALIAS:-rashid-key}" \
+              --keystorealiaspass "${KS_KEY_PASS:-$KS_PASS}" \
+              --androidreleasetype APK \
+              --signing-type apksigner 2>&1 | tee build.log | tail -40
+          else
+            keytool -genkey -v \
+              -keystore temp-key.jks \
+              -storepass "TempPass123" \
+              -alias "rashid-temp" \
+              -keypass "TempPass123" \
+              -keyalg RSA -keysize 2048 -validity 365 \
+              -dname "CN=Rashid, OU=Dev, O=RashidApps, L=City, ST=State, C=SA" \
+              -noprompt 2>&1
+            npx cap build android \
+              --keystorepath "$PWD/temp-key.jks" \
+              --keystorepass "TempPass123" \
+              --keystorealias "rashid-temp" \
+              --keystorealiaspass "TempPass123" \
+              --androidreleasetype APK \
+              --signing-type apksigner 2>&1 | tee build.log | tail -40
+          fi
+
+      - name: Copy APK to site folder
+        id: apk
+        run: |
+          APK_FILE=$(find ${{ matrix.project }}/android/app/build/outputs/apk -name "*.apk" -type f 2>/dev/null | head -1)
+          if [ -n "$APK_FILE" ]; then
+            FOLDER="${{ steps.info.outputs.folder }}"
+            VERSION="${{ steps.version.outputs.version }}"
+            DEST="apks/${FOLDER}-v${VERSION}.apk"
+            cp "$APK_FILE" "$DEST"
+            echo "path=$DEST" >> $GITHUB_OUTPUT
+            echo "APK copied to $DEST"
+          else
+            echo "path=" >> $GITHUB_OUTPUT
+            echo "::error::No APK produced for ${{ matrix.project }} — Capacitor/Gradle build failed"
+            exit 1
+          fi
+
+      - name: Verify APK is signed
+        if: steps.apk.outputs.path != ''
+        run: |
+          if jarsigner -verify "${{ steps.apk.outputs.path }}" 2>&1 | grep -q "jar is unsigned"; then
+            echo "::error::${{ steps.apk.outputs.path }} is UNSIGNED — refusing to publish it. Check the 'Build APK' step log for a signing failure (e.g. apksigner not found)."
+            exit 1
+          fi
+
+      - name: Update version.json with site URL
+        if: steps.apk.outputs.path != ''
+        run: |
+          VER_FILE="${{ matrix.project }}/version.json"
+          FOLDER="${{ steps.info.outputs.folder }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD="${{ steps.version.outputs.build }}"
+          SITE_URL="https://rashid-wep.vercel.app/apks/${FOLDER}-v${VERSION}.apk"
+          if [ -f "$VER_FILE" ]; then
+            NEW_VER=$(cat $VER_FILE | jq \
+              --arg url "$SITE_URL" \
+              --argjson bld "$BUILD" \
+              '.apkUrl = $url | .buildNumber = $bld')
+            echo "$NEW_VER" > "$VER_FILE"
+            echo "Updated version.json with site URL"
+          fi
+
+      - name: Commit APK + version.json
+        if: steps.apk.outputs.path != ''
+        run: |
+          git config user.name "APK Bot"
+          git config user.email "bot@rashid.app"
+          git add "${{ matrix.project }}/version.json"
+          git add "apks/${{ steps.info.outputs.folder }}-v${{ steps.version.outputs.version }}.apk"
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          git commit -m "add apk: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }}"
+          # Parallel matrix jobs push concurrently — rebase & retry to avoid losing APKs to a push race
+          for i in 1 2 3 4 5; do
+            if git push; then
+              echo "pushed on attempt $i"; exit 0
+            fi
+            echo "push rejected (attempt $i), rebasing..."
+            git pull --rebase --autostash origin main || true
+            sleep $((RANDOM % 5 + 1))
+          done
+          echo "::error::Failed to push APK after retries"
+          exit 1

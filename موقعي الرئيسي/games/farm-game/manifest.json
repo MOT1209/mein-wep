@@ -1,0 +1,28 @@
+{
+  "name": "Farm World 3D",
+  "short_name": "Farm World",
+  "description": "3D Farming Simulator — Grow crops, raise animals, build your dream farm.",
+  "start_url": "/games/farm-game/",
+  "display": "standalone",
+  "background_color": "#87CEEB",
+  "theme_color": "#4a7c3f",
+  "orientation": "landscape-primary",
+  "scope": "/games/farm-game/",
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "entertainment", "simulation"]
+}

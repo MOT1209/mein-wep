@@ -1,0 +1,90 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f0f1a"/>
+      <stop offset="50%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#0f0f1a"/>
+    </linearGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#bg)"/>
+
+  <!-- Ground -->
+  <rect x="0" y="500" width="1280" height="220" fill="#1a1a2e"/>
+  <rect x="0" y="500" width="1280" height="2" fill="rgba(148,163,184,0.2)"/>
+
+  <!-- Large building structure (front face) -->
+  <rect x="320" y="200" width="280" height="300" rx="4" fill="#64748b" stroke="#94a3b8" stroke-width="2"/>
+  <!-- Side face (isometric wedge) -->
+  <polygon points="320,200 240,260 240,560 320,500" fill="#475569" stroke="#64748b" stroke-width="2"/>
+  <polygon points="600,200 680,260 680,560 600,500" fill="#334155" stroke="#64748b" stroke-width="2"/>
+  <!-- Top face -->
+  <polygon points="320,200 600,200 680,260 240,260" fill="#94a3b8" stroke="#cbd5e1" stroke-width="2"/>
+
+  <!-- Windows on front -->
+  <rect x="340" y="240" width="50" height="60" rx="2" fill="#0ea5e9" opacity="0.8"/>
+  <rect x="410" y="240" width="50" height="60" rx="2" fill="#0ea5e9" opacity="0.6"/>
+  <rect x="480" y="240" width="50" height="60" rx="2" fill="#0ea5e9" opacity="0.7"/>
+  <rect x="340" y="330" width="50" height="60" rx="2" fill="#0ea5e9" opacity="0.5"/>
+  <rect x="480" y="330" width="50" height="60" rx="2" fill="#0ea5e9" opacity="0.6"/>
+  <!-- Door -->
+  <rect x="410" y="380" width="50" height="120" rx="2" fill="#1e293b" stroke="#94a3b8" stroke-width="1"/>
+
+  <!-- Crane -->
+  <rect x="740" y="100" width="8" height="400" fill="#f59e0b"/>
+  <rect x="720" y="100" width="80" height="8" fill="#f59e0b"/>
+  <line x1="740" y1="100" x2="700" y2="120" stroke="#fbbf24" stroke-width="2"/>
+  <line x1="780" y1="100" x2="820" y2="380" stroke="#fbbf24" stroke-width="2"/>
+  <!-- Crane hook -->
+  <rect x="815" y="380" width="10" height="15" fill="#d97706"/>
+  <!-- Suspended beam -->
+  <rect x="800" y="395" width="40" height="12" rx="2" fill="#94a3b8" stroke="#64748b" stroke-width="1"/>
+
+  <!-- Scaffolding left -->
+  <rect x="200" y="300" width="4" height="200" fill="#f59e0b"/>
+  <rect x="220" y="300" width="4" height="200" fill="#f59e0b"/>
+  <rect x="200" y="320" width="24" height="4" fill="#d97706"/>
+  <rect x="200" y="360" width="24" height="4" fill="#d97706"/>
+  <rect x="200" y="400" width="24" height="4" fill="#d97706"/>
+
+  <!-- Pipes -->
+  <rect x="280" y="260" width="6" height="240" rx="3" fill="#f97316"/>
+  <rect x="620" y="280" width="6" height="220" rx="3" fill="#f97316" opacity="0.8"/>
+
+  <!-- Barrels -->
+  <rect x="140" y="420" width="30" height="40" rx="4" fill="#ef4444" stroke="#dc2626" stroke-width="1"/>
+  <rect x="175" y="420" width="30" height="40" rx="4" fill="#ef4444" stroke="#dc2626" stroke-width="1"/>
+  <rect x="157" y="400" width="30" height="40" rx="4" fill="#dc2626" stroke="#b91c1c" stroke-width="1"/>
+  <rect x="145" y="428" width="20" height="4" rx="2" fill="#fca5a5"/>
+  <rect x="180" y="428" width="20" height="4" rx="2" fill="#fca5a5"/>
+
+  <!-- Warning stripes -->
+  <pattern id="stripe" width="20" height="20" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+    <rect width="10" height="20" fill="#f59e0b"/>
+    <rect x="10" width="10" height="20" fill="#1e293b"/>
+  </pattern>
+  <rect x="0" y="560" width="1280" height="8" fill="url(#stripe)" opacity="0.5"/>
+
+  <!-- Floating particles -->
+  <circle cx="350" cy="180" r="2" fill="#f59e0b" opacity="0.6"/>
+  <circle cx="500" cy="160" r="1.5" fill="#f59e0b" opacity="0.4"/>
+  <circle cx="650" cy="190" r="2" fill="#f59e0b" opacity="0.5"/>
+  <circle cx="280" cy="170" r="1.5" fill="#f59e0b" opacity="0.3"/>
+
+  <!-- Title -->
+  <text x="640" y="680" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#94a3b8" opacity="0.6">Rust Construction</text>
+
+  <!-- Resource counters UI style -->
+  <rect x="50" y="40" width="160" height="40" rx="8" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="70" y="66" font-family="monospace" font-size="14" fill="#f59e0b">■ Wood: 284</text>
+  
+  <rect x="230" y="40" width="160" height="40" rx="8" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="250" y="66" font-family="monospace" font-size="14" fill="#94a3b8">■ Metal: 142</text>
+  
+  <rect x="410" y="40" width="160" height="40" rx="8" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="430" y="66" font-family="monospace" font-size="14" fill="#f97316">■ Stone: 89</text>
+</svg>

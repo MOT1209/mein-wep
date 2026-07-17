@@ -1,0 +1,374 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --card-bg: #f8fafc;
+  --card-border: #e2e8f0;
+}
+
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+  --card-bg: #1e293b;
+  --card-border: #334155;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Canvas Styles */
+.drawing-canvas {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.drawing-canvas.eraser {
+  cursor: url('/eraser-cursor.svg') 16 16, auto;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.5); }
+  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.8); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Gradient Backgrounds */
+.gradient-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-warm {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.gradient-cool {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.gradient-sunset {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Button Styles */
+.btn-primary {
+  @apply px-6 py-3 bg-gradient-to-r from-primary-500 to-secondary-500 
+         text-white font-semibold rounded-xl shadow-lg 
+         hover:shadow-xl hover:scale-105 transition-all duration-200
+         active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-secondary {
+  @apply px-6 py-3 bg-white dark:bg-slate-800 
+         text-slate-800 dark:text-white font-semibold rounded-xl 
+         shadow-lg border-2 border-slate-200 dark:border-slate-700
+         hover:shadow-xl hover:scale-105 transition-all duration-200
+         active:scale-95;
+}
+
+.btn-icon {
+  @apply p-3 rounded-xl bg-white dark:bg-slate-800 
+         shadow-lg hover:shadow-xl hover:scale-110 
+         transition-all duration-200 active:scale-95;
+}
+
+/* Card Styles */
+.card {
+  @apply bg-white dark:bg-slate-800 rounded-2xl shadow-xl 
+         border border-slate-200 dark:border-slate-700 p-6;
+}
+
+.card-hover {
+  @apply card hover:shadow-2xl hover:scale-[1.02] transition-all duration-200;
+}
+
+/* Input Styles */
+.input {
+  @apply w-full px-4 py-3 rounded-xl bg-slate-100 dark:bg-slate-700
+         border-2 border-transparent focus:border-primary-500 
+         focus:bg-white dark:focus:bg-slate-600
+         text-slate-800 dark:text-white placeholder-slate-400
+         outline-none transition-all duration-200;
+}
+
+/* Badge Styles */
+.badge {
+  @apply px-3 py-1 rounded-full text-sm font-semibold;
+}
+
+.badge-primary {
+  @apply badge bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-300;
+}
+
+.badge-secondary {
+  @apply badge bg-secondary-100 text-secondary-700 dark:bg-secondary-900 dark:text-secondary-300;
+}
+
+.badge-success {
+  @apply badge bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300;
+}
+
+.badge-warning {
+  @apply badge bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300;
+}
+
+.badge-danger {
+  @apply badge bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .btn-primary, .btn-secondary {
+    @apply w-full;
+  }
+  
+  .card {
+    @apply p-4;
+  }
+}
+
+/* Dark Mode Transitions */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Smooth scrolling for all containers */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Responsive text sizing */
+@media (max-width: 480px) {
+  .text-responsive {
+    font-size: clamp(0.875rem, 2.5vw, 1rem);
+  }
+}
+
+/* Painting Tools */
+.tool-button {
+  @apply p-2 rounded-lg transition-all duration-200;
+}
+
+.tool-button.active {
+  @apply bg-primary-500 text-white shadow-lg;
+}
+
+.tool-button:not(.active) {
+  @apply bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600;
+}
+
+/* Color Palette */
+.color-swatch {
+  @apply w-8 h-8 rounded-full cursor-pointer transform hover:scale-125 
+         transition-all duration-200 border-2 border-white shadow-md;
+}
+
+.color-swatch.active {
+  @apply ring-2 ring-primary-500 ring-offset-2;
+}
+
+/* Countdown Timer */
+.countdown {
+  @apply text-6xl font-bold text-center;
+}
+
+.countdown.warning {
+  @apply text-yellow-500 animate-pulse;
+}
+
+.countdown.danger {
+  @apply text-red-500 animate-pulse-fast;
+}
+
+/* Canvas Grid Pattern */
+.canvas-grid {
+  background-image:
+    linear-gradient(rgba(200, 200, 200, 0.3) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200, 200, 200, 0.3) 1px, transparent 1px);
+  background-size: 25px 25px;
+  background-color: white;
+}
+
+.dark .canvas-grid {
+  background-image:
+    linear-gradient(rgba(100, 100, 100, 0.2) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(100, 100, 100, 0.2) 1px, transparent 1px);
+  background-color: #1e293b;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 30;
+}
+
+.zoom-controls button {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease;
+  background: white;
+  color: #334155;
+  border: 2px solid #e2e8f0;
+}
+
+.zoom-controls button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.zoom-controls button:active {
+  transform: scale(0.95);
+}
+
+.dark .zoom-controls button {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+/* Enhanced Dark Mode Styles */
+.dark body {
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+.dark .card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.dark input,
+.dark select {
+  background-color: #334155;
+  color: #e2e8f0;
+  border-color: #475569;
+}
+
+.dark input:focus,
+.dark select:focus {
+  border-color: #818cf8;
+  box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2);
+}
+
+/* Game Type Badges */
+.game-type-badge {
+  @apply px-3 py-1.5 rounded-full text-sm font-semibold;
+}
+
+.game-type-classic {
+  @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300;
+}
+
+.game-type-letter {
+  @apply bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300;
+}
+
+.game-type-category {
+  @apply bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300;
+}
+
+.game-type-creative {
+  @apply bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.modal-content {
+  @apply bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 max-w-sm w-full mx-4;
+  animation: modalEnter 0.2s ease-out;
+}
+
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.9) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}

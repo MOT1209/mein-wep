@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index, follow">
+    <title>API Reference | Rashid</title>
+    <meta name="description" content="Rashid API Reference — Public API notes, Supabase data contracts, and integration references.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="API Reference | Rashid">
+    <meta property="og:description" content="Rashid API Reference — Public API notes, Supabase data contracts, and integration references.">
+    <meta property="og:image" content="../../images/logo.png">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/vault/api/">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/vault/api/">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="../../css/style.css?v=4.2">
+    <style>
+        .api-section { margin-top: 40px; }
+        .api-card { background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 25px; margin-bottom: 20px; transition: 0.3s; }
+        .api-card:hover { border-color: #ef4444; }
+        .api-card h3 { color: #ef4444; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+        .api-card h3 i { font-size: 1.2rem; }
+        .api-card .endpoint { background: #0a0a0a; padding: 10px 16px; border-radius: 8px; font-family: monospace; color: #22c55e; font-size: 0.9rem; margin-bottom: 10px; display: inline-block; border: 1px solid rgba(255,255,255,0.05); }
+        .api-card p { color: #a1a1aa; font-size: 0.9rem; line-height: 1.6; }
+        .api-card .table-wrap { overflow-x: auto; margin-top: 15px; }
+        .api-card table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .api-card th { text-align: left; color: #fff; padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
+        .api-card td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a1a1aa; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Vault",
+      "item": "https://rashid-wep.vercel.app/vault/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Vault / API",
+      "item": "https://rashid-wep.vercel.app/vault/api/"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+    <main class="container" style="padding: 72px 0;">
+        <a href="../../index.html#vault" class="btn btn-glass">Back to Vault</a>
+        <section class="section-header" style="margin-top: 48px;">
+            <span class="section-tag">Vault</span>
+            <h1>API Reference</h1>
+            <p>Public API notes, Supabase data contracts, and integration references for Rashid.</p>
+        </section>
+
+        <div class="api-section">
+            <div class="api-card">
+                <h3><i class="fas fa-database"></i> Supabase Database Schema</h3>
+                <p>The Rashid platform uses Supabase for backend services including authentication, real-time data, and file storage. Below are the primary database tables and their contracts.</p>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr><th>Table</th><th>Description</th><th>Policies</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td><code>profiles</code></td><td>User profiles with preferences and settings</td><td>RLS: users can read/write own row</td></tr>
+                            <tr><td><code>projects</code></td><td>Dynamic project entries for the matrix grid</td><td>RLS: public read, authenticated write</td></tr>
+                            <tr><td><code>lessons</code></td><td>Learning center course content</td><td>RLS: public read, admin write</td></tr>
+                            <tr><td><code>analytics</code></td><td>Page view and interaction tracking</td><td>RLS: service_role only</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="api-card">
+                <h3><i class="fas fa-plug"></i> Supabase Realtime Channels</h3>
+                <p>Realtime subscriptions are used for live updates on projects and collaborative features.</p>
+                <div class="endpoint">supabase.channel('projects-updates')</div>
+                <p>Listens to INSERT, UPDATE, and DELETE events on the <code>projects</code> table. The admin dashboard uses this channel to reflect changes instantly without page refresh.</p>
+            </div>
+
+            <div class="api-card">
+                <h3><i class="fas fa-robot"></i> Gemini AI Integration</h3>
+                <p>The Rashid AI assistant integrates with the Google Gemini API for conversational AI capabilities.</p>
+                <div class="endpoint">POST /api/gemini/generate</div>
+                <p>Request body: <code>{ prompt: string, context?: string, model?: string }</code></p>
+                <p>The AI supports multilingual responses (Arabic, English, German, French, and more) with streaming support for real-time chat interactions.</p>
+            </div>
+
+            <div class="api-card">
+                <h3><i class="fas fa-cloud"></i> Vercel Deployment</h3>
+                <p>The entire Rashid frontend is deployed on Vercel with automatic CI/CD from the GitHub repository. Custom headers and redirects are configured via vercel.json for SEO and SPA routing.</p>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

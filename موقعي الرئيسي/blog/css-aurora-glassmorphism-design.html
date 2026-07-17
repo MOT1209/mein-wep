@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How I built a dark design system with CSS-only animated aurora backgrounds, glassmorphism cards, and a themeable accent color using custom properties — no images, no JavaScript.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Aurora Backgrounds and Glassmorphism with Pure CSS">
+    <meta property="og:description" content="A dark, themeable design system built from CSS custom properties, animated gradient orbs, and backdrop-filter glass — no images required.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Aurora Backgrounds and Glassmorphism with Pure CSS">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <title>Aurora Backgrounds &amp; Glassmorphism with Pure CSS — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Aurora Backgrounds and Glassmorphism with Pure CSS",
+      "description": "A dark, themeable design system built from CSS custom properties, animated gradient orbs, and backdrop-filter glass — no images required.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-23",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html",
+      "keywords": ["CSS","Design System","Glassmorphism","Custom Properties","Web Design"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.2">
+    <link rel="stylesheet" href="../css/blog-post.css?v=1.0">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://rashid-wep.vercel.app/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Aurora Backgrounds and Glassmorphism with Pure CSS",
+      "item": "https://rashid-wep.vercel.app/blog/css-aurora-glassmorphism-design.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 23, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 9 min read</span>
+            <span class="post-tag">Web Design</span>
+            <span class="post-tag">CSS</span>
+        </div>
+
+        <h1>Aurora Backgrounds and Glassmorphism with Pure CSS</h1>
+
+        <div class="post-content">
+            <p>The current look of this site — a near-black background with soft glowing orbs drifting behind frosted-glass cards — is built entirely with CSS. No background images, no canvas, no JavaScript animation loop. This post breaks down the three techniques behind it: a token system with custom properties, animated aurora orbs, and glassmorphism with <code>backdrop-filter</code>.</p>
+
+            <h2>Step One: A Token System</h2>
+            <p>Before any visuals, I define the entire palette and scale as CSS custom properties on <code>:root</code>. This is the backbone — every component references tokens, never raw values:</p>
+            <pre><code>:root {
+  --bg:            #050507;
+  --bg-surface:    rgba(255, 255, 255, 0.03);
+  --bg-elevated:   rgba(255, 255, 255, 0.05);
+  --text:          #f4f4f5;
+  --text-secondary:#a1a1aa;
+  --text-muted:    #52525b;
+  --border:        rgba(255, 255, 255, 0.08);
+
+  --accent:        #6366f1;   /* electric indigo */
+  --accent-glow:   #818cf8;
+  --accent-subtle: rgba(99, 102, 241, 0.12);
+
+  --radius:    14px;
+  --radius-lg: 20px;
+  --transition: 0.25s ease;
+}</code></pre>
+            <p>The payoff is huge: because <code>--accent</code> is a single variable, I can re-theme the entire site by changing one value — and even let JavaScript overwrite it at runtime for a user-selectable accent color.</p>
+
+            <h2>Step Two: The Aurora Background</h2>
+            <p>The glowing orbs are just large, heavily-blurred radial gradients positioned behind everything and slowly animated. Each "orb" is a pseudo-element:</p>
+            <pre><code>body::before,
+body::after {
+  content: '';
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.5;
+  z-index: -1;
+  pointer-events: none;
+}
+
+body::before {           /* indigo orb, top-left */
+  width: 45vw; height: 45vw;
+  top: -10%; left: -10%;
+  background: radial-gradient(circle,
+    rgba(99,102,241,0.5), transparent 70%);
+  animation: drift 18s ease-in-out infinite;
+}
+
+body::after {            /* cyan orb, bottom-right */
+  width: 40vw; height: 40vw;
+  bottom: -15%; right: -10%;
+  background: radial-gradient(circle,
+    rgba(34,211,238,0.4), transparent 70%);
+  animation: drift 22s ease-in-out infinite reverse;
+}</code></pre>
+            <p>The motion comes from one reusable keyframe that nudges position and scale:</p>
+            <pre><code>@keyframes drift {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%      { transform: translate(6%, 8%) scale(1.15); }
+}</code></pre>
+            <p>The heavy <code>blur(100px)</code> is what turns two hard gradient circles into a soft, atmospheric glow. Two pseudo-elements, zero images, and the background feels alive.</p>
+
+            <h2>Step Three: Glassmorphism Cards</h2>
+            <p>Cards sit on top of the aurora as frosted glass. The recipe is a translucent background plus <code>backdrop-filter: blur()</code>, which blurs whatever is <em>behind</em> the element:</p>
+            <pre><code>.glass-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}</code></pre>
+            <p>Three details sell the glass effect:</p>
+            <ul>
+                <li>The <strong>translucent background</strong> lets the aurora bleed through faintly.</li>
+                <li>The <strong>1px hairline border</strong> in a low-opacity white gives the edge a "lit rim," the way real glass catches light.</li>
+                <li><strong>saturate(140%)</strong> on the backdrop boosts the color behind the card so the glow reads through richer.</li>
+            </ul>
+
+            <h2>Performance: The Catch</h2>
+            <p><code>backdrop-filter</code> and large blurs are GPU-intensive. On weaker devices, dozens of glass cards plus animated orbs can drop the frame rate. My mitigations:</p>
+            <ul>
+                <li><strong>A performance toggle.</strong> A "reduce effects" setting swaps <code>backdrop-filter</code> for a solid surface color and pauses the orb animation.</li>
+                <li><strong>Respect <code>prefers-reduced-motion</code>.</strong> Users who ask for less motion get the orbs frozen automatically:</li>
+            </ul>
+            <pre><code>@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
+}</code></pre>
+            <ul>
+                <li><strong>Limit the blurred layers.</strong> Two orbs and glass only on real cards — not every box — keeps the compositor happy.</li>
+            </ul>
+
+            <h2>Accessibility and Contrast</h2>
+            <p>Dark, glowing designs can quietly fail contrast checks. Translucent text over a busy background is the usual culprit. I keep body text at a solid <code>--text-secondary</code> rather than a low alpha, ensure headings hit the 4.5:1 ratio against the darkest background, and never put essential text directly over the brightest part of an orb.</p>
+
+            <h2>Why CSS-Only Was the Right Call</h2>
+            <p>I could have used a canvas particle system or a WebGL shader for the background. CSS won because it's lightweight (no JS bundle, no render loop competing with the main thread), it degrades gracefully (older browsers just see a dark background), and it themes instantly through custom properties. For an atmospheric portfolio background, a couple of blurred gradients and a keyframe deliver 90% of the effect at a tiny fraction of the cost.</p>
+
+            <h2>Takeaways</h2>
+            <p>Build on a token system first — it makes everything after it themeable. Reach for pseudo-elements and <code>filter: blur()</code> before images or canvas. And always pair flashy effects with an escape hatch for performance and accessibility. The whole aesthetic of this site rests on those three moves, and you can read every line of it in the stylesheet.</p>
+        </div>
+    </main>
+    <div id="reading-progress"></div>
+    <script src="../src/js/main.js" type="module"></script>
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        window.addEventListener('scroll', function() {
+            var h = document.documentElement;
+            var scrollTop = h.scrollTop || document.body.scrollTop;
+            var scrollHeight = h.scrollHeight - h.clientHeight;
+            bar.style.width = (scrollTop / scrollHeight) * 100 + '%';
+        });
+        document.querySelectorAll('.post-content pre').forEach(function(pre) {
+            var btn = document.createElement('button');
+            btn.className = 'copy-code-btn';
+            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+            btn.addEventListener('click', function() {
+                var code = pre.querySelector('code');
+                var text = code ? code.textContent : pre.textContent;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+                    });
+                }
+            });
+        });
+        var currentId = 'css-aurora-glassmorphism-design';
+        fetch('posts.json?_=' + Date.now())
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+                var post = posts.find(function(p) { return p.id === currentId; });
+                if (!post) return;
+                var related = posts.filter(function(p) {
+                    return p.id !== currentId && p.categories.some(function(c) { return post.categories.indexOf(c) !== -1; });
+                }).slice(0, 3);
+                var main = document.querySelector('.blog-post');
+                if (!main || related.length === 0) return;
+                var section = document.createElement('div');
+                section.className = 'related-posts';
+                section.innerHTML = '<h2><i class="fas fa-link" style="color:var(--accent);"></i> Related Articles</h2><div class="related-grid">' +
+                    related.map(function(p) {
+                        var d = new Date(p.date + 'T00:00:00Z');
+                        var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        return '<a href="' + p.id + '.html" class="related-card"><h3>' + p.title + '</h3><p>' + p.description + '</p><div class="related-meta"><span>' + ds + '</span><span> · </span><span>' + p.readTime + ' min</span></div></a>';
+                    }).join('') + '</div>';
+                main.appendChild(section);
+            })
+            .catch(function() {});
+    })();
+    </script>
+
+</body>
+</html>

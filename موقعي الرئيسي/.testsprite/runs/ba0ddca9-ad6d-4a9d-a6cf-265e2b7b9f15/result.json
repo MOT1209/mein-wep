@@ -1,0 +1,18 @@
+{
+  "testId": "fd788e1a-4d47-4d08-8384-6d64be40229b",
+  "status": "blocked",
+  "startedAt": "2026-07-06T14:17:54.622Z",
+  "finishedAt": "2026-07-06T14:21:17.297Z",
+  "videoUrl": "https://testsprite-videos.s3.us-east-1.amazonaws.com/a4b88408-60d1-702b-14de-e4429e915731/1783347677051075//tmp/b5d21540-900a-45ca-8fa3-411025cf6565/result.webm",
+  "failureAnalysisUrl": null,
+  "snapshotId": "snap_31157fd86f59ad71",
+  "runIdIfAvailable": "ba0ddca9-ad6d-4a9d-a6cf-265e2b7b9f15",
+  "codeVersion": "v1",
+  "targetUrl": "https://rashid-wep.vercel.app/king2",
+  "targetUrlSource": "run",
+  "failedStepIndex": 6,
+  "failureKind": null,
+  "verdict": "blocked",
+  "executionStatus": "completed",
+  "summary": "Blocked before a verdict could be produced: TEST BLOCKED: Result summary — PASS: All requested assertions were verified.\n\nWhat was requested:\n- Navigate to https://rashid-wep.vercel.app/king2 and open the sign-in page.\n- Confirm sign-in page URL contains /king2/auth/signin.\n- Verify Google OAuth button is visible and that it links/redirects to accounts.google.com.\n- Verify GitHub OAuth button is visible and that it links/redirects to github.com.\n- Stop after verification and report results.\n\nWh…"
+}

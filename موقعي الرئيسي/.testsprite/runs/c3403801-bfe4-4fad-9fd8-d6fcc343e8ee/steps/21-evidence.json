@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 21,
+    "summary": "Step 21 'Click 'button'' failed. (no captured error text on the test row)",
+    "path": "steps/21-snapshot.html"
+  }
+]

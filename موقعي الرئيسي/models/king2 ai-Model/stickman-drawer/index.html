@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>استوديو الستيكمان — KING2</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <div>
+    <h1>🎨 استوديو الستيكمان</h1>
+    <p class="subtitle">ارسم، لوّن، وحرّك — كل شيء ترسمه ملكك بالكامل</p>
+  </div>
+
+  <div class="panel-card">
+    <div class="canvas-box">
+      <canvas id="drawCanvas"></canvas>
+      <canvas id="onionCanvas"></canvas>
+    </div>
+
+    <div class="toolbar">
+      <button data-tool="pen" type="button" title="قلم">✏️ قلم</button>
+      <button data-tool="eraser" type="button" title="ممحاة">🧽 ممحاة</button>
+      <button data-tool="spray" type="button" title="رذاذ">💨 رذاذ</button>
+      <button data-tool="fill" type="button" title="تعبئة دلو">🪣 تعبئة</button>
+      <button data-tool="eyedropper" type="button" title="قطّارة لون">💧 قطّارة</button>
+      <button data-tool="text" type="button" title="نص">🔤 نص</button>
+      <button data-tool="move" type="button" title="تحريك">🖐️ تحريك</button>
+    </div>
+
+    <div class="toolbar">
+      <button data-tool="line" type="button" title="خط">📏 خط</button>
+      <button data-tool="rect" type="button" title="مستطيل">⬛ مستطيل</button>
+      <button data-tool="ellipse" type="button" title="دائرة">⚪ دائرة</button>
+      <button data-tool="triangle" type="button" title="مثلث">🔺 مثلث</button>
+      <button data-tool="arrow" type="button" title="سهم">➡️ سهم</button>
+      <button data-tool="star" type="button" title="نجمة">⭐ نجمة</button>
+    </div>
+
+    <div class="toolbar">
+      <input type="color" id="colorPicker" value="#000000" title="اختر لون">
+      <div class="palette" id="palette">
+        <button class="swatch" type="button" data-color="#000000"></button>
+        <button class="swatch" type="button" data-color="#e74c3c"></button>
+        <button class="swatch" type="button" data-color="#2ecc71"></button>
+        <button class="swatch" type="button" data-color="#3498db"></button>
+        <button class="swatch" type="button" data-color="#f1c40f"></button>
+        <button class="swatch" type="button" data-color="#9b59b6"></button>
+      </div>
+      <div class="slider-group">
+        <span>السُمك</span>
+        <input type="range" id="brushSize" min="2" max="40" value="8">
+      </div>
+      <label class="checkbox"><input type="checkbox" id="fillToggle"> تعبئة الأشكال</label>
+      <label class="checkbox"><input type="checkbox" id="onionToggle"> ورق شفاف (Onion)</label>
+    </div>
+
+    <div class="toolbar">
+      <button id="undoBtn" type="button">↩️ تراجع</button>
+      <button id="clearBtn" type="button">🗑️ مسح اللوحة</button>
+      <button id="saveFrameBtn" class="primary" type="button">💾 حفظ الإطار</button>
+    </div>
+    <p class="hint">ارسم إطار، احفظه، امسح اللوحة وارسم التالي — كرر لعمل فليبوك متحرك</p>
+    <p class="hint">🖐️ أداة "تحريك": اسحب لتحديد منطقة، ثم اسحبها من جديد لتغيير مكانها — تثبت تلقائياً لما تبدّل الأداة</p>
+  </div>
+
+  <!-- ============ SHAPE-TWEEN GENERATOR (feeds frames into the flipbook below) ============ -->
+  <div class="panel-card">
+    <h2>🔷 مولّد حركة الأشكال</h2>
+    <p class="hint" style="margin-top:0">حرّك شكل من نقطة لنقطة وحوّله تلقائياً لإطارات تُضاف لنفس الفليبوك تحت — تقدر بعدين تفتح أي إطار متولّد وترسم فوقه بالقلم</p>
+
+    <div class="toolbar">
+      <button data-tween-shape="circle" type="button">⚪ دائرة</button>
+      <button data-tween-shape="rect" type="button">⬛ مربع</button>
+      <button data-tween-shape="triangle" type="button">🔺 مثلث</button>
+      <button data-tween-shape="star" type="button">⭐ نجمة</button>
+      <button data-tween-shape="line" type="button">➖ خط</button>
+    </div>
+
+    <div class="toolbar">
+      <input type="color" id="tweenColor" value="#6c5ce7" title="لون الشكل">
+      <div class="slider-group">
+        <span>الحجم</span>
+        <input type="range" id="tweenSize" min="10" max="120" value="40">
+      </div>
+      <label class="checkbox"><input type="checkbox" id="tweenFill" checked> تعبئة</label>
+    </div>
+
+    <div class="toolbar">
+      <button id="setPointABtn" class="toggled" type="button">📍 حدّد نقطة البداية (A)</button>
+      <button id="setPointBBtn" type="button">🏁 حدّد نقطة النهاية (B)</button>
+    </div>
+    <p id="tweenStatus" class="hint">اضغط على الكانفاس بالأعلى لتحديد نقطة البداية</p>
+
+    <div class="toolbar">
+      <div class="slider-group">
+        <span>دوران البداية</span>
+        <input type="range" id="rotAInput" min="-180" max="180" value="0">
+      </div>
+      <div class="slider-group">
+        <span>دوران النهاية</span>
+        <input type="range" id="rotBInput" min="-180" max="180" value="0">
+      </div>
+      <div class="slider-group">
+        <span>حجم البداية</span>
+        <input type="range" id="scaleAInput" min="0.2" max="3" step="0.1" value="1">
+      </div>
+      <div class="slider-group">
+        <span>حجم النهاية</span>
+        <input type="range" id="scaleBInput" min="0.2" max="3" step="0.1" value="1">
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="slider-group">
+        <span>المدة (ث)</span>
+        <input type="range" id="durationInput" min="0.3" max="5" step="0.1" value="1">
+      </div>
+      <div class="slider-group">
+        <span>FPS</span>
+        <input type="range" id="tweenFpsInput" min="4" max="24" value="10">
+      </div>
+      <select id="easingSelect">
+        <option value="linear">حركة خطية</option>
+        <option value="ease" selected>حركة ناعمة</option>
+      </select>
+    </div>
+
+    <div class="toolbar">
+      <button id="previewTweenBtn" type="button">▶️ معاينة سريعة</button>
+      <button id="generateFramesBtn" class="primary" type="button">🎬 ولّد الإطارات بالفليبوك</button>
+    </div>
+  </div>
+
+  <!-- ============ FLIPBOOK (shared by hand-drawn + generated frames) ============ -->
+  <div class="panel-card">
+    <div class="frames-header">
+      <h2>🎞️ الإطارات (<span id="frameCount">0</span>)</h2>
+      <div class="frames-actions">
+        <button id="downloadPngsBtn" type="button">⬇️ تنزيل PNG + بيانات</button>
+        <button id="downloadWebmBtn" type="button">🎬 تصدير فيديو WebM</button>
+        <button id="clearAllFramesBtn" class="danger" type="button">حذف الكل</button>
+      </div>
+    </div>
+    <div id="framesStrip" class="frames-strip"></div>
+    <p id="framesEmptyState" class="empty-state">لسا ما فيه إطارات. ارسم واحفظ بالأعلى، أو ولّد حركة شكل.</p>
+
+    <div class="playback-row">
+      <button id="playBtn" type="button">▶️ تشغيل</button>
+      <div class="slider-group">
+        <span>سرعة (FPS)</span>
+        <input type="range" id="fpsInput" min="1" max="24" value="8">
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

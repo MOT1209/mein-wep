@@ -1,0 +1,30 @@
+# vLLM deployment config for KING2 Fine-tuned Models
+# يُستخدم عند التشغيل على سيرفر مع GPU (مثل RunPod, Vast.ai, أو سيرفر خاص)
+
+model: Qwen/Qwen3.5-9B
+# أو: google/gemma-4-e4b-it
+
+# مسار LoRA adapter (بعد تدريب LLaMA Factory)
+# انسخ مجلد adapter إلى السيرفر
+enable_lora: true
+lora_modules:
+  - name: king2
+    path: /models/king2-qwen-adapter
+    base_model_name: Qwen/Qwen3.5-9B
+
+# إعدادات التشغيل
+max_num_seqs: 256
+max_model_len: 16384
+gpu_memory_utilization: 0.95
+tensor_parallel_size: 1
+
+# خفض الدقة (لأداء أسرع)
+quantization: fp8
+# أو: quantization: awq
+
+# خادم API
+host: 0.0.0.0
+port: 8000
+
+# مفاتيح API للمستخدمين
+api_key: king2-local-key

@@ -1,0 +1,14 @@
+{
+  "appId": "com.rashid.kingcraft",
+  "appName": "Voxel Realm",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "releaseType": "APK",
+      "signingType": "apksigner"
+    }
+  }
+}
