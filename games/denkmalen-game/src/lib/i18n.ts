@@ -73,6 +73,20 @@ const translations: Record<string, Record<Lang, string>> = {
   'draw.clearWarning': { en: 'This action cannot be undone. Your current drawing will be erased.', ar: 'لا يمكن التراجع عن هذا الإجراء. سيتم مسح رسمتك الحالية.', de: 'Diese Aktion kann nicht rückgängig gemacht werden. Deine aktuelle Zeichnung wird gelöscht.' },
   'draw.clear':        { en: 'Clear',             ar: 'مسح',                             de: 'Löschen' },
 
+  // Accessible names for the icon-only drawing tools (no visible text label).
+  'tool.undo':         { en: 'Undo',              ar: 'تراجع',                           de: 'Rückgängig' },
+  'tool.redo':         { en: 'Redo',              ar: 'إعادة',                           de: 'Wiederholen' },
+  'tool.pencil':       { en: 'Pencil',            ar: 'قلم رصاص',                        de: 'Bleistift' },
+  'tool.brush':        { en: 'Brush',             ar: 'فرشاة',                           de: 'Pinsel' },
+  'tool.marker':       { en: 'Marker',            ar: 'قلم تحديد',                       de: 'Marker' },
+  'tool.fill':         { en: 'Fill',              ar: 'تعبئة',                           de: 'Füllen' },
+  'tool.eraser':       { en: 'Eraser',            ar: 'ممحاة',                           de: 'Radierer' },
+  'tool.zoomIn':       { en: 'Zoom in',           ar: 'تكبير',                           de: 'Vergrößern' },
+  'tool.zoomOut':      { en: 'Zoom out',          ar: 'تصغير',                           de: 'Verkleinern' },
+  'tool.clearCanvas':  { en: 'Clear canvas',      ar: 'مسح اللوحة',                      de: 'Leinwand löschen' },
+  'tool.currentColor': { en: 'Current color',     ar: 'اللون الحالي',                    de: 'Aktuelle Farbe' },
+  'tool.colorNamed':   { en: 'Color',             ar: 'لون',                             de: 'Farbe' },
+
   // ── Voting Screen ──────────────────────────────────────────────────
   'vote.title':        { en: 'Vote for the Best Drawing', ar: 'صوّت لأفضل رسمة',       de: 'Für die beste Zeichnung abstimmen' },
   'vote.submit':       { en: 'Submit Vote',        ar: 'إرسال التصويت',                   de: 'Stimme abgeben' },

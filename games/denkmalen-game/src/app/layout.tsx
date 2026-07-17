@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter, Cairo } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/ThemeProvider'
@@ -45,12 +45,17 @@ export const metadata: Metadata = {
 
   // Misc
   manifest: '/denkmalen/manifest.json',
-  themeColor: '#0ea5e9',
   icons: {
     icon: '/denkmalen/favicon.svg',
     apple: '/denkmalen/favicon.svg',
   },
   metadataBase: new URL(APP_URL),
+}
+
+// Next 14 moved themeColor out of metadata; leaving it there logs a warning on
+// every build and drops the tag, which the installed PWA needs for its title bar.
+export const viewport: Viewport = {
+  themeColor: '#0ea5e9',
 }
 
 export default function RootLayout({

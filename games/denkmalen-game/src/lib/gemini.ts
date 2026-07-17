@@ -84,6 +84,14 @@ function checkQuotaOrFallback(locale: string = 'en'): AIEvaluation | null {
 
 // Evaluates a single drawing, with retry on rate limit / server error.
 export async function evaluateDrawing(drawing: DrawingToEvaluate): Promise<AIEvaluation> {
+  // Offline (the pass-and-play mode is built to work with no network): the
+  // fetch below can only fail, and each attempt still waits out RETRY_DELAY_MS,
+  // stalling the results screen for seconds per drawing to reach the same
+  // template score we can return now.
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) {
+    return defaultEvaluation(drawing.locale || 'en')
+  }
+
   // Check quota first
   const quotaFallback = checkQuotaOrFallback(drawing.locale || 'en')
   if (quotaFallback) return quotaFallback
