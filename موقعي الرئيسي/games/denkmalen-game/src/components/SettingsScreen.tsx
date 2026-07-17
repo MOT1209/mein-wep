@@ -160,16 +160,19 @@ export function SettingsScreen() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
+                role="switch"
+                aria-checked={settings.music}
+                aria-label={t('settings.music', lang)}
                 onClick={() => toggleSetting('music')}
                 className={`w-14 h-8 rounded-full transition-all ${
-                  settings.music 
-                    ? 'bg-secondary-500' 
+                  settings.music
+                    ? 'bg-secondary-500'
                     : 'bg-slate-300'
                 }`}
               >
                 <motion.div
-                  animate={{ x: settings.music ? 24 : 0 }}
-                  className="w-6 h-6 bg-white rounded-full shadow-md ml-1"
+                  animate={{ x: settings.music ? knobX : 0 }}
+                  className="w-6 h-6 bg-white rounded-full shadow-md ms-1"
                 />
               </motion.button>
             </div>
@@ -182,16 +185,19 @@ export function SettingsScreen() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
+                role="switch"
+                aria-checked={settings.vibration}
+                aria-label={t('settings.vibration', lang)}
                 onClick={() => toggleSetting('vibration')}
                 className={`w-14 h-8 rounded-full transition-all ${
-                  settings.vibration 
-                    ? 'bg-accent-500' 
+                  settings.vibration
+                    ? 'bg-accent-500'
                     : 'bg-slate-300'
                 }`}
               >
                 <motion.div
-                  animate={{ x: settings.vibration ? 24 : 0 }}
-                  className="w-6 h-6 bg-white rounded-full shadow-md ml-1"
+                  animate={{ x: settings.vibration ? knobX : 0 }}
+                  className="w-6 h-6 bg-white rounded-full shadow-md ms-1"
                 />
               </motion.button>
             </div>
