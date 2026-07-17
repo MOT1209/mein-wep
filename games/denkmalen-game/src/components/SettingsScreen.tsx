@@ -17,6 +17,8 @@ export function SettingsScreen() {
   const { theme, setTheme, resolvedTheme } = useTheme()
   const { user, loading: authLoading, signIn, signOut } = useAuth()
   const lang = settings.language
+  // In RTL the toggle track is mirrored, so the "on" knob must slide the other way.
+  const knobX = lang === 'ar' ? -24 : 24
 
   const toggleSetting = (key: keyof typeof settings) => {
     playSound('click')
@@ -37,6 +39,7 @@ export function SettingsScreen() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => { playSound('click'); setPhase('menu') }}
+          aria-label={t('common.back', lang)}
           className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-lg"
         >
           <FaArrowLeft className="text-xl text-slate-700 dark:text-white" />
@@ -67,19 +70,22 @@ export function SettingsScreen() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
+                role="switch"
+                aria-checked={resolvedTheme === 'dark'}
+                aria-label={t('settings.darkMode', lang)}
                 onClick={() => {
                   playSound('click')
                   setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')
                 }}
                 className={`w-14 h-8 rounded-full transition-all ${
-                  resolvedTheme === 'dark' 
-                    ? 'bg-primary-500' 
+                  resolvedTheme === 'dark'
+                    ? 'bg-primary-500'
                     : 'bg-slate-300'
                 }`}
               >
                 <motion.div
-                  animate={{ x: resolvedTheme === 'dark' ? 24 : 0 }}
-                  className="w-6 h-6 bg-white rounded-full shadow-md ml-1"
+                  animate={{ x: resolvedTheme === 'dark' ? knobX : 0 }}
+                  className="w-6 h-6 bg-white rounded-full shadow-md ms-1"
                 />
               </motion.button>
             </div>
@@ -129,16 +135,19 @@ export function SettingsScreen() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
+                role="switch"
+                aria-checked={settings.sound}
+                aria-label={t('settings.sound', lang)}
                 onClick={() => toggleSetting('sound')}
                 className={`w-14 h-8 rounded-full transition-all ${
-                  settings.sound 
-                    ? 'bg-primary-500' 
+                  settings.sound
+                    ? 'bg-primary-500'
                     : 'bg-slate-300'
                 }`}
               >
                 <motion.div
-                  animate={{ x: settings.sound ? 24 : 0 }}
-                  className="w-6 h-6 bg-white rounded-full shadow-md ml-1"
+                  animate={{ x: settings.sound ? knobX : 0 }}
+                  className="w-6 h-6 bg-white rounded-full shadow-md ms-1"
                 />
               </motion.button>
             </div>
@@ -151,16 +160,19 @@ export function SettingsScreen() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
+                role="switch"
+                aria-checked={settings.music}
+                aria-label={t('settings.music', lang)}
                 onClick={() => toggleSetting('music')}
                 className={`w-14 h-8 rounded-full transition-all ${
-                  settings.music 
-                    ? 'bg-secondary-500' 
+                  settings.music
+                    ? 'bg-secondary-500'
                     : 'bg-slate-300'
                 }`}
               >
                 <motion.div
-                  animate={{ x: settings.music ? 24 : 0 }}
-                  className="w-6 h-6 bg-white rounded-full shadow-md ml-1"
+                  animate={{ x: settings.music ? knobX : 0 }}
+                  className="w-6 h-6 bg-white rounded-full shadow-md ms-1"
                 />
               </motion.button>
             </div>
@@ -173,16 +185,19 @@ export function SettingsScreen() {
               </div>
               <motion.button
                 whileTap={{ scale: 0.95 }}
+                role="switch"
+                aria-checked={settings.vibration}
+                aria-label={t('settings.vibration', lang)}
                 onClick={() => toggleSetting('vibration')}
                 className={`w-14 h-8 rounded-full transition-all ${
-                  settings.vibration 
-                    ? 'bg-accent-500' 
+                  settings.vibration
+                    ? 'bg-accent-500'
                     : 'bg-slate-300'
                 }`}
               >
                 <motion.div
-                  animate={{ x: settings.vibration ? 24 : 0 }}
-                  className="w-6 h-6 bg-white rounded-full shadow-md ml-1"
+                  animate={{ x: settings.vibration ? knobX : 0 }}
+                  className="w-6 h-6 bg-white rounded-full shadow-md ms-1"
                 />
               </motion.button>
             </div>

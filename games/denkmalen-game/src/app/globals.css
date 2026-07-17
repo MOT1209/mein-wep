@@ -212,6 +212,29 @@ body {
   scroll-behavior: smooth;
 }
 
+/* Respect the OS "reduce motion" setting: near-instant transitions/animations
+   for users who get motion sick or find the framer-motion effects distracting.
+   `.reduce-motion` mirrors it for anything that toggles the class manually. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
 /* Responsive text sizing */
 @media (max-width: 480px) {
   .text-responsive {

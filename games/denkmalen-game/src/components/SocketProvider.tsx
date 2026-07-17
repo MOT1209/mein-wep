@@ -65,7 +65,7 @@ interface SocketContextType {
   disconnect: () => void
   createRoom: (data: { playerName: string; avatar?: string; maxPlayers?: number; rounds?: number; drawingTime?: number; category?: string }) => void
   joinRoom: (data: { roomCode: string; playerName: string; avatar?: string }) => void
-  startGame: (words: Word[], gameType: GameType, currentLetter: string | null, creativePrompt: string | null) => void
+  startGame: (words: Word[], gameType: GameType, currentLetter: string | null, creativePrompt: string | null, settings?: { rounds: number; drawingTime: number }) => void
   sendDrawingUpdate: (drawingData: string) => void
   submitDrawing: (data: { word: string; canvasData: string; category: string }) => void
   submitVote: (data: { drawingId: string; rank: number }) => void
@@ -156,6 +156,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
         votes: [],
         hasVoted: {},
         currentRound: data.round,
+        // Apply the room's rounds/time so the host's lobby settings actually
+        // govern the online game (the store default would otherwise win).
+        totalRounds: room.rounds,
+        drawingTime: room.drawingTime,
         timeLeft: room.drawingTime,
       })
       setSubmittedCount(0)
@@ -267,8 +271,10 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     socketRef.current?.emit('join-room', data)
   }, [])
 
-  const startGame = useCallback((words: Word[], gameType: GameType, currentLetter: string | null, creativePrompt: string | null) => {
-    socketRef.current?.emit('start-game', { words, gameType, currentLetter, creativePrompt })
+  const startGame = useCallback((words: Word[], gameType: GameType, currentLetter: string | null, creativePrompt: string | null, settings?: { rounds: number; drawingTime: number }) => {
+    // Carry the host's current rounds/time so late edits in the lobby panel take
+    // effect. Without this the server keeps whatever was set at room creation.
+    socketRef.current?.emit('start-game', { words, gameType, currentLetter, creativePrompt, rounds: settings?.rounds, drawingTime: settings?.drawingTime })
   }, [])
 
   const sendDrawingUpdate = useCallback((drawingData: string) => {

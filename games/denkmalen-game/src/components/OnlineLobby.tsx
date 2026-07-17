@@ -152,7 +152,7 @@ export function OnlineLobby() {
     const words = Array.from({ length: room.players.length }, () => getRandomWord(selectedCategory))
     const letter = selectedGameType === 'letter' ? selectedLetter : null
     const prompt = selectedGameType === 'creative' ? getRandomCreativePrompt(settings.language) : null
-    socketStartGame(words, selectedGameType, letter, prompt)
+    socketStartGame(words, selectedGameType, letter, prompt, { rounds, drawingTime: time })
   }
 
   return (
@@ -168,6 +168,7 @@ export function OnlineLobby() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => { playSound('click'); setPhase('menu') }}
+          aria-label={t('common.back', settings.language)}
           className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-lg"
         >
           <FaArrowLeft className="text-xl text-slate-700 dark:text-white" />

@@ -45,15 +45,14 @@ export function ToastProvider({ children }: ToastProviderProps) {
   }, [])
 
   useEffect(() => {
-    // Auto-hide toasts after duration
-    toasts.forEach(toast => {
-      if (toast.duration) {
-        const timer = setTimeout(() => {
-          hideToast(toast.id)
-        }, toast.duration)
-        return () => clearTimeout(timer)
-      }
-    })
+    // Auto-hide each toast after its duration. The cleanup has to clear every
+    // timer this effect armed — returning it from the forEach callback (as this
+    // once did) just discards it, so timers leaked and fired after unmount.
+    const timers = toasts
+      .filter(toast => toast.duration)
+      .map(toast => setTimeout(() => hideToast(toast.id), toast.duration))
+
+    return () => timers.forEach(clearTimeout)
   }, [toasts, hideToast])
 
   return (
