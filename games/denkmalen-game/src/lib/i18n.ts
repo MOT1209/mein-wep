@@ -210,6 +210,9 @@ const translations: Record<string, Record<Lang, string>> = {
   'common.or':         { en: 'or',                 ar: 'أو',                              de: 'oder' },
   'common.startGame':  { en: 'Start Game!',        ar: 'ابدأ اللعبة!',                    de: 'Spiel starten!' },
 
+  // ── PWA / Connectivity ─────────────────────────────────────────────
+  'pwa.offlineBadge':  { en: 'No connection',      ar: 'لا يوجد اتصال',                   de: 'Keine Verbindung' },
+
   // ── Category Names ─────────────────────────────────────────────────
   'category.food':       { en: 'Food',           ar: 'طعام',          de: 'Essen' },
   'category.animals':    { en: 'Animals',        ar: 'حيوانات',       de: 'Tiere' },

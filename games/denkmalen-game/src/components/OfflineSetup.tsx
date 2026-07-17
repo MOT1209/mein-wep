@@ -213,7 +213,7 @@ export function OfflineSetup() {
                   ? 'bg-green-500 text-white'
                   : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
             }`}>
-              <span className="font-bold">{getStepNumber(s) > getStepNumber(s) ? '✓' : getStepNumber(s)}</span>
+              <span className="font-bold">{getStepNumber(step) > getStepNumber(s) ? '✓' : getStepNumber(s)}</span>
               <span className="hidden sm:inline">
                 {s === 'names' ? t('setup.playersCount', settings.language) : s === 'gametype' ? t('setup.gameType', settings.language) : t('settings.title', settings.language)}
               </span>
@@ -517,22 +517,7 @@ export function OfflineSetup() {
             >
               {t('setup.nextGameType', settings.language)}
             </motion.button>
-          ) : step === 'gametype' ? (
-            <motion.button
-              whileHover={{ scale: canStart ? 1.05 : 1 }}
-              whileTap={{ scale: canStart ? 0.95 : 1 }}
-              onClick={() => handleStart()}
-              disabled={!canStart}
-              className={`flex-1 py-4 rounded-2xl font-bold text-xl flex items-center justify-center gap-3 transition-all ${
-                canStart
-                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg hover:shadow-xl'
-                  : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
-              }`}
-            >
-              <FaPlay />
-              {t('common.startGame', settings.language)}
-            </motion.button>
-          ) : (
+          ) : step === 'gametype' ? null : (
             <motion.button
               whileHover={{ scale: canStart ? 1.05 : 1 }}
               whileTap={{ scale: canStart ? 0.95 : 1 }}

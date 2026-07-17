@@ -2,8 +2,8 @@
   "name": "Denkmalen - Drawing Battle Game",
   "short_name": "Denkmalen",
   "description": "Draw words, get judged by AI, and compete with friends! A creative drawing battle game with instant AI feedback.",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/denkmalen/",
+  "scope": "/denkmalen/",
   "display": "standalone",
   "background_color": "#0a0a0a",
   "theme_color": "#0ea5e9",
@@ -14,43 +14,43 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "/icons/icon-72.png",
+      "src": "/denkmalen/icons/icon-72.png",
       "sizes": "72x72",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-96.png",
+      "src": "/denkmalen/icons/icon-96.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-128.png",
+      "src": "/denkmalen/icons/icon-128.png",
       "sizes": "128x128",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-144.png",
+      "src": "/denkmalen/icons/icon-144.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-152.png",
+      "src": "/denkmalen/icons/icon-152.png",
       "sizes": "152x152",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-192.png",
+      "src": "/denkmalen/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-384.png",
+      "src": "/denkmalen/icons/icon-384.png",
       "sizes": "384x384",
       "type": "image/png"
     },
     {
-      "src": "/icons/icon-512.png",
+      "src": "/denkmalen/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -58,7 +58,7 @@
   ],
   "screenshots": [
     {
-      "src": "/og.svg",
+      "src": "/denkmalen/og.svg",
       "sizes": "1200x630",
       "type": "image/svg+xml",
       "form_factor": "wide",

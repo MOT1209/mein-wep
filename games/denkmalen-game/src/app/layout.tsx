@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider'
 import { GameProvider } from '@/components/GameProvider'
 import { SocketProvider } from '@/components/SocketProvider'
 import { AuthProvider } from '@/components/AuthProvider'
+import { ServiceWorkerProvider } from '@/components/ServiceWorkerProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' })
@@ -68,7 +69,9 @@ export default function RootLayout({
           <AuthProvider>
             <SocketProvider>
               <GameProvider>
-                {children}
+                <ServiceWorkerProvider>
+                  {children}
+                </ServiceWorkerProvider>
               </GameProvider>
             </SocketProvider>
           </AuthProvider>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0ea5e9"/>
+      <stop offset="100%" stop-color="#d946ef"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Full-bleed background: maskable icons are cropped to a circle by the
+       launcher, so art below stays inside the center 60% safe zone. -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Artist palette: outer blob with a thumb hole punched out via even-odd -->
+  <path fill="#ffffff" fill-rule="evenodd" d="
+    M 256 136
+    C 322 136 386 174 386 240
+    C 386 286 350 302 326 302
+    L 300 302
+    C 284 302 274 312 274 326
+    C 274 338 282 344 282 356
+    C 282 368 271 376 256 376
+    C 190 376 126 330 126 256
+    C 126 182 190 136 256 136
+    Z
+    M 232 316
+    C 232 302 221 291 207 291
+    C 193 291 182 302 182 316
+    C 182 330 193 341 207 341
+    C 221 341 232 330 232 316
+    Z
+  "/>
+
+  <!-- Paint wells -->
+  <circle cx="196" cy="212" r="21" fill="#0ea5e9"/>
+  <circle cx="256" cy="188" r="21" fill="#f43f5e"/>
+  <circle cx="316" cy="212" r="21" fill="#facc15"/>
+  <circle cx="340" cy="262" r="21" fill="#22c55e"/>
+</svg>
