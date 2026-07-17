@@ -263,6 +263,11 @@ function startServer() {
       room.phase = 'playing'
       room.currentRound = 1
 
+      // Apply the host's latest rounds/time (the lobby panel can change these
+      // after room creation); same clamps as create-room. Absent = keep current.
+      if (data.rounds !== undefined) room.settings.rounds = clamp(data.rounds, 2, 10, room.settings.rounds)
+      if (data.drawingTime !== undefined) room.settings.drawingTime = clamp(data.drawingTime, 10, 300, room.settings.drawingTime)
+
       const gameType = sanitizeGameType(data.gameType)
       const currentLetter = typeof data.currentLetter === 'string' ? data.currentLetter.slice(0, 1) : null
       const creativePrompt = typeof data.creativePrompt === 'string' ? data.creativePrompt.slice(0, 300) : null

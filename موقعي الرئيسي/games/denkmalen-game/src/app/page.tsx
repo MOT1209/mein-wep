@@ -1,7 +1,6 @@
 'use client'
 
-import { useGameStore, GamePhase } from '@/store/gameStore'
-import { useGame } from '@/components/GameProvider'
+import { useGameStore } from '@/store/gameStore'
 import { MainMenu } from '@/components/MainMenu'
 import { OfflineSetup } from '@/components/OfflineSetup'
 import { OnlineLobby } from '@/components/OnlineLobby'
@@ -12,6 +11,7 @@ import { Leaderboard } from '@/components/Leaderboard'
 import { SettingsScreen } from '@/components/SettingsScreen'
 import { StatsScreen } from '@/components/StatsScreen'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { SkipToContent } from '@/components/AccessibilityProvider'
 import { AnimatePresence } from 'framer-motion'
 
 export default function Home() {
@@ -45,7 +45,8 @@ export default function Home() {
 
   return (
     <ErrorBoundary>
-      <main className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+      <SkipToContent />
+      <main id="main-content" className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
         <AnimatePresence mode="wait">
           {renderPhase()}
         </AnimatePresence>

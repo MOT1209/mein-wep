@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير فحص وتحسين Denkmalen — يوليو 2026</title>
+<style>
+  :root {
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --primary: #0ea5e9;
+    --secondary: #d946ef;
+    --accent: #f97316;
+    --crit: #ef4444;
+    --high: #f97316;
+    --med: #eab308;
+    --low: #22c55e;
+    --code-bg: #f8fafc;
+    --code-ink: #be123c;
+    --shadow: 0 4px 20px rgba(2,8,23,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0b1120;
+      --card: #131c31;
+      --ink: #e2e8f0;
+      --muted: #94a3b8;
+      --line: #24314d;
+      --code-bg: #0f172a;
+      --code-ink: #fda4af;
+      --shadow: 0 4px 24px rgba(0,0,0,.4);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", "Tahoma", system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.85;
+    padding: 24px 16px 80px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; }
+
+  header.hero {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 24px;
+    padding: 40px 32px;
+    color: #fff;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-bottom: 28px;
+  }
+  header.hero h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); margin-bottom: 10px; }
+  header.hero p { opacity: .95; font-size: 1.05rem; }
+  .meta-row {
+    display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 18px;
+  }
+  .meta-row span {
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.28);
+    padding: 5px 14px; border-radius: 999px; font-size: .85rem; backdrop-filter: blur(4px);
+  }
+
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 14px; margin-bottom: 28px;
+  }
+  .stat {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 16px; text-align: center; box-shadow: var(--shadow);
+  }
+  .stat .num { font-size: 2rem; font-weight: 800; line-height: 1.2; }
+  .stat .lbl { font-size: .82rem; color: var(--muted); margin-top: 4px; }
+  .stat.red .num { color: var(--crit); }
+  .stat.orange .num { color: var(--high); }
+  .stat.blue .num { color: var(--primary); }
+  .stat.green .num { color: var(--low); }
+
+  section { margin-bottom: 34px; }
+  h2.sec {
+    font-size: 1.35rem; margin-bottom: 6px; display: flex; align-items: center; gap: 10px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--line);
+  }
+  h2.sec .n {
+    background: var(--primary); color: #fff; width: 30px; height: 30px; border-radius: 9px;
+    display: inline-grid; place-items: center; font-size: .95rem; flex-shrink: 0;
+  }
+  .sec-note { color: var(--muted); font-size: .92rem; margin: 10px 0 18px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; margin-bottom: 14px; box-shadow: var(--shadow);
+    border-inline-start: 5px solid var(--line);
+  }
+  .card.crit { border-inline-start-color: var(--crit); }
+  .card.high { border-inline-start-color: var(--high); }
+  .card.med  { border-inline-start-color: var(--med); }
+  .card.low  { border-inline-start-color: var(--low); }
+
+  .card h3 { font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .badge {
+    font-size: .68rem; font-weight: 700; padding: 3px 9px; border-radius: 999px; color: #fff; letter-spacing: .3px;
+  }
+  .badge.crit { background: var(--crit); }
+  .badge.high { background: var(--high); }
+  .badge.med  { background: var(--med); color:#3b2f00; }
+  .badge.low  { background: var(--low); }
+  .card p { color: var(--ink); font-size: .95rem; }
+  .card .impact { color: var(--muted); font-size: .88rem; margin-top: 6px; }
+  code {
+    font-family: "Cascadia Code", "Consolas", monospace; background: var(--code-bg);
+    color: var(--code-ink); padding: 2px 7px; border-radius: 6px; font-size: .82rem;
+    direction: ltr; display: inline-block; unicode-bidi: embed;
+  }
+
+  ul.clean { list-style: none; }
+  ul.clean li { padding: 7px 0; padding-inline-start: 26px; position: relative; font-size: .95rem; }
+  ul.clean li::before { content: "◂"; position: absolute; inset-inline-start: 4px; color: var(--primary); }
+
+  .feature {
+    background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+    padding: 20px 22px; margin-bottom: 16px; box-shadow: var(--shadow);
+  }
+  .feature .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+  .feature h3 { font-size: 1.12rem; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .chip { font-size: .72rem; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+  .chip.val { background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.35); color: #16a34a; }
+  .chip.eff { background: rgba(14,165,233,.12); border-color: rgba(14,165,233,.35); color: var(--primary); }
+
+  table.road { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 14px; box-shadow: var(--shadow); }
+  table.road th, table.road td { padding: 13px 16px; text-align: right; border-bottom: 1px solid var(--line); font-size: .92rem; }
+  table.road th { background: var(--primary); color: #fff; font-weight: 700; }
+  table.road tr:last-child td { border-bottom: none; }
+  table.road td:first-child { font-weight: 700; white-space: nowrap; }
+  .tbl-scroll { overflow-x: auto; }
+
+  .callout {
+    background: linear-gradient(135deg, rgba(14,165,233,.1), rgba(217,70,239,.08));
+    border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; margin: 16px 0;
+    font-size: .92rem;
+  }
+  .callout strong { color: var(--secondary); }
+
+  footer { text-align: center; color: var(--muted); font-size: .85rem; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>🔍 تقرير فحص وتحسين Denkmalen</h1>
+    <p>فحص شامل للمشروع + خطة تحسينات وميزات مقترحة</p>
+    <div class="meta-row">
+      <span>📅 يوليو 2026</span>
+      <span>🎮 لعبة رسم بحكم ذكاء اصطناعي</span>
+      <span>⚙️ Next.js 14 · Static Export</span>
+      <span>🌐 عربي / إنجليزي / ألماني</span>
+    </div>
+  </header>
+
+  <!-- عدّادات -->
+  <div class="stats">
+    <div class="stat red"><div class="num">36</div><div class="lbl">ملاحظة من الفحص</div></div>
+    <div class="stat orange"><div class="num">2,943</div><div class="lbl">سطر كود ميت</div></div>
+    <div class="stat blue"><div class="num">91</div><div class="lbl">اختبار ناجح</div></div>
+    <div class="stat green"><div class="num">0</div><div class="lbl">اختبار لـ gameStore</div></div>
+  </div>
+
+  <!-- ملخص تنفيذي -->
+  <section>
+    <h2 class="sec"><span class="n">١</span> الملخّص التنفيذي</h2>
+    <p class="sec-note">
+      المشروع في حالة جيدة عموماً: يبني بنجاح، 91 اختبار ناجح، دعم كامل لثلاث لغات، وأصبح يعمل فعلياً بدون إنترنت
+      (PWA) والحكم الذكي صار حقيقياً في الإنتاج (إصلاحات هذه الجلسة). لكن الفحص كشف طبقة من المشاكل غير المرئية:
+      مكوّنات كاملة غير مركّبة أصلاً، فجوة وصولية واسعة خارج شاشة الرسم، تسرّب نصوص إنجليزية للواجهة العربية،
+      وكمية كبيرة من الكود الميت.
+    </p>
+
+    <div class="callout">
+      ⚠️ <strong>ملاحظة سياق:</strong> جلسة عمل أخرى تعيد حالياً هيكلة <code>DrawingScreen.tsx</code> وأنشأت
+      مجلد <code>src/components/drawing/</code>. هذا التقرير <strong>يستثني</strong> داخليّات هذين الملفين —
+      والوصولية فيهما مُغطّاة أصلاً بشكل جيد. أي إصلاح على شاشة الرسم يجب تنسيقه مع تلك الجلسة قبل أي دمج.
+    </div>
+
+    <h3 style="margin:18px 0 10px; font-size:1.05rem;">🎯 أبرز 5 نتائج حرجة</h3>
+    <ul class="clean">
+      <li><strong>مكوّنات ميتة مركزياً:</strong> <code>ToastProvider</code> و<code>AccessibilityProvider</code> غير مركّبين في الـ layout إطلاقاً — أي استدعاء لـ <code>useToast</code> يرمي خطأ، وكل ميزات الوصولية (تخطّي المحتوى، تقليل الحركة) معطّلة.</li>
+      <li><strong>إعدادات الأونلاين تُتجاهل:</strong> في اللوبي، تغيير عدد الجولات أو وقت الرسم بعد إنشاء الغرفة لا يُرسل للخادم — يبدأ باللعبة بالقيم الافتراضية.</li>
+      <li><strong>مؤقّتات Toast لا تُنظّف:</strong> <code>Toast.tsx:47-57</code> — دالة التنظيف تُرجَع من داخل <code>forEach</code> فتُهمَل؛ مؤقّتات تتراكم وتُطلَق بعد إزالة المكوّن.</li>
+      <li><strong>التصويت مستحيل بالكيبورد:</strong> بطاقات الرسم في التصويت عناصر <code>&lt;div&gt;</code> قابلة للنقر بلا دور أو دعم لوحة مفاتيح.</li>
+      <li><strong>نصوص إنجليزية تتسرّب للعربي/الألماني:</strong> عدة سلاسل مكتوبة مباشرة تتجاوز نظام الترجمة <code>t()</code>.</li>
+    </ul>
+  </section>
+
+  <!-- أخطاء صحّية -->
+  <section>
+    <h2 class="sec"><span class="n">٢</span> أخطاء صحّية (Correctness)</h2>
+    <p class="sec-note">مرتّبة بحسب الأثر على المستخدم. كل ملاحظة موثّقة بموقعها الفعلي في الكود.</p>
+
+    <div class="card crit">
+      <h3>مكوّنات مزوِّدة غير مركّبة <span class="badge crit">حرج</span></h3>
+      <p><code>AccessibilityProvider.tsx</code> و<code>Toast.tsx (ToastProvider)</code> لا يظهران في شجرة <code>layout.tsx</code>. النتيجة: <code>SkipToContent</code>، <code>VisuallyHidden</code>، ومستمع تقليل الحركة كلها ميتة؛ و<code>useToast</code> سيرمي خطأً لأي مستدعٍ.</p>
+      <p class="impact">التأثير: ميزات وصولية كاملة غير فعّالة، ونظام إشعارات غير قابل للاستخدام.</p>
+    </div>
+
+    <div class="card crit">
+      <h3>إعدادات الجولات/الوقت في الأونلاين لا تصل الخادم <span class="badge crit">حرج</span></h3>
+      <p><code>OnlineLobby.tsx</code> — القيمتان تُرسَلان فقط عند إنشاء الغرفة؛ <code>handleStartGame</code> يرسل الكلمات ونوع اللعبة لكن ليس الجولات/الوقت، ولوحة الإعدادات تظهر بعد الدخول للغرفة فقط.</p>
+      <p class="impact">التأثير: المضيف يظن أنه غيّر الإعدادات، لكن اللعبة تبدأ بالقيم الأصلية.</p>
+    </div>
+
+    <div class="card high">
+      <h3>مؤقّتات Toast لا تُنظَّف وتُعاد جدولتها <span class="badge high">عالٍ</span></h3>
+      <p><code>Toast.tsx:47-57</code> — <code>return () =&gt; clearTimeout(timer)</code> يُرجَع من دالة <code>forEach</code> لا من الـ effect، فيُهمَل. كل تغيّر في القائمة يُنشئ مؤقّتاً جديداً لكل توست قائم.</p>
+      <p class="impact">التأثير: عمر التوست يُعاد ضبطه، ومؤقّتات تُطلَق بعد إزالة المكوّن.</p>
+    </div>
+
+    <div class="card high">
+      <h3>مفتاح <code>index</code> داخل <code>AnimatePresence</code> <span class="badge high">عالٍ</span></h3>
+      <p><code>OfflineSetup.tsx:265</code> — قائمة اللاعبين تستخدم <code>key={index}</code>. حذف لاعب من المنتصف يجعل React يعيد استخدام DOM الخطأ فتتحرك الأنيميشن على صف خاطئ وتنتقل القيم.</p>
+      <p class="impact">التأثير: أسماء لاعبين تختلط بصرياً عند حذف واحد من المنتصف.</p>
+    </div>
+
+    <div class="card med">
+      <h3>زر الترس = زر الرجوع <span class="badge med">متوسط</span></h3>
+      <p><code>Leaderboard.tsx:71</code> — زر الإعدادات (<code>FaCog</code>) يستدعي <code>setPhase('menu')</code>، تماماً مثل زر الرجوع في <code>:50</code>. المفترض <code>setPhase('settings')</code>.</p>
+      <p class="impact">التأثير: زران مختلفان بصرياً بنفس الوظيفة؛ لا وصول للإعدادات من المتصدّرين.</p>
+    </div>
+
+    <div class="card med">
+      <h3>فرع خطأ ميت في الحكم <span class="badge med">متوسط</span></h3>
+      <p><code>AIJudge.tsx</code> — <code>setError</code> لا يُستدعى إلا بـ <code>null</code>؛ الـ <code>catch</code> يضع تقييماً بديلاً بدلاً منه، فبطاقة الخطأ الحمراء كود لا يُصل إليه أبداً.</p>
+      <p class="impact">التأثير: كود ميت مضلِّل عند الصيانة.</p>
+    </div>
+
+    <div class="card low">
+      <h3>شروط وفروع مكرّرة حرفياً <span class="badge low">منخفض</span></h3>
+      <p><code>OfflineSetup.tsx:547-553</code> فرعا <code>if/else</code> متطابقان؛ <code>:107-108</code> <code>canProceed</code> و<code>canStart</code> نفس التعبير؛ و<code>AccessibilityProvider</code> يعيد حساب <code>matchMedia</code> كل رِندر دون اشتراك (قيم لا تتحدّث + تضارب hydration).</p>
+      <p class="impact">التأثير: تعقيد زائد ومخاطر صيانة، لا عطل مباشر.</p>
+    </div>
+
+    <div class="card low">
+      <h3>استيرادات ومتغيّرات غير مستخدمة <span class="badge low">منخفض</span></h3>
+      <p>أمثلة: <code>ResultsScreen.tsx</code> (<code>FaMedal</code>, <code>AIJudge</code>, <code>creativePrompt</code>)، <code>Leaderboard.tsx</code> (<code>FaMedal</code>, <code>vibrate</code>)، <code>page.tsx</code> (<code>GamePhase</code>, <code>useGame</code>)، وغيرها.</p>
+      <p class="impact">التأثير: ضوضاء في الكود وزيادة طفيفة في الحزمة.</p>
+    </div>
+  </section>
+
+  <!-- الوصولية -->
+  <section>
+    <h2 class="sec"><span class="n">٣</span> الوصولية (Accessibility)</h2>
+    <p class="sec-note">خارج مجلد <code>drawing/</code> (المُعاد هيكلته حالياً)، التطبيق كله يحتوي <strong>سمة <code>aria-label</code> واحدة فقط</strong>.</p>
+
+    <div class="card high">
+      <h3>أزرار أيقونية بلا اسم يُنطَق <span class="badge high">عالٍ</span></h3>
+      <p>كل أزرار الرجوع (<code>StatsScreen</code>, <code>Leaderboard</code>, <code>SettingsScreen</code>, <code>OnlineLobby</code>, <code>OfflineSetup</code>)، زر الترس، زر إغلاق التوست، وأزرار إضافة/حذف اللاعبين — قارئ الشاشة ينطقها "button" فقط.</p>
+    </div>
+
+    <div class="card high">
+      <h3>التصويت مستحيل بالكيبورد <span class="badge high">عالٍ</span></h3>
+      <p><code>VotingScreen.tsx:191</code> — بطاقات الرسم <code>&lt;div&gt;</code> بـ <code>onClick</code> بلا <code>role</code>/<code>tabIndex</code>/معالج مفاتيح. صف النتائج القابل للتوسّع في <code>ResultsScreen.tsx:275</code> نفس المشكلة.</p>
+    </div>
+
+    <div class="card med">
+      <h3>مودالات بلا حبس تركيز أو دور <span class="badge med">متوسط</span></h3>
+      <p>مودالات <code>OfflineSetup.tsx</code> وغطاء "مرّر الجهاز" في <code>VotingScreen.tsx:125</code> بلا <code>role="dialog"</code>، <code>aria-modal</code>، حبس تركيز، أو إغلاق بـ Escape؛ والخلفية <code>&lt;div&gt;</code> قابل للنقر.</p>
+    </div>
+
+    <div class="card med">
+      <h3>مفاتيح التبديل ليست أزرار تبديل دلالياً <span class="badge med">متوسط</span></h3>
+      <p><code>SettingsScreen.tsx</code> — المفاتيح الأربعة <code>&lt;button&gt;</code> عادية بلا <code>role="switch"</code> أو <code>aria-checked</code> أو اسم؛ قارئ الشاشة يسمع زراً فارغاً.</p>
+    </div>
+
+    <div class="card low">
+      <h3>غياب <code>aria-live</code> للمحتوى المتغيّر <span class="badge low">منخفض</span></h3>
+      <p>حاوية التوست، سطر حالة التصويت، ورسالة "الذكاء يحلّل" في النتائج تتغيّر جميعها بصمت دون إعلان.</p>
+    </div>
+  </section>
+
+  <!-- RTL / i18n -->
+  <section>
+    <h2 class="sec"><span class="n">٤</span> RTL و التدويل</h2>
+    <p class="sec-note">الاتجاه RTL مفعّل للعربية (<code>GameProvider.tsx</code> يضبط <code>dir="rtl"</code>)، لكن تفاصيل عديدة لا تنعكس.</p>
+
+    <div class="card high">
+      <h3>نصوص إنجليزية تتسرّب للعربي والألماني <span class="badge high">عالٍ</span></h3>
+      <p>مثل: <code>VotingScreen.tsx</code> (<code>"...'s turn to vote!"</code>، <code>alt="Drawing by..."</code>، <code>"Letter: ..."</code>)، وفي <code>ResultCard.tsx</code> نصوص <code>Word:</code> و<code>SCORE</code> و<code>Drawn by</code> مطبوعة داخل صورة PNG المشتركة (وخط <code>Arial</code> لا يشكّل العربية).</p>
+      <p class="impact">التأثير: تجربة غير متّسقة للاعبين غير الناطقين بالإنجليزية.</p>
+    </div>
+
+    <div class="card med">
+      <h3>أسهم ومفاتيح لا تنعكس في RTL <span class="badge med">متوسط</span></h3>
+      <p><code>OfflineSetup.tsx:356</code> سهم مزيّف بـ <code>rotate(180deg)</code> يشير للاتجاه الخطأ في RTL؛ ومقبض التبديل في <code>SettingsScreen</code> يستخدم <code>ml-1</code> + <code>x:24</code> فينزلق يميناً بينما ينقلب المسار.</p>
+    </div>
+
+    <div class="card low">
+      <h3>هوامش فيزيائية بدل منطقية <span class="badge low">منخفض</span></h3>
+      <p>استخدام <code>ml-*/mr-*</code> و<code>left/right</code> بدل <code>ms-*/me-*</code> والخصائص المنطقية في عدة مواضع.</p>
+    </div>
+  </section>
+
+  <!-- الجوال -->
+  <section>
+    <h2 class="sec"><span class="n">٥</span> الجوال واللمس</h2>
+
+    <div class="card high">
+      <h3>غياب Safe-Area Insets كليّاً <span class="badge high">عالٍ</span></h3>
+      <p>لا وجود لـ <code>env(safe-area-inset)</code> ولا <code>viewportFit: 'cover'</code>. أشرطة الأزرار السفلية والتوست تجلس تحت شريط الإيماءات في iPhone.</p>
+    </div>
+
+    <div class="card med">
+      <h3>أهداف لمس أصغر من 44px <span class="badge med">متوسط</span></h3>
+      <p>أزرار الحروف في اللوبي <code>36px</code>، زر إغلاق التوست ≈ <code>12px</code>، وأزرار إضافة/حذف اللاعب <code>p-2</code> ≈ <code>32px</code>.</p>
+    </div>
+
+    <div class="card low">
+      <h3>الأزرار الأساسية تحت الطيّة في النتائج <span class="badge low">منخفض</span></h3>
+      <p><code>ResultsScreen.tsx</code> — بطاقة الفائز والمشاركة تظهر بتأخير أسفل قائمة كاملة الطول، فيُدفَع زر "الجولة التالية" أسفل الشاشة على الجوال.</p>
+    </div>
+  </section>
+
+  <!-- التصميم -->
+  <section>
+    <h2 class="sec"><span class="n">٦</span> التصميم ونظام الألوان</h2>
+    <p class="sec-note">
+      نظام الألوان (<code>tailwind.config.ts</code>) سليم ومنظّم: <code>primary</code> سماوي، <code>secondary</code> بنفسجي،
+      <code>accent</code> برتقالي بتدرّجات كاملة. المشكلة أن المكوّنات <strong>تتجاوز</strong> هذه الرموز بألوان مكتوبة يدوياً.
+    </p>
+
+    <div class="callout">
+      🎨 <strong>توجيه التصميم:</strong> بناءً على تفضيلك الموثّق، المقترح هو <strong>تطوير تدريجي على الموجود</strong>
+      — توحيد الاستخدام على الرموز الحالية، إضافة safe-area، وتلميع الظلال والزوايا — <strong>لا</strong> هوية بصرية جديدة.
+    </div>
+
+    <div class="card med">
+      <h3>لوحة ألوان مختلفة في بطاقة النتيجة <span class="badge med">متوسط</span></h3>
+      <p><code>ResultCard.tsx</code> يستخدم <code>#667eea</code>/<code>#764ba2</code>/<code>#f093fb</code> — بنفسجي مختلف تماماً عن هوية التطبيق. الصورة المشتركة لا تطابق العلامة.</p>
+    </div>
+
+    <div class="card low">
+      <h3>أصناف مساعدة معرّفة وغير مستخدمة <span class="badge low">منخفض</span></h3>
+      <p><code>globals.css</code> يعرّف <code>.btn-primary</code>, <code>.btn-icon</code>, <code>.badge-*</code> لكنها شبه غير مستخدمة؛ بدلها تُعاد كتابة نفس سلسلة الأصناف الطويلة ~8 مرات (كل أزرار الرجوع هي حرفياً <code>.btn-icon</code>).</p>
+    </div>
+
+    <div class="card low">
+      <h3>تكرار وترانزيشن عام مفرط <span class="badge low">منخفض</span></h3>
+      <p>Confetti مُعاد تنفيذه inline في النتائج رغم وجود <code>Confetti.tsx</code>؛ ودوال ألوان المراتب مكرّرة بين <code>ResultsScreen</code> و<code>Leaderboard</code>؛ و<code>globals.css</code> يطبّق <code>transition</code> على <code>*</code> (كل عنصر بالشجرة).</p>
+    </div>
+  </section>
+
+  <!-- كود ميت -->
+  <section>
+    <h2 class="sec"><span class="n">٧</span> الكود الميت والتبعيات</h2>
+
+    <div class="card high">
+      <h3>نظام إضافات كامل غير موصول <span class="badge high">عالٍ</span></h3>
+      <p><code>src/plugin-system/</code> و<code>src/plugins/</code> (~2,943 سطر: teams, tournaments, ai, audio) <strong>لا تُستورد من أي مكان</strong> خارج نفسها — تم التحقق بالبحث. <code>GameProvider</code> عنده نسخة أصوات داخلية موازية مستقلة.</p>
+      <p class="impact">التأثير: عبء صيانة وإرباك؛ حذفه آمن ويقلّص المشروع كثيراً.</p>
+    </div>
+
+    <div class="card med">
+      <h3>تبعيات غير مستخدمة <span class="badge med">متوسط</span></h3>
+      <p><code>howler</code> و<code>idb</code> لا يُستوردان إطلاقاً (تحقق بالبحث)؛ و<code>@google/generative-ai</code> يظهر فقط في <code>src/app/api/*</code> — وهي routes لا تُنشر أبداً بسبب <code>output: 'export'</code>.</p>
+      <p class="impact">التأثير: حجم <code>node_modules</code> أكبر بلا فائدة.</p>
+    </div>
+  </section>
+
+  <!-- الاختبارات -->
+  <section>
+    <h2 class="sec"><span class="n">٨</span> تغطية الاختبارات</h2>
+
+    <div class="card high">
+      <h3>قلب اللعبة بلا اختبار <span class="badge high">عالٍ</span></h3>
+      <p>91 اختبار ناجح، لكنها تغطّي مكوّنات وأدوات مساعدة (aiQuota, i18n, flags, words, sounds, ResultCard, DrawingHeader/Modals/Overlays). <strong><code>gameStore.ts</code> — منطق النقاط، تقدّم الجولات، تدوير اللاعبين، والتصويت — بلا أي اختبار.</strong></p>
+      <p class="impact">التأثير: أعلى منطق خطورة في اللعبة غير محمي من الانحدار (regressions).</p>
+    </div>
+  </section>
+
+  <!-- ميزات -->
+  <section>
+    <h2 class="sec"><span class="n">٩</span> ميزات جديدة مقترحة</h2>
+    <p class="sec-note">مرتّبة بحسب نسبة القيمة إلى الجهد. جميعها تُبنى على بنى موجودة (<code>gameStore</code>, <code>words.ts</code>, <code>aiQuota</code>) وتعمل ضمن قيد التصدير الثابت.</p>
+
+    <div class="feature">
+      <div class="top">
+        <h3>🎯 وضع التحدّي اليومي + السلاسل (Streaks)</h3>
+        <div class="chips"><span class="chip val">قيمة عالية</span><span class="chip eff">جهد منخفض</span></div>
+      </div>
+      <p>كلمة يومية ثابتة للجميع (نوع اللعبة <code>daily</code> موجود جزئياً)، عدّاد أيام متتالية، وإنجازات بسيطة. يزيد العودة اليومية بشكل كبير. يُخزَّن محلياً (<code>localStorage</code>) بنفس نمط <code>aiQuota.ts</code>، ويستفيد من نظام الإحصائيات الموجود في <code>gameStore</code>.</p>
+    </div>
+
+    <div class="feature">
+      <div class="top">
+        <h3>💾 حفظ/استئناف الجلسة + معرض رسومات</h3>
+        <div class="chips"><span class="chip val">قيمة عالية</span><span class="chip eff">جهد متوسط</span></div>
+      </div>
+      <p>حفظ الجلسة الحالية واستئنافها لاحقاً (مهم للأوفلاين على الجوال حيث تُقاطَع الجلسات)، ومعرض محلي لأحلى الرسومات السابقة. الرسومات أصلاً على هيئة base64 في <code>gameStore</code>؛ الحفظ عبر <code>localStorage</code> أو <code>idb</code> (تبعية موجودة بالفعل وغير مستخدمة — فرصة مثالية).</p>
+    </div>
+
+    <div class="feature">
+      <div class="top">
+        <h3>🤖 لاعب ذكاء اصطناعي (وضع لاعب واحد)</h3>
+        <div class="chips"><span class="chip val">قيمة عالية</span><span class="chip eff">جهد أعلى</span></div>
+      </div>
+      <p>خصم ذكي يمكّن اللعب الفردي — أهم إضافة لتوسيع الجمهور (اللعبة حالياً تتطلّب لاعبَين+). يعيد استخدام مسار الحكم الذكي الموجود (<code>api/evaluate.js</code>)؛ يحتاج توليد رسم/تخمين من الذكاء، وهو الأعقد لكنه الأعلى أثراً.</p>
+    </div>
+
+    <div class="callout">
+      💡 <strong>التوصية:</strong> ابدأ بالتحدّي اليومي + السلاسل (قيمة عالية/جهد منخفض)، ثم الحفظ والمعرض، وأجّل لاعب الذكاء
+      لموجة لاحقة لأنه الأكبر ويستحق تصميماً مستقلاً.
+    </div>
+  </section>
+
+  <!-- خارطة الطريق -->
+  <section>
+    <h2 class="sec"><span class="n">١٠</span> خارطة طريق مقترحة</h2>
+    <div class="tbl-scroll">
+    <table class="road">
+      <thead>
+        <tr><th>الموجة</th><th>المحتوى</th><th>الأثر</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>الموجة ١<br>إصلاحات حرجة</td>
+          <td>تركيب <code>ToastProvider</code>/<code>AccessibilityProvider</code>، إصلاح إعدادات الأونلاين، مؤقّتات Toast، زر الترس، ومفتاح <code>index</code>.</td>
+          <td>يوقف أعطالاً يراها المستخدم مباشرة.</td>
+        </tr>
+        <tr>
+          <td>الموجة ٢<br>وصولية + RTL + تنظيف</td>
+          <td>أسماء للأزرار الأيقونية، تصويت بالكيبورد، أدوار المودالات والمفاتيح، إصلاح تسرّب النصوص الإنجليزية، وحذف الكود الميت (~2,943 سطر) والتبعيات.</td>
+          <td>يوسّع الجمهور ويقلّص المشروع.</td>
+        </tr>
+        <tr>
+          <td>الموجة ٣<br>ميزات + تصميم</td>
+          <td>التحدّي اليومي + السلاسل، الحفظ والمعرض، توحيد التصميم على الرموز + safe-area، واختبارات <code>gameStore</code>.</td>
+          <td>يرفع الارتباط والجودة طويلة المدى.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="callout" style="margin-top:18px;">
+      🔄 <strong>قبل أي تنفيذ:</strong> يجب التنسيق مع الجلسة المتوازية التي تعيد هيكلة شاشة الرسم، وعدم إعادة البناء
+      أو مزامنة النسخة المنشورة (<code>out/ → denkmalen/</code>) حتى تستقر تلك الهيكلة — وإلا تُخبَز نسخة نصف جاهزة في الإنتاج.
+    </div>
+  </section>
+
+  <footer>
+    تقرير آلي — Denkmalen · يوليو 2026 · مبني على فحص فعلي للكود هذه الجلسة<br>
+    كل موقع <code>file:line</code> مذكور تم التحقق منه مقابل الكود الحالي.
+  </footer>
+
+</div>
+</body>
+</html>

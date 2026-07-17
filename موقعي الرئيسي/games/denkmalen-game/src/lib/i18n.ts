@@ -174,6 +174,8 @@ const translations: Record<string, Record<Lang, string>> = {
   'setup.gameType':    { en: 'Game Type',          ar: 'نوع اللعبة',                       de: 'Spieltyp' },
   'setup.minPlayersWarning': { en: 'Add at least 2 players to start', ar: 'أضف لاعبين اثنين على الأقل للبدء', de: 'Füge mindestens 2 Spieler hinzu, um zu starten' },
   'setup.playerName':  { en: 'Player',             ar: 'اللاعب',                           de: 'Spieler' },
+  'setup.addPlayer':   { en: 'Add player',         ar: 'إضافة لاعب',                       de: 'Spieler hinzufügen' },
+  'setup.removePlayer':{ en: 'Remove player',      ar: 'حذف لاعب',                         de: 'Spieler entfernen' },
   'setup.gameModeLabel': { en: 'Game Mode:',       ar: 'وضع اللعبة:',                     de: 'Spielmodus:' },
   'setup.playersLabel': { en: 'Players:',          ar: 'اللاعبون:',                       de: 'Spieler:' },
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useGameStore, Category, GameType, getLetters, getRandomCreativePrompt } from '@/store/gameStore'
 import { useGame } from '@/components/GameProvider'
@@ -70,9 +70,12 @@ export function OfflineSetup() {
   const { setPhase, setCategory, setGameType, setCurrentLetter, setCreativePrompt, selectedCategory, totalRounds, drawingTime, settings } = useGameStore()
   const { startOfflineGame, playSound, vibrate } = useGame()
   
-  const [players, setPlayers] = useState<{ name: string }[]>([
-    { name: '' },
-    { name: '' },
+  // Stable ids so React keys survive removing a player from the middle of the
+  // list — keying by array index made the wrong row animate and swap values.
+  const nextPlayerId = useRef(2)
+  const [players, setPlayers] = useState<{ id: number; name: string }[]>([
+    { id: 0, name: '' },
+    { id: 1, name: '' },
   ])
   const [rounds, setRounds] = useState(totalRounds)
   const [time, setTime] = useState(drawingTime)
@@ -86,7 +89,7 @@ export function OfflineSetup() {
   const addPlayer = () => {
     if (players.length < 8) {
       playSound('click')
-      setPlayers([...players, { name: '' }])
+      setPlayers([...players, { id: nextPlayerId.current++, name: '' }])
     }
   }
 
@@ -100,11 +103,10 @@ export function OfflineSetup() {
 
   const updatePlayerName = (index: number, name: string) => {
     const newPlayers = [...players]
-    newPlayers[index] = { name }
+    newPlayers[index] = { ...newPlayers[index], name }
     setPlayers(newPlayers)
   }
 
-  const canProceed = players.filter(p => p.name.trim()).length >= 2
   const canStart = players.filter(p => p.name.trim()).length >= 2
 
   const getStepNumber = (s: 'names' | 'gametype' | 'settings') => {
@@ -187,6 +189,7 @@ export function OfflineSetup() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={() => { playSound('click'); setPhase('menu') }}
+          aria-label={t('common.back', settings.language)}
           className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-lg"
         >
           <FaArrowLeft className="text-xl text-slate-700 dark:text-white" />
@@ -248,6 +251,7 @@ export function OfflineSetup() {
                 whileTap={{ scale: 0.9 }}
                 onClick={addPlayer}
                 disabled={players.length >= 8}
+                aria-label={t('setup.addPlayer', settings.language)}
                 className="p-2 bg-primary-500 text-white rounded-xl disabled:opacity-50"
               >
                 <FaPlus />
@@ -262,7 +266,7 @@ export function OfflineSetup() {
               <AnimatePresence>
                 {players.map((player, index) => (
                   <motion.div
-                    key={index}
+                    key={player.id}
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -100 }}
@@ -285,6 +289,7 @@ export function OfflineSetup() {
                         whileHover={{ scale: 1.1 }}
                         whileTap={{ scale: 0.9 }}
                         onClick={() => removePlayer(index)}
+                        aria-label={`${t('setup.removePlayer', settings.language)} ${index + 1}`}
                         className="p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-xl"
                       >
                         <FaTimes />
@@ -505,12 +510,12 @@ export function OfflineSetup() {
 
           {step === 'names' ? (
             <motion.button
-              whileHover={{ scale: canProceed ? 1.05 : 1 }}
-              whileTap={{ scale: canProceed ? 0.95 : 1 }}
+              whileHover={{ scale: canStart ? 1.05 : 1 }}
+              whileTap={{ scale: canStart ? 0.95 : 1 }}
               onClick={() => { playSound('click'); setStep('gametype') }}
-              disabled={!canProceed}
+              disabled={!canStart}
               className={`flex-1 py-4 rounded-2xl font-bold text-lg transition-all ${
-                canProceed
+                canStart
                   ? 'bg-gradient-to-r from-primary-500 to-secondary-500 text-white shadow-lg'
                   : 'bg-slate-300 dark:bg-slate-700 text-slate-500 cursor-not-allowed'
               }`}
@@ -544,13 +549,7 @@ export function OfflineSetup() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
-            onClick={() => {
-              if (localGameType === 'category') {
-                setShowCategoryPicker(false)
-              } else {
-                setShowCategoryPicker(false)
-              }
-            }}
+            onClick={() => setShowCategoryPicker(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
