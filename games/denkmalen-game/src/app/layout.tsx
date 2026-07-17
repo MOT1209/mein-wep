@@ -11,7 +11,7 @@ const inter = Inter({ subsets: ['latin'] })
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' })
 
 const APP_URL = 'https://rashid-wep.vercel.app/denkmalen'
-const OG_IMAGE = `${APP_URL}/og.svg`
+const OG_IMAGE = `${APP_URL}/og.png`
 
 export const metadata: Metadata = {
   title: 'Denkmalen — Drawing Battle Game with AI Judge',
@@ -29,6 +29,7 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: 'Denkmalen - Drawing Battle Game',
+        type: 'image/png',
       },
     ],
     locale: 'en_US',
@@ -40,7 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Denkmalen — Drawing Battle Game with AI Judge',
     description: 'Draw words, get judged by AI, and compete with friends! A creative drawing battle game with instant AI feedback.',
-    images: [OG_IMAGE],
+    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: 'Denkmalen - Drawing Battle Game', type: 'image/png' }],
   },
 
   // Misc

@@ -64,19 +64,21 @@ export function MainMenu() {
         </p>
       </motion.div>
 
-      {/* Demo Video Placeholder */}
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.4 }}
-        className="w-full max-w-md mb-8 rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 aspect-video flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600"
-      >
-        <div className="text-center p-4">
-          <div className="text-5xl mb-3">🎬</div>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('menu.demoSoon', lang)}</p>
-          <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">{t('menu.demoLength', lang)}</p>
-        </div>
-      </motion.div>
+      {/* Demo Video Placeholder — gated behind demoVideo flag */}
+      {FEATURES.demoVideo && (
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.4 }}
+          className="w-full max-w-md mb-8 rounded-2xl overflow-hidden shadow-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 aspect-video flex items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600"
+        >
+          <div className="text-center p-4">
+            <div className="text-5xl mb-3">🎬</div>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{t('menu.demoSoon', lang)}</p>
+            <p className="text-slate-400 dark:text-slate-500 text-xs mt-1">{t('menu.demoLength', lang)}</p>
+          </div>
+        </motion.div>
+      )}
 
       {/* Primary CTA Button */}
       <motion.button

@@ -18,4 +18,7 @@ export const FEATURES = {
   
   /** Statistics tab (shows only if there's data) */
   statistics: process.env.NEXT_PUBLIC_FEATURE_STATISTICS !== 'false',
+
+  /** Demo video placeholder in hero — hidden by default */
+  demoVideo: process.env.NEXT_PUBLIC_FEATURE_DEMO_VIDEO === 'true',
 } as const
