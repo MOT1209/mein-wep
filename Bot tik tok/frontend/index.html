@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TikBoost - نمو حقيقي لتيك توك</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'oled': '#000000',
+                        'surface': '#0d0d0d',
+                        'card': '#141414',
+                        'cyan': '#25F4EE',
+                        'pink': '#FE2C55',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-oled text-white font-[Tajawal] h-screen flex justify-center">
+
+    <div id="app" class="w-full max-w-md h-full flex flex-col relative overflow-hidden border-x border-white/5">
+
+        <!-- Status Bar -->
+        <div class="flex justify-between items-center px-5 py-2 text-[10px] text-white/30 font-bold z-50 shrink-0">
+            <span id="clock">00:00</span>
+            <div class="flex items-center gap-2">
+                <span id="server-dot" class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                <span id="server-label">OFFLINE</span>
+            </div>
+        </div>
+
+        <!-- Dynamic Content -->
+        <main id="content" class="flex-1 overflow-hidden"></main>
+
+        <!-- Bottom Nav -->
+        <nav id="navbar"
+            class="hidden shrink-0 h-[70px] bg-surface/80 backdrop-blur-xl border-t border-white/5 flex justify-around items-center px-2 pb-3">
+            <button onclick="go('home')" data-page="home" class="nav-item flex flex-col items-center gap-1 p-2">
+                <i class="fa-solid fa-house text-lg"></i>
+                <span class="text-[9px]">الرئيسية</span>
+            </button>
+            <button onclick="go('earn')" data-page="earn" class="nav-item flex flex-col items-center gap-1 p-2">
+                <i class="fa-solid fa-bolt text-lg text-yellow-400"></i>
+                <span class="text-[9px]">كسب نقاط</span>
+            </button>
+            <button onclick="go('shop')" data-page="shop" class="nav-item flex flex-col items-center gap-1 p-2">
+                <i class="fa-solid fa-cart-shopping text-lg text-pink"></i>
+                <span class="text-[9px]">شراء</span>
+            </button>
+            <button onclick="go('history')" data-page="history" class="nav-item flex flex-col items-center gap-1 p-2">
+                <i class="fa-solid fa-clock-rotate-left text-lg text-white/40"></i>
+                <span class="text-[9px]">السجل</span>
+            </button>
+            <button onclick="go('profile')" data-page="profile" class="nav-item flex flex-col items-center gap-1 p-2">
+                <i class="fa-solid fa-user text-lg"></i>
+                <span class="text-[9px]">حسابي</span>
+            </button>
+        </nav>
+
+        <!-- Toast -->
+        <div id="toast"
+            class="fixed top-6 left-1/2 -translate-x-1/2 bg-card border border-white/10 px-5 py-3 rounded-2xl flex items-center gap-3 z-[200] opacity-0 scale-90 transition-all duration-300 pointer-events-none shadow-2xl">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-cyan text-sm"></i>
+            <span id="toast-text" class="text-xs font-bold"></span>
+        </div>
+
+        <!-- Link Account Modal -->
+        <div id="modal"
+            class="fixed inset-0 bg-black/95 backdrop-blur-xl z-[100] hidden items-center justify-center p-8">
+            <div class="w-full max-w-sm space-y-6 fade-in">
+                <h2 class="text-2xl font-black text-center">ربط حساب تيك توك 🔗</h2>
+                <p class="text-white/40 text-[10px] text-center">أدخل @اسم_المستخدم فقط للبدء سريعاً.<br />(الـ Session
+                    ID اختياري للأتمتة الكاملة)</p>
+                <div class="space-y-4">
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-white/40 font-bold">@</span>
+                        <input type="text" id="login-username"
+                            class="w-full bg-white/5 border border-white/10 p-4 pr-4 pl-10 rounded-2xl outline-none focus:border-cyan focus:bg-white/10 transition font-bold"
+                            placeholder="اسم مستخدم تيك توك">
+                    </div>
+                    <details class="group bg-white/5 rounded-2xl border border-white/5">
+                        <summary
+                            class="list-none p-4 text-[10px] text-white/30 cursor-pointer flex justify-between items-center">
+                            <span>خيارات متقدمة (Session ID)</span>
+                            <i class="fa-solid fa-chevron-down transition-transform group-open:rotate-180"></i>
+                        </summary>
+                        <div class="px-4 pb-4">
+                            <input id="m-sid" type="text"
+                                class="w-full bg-black/40 border border-white/10 p-3 rounded-xl outline-none focus:border-cyan transition text-[10px] font-mono"
+                                placeholder="Paste sessionid cookie here...">
+                        </div>
+                    </details>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="closeModal()"
+                        class="flex-1 py-4 bg-white/5 rounded-2xl font-bold text-sm">إلغاء</button>
+                    <button onclick="linkAccount()" id="link-btn"
+                        class="flex-[2] py-4 bg-cyan text-black rounded-2xl font-black text-sm">ربط الآن</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        setInterval(() => {
+            const n = new Date();
+            document.getElementById('clock').textContent = n.getHours().toString().padStart(2, '0') + ':' + n.getMinutes().toString().padStart(2, '0');
+        }, 1000);
+
+        async function checkServer() {
+            try {
+                const r = await fetch('/health');
+                if (r.ok) {
+                    document.getElementById('server-dot').className = 'w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_6px_#22c55e]';
+                    document.getElementById('server-label').textContent = 'LIVE';
+                }
+            } catch {
+                document.getElementById('server-dot').className = 'w-1.5 h-1.5 rounded-full bg-red-500';
+                document.getElementById('server-label').textContent = 'OFFLINE';
+            }
+        }
+        checkServer(); setInterval(checkServer, 8000);
+    </script>
+</body>
+
+</html>

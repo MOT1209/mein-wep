@@ -1,0 +1,7 @@
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "https://api.ecomagent.in/",
+    "ANTHROPIC_AUTH_TOKEN": "sk-ee9d10e214c55206ab7246b9259f00f30dfce06d1a24955f",
+    "ANTHROPIC_AUTH_TOKEN":"claude-opus-4.6"
+  }
+}
