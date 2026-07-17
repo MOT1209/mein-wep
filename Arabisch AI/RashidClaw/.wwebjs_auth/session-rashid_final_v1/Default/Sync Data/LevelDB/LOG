@@ -1,0 +1,4 @@
+2026/03/21-21:02:37.594 2b60 Creating DB C:\Users\aihmo\جميع ملفات البرمجه\Arabisch AI\RashidClaw\.wwebjs_auth\session-rashid_final_v1\Default\Sync Data\LevelDB since it was missing.
+2026/03/21-21:02:38.023 2b60 Reusing MANIFEST C:\Users\aihmo\جميع ملفات البرمجه\Arabisch AI\RashidClaw\.wwebjs_auth\session-rashid_final_v1\Default\Sync Data\LevelDB/MANIFEST-000001
+2026/03/21-21:02:38.025 2b60 Recovering log #3
+2026/03/21-21:02:38.028 2b60 Reusing old log C:\Users\aihmo\جميع ملفات البرمجه\Arabisch AI\RashidClaw\.wwebjs_auth\session-rashid_final_v1\Default\Sync Data\LevelDB/000003.log 
