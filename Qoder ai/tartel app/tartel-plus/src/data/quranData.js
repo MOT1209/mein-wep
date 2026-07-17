@@ -1,0 +1,56 @@
+const quranData = {
+  surahs: [
+    {
+      id: 1,
+      name: "الفاتحة",
+      transliteration: "Al-Fatihah",
+      translation: "The Opening",
+      ayahCount: 7,
+      revelationType: "Meccan"
+    },
+    {
+      id: 2,
+      name: "البقرة",
+      transliteration: "Al-Baqarah",
+      translation: "The Cow",
+      ayahCount: 286,
+      revelationType: "Medinan"
+    },
+    {
+      id: 3,
+      name: "آل عمران",
+      transliteration: "Ali 'Imran",
+      translation: "Family of Imran",
+      ayahCount: 200,
+      revelationType: "Medinan"
+    }
+  ],
+  verses: {
+    "1:1": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    "1:2": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+    "1:3": "الرَّحْمَٰنِ الرَّحِيمِ",
+    "1:4": "مَالِكِ يَوْمِ الدِّينِ",
+    "1:5": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+    "1:6": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+    "1:7": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ"
+  },
+  tajweedRules: {
+    "ghunnah": {
+      letters: ["ن", "م"],
+      description: "Ghunnah (Nasal sound)",
+      color: "#FF5722"
+    },
+    "ikhfa": {
+      letters: ["ت", "ث", "ج", "د", "ذ", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ف", "ق", "ك"],
+      description: "Ikhfa (Concealment)",
+      color: "#4CAF50"
+    },
+    "idgham": {
+      letters: ["ي", "و", "ن", "م"],
+      description: "Idgham (Merging)",
+      color: "#2196F3"
+    }
+  }
+};
+
+export default quranData;

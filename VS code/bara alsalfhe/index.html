@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <title>برا السالفة — مين يعرف؟</title>
+    <meta name="description"
+        content="لعبة برا السالفة الجماعية - اكتشف المخفي بين أصدقائك! أوضاع متعددة، تصنيفات متنوعة، ومتعة بلا حدود.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <!-- ===== Splash Screen ===== -->
+    <div id="splash-screen" class="screen active">
+        <div class="splash-content">
+            <div class="splash-logo">
+                <div class="splash-icon">🎭</div>
+                <h1 class="splash-title">برا السالفة</h1>
+                <p class="splash-subtitle">مين يعرف؟</p>
+            </div>
+            <div class="splash-loader">
+                <div class="loader-bar"></div>
+            </div>
+        </div>
+        <div class="floating-emojis">
+            <span class="float-emoji" style="--delay:0s;--x:10%">🕵️</span>
+            <span class="float-emoji" style="--delay:1s;--x:80%">🤔</span>
+            <span class="float-emoji" style="--delay:2s;--x:30%">😏</span>
+            <span class="float-emoji" style="--delay:0.5s;--x:60%">🎯</span>
+            <span class="float-emoji" style="--delay:1.5s;--x:90%">🤫</span>
+            <span class="float-emoji" style="--delay:2.5s;--x:45%">👀</span>
+        </div>
+    </div>
+
+    <!-- ===== Main Menu ===== -->
+    <div id="main-menu" class="screen">
+        <div class="menu-bg-shapes">
+            <div class="bg-shape shape-1"></div>
+            <div class="bg-shape shape-2"></div>
+            <div class="bg-shape shape-3"></div>
+        </div>
+        <div class="menu-content">
+            <div class="menu-header">
+                <div class="menu-logo">🎭</div>
+                <h1 class="menu-title">برا السالفة</h1>
+                <p class="menu-tagline">اكتشف المخفي بين أصدقائك!</p>
+                <div id="connection-status-main" class="connection-status"
+                    style="margin-top: 10px; display: inline-flex;">
+                    <span class="status-dot offline"></span>
+                    <span class="status-text">غير متصل</span>
+                </div>
+            </div>
+            <div class="menu-buttons">
+                <button id="btn-quick-play" class="menu-btn btn-primary" onclick="startQuickPlay()">
+                    <span class="btn-icon">⚡</span>
+                    <span class="btn-text">لعب سريع</span>
+                    <span class="btn-desc">ابدأ فوراً</span>
+                </button>
+                <button id="btn-one-phone" class="menu-btn btn-secondary" onclick="showScreen('setup-screen')">
+                    <span class="btn-icon">📱</span>
+                    <span class="btn-text">هاتف واحد</span>
+                    <span class="btn-desc">مرر الهاتف بين اللاعبين</span>
+                </button>
+                <button id="btn-create-room" class="menu-btn btn-accent" onclick="showScreen('create-room-screen')">
+                    <span class="btn-icon">🏠</span>
+                    <span class="btn-text">إنشاء غرفة</span>
+                    <span class="btn-desc">العب مع أصدقائك أونلاين</span>
+                </button>
+                <button id="btn-join-room" class="menu-btn btn-outline" onclick="showScreen('join-room-screen')">
+                    <span class="btn-icon">🚪</span>
+                    <span class="btn-text">دخول غرفة</span>
+                    <span class="btn-desc">لديك رمز؟ ادخل هنا</span>
+                </button>
+            </div>
+            <div class="menu-footer">
+                <button id="btn-settings" class="icon-btn" onclick="showScreen('settings-screen')"
+                    title="الإعدادات">⚙️</button>
+                <button id="btn-how-to-play" class="icon-btn" onclick="showScreen('how-to-play-screen')"
+                    title="كيف تلعب؟">❓</button>
+                <button id="btn-leaderboard" class="icon-btn" onclick="showScreen('leaderboard-screen')"
+                    title="المتصدرين">🏆</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== How To Play Screen ===== -->
+    <div id="how-to-play-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showScreen('main-menu')">←</button>
+            <h2>كيف تلعب؟ 🤔</h2>
+        </div>
+        <div class="screen-body how-to-play-body">
+            <button class="menu-btn btn-accent" onclick="startTutorial()" style="margin-bottom:20px;">
+                <span>🎓 ابدأ التدريب التفاعلي</span>
+            </button>
+            <div class="how-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>اختر طريقة اللعب 🎮</h3>
+                    <p>العب محلياً بتمرير الهاتف أو أونلاين بإنشاء غرفة ومشاركة الرمز!</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>توزيع الأدوار 🎭</h3>
+                    <p>كل اللاعبين يرون الكلمة ما عدا لاعب واحد — المخفي!</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>قدّم تلميحك 💡</h3>
+                    <p>كل لاعب يعطي تلميح عن الكلمة. المخفي يحاول التظاهر!</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>صوّت! 🗳️</h3>
+                    <p>بعد كل الجولات، صوتوا لمعرفة من هو المخفي!</p>
+                </div>
+            </div>
+            <div class="how-step">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>اكشف النتيجة! 🏆</h3>
+                    <p>إذا اكتُشف المخفي يربح الباقون. وإذا خمّن الكلمة يربح هو!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Setup Screen ===== -->
+    <div id="setup-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showScreen('main-menu')">←</button>
+            <h2>إعداد اللعبة ⚙️</h2>
+        </div>
+        <div class="screen-body setup-body">
+            <!-- Game Mode Selection -->
+            <div class="setup-section">
+                <h3 class="section-title">وضع اللعب 🎮</h3>
+                <div class="mode-selector">
+                    <button class="mode-btn" data-mode="classic" onclick="selectMode('classic')">
+                        <span class="mode-icon">🎯</span>
+                        <span class="mode-name">كلاسيكي</span>
+                        <span class="mode-desc">تلميحات وتخمين</span>
+                    </button>
+                    <button class="mode-btn active" data-mode="questions" onclick="selectMode('questions')">
+                        <span class="mode-icon">❓</span>
+                        <span class="mode-name">أسئلة</span>
+                        <span class="mode-desc">أسئلة وأجوبة</span>
+                    </button>
+                    <button class="mode-btn" data-mode="quick" onclick="selectMode('quick')">
+                        <span class="mode-icon">⚡</span>
+                        <span class="mode-name">سريع</span>
+                        <span class="mode-desc">30 ثانية فقط</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Player Names -->
+            <div class="setup-section">
+                <h3 class="section-title">اللاعبون 👥</h3>
+                <div class="player-count-control">
+                    <button class="count-btn" onclick="changePlayerCount(-1)">−</button>
+                    <span id="player-count-display" class="count-display">4</span>
+                    <button class="count-btn" onclick="changePlayerCount(1)">+</button>
+                </div>
+                <div id="player-names-container" class="player-names">
+                    <!-- Dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Category Selection -->
+            <div class="setup-section">
+                <h3 class="section-title">التصنيف 🗂️</h3>
+                <div id="category-grid" class="category-grid">
+                    <!-- Dynamically generated -->
+                </div>
+            </div>
+
+            <!-- Timer Setting -->
+            <div class="setup-section">
+                <h3 class="section-title">وقت الدور ⏱️</h3>
+                <div class="timer-selector">
+                    <button class="timer-btn" data-time="10" onclick="selectTimer(10)">10s</button>
+                    <button class="timer-btn active" data-time="15" onclick="selectTimer(15)">15s</button>
+                    <button class="timer-btn" data-time="20" onclick="selectTimer(20)">20s</button>
+                    <button class="timer-btn" data-time="30" onclick="selectTimer(30)">30s</button>
+                </div>
+            </div>
+
+            <!-- Number of Rounds -->
+            <div class="setup-section">
+                <h3 class="section-title">عدد الجولات 🔄</h3>
+                <div class="timer-selector">
+                    <button class="round-btn" data-rounds="1" onclick="selectRounds(1)">1</button>
+                    <button class="round-btn active" data-rounds="3" onclick="selectRounds(3)">3</button>
+                    <button class="round-btn" data-rounds="5" onclick="selectRounds(5)">5</button>
+                    <button class="round-btn" data-rounds="7" onclick="selectRounds(7)">7</button>
+                </div>
+            </div>
+
+            <button id="btn-start-game" class="start-game-btn" onclick="startGame()">
+                <span>🚀 ابدأ اللعبة!</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== Player Turn Screen (Pass Phone) ===== -->
+    <div id="pass-phone-screen" class="screen">
+        <div class="pass-phone-content">
+            <div class="pass-icon">📱</div>
+            <h2 class="pass-title">مرر الهاتف إلى</h2>
+            <div id="pass-player-name" class="pass-player-name">اللاعب</div>
+            <p class="pass-hint">تأكد أن لا أحد يرى الشاشة!</p>
+            <button id="btn-show-role" class="show-role-btn" onclick="showRole()">
+                <span>👁️ اضغط لرؤية دورك</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== Role Reveal Screen ===== -->
+    <div id="role-screen" class="screen">
+        <div class="role-content">
+            <button class="home-icon-btn" onclick="backToMenu()">🏠</button>
+            <div id="role-card" class="role-card">
+                <div id="role-icon" class="role-icon">🎯</div>
+                <h2 id="role-title" class="role-title">أنت تعرف الكلمة!</h2>
+                <div id="role-word" class="role-word">الكلمة</div>
+                <p id="role-hint" class="role-hint">قدّم تلميحاً ذكياً دون فضح الكلمة</p>
+            </div>
+            <div id="role-timer" class="role-timer">
+                <div class="timer-circle">
+                    <svg viewBox="0 0 120 120">
+                        <circle class="timer-bg" cx="60" cy="60" r="54" />
+                        <circle id="timer-progress" class="timer-fill" cx="60" cy="60" r="54" />
+                    </svg>
+                    <span id="timer-text" class="timer-text">15</span>
+                </div>
+            </div>
+            <button id="btn-next-player" class="next-player-btn" onclick="nextPlayer()">
+                <span>التالي ➡️</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== Hint/Question Input Screen ===== -->
+    <div id="hint-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="backToMenu()">🏠</button>
+            <h2 id="hint-screen-title">دور التلميحات 💡</h2>
+        </div>
+        <div class="hint-content">
+            <div id="current-hint-player" class="hint-player-name">اللاعب</div>
+            <div id="hint-instruction" class="hint-instruction">اكتب تلميحك</div>
+            <div class="hint-input-wrapper">
+                <input type="text" id="hint-input" class="hint-input" placeholder="اكتب تلميحك هنا..." maxlength="50">
+                <button id="btn-submit-hint" class="submit-hint-btn" onclick="submitHint()">إرسال ✓</button>
+            </div>
+            <div id="hints-list" class="hints-list">
+                <!-- Dynamically generated hints -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Voting Screen ===== -->
+    <div id="voting-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="backToMenu()">🏠</button>
+            <h2>التصويت 🗳️</h2>
+        </div>
+        <div class="voting-content">
+            <p class="voting-question">من هو المخفي؟ 🕵️</p>
+            <div id="voting-players" class="voting-players">
+                <!-- Dynamically generated -->
+            </div>
+            <div id="spy-guess-section" class="spy-guess-section hidden">
+                <h3>🕵️ المخفي يخمن الكلمة!</h3>
+                <input type="text" id="spy-guess-input" class="hint-input" placeholder="ما هي الكلمة؟">
+                <button class="submit-hint-btn" onclick="submitSpyGuess()">تخمين! 🎯</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Results Screen ===== -->
+    <div id="results-screen" class="screen">
+        <div class="results-content">
+            <div id="results-reveal" class="results-reveal">
+                <div id="result-icon" class="result-icon">🎉</div>
+                <h2 id="result-title" class="result-title">تم كشف المخفي!</h2>
+                <div id="result-spy" class="result-spy">
+                    <span class="spy-label">المخفي كان:</span>
+                    <span id="spy-name" class="spy-name">اللاعب</span>
+                </div>
+                <div id="result-word" class="result-word-container">
+                    <span class="word-label">الكلمة كانت:</span>
+                    <span id="result-word-text" class="result-word-text">كلمة</span>
+                </div>
+            </div>
+            <div id="round-scores" class="round-scores">
+                <h3>النقاط 🏆</h3>
+                <div id="scores-list" class="scores-list">
+                    <!-- Dynamically generated -->
+                </div>
+            </div>
+            <div class="results-actions">
+                <button id="btn-next-round" class="menu-btn btn-primary" onclick="nextRound()">
+                    <span class="btn-icon">🔄</span>
+                    <span class="btn-text">الجولة التالية</span>
+                </button>
+                <button id="btn-back-menu" class="menu-btn btn-outline" onclick="backToMenu()">
+                    <span class="btn-icon">🏠</span>
+                    <span class="btn-text">القائمة الرئيسية</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Final Results / Leaderboard Screen ===== -->
+    <div id="leaderboard-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showScreen('main-menu')">←</button>
+            <h2>لوحة المتصدرين 🏆</h2>
+        </div>
+        <div class="leaderboard-content">
+            <div id="leaderboard-podium" class="podium">
+                <!-- Top 3 players -->
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list">
+                <!-- All players -->
+            </div>
+            <div id="my-achievements" class="achievements-section">
+                <h3>🎖️ أوسمتي</h3>
+                <div id="achievements-list" class="achievements-grid">
+                    <!-- Dynamically generated -->
+                </div>
+            </div>
+            <button class="menu-btn btn-outline" onclick="showScreen('main-menu')" style="margin-top:20px;">
+                <span class="btn-icon">🏠</span>
+                <span class="btn-text">العودة</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- ===== Create Room Screen ===== -->
+    <div id="create-room-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="OnlineGame.leaveRoom(); showScreen('main-menu')">←</button>
+            <h2>إنشاء غرفة 🏠</h2>
+            <div id="connection-status-create" class="connection-status">
+                <span class="status-dot offline"></span>
+                <span class="status-text">غير متصل</span>
+            </div>
+        </div>
+        <div class="room-content">
+            <!-- Step 1: Enter name -->
+            <div id="create-name-step" class="room-step">
+                <div class="room-name-form">
+                    <p>اسمك في اللعبة:</p>
+                    <input type="text" class="player-name-join" placeholder="أدخل اسمك..." id="create-player-name"
+                        maxlength="15">
+                    <button class="start-game-btn" onclick="OnlineGame.createRoom()">
+                        <span>🏠 إنشاء الغرفة</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Step 2: Room Lobby -->
+            <div id="create-lobby-step" class="room-step hidden">
+                <div class="room-code-display">
+                    <p>رمز الغرفة:</p>
+                    <div id="room-code" class="room-code">-----</div>
+                    <button class="copy-btn" onclick="copyRoomCode()" title="نسخ الرمز">📋</button>
+                </div>
+                <div class="room-settings-section">
+                    <h3>⚙️ إعدادات اللعبة</h3>
+                    <div class="room-setting-row">
+                        <span>الوضع:</span>
+                        <select id="room-mode-select" onchange="OnlineGame.updateSettings()">
+                            <option value="classic">🎯 كلاسيكي</option>
+                            <option value="questions" selected>❓ أسئلة</option>
+                            <option value="quick">⚡ سريع</option>
+                        </select>
+                    </div>
+                    <div class="room-setting-row">
+                        <span>التصنيف:</span>
+                        <select id="room-category-select" onchange="OnlineGame.updateSettings()">
+                            <option value="random">🎲 عشوائي</option>
+                            <option value="animals">🐶 حيوانات</option>
+                            <option value="countries">🌍 بلدان</option>
+                            <option value="food">🍔 طعام</option>
+                            <option value="football">⚽ لاعبي كرة</option>
+                            <option value="movies">🎬 أفلام</option>
+                            <option value="celebrities">👑 مشاهير</option>
+                            <option value="jobs">💼 وظائف</option>
+                            <option value="clothes">👕 ملابس</option>
+                            <option value="cartoons">🧸 كرتون</option>
+                            <option value="games">🎮 ألعاب</option>
+                            <option value="things">📦 أشياء</option>
+                        </select>
+                    </div>
+                    <div class="room-setting-row">
+                        <span>الجولات:</span>
+                        <select id="room-rounds-select" onchange="OnlineGame.updateSettings()">
+                            <option value="1">1</option>
+                            <option value="3" selected>3</option>
+                            <option value="5">5</option>
+                            <option value="7">7</option>
+                        </select>
+                    </div>
+                    <div class="room-setting-row">
+                        <span>السرعة القصوى ⚡:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="room-blitz-toggle" onchange="OnlineGame.updateSettings()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <div class="room-setting-row">
+                        <span>جاسوس مزدوج 🕵️🕵️:</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="room-double-spy-toggle" onchange="OnlineGame.updateSettings()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="room-players-list">
+                    <h3>اللاعبون (<span id="room-player-count">1</span>/12):</h3>
+                    <div id="room-players" class="room-players">
+                        <!-- Dynamically filled -->
+                    </div>
+                </div>
+                <p class="room-info">💡 شارك الرمز مع أصدقائك ليدخلوا الغرفة</p>
+                <button id="btn-start-online-game" class="start-game-btn" onclick="OnlineGame.startGame()">
+                    <span>🚀 ابدأ اللعبة</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Join Room Screen ===== -->
+    <div id="join-room-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="OnlineGame.leaveRoom(); showScreen('main-menu')">←</button>
+            <h2>دخول غرفة 🚪</h2>
+        </div>
+        <div class="room-content">
+            <!-- Step 1: Enter code and name -->
+            <div id="join-form-step" class="room-step">
+                <div class="join-room-form">
+                    <p>أدخل رمز الغرفة:</p>
+                    <div class="code-input-group">
+                        <input type="text" class="code-input" maxlength="1" data-index="0">
+                        <input type="text" class="code-input" maxlength="1" data-index="1">
+                        <input type="text" class="code-input" maxlength="1" data-index="2">
+                        <input type="text" class="code-input" maxlength="1" data-index="3">
+                        <input type="text" class="code-input" maxlength="1" data-index="4">
+                    </div>
+                    <input type="text" class="player-name-join" placeholder="اسمك في اللعبة" id="join-player-name"
+                        maxlength="15">
+                    <button class="start-game-btn" onclick="OnlineGame.joinRoom()">
+                        <span>🚪 دخول الغرفة</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Step 2: Waiting Lobby (after joining) -->
+            <div id="join-lobby-step" class="room-step hidden">
+                <div class="room-code-display">
+                    <p>في الغرفة:</p>
+                    <div id="join-room-code-display" class="room-code">-----</div>
+                </div>
+                <div class="room-players-list">
+                    <h3>اللاعبون (<span id="join-player-count">1</span>/12):</h3>
+                    <div id="join-room-players" class="room-players">
+                        <!-- Dynamically filled -->
+                    </div>
+                </div>
+                <button class="ready-toggle-btn" onclick="OnlineGame.toggleReady()">
+                    <span id="ready-btn-text">✋ أنا جاهز!</span>
+                </button>
+                <p class="room-info">⏳ بانتظار صاحب الغرفة لبدء اللعبة...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Online Game Screen (shared for online play) ===== -->
+    <div id="online-game-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="OnlineGame.leaveRoom(); backToMenu()">🏠</button>
+            <h2 id="online-game-title">الجولة 1 🎮</h2>
+            <div id="online-round-info" class="round-info-badge">1/3</div>
+        </div>
+        <div class="online-game-content">
+            <!-- Role display (online) -->
+            <div id="online-role-section" class="online-section">
+                <div id="online-role-card" class="role-card">
+                    <div id="online-role-icon" class="role-icon">🎯</div>
+                    <h2 id="online-role-title" class="role-title">أنت تعرف الكلمة!</h2>
+                    <div id="online-role-word" class="role-word">الكلمة</div>
+                    <p id="online-role-hint" class="role-hint">اكتب تلميحك وأرسله</p>
+                </div>
+            </div>
+            <!-- Hint input (online) -->
+            <div id="online-hint-section" class="online-section hidden">
+                <h3 id="online-hint-title">💡 أرسل تلميحك</h3>
+                <div class="hint-input-wrapper">
+                    <input type="text" id="online-hint-input" class="hint-input" placeholder="اكتب تلميحك هنا..."
+                        maxlength="50">
+                    <button id="online-submit-hint-btn" class="submit-hint-btn" onclick="OnlineGame.submitHint()">إرسال
+                        ✓</button>
+                </div>
+                <div id="online-hints-list" class="hints-list">
+                    <!-- Live hints from other players -->
+                </div>
+                <div id="online-hint-status" class="hint-status">بانتظار باقي اللاعبين...</div>
+            </div>
+
+            <!-- Emoji Reactions (Floating) -->
+            <div id="emoji-reactions-bar" class="emoji-reactions-bar hidden">
+                <button onclick="OnlineGame.sendReaction('🤔')">🤔</button>
+                <button onclick="OnlineGame.sendReaction('😂')">😂</button>
+                <button onclick="OnlineGame.sendReaction('🤨')">🤨</button>
+                <button onclick="OnlineGame.sendReaction('🕵️')">🕵️</button>
+                <button onclick="OnlineGame.sendReaction('🤫')">🤫</button>
+                <button onclick="OnlineGame.sendReaction('😱')">😱</button>
+            </div>
+            <!-- Voting (online) -->
+            <div id="online-voting-section" class="online-section hidden">
+                <p class="voting-question">من هو المخفي؟ 🕵️</p>
+                <div id="online-voting-players" class="voting-players">
+                    <!-- Dynamically generated -->
+                </div>
+            </div>
+            <!-- Spy Guess (online) -->
+            <div id="online-spy-guess-section" class="online-section hidden">
+                <h3>🕵️ المخفي يخمن الكلمة!</h3>
+                <input type="text" id="online-spy-guess-input" class="hint-input" placeholder="ما هي الكلمة؟">
+                <button class="submit-hint-btn" onclick="OnlineGame.submitSpyGuess()">تخمين! 🎯</button>
+            </div>
+            <!-- Chat Section (Online) -->
+            <div id="online-chat-section" class="online-chat-container">
+                <div id="online-chat-messages" class="chat-messages"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="online-chat-input" placeholder="اكتب رسالة..." maxlength="100">
+                    <button onclick="OnlineGame.sendMessage()">✉️</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Settings Screen ===== -->
+    <div id="settings-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showScreen('main-menu')">←</button>
+            <h2>الإعدادات ⚙️</h2>
+        </div>
+        <div class="screen-body settings-body">
+            <div class="setting-item">
+                <div class="setting-info">
+                    <span class="setting-icon">🔊</span>
+                    <span id="label-sound" class="setting-label">المؤثرات الصوتية</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="sound-toggle" checked onchange="toggleSound()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <span class="setting-icon">🌙</span>
+                    <span id="label-dark-mode" class="setting-label">الوضع الداكن</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="dark-mode-toggle" checked onchange="toggleDarkMode()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <span class="setting-icon">📳</span>
+                    <span id="label-vibration" class="setting-label">الاهتزاز</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="vibration-toggle" checked onchange="toggleVibration()">
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="setting-item">
+                <div class="setting-info">
+                    <span class="setting-icon">🌐</span>
+                    <span id="label-language" class="setting-label">اللغة</span>
+                </div>
+                <select class="setting-select" id="language-select" onchange="changeLanguage()">
+                    <option value="ar" selected>العربية (Default)</option>
+                    <option value="en">English (الانجليزية)</option>
+                    <option value="de">Deutsch (الالمانية)</option>
+                    <option value="fr">Français (الفرنسية)</option>
+                    <option value="es">Español (الاسبانية)</option>
+                </select>
+            </div>
+            <div class="setting-divider"></div>
+            <div class="setting-item clickable" onclick="showScreen('custom-words-screen')">
+                <div class="setting-info">
+                    <span class="setting-icon">📝</span>
+                    <span id="label-custom-words" class="setting-label">كلمات مخصصة</span>
+                </div>
+                <span class="setting-arrow">←</span>
+            </div>
+            <div class="setting-item clickable" onclick="resetScores()">
+                <div class="setting-info">
+                    <span class="setting-icon">🗑️</span>
+                    <span id="label-reset-scores" class="setting-label">مسح النقاط</span>
+                </div>
+                <span class="setting-arrow">←</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== Custom Words Screen ===== -->
+    <div id="custom-words-screen" class="screen">
+        <div class="screen-header">
+            <button class="back-btn" onclick="showScreen('settings-screen')">←</button>
+            <h2>كلمات مخصصة 📝</h2>
+        </div>
+        <div class="screen-body">
+            <div class="custom-words-form">
+                <input type="text" id="custom-word-input" class="hint-input" placeholder="أضف كلمة جديدة...">
+                <button class="submit-hint-btn" onclick="addCustomWord()">إضافة +</button>
+            </div>
+            <div id="custom-words-list" class="custom-words-list">
+                <!-- Dynamically generated -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Sound Effects (Web Audio will be used) -->
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="words.js"></script>
+    <script src="game.js"></script>
+    <script src="online.js"></script>
+</body>
+
+</html>

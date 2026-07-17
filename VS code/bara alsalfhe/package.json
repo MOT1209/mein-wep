@@ -1,0 +1,20 @@
+{
+  "name": "bara-alsalfhe",
+  "version": "1.0.0",
+  "description": "برا السالفة — لعبة جماعية تفاعلية",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "express": "^4.22.1",
+    "socket.io": "^4.8.3"
+  }
+}
