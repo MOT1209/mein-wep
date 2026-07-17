@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الزكاة - نور الهدى</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-wrapper {
+            padding: 120px 20px 60px;
+            min-height: 100vh;
+        }
+
+        .zakat-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: right;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-glass);
+            background: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            font-family: inherit;
+            transition: var(--transition-fast);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(11, 122, 117, 0.2);
+        }
+
+        body.dark-mode .form-input {
+            background: rgba(30, 41, 59, 0.8);
+            color: white;
+        }
+
+        .result-box {
+            margin-top: 30px;
+            padding: 25px;
+            background: rgba(11, 122, 117, 0.1);
+            border-radius: var(--radius-md);
+            text-align: center;
+            display: none;
+            border: 2px dashed var(--primary-color);
+        }
+
+        .result-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .result-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+        }
+
+        .info-alert {
+            padding: 15px;
+            border-left: 4px solid var(--secondary-color);
+            background: rgba(215, 181, 109, 0.1);
+            margin-bottom: 30px;
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="glass-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fa-solid fa-mosque"></i> نور الهدى</a>
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search" placeholder="ابحث في أحكام المال والزكاة...">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="quran.html">القرآن الكريم</a></li>
+                    <li><a href="hadith.html">الأحاديث النبوية</a></li>
+                    <li><a href="prayer.html">مواقيت الصلاة</a></li>
+                    <li><a href="azkar.html">الأذكار</a></li>
+                    <li><a href="articles.html">المقالات</a></li>
+                    <li><a href="names-of-allah.html">أسماء الله الحسنى</a></li>
+                    <li><a href="zakat.html" class="active">الزكاة</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="menu-toggle" id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container page-wrapper">
+        <div class="zakat-grid">
+            <!-- Educational Section -->
+            <div class="zakat-insights">
+                <h2 class="section-title" style="text-align: right; margin-bottom: 30px;">لماذا نزكي؟</h2>
+                <div class="glass-panel insight-card">
+                    <div class="insight-item">
+                        <i class="fa-solid fa-heart-circle-check"></i>
+                        <div>
+                            <h3>تطهير النفس والمال</h3>
+                            <p>الزكاة ليست مجرد ضريبة، بل هي وسيلة لتطهير النفس من الشح وتزكية المال ليبارك الله فيه.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <i class="fa-solid fa-hand-holding-heart"></i>
+                        <div>
+                            <h3>التكافل الاجتماعي</h3>
+                            <p>تساهم الزكاة في تقليص الفجوة بين الأغنياء والفقراء وتحقيق توازن معيشي كريم في المجتمع
+                                الإسلامي.</p>
+                        </div>
+                    </div>
+                    <div class="insight-item">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <div>
+                            <h3>حق معلوم</h3>
+                            <p>الزكاة حق للمحتاجين في أموال المقتدرين، وهي الركن الثالث من أركان الإسلام العظيمة.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simple Calculator Section -->
+            <div class="zakat-calc-simple">
+                <h2 class="section-title">حاسبة سريعة</h2>
+                <div class="glass-panel simple-calc-card">
+                    <div class="live-price-mini">
+                        <span>سعر الذهب الحالي (21k):</span>
+                        <strong id="gold-price-display">جاري الجلب...</strong>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">إجمالي مدخراتك (سيولة + ذهب + تجارة):</label>
+                        <input type="number" id="total-wealth" class="form-input" placeholder="أدخل المبلغ الإجمالي">
+                    </div>
+
+                    <button class="btn btn-primary" style="width: 100%; justify-content: center;"
+                        onclick="calculateZakatSimple()">
+                        <i class="fa-solid fa-calculator"></i> احسب الزكاة الواجبة
+                    </button>
+
+                    <div id="simple-result" class="simple-result-box"
+                        style="display: none; margin-top: 30px; text-align: center;">
+                        <span style="display: block; color: var(--text-muted); font-size: 0.9rem;">الزكاة المستحقة
+                            (2.5%):</span>
+                        <div id="zakat-amount"
+                            style="font-size: 2.2rem; font-weight: 800; color: var(--primary-color);">0.00</div>
+                        <div id="nisab-alert" class="nisab-alert"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script src="zakat.js"></script>
+    <!-- Global Search Overlay -->
+    <div id="search-overlay" class="search-overlay">
+        <button class="close-search-overlay" onclick="toggleSearchOverlay()">&times;</button>
+        <div class="search-modal-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magic"></i>
+                <input type="text" id="overlay-search-input" placeholder="اكتب للبحث في القرآن والسنة..."
+                    autocomplete="off">
+            </div>
+            <div id="search-results" class="search-results-area">
+                <div style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    <i class="fa-solid fa-keyboard" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    ابدأ الكتابة للبحث الشامل...
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

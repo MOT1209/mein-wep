@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>القرآن الكريم - نور الهدى</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <!-- خط القرآن -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            width: 95%;
+            transform: translateY(-40px);
+            transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .modal.active .modal-content {
+            transform: translateY(0);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-size: 2.5rem;
+            cursor: pointer;
+            line-height: 1;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: var(--secondary-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-glass);
+            padding-bottom: 15px;
+        }
+
+        .ayah {
+            transition: all 0.2s ease;
+            display: inline;
+            padding: 2px 4px;
+            cursor: pointer;
+        }
+
+        .ayah:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-radius: 6px;
+        }
+
+        .page-wrapper {
+            padding: 120px 20px 60px;
+            min-height: 100vh;
+        }
+
+        .surah-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .surah-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            text-align: right;
+        }
+
+        .surah-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary-color);
+            background: var(--bg-glass-hover);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .surah-number-badge {
+            width: 50px;
+            height: 50px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,5 64,20 80,10 80,30 95,36 85,50 95,64 80,70 80,90 64,80 50,95 36,80 20,90 20,70 5,64 15,50 5,36 20,30 20,10 36,20" fill="%230b7a75" stroke="%23d7b56d" stroke-width="2"/></svg>') center/cover;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            flex-shrink: 0;
+            margin-bottom: 0;
+        }
+
+        .surah-card:hover .surah-number-badge {
+            transform: rotate(45deg);
+            transition: transform 0.3s ease;
+        }
+
+        .surah-main-info {
+            flex: 1;
+        }
+
+        .surah-name-ar {
+            font-family: 'Amiri', serif;
+            font-size: 1.6rem;
+            color: var(--primary-color);
+            margin-bottom: 2px;
+        }
+
+        .surah-name-en {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: normal;
+        }
+
+        .surah-meta {
+            display: flex;
+            gap: 10px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .surah-meta i {
+            color: var(--secondary-color);
+        }
+
+        .ayahs-box {
+            font-family: 'Amiri', serif;
+            font-size: 1.8rem;
+            line-height: 2.2;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .ayah {
+            display: inline;
+        }
+
+        .ayah-number {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 35px;
+            height: 35px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,5 95,28 95,73 50,95 5,73 5,28" fill="none" stroke="%23d7b56d" stroke-width="4"/></svg>') center/cover;
+            font-size: 1.1rem;
+            margin: 0 10px;
+            color: var(--primary-color);
+            font-family: 'Tajawal', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="glass-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-mosque"></i> نور الهدى
+            </a>
+
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search" placeholder="ابحث في المنصة...">
+            </div>
+
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="quran.html" class="active">القرآن الكريم</a></li>
+                    <li><a href="hadith.html">الأحاديث النبوية</a></li>
+                    <li><a href="prayer.html">مواقيت الصلاة</a></li>
+                    <li><a href="azkar.html">الأذكار</a></li>
+                    <li><a href="articles.html">المقالات</a></li>
+                    <li><a href="names-of-allah.html">أسماء الله الحسنى</a></li>
+                    <li><a href="zakat.html">الزكاة</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="menu-toggle" id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container page-wrapper">
+        <!-- قسم قائمة السور والأجزاء -->
+        <div id="surahs-list-view">
+            <h2 class="section-title">فهرس القرآن الكريم</h2>
+
+            <div class="quran-controls glass-panel">
+                <div class="quran-search">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="quran-search-input" placeholder="ابحث عن سورة بالاسم أو الرقم..."
+                        oninput="filterQuran()">
+                </div>
+
+                <div class="quran-tabs">
+                    <button class="tab-btn active" onclick="switchQuranView('surah')" id="tab-surah">
+                        <i class="fa-solid fa-list-ol"></i> السور
+                    </button>
+                    <button class="tab-btn" onclick="switchQuranView('juz')" id="tab-juz">
+                        <i class="fa-solid fa-layer-group"></i> الأجزاء
+                    </button>
+                </div>
+                <div class="header-actions">
+                    <div class="reciter-selector-wrapper">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                        <select id="reciter-select" onchange="changeReciter()">
+                            <option value="ar.alafasy">مشاري العفاسي</option>
+                            <option value="ar.husary">محمود خليل الحصري</option>
+                            <option value="ar.minshawi">محمد صديق المنشاوي</option>
+                            <option value="ar.abdulsamad">عبد الباسط عبد الصمد</option>
+                            <option value="ar.abdurrahmaansudais">عبد الرحمن السديس</option>
+                            <option value="ar.mahermuaiqly">ماهر المعيقلي</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div id="loader" class="loader">
+                <i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...
+            </div>
+
+            <div id="surah-grid" class="surah-grid"></div>
+            <div id="juz-grid" class="surah-grid" style="display: none;"></div>
+        </div>
+
+        <!-- قسم عرض آيات السورة -->
+        <div id="surah-content-view" style="display: none;">
+            <button class="btn btn-secondary" onclick="backToSurahs()" style="margin-bottom: 20px;">
+                <i class="fa-solid fa-arrow-right"></i> عودة للفهرس
+            </button>
+            <h2 id="current-surah-title" class="section-title"></h2>
+            <div id="ayahs-container" class="glass-panel ayahs-box"></div>
+        </div>
+    </main>
+
+    <!-- مودال التفسير -->
+    <div id="tafsir-modal" class="modal">
+        <div class="modal-content glass-panel" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="tafsir-ayah-title">تفسير الآية</h3>
+                <button class="close-modal" onclick="closeTafsirModal()">&times;</button>
+            </div>
+            <div id="tafsir-text" class="modal-body"
+                style="font-size: 1.25rem; line-height: 1.8; color: var(--text-main); text-align: justify; font-family: 'Amiri', serif;">
+                جاري تحميل التفسير...
+            </div>
+            <div class="modal-footer"
+                style="margin-top: 20px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-glass); padding-top: 10px;">
+                المصدر: تفسير الجلالين
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Audio Player -->
+    <div id="audio-player-container" class="glass-panel audio-player-footer">
+        <div class="player-info">
+            <div class="player-title" id="player-surah-name">سورة الفاتحة</div>
+            <div class="player-reciter" id="player-reciter-name">مشاري العفاسي</div>
+        </div>
+        <div class="player-controls">
+            <button class="player-btn" id="prev-btn"><i class="fa-solid fa-backward-step"></i></button>
+            <button class="player-btn play-pause-btn" id="play-pause-btn"><i class="fa-solid fa-play"></i></button>
+            <button class="player-btn" id="next-btn"><i class="fa-solid fa-forward-step"></i></button>
+        </div>
+        <div class="player-progress-wrapper">
+            <span id="current-time">00:00</span>
+            <input type="range" id="progress-bar" value="0" min="0" max="100">
+            <span id="total-time">00:00</span>
+        </div>
+        <div class="player-volume">
+            <i class="fa-solid fa-volume-high"></i>
+            <input type="range" id="volume-slider" value="80" min="0" max="100">
+        </div>
+        <button class="player-close" onclick="closePlayer()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <audio id="quran-audio" style="display:none;"></audio>
+
+    <script src="app.js"></script>
+    <script src="quran.js"></script>
+</body>
+
+</html>

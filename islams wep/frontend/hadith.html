@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الأحاديث النبوية - نور الهدى</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-wrapper {
+            padding: 120px 20px 60px;
+            min-height: 100vh;
+        }
+
+        .categories-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .cat-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid var(--border-glass);
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 1rem;
+            color: var(--text-main);
+            transition: var(--transition-fast);
+        }
+
+        .cat-btn:hover,
+        .cat-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .hadiths-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .hadith-card {
+            padding: 30px;
+            position: relative;
+        }
+
+        .hadith-text {
+            font-size: 1.4rem;
+            line-height: 2;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .hadith-meta {
+            display: flex;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            border-top: 1px solid var(--border-glass);
+            padding-top: 15px;
+        }
+
+        .grade {
+            background: rgba(11, 122, 117, 0.1);
+            color: var(--primary-color);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            border: 1px solid var(--primary-color);
+        }
+
+        .hadith-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid var(--border-glass);
+        }
+
+        .hadith-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="glass-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">
+                <i class="fa-solid fa-mosque"></i> نور الهدى
+            </a>
+
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search" placeholder="ابحث في السنة...">
+            </div>
+
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="quran.html">القرآن الكريم</a></li>
+                    <li><a href="hadith.html" class="active">الأحاديث النبوية</a></li>
+                    <li><a href="prayer.html">مواقيت الصلاة</a></li>
+                    <li><a href="azkar.html">الأذكار</a></li>
+                    <li><a href="articles.html">المقالات</a></li>
+                    <li><a href="names-of-allah.html">أسماء الله الحسنى</a></li>
+                    <li><a href="zakat.html">الزكاة</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="menu-toggle" id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container page-wrapper">
+        <h2 class="section-title">الأحاديث النبوية الصحيحة</h2>
+
+        <div class="quran-controls glass-panel">
+            <div class="quran-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="hadith-search-input" placeholder="ابحث في متن الحديث أو الراوي..."
+                    oninput="filterHadiths()">
+            </div>
+
+            <div class="quran-tabs" id="book-tabs">
+                <button class="tab-btn active" onclick="switchBook('all')" id="tab-all">
+                    <i class="fa-solid fa-layer-group"></i> الكل
+                </button>
+                <button class="tab-btn" onclick="switchBook('صحيح البخاري')" id="tab-bukhari">
+                    <i class="fa-solid fa-book-open"></i> البخاري
+                </button>
+                <button class="tab-btn" onclick="switchBook('صحيح مسلم')" id="tab-muslim">
+                    <i class="fa-solid fa-book-open"></i> مسلم
+                </button>
+            </div>
+        </div>
+
+        <div id="categories-container" class="categories-filter">
+            <!-- سيتم إضافة الأزرار هنا ديناميكياً -->
+            <button class="cat-btn active" onclick="loadByTopic('الإيمان والنوايا', this)">الإيمان والنوايا</button>
+            <button class="cat-btn" onclick="loadByTopic('الأخلاق وحقوق المسلم', this)">الأخلاق وحقوق المسلم</button>
+            <button class="cat-btn" onclick="loadByTopic('العلم', this)">العلم</button>
+        </div>
+
+        <div id="loader" style="text-align: center; font-size: 1.5rem; color: var(--primary-color);">
+            <i class="fa-solid fa-spinner fa-spin"></i> جاري التحميل...
+        </div>
+
+        <div id="hadiths-container" class="hadiths-container">
+            <!-- سيتم إضافة الأحاديث هنا -->
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script src="hadith.js"></script>
+    <!-- Global Search Overlay -->
+    <div id="search-overlay" class="search-overlay">
+        <button class="close-search-overlay" onclick="toggleSearchOverlay()">&times;</button>
+        <div class="search-modal-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magic"></i>
+                <input type="text" id="overlay-search-input" placeholder="اكتب للبحث في القرآن والسنة..."
+                    autocomplete="off">
+            </div>
+            <div id="search-results" class="search-results-area">
+                <div style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    <i class="fa-solid fa-keyboard" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    ابدأ الكتابة للبحث الشامل...
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

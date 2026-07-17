@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المدرب الذكي Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+    <!-- Authentication Modal -->
+    <div id="authModal" class="auth-modal">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h2>🏋️ المدرب الذكي Pro</h2>
+                <p>سجل دخولك أو أنشئ حساب جديد</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">تسجيل دخول</button>
+                <button class="auth-tab" data-tab="register">إنشاء حساب</button>
+            </div>
+
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label>📧 البريد الإلكتروني</label>
+                    <input type="email" id="loginEmail" placeholder="بريدك الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label>🔑 كلمة المرور</label>
+                    <input type="password" id="loginPassword" placeholder="كلمة المرور" required>
+                </div>
+                <button type="submit" class="save-btn" style="width:100%;">دخول</button>
+
+                <div style="text-align:center; margin: 20px 0;">
+                    <p style="color: var(--text-muted); margin-bottom: 15px;">أو</p>
+                    <button type="button" id="googleLoginBtn"
+                        style="background: #fff; color: #333; border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4"
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path fill="#34A853"
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path fill="#FBBC05"
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path fill="#EA4335"
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                        الدخول بحساب Google
+                    </button>
+                </div>
+            </form>
+
+            <form id="registerFormModal" class="auth-form" style="display:none;">
+                <div class="form-group">
+                    <label>👤 الاسم</label>
+                    <input type="text" id="registerNameModal" placeholder="اسمك">
+                </div>
+                <div class="form-group">
+                    <label>📧 البريد الإلكتروني</label>
+                    <input type="email" id="registerEmailModal" placeholder="بريدك الإلكتروني" required>
+                </div>
+                <div class="form-group">
+                    <label>🔑 كلمة المرور</label>
+                    <input type="password" id="registerPasswordModal" placeholder="كلمة المرور" required minlength="6">
+                </div>
+                <button type="button" class="save-btn" style="width:100%; background: var(--secondary);"
+                    onclick="registerUser()">إنشاء حساب</button>
+            </form>
+
+            <div class="auth-footer">
+                <button class="guest-btn" id="guestBtn">دخول كضيف (حفظ محلي)</button>
+                <p style="text-align:center; margin-top:15px; color:var(--text-muted);">
+                    <a href="register.html" style="color:var(--primary);">إنشاء حساب</a> |
+                    <a href="login.html" style="color:var(--secondary);">تسجيل دخول</a>
+                </p>
+            </div>
+
+            <div id="authError" class="auth-error"></div>
+        </div>
+    </div>
+
+    <div id="app">
+        <header>
+            <div class="user-info" id="userInfo" style="display:none;">
+                <span id="userNameDisplay"></span>
+                <button class="logout-btn" id="logoutBtn">خروج</button>
+            </div>
+            <h1>🏋️ المدرب الذكي Pro</h1>
+            <nav>
+                <button class="nav-btn active" data-section="home">الرئيسية</button>
+                <button class="nav-btn" data-section="ai-assistant">🤖 المساعد</button>
+                <button class="nav-btn" data-section="food">🍽️ الطعام</button>
+                <button class="nav-btn" data-section="water">💧 الماء</button>
+                <button class="nav-btn" data-section="workout">💪 التمارين</button>
+                <button class="nav-btn" data-section="vitals">🏥 الحيوية</button>
+                <button class="nav-btn" data-section="stress">😌 الإجهاد</button>
+                <button class="nav-btn" data-section="dashboard">📊 اللوحة</button>
+                <button class="nav-btn" data-section="progress-photos">📸 التقدم</button>
+                <button class="nav-btn" data-section="articles">📚 المقالات</button>
+                <button class="nav-btn" data-section="gps">🗺️ GPS</button>
+                <button class="nav-btn" data-section="profile">👤 حسابي</button>
+            </nav>
+        </header>
+
+        <main>
+            <!-- الصفحة الرئيسية -->
+            <section id="home" class="section active">
+                <h2>👋 مرحباً بك في المدرب الذكي Pro</h2>
+
+                <div class="dashboard-summary">
+                    <div class="summary-card">
+                        <div class="card-icon">💧</div>
+                        <div class="card-info">
+                            <h3>الماء</h3>
+                            <span id="homeWater">0/8 أكواب</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">🔥</div>
+                        <div class="card-info">
+                            <h3>السعرات</h3>
+                            <span id="homeCalories">0/2000</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">💪</div>
+                        <div class="card-info">
+                            <h3>التمارين</h3>
+                            <span id="homeWorkout">لم يتم</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-icon">😴</div>
+                        <div class="card-info">
+                            <h3>النوم</h3>
+                            <span id="homeSleep">-- ساعات</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-recommendation-banner" id="aiRecommendationBanner">
+                    <h3>💡 توصية المساعد الذكي</h3>
+                    <p id="aiRecommendationText">جاري تحليل بياناتك...</p>
+                </div>
+            </section>
+
+            <!-- المساعد الذكي -->
+            <section id="ai-assistant" class="section">
+                <h2>🤖 المساعد الذكي</h2>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message ai-message">
+                            <div class="message-avatar">🤖</div>
+                            <div class="message-content">
+                                <strong>مرحباً! 👋</strong><br>
+                                أنا مساعدك الذكي في اللياقة والتغذية.<br><br>
+                                يمكنك سؤالي عن:<br>
+                                • نصائح تغذية 🥗<br>
+                                • برامج تمارين 💪<br>
+                                • تحليل بياناتك 📊<br>
+                                • نصائح صحية 🏥<br>
+                                <br>
+                                كيف يمكنني مساعدتك؟
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-area">
+                        <input type="text" id="chatInput" placeholder="اكتب سؤالك هنا...">
+                        <button id="sendMessageBtn" class="send-btn">📤</button>
+                    </div>
+
+                    <div class="quick-questions">
+                        <h4>أسئلة شائعة:</h4>
+                        <button class="quick-q" data-q="ما أفضل وجبة بعد التمرين؟">بعد التمرين</button>
+                        <button class="quick-q" data-q="كم لتر ماء يجب أن أشرب؟">كمية الماء</button>
+                        <button class="quick-q" data-q="نصائح لنوم أفضل">النوم</button>
+                        <button class="quick-q" data-q="كيف أحرق دهون البطن؟">حرق الدهون</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- الطعام -->
+            <section id="food" class="section">
+                <h2>🍽️ تحليل الطعام بالذكاء الاصطناعي</h2>
+
+                <div class="upload-section">
+                    <h3>📸 رفع صورة الطعام</h3>
+                    <p style="color: #6b7280; margin-bottom: 15px;">سيقوم الذكاء الاصطناعي بتحليل الصورة وتحديد نوع
+                        الطعام والقيمة الغذائية تلقائياً</p>
+                    <div class="upload-box" id="uploadBox">
+                        <div class="upload-icon">📷</div>
+                        <p>اضغط لرفع صورة الطعام</p>
+                        <small style="color: #6b7280;">JPG, PNG - الحد الأقصى 5MB</small>
+                    </div>
+                    <input type="file" id="foodImage" accept="image/*" hidden>
+                </div>
+
+                <div class="manual-entry">
+                    <h3>➕ إضافة وجبة يدوياً</h3>
+                    <div class="manual-form">
+                        <input type="text" id="mealName" placeholder="اسم الوجبة (مثل: دجاج مشوي)">
+                        <input type="number" id="mealCalories" placeholder="السعرات الحرارية">
+                        <input type="number" id="mealProtein" placeholder="البروتين (جرام)">
+                        <input type="number" id="mealCarbs" placeholder="الكربوهيدرات (جرام)">
+                        <input type="number" id="mealFat" placeholder="الدهون (جرام)">
+                        <button id="addMealBtn" class="save-btn">إضافة وجبة</button>
+                    </div>
+                </div>
+
+                <div class="daily-log">
+                    <h3>📊 سجل اليوم</h3>
+                    <div id="mealsList" class="meals-list"></div>
+                    <div class="daily-summary">
+                        <div class="summary-cards">
+                            <div class="card">
+                                <span class="label">السعرات</span>
+                                <span id="totalCalories" class="value">0</span>
+                            </div>
+                            <div class="card">
+                                <span class="label">بروتين</span>
+                                <span id="totalProtein" class="value">0g</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- الماء -->
+            <section id="water" class="section">
+                <h2>💧 تتبع الماء</h2>
+
+                <div class="water-tracker">
+                    <div class="water-bottle" id="waterBottle">
+                        <div class="water-level" id="waterLevel" style="height: 0%"></div>
+                        <div class="water-icon">💧</div>
+                    </div>
+                    <div class="water-stats">
+                        <span class="water-count" id="waterCount">0</span>
+                        <span class="water-total" id="waterTarget">/ 8 أكواب</span>
+                    </div>
+
+                    <div class="water-progress-text" id="waterProgressText">0% من الهدف اليومي</div>
+
+                    <div class="water-controls">
+                        <button id="addWaterBtn" class="water-btn">+ إضافة كوب</button>
+                        <button id="addGlassBtn" class="water-btn glass">+ كأس كبيرة</button>
+                        <button id="removeWaterBtn" class="water-btn remove">- إزالة</button>
+                        <button id="resetWaterBtn" class="water-btn reset">إعادة</button>
+                    </div>
+
+                    <div class="water-settings">
+                        <label>الهدف اليومي:</label>
+                        <select id="waterGoalSelect">
+                            <option value="4">4 أكواب</option>
+                            <option value="6">6 أكواب</option>
+                            <option value="8" selected>8 أكواب</option>
+                            <option value="10">10 أكواب</option>
+                            <option value="12">12 كوب</option>
+                        </select>
+                    </div>
+
+                    <div class="water-tips" id="waterTips">
+                        <h4>💡 نصائح الترطيب:</h4>
+                        <p id="tipText">اشرب كوباً ماءاً الآن لبدء يوم صحي!</p>
+                    </div>
+                </div>
+
+                <div class="water-history">
+                    <h3>📅 سجل الأسبوع</h3>
+                    <div class="history-bars" id="historyBars"></div>
+                </div>
+            </section>
+
+            <!-- التمارين -->
+            <section id="workout" class="section">
+                <h2>💪 برنامج التمارين</h2>
+
+                <div class="workout-options">
+                    <div class="location-selector">
+                        <h3>المكان</h3>
+                        <button class="location-btn active" data-location="home">🏠 المنزل</button>
+                        <button class="location-btn" data-location="gym">🏋️ الجيم</button>
+                    </div>
+                    <div class="goal-selector">
+                        <h3>الهدف</h3>
+                        <button class="goal-btn active" data-goal="cut">🔥 تنشيف</button>
+                        <button class="goal-btn" data-goal="bulk">💪 تضخيم</button>
+                    </div>
+                </div>
+
+                <div id="workoutPlan" class="workout-plan"></div>
+            </section>
+
+            <!-- المؤشرات الحيوية -->
+            <section id="vitals" class="section">
+                <h2>🏥 المؤشرات الحيوية</h2>
+
+                <div class="vitals-form">
+                    <h3>تسجيل القياسات</h3>
+
+                    <div class="form-group">
+                        <label>📈 ضغط الدم الانقباضي</label>
+                        <input type="number" id="systolicBP" placeholder="120">
+                    </div>
+
+                    <div class="form-group">
+                        <label>📉 ضغط الدم الانبساطي</label>
+                        <input type="number" id="diastolicBP" placeholder="80">
+                    </div>
+
+                    <div class="form-group">
+                        <label>💓 معدل النبض</label>
+                        <input type="number" id="heartRate" placeholder="72">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🩸 مستوى السكر</label>
+                        <input type="number" id="bloodSugar" placeholder="100">
+                    </div>
+
+                    <div class="form-group">
+                        <label>🩺 الكوليسترول</label>
+                        <input type="number" id="cholesterol" placeholder="200">
+                    </div>
+
+                    <button id="saveVitalsBtn" class="save-btn">حفظ القياسات</button>
+                </div>
+
+                <div class="charts-container">
+                    <h3>📊 الرسوم البيانية</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="bpChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- الإجهاد -->
+            <section id="stress" class="section">
+                <h2>😌 إدارة الإجهاد والتوتر</h2>
+
+                <div class="stress-assessment">
+                    <h3>تقييم مستوى التوتر اليومي</h3>
+                    <p>كيف تشعر اليوم؟ (1-10)</p>
+
+                    <div class="stress-scale">
+                        <input type="range" id="stressLevel" min="1" max="10" value="5" class="stress-slider">
+                        <div class="stress-value" id="stressValue">5</div>
+                    </div>
+
+                    <div class="stress-factors">
+                        <h4>عوامل الإجهاد:</h4>
+                        <label><input type="checkbox" class="stress-factor" value="work"> العمل</label>
+                        <label><input type="checkbox" class="stress-factor" value="family"> العائلة</label>
+                        <label><input type="checkbox" class="stress-factor" value="sleep"> قلة النوم</label>
+                        <label><input type="checkbox" class="stress-factor" value="exercise"> التمرين</label>
+                    </div>
+
+                    <button id="saveStressBtn" class="save-btn">حفظ التقييم</button>
+                </div>
+
+                <div class="relaxation-exercises">
+                    <h3>🧘 تمارين الاسترخاء</h3>
+
+                    <div class="exercise-card" data-exercise="breathing">
+                        <h4>🫁 تمارين التنفس</h4>
+                        <p>تنفس عميق لمدة 5 دقائق</p>
+                        <button class="start-exercise-btn">بدء</button>
+                    </div>
+
+                    <div class="exercise-card" data-exercise="meditation">
+                        <h4>🧘‍♂️ تأمل</h4>
+                        <p>جلسة تأمل لمدة 10 دقائق</p>
+                        <button class="start-exercise-btn">بدء</button>
+                    </div>
+                </div>
+
+                <div class="chart-wrapper">
+                    <canvas id="stressChart"></canvas>
+                </div>
+            </section>
+
+            <!-- لوحة التحكم -->
+            <section id="dashboard" class="section">
+                <h2>📊 لوحة التحكم</h2>
+
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>⚖️ تطور الوزن</h3>
+                        <canvas id="weightProgressChart"></canvas>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>🔥 السعرات</h3>
+                        <canvas id="caloriesChart"></canvas>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>💧 تاريخ الماء</h3>
+                        <canvas id="waterHistoryChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- صور التقدم -->
+            <section id="progress-photos" class="section">
+                <h2>📸 صور التقدم</h2>
+
+                <div class="photo-upload">
+                    <h3>📷 التقاط صورة جديدة</h3>
+                    <div class="upload-types">
+                        <label><input type="radio" name="photoType" value="front" checked> أمامية</label>
+                        <label><input type="radio" name="photoType" value="side"> جانبية</label>
+                        <label><input type="radio" name="photoType" value="back"> خلفية</label>
+                    </div>
+                    <div class="upload-box" id="photoUploadBox">
+                        <div class="upload-icon">📷</div>
+                        <p>اضغط لرفع صورة</p>
+                    </div>
+                    <input type="file" id="photoInput" accept="image/*" hidden>
+                </div>
+
+                <div class="photo-timeline">
+                    <h3>📅 الجدول الزمني</h3>
+                    <div id="photoTimeline" class="timeline"></div>
+                </div>
+            </section>
+
+            <!-- المقالات -->
+            <section id="articles" class="section">
+                <h2>📚 المقالات والتعليمات</h2>
+
+                <div class="articles-categories">
+                    <button class="article-cat active" data-cat="all">الكل</button>
+                    <button class="article-cat" data-cat="nutrition">🥗 تغذية</button>
+                    <button class="article-cat" data-cat="workout">💪 تمارين</button>
+                    <button class="article-cat" data-cat="health">🏥 صحة</button>
+                </div>
+
+                <div id="articlesList" class="articles-grid"></div>
+            </section>
+
+            <!-- GPS -->
+            <section id="gps" class="section">
+                <h2>🗺️ تتبع مسارات التدريب</h2>
+
+                <div class="gps-controls">
+                    <button id="startTrackingBtn" class="save-btn">▶️ بدء التتبع</button>
+                    <button id="stopTrackingBtn" class="close-btn" style="display:none;">⏹️ إيقاف</button>
+                </div>
+
+                <div class="gps-stats">
+                    <div class="stat-box">
+                        <span>📏 المسافة</span>
+                        <strong id="gpsDistance">0.00 كم</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span>⏱️ الوقت</span>
+                        <strong id="gpsTime">00:00:00</strong>
+                    </div>
+                    <div class="stat-box">
+                        <span>🔥 السعرات</span>
+                        <strong id="gpsCalories">0</strong>
+                    </div>
+                </div>
+
+                <div class="saved-routes">
+                    <h3>📍 المسارات المحفوظة</h3>
+                    <div id="savedRoutesList"></div>
+                </div>
+            </section>
+
+            <!-- الملف الشخصي -->
+            <section id="profile" class="section">
+                <h2>👤 الملف الشخصي</h2>
+
+                <form id="profileForm" class="profile-form">
+                    <div class="form-group">
+                        <label>الاسم</label>
+                        <input type="text" id="userName" placeholder="أدخل اسمك">
+                    </div>
+                    <div class="form-group">
+                        <label>العمر</label>
+                        <input type="number" id="userAge" placeholder="العمر">
+                    </div>
+                    <div class="form-group">
+                        <label>الطول (سم)</label>
+                        <input type="number" id="userHeight" placeholder="الطول">
+                    </div>
+                    <div class="form-group">
+                        <label>الوزن (كجم)</label>
+                        <input type="number" id="userWeight" placeholder="الوزن">
+                    </div>
+                    <button type="submit" class="save-btn">حفظ البيانات</button>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>

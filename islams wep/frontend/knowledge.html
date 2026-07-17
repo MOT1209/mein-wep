@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المستكشف المعرفي - نور الهدى</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-wrapper {
+            padding: 120px 20px 60px;
+            min-height: 100vh;
+        }
+
+        .topic-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .knowledge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .entity-card {
+            padding: 20px;
+            border-top: 4px solid var(--primary-color);
+        }
+
+        .entity-type-tag {
+            font-size: 0.8rem;
+            background: var(--primary-light);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="glass-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fa-solid fa-mosque"></i> نور الهدى</a>
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search" placeholder="ابحث في المستكشف المعرفي...">
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="quran.html">القرآن الكريم</a></li>
+                    <li><a href="hadith.html">الأحاديث النبوية</a></li>
+                    <li><a href="knowledge.html" class="active">المستكشف</a></li>
+                    <li><a href="zakat.html">الزكاة</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+        </div>
+    </header>
+
+    <main class="container page-wrapper">
+        <div id="topic-view" class="topic-header">
+            <h1 id="topic-name" class="section-title">المستكشف المعرفي</h1>
+            <p id="topic-desc">اختر موضوعاً لاستكشاف الروابط بين الآيات والأحاديث والأحكام</p>
+        </div>
+
+        <div id="knowledge-results" class="knowledge-grid">
+            <!-- النتائج ستظهر هنا -->
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        const API_URL = window.API_BASE_URL || '/api';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const topic = urlParams.get('topic');
+            const searchQuery = urlParams.get('search');
+
+            if (topic) {
+                loadTopicData(topic);
+            } else if (searchQuery) {
+                performKnowledgeSearch(searchQuery);
+            }
+        });
+
+        async function performKnowledgeSearch(query) {
+            document.getElementById('topic-name').innerText = `نتائج البحث عن: ${query}`;
+            const results = document.getElementById('knowledge-results');
+            results.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري البحث في المعرفة...';
+
+            try {
+                const response = await fetch(`${API_URL}/knowledge/topic/${encodeURIComponent(query)}`);
+                const data = await response.json();
+
+                if (data.length === 0) {
+                    results.innerHTML = `
+                        <div class="glass-panel" style="padding:40px; text-align:center; grid-column: 1/-1;">
+                            <i class="fa-solid fa-magnifying-glass-chart" style="font-size:3rem; color:var(--text-muted); margin-bottom:20px;"></i>
+                            <h3>عذراً، لم نجد محتوى مطابقاً تماماً لـ "${query}"</h3>
+                            <p>جرب ابحث عن كلمات مثل: الصبر، الزكاة، العلم.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                renderResults(data);
+            } catch (err) {
+                results.innerHTML = '<p style="color:red;">خطأ في الاتصال بالسيرفر.</p>';
+            }
+        }
+
+        async function loadTopicData(topicName) {
+            document.getElementById('topic-name').innerText = topicName;
+            const results = document.getElementById('knowledge-results');
+            results.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري جلب البيانات...';
+
+            try {
+                const response = await fetch(`${API_URL}/knowledge/topic/${encodeURIComponent(topicName)}`);
+                const data = await response.json();
+                renderResults(data);
+            } catch (err) {
+                results.innerHTML = '<p style="color:red;">خطأ في الاتصال بالسيرفر.</p>';
+            }
+        }
+
+        function renderResults(data) {
+            const results = document.getElementById('knowledge-results');
+            if (data.length === 0) {
+                results.innerHTML = '<p>لا توجد بيانات مرتبطة بهذا الموضوع حالياً.</p>';
+                return;
+            }
+
+            results.innerHTML = data.map(item => `
+                <div class="glass-panel entity-card">
+                    <span class="entity-type-tag">${item.type.name === 'ayah' ? 'آية قرآنية' : item.type.name === 'hadith' ? 'الحديث الشريف' : 'مقال'}</span>
+                    <p>رقم الكيان بداخل القسم: ${item.entity_id}</p>
+                    <p style="margin-bottom:15px;">قوة الصلة بهذا السياق: <strong>${item.relevance_score}/10</strong></p>
+                    <button class="btn btn-primary" style="width:100%; justify-content:center; font-size:0.9rem;">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> عرض التفاصيل الكاملة
+                    </button>
+                </div>
+            `).join('');
+        }
+    </script>
+</body>
+
+</html>

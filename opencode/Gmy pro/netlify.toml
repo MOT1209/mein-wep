@@ -1,0 +1,72 @@
+[build]
+  publish = "."
+  
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Content-Security-Policy = "default-src 'self' https://api.openai.com https://cdn.jsdelivr.net; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.openai.com;"
+    
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+  
+[[redirects]]
+  from = "/home"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/food"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/water"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/workout"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/vitals"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/stress"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/dashboard"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/progress-photos"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/articles"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/gps"
+  to = "/index.html"
+  status = 200
+  
+[[redirects]]
+  from = "/profile"
+  to = "/index.html"
+  status = 200

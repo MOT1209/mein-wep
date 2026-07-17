@@ -1,0 +1,161 @@
+/* إعدادات عامة */
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Tajawal', sans-serif;
+    /* خلفية متدرجة جميلة */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+    position: relative;
+    overflow: hidden;
+}
+
+/* إضافة خلفية ديكورية */
+body::before {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 50px 50px;
+    animation: backgroundMove 60s linear infinite;
+}
+
+@keyframes backgroundMove {
+    from { transform: translate(0, 0); }
+    to { transform: translate(50px, 50px); }
+}
+
+
+/* حاوية المحول بتأثير الزجاج الضبابي */
+.converter {
+    background-color: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(15px);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    z-index: 1;
+}
+
+h1 {
+    margin-bottom: 5px;
+    color: #4a148c;
+    font-weight: 700;
+    font-size: 2.2rem;
+}
+
+#date-display {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 25px;
+}
+
+/* تنظيم الحقول في صف */
+.input-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    flex: 1;
+    text-align: right;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+}
+
+input[type="number"],
+select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+}
+
+input[type="number"]:focus,
+select:focus {
+    outline: none;
+    border-color: #7b1fa2;
+    box-shadow: 0 0 0 3px rgba(123, 31, 162, 0.2);
+}
+
+/* أيقونة التبديل */
+.swap-icon {
+    font-size: 24px;
+    color: #7b1fa2;
+    margin: 5px 0 15px;
+    cursor: pointer;
+    transition: transform 0.4s ease;
+}
+
+.swap-icon:hover {
+    transform: rotate(180deg);
+}
+
+/* زر التحويل */
+#convert-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(45deg, #8e24aa, #d81b60);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    box-shadow: 0 5px 15px rgba(216, 27, 96, 0.3);
+}
+
+#convert-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 7px 20px rgba(216, 27, 96, 0.4);
+}
+
+#convert-btn:active {
+    transform: translateY(0);
+}
+
+/* منطقة عرض النتيجة */
+.result {
+    margin-top: 25px;
+    padding: 25px;
+    background: linear-gradient(45deg, #43a047, #66bb6a);
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: 700;
+    color: white;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+    transition: all 0.3s ease;
+}
+
+.result .result-text {
+    color: rgba(255, 255, 255, 0.9);
+}
+

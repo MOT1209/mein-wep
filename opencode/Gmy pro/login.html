@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل دخول - المدرب الذكي Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #10b981;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.9);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(12px);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        p.subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+        }
+        
+        .form-group { margin-bottom: 20px; }
+        
+        label {
+            display: block;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        button {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+        
+        .success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--secondary);
+            color: var(--secondary);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            text-align: center;
+        }
+        
+        .link {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+        }
+        
+        .link a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        .link a:hover {
+            text-decoration: underline;
+        }
+        
+        .guest-btn {
+            background: transparent;
+            border: 1px dashed var(--text-muted);
+            color: var(--text-muted);
+            margin-top: 15px;
+        }
+        
+        .guest-btn:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+            background: rgba(16, 185, 129, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏋️ المدرب الذكي Pro</h1>
+        <p class="subtitle">تسجيل دخول</p>
+        
+        <div id="error" class="error"></div>
+        
+        <form id="loginForm">
+            <div class="form-group">
+                <label>📧 البريد الإلكتروني</label>
+                <input type="email" id="email" placeholder="بريدك@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label>🔑 كلمة المرور</label>
+                <input type="password" id="password" placeholder="كلمة المرور" required>
+            </div>
+            
+            <button type="submit" id="submitBtn">دخول</button>
+        </form>
+        
+        <button class="guest-btn" id="guestBtn">دخول كضيف (بدون تسجيل)</button>
+        
+        <p class="link">
+            ليس لديك حساب؟ <a href="register.html">إنشاء حساب</a>
+        </p>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Supabase config
+        const supabaseUrl = 'https://ilopoevhgkgepumjsmid.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imlsb3BvZXZoZ2tnZXB1bWpzbWlkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NjQ5NDAsImV4cCI6MjA4NDE0MDk0MH0.LnJN5o9MqSLodN1PXwRLIBuDWUiZ-9rGb1CLdz3fdt8';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        const form = document.getElementById('loginForm');
+        const errorEl = document.getElementById('error');
+        const submitBtn = document.getElementById('submitBtn');
+        const guestBtn = document.getElementById('guestBtn');
+        
+        // Login form
+        form.onsubmit = async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'جاري تسجيل الدخول...';
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                // جلب بيانات الملف الشخصي
+                let userName = email.split('@')[0];
+                const { data: profile } = await supabase
+                    .from('profile')
+                    .select('name')
+                    .eq('user_id', data.user.id)
+                    .single();
+                
+                if (profile && profile.name) {
+                    userName = profile.name;
+                }
+                
+                // حفظ البيانات محلياً
+                localStorage.setItem('userData', JSON.stringify({
+                    id: data.user.id,
+                    email: data.user.email,
+                    name: userName
+                }));
+                
+                // الانتقال للصفحة الرئيسية
+                window.location.href = 'index.html';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                
+                if (error.message.includes('Invalid login credentials')) {
+                    showError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+                } else if (error.message.includes('Email not confirmed')) {
+                    showError('يرجى التحقق من بريدك الإلكتروني للتفعيل');
+                } else {
+                    showError(error.message || 'حدث خطأ ما');
+                }
+            }
+            
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'دخول';
+        };
+        
+        // Guest login
+        guestBtn.onclick = () => {
+            window.location.href = 'index.html';
+        };
+        
+        function showError(msg) {
+            errorEl.textContent = msg;
+            errorEl.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسماء الله الحسنى - نور الهدى</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .page-wrapper {
+            padding: 120px 20px 60px;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .names-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .name-card {
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .name-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--secondary-color);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .name-ar {
+            font-size: 3rem;
+            color: var(--secondary-color);
+            font-family: 'Amiri', serif;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .name-meaning {
+            font-size: 1.1rem;
+            color: var(--text-main);
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .name-evidence {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        /* Detail View Modal */
+        .name-detail-modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .name-detail-modal.active {
+            display: flex;
+        }
+
+        .name-detail-content {
+            width: 90%;
+            max-width: 700px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .detail-name {
+            font-size: 4rem;
+            color: var(--secondary-color);
+            font-family: 'Amiri', serif;
+            margin-bottom: 20px;
+        }
+
+        .detail-meaning {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            line-height: 1.8;
+        }
+
+        .detail-evidence {
+            background: rgba(11, 122, 117, 0.1);
+            padding: 20px;
+            border-radius: var(--radius-md);
+            border-left: 4px solid var(--primary-color);
+            text-align: right;
+            font-family: 'Amiri', serif;
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .close-detail {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 2rem;
+            color: var(--text-main);
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="glass-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fa-solid fa-mosque"></i> نور الهدى</a>
+
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search" placeholder="ابحث في الأسماء والمعاني...">
+            </div>
+
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="quran.html">القرآن الكريم</a></li>
+                    <li><a href="hadith.html">الأحاديث النبوية</a></li>
+                    <li><a href="prayer.html">مواقيت الصلاة</a></li>
+                    <li><a href="azkar.html">الأذكار</a></li>
+                    <li><a href="articles.html">المقالات</a></li>
+                    <li><a href="zakat.html">الزكاة</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="menu-toggle" id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container page-wrapper">
+        <section class="names-header">
+            <h1 class="section-title">أسماء الله الحسنى</h1>
+            <p class="section-subtitle">"وَلِلَّهِ الْأَسْمَاءُ الْحُسْنَى فَادْعُوهُ بِهَا"</p>
+
+            <div class="search-container">
+                <input type="text" id="name-search" class="form-input" placeholder="ابحث عن اسم أو معنى..."
+                    oninput="filterNames()">
+            </div>
+        </section>
+
+        <div id="names-grid" class="names-grid">
+            <!-- سيتم إضافة الأسماء هنا -->
+            <div class="loader"><i class="fa-solid fa-spinner fa-spin"></i> جاري تحميل الأسماء...</div>
+        </div>
+    </main>
+
+    <!-- مودال التفاصيل -->
+    <div id="name-modal" class="name-detail-modal">
+        <div class="name-detail-content glass-panel">
+            <span class="close-detail" onclick="closeNameModal()">&times;</span>
+            <div id="detail-name" class="detail-name"></div>
+            <div id="detail-meaning" class="detail-meaning"></div>
+            <div id="detail-evidence" class="detail-evidence"></div>
+            <div class="knowledge-link" id="name-knowledge-link">
+                <!-- رابط للمقالات المتعلقة -->
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script src="names.js"></script>
+    <!-- Global Search Overlay -->
+    <div id="search-overlay" class="search-overlay">
+        <button class="close-search-overlay" onclick="toggleSearchOverlay()">&times;</button>
+        <div class="search-modal-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magic"></i>
+                <input type="text" id="overlay-search-input" placeholder="اكتب للبحث في القرآن والسنة..."
+                    autocomplete="off">
+            </div>
+            <div id="search-results" class="search-results-area">
+                <div style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    <i class="fa-solid fa-keyboard" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    ابدأ الكتابة للبحث الشامل...
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

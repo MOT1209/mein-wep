@@ -1,0 +1,31 @@
+# Environment variables
+.env
+.env.local
+
+# Build files
+.next
+dist
+out
+
+# Dependencies
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE
+.vscode
+.idea
+
+# Netlify
+.netlify/
+
+# TypeScript
+*.tsbuildinfo
+nul
+pnpm-lock.yaml
+pnpm-workspace.yaml

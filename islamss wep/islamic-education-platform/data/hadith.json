@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "topic": "Intention",
+    "arabic_text": "إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ",
+    "english_translation": "Actions are but by intentions.",
+    "authenticity_grade": "Sahih (Authentic)",
+    "source_reference": "Sahih al-Bukhari 1"
+  },
+  {
+    "id": "2",
+    "topic": "Faith",
+    "arabic_text": "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ",
+    "english_translation": "A Muslim is the one from whose tongue and hands the Muslims are safe.",
+    "authenticity_grade": "Sahih (Authentic)",
+    "source_reference": "Sahih al-Bukhari 10"
+  },
+  {
+    "id": "3",
+    "topic": "Good Character",
+    "arabic_text": "أَكْمَلُ الْمُؤْمِنِينَ إِيمَانًا أَحْسَنُهُمْ خُلُقًا",
+    "english_translation": "The most perfect of believers in faith are those with the best character.",
+    "authenticity_grade": "Hasan (Good)",
+    "source_reference": "Sunan Abi Dawud 4682"
+  },
+  {
+    "id": "4",
+    "topic": "Knowledge",
+    "arabic_text": "طَلَبُ الْعِلْمِ فَرِيضَةٌ عَلَى كُلِّ مُسْلِمٍ",
+    "english_translation": "Seeking knowledge is an obligation upon every Muslim.",
+    "authenticity_grade": "Hasan (Good)",
+    "source_reference": "Sunan Ibn Majah 224"
+  },
+  {
+    "id": "5",
+    "topic": "Charity",
+    "arabic_text": "تَبَسُّمُكَ فِي وَجْهِ أَخِيكَ لَكَ صَدَقَةٌ",
+    "english_translation": "Your smile for your brother is charity.",
+    "authenticity_grade": "Sahih (Authentic)",
+    "source_reference": "Jami` at-Tirmidhi 1956"
+  }
+]

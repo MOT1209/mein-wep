@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>تذكير - تطبيق إدارة يومك</title>
+
+    <!-- Google Font Tajawal (RTL-friendly Arabic font) -->
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet" />
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --card: #ffffff;
+        --text: #1f2a37;
+        --muted: #5f6b79;
+        --primary: #4e8cff;
+        --green: #2ecc71;
+        --red: #e74c3c;
+        --shadow: 0 6px 18px rgba(0,0,0,.08);
+        --border: rgba(0,0,0,.08);
+      }
+      [data-theme="dark"] {
+        --bg: #0f111a;
+        --card: #141923;
+        --text: #eaf0f7;
+        --muted: #aab3c1;
+        --shadow: 0 6px 18px rgba(0,0,0,.5);
+        --border: rgba(255,255,255,.08);
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0; font-family: Tajawal, system-ui, Arial;
+        background: var(--bg); color: var(--text);
+        display: flex; min-height: 100%; direction: rtl;
+      }
+      /* Sidebar */
+      .sidebar {
+        width: 260px; background: var(--card); border-left: 1px solid var(--border);
+        padding: 16px; position: fixed; top: 0; bottom: 0; overflow: auto;
+        box-shadow: var(--shadow);
+      }
+      .sidebar h2 { font-size: 16px; margin: 8px 0 12px; color: var(--muted); }
+      .nav {
+        display: grid; gap: 6px;
+      }
+      .nav button {
+        text-align: right; padding: 12px 12px; border-radius: 8px; border: 1px solid var(--border);
+        background: #fff; cursor: pointer; font-size: 14px; color: #333;
+      }
+      .nav button.active { background: #eef4ff; border-color: #cfe0ff; }
+      /* Main content */
+      .main {
+        margin-right: 260px; padding: 20px; flex: 1;
+        width: calc(100% - 260px);
+      }
+      header.brand { display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 16px; position: sticky; top: 0; background: var(--bg); z-index: 10; }
+      .card {
+        background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; box-shadow: var(--shadow);
+        margin-bottom: 14px;
+      }
+      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      @media (max-width: 1000px) {
+        .sidebar { position: relative; width: 100%; height: auto; border-left: none; box-shadow: none; }
+        .main { margin-right: 0; width: 100%; }
+        .grid { grid-template-columns: 1fr; }
+      }
+      h1 { font-size: 20px; margin: 0 0 8px; }
+      #calendar { max-width: 100%; }
+      #map { height: 320px; width: 100%; }
+      .section-title { display:flex; justify-content: space-between; align-items:center; margin-bottom:8px; }
+      .badge { padding: 4px 8px; border-radius: 999px; font-size: 12px; color: #fff; }
+      .badge.alarm { background: var(--red); }
+      .badge.prayer { background: var(--primary); }
+      .toast { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); background:#323232; color:white; padding: 10px 14px; border-radius: 8px; z-index: 999; }
+      /* Minimal modal */
+      .modal { display:none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,.5); align-items: center; justify-content: center; }
+      .modal-content { background: #fff; color:#000; padding: 20px; border-radius: 8px; max-width: 420px; width: 90%; }
+      .btn { cursor: pointer; padding: 8px 12px; border-radius: 6px; border: 1px solid #ccc; background:#eee; }
+      .btn.primary { background: var(--primary); color:white; border: none; }
+      .section { display:none; }
+      .section.active { display:block; }
+    </style>
+  </head>
+  <body>
+    <aside class="sidebar" aria-label="قائمة التنقل">
+      <div style="text-align:center; padding:6px 0 12px; border-bottom:1px solid var(--border);">
+        <i class="fa-solid fa-bell" style="font-size:28px; color:var(--primary);"></i>
+        <div style="font-size:14px; margin-top:6px;">تذكير</div>
+      </div>
+      <nav class="nav" id="nav">
+        <button data-section="calendar" class="active">التقويم</button>
+        <button data-section="assistant">المساعد الصوتي</button>
+        <button data-section="alarms">التنبيهات</button>
+        <button data-section="todo">قائمة المهام</button>
+        <button data-section="prayer">أوقات الصلاة</button>
+        <button data-section="map">الخريطة</button>
+        <button data-section="stats">الإحصاءات</button>
+        <button data-section="settings">الإعدادات</button>
+      </nav>
+      <div style="margin-top:14px; text-align:center; font-size:12px; color:var(--muted);">
+        تم التطوير محلياً - لا حاجة لخادم
+      </div>
+    </aside>
+
+    <main class="main" role="main">
+      <header class="brand" aria-label="شريط العناوين">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="fas fa-calendar-alt" aria-hidden="true"></span>
+          <h1 style="margin:0; font-size:18px;">تذكير - تطبيق الإنتاجية</h1>
+        </div>
+        <div>
+          <button id="themeToggle" class="btn" title="تبديل الوضع">🌗 وضع</button>
+          <button id="notifyBtn" class="btn" title="طلب إذن الإشعارات">إشعارات</button>
+        </div>
+      </header>
+
+      <!-- Calendar Card -->
+      <section class="card section active" id="calendarSection">
+        <div class="section-title"><strong>التقويم</strong><span class="badge" id="calendarCount">0Events</span></div>
+        <div id="calendar"></div>
+      </section>
+
+      <!-- Assistant Card -->
+      <section class="card section" id="assistantSection">
+        <div class="section-title"><strong>المساعد الصوتي</strong><span class="badge" id="listeningState">غير مستمع</span></div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="startListening" class="btn primary"><i class="fa-solid fa-microphone"></i> ابدأ الاستماع</button>
+          <button id="sendText" class="btn">إرسال نص تلقائي</button>
+        </div>
+        <div id="assistantLog" class="card" style="margin-top:8px; min-height:80px; background:#f9f9f9; border:1px dashed #ccc; padding:8px;">
+          <div style="color:var(--muted);">معنى الأوامر سيظهر هنا</div>
+        </div>
+      </section>
+
+      <!-- Alarms Card -->
+      <section class="card section" id="alarmsSection">
+        <div class="section-title"><strong>التنبيهات المتقدمة</strong><span class="badge" id="activeAlarmsCount">0</span></div>
+        <div id="alarmsList" style="max-height:260px; overflow:auto; padding-right:6px;"></div>
+        <div style="margin-top:8px; display:flex; gap:8px;">
+          <button id="addDemoAlarm" class="btn">إضافة تنبيه تجريبي</button>
+          <button id="clearAlarms" class="btn">مسح الكل</button>
+        </div>
+      </section>
+
+      <!-- To-Do Card -->
+      <section class="card section" id="todoSection">
+        <div class="section-title"><strong>قائمة المهام</strong><span class="badge" id="todoRemaining">0 مهمة</span></div>
+        <div style="display:flex; gap:6px; align-items:center;">
+          <input id="newTodo" placeholder="أضف مهمة جديدة" style="flex:1; padding:8px; border-radius:6px; border:1px solid var(--border);" />
+          <button id="addTodo" class="btn primary">إضافة</button>
+        </div>
+        <ul id="todoList" style="list-style:none; padding:6px; margin:6px 0 0; display:flex; flex-direction:column; gap:6px;">
+        </ul>
+      </section>
+
+      <!-- Prayer Times Card -->
+      <section class="card section" id="prayerSection">
+        <div class="section-title"><strong>أوقات الصلاة</strong><span class="badge" id="nextPrayer">قادمة</span></div>
+        <div id="prayerTimes" style="display:flex; flex-direction:column; gap:6px; max-width:400px;">
+          <div class="card" style="display:flex; justify-content:space-between; padding:8px; align-items:center;">
+            <span>الفجر</span><span id="fajr">--:--</span>
+          </div>
+          <div class="card" style="display:flex; justify-content:space-between; padding:8px; align-items:center;">
+            <span>الظهر</span><span id="dhuhr">--:--</span>
+          </div>
+          <div class="card" style="display:flex; justify-content:space-between; padding:8px; align-items:center;">
+            <span>العصر</span><span id="asr">--:--</span>
+          </div>
+          <div class="card" style="display:flex; justify-content:space-between; padding:8px; align-items:center;">
+            <span>المغرب</span><span id="maghrib">--:--</span>
+          </div>
+          <div class="card" style="display:flex; justify-content:space-between; padding:8px; align-items:center;">
+            <span>العشاء</span><span id="isha">--:--</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Map Card -->
+      <section class="card section" id="mapSection">
+        <div class="section-title"><strong>الخريطة والمساجد</strong><span class="badge" id="favMosqueLabel">المسجد المفضل</span></div>
+        <div id="map" style="height:320px; width:100%;"></div>
+      </section>
+
+      <!-- Stats Card -->
+      <section class="card section" id="statsSection">
+        <div class="section-title"><strong>الإحصاءات</strong></div>
+        <div class="grid" style="gap:12px;">
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>التنبيهات النشطة</span><span id="statsAlarms">0</span>
+          </div>
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>المهام المتبقية</span><span id="statsTodos">0</span>
+          </div>
+          <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
+            <span>الوقت القادم للصلاة</span><span id="statsNextPrayerTime">--:--</span>
+          </div>
+          <div class="card" style="display:flex; justify-content-between; align-items:center;">
+            <span>الموقع</span><span id="statsLocation">غير محدد</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Settings Card -->
+      <section class="card section" id="settingsSection">
+        <div class="section-title"><strong>الإعدادات</strong></div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <label>الوضع الداكن</label>
+          <input type="checkbox" id="toggleDark" />
+        </div>
+        <div style="margin-top:12px; padding-top:8px; border-top:1px dashed var(--border);">
+          <div style="font-size:12px; color:var(--muted); margin-bottom:6px;">التصدير/الاستيراد للبيانات المحلية</div>
+          <button id="exportData" class="btn primary">تصدير البيانات</button>
+          <button id="importData" class="btn" style="margin-right:8px;">استيراد البيانات</button>
+          <input id="importFile" type="file" accept="application/json" style="display:none" />
+        </div>
+      </section>
+    </main>
+
+    <!-- Modals & Toasts -->
+    <div id="toast" class="toast" style="display:none;"></div>
+
+    <div id="alarmModal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <h3>تنبيه جديد</h3>
+        <div id="alarmModalBody"></div>
+        <div style="margin-top:8px; text-align:right;">
+          <button class="btn" onclick="closeModal()">إغلاق</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scripts: CDN libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/daygrid/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/timegrid/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/interaction/main.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+      // Global state keys
+      const STORAGE = {
+        EVENTS: 'calendar_events',
+        TODOS: 'todo_list',
+        LOCATION: 'location_data',
+        FAV_MOSQUE: 'favorite_mosque',
+        THEME: 'theme_pref',
+        ALARMS: 'alarms',
+        PRAY_TIMES: 'prayer_times_cache'
+      };
+
+      // Theme handling
+      const applyTheme = (mode) => {
+        document.documentElement.setAttribute('data-theme', mode === 'dark' ? 'dark' : 'light');
+      };
+      const loadTheme = () => {
+        const t = localStorage.getItem(STORAGE.THEME) || 'light';
+        applyTheme(t);
+        document.getElementById('toggleDark').checked = t === 'dark';
+      };
+
+      // Helpers
+      const showToast = (msg) => {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.style.display = 'block';
+        setTimeout(() => t.style.display = 'none', 2500);
+      };
+
+      // Calendar persistence
+      let calendar;
+      const loadEvents = () => {
+        try {
+          const raw = localStorage.getItem(STORAGE.EVENTS);
+          return raw ? JSON.parse(raw) : [];
+        } catch {
+          return [];
+        }
+      };
+      const saveEvents = (evs) => localStorage.setItem(STORAGE.EVENTS, JSON.stringify(evs));
+
+      // Alarm persistence
+      const loadAlarms = () => {
+        try { const raw = localStorage.getItem(STORAGE.ALARMS); return raw ? JSON.parse(raw) : []; } catch { return []; }
+      };
+      const saveAlarms = (ars) => localStorage.setItem(STORAGE.ALARMS, JSON.stringify(ars));
+
+      // Todo persistence
+      const loadTodos = () => {
+        try { const raw = localStorage.getItem(STORAGE.TODOS); return raw ? JSON.parse(raw) : []; } catch { return []; }
+      };
+      const saveTodos = (tds) => localStorage.setItem(STORAGE.TODOS, JSON.stringify(tds));
+
+      // Location persistence
+      const loadLocation = () => {
+        try { const raw = localStorage.getItem(STORAGE.LOCATION); return raw ? JSON.parse(raw) : null; } catch { return null; }
+      };
+      const saveLocation = (loc) => localStorage.setItem(STORAGE.LOCATION, JSON.stringify(loc));
+
+      // Mosque persistence
+      const loadFavoriteMosque = () => {
+        try { const raw = localStorage.getItem(STORAGE.FAV_MOSQUE); return raw ? JSON.parse(raw) : null; } catch { return null; }
+      };
+      const saveFavoriteMosque = (m) => localStorage.setItem(STORAGE.FAV_MOSQUE, JSON.stringify(m));
+
+      // Initialize UI components
+      const initCalendar = () => {
+        const events = loadEvents();
+        const calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+          initialView: 'dayGridMonth',
+          headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek'
+          },
+          dateClick: function(info) {
+            const title = prompt('أدخل عنوان الحدث:');
+            if (!title) return;
+            const type = prompt('نوع الحدث: alarm | prayer | general', 'general');
+            const color = type === 'alarm' ? '#e74c3c' : type === 'prayer' ? '#3498db' : '#2ecc71';
+            const ev = {
+              id: 'ev_' + Date.now(),
+              title,
+              start: info.dateStr,
+              end: null,
+              color,
+              type,
+              notes: ''
+            };
+            events.push(ev);
+            calendar.addEvent(ev);
+            saveEvents(events);
+            updateCalendarCount();
+            showToast('تم حفظ الحدث بنجاح');
+          },
+          eventClick: function(info) {
+            if (confirm('حذف الحدث؟')) {
+              const evs = loadEvents();
+              const idx = evs.findIndex(e => e.id === info.event.id);
+              if (idx > -1) { evs.splice(idx,1); saveEvents(evs); }
+              info.event.remove();
+              updateCalendarCount();
+              showToast('تم حذف الحدث');
+            }
+          },
+          events: events
+        });
+        calendar.render();
+        updateCalendarCount();
+      };
+
+      const updateCalendarCount = () => {
+        const evs = loadEvents();
+        const count = evs.length;
+        document.getElementById('calendarCount').textContent = count + ' حدث';
+      };
+
+      // Assistant: Speech
+      let recognition;
+      // Assistant: lightweight natural language helpers for extraction
+      const extractTimeFromText = (txt) => {
+        // Look for patterns like 5:30 صباحاً / 5:30 pm / 5 مساء
+        const m1 = txt.match(/(\d{1,2})[:.](\d{2})\s*(صباحاً|صباح|مساءً|مساء)?/i);
+        if (m1) {
+          let hour = parseInt(m1[1], 10);
+          let minute = parseInt(m1[2], 10);
+          const period = (m1[3] || '').toLowerCase();
+          let ampm = '';
+          if (period.includes('صباح')) ampm = 'AM';
+          if (period.includes('مساء')) ampm = 'PM';
+          return { hour, minute, ampm };
+        }
+        // Arabic digits support (١٢:٣٠)
+        const m2 = txt.match(/[٠-٩]{1,2}[:.][٠-٩]{2}/u);
+        if (m2) {
+          const parts = m2[0].split(/[:.]/);
+          const h = parseInt(parts[0].replace(/[٠-٩]/g, d => '0123456789'.charAt('٠١٢٣٤٥٦٧٨٩'.indexOf(d))), 10);
+          const mi = parseInt(parts[1].replace(/[٠-٩]/g, d => '0123456789'.charAt('٠١٢٣٤٥٦٧٨٩'.indexOf(d))), 10);
+          return { hour: h, minute: mi, ampm: '' };
+        }
+        return null;
+      };
+      const initSpeech = () => {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) { document.getElementById('assistantSection').querySelector('#startListening').disabled = true; return; }
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ar-SA';
+        recognition.continuous = false;
+        recognition.interimResults = false;
+        recognition.onresult = (e) => {
+          const text = e.results[0][0].transcript;
+          addLog('المُدخل: ' + text);
+          processCommand(text);
+        };
+        recognition.onerror = (e) => { showToast('لم يتم التعرف على الصوت'); };
+        document.getElementById('startListening').addEventListener('click', () => {
+          recognition.start();
+          document.getElementById('listeningState').textContent = 'استماع...';
+          setTimeout(() => { document.getElementById('listeningState').textContent = 'في الاستماع'; }, 2000);
+        });
+      };
+
+      const speak = (text) => {
+        if (!('speechSynthesis' in window)) return;
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = 'ar-SA';
+        window.speechSynthesis.speak(u);
+      };
+
+      const addLog = (txt) => {
+        const log = document.getElementById('assistantLog');
+        const div = document.createElement('div'); div.textContent = txt; log.appendChild(div);
+      };
+
+      const processCommand = (text) => {
+        const t = text.toLowerCase();
+        // 1) Handle alarm commands: نبهني الساعة 5:30 مساءً لأخذ الدواء يومياً
+        const timeFromText = extractTimeFromText(t);
+        const recurrenceFromText = (t.includes('يومياً') || t.includes('يومي') || t.includes('يوميه') || t.includes('يومياً')) ? 'daily' : (t.includes('أسبوعياً') ? 'weekly' : (t.includes('شهرياً') ? 'monthly' : 'once'));
+      const extractAlarmName = (src) => {
+          const parts = src.split('ل')[1];
+          if (!parts) return 'تنبيه';
+          return parts.split(' ').join(' ').trim();
+      };
+        const timeMatch = t.match(/(\d{1,2}):(\d{2})\s*(صباحاً|مساءً|صباح|مساء)?/);
+        if (t.includes('نبهني') || t.includes('انبهني')) {
+          if ((timeFromText) || (timeMatch)) {
+            const hour = timeFromText?.hour ?? parseInt(timeMatch[1],10);
+            const minute = timeFromText?.minute ?? parseInt(timeMatch[2],10);
+            const period = timeFromText?.ampm ?? (timeMatch[3] || '');
+            const ampm = (period && period.toUpperCase().startsWith('P')) ? 'PM' : (period && period.toUpperCase().startsWith('A')) ? 'AM' : '';
+            const name = extractAlarmName(t);
+            const alarm = {
+              id: 'alarm_' + Date.now(),
+              name: name || 'تنبيه',
+              hour,
+              minute,
+              ampm,
+              recurring: recurrenceFromText,
+              createdAt: new Date().toISOString()
+            };
+            let list = loadAlarms();
+            list.push(alarm);
+            saveAlarms(list);
+            renderAlarms();
+            showToast('تم إضافة التنبيه');
+            speak('تم حفظ التنبيه ' + alarm.name);
+            return;
+          }
+        }
+        // Additional command: stop all alarms
+        if (t.includes('إيقاف') && (t.includes('التنبيهات') || t.includes('التنبيه'))) {
+          saveAlarms([]);
+          renderAlarms();
+          showToast('تم إيقاف جميع التنبيهات');
+          speak('تم إيقاف جميع التنبيهات');
+          return;
+        }
+        // Show alarms list
+        if (t.includes('قائمة التنبيهات') || t.includes('عرض التنبيهات')) {
+          renderAlarms(); showToast('عرض قائمة التنبيهات'); speak('هذه قائمة التنبيهات'); return;
+        }
+        if (t.includes('أضف مهمة')) {
+          const task = text.replace(/.*أضف مهمة/i, '').trim();
+          if (task) {
+            let todos = loadTodos();
+            const tdoc = { id: 'todo_' + Date.now(), text: task, done: false, createdAt: new Date().toISOString() };
+            todos.push(tdoc);
+            saveTodos(todos);
+            renderTodos();
+            showToast('تم إضافة المهمة');
+            speak('تمت إضافة المهمة ' + task);
+          }
+          return;
+        }
+        if (t.includes('أوقات الصلاة')) {
+          fetchPrayerTimes().then(res => {
+            addLog('أوقات الصلاة محدثة');
+            speak('تم تحديث أوقات الصلاة حسب موقعك');
+          });
+          return;
+        }
+        // Open map quick command
+        if (t.includes('افتح الخريطة') || t.includes('افتح الخريطة')) {
+          showSection('map'); speak('جارٍ فتح الخريطة'); return;
+        }
+        // Open settings
+        if (t.includes('الإعدادات') || t.includes('إعدادات')) {
+          showSection('settings'); speak('فتح الإعدادات'); return;
+        }
+        if (t.includes('افتح الخريطة') || t.includes('افتح الخريطة')) {
+          showSection('map');
+          speak('جارٍ فتح الخريطة');
+          return;
+        }
+        if (t.includes('مرحبا') || t.includes('أهلاً')) {
+          const reply = 'مرحبا! كيف أساعدك اليوم؟';
+          addLog('المساعد: ' + reply);
+          speak(reply);
+          return;
+        }
+        // Default fallback (مختصر)
+        const reply = 'تم التنفيذ: ' + text;
+        addLog('المساعد: ' + reply);
+        speak(reply);
+      };
+
+      const closeModal = () => { document.getElementById('alarmModal').style.display = 'none'; };
+      // Alarm rendering
+      const renderAlarms = () => {
+        const el = document.getElementById('alarmsList'); el.innerHTML = '';
+        const list = loadAlarms();
+        list.forEach(a => {
+          const row = document.createElement('div'); row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.alignItems = 'center'; row.style.padding = '6px'; row.style.borderBottom = '1px solid #eee';
+          const name = document.createElement('span'); name.textContent = a.name + ' (' + (a.recurring || 'once') + ')';
+          const time = document.createElement('span'); time.textContent = (a.hour || 0).toString().padStart(2,'0') + ':' + (a.minute || 0).toString().padStart(2,'0');
+          const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'حذف'; btn.addEventListener('click', () => {
+            const arr = loadAlarms();
+            const idx = arr.findIndex(x => x.id === a.id); if (idx>-1) { arr.splice(idx,1); saveAlarms(arr); renderAlarms(); }
+          });
+          row.appendChild(name); row.appendChild(time); row.appendChild(btn);
+          el.appendChild(row);
+        });
+        document.getElementById('activeAlarmsCount').textContent = list.length;
+      };
+
+      const renderTodos = () => {
+        const ul = document.getElementById('todoList');
+        ul.innerHTML = '';
+        const tds = loadTodos();
+        tds.forEach(t => {
+          const li = document.createElement('li'); li.style.display = 'flex'; li.style.justifyContent = 'space-between'; li.style.alignItems = 'center'; li.style.padding = '6px'; li.style.border = '1px solid var(--border)'; li.style.borderRadius = '6px';
+          const span = document.createElement('span'); span.textContent = t.text; if (t.done) span.style.textDecoration = 'line-through';
+          const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!t.done; cb.addEventListener('change', () => {
+            t.done = cb.checked; saveTodos(tds); renderTodos(); updateTodoCount();
+          });
+          const del = document.createElement('button'); del.textContent = 'حذف'; del.className = 'btn'; del.style.marginLeft = '8px'; del.addEventListener('click', () => {
+            const arr = loadTodos(); const idx = arr.findIndex(x => x.id === t.id); if (idx>-1) { arr.splice(idx,1); saveTodos(arr); renderTodos(); updateTodoCount(); }
+          });
+          li.appendChild(cb); li.appendChild(span); li.appendChild(del);
+          ul.appendChild(li);
+        });
+      };
+      const updateTodoCount = () => {
+        const todos = loadTodos(); const rem = todos.filter(t => !t.done).length; document.getElementById('todoRemaining').textContent = rem + ' مهمة';
+      };
+
+      // Prayer times
+      const fetchPrayerTimes = async () => {
+        const loc = loadLocation();
+        if (!loc) { try { await locate(); } catch(e) { /* ignore */ } }
+        const g = loadLocation() || { lat: 0, lon: 0 };
+        const url = `https://api.aladhan.com/v1/timings?latitude=${g.lat}&longitude=${g.lon}&method=2`;
+        try {
+          const r = await fetch(url); const data = await r.json();
+          const timings = data.data.timings;
+          ['Fajr','Dhuhr','Asr','Maghrib','Isha'].forEach(k => {
+            const v = timings[k]; const el = document.getElementById(k.toLowerCase()); if (el) el.textContent = v; // display
+          });
+          // Next prayer
+          const now = new Date();
+          const order = ['Fajr','Dhuhr','Asr','Maghrib','Isha'];
+          let next = null;
+          for (const k of order) {
+            const t = timings[k]; // format HH:MM
+            const [h,m] = t.split(':').map(Number);
+            const pr = new Date(now); pr.setHours(h, m, 0, 0);
+            if (pr > now) { next = { name: k, time: pr.toTimeString().slice(0,5) }; break; }
+          }
+          const nextEl = document.getElementById('nextPrayer');
+          const nextStatEl = document.getElementById('statsNextPrayerTime');
+          const nextText = next ? next.name + ' ' + next.time : '--:--';
+          if (nextEl) nextEl.textContent = nextText;
+          if (nextStatEl) nextStatEl.textContent = nextText;
+          // Save cache
+          localStorage.setItem(STORAGE.PRAY_TIMES, JSON.stringify({ lat: g.lat, lon: g.lon, dateKey: new Date().toDateString(), timings }));
+          return timings;
+        } catch (err) {
+          console.error(err); showToast('خطأ في جلب أوقات الصلاة'); return null;
+        }
+      };
+      const locate = () => new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((p) => {
+            const lat = p.coords.latitude, lon = p.coords.longitude; const loc = { lat, lon, city: '', country: '' };
+            saveLocation(loc);
+            resolve(loc);
+          }, (err) => { reject(err); }, { enableHighAccuracy: true });
+        } else { reject(new Error('Geolocation not supported')); }
+      });
+
+      // Map: initialize and Overpass search
+      let mapInstance;
+      const initMap = () => {
+        mapInstance = L.map('map').setView([20,0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors'
+        }).addTo(mapInstance);
+        // locate user
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition((p) => {
+            const lat = p.coords.latitude, lon = p.coords.longitude; mapInstance.setView([lat, lon], 14);
+            L.marker([lat, lon]).addTo(mapInstance).bindPopup('الموقع الحالي').openPopup();
+            // search mosques nearby
+            searchMosques(lat, lon);
+            const loc = { lat, lon, city: '', country: '' };
+            saveLocation(loc);
+            renderStats();
+          }, () => { /* ignore */ });
+        }
+      };
+      const searchMosques = async (lat, lon) => {
+        const radius = 2000;
+        const url = `https://overpass-api.de/api/interpreter?data=[out:json];node["amenity"="mosque"](around:${radius},${lat},${lon});out;`;
+        try {
+          const r = await fetch(url);
+          const data = await r.json();
+          data.elements.forEach(e => {
+            if (e.lat && e.lon) {
+              const m = L.marker([e.lat, e.lon]).addTo(mapInstance);
+              m.bindPopup((e.tags && e.tags.name) || 'مسجد');
+              m.on('click', () => {
+                // set as favorite
+                const mosq = { id: 'mos_' + e.id, name: e.tags?.name || 'مسجد', lat: e.lat, lon: e.lon, address: e.tags?.address || '', updatedAt: new Date().toISOString() };
+                saveFavoriteMosque(mosq); renderStats(); document.getElementById('favMosqueLabel').textContent = mosq.name;
+              });
+            }
+          });
+        } catch (err) {
+          console.error(err); showToast('خطأ في البحث عن المساجد');
+        }
+      };
+      // Stats rendering helpers
+      const renderStats = () => {
+        const loc = loadLocation() || { lat: 0, lon: 0 };
+        document.getElementById('statsLocation').textContent = loc.lat ? (loc.lat.toFixed(4) + ', ' + loc.lon.toFixed(4)) : 'غير محدد';
+        const fav = loadFavoriteMosque();
+        if (fav) document.getElementById('favMosqueLabel').textContent = fav.name; else document.getElementById('favMosqueLabel').textContent = 'المسجد المفضل';
+      };
+
+      // Initialize everything on load
+      const showSection = (name) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelector('#'+name+'Section')?.classList.add('active');
+        // Update nav active state
+        document.querySelectorAll('#nav button').forEach(btn => btn.classList.remove('active'));
+        const btn = Array.from(document.querySelectorAll('#nav button')).find(b => b.dataset.section === name);
+        btn?.classList.add('active');
+      };
+
+      // Profile: click nav
+      document.querySelectorAll('#nav button').forEach(btn => {
+        btn.addEventListener('click', () => showSection(btn.dataset.section));
+      });
+
+        // 2) Quick actions for managing alarms from voice
+        if (t.includes('حذف التنبيه') || t.includes('إزالة التنبيه')) {
+          // delete the most recent alarm for simplicity
+          const alist = loadAlarms();
+          if (alist.length > 0) {
+            const removed = alist.pop();
+            saveAlarms(alist); renderAlarms(); showToast('تم حذف التنبيه الأخير'); speak('تم حذف التنبيه الأخير');
+          } else {
+            showToast('لا توجد تنبيهات للحذف'); speak('لا توجد تنبيهات للحذف');
+          }
+          return;
+        }
+        if (t.includes('عرض التنبيهات') || t.includes('قائمة التنبيهات')) {
+          renderAlarms(); showToast('عرض قائمة التنبيهات'); speak('هذه هي قائمة التنبيهات'); return;
+        }
+        // Add demo alarm
+      document.getElementById('addDemoAlarm').addEventListener('click', () => {
+        const list = loadAlarms();
+        const a = { id: 'alarm_' + Date.now(), name: 'تنبيه تجريبي', hour: 21, minute: 0, recurring: 'once' };
+        list.push(a); saveAlarms(list); renderAlarms(); showToast('تم إضافة تنبيه تجريبي');
+      });
+      document.getElementById('clearAlarms').addEventListener('click', () => {
+        saveAlarms([]); renderAlarms(); showToast('تم مسح التنبيهات');
+      });
+
+      // New Todo
+      document.getElementById('addTodo').addEventListener('click', () => {
+        const input = document.getElementById('newTodo'); const v = input.value.trim(); if (!v) return; const t = { id: 'todo_' + Date.now(), text: v, done: false, createdAt: new Date().toISOString() };
+        const arr = loadTodos(); arr.push(t); saveTodos(arr); input.value = ''; renderTodos(); updateTodoCount(); showToast('تم إضافة المهمة');
+      });
+      // initial renderers
+      loadTheme(); loadLocation();
+      initCalendar(); renderAlarms(); renderTodos(); initSpeech(); initMap(); fetchPrayerTimes(); renderStats();
+
+      // Theme toggle
+      document.getElementById('themeToggle').addEventListener('click', () => {
+        const current = localStorage.getItem(STORAGE.THEME) || 'light';
+        const next = current === 'dark' ? 'light' : 'dark';
+        localStorage.setItem(STORAGE.THEME, next); applyTheme(next);
+      });
+      document.getElementById('toggleDark').addEventListener('change', (e) => {
+        const mode = e.target.checked ? 'dark' : 'light'; localStorage.setItem(STORAGE.THEME, mode); applyTheme(mode);
+      });
+
+      // Notification permission
+      document.getElementById('notifyBtn').addEventListener('click', async () => {
+        if (!('Notification' in window)) { showToast('إشعارات غير مدعومة في هذا المتصفح'); return; }
+        if (Notification.permission === 'granted') {
+          showToast('تم منح الإذن سابقاً');
+        } else {
+          const p = await Notification.requestPermission();
+          showToast('إذن الإشعارات: ' + p);
+        }
+      });
+
+      // Helper: simple closing for modal
+      window.closeModal = closeModal;
+      function updateCalendarCounts() { updateCalendarCount(); }
+      function updateLocationAndStats() { renderStats(); }
+      function updatePrayerNext() { /* placeholder */ }
+      // (تم إزالة التكرار الزائد لآلية التنبيهات الصوتية في التحديث الأخير)
+
+      // Mapping module:
+      // Export/Import handlers
+      document.getElementById('exportData').addEventListener('click', () => {
+        const payload = {
+          events: loadEvents(),
+          todos: loadTodos(),
+          location: loadLocation(),
+          favoriteMosque: loadFavoriteMosque(),
+          theme: localStorage.getItem(STORAGE.THEME) || 'light',
+          alarms: loadAlarms(),
+          prayerTimesCache: JSON.parse(localStorage.getItem(STORAGE.PRAY_TIMES) || '{}')
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tadhkir_data.json'; a.click(); URL.revokeObjectURL(a.href);
+      });
+      document.getElementById('importData').addEventListener('click', () => {
+        document.getElementById('importFile').click();
+      });
+      document.getElementById('importFile').addEventListener('change', (e) => {
+        const f = e.target.files?.[0]; if (!f) return;
+        const reader = new FileReader(); reader.onload = () => {
+          try {
+            const obj = JSON.parse(reader.result);
+            if (obj.events) localStorage.setItem(STORAGE.EVENTS, JSON.stringify(obj.events));
+            if (obj.todos) localStorage.setItem(STORAGE.TODOS, JSON.stringify(obj.todos));
+            if (obj.location) localStorage.setItem(STORAGE.LOCATION, JSON.stringify(obj.location));
+            if (obj.favoriteMosque) localStorage.setItem(STORAGE.FAV_MOSQUE, JSON.stringify(obj.favoriteMosque));
+            if (obj.theme) localStorage.setItem(STORAGE.THEME, obj.theme);
+            if (obj.alarms) localStorage.setItem(STORAGE.ALARMS, JSON.stringify(obj.alarms));
+            if (obj.prayerTimesCache) localStorage.setItem(STORAGE.PRAY_TIMES, JSON.stringify(obj.prayerTimesCache));
+            showToast('البيانات مستوردة بنجاح');
+            // Simple refresh of UI
+            renderAlarms(); renderTodos(); renderStats(); location.reload();
+          } catch (err) {
+            showToast('فشل الاستيراد: بيانات غير صالحة');
+          }
+        }; reader.readAsText(f);
+      });
+    </script>
+  </body>
+  </html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مواقيت الصلاة - نور الهدى</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        .page-wrapper {
+            padding: 120px 20px 60px;
+            min-height: 100vh;
+            text-align: center;
+        }
+
+        .prayer-header {
+            margin-bottom: 40px;
+        }
+
+        .location-info {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .location-details {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .date-info {
+            color: var(--text-main);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .map-section {
+            margin: 40px 0;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            height: 500px;
+        }
+
+        #map {
+            height: 100%;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-glass);
+            z-index: 1;
+        }
+
+        .mosques-panel {
+            background: var(--bg-glass);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .mosques-header {
+            padding: 15px;
+            background: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .mosques-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+            text-align: right;
+        }
+
+        .mosque-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-glass);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .mosque-item:hover {
+            background: rgba(11, 122, 117, 0.1);
+        }
+
+        .mosque-item.favorite {
+            border-right: 4px solid var(--secondary-color);
+        }
+
+        .times-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .time-card {
+            padding: 30px 20px;
+            transition: transform 0.3s;
+        }
+
+        .time-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
+        }
+
+        .prayer-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--text-main);
+        }
+
+        .prayer-time {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            font-weight: 800;
+        }
+
+        .detect-btn {
+            margin-bottom: 15px;
+        }
+
+        /* New Countdown & Notification Styles */
+        .countdown-wrapper {
+            background: linear-gradient(135deg, rgba(11, 122, 117, 0.1), rgba(212, 175, 55, 0.1));
+            border-radius: var(--radius-lg);
+            padding: 25px;
+            margin: 20px auto 40px;
+            max-width: 600px;
+            border: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .countdown-label {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        #next-prayer-name {
+            color: var(--secondary-color);
+            font-weight: bold;
+        }
+
+        .countdown-timer {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+        }
+
+        .interaction-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .notification-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg-glass);
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--border-glass);
+            cursor: pointer;
+            transition: var(--transition-norm);
+        }
+
+        .notification-toggle:hover {
+            border-color: var(--secondary-color);
+        }
+
+        .notification-toggle span {
+            font-size: 0.95rem;
+            font-weight: bold;
+        }
+
+        .notification-toggle i {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .notification-toggle.active i {
+            color: var(--secondary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <header class="glass-header">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><i class="fa-solid fa-mosque"></i> نور الهدى</a>
+
+            <div class="header-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="global-search" placeholder="ابحث في المواقيت والأدلة...">
+            </div>
+
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.html">الرئيسية</a></li>
+                    <li><a href="quran.html">القرآن الكريم</a></li>
+                    <li><a href="hadith.html">الأحاديث النبوية</a></li>
+                    <li><a href="prayer.html" class="active">مواقيت الصلاة</a></li>
+                    <li><a href="azkar.html">الأذكار</a></li>
+                    <li><a href="articles.html">المقالات</a></li>
+                    <li><a href="names-of-allah.html">أسماء الله الحسنى</a></li>
+                    <li><a href="zakat.html">الزكاة</a></li>
+                </ul>
+            </nav>
+            <button class="theme-toggle" id="theme-toggle"><i class="fa-solid fa-moon"></i></button>
+            <button class="menu-toggle" id="menu-toggle"><i class="fa-solid fa-bars"></i></button>
+        </div>
+    </header>
+
+    <main class="container page-wrapper">
+        <div class="prayer-header">
+            <h2 class="section-title">مواقيت الصلاة حسب موقعك</h2>
+
+            <div class="interaction-controls">
+                <button class="btn btn-primary detect-btn" onclick="detectLocation()">
+                    <i class="fa-solid fa-location-crosshairs"></i> تحديد موقعي
+                </button>
+                <div id="notif-toggle" class="notification-toggle" onclick="toggleNotifications()">
+                    <i class="fa-solid fa-bell-slash"></i>
+                    <span>تنبيهات الأذان</span>
+                </div>
+            </div>
+
+            <div id="location-name" class="location-info">جاري تحديد الموقع...</div>
+            <div id="location-details" class="location-details"></div>
+
+            <div id="countdown-wrapper" class="countdown-wrapper" style="display: none;">
+                <div class="countdown-label">المتبقي لصلاة <span id="next-prayer-name">---</span>:</div>
+                <div id="countdown-timer" class="countdown-timer">00:00:00</div>
+            </div>
+
+            <div class="method-selector glass-panel" style="max-width: 400px; margin: 0 auto 20px; padding: 10px;">
+                <label for="calc-method" style="font-size: 0.9rem; margin-left: 10px;">طريقة الحساب:</label>
+                <select id="calc-method" class="form-input" style="width: auto; padding: 5px; display: inline-block;"
+                    onchange="handleMethodChange()">
+                    <option value="3" selected>رابطة العالم الإسلامي (أوروبا)</option>
+                    <option value="1">جامعة أم القرى، مكة</option>
+                    <option value="12">اتحاد المنظمات الإسلامية في فرنسا</option>
+                    <option value="13">رئاسة الشؤون الدينية التركية (ديانت)</option>
+                    <option value="14">المجلس الروحي لمسلمي روسيا</option>
+                    <option value="5">الهيئة المصرية العامة للمساحة</option>
+                    <option value="2">الجمعية الإسلامية لأمريكا الشمالية (ISNA)</option>
+                    <option value="4">جامعة العلوم الإسلامية، كراتشي</option>
+                    <option value="8">منطقة الخليج</option>
+                </select>
+            </div>
+
+            <div id="date-gregorian-hijri" class="date-info"></div>
+        </div>
+
+        <!-- قسم الخريطة التفاعلية -->
+        <div class="map-section container">
+            <div id="map"></div>
+            <div class="mosques-panel">
+                <div class="mosques-header">
+                    <i class="fa-solid fa-mosque"></i> المساجد القريبة (2 كم)
+                </div>
+                <div id="mosques-list" class="mosques-list">
+                    <div style="padding: 20px; color: var(--text-muted);">حرك الخريطة أو حدد موقعك للبحث عن المساجد...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loader" style="display: none; font-size: 1.5rem; color: var(--primary-color);">
+            <i class="fa-solid fa-spinner fa-spin"></i> جاري جلب المواقيت...
+        </div>
+
+        <div id="times-container" class="times-grid" style="display: none;">
+            <!-- المواقيت -->
+        </div>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="app.js"></script>
+    <script src="prayer.js"></script>
+    <!-- Global Search Overlay -->
+    <div id="search-overlay" class="search-overlay">
+        <button class="close-search-overlay" onclick="toggleSearchOverlay()">&times;</button>
+        <div class="search-modal-container">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magic"></i>
+                <input type="text" id="overlay-search-input" placeholder="اكتب للبحث في القرآن والسنة..." autocomplete="off">
+            </div>
+            <div id="search-results" class="search-results-area">
+                <div style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    <i class="fa-solid fa-keyboard" style="font-size: 3rem; margin-bottom: 20px; display: block;"></i>
+                    ابدأ الكتابة للبحث الشامل...
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
