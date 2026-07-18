@@ -1,5 +1,37 @@
 require('@testing-library/jest-dom')
 
+// Mock AudioContext
+const AudioContextMock = jest.fn().mockImplementation(() => ({
+  createOscillator: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    start: jest.fn(),
+    stop: jest.fn(),
+    frequency: { value: 0 },
+    type: 'sine',
+  }),
+  createGain: jest.fn().mockReturnValue({
+    connect: jest.fn(),
+    gain: {
+      setValueAtTime: jest.fn(),
+      exponentialRampToValueAtTime: jest.fn(),
+    },
+  }),
+  destination: {},
+  currentTime: 0,
+  state: 'running',
+  resume: jest.fn(),
+}))
+
+Object.defineProperty(window, 'AudioContext', {
+  writable: true,
+  value: AudioContextMock,
+})
+
+Object.defineProperty(window, 'webkitAudioContext', {
+  writable: true,
+  value: AudioContextMock,
+})
+
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
@@ -74,3 +106,17 @@ HTMLCanvasElement.prototype.getContext = jest.fn(() => ({
 // per-case via mockImplementation, e.g. to simulate the Blob a real canvas
 // would produce.
 HTMLCanvasElement.prototype.toBlob = jest.fn()
+
+// Mock navigator.vibrate
+Object.defineProperty(navigator, 'vibrate', {
+  writable: true,
+  value: jest.fn(),
+})
+
+// Mock clipboard API
+Object.defineProperty(navigator, 'clipboard', {
+  writable: true,
+  value: {
+    writeText: jest.fn().mockResolvedValue(undefined),
+  },
+})
