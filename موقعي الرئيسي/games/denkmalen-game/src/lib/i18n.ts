@@ -98,6 +98,9 @@ const translations: Record<string, Record<Lang, string>> = {
   'vote.seeResults':   { en: 'See Results',        ar: 'عرض النتائج',                     de: 'Ergebnisse ansehen' },
   'vote.votesCollected': { en: 'Votes Collected',  ar: 'الأصوات المجمعة',                 de: 'Stimmen gesammelt' },
   'vote.yourDrawing':  { en: 'Your Drawing',       ar: 'رسمتك',                           de: 'Deine Zeichnung' },
+  'vote.turnToVote':   { en: "{name}'s turn to vote!", ar: 'دور {name} للتصويت!',          de: '{name} ist mit Abstimmen dran!' },
+  'vote.drawingAlt':   { en: "A player's drawing",  ar: 'رسمة أحد اللاعبين',                de: 'Zeichnung eines Spielers' },
+  'vote.creativeLabel':{ en: 'Creative Challenge',  ar: 'تحدٍ إبداعي',                      de: 'Kreative Herausforderung' },
   'vote.tapFavorite':  { en: 'Tap on your favorite drawing to vote', ar: 'اضغط على رسمتك المفضلة للتصويت', de: 'Tippe auf deine Lieblingszeichnung, um abzustimmen' },
   'vote.voteFor':      { en: 'vote for the best drawing starting with', ar: 'صوّت لأفضل رسمة تبدأ بـ',  de: 'stimme für die beste Zeichnung, die beginnt mit' },
   'vote.voteForCreative': { en: 'vote for the best creative drawing!', ar: 'صوّت لأفضل رسمة إبداعية!', de: 'stimme für die beste kreative Zeichnung!' },
@@ -288,6 +291,24 @@ const translations: Record<string, Record<Lang, string>> = {
   'stats.drawingTime':  { en: 'Drawing Time (s)',     ar: 'وقت الرسم (ث)',                de: 'Zeichnungszeit (s)' },
   'stats.favoriteGameType': { en: 'Favorite Game Type', ar: 'نوع اللعبة المفضل',          de: 'Lieblingsspieltyp' },
   'stats.favoriteCategory': { en: 'Favorite Category', ar: 'التصنيف المفضل',               de: 'Lieblingskategorie' },
+
+  // ── Plugins ──────────────────────────────────────────────────────
+  'plugins.title':      { en: 'Plugin Manager',     ar: 'مدير الإضافات',                  de: 'Plugin-Manager' },
+  'plugins.subtitle':   { en: 'Enable or disable game features', ar: 'تفعيل أو تعطيل ميزات اللعبة', de: 'Spielefunktionen aktivieren oder deaktivieren' },
+  'plugins.status.active': { en: 'Active',           ar: 'نشط',                           de: 'Aktiv' },
+  'plugins.status.inactive': { en: 'Inactive',       ar: 'غير نشط',                       de: 'Inaktiv' },
+  'plugins.status.error': { en: 'Error',             ar: 'خطأ',                           de: 'Fehler' },
+  'plugins.status.loading': { en: 'Loading',         ar: 'جاري التحميل',                  de: 'Lädt' },
+  'plugins.ai.name':    { en: 'AI Judge',            ar: 'حكم الذكاء الاصطناعي',          de: 'KI-Richter' },
+  'plugins.challenges.name': { en: 'Challenges',     ar: 'تحديات',                        de: 'Herausforderungen' },
+  'plugins.cosmetics.name': { en: 'Cosmetics',       ar: 'التجهيزات',                     de: 'Kosmetik' },
+  'plugins.replay.name': { en: 'Replay',             ar: 'إعادة تشغيل',                   de: 'Wiederholung' },
+  'plugins.tournaments.name': { en: 'Tournaments',   ar: 'بطولات',                        de: 'Turniere' },
+  'plugins.teams.name': { en: 'Teams',               ar: 'فرق',                           de: 'Teams' },
+  'plugins.statistics.name': { en: 'Statistics',     ar: 'إحصائيات',                      de: 'Statistiken' },
+  'plugins.audio.name': { en: 'Audio',               ar: 'صوت',                           de: 'Audio' },
+  'plugins.community.name': { en: 'Community',       ar: 'المجتمع',                       de: 'Community' },
+  'plugins.settings.name': { en: 'Settings',         ar: 'الإعدادات',                     de: 'Einstellungen' },
 }
 
 // ── Helper ──────────────────────────────────────────────────────────

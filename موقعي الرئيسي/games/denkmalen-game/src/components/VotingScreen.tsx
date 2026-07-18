@@ -135,7 +135,7 @@ export function VotingScreen() {
             >
               <div className="text-6xl mb-6">🗳️</div>
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                {voter?.name}&apos;s turn to vote!
+                {t('vote.turnToVote', settings.language).replace('{name}', voter?.name ?? '')}
               </h2>
               <p className="text-slate-300 mb-8 text-lg">
                 {t('draw.passDevice', settings.language)} {voter?.name}
@@ -166,7 +166,7 @@ export function VotingScreen() {
           <FaVoteYea className="text-xl" />
           <span className="font-bold text-lg">{t('vote.title', settings.language)}!</span>
         </motion.div>
-        <p className="text-slate-600 dark:text-slate-400 mt-3">
+        <p aria-live="polite" className="text-slate-600 dark:text-slate-400 mt-3">
           {allPlayersVoted
             ? t('vote.allVotesIn', settings.language)
             : hasVoterVoted
@@ -194,7 +194,18 @@ export function VotingScreen() {
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.1 }}
               onClick={() => !isOwn && !hasVoterVoted && handleVote(drawing.id)}
-              className={`relative rounded-2xl overflow-hidden shadow-lg transition-all ${
+              // Ballots must be reachable by keyboard, not just tap/click.
+              role={!isOwn && !hasVoterVoted ? 'button' : undefined}
+              tabIndex={!isOwn && !hasVoterVoted ? 0 : undefined}
+              aria-pressed={!isOwn && !hasVoterVoted ? isSelected : undefined}
+              aria-label={isOwn ? t('vote.yourDrawing', settings.language) : t('vote.drawingAlt', settings.language)}
+              onKeyDown={(e) => {
+                if ((e.key === 'Enter' || e.key === ' ') && !isOwn && !hasVoterVoted) {
+                  e.preventDefault()
+                  handleVote(drawing.id)
+                }
+              }}
+              className={`relative rounded-2xl overflow-hidden shadow-lg transition-all outline-none focus-visible:ring-4 focus-visible:ring-primary-400 ${
                 isOwn
                   ? 'opacity-50 cursor-not-allowed'
                   : hasVoterVoted
@@ -206,7 +217,7 @@ export function VotingScreen() {
               <div className="aspect-square bg-white">
                 <img
                   src={drawing.canvasData}
-                  alt={`Drawing by anonymous player`}
+                  alt={t('vote.drawingAlt', settings.language)}
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -220,9 +231,9 @@ export function VotingScreen() {
                   <div className="flex items-center gap-1 text-white text-sm">
                     <span>
                       {gameType === 'letter'
-                        ? `Letter: ${currentLetter}`
+                        ? `${t('draw.letter', settings.language)} ${currentLetter}`
                         : gameType === 'creative'
-                          ? '🎨 Creative Challenge'
+                          ? `🎨 ${t('vote.creativeLabel', settings.language)}`
                           : drawing.word}
                     </span>
                   </div>
