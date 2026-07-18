@@ -1,0 +1,15 @@
+include: package:flutter_lints/flutter.yaml
+
+linter:
+  rules:
+    use_key_in_widget_constructors: true
+
+analyzer:
+  errors:
+    # تنبيهات إطار Flutter المهجورة (withOpacity/Radio.groupValue/...) — لا تمنع التشغيل
+    deprecated_member_use: ignore
+    invalid_annotation_target: ignore
+    use_build_context_synchronously: ignore
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"

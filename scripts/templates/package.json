@@ -1,0 +1,19 @@
+{
+  "name": "{{APP_NAME_SLUG}}",
+  "version": "{{APP_VERSION}}",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build:web": "node ../../scripts/copy-to-www.mjs",
+    "cap:sync": "npx cap sync android",
+    "cap:build": "npx cap build android",
+    "cap:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/android": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.0.0"
+  }
+}

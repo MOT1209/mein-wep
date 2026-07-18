@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a1a">
+    <link rel="manifest" href="manifest.json">
+    <title>الخزنة الذكية | Smart Vault</title>
+    <meta name="description" content="الخزنة الذكية — آلة حاسبة مع خزنة سرية. إخفاء الملفات والصور والبيانات خلف واجهة حاسبة.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/apps/calculator-app/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="الخزنة الذكية | Smart Vault">
+    <meta property="og:description" content="الخزنة الذكية — آلة حاسبة مع خزنة سرية.">
+    <meta property="og:image" content="../../images/logo.png">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/apps/calculator-app/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="الخزنة الذكية | Smart Vault">
+    <meta name="twitter:description" content="الخزنة الذكية — آلة حاسبة مع خزنة سرية.">
+    <meta name="twitter:image" content="../../images/logo.png">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Smart Vault / Calculator",
+  "description": "الخزنة الذكية — آلة حاسبة مع خزنة سرية. إخفاء الملفات والصور والبيانات خلف واجهة حاسبة.",
+  "url": "https://rashid-wep.vercel.app/apps/calculator-app/",
+  "author": {
+    "@type": "Person",
+    "name": "Rashid",
+    "alternateName": "MOT1209",
+    "url": "https://rashid-wep.vercel.app"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  },
+  "applicationCategory": "Utility",
+  "operatingSystem": "Any (Browser)"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Apps",
+      "item": "https://rashid-wep.vercel.app/apps/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Smart Vault",
+      "item": "https://rashid-wep.vercel.app/apps/calculator-app/"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+    <!-- Onboarding -->
+    <div class="onboarding-overlay" id="onboarding">
+        <div class="onboarding-card">
+            <div class="onboarding-icon">🔐</div>
+            <h2>مرحباً بك في الخزنة الذكية</h2>
+            <p>آلة حاسبة تخفي خزنة سرية خلفها. لا أحد يعلم بوجودها غيرك.</p>
+            <ul class="onboarding-steps">
+                <li><i class="fas fa-calculator"></i> استخدم الآلة الحاسبة كالمعتاد</li>
+                <li><i class="fas fa-key"></i> أدخل رمزك السري واضغط = لفتح الخزنة</li>
+                <li><i class="fas fa-shield-alt"></i> أول مرة؟ SET CODE سيظهر — اتبع التعليمات</li>
+            </ul>
+            <button class="onboarding-btn" onclick="dismissOnboarding()">
+                <i class="fas fa-check"></i> فهمت
+            </button>
+        </div>
+    </div>
+
+    <!-- Calculator -->
+    <div class="calculator-wrapper" id="calc-wrapper">
+        <div class="calculator">
+            <div class="calc-header">
+                <i class="fas fa-calculator"></i>
+                <span>آلة حاسبة</span>
+            </div>
+            <div class="display">
+                <div class="previous-operand" id="previous-operand"></div>
+                <div class="current-operand" id="current-operand">0</div>
+            </div>
+            <div class="buttons">
+                <button class="btn col-2 action-btn" data-action="clear">AC</button>
+                <button class="btn action-btn" data-action="delete"><i class="fas fa-backspace"></i></button>
+                <button class="btn operator-btn" data-operator="/">÷</button>
+                <button class="btn number-btn" data-number="7">7</button>
+                <button class="btn number-btn" data-number="8">8</button>
+                <button class="btn number-btn" data-number="9">9</button>
+                <button class="btn operator-btn" data-operator="*">×</button>
+                <button class="btn number-btn" data-number="4">4</button>
+                <button class="btn number-btn" data-number="5">5</button>
+                <button class="btn number-btn" data-number="6">6</button>
+                <button class="btn operator-btn" data-operator="-">−</button>
+                <button class="btn number-btn" data-number="1">1</button>
+                <button class="btn number-btn" data-number="2">2</button>
+                <button class="btn number-btn" data-number="3">3</button>
+                <button class="btn operator-btn" data-operator="+">+</button>
+                <button class="btn number-btn col-2" data-number="0">0</button>
+                <button class="btn number-btn" data-number=".">.</button>
+                <button class="btn equals-btn" id="equals-btn">=</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vault -->
+    <div class="vault-overlay hidden" id="vault-ui">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-icon"><i class="fas fa-shield-virus"></i></div>
+                <span>خزنتي السرية</span>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active"><i class="fas fa-home"></i> الرئيسية</button>
+                <button class="nav-btn"><i class="fas fa-images"></i> الصور</button>
+                <button class="nav-btn"><i class="fas fa-film"></i> الفيديو</button>
+                <button class="nav-btn"><i class="fas fa-file-shield"></i> مستندات</button>
+                <button class="nav-btn"><i class="fas fa-key"></i> كلمات المرور</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="lock-vault" class="exit-btn">
+                    <i class="fas fa-lock"></i> قفل الخزنة
+                </button>
+            </div>
+        </aside>
+
+        <main class="vault-main">
+            <header class="main-header">
+                <div class="header-info">
+                    <h1>لوحة المعلومات</h1>
+                    <p>جميع ملفاتك مشفرة ببروتوكول AES-256</p>
+                </div>
+                <div class="header-actions">
+                    <button class="add-btn"><i class="fas fa-plus"></i> إضافة ملف</button>
+                </div>
+            </header>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon img-bg"><i class="fas fa-image"></i></div>
+                    <div class="stat-details">
+                        <span class="count">0</span>
+                        <span class="label">صور</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon vid-bg"><i class="fas fa-play"></i></div>
+                    <div class="stat-details">
+                        <span class="count">0</span>
+                        <span class="label">فيديو</span>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon doc-bg"><i class="fas fa-file"></i></div>
+                    <div class="stat-details">
+                        <span class="count">0</span>
+                        <span class="label">مستندات</span>
+                    </div>
+                </div>
+            </div>
+
+            <section class="recent-files">
+                <h2><i class="fas fa-clock"></i> الملفات الأخيرة</h2>
+                <div class="empty-state">
+                    <i class="fas fa-folder-open"></i>
+                    <p>لا توجد ملفات حالياً. ابدأ بإضافة ملفاتك الخاصة.</p>
+                </div>
+            </section>
+
+            <section class="note-manager">
+                <div class="note-header">
+                    <h2><i class="fas fa-feather-alt"></i> ملاحظات سرية</h2>
+                    <span id="note-status" style="color:var(--green);font-weight:600;opacity:0;transition:0.3s;font-size:0.85rem;">تم الحفظ ✓</span>
+                </div>
+                <div class="note-input-container">
+                    <textarea id="vault-note-area" placeholder="اكتب ملاحظاتك السرية هنا..."></textarea>
+                    <button id="save-note-btn" class="save-note-btn">
+                        <i class="fas fa-save"></i> حفظ الملاحظة
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification -->
+    <div id="notif" class="notif hidden"></div>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="mobile-nav">
+        <div class="mobile-nav-items">
+            <button class="mobile-nav-item active" onclick="switchTab('home', event)">
+                <i class="fas fa-home"></i>
+                <span>الرئيسية</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchTab('files', event)">
+                <i class="fas fa-folder"></i>
+                <span>الملفات</span>
+            </button>
+            <button class="mobile-nav-item" onclick="switchTab('passwords', event)">
+                <i class="fas fa-key"></i>
+                <span>كلمات المرور</span>
+            </button>
+            <button class="mobile-nav-item" onclick="toggleVault()">
+                <i class="fas fa-lock"></i>
+                <span>قفل</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- FAB -->
+    <button class="fab" onclick="addNewFile()" title="إضافة ملف جديد">
+        <i class="fas fa-plus"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="js/vendor/capacitor.js"></script>
+    <script src="js/vendor/admob.js"></script>
+    <script src="js/ads.js"></script>
+    <script src="../../js/app-controls.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        if (typeof AppControls !== 'undefined') {
+            AppControls.init({
+                appName: 'الخزنة الذكية',
+                primaryColor: '#7c3aed',
+                showBackButton: true,
+                hideElements: ['.calc-header'],
+                onBack: () => {
+                    const vaultUI = document.getElementById('vault-ui');
+                    if (vaultUI && !vaultUI.classList.contains('hidden')) {
+                        vaultUI.classList.add('hidden');
+                        document.getElementById('calc-wrapper').style.display = 'flex';
+                    } else {
+                        window.history.back();
+                    }
+                }
+            });
+        }
+
+        function switchTab(tab, event) {
+            document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+            event.target.closest('.mobile-nav-item').classList.add('active');
+            showNotification(`تم التبديل إلى: ${tab}`, 'info');
+        }
+
+        function toggleVault() {
+            const vaultUI = document.getElementById('vault-ui');
+            if (vaultUI && !vaultUI.classList.contains('hidden')) {
+                vaultUI.classList.add('hidden');
+                document.getElementById('calc-wrapper').style.display = 'flex';
+                showNotification('تم قفل الخزنة', 'success');
+            }
+        }
+
+        function addNewFile() {
+            const vaultUI = document.getElementById('vault-ui');
+            if (vaultUI && vaultUI.classList.contains('hidden')) {
+                showNotification('افتح الخزنة أولاً', 'error');
+                return;
+            }
+            showNotification('اختر ملفاً للإضافة', 'info');
+            document.querySelector('.add-btn')?.click();
+        }
+
+        function dismissOnboarding() {
+            document.getElementById('onboarding').classList.add('hidden');
+            localStorage.setItem('onboardingDone', 'true');
+        }
+
+        if (localStorage.getItem('onboardingDone')) {
+            document.getElementById('onboarding').classList.add('hidden');
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('[Vault] SW registered:', reg))
+                .catch(err => console.log('[Vault] SW registration failed:', err));
+        }
+    </script>
+  <script src="js/update-checker.js"></script>
+  <!-- OTA update checker -->
+  <script>window.RASHID_APP={id:'com.rashid.smartvault',version:'1.0.1',name:'Calculator Vault'};</script>
+  <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
+</body>
+</html>
+

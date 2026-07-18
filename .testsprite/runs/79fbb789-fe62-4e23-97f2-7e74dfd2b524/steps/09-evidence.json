@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 9,
+    "summary": "Step 9 'Expected the Google OAuth button to be visible on the page.' failed. Error: TEST FAILURE\n\nThe sign-in page was inspected but the GitHub OAuth button was not found, so the GitHub OAuth redirect could not be verified.\n\nObservations:\n- The sign-in page loaded at URL containing '/king2/auth/signin'.\n- A Google OAuth button labeled 'تسجيل الدخول بـ Google' is visible and was verified to redirect to accounts.google.com.\n- No visible or clickable 'تسجيل الدخول بـ GitHub' (Sign in with GitHub) button was found in the page interactive elements or screenshot; only non-interactive text matches were present.",
+    "path": "steps/09-snapshot.html"
+  }
+]

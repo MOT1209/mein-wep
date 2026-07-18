@@ -1,0 +1,8 @@
+لوحة الإدارة - Rashid Portfolio
+=================================
+تسجيل الدخول:  https://rashid-wep.vercel.app/admin/login.html
+لوحة التحكم:   https://rashid-wep.vercel.app/admin/dashboard.html
+
+Admin Dashboard:
+Login:  /admin/login.html
+Dashboard: /admin/dashboard.html

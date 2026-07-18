@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="80" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="1100" cy="530" r="120" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="200" cy="500" r="60" fill="rgba(255,255,255,0.08)"/>
+  
+  <!-- Canvas/Paper -->
+  <rect x="400" y="180" width="400" height="280" rx="12" fill="white" opacity="0.95"/>
+  <rect x="410" y="190" width="380" height="260" rx="8" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
+  
+  <!-- Smiley face drawing -->
+  <circle cx="600" cy="310" r="60" fill="#fbbf24" stroke="#f59e0b" stroke-width="4"/>
+  <circle cx="578" cy="298" r="8" fill="#1e293b"/>
+  <circle cx="622" cy="298" r="8" fill="#1e293b"/>
+  <path d="M 570 330 Q 600 360 630 330" stroke="#1e293b" stroke-width="4" fill="none" stroke-linecap="round"/>
+  
+  <!-- Pencil icon -->
+  <g transform="translate(680, 220) rotate(45)">
+    <rect x="0" y="0" width="12" height="60" fill="#f59e0b"/>
+    <polygon points="0,60 6,75 12,60" fill="#1e293b"/>
+    <rect x="0" y="0" width="12" height="15" fill="#ec4899"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="600" y="120" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="white" text-anchor="middle" letter-spacing="8">DENKMALEN</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="155" font-family="Arial, sans-serif" font-size="28" fill="rgba(255,255,255,0.9)" text-anchor="middle">Drawing Battle Game</text>
+  
+  <!-- Tagline -->
+  <text x="600" y="520" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" font-weight="bold">🎨 AI Judge • Draw • Vote • Win!</text>
+  
+  <!-- URL -->
+  <text x="600" y="580" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.7)" text-anchor="middle">rashid-wep.vercel.app/denkmalen</text>
+</svg>

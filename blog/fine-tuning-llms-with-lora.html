@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A hands-on explanation of fine-tuning large language models with LoRA — what low-rank adapters are, why they save memory, and how I merge and upload a custom model.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/fine-tuning-llms-with-lora.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Fine-Tuning LLMs with LoRA: A Practical Walkthrough">
+    <meta property="og:description" content="What low-rank adapters are, why they cut memory cost dramatically, and how I train, merge, and ship a custom language model.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/fine-tuning-llms-with-lora.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Fine-Tuning LLMs with LoRA">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <title>Fine-Tuning LLMs with LoRA — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Fine-Tuning LLMs with LoRA: A Practical Walkthrough",
+      "description": "What low-rank adapters are, why they cut memory cost dramatically, and how I train, merge, and ship a custom language model.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-17",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/fine-tuning-llms-with-lora.html",
+      "keywords": ["LoRA","LLM","Fine-tuning","AI","Machine Learning"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.2">
+    <link rel="stylesheet" href="../css/blog-post.css?v=1.0">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://rashid-wep.vercel.app/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Fine-Tuning LLMs with LoRA: A Practical Walkthrough",
+      "item": "https://rashid-wep.vercel.app/blog/fine-tuning-llms-with-lora.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 17, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 10 min read</span>
+            <span class="post-tag">AI &amp; ML</span>
+            <span class="post-tag">LoRA</span>
+        </div>
+
+        <h1>Fine-Tuning LLMs with LoRA: A Practical Walkthrough</h1>
+
+        <div class="post-content">
+            <p>Training a large language model from scratch is out of reach for an individual — it costs millions of dollars in compute. But <em>adapting</em> an existing open model to your own data is surprisingly accessible, and the technique that makes it possible is <strong>LoRA</strong> (Low-Rank Adaptation). I've been training a custom model I call KING2 this way, and this post explains what LoRA actually does and the full train → merge → upload pipeline I use.</p>
+
+            <h2>The Problem with Full Fine-Tuning</h2>
+            <p>A modern open model has billions of parameters. Full fine-tuning updates <em>all</em> of them, which means you need enough GPU memory to hold the weights, their gradients, and the optimizer state — typically several times the size of the model itself. A 7-billion-parameter model can demand 60+ GB of VRAM to fine-tune fully. That's data-center territory, not a single consumer GPU.</p>
+
+            <h2>The LoRA Insight</h2>
+            <p>LoRA starts from a clever observation: the <em>change</em> a fine-tune makes to a weight matrix tends to be "low rank" — it can be approximated by the product of two much smaller matrices. So instead of updating a giant weight matrix <code>W</code>, LoRA freezes it and learns a small additive update:</p>
+            <pre><code>W_effective = W (frozen) + (B × A) × (alpha / r)
+
+where:
+  A : shape (r, d)   — small, trainable
+  B : shape (d, r)   — small, trainable
+  r : the rank (e.g. 8, 16, 32) — tiny
+  alpha : a scaling factor</code></pre>
+            <p>Because <code>r</code> is small (often 8 or 16), the two adapter matrices have a fraction of the parameters of the original. You might train <strong>less than 1%</strong> of the total parameter count and still capture most of the benefit. The frozen base never changes, so you only store and update the adapters.</p>
+
+            <h2>Why This Saves So Much Memory</h2>
+            <p>Two big wins stack up:</p>
+            <ul>
+                <li><strong>Far fewer trainable parameters</strong> means far less gradient and optimizer memory — often the dominant cost.</li>
+                <li><strong>QLoRA</strong> goes further by quantizing the frozen base model to 4-bit. The base sits in memory compressed while the adapters train in higher precision on top.</li>
+            </ul>
+            <p>Together these bring fine-tuning a 7B model down to something that fits on a single 16 GB GPU — the kind you can rent by the hour or find in a free notebook environment.</p>
+
+            <h2>The Key Hyperparameters</h2>
+            <p>Three knobs matter most when configuring a LoRA run:</p>
+            <ul>
+                <li><strong>Rank (<code>r</code>)</strong> — capacity of the adapter. Higher means more expressive but more parameters and more overfitting risk. 8–16 is a sensible starting range.</li>
+                <li><strong>Alpha</strong> — scales how strongly the adapter affects the output. A common rule of thumb is <code>alpha = 2 × r</code>.</li>
+                <li><strong>Target modules</strong> — which layers get adapters. Attention projections (<code>q_proj</code>, <code>k_proj</code>, <code>v_proj</code>, <code>o_proj</code>) are the usual targets; adding the MLP layers increases capacity at extra cost.</li>
+            </ul>
+
+            <h2>Preparing the Data</h2>
+            <p>The model is only as good as the dataset. For instruction-style tuning I format each example as a consistent prompt/response template and keep it strict — mixing formats confuses the model. A typical record:</p>
+            <pre><code>{
+  "instruction": "Explain what a closure is in JavaScript.",
+  "input": "",
+  "output": "A closure is a function bundled together with ..."
+}</code></pre>
+            <p>Quality beats quantity. A few thousand clean, on-distribution examples outperform tens of thousands of noisy ones. I deduplicate, strip broken samples, and hold out a small validation set to watch for overfitting.</p>
+
+            <h2>Merging the Adapter</h2>
+            <p>After training you have two artifacts: the original base model and a small adapter. You can serve them separately — load the base, then attach the adapter at runtime — which is great for swapping behaviors. But for a single distributable model, I <strong>merge</strong> the adapter back into the weights:</p>
+            <pre><code>from peft import PeftModel
+from transformers import AutoModelForCausalLM
+
+base = AutoModelForCausalLM.from_pretrained(BASE_ID)
+model = PeftModel.from_pretrained(base, ADAPTER_DIR)
+
+# fold B×A back into W
+merged = model.merge_and_unload()
+merged.save_pretrained("KING2-merged")</code></pre>
+            <p>Merging removes the runtime dependency on the adapter library and produces a standalone model that any standard loader can run. The trade-off is you lose the ability to detach the adapter, so I keep the raw adapter archived separately.</p>
+
+            <h2>Shipping the Model</h2>
+            <p>The final step is uploading the merged weights to a model hub so they can be pulled by ID anywhere. I script this so the whole pipeline — train, merge, push — runs unattended from a notebook:</p>
+            <pre><code>merged.push_to_hub("MOT1209/KING2")
+tokenizer.push_to_hub("MOT1209/KING2")</code></pre>
+            <p>Always upload the tokenizer alongside the weights — a model with a mismatched tokenizer produces garbage, and it's the most common "why is my model broken" mistake.</p>
+
+            <h2>What I'd Tell My Past Self</h2>
+            <ul>
+                <li><strong>Start small.</strong> Validate the whole pipeline end-to-end on a tiny model and a handful of examples before burning GPU hours on the real run.</li>
+                <li><strong>Watch the validation loss.</strong> If training loss keeps dropping while validation loss rises, you're overfitting — lower the rank, add data, or stop earlier.</li>
+                <li><strong>Version everything.</strong> Dataset, hyperparameters, and base model ID. Reproducibility is what turns a lucky run into a repeatable process.</li>
+            </ul>
+
+            <h2>Conclusion</h2>
+            <p>LoRA democratized model customization. By learning a tiny low-rank update on top of frozen weights, it turned fine-tuning from a data-center luxury into something you can do on a single rented GPU. If you have a focused task and a clean dataset, you can have a custom model trained, merged, and published in an afternoon — and understand exactly why every step is there.</p>
+        </div>
+    </main>
+    <div id="reading-progress"></div>
+    <script src="../src/js/main.js" type="module"></script>
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        window.addEventListener('scroll', function() {
+            var h = document.documentElement;
+            var scrollTop = h.scrollTop || document.body.scrollTop;
+            var scrollHeight = h.scrollHeight - h.clientHeight;
+            bar.style.width = (scrollTop / scrollHeight) * 100 + '%';
+        });
+        document.querySelectorAll('.post-content pre').forEach(function(pre) {
+            var btn = document.createElement('button');
+            btn.className = 'copy-code-btn';
+            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+            btn.addEventListener('click', function() {
+                var code = pre.querySelector('code');
+                var text = code ? code.textContent : pre.textContent;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+                    });
+                }
+            });
+        });
+        var currentId = 'fine-tuning-llms-with-lora';
+        fetch('posts.json?_=' + Date.now())
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+                var post = posts.find(function(p) { return p.id === currentId; });
+                if (!post) return;
+                var related = posts.filter(function(p) {
+                    return p.id !== currentId && p.categories.some(function(c) { return post.categories.indexOf(c) !== -1; });
+                }).slice(0, 3);
+                var main = document.querySelector('.blog-post');
+                if (!main || related.length === 0) return;
+                var section = document.createElement('div');
+                section.className = 'related-posts';
+                section.innerHTML = '<h2><i class="fas fa-link" style="color:var(--accent);"></i> Related Articles</h2><div class="related-grid">' +
+                    related.map(function(p) {
+                        var d = new Date(p.date + 'T00:00:00Z');
+                        var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        return '<a href="' + p.id + '.html" class="related-card"><h3>' + p.title + '</h3><p>' + p.description + '</p><div class="related-meta"><span>' + ds + '</span><span> · </span><span>' + p.readTime + ' min</span></div></a>';
+                    }).join('') + '</div>';
+                main.appendChild(section);
+            })
+            .catch(function() {});
+    })();
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,528 @@
+/* 
+    DevOS — Rashid Portfolio Redesign
+    A unified, futuristic, and high-performance developer operating system.
+*/
+
+:root {
+    /* DevOS Core Palette */
+    --os-bg: #09090b;
+    --os-sidebar: #020617;
+    --os-surface: #111114;
+    --os-surface-hover: #18181b;
+    --os-border: rgba(255, 255, 255, 0.08);
+    --os-border-bright: rgba(255, 255, 255, 0.15);
+    
+    /* Accents */
+    --os-accent: #38bdf8;
+    --os-accent-rgb: 56, 189, 248;
+    --os-accent-secondary: #8b5cf6;
+    --os-accent-secondary-rgb: 139, 92, 246;
+    
+    /* Text */
+    --os-text: #f8fafc;
+    --os-text-dim: #94a3b8;
+    --os-text-muted: #64748b;
+    
+    /* Sizes */
+    --os-sidebar-width: 280px;
+    --os-sidebar-collapsed: 80px;
+    --os-header-height: 64px;
+    --os-radius: 12px;
+    
+    /* Shadows & Effects */
+    --os-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    --os-glow: 0 0 20px rgba(var(--os-accent-rgb), 0.15);
+    --os-blur: blur(12px);
+}
+
+/* Layout Structure */
+.devos-shell {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background: var(--os-bg);
+    color: var(--os-text);
+    overflow: hidden;
+    font-family: var(--font-body);
+}
+
+.devos-sidebar {
+    width: var(--os-sidebar-width);
+    background: var(--os-sidebar);
+    border-right: 1px solid var(--os-border);
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 100;
+}
+
+.devos-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+}
+
+.devos-header {
+    height: var(--os-header-height);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--os-border);
+    background: rgba(9, 9, 11, 0.5);
+    backdrop-filter: var(--os-blur);
+}
+
+.devos-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px;
+    scroll-behavior: smooth;
+}
+
+/* Sidebar Components */
+.sidebar-header {
+    padding: 32px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-logo {
+    font-family: var(--font-heading);
+    font-weight: 800;
+    font-size: 1.5rem;
+    color: var(--os-text);
+    letter-spacing: -0.02em;
+}
+
+.sidebar-logo span {
+    color: var(--os-accent);
+}
+
+.sidebar-nav {
+    flex: 1;
+    padding: 0 16px;
+}
+
+.nav-group {
+    margin-bottom: 32px;
+}
+
+.nav-label {
+    padding: 0 12px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--os-text-muted);
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    color: var(--os-text-dim);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    margin-bottom: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.nav-item i {
+    width: 20px;
+    font-size: 1.1rem;
+    color: var(--os-text-muted);
+    transition: color 0.2s ease;
+}
+
+.nav-item:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--os-text);
+}
+
+.nav-item:hover i {
+    color: var(--os-text);
+}
+
+.nav-item.active {
+    background: linear-gradient(135deg, rgba(var(--os-accent-rgb), 0.15) 0%, rgba(var(--os-accent-rgb), 0.05) 100%);
+    color: var(--os-accent);
+    border: 1px solid rgba(var(--os-accent-rgb), 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.nav-item.active i {
+    color: var(--os-accent);
+}
+
+/* Dashboard Widgets (Bento Grid) */
+.bento-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: minmax(160px, auto);
+    gap: 20px;
+}
+
+.bento-item {
+    background: var(--os-surface);
+    border: 1px solid var(--os-border);
+    border-radius: 24px;
+    padding: 24px;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.bento-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.03) 0%, transparent 60%);
+    pointer-events: none;
+}
+
+.bento-item:hover {
+    border-color: var(--os-border-bright);
+    transform: translateY(-4px) scale(1.01);
+    box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+}
+
+.bento-item.col-12 { grid-column: span 12; }
+.bento-item.col-8 { grid-column: span 8; }
+.bento-item.col-6 { grid-column: span 6; }
+.bento-item.col-4 { grid-column: span 4; }
+.bento-item.row-2 { grid-row: span 2; }
+
+/* Status Indicators */
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: rgba(34, 197, 94, 0.1);
+    color: #22c55e;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background: currentColor;
+    border-radius: 50%;
+    box-shadow: 0 0 8px currentColor;
+}
+
+/* Glass Buttons */
+.btn-os {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--os-border);
+    color: var(--os-text);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-os:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--os-border-bright);
+}
+
+.btn-os.primary {
+    background: var(--os-accent);
+    color: #000;
+    border: none;
+}
+
+.btn-os.primary:hover {
+    background: #7dd3fc;
+    transform: scale(1.02);
+}
+
+/* Section Header */
+.view-section {
+    display: none;
+}
+
+.view-section.active {
+    display: block;
+    animation: viewFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Status Bar */
+.devos-statusbar {
+    position: fixed;
+    bottom: 0;
+    left: var(--os-sidebar-width);
+    right: 0;
+    height: 36px;
+    background: rgba(2, 6, 23, 0.95);
+    border-top: 1px solid var(--os-border);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--os-text-muted);
+    z-index: 50;
+    gap: 24px;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.devos-statusbar .status-dot {
+    width: 6px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #22c55e;
+}
+
+/* Adjust content padding for status bar */
+.devos-content {
+    padding-bottom: 56px;
+}
+
+/* Settings Modal Overrides for DevOS */
+.settings-modal {
+    z-index: 2000 !important;
+}
+
+.settings-overlay {
+    z-index: 1999 !important;
+}
+
+/* Light Mode Overrides */
+body.light-mode .devos-shell {
+    --os-bg: #f1f5f9;
+    --os-sidebar: #ffffff;
+    --os-surface: #ffffff;
+    --os-surface-hover: #f8fafc;
+    --os-border: rgba(0, 0, 0, 0.08);
+    --os-border-bright: rgba(0, 0, 0, 0.15);
+    --os-text: #0f172a;
+    --os-text-dim: #475569;
+    --os-text-muted: #94a3b8;
+}
+
+body.light-mode .devos-header {
+    background: rgba(255, 255, 255, 0.7);
+}
+
+body.light-mode .devos-statusbar {
+    background: rgba(255, 255, 255, 0.9);
+}
+
+body.light-mode .bento-item::before {
+    background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(0,0,0,0.02) 0%, transparent 60%);
+}
+
+body.light-mode .nav-item:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+body.light-mode .command-search input::placeholder {
+    color: #94a3b8;
+}
+
+/* Hide skip link in DevOS mode */
+.skip-link {
+    display: none !important;
+}
+
+/* Vault Grid in DevOS */
+.vault-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+@media (max-width: 768px) {
+    .vault-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* View Transition */
+@keyframes viewFadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(16px) scale(0.98); 
+        filter: blur(4px);
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0) scale(1); 
+        filter: blur(0);
+    }
+}
+
+/* Custom Scrollbar */
+.devos-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.devos-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.devos-content::-webkit-scrollbar-thumb {
+    background: var(--os-border);
+    border-radius: 10px;
+}
+
+.devos-content::-webkit-scrollbar-thumb:hover {
+    background: var(--os-text-muted);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 1200px) {
+    .bento-item.col-8 { grid-column: span 12; }
+}
+
+@media (max-width: 1024px) {
+    .devos-sidebar {
+        width: var(--os-sidebar-collapsed);
+    }
+    .nav-label, .nav-item span, .sidebar-logo {
+        display: none;
+    }
+    .sidebar-header {
+        justify-content: center;
+        padding: 24px 0;
+    }
+    .sidebar-logo .accent-dot { display: inline; }
+    .devos-statusbar {
+        left: var(--os-sidebar-collapsed);
+    }
+    .command-search {
+        width: 280px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .devos-shell {
+        flex-direction: column;
+    }
+    .devos-sidebar {
+        width: 100%;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--os-border);
+        position: static;
+    }
+    .sidebar-header {
+        display: none;
+    }
+    .sidebar-nav {
+        display: flex;
+        overflow-x: auto;
+        padding: 8px 12px;
+        gap: 4px;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    .sidebar-nav::-webkit-scrollbar { display: none; }
+    .nav-group {
+        margin-bottom: 0;
+        display: flex;
+        gap: 4px;
+    }
+    .nav-label {
+        display: none;
+    }
+    .nav-item {
+        white-space: nowrap;
+        padding: 10px 14px;
+        font-size: 0.8rem;
+    }
+    .nav-item i {
+        margin-right: 0;
+    }
+    .nav-item span {
+        display: inline;
+    }
+    .sidebar-footer {
+        display: none !important;
+    }
+    
+    .devos-header {
+        height: 56px;
+        padding: 0 16px;
+    }
+    .command-search {
+        width: 200px !important;
+    }
+    .command-search span {
+        display: none;
+    }
+    .user-info {
+        display: none;
+    }
+    
+    .devos-content {
+        padding: 20px 16px 48px;
+    }
+    
+    .bento-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+    .bento-item {
+        border-radius: 16px;
+        padding: 16px;
+    }
+    .bento-item.col-8 { grid-column: span 4; }
+    .bento-item.col-6 { grid-column: span 4; }
+    .bento-item.col-4 { grid-column: span 4; }
+    .bento-item.row-2 { grid-row: span 1; }
+    
+    .devos-statusbar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 32px;
+        font-size: 0.55rem;
+        gap: 12px;
+        overflow: hidden;
+    }
+    
+    .view-section.active h1 {
+        font-size: 1.5rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .devos-header .system-status { display: none; }
+    .command-search {
+        width: 160px !important;
+    }
+    .devos-content {
+        padding: 16px 12px 40px;
+    }
+    .bento-grid {
+        gap: 10px;
+    }
+    .bento-item {
+        padding: 14px;
+        border-radius: 14px;
+    }
+}

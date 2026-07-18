@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="How I structure Flutter apps with Clean Architecture — separating presentation, domain, and data layers so the codebase stays testable and easy to change.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/flutter-clean-architecture.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Clean Architecture in Flutter: Layers That Scale">
+    <meta property="og:description" content="Separating presentation, domain, and data in a Flutter app so it stays testable and easy to change as it grows.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/flutter-clean-architecture.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Clean Architecture in Flutter">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <title>Clean Architecture in Flutter — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Clean Architecture in Flutter: Layers That Scale",
+      "description": "Separating presentation, domain, and data in a Flutter app so it stays testable and easy to change as it grows.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-19",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/flutter-clean-architecture.html",
+      "keywords": ["Flutter","Clean Architecture","Dart","Mobile","App Dev"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.2">
+    <link rel="stylesheet" href="../css/blog-post.css?v=1.0">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://rashid-wep.vercel.app/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Clean Architecture in Flutter: Layers That Scale",
+      "item": "https://rashid-wep.vercel.app/blog/flutter-clean-architecture.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 19, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 9 min read</span>
+            <span class="post-tag">Mobile</span>
+            <span class="post-tag">Flutter</span>
+        </div>
+
+        <h1>Clean Architecture in Flutter: Layers That Scale</h1>
+
+        <div class="post-content">
+            <p>Flutter makes it dangerously easy to put everything in one widget — UI, business logic, and an HTTP call all tangled in a single <code>build</code> method. It works for a demo and collapses for a real app. Building Maarifah, an educational app, pushed me to adopt Clean Architecture properly. This is the structure I settled on and why each boundary earns its keep.</p>
+
+            <h2>The Core Idea: Dependencies Point Inward</h2>
+            <p>Clean Architecture organizes code into concentric layers. The rule that makes it work is simple: <strong>inner layers know nothing about outer layers.</strong> Your business rules don't import Flutter, don't know about HTTP, and don't care whether data comes from a server or a local file. Outer layers depend on inner ones, never the reverse.</p>
+            <p>In a Flutter project this collapses into three practical layers per feature:</p>
+            <pre><code>lib/
+└── features/
+    └── lessons/
+        ├── presentation/   # widgets, state (UI)
+        ├── domain/         # entities, use cases (rules)
+        └── data/           # models, repositories, sources</code></pre>
+
+            <h2>The Domain Layer: Pure Dart</h2>
+            <p>The domain is the heart and it imports nothing from Flutter or any package. It holds <strong>entities</strong> (plain objects representing core concepts) and <strong>use cases</strong> (one class per action the app can perform):</p>
+            <pre><code>// entity — no annotations, no JSON, pure
+class Lesson {
+  final String id;
+  final String title;
+  final bool isCompleted;
+  const Lesson({ required this.id, required this.title,
+                 this.isCompleted = false });
+}
+
+// use case — a single responsibility
+class GetLessons {
+  final LessonRepository repo;
+  GetLessons(this.repo);
+  Future&lt;List&lt;Lesson&gt;&gt; call() =&gt; repo.getLessons();
+}</code></pre>
+            <p>Notice <code>LessonRepository</code> is referenced but not defined here — the domain declares an <em>abstract</em> repository interface and lets the data layer implement it. This inversion is what keeps the domain free of infrastructure.</p>
+
+            <h2>The Data Layer: Where Reality Lives</h2>
+            <p>The data layer implements the repository interface and deals with the messy outside world — JSON, databases, caching. Models extend entities and add serialization:</p>
+            <pre><code>class LessonModel extends Lesson {
+  const LessonModel({ required super.id, required super.title,
+                      super.isCompleted });
+
+  factory LessonModel.fromJson(Map&lt;String, dynamic&gt; json) =&gt;
+    LessonModel(
+      id: json['id'],
+      title: json['title'],
+      isCompleted: json['is_completed'] ?? false,
+    );
+}</code></pre>
+            <p>Maarifah uses local data, so the repository reads from a bundled source and a local store rather than a network. The beauty of the boundary: the domain and UI have <em>no idea</em> the data is local. If I later switch to a remote API, only the data layer changes.</p>
+
+            <h2>The Presentation Layer: UI and State</h2>
+            <p>Widgets stay dumb. They render state and forward user intents to a state manager (Bloc, Riverpod, or a simple ChangeNotifier — the pattern is what matters, not the package). The state manager calls use cases and never touches a repository directly:</p>
+            <pre><code>class LessonsNotifier extends ChangeNotifier {
+  final GetLessons getLessons;
+  LessonsState state = LessonsState.loading();
+
+  Future&lt;void&gt; load() async {
+    state = LessonsState.loading();
+    notifyListeners();
+    final lessons = await getLessons();   // use case
+    state = LessonsState.data(lessons);
+    notifyListeners();
+  }
+}</code></pre>
+
+            <h2>Wiring It Together with Dependency Injection</h2>
+            <p>Each layer depends on <em>abstractions</em>, so something has to supply the concrete implementations at startup. A service locator (like <code>get_it</code>) registers everything in one place:</p>
+            <pre><code>final sl = GetIt.instance;
+
+void init() {
+  // presentation
+  sl.registerFactory(() =&gt; LessonsNotifier(getLessons: sl()));
+  // domain
+  sl.registerLazySingleton(() =&gt; GetLessons(sl()));
+  // data
+  sl.registerLazySingleton&lt;LessonRepository&gt;(
+    () =&gt; LessonRepositoryImpl(localSource: sl()));
+}</code></pre>
+            <p>This single file becomes the map of how the whole app is assembled — and the seam where you swap real implementations for fakes in tests.</p>
+
+            <h2>Why the Overhead Pays Off</h2>
+            <p>Yes, this is more files than dumping logic in a widget. Here's what you buy:</p>
+            <ul>
+                <li><strong>Testability.</strong> Use cases are pure functions over a mocked repository — fast unit tests with no Flutter test harness needed.</li>
+                <li><strong>Changeable infrastructure.</strong> Switch local storage for an API, or one state library for another, by touching a single layer.</li>
+                <li><strong>Parallel work.</strong> The domain interface is a contract — UI and data can be built against it independently.</li>
+                <li><strong>Readability.</strong> Each class does one thing. New contributors find logic where they expect it.</li>
+            </ul>
+
+            <h2>When NOT to Use It</h2>
+            <p>Clean Architecture is overkill for a throwaway prototype or a three-screen utility. The ceremony only pays back when an app is going to grow and live for a while. For Maarifah — with lessons, progress tracking, and content that will expand — the structure has kept the codebase calm as features piled on. Match the architecture to the lifespan of the app, not to a checklist.</p>
+
+            <h2>Closing Thought</h2>
+            <p>The single principle worth remembering is the dependency rule: point dependencies inward, toward stable business logic, away from volatile frameworks and I/O. Everything else — the folder names, the DI container, the model-vs-entity split — is just bookkeeping in service of that one idea.</p>
+        </div>
+    </main>
+    <div id="reading-progress"></div>
+    <script src="../src/js/main.js" type="module"></script>
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        window.addEventListener('scroll', function() {
+            var h = document.documentElement;
+            var scrollTop = h.scrollTop || document.body.scrollTop;
+            var scrollHeight = h.scrollHeight - h.clientHeight;
+            bar.style.width = (scrollTop / scrollHeight) * 100 + '%';
+        });
+        document.querySelectorAll('.post-content pre').forEach(function(pre) {
+            var btn = document.createElement('button');
+            btn.className = 'copy-code-btn';
+            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+            btn.addEventListener('click', function() {
+                var code = pre.querySelector('code');
+                var text = code ? code.textContent : pre.textContent;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+                    });
+                }
+            });
+        });
+        var currentId = 'flutter-clean-architecture';
+        fetch('posts.json?_=' + Date.now())
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+                var post = posts.find(function(p) { return p.id === currentId; });
+                if (!post) return;
+                var related = posts.filter(function(p) {
+                    return p.id !== currentId && p.categories.some(function(c) { return post.categories.indexOf(c) !== -1; });
+                }).slice(0, 3);
+                var main = document.querySelector('.blog-post');
+                if (!main || related.length === 0) return;
+                var section = document.createElement('div');
+                section.className = 'related-posts';
+                section.innerHTML = '<h2><i class="fas fa-link" style="color:var(--accent);"></i> Related Articles</h2><div class="related-grid">' +
+                    related.map(function(p) {
+                        var d = new Date(p.date + 'T00:00:00Z');
+                        var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        return '<a href="' + p.id + '.html" class="related-card"><h3>' + p.title + '</h3><p>' + p.description + '</p><div class="related-meta"><span>' + ds + '</span><span> · </span><span>' + p.readTime + ' min</span></div></a>';
+                    }).join('') + '</div>';
+                main.appendChild(section);
+            })
+            .catch(function() {});
+    })();
+    </script>
+
+</body>
+</html>

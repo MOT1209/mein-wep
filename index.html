@@ -1,0 +1,763 @@
+﻿<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Rashid (MOT1209) — Full-Stack Developer & AI Engineer. Building web platforms, AI tools, and 3D games with JavaScript, Supabase & Three.js.">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Rashid (MOT1209)">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/">
+    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/">
+    <link rel="alternate" hreflang="ar" href="https://rashid-wep.vercel.app/?lang=ar">
+    <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/?lang=de">
+    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://www.google-analytics.com https://generativelanguage.googleapis.com https://openrouter.ai https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com; frame-src 'self' https://*.supabase.co https://pagead2.googlesyndication.com https://www.youtube.com https://youtube.com; worker-src 'self' blob:; media-src 'self' https:; object-src 'none'; base-uri 'self'">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Rashid — Full-Stack Developer & AI Engineer">
+    <meta property="og:description" content="Building AI-powered platforms, 3D games, and open-source tools. Creator of KingCraft, Alking, and Rashid AI.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/">
+    <meta property="og:site_name" content="Rashid Portfolio">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Rashid — Full-Stack Developer & AI Engineer">
+    <meta name="twitter:description" content="Building AI-powered platforms, 3D games, and open-source tools.">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta name="twitter:creator" content="@MOT1209">
+    <meta name="keywords" content="Rashid, MOT1209, Full-Stack Developer, AI Engineer, JavaScript, Three.js, Supabase, KingCraft, Portfolio, Web Development, Game Development">
+    <title>Rashid — Full-Stack Developer & AI Engineer</title>
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Rashid",
+      "alternateName": "MOT1209",
+      "url": "https://rashid-wep.vercel.app",
+      "image": "https://rashid-wep.vercel.app/images/og-image.svg",
+      "jobTitle": "Full-Stack Developer & AI Engineer",
+      "description": "Building AI-powered platforms, 3D games with Three.js, and open-source tools. Creator of KingCraft and Alking AI.",
+      "knowsAbout": ["JavaScript","TypeScript","Python","Next.js","Three.js","Supabase","React","Node.js","AI","PWA","PostgreSQL","Gemini"],
+      "sameAs": ["https://github.com/MOT1209"],
+      "makesOffer": [
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"Web Development","description":"Full-stack web platforms with Next.js & Supabase"}},
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"AI Integration","description":"AI assistants, chatbots, and automation powered by Gemini & OpenRouter"}},
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"3D Game Development","description":"Browser-based 3D games with Three.js and custom engines"}}
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Rashid — Full-Stack Developer & AI Engineer",
+      "url": "https://rashid-wep.vercel.app",
+      "description": "Full-stack developer and AI engineer portfolio. Building AI-powered platforms, 3D games, and open-source tools.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209"},
+      "inLanguage": ["en","ar"],
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://rashid-wep.vercel.app/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Fonts: Inter + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css?v=10.1">
+    <style>
+        .blog-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        .blog-preview-card { display: flex; flex-direction: column; gap: 14px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; text-decoration: none; transition: var(--transition); position: relative; overflow: hidden; }
+        .blog-preview-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: 0; transition: var(--transition); }
+        .blog-preview-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
+        .blog-preview-card:hover::before { opacity: 1; }
+        .blog-preview-card .bpc-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.1rem; }
+        .blog-preview-card h3 { color: var(--text-high); font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.35; }
+        .blog-preview-card p { color: var(--text-med); font-size: 0.82rem; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .blog-preview-card .bpc-meta { display: flex; gap: 10px; font-size: 0.75rem; color: var(--text-muted); }
+        .blog-preview-card .bpc-meta span { display: flex; align-items: center; gap: 4px; }
+        @media (max-width: 768px) { .blog-preview-grid { grid-template-columns: 1fr; } }
+    </style>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="js/supabase-config.js?v=1.1" defer></script>
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json?v=2">
+    <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+
+    <!-- GA4 (consent-aware) -->
+    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied'});</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W139X3X20X"></script>
+    <script>gtag('js',new Date());gtag('config','G-W139X3X20X',{'anonymize_ip':true});</script>
+
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+
+    <!-- Skip Link -->
+    <a href="#main" class="skip-link" tabindex="1">Skip to main content</a>
+
+    <!-- Navigation -->
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="#home" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="#home" class="active">Home</a>
+                <a href="#about">About</a>
+                <a href="#projects">Projects</a>
+                <a href="#skills">Skills</a>
+                <a href="#timeline">Timeline</a>
+                <a href="#github">Open Source</a>
+                <a href="#vault">Vault</a>
+                <a href="blog/">Blog</a>
+                <a href="downloads.html">Downloads</a>
+                <a href="#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+                <button class="nav-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders-h"></i></button>
+                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#skills">Skills</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#github">Open Source</a>
+        <a href="#vault">Vault</a>
+        <a href="blog/">Blog</a>
+        <a href="downloads.html">Downloads</a>
+        <a href="#contact">Contact</a>
+    </div>
+
+    <!-- Hero -->
+    <section id="home" class="hero reveal">
+        <div class="container hero-grid">
+            <div>
+                <div class="hero-tag">Available for collaboration</div>
+                <h1>Building the future with <span>code &amp; AI</span></h1>
+                <p>I'm <strong style="color:var(--text);">Rashid</strong> — a Full-Stack Developer and AI Engineer. I build AI-powered platforms, 3D games, and open-source tools that push the boundaries of what the web can do.</p>
+                <div class="hero-cta">
+                    <a href="#projects" class="btn btn-primary">View Projects <i class="fas fa-arrow-right"></i></a>
+                    <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+                </div>
+                <div class="hero-tech">
+                    <span class="tech-badge">Next.js</span>
+                    <span class="tech-badge">Python</span>
+                    <span class="tech-badge">Supabase</span>
+                    <span class="tech-badge">Three.js</span>
+                    <span class="tech-badge">React</span>
+                    <span class="tech-badge">Node.js</span>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-image">
+                    <img src="images/logo.webp" alt="Rashid" width="320" height="320" fetchpriority="high">
+                </div>
+                <div class="hero-status">
+                    <div class="hero-status-item"><span>Status</span><span style="color:#22c55e;">Active</span></div>
+                    <div class="hero-status-item"><span>Projects</span><span>13+</span></div>
+                    <div class="hero-status-item"><span>Repos</span><span>15</span></div>
+                    <div class="hero-status-item"><span>AI Model</span><span>v3.0</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AdSense Ad Unit (loaded after consent) -->
+    <div id="adsense-container" class="container" style="padding: 20px 20px 0; min-height: 90px; display:none;"></div>
+
+    <div class="section-divider"></div>
+
+    <!-- About -->
+    <section id="about" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>About Me</h2>
+                <p>Full-Stack Developer &amp; AI Engineer — building the future one project at a time.</p>
+            </div>
+            <div class="about-grid">
+                <div class="about-card">
+                    <h3>Rashid <span style="color:var(--accent);">(MOT1209)</span></h3>
+                    <div class="subtitle">Lead Architect &amp; AI Engineer</div>
+                    <p>I build AI-powered tools, 3D game engines, and full-stack platforms — all open-source. My journey started with curiosity: manipulating CSS, breaking JavaScript, rebuilding everything better. Now I create intelligent systems that push web capabilities forward.</p>
+                    <p><strong>What I build:</strong> AI assistants powered by Gemini &amp; OpenRouter, 3D sandbox worlds with Three.js, full-stack platforms with Next.js 15 + Supabase, and open-source tools that help developers ship faster.</p>
+                    <p><strong>Mission:</strong> Democratizing AI and 3D web development through open-source tools, educational content, and community-driven platforms.</p>
+                    <div class="about-stats">
+                        <div class="stat-box"><span class="stat-num">15+</span><span class="stat-label">Repos</span></div>
+                        <div class="stat-box"><span class="stat-num">13+</span><span class="stat-label">Projects</span></div>
+                        <div class="stat-box"><span class="stat-num">24/7</span><span class="stat-label">Live</span></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="about-card" style="margin-bottom:20px;">
+                        <h3 style="margin-bottom:16px;">Core Technologies</h3>
+                        <div class="skills-grid">
+                            <span class="skill-tag"><i class="fab fa-js"></i> JavaScript</span>
+                            <span class="skill-tag"><i class="fab fa-react"></i> React</span>
+                            <span class="skill-tag"><i class="fab fa-python"></i> Python</span>
+                            <span class="skill-tag"><i class="fab fa-node"></i> Node.js</span>
+                            <span class="skill-tag"><i class="fas fa-database"></i> Supabase</span>
+                            <span class="skill-tag"><i class="fas fa-cube"></i> Three.js</span>
+                            <span class="skill-tag"><i class="fas fa-cloud"></i> Vercel</span>
+                            <span class="skill-tag"><i class="fab fa-git-alt"></i> Git</span>
+                            <span class="skill-tag"><i class="fas fa-robot"></i> AI/ML</span>
+                            <span class="skill-tag"><i class="fas fa-mobile-alt"></i> PWA</span>
+                        </div>
+                    </div>
+                    <div class="about-card">
+                        <p style="font-style:italic;color:var(--text-muted);text-align:center;">
+                            <i class="fas fa-quote-left" style="color:var(--accent);opacity:0.5;"></i>
+                            "Code is not just syntax — it's a tool to shape reality. Every line is a brick in the future we're building."
+                            <i class="fas fa-quote-right" style="color:var(--accent);opacity:0.5;"></i>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Projects (Core section) -->
+    <section id="projects" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Projects</h2>
+                <p>Games, apps, AI models, and tools I've built. Each project is a PWA — installable, offline-ready, and performant.</p>
+            </div>
+            <div class="projects-header">
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="games">Games</button>
+                    <button class="filter-btn" data-filter="app">Apps</button>
+                    <button class="filter-btn" data-filter="model">AI Models</button>
+                    <button class="filter-btn" data-filter="tool">Tools</button>
+                </div>
+            </div>
+            <div class="projects-grid" id="gaming-grid">
+                <!-- Projects injected by JS -->
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Rashid AI v3.0 — Product Feature -->
+    <section id="ai-product" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Rashid AI <span style="font-size:0.6em;vertical-align:middle;padding:4px 12px;background:var(--accent-subtle);color:var(--accent);border-radius:100px;">v3.0</span></h2>
+                <p>Your AI-powered development assistant — built into the browser.</p>
+            </div>
+            <div class="ai-grid">
+                <div class="ai-card">
+                    <div class="ai-card-icon"><i class="fas fa-brain"></i></div>
+                    <h4>What It Does</h4>
+                    <p>Rashid AI is a multimodal assistant that understands code, generates solutions, and responds in 10+ languages using Gemini &amp; OpenRouter APIs.</p>
+                </div>
+                <div class="ai-card">
+                    <div class="ai-card-icon"><i class="fas fa-microphone-alt"></i></div>
+                    <h4>Voice &amp; Chat</h4>
+                    <p>Speak naturally or type. Rashid AI processes voice input (Chrome/Edge), generates speech output, and maintains context across conversations.</p>
+                </div>
+                <div class="ai-card">
+                    <div class="ai-card-icon"><i class="fas fa-cube"></i></div>
+                    <h4>3D Avatar <span style="font-size:0.7em;padding:2px 8px;background:rgba(251,191,36,0.2);color:#fbbf24;border-radius:100px;">Beta</span></h4>
+                    <p>Interactive 3D robot assistant with real-time head tracking and voice animation. Visual feedback for every interaction.</p>
+                </div>
+                <div class="ai-card ai-card-wide">
+                    <div class="ai-card-icon"><i class="fas fa-code"></i></div>
+                    <div>
+                        <h4>Use Cases</h4>
+                        <p>Code refactoring · Debugging · API integration · Language translation · Creative writing · Learning assistance · System prompts · Automation scripts</p>
+                        <a href="#contact" class="btn btn-primary" style="margin-top:16px;">Try It Now <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Skills — Progress Bars -->
+    <section id="skills" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Skills</h2>
+                <p>Technologies I use daily to build production-ready systems.</p>
+            </div>
+            <div class="sk-progress-grid">
+                <div class="sk-progress-group">
+                    <h3>Frontend</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">React</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Next.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Three.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Tailwind CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">HTML/CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>Backend</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">Node.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Python</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">REST APIs</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:93%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">WebSockets</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:75%"></div></div></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>Databases</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">PostgreSQL</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Supabase</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">SQLite</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>DevOps</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">Vercel</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Git</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">CI/CD</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:80%"></div></div></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>AI & ML</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">Gemini API</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">OpenRouter</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">LLMs & NLP</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">RAG</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div></div>
+                </div>
+                <div class="sk-progress-group">
+                    <h3>Tools</h3>
+                    <div class="sk-progress"><span class="sk-progress-label">VS Code</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">Figma</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:72%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">ES Modules</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div></div>
+                    <div class="sk-progress"><span class="sk-progress-label">PWA</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Timeline — Alternating -->
+    <section id="timeline" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Timeline</h2>
+                <p>The evolution of my creative coding journey.</p>
+            </div>
+            <div class="tl">
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2025</span></div>
+                    <div class="tl-content">
+                        <h4>Rashid AI v3.0 &amp; 3D Game Engine</h4>
+                        <p>Launched multilingual AI assistant with voice synthesis, 3D avatar, and Gemini API integration. Upgraded KingCraft and Rust Construction with improved physics and rendering.</p>
+                        <div class="tl-tags"><span>AI</span><span>Three.js</span><span>Product Launch</span></div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2024</span></div>
+                    <div class="tl-content">
+                        <h4>Next-Gen Frameworks &amp; Supabase</h4>
+                        <p>Developing premium full-stack portals using Next.js and Supabase, alongside interactive 3D simulations using Three.js. Built Alking and Gem-PRO.</p>
+                        <div class="tl-tags"><span>Next.js</span><span>Supabase</span><span>Full-Stack</span></div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2023</span></div>
+                    <div class="tl-content">
+                        <h4>Full-Stack &amp; Backend Integration</h4>
+                        <p>Leveraging Supabase for real-time databases and user authentication, building responsive PWAs, and developing automation tools. Started the 3D game journey with Three.js.</p>
+                        <div class="tl-tags"><span>PWA</span><span>Supabase</span><span>Backend</span></div>
+                    </div>
+                </div>
+                <div class="tl-item">
+                    <div class="tl-marker"><span>2022</span></div>
+                    <div class="tl-content">
+                        <h4>GitHub Launch &amp; Open Source</h4>
+                        <p>Established the MOT1209 GitHub workspace, publishing original utilities, web projects, and open-source tools. Started contributing to the developer community.</p>
+                        <div class="tl-tags"><span>Open Source</span><span>GitHub</span><span>Launch</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- GitHub / Open Source — Dashboard -->
+    <section id="github" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Open Source</h2>
+                <p>Real-time GitHub dashboard — stats, repos, and activity.</p>
+            </div>
+            <div class="gh-dashboard" id="github-stats">
+                <p style="color:var(--text-muted);text-align:center;padding:60px;">Loading GitHub data...</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Vault — Knowledge Hub -->
+    <section id="vault" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>The Vault</h2>
+                <p>Knowledge repository — prompts, code, media, docs, and archives.</p>
+            </div>
+            <div class="vault-toolbar">
+                <div class="vault-search-wrap">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="vault-search" placeholder="Search vault..." aria-label="Search vault">
+                </div>
+                <div class="vault-toolbar-actions">
+                    <div class="vault-filters" role="tablist" aria-label="Vault categories">
+                        <button class="vault-filter active" data-filter="prompts" role="tab" aria-selected="true">Prompts</button>
+                        <button class="vault-filter" data-filter="code" role="tab" aria-selected="false">Code</button>
+                        <button class="vault-filter" data-filter="media" role="tab" aria-selected="false">Media</button>
+                        <button class="vault-filter" data-filter="docs" role="tab" aria-selected="false">Docs</button>
+                        <button class="vault-filter" data-filter="archives" role="tab" aria-selected="false">Archives</button>
+                    </div>
+                    <button class="vault-add-btn" id="vault-add-btn"><i class="fas fa-plus"></i> Add</button>
+                </div>
+            </div>
+            <div class="vault-section-desc" id="vault-section-desc">Click an item to copy, view, or download.</div>
+            <div class="vault-grid" id="vault-grid">
+                <!-- Items rendered by vault.js -->
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Blog Preview -->
+    <section id="blog" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Latest from the <span style="color:var(--accent);">Blog</span></h2>
+                <p>Tutorials, deep dives, and dev logs on web, game dev, AI, and open-source.</p>
+            </div>
+            <div class="blog-preview-grid" id="blog-preview-grid">
+                <div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+            <div style="text-align:center;margin-top:30px;">
+                <a href="blog/" class="btn btn-primary">View All Articles <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <!-- Contact — Final Section -->
+    <section id="contact" class="section reveal">
+        <div class="container">
+            <div class="section-head">
+                <h2>Get in Touch</h2>
+                <p>Let's build something great together. Reach out anytime.</p>
+            </div>
+            <div class="ct-grid">
+                <div class="ct-channels">
+                    <a href="mailto:zwnt45602@gmail.com" class="ct-btn ct-email" aria-label="Send email to zwnt45602@gmail.com"><i class="fas fa-envelope"></i><span>Email</span><small>zwnt45602@gmail.com</small></a>
+                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener" class="ct-btn ct-gh" aria-label="GitHub profile MOT1209"><i class="fab fa-github"></i><span>GitHub</span><small>@MOT1209</small></a>
+                    <a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener" class="ct-btn ct-yt" aria-label="YouTube channel"><i class="fab fa-youtube"></i><span>YouTube</span><small>مختبر البرمجه</small></a>
+                    <a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener" class="ct-btn ct-tt" aria-label="TikTok profile"><i class="fab fa-tiktok"></i><span>TikTok</span><small>@programmierlabor</small></a>
+                </div>
+                <form class="ct-form">
+                    <!-- Honeypot: hidden from humans, bots tend to fill it. Submissions with a value are dropped. -->
+                    <div class="ct-hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+                        <label for="ct-website">Website</label>
+                        <input type="text" id="ct-website" name="website" tabindex="-1" autocomplete="off">
+                    </div>
+                    <label for="ct-name">Name</label>
+                    <input type="text" id="ct-name" class="ct-input" placeholder="Your name" required>
+                    <label for="ct-email">Email</label>
+                    <input type="email" id="ct-email" class="ct-input" placeholder="name@example.com" required>
+                    <label for="ct-msg">Message</label>
+                    <textarea id="ct-msg" class="ct-input" rows="4" placeholder="Tell me about your project..." required></textarea>
+                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px 24px;font-size:1rem;">Send Message <i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer container" style="max-width:var(--max-width);">
+        <p>&copy; <span class="copyright-year"></span> Rashid. Built with <i class="fas fa-heart" style="color:var(--accent);"></i> and open source.</p>
+        <div class="footer-links">
+            <a href="https://github.com/MOT1209" target="_blank" rel="noopener">GitHub</a>
+            <a href="blog/">Blog</a>
+        </div>
+    </footer>
+
+    <!-- Settings Modal — Customize Workspace -->
+    <div class="settings-overlay" id="settings-overlay"></div>
+    <div class="settings-modal blur-glass" id="settings-modal" role="dialog" aria-label="Customize Workspace">
+        <div class="settings-header">
+            <h3><i class="fas fa-palette"></i> Customize Workspace</h3>
+            <button class="close-settings" id="close-settings"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="settings-body">
+            <div class="setting-section">
+                <h4>Theme</h4>
+                <div class="theme-selector">
+                    <button class="theme-opt active" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
+                    <button class="theme-opt" data-theme="light"><i class="fas fa-sun"></i> Light</button>
+                </div>
+            </div>
+            <div class="setting-section">
+                <h4>Accent Color</h4>
+                <div class="accent-picker">
+                    <div class="accent-dot active" data-color="#38bdf8" style="background:#38bdf8;"></div>
+                    <div class="accent-dot" data-color="#f472b6" style="background:#f472b6;"></div>
+                    <div class="accent-dot" data-color="#34d399" style="background:#34d399;"></div>
+                    <div class="accent-dot" data-color="#fbbf24" style="background:#fbbf24;"></div>
+                    <div class="accent-dot" data-color="#a78bfa" style="background:#a78bfa;"></div>
+                    <div class="accent-dot" data-color="#f97316" style="background:#f97316;"></div>
+                </div>
+            </div>
+            <div class="setting-section">
+                <h4>Language</h4>
+                <div class="lang-grid">
+                    <button class="lang-btn active" data-lang="en">English</button>
+                    <button class="lang-btn" data-lang="ar">العربية</button>
+                    <button class="lang-btn" data-lang="de">Deutsch</button>
+                </div>
+            </div>
+            <div class="setting-section">
+                <h4>Performance</h4>
+                <div class="toggle-row">
+                    <div>
+                        <span>Performance Mode</span>
+                        <p class="desc">Disable animations and 3D effects for speed.</p>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="perf-mode"><span class="slider"></span></label>
+                </div>
+                <div class="toggle-row">
+                    <div>
+                        <span>Reduce Motion</span>
+                        <p class="desc">Minimize transitions and motion effects.</p>
+                    </div>
+                    <label class="switch"><input type="checkbox" id="reduce-motion"><span class="slider"></span></label>
+                </div>
+            </div>
+            <div class="setting-section">
+                <h4>Info</h4>
+                <p class="desc">Design System v9 · Built with Inter + JetBrains Mono</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Voice / AI Widget -->
+    <div id="voice-widget">
+        <div class="voice-widget-toggle"><i class="fas fa-microphone-alt"></i></div>
+        <div class="voice-glow-ring"></div>
+        <div class="voice-panel" id="voice-panel">
+            <div class="voice-header">
+                <h3><span class="voice-status-dot"></span> Rashid-AI v3.0</h3>
+                <span class="voice-close"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="visualizer-container" id="avatar-viewport">
+                <div id="voice-visualizer">
+                    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+                </div>
+            </div>
+            <div class="voice-chat-body" id="voice-chat-body">
+                <div class="chat-msg bot">Hello! I am your unified AI assistant. How can I help you today?</div>
+            </div>
+            <div class="voice-footer">
+                <button id="voice-speaker-toggle" class="footer-btn"><i class="fas fa-volume-up"></i></button>
+                <div class="voice-input-wrapper">
+                    <input type="text" id="voice-input" class="voice-input" placeholder="Ask me anything about code...">
+                    <button id="voice-mic-btn" class="mic-btn"><i class="fas fa-microphone"></i></button>
+                </div>
+                <button id="voice-send-btn" class="footer-btn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/gemini-config.js"></script>
+    <script src="js/rashid-ai-v2.js?v=3.0"></script>
+    <script type="module" src="src/js/main.js?v=2.0"></script>
+    <script src="js/admin.js?v=3.1" defer></script>
+
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+  <div class="cookie-content">
+    <div class="cookie-text">
+      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
+      <span>This site uses cookies for analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+    </div>
+    <div class="cookie-actions">
+      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  var banner = document.getElementById('cookie-consent');
+  if (!banner) return;
+  // Safe localStorage access (works in private browsing)
+  var getConsent, setConsent;
+  try {
+    getConsent = function() { return localStorage.getItem('cookieConsent'); };
+    setConsent = function(v) { localStorage.setItem('cookieConsent', v); };
+  } catch(e) {
+    getConsent = function() { return null; };
+    setConsent = function() {};
+  }
+  // Check existing consent (accepted/declined)
+  var existingConsent = getConsent();
+  if (existingConsent) {
+    banner.style.display = 'none';
+    if (existingConsent === 'accepted') loadAdSense();
+    return;
+  }
+  // Show banner after short delay
+  setTimeout(function() {
+    banner.style.display = 'flex';
+    requestAnimationFrame(function() {
+      banner.classList.add('visible');
+    });
+  }, 500);
+  var AD_CLIENT = 'ca-pub-4804302403615958';
+  var AD_SLOT = '5604153803';
+  var ADSENSE_URL = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + AD_CLIENT;
+
+  function loadAdSense() {
+    var container = document.getElementById('adsense-container');
+    if (!container) return;
+    // Create ad unit markup
+    var ins = document.createElement('ins');
+    ins.className = 'adsbygoogle';
+    ins.style.cssText = 'display:block';
+    ins.setAttribute('data-ad-client', AD_CLIENT);
+    ins.setAttribute('data-ad-slot', AD_SLOT);
+    ins.setAttribute('data-ad-format', 'auto');
+    ins.setAttribute('data-full-width-responsive', 'true');
+    container.appendChild(ins);
+    container.style.display = '';
+    // Load AdSense script if not already loaded
+    if (!window.adsbygoogle) {
+      var s = document.createElement('script');
+      s.src = ADSENSE_URL;
+      s.async = true;
+      s.crossOrigin = 'anonymous';
+      s.onload = function() {
+        (adsbygoogle = window.adsbygoogle || []).push({});
+      };
+      document.head.appendChild(s);
+    } else {
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    }
+  }
+
+  // Accept
+  document.getElementById('cookie-accept').addEventListener('click', function accept() {
+    setConsent('accepted');
+    banner.classList.remove('visible');
+    setTimeout(function() { banner.style.display = 'none'; }, 500);
+    try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' }); } catch(e) {}
+    loadAdSense();
+  });
+  // Decline
+  document.getElementById('cookie-decline').addEventListener('click', function decline() {
+    setConsent('declined');
+    banner.classList.remove('visible');
+    setTimeout(function() { banner.style.display = 'none'; }, 500);
+    try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' }); } catch(e) {}
+    // Remove ad container completely
+    var c = document.getElementById('adsense-container');
+    if (c) c.remove();
+  });
+})();
+</script>
+    <script src="js/pwa-installer.js?v=1.1" defer></script>
+    <script>
+    // Dynamic year
+    document.querySelectorAll('.copyright-year').forEach(function(el){el.textContent=new Date().getFullYear();});
+    // Mobile menu
+    (function(){
+      var hm=document.getElementById('hamburger'),mm=document.getElementById('mobile-menu'),mc=document.getElementById('mobile-menu-close');
+      function openMenu(){if(mm){mm.classList.add('open');if(hm)hm.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';}}
+      function closeMenu(){if(mm){mm.classList.remove('open');if(hm)hm.setAttribute('aria-expanded','false');document.body.style.overflow='';}}
+      if(hm){hm.addEventListener('click',function(){if(mm&&mm.classList.contains('open')){closeMenu();}else{openMenu();}});}
+      if(mc){mc.addEventListener('click',closeMenu);}
+      document.querySelectorAll('.mobile-menu a').forEach(function(a){
+        a.addEventListener('click',closeMenu);
+      });
+      document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mm&&mm.classList.contains('open')){closeMenu();}});
+    })();
+    // iOS viewport fix
+    (function(){var vh=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh+'px');window.addEventListener('resize',function(){var vh2=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh2+'px');});})();
+    // Nav scroll highlight
+    document.addEventListener('scroll',function(){
+      var sections=document.querySelectorAll('section[id]');
+      var scrollPos=window.scrollY+120;
+      sections.forEach(function(s){
+        if(s.offsetTop<=scrollPos&&s.offsetTop+s.offsetHeight>scrollPos){
+          document.querySelectorAll('.nav-links a').forEach(function(a){a.classList.remove('active');});
+          var link=document.querySelector('.nav-links a[href="#'+s.id+'"]');
+          if(link)link.classList.add('active');
+        }
+      });
+    });
+    // Hidden admin access: Ctrl+Shift+A (not publicly documented)
+    document.addEventListener('keydown',function(e){
+      if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();window.open('admin/login.html','_blank');}
+    });
+    </script>
+    <script>
+    (function() {
+        var grid = document.getElementById('blog-preview-grid');
+        if (!grid) return;
+        fetch('blog/posts.json?_=' + Date.now())
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+                var sorted = posts.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+                var top = sorted.slice(0, 3);
+                grid.innerHTML = top.map(function(p) {
+                    var d = new Date(p.date + 'T00:00:00Z');
+                    var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return '<a href="blog/' + p.id + '.html" class="blog-preview-card">' +
+                        '<div class="bpc-icon" style="background:' + p.iconBg + ';color:' + p.iconColor + ';"><i class="fas fa-' + p.icon + '"></i></div>' +
+                        '<h3>' + p.title + '</h3>' +
+                        '<p>' + p.description + '</p>' +
+                        '<div class="bpc-meta"><span><i class="fas fa-calendar"></i> ' + ds + '</span><span><i class="fas fa-clock"></i> ' + p.readTime + ' min</span></div>' +
+                    '</a>';
+                }).join('');
+            })
+            .catch(function() { grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">Could not load articles.</div>'; });
+    })();
+    </script>
+</body>
+</html>

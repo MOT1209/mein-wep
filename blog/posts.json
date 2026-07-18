@@ -1,0 +1,98 @@
+[
+  {
+    "id": "css-aurora-glassmorphism-design",
+    "title": "Aurora Backgrounds and Glassmorphism with Pure CSS",
+    "description": "A dark, themeable design system built from CSS custom properties, animated gradient orbs, and backdrop-filter glass — no images required.",
+    "date": "2026-06-23",
+    "readTime": 9,
+    "lang": "en",
+    "categories": ["Web Design", "CSS"],
+    "icon": "wand-magic-sparkles",
+    "iconColor": "#818cf8",
+    "iconBg": "rgba(99,102,241,0.1)"
+  },
+  {
+    "id": "building-a-game-ai-agent-in-javascript",
+    "title": "Building a Game AI Agent in Vanilla JavaScript",
+    "description": "A finite state machine plus utility scoring gives a farming-game bot that plants, waters, harvests, and sells on its own.",
+    "date": "2026-06-21",
+    "readTime": 8,
+    "lang": "en",
+    "categories": ["Game Dev", "Game AI"],
+    "icon": "robot",
+    "iconColor": "#22d3ee",
+    "iconBg": "rgba(34,211,238,0.1)"
+  },
+  {
+    "id": "flutter-clean-architecture",
+    "title": "Clean Architecture in Flutter: Layers That Scale",
+    "description": "Separating presentation, domain, and data in a Flutter app so it stays testable and easy to change as it grows.",
+    "date": "2026-06-19",
+    "readTime": 9,
+    "lang": "en",
+    "categories": ["Mobile", "Flutter"],
+    "icon": "layer-group",
+    "iconColor": "#38bdf8",
+    "iconBg": "rgba(56,189,248,0.1)"
+  },
+  {
+    "id": "fine-tuning-llms-with-lora",
+    "title": "Fine-Tuning LLMs with LoRA: A Practical Walkthrough",
+    "description": "What low-rank adapters are, why they cut memory cost dramatically, and how I train, merge, and ship a custom language model.",
+    "date": "2026-06-17",
+    "readTime": 10,
+    "lang": "en",
+    "categories": ["AI & ML", "LoRA"],
+    "icon": "microchip",
+    "iconColor": "#a855f7",
+    "iconBg": "rgba(168,85,247,0.1)"
+  },
+  {
+    "id": "supabase-backend-for-static-sites",
+    "title": "Adding a Real Backend to a Static Site with Supabase",
+    "description": "Contact forms, a content vault, and Row Level Security on a static site — using Supabase and Postgres without running a server.",
+    "date": "2026-06-15",
+    "readTime": 9,
+    "lang": "en",
+    "categories": ["Backend", "Supabase"],
+    "icon": "database",
+    "iconColor": "#34d399",
+    "iconBg": "rgba(52,211,153,0.1)"
+  },
+  {
+    "id": "building-a-pwa-with-service-workers",
+    "title": "Building a PWA with Service Workers: Offline-First in Plain JavaScript",
+    "description": "How I made my portfolio installable and offline-capable using a Service Worker, cache strategies, and a web app manifest — no frameworks.",
+    "date": "2026-06-13",
+    "readTime": 8,
+    "lang": "en",
+    "categories": ["Web Dev", "PWA"],
+    "icon": "mobile-screen",
+    "iconColor": "#fb923c",
+    "iconBg": "rgba(251,146,60,0.1)"
+  },
+  {
+    "id": "building-kingcraft-3d-game",
+    "title": "Building KingCraft: A 3D Voxel Game in the Browser",
+    "description": "How I built a Minecraft-like voxel game using Three.js with chunk-based rendering, block physics, and keyboard controls.",
+    "date": "2026-06-11",
+    "readTime": 5,
+    "lang": "en",
+    "categories": ["Game Dev", "Three.js"],
+    "icon": "cube",
+    "iconColor": "#818cf8",
+    "iconBg": "rgba(99,102,241,0.1)"
+  },
+  {
+    "id": "portfolio-optimization-tips",
+    "title": "Portfolio Optimization: From 72 to 85 in One Day",
+    "description": "How I optimized a portfolio site with WebP images, SEO structured data, accessibility fixes, and performance tuning.",
+    "date": "2026-06-11",
+    "readTime": 4,
+    "lang": "en",
+    "categories": ["Web Dev", "SEO"],
+    "icon": "rocket",
+    "iconColor": "#38bdf8",
+    "iconBg": "rgba(56,189,248,0.1)"
+  }
+]

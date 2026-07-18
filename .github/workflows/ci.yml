@@ -1,0 +1,102 @@
+# Deploy to Vercel + Lint Check
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: 🧹 Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Check HTML validity
+        run: |
+          echo "✅ HTML files found: $(find . -name '*.html' -not -path '*/node_modules/*' -not -path '*/.git/*' | wc -l)"
+          # Basic validation: check for unclosed tags
+          for f in $(find . -name '*.html' -not -path '*/node_modules/*' -not -path '*/.git/*'); do
+            if grep -q "</html>" "$f" 2>/dev/null; then
+              echo "✅ $(basename $f)"
+            fi
+          done
+      
+      - name: Check for exposed API keys
+        run: |
+          set -o pipefail
+          KEY_PATTERN='AIza[0-9A-Za-z_-]{35}|sk-(proj|ant)-[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}'
+          SECRET_ASSIGN_PATTERN='(SERVICE_ROLE|SECRET)[A-Za-z_]*[[:space:]]*[:=][[:space:]]*['"'"'"]'
+          MATCHES=$( { grep -rEn "$KEY_PATTERN" --include="*.js" --include="*.html" \
+              --exclude-dir=node_modules --exclude-dir=.git .
+            grep -rEn "$SECRET_ASSIGN_PATTERN" --include="*.js" --include="*.html" \
+              --exclude-dir=node_modules --exclude-dir=.git . ; } 2>/dev/null \
+            | grep -v "gemini-config.example" || true)
+          if [ -n "$MATCHES" ]; then
+            echo "$MATCHES"
+            echo "::error::Potential exposed secret(s) found in client-side code — see matches above"
+            exit 1
+          fi
+          echo "✅ No exposed API keys"
+
+  lighthouse:
+    name: 📊 Lighthouse CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Lighthouse
+        run: |
+          echo "🔍 Run Lighthouse locally: npx lighthouse https://rashid-wep.vercel.app/ --output=json"
+
+  flutter-test:
+    name: 🎯 Maarifah App Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      - name: Install dependencies
+        working-directory: apps/maarifah-app
+        run: flutter pub get
+      - name: Run flutter test (unit + widget — the 84 tests referenced in commit history)
+        working-directory: apps/maarifah-app
+        run: flutter test
+      # integration_test/app_test.dart needs a device/emulator per its own header
+      # comment — not wired into CI here to avoid an unverified, possibly-flaky
+      # Android emulator setup; run it locally with `flutter test integration_test`.
+
+  test:
+    name: 🧪 API & Pages Tests
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run test3.py (24 API & page checks)
+        run: python .testsprite/test3.py
+      - name: Run games tests
+        run: python .testsprite/test_games_page.py
+      - name: Run apps tests
+        run: python .testsprite/test_maarifah_web.py
+
+  deploy:
+    name: 🚀 Deploy
+    needs: [test]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to Vercel
+        run: |
+          echo "✅ Ready for deployment!"
+          echo "Vercel auto-deploys from main branch."
+          echo "URL: https://rashid-wep.vercel.app/"

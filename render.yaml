@@ -1,0 +1,25 @@
+# Render Blueprint — Denkmalen multiplayer game server (Socket.io only).
+# Deploy: https://dashboard.render.com/blueprints → New Blueprint Instance →
+# pick this repo. The frontend stays on Vercel; this service only hosts the
+# realtime socket server.
+#
+# Deployed URL: https://denkmalen-server-hntw.onrender.com (Render appended
+# the -hntw suffix at creation; the client default in SocketProvider.tsx
+# matches it). If the URL ever changes, rebuild the game with
+#   NEXT_PUBLIC_SOCKET_URL=https://<actual-name>.onrender.com
+services:
+  - type: web
+    name: denkmalen-server
+    runtime: node
+    plan: free
+    rootDir: games/denkmalen-game
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.js
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SOCKET_ONLY
+        value: "1"
+      - key: ALLOWED_ORIGIN
+        value: https://rashid-wep.vercel.app

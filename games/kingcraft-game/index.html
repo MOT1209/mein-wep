@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ar" dir="ltr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <title>Voxel Realm</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="css/main.css" />
+  <link rel="stylesheet" href="css/hud.css" />
+  <link rel="stylesheet" href="css/menu.css" />
+  <link rel="stylesheet" href="css/inventory.css" />
+  <link rel="stylesheet" href="css/health.css" />
+  <link rel="icon" href="icons/icon-48.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+
+  <!-- شاشة تشخيص الأخطاء -->
+  <script>
+    function kcError(msg) {
+      var d = document.getElementById("kc-error");
+      if (!d) {
+        d = document.createElement("div");
+        d.id = "kc-error";
+        d.style.cssText = "position:fixed;inset:0;z-index:9999;background:rgba(120,0,0,0.95);color:#fff;font:14px/1.6 monospace;padding:24px;overflow:auto;white-space:pre-wrap;direction:ltr;text-align:left";
+        document.body.appendChild(d);
+        d.textContent = "\u26a0\ufe0f Voxel Realm \u2014 \u062e\u0637\u0623 \u0641\u064a \u0627\u0644\u062a\u062d\u0645\u064a\u0644:\n\n";
+      }
+      d.textContent += msg + "\n";
+    }
+    window.addEventListener("error", function (e) {
+      kcError((e.message || e.error || "script error") + (e.filename ? "\n  @ " + e.filename + ":" + e.lineno : ""));
+    });
+    window.addEventListener("unhandledrejection", function (e) {
+      kcError("Promise rejected: " + (e.reason && e.reason.message ? e.reason.message : e.reason));
+    });
+    if (location.protocol === "file:") {
+      kcError("\u0641\u062a\u062d\u062a \u0627\u0644\u0644\u0639\u0628\u0629 \u0639\u0628\u0631 file:// \u2014 \u0648\u062d\u062f\u0627\u062a JavaScript \u0644\u0627 \u062a\u0639\u0645\u0644 \u0628\u0647\u0630\u0627 \u0627\u0644\u0634\u0643\u0644.\n\u0634\u063a\u0651\u0644 \u062e\u0627\u062f\u0645\u064b\u0627 \u0645\u062d\u0644\u064a\u064b\u0627 \u0648\u0627\u0641\u062a\u062d:  http://127.0.0.1:8099/index.html");
+    }
+  </script>
+
+  <!-- تفريغ Cache الـ Service Worker -->
+  <script>
+    if ('caches' in window) { caches.keys().then(function(ks) { ks.forEach(function(k) { caches.delete(k); }); }); }
+    if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(function(rs) { rs.forEach(function(r) { r.unregister(); }); }); }
+  </script>
+
+  <!-- Three.js importmap (للاستخدام المباشر بدون Vite) -->
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    }
+  }
+  </script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Game",
+  "name": "KingCraft 3D",
+  "description": "Build and explore a 3D world in this creative sandbox game. Craft tools, build structures, and survive.",
+  "url": "https://rashid-wep.vercel.app/games/kingcraft-game/",
+  "author": {
+    "@type": "Person",
+    "name": "Rashid",
+    "alternateName": "MOT1209",
+    "url": "https://rashid-wep.vercel.app"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  },
+  "applicationCategory": "Simulation",
+  "browserRequirements": "Requires WebGL support",
+  "operatingSystem": "Any (Browser)"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Games",
+      "item": "https://rashid-wep.vercel.app/games/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "KingCraft 3D",
+      "item": "https://rashid-wep.vercel.app/games/kingcraft-game/"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+  <!-- ===== القائمة الرئيسية ===== -->
+  <div id="menu" class="menu">
+    <div class="menu-bg"></div>
+    <div class="menu-panel">
+      <h1 class="logo">Voxel Realm</h1>
+      <span class="logo-sub">عالم المكعبات</span>
+      <button id="btn-singleplayer" class="btn-mc">▶ Singleplayer</button>
+      <button id="btn-multiplayer" class="btn-mc disabled" disabled>🌐 Multiplayer</button>
+      <button id="btn-settings" class="btn-mc">⚙ Options...</button>
+      <button id="btn-quit" class="btn-mc">✕ Quit Game</button>
+      <p class="version">v0.6.0</p>
+    </div>
+  </div>
+
+  <!-- ===== اختيار العالم ===== -->
+  <div id="world-select" class="menu hidden">
+    <div class="menu-bg"></div>
+    <div class="world-panel">
+      <h2 class="screen-title">Singleplayer</h2>
+      <div id="world-list" class="world-list"></div>
+      <div class="world-actions">
+        <button id="btn-create-world" class="btn-mc">➕ Create New World</button>
+        <button id="btn-back-menu" class="btn-back">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== إنشاء عالم جديد ===== -->
+  <div id="world-create" class="menu hidden">
+    <div class="menu-bg"></div>
+    <div class="create-panel">
+      <h2 class="screen-title">Create New World</h2>
+      <div class="create-row">
+        <label>World Name:</label>
+        <input type="text" id="create-name" class="mc-input" value="My World" maxlength="32" />
+      </div>
+      <div class="create-row">
+        <label>Seed:</label>
+        <input type="text" id="create-seed" class="mc-input" placeholder="Random" />
+        <button id="btn-random-seed" class="btn-sm">🎲</button>
+      </div>
+      <div class="create-row">
+        <label>Game Mode:</label>
+        <select id="create-mode" class="mc-select">
+          <option value="survival">Survival</option>
+          <option value="creative">Creative</option>
+        </select>
+      </div>
+      <div class="create-row">
+        <label>Difficulty:</label>
+        <select id="create-difficulty" class="mc-select">
+          <option value="peaceful">Peaceful</option>
+          <option value="easy">Easy</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <div class="create-actions">
+        <button id="btn-create-confirm" class="btn-mc">✓ Create World</button>
+        <button id="btn-cancel-create" class="btn-back">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== قائمة الإيقاف المؤقت (مثل ماين كرافت الحقيقي) ===== -->
+  <div id="pause-menu" class="pause-overlay hidden">
+    <div class="pause-panel">
+      <button id="btn-resume" class="btn-mc">▶ Resume Game</button>
+      <button id="btn-pause-settings" class="btn-mc">⚙ Options...</button>
+      <button id="btn-save-worlds" class="btn-mc">🌍 Save &amp; Quit to Worlds</button>
+      <button id="btn-save-quit" class="btn-mc">💾 Save &amp; Quit to Title</button>
+      <button id="btn-quit-game" class="btn-mc">✕ Quit Game</button>
+    </div>
+  </div>
+
+  <!-- ===== الإعدادات ===== -->
+  <div id="settings-panel" class="settings-panel hidden">
+    <div class="settings-box">
+      <h2>⚙ Settings</h2>
+      <div class="settings-section">
+        <h3>🔊 Audio</h3>
+        <div class="settings-row"><span>Master Volume</span><input type="range" id="vol-master" min="0" max="100" value="50" /></div>
+        <div class="settings-row"><span>SFX Volume</span><input type="range" id="vol-sfx" min="0" max="100" value="80" /></div>
+        <div class="settings-row"><span>Music Volume</span><input type="range" id="vol-music" min="0" max="100" value="50" /></div>
+      </div>
+      <div class="settings-section">
+        <h3>🖱 Controls</h3>
+        <div class="settings-row"><span>Sensitivity</span><input type="range" id="sens-slider" min="1" max="20" value="10" /></div>
+        <div class="settings-row"><span>Auto-Jump</span><label class="toggle"><input type="checkbox" id="auto-jump" checked /><span class="toggle-slider"></span></label></div>
+        <div class="settings-row"><span>Invert Y</span><label class="toggle"><input type="checkbox" id="invert-y" /><span class="toggle-slider"></span></label></div>
+      </div>
+      <div class="settings-section">
+        <h3>🎬 Video</h3>
+        <div class="settings-row"><span>Render Distance</span><input type="range" id="render-dist" min="4" max="16" value="8" /></div>
+        <div class="settings-row"><span>FOV</span><input type="range" id="fov-slider" min="60" max="110" value="80" /></div>
+        <div class="settings-row"><span>Brightness</span><input type="range" id="brightness" min="50" max="150" value="100" /></div>
+      </div>
+      <div class="settings-section">
+        <h3>🌐 Language</h3>
+        <div class="settings-row"><span>Language</span><select id="lang-select" class="mc-select"><option value="ar">العربية</option><option value="en">English</option></select></div>
+      </div>
+      <div class="settings-actions">
+        <button id="btn-save-settings" class="btn-back">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== المودالات ===== -->
+  <div id="modal-quit" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h2>✕ Quit Game</h2>
+      <p>Are you sure you want to quit?</p>
+      <div class="modal-btns">
+        <button id="btn-confirm-quit" class="btn-mc">✔ Yes</button>
+        <button id="btn-cancel-quit" class="btn-mc">✖ No</button>
+      </div>
+    </div>
+  </div>
+  <div id="modal-delete" class="modal-overlay hidden">
+    <div class="modal-box">
+      <h2>🗑 Delete World</h2>
+      <p id="delete-msg">Are you sure? This cannot be undone.</p>
+      <div class="modal-btns">
+        <button id="btn-confirm-delete" class="btn-mc btn-danger">✔ Delete</button>
+        <button id="btn-cancel-delete" class="btn-mc">✖ Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== المحادثة ===== -->
+  <div id="chat-input" class="chat-input hidden">
+    <input type="text" maxlength="256" placeholder="اكتب رسالة..." />
+    <div class="chat-msgs"></div>
+  </div>
+
+  <!-- ===== HUD ===== -->
+  <div id="crosshair" class="crosshair hidden">+</div>
+
+  <div id="hud" class="hud hidden">
+    <div id="hotbar" class="hotbar"></div>
+    <div id="health-bar" class="stat-bar"></div>
+    <div id="food-bar" class="stat-bar"></div>
+  </div>
+
+  <div id="death-screen" class="hidden">
+    <h2>💀 لقد مت</h2>
+    <button id="btn-respawn" class="btn-mc">إعادة الحياة</button>
+  </div>
+
+  <div id="debug" class="debug hidden"></div>
+
+  <canvas id="game"></canvas>
+
+  <script src="../../js/unified-game-controls.js"></script>
+  <script type="module" src="js/main.js"></script>
+  <script src="js/update-checker.js"></script>
+  <!-- OTA update checker -->
+  <script>window.RASHID_APP={id:'com.rashid.kingcraft',version:'0.6.0',name:'Voxel Realm'};</script>
+  <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
+</body>
+</html>
+

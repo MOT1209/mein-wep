@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KING2 - المساعد الذكي الملكي</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+    <meta name="description" content="KING2 - المساعد الذكي المدعوم بالذكاء الاصطناعي">
+    <meta name="theme-color" content="#050a14">
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- APP CONTAINER                              -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="app-container">
+
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleSidebar()" aria-label="فتح القائمة الجانبية">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Sidebar Overlay (mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- SIDEBAR                                -->
+        <!-- ═══════════════════════════════════════ -->
+        <aside class="sidebar" id="sidebar" role="navigation" aria-label="القائمة الجانبية">
+            <!-- Header: Logo + Toggle -->
+            <div class="sidebar-header">
+                <a href="/" class="sidebar-logo" aria-label="الرئيسية - KING2">
+                    <span class="crown">👑</span>
+                    <span>KING2</span>
+                </a>
+                <button class="toggle-btn" id="sidebar-toggle-btn" onclick="toggleSidebarCollapse()" title="طي/توسيع القائمة" aria-label="طي أو توسيع القائمة">
+                    <i class="fas fa-angles-right"></i>
+                </button>
+            </div>
+
+             <!-- New Chat Button -->
+             <button class="new-chat-btn" onclick="startNewChat()" aria-label="محادثة جديدة">
+                 <i class="fas fa-plus"></i>
+                 <span>محادثة جديدة</span>
+             </button>
+
+             <!-- سجل الدردشات (Chat History) -->
+             <div class="sidebar-section">
+                 <div class="sidebar-section-title">
+                     <i class="fas fa-comments"></i>
+                     <span>سجل الدردشات</span>
+                 </div>
+                 <div class="chat-history-search">
+                     <input type="text" placeholder="بحث..." id="chat-history-search" oninput="searchChats(this.value)" aria-label="بحث في سجل الدردشات">
+                 </div>
+                 <div class="chat-history" id="chat-history" role="list" aria-label="سجل الدردشات">
+                     <!-- Chat history items will be rendered here -->
+                 </div>
+             </div>
+
+            <!-- Sidebar Divider -->
+            <div class="sidebar-divider"></div>
+
+            <!-- عن KING2 AI -->
+            <a href="/about" class="sidebar-nav-item" aria-label="عن KING2 AI">
+                <i class="fas fa-circle-info"></i>
+                <span>عن KING2 AI</span>
+            </a>
+
+            <!-- Sidebar Divider -->
+            <div class="sidebar-divider"></div>
+
+            <!-- الإعدادات + المساعدة -->
+            <button class="sidebar-nav-item" onclick="openSettings()" aria-label="الإعدادات">
+                <i class="fas fa-gear"></i>
+                <span>الإعدادات</span>
+            </button>
+            <button class="sidebar-nav-item" onclick="openHelp()" aria-label="المساعدة">
+                <i class="fas fa-question-circle"></i>
+                <span>المساعدة</span>
+            </button>
+
+            <!-- Sidebar Divider -->
+            <div class="sidebar-divider"></div>
+
+            <!-- Sidebar Footer: الحساب الشخصي -->
+            <div class="sidebar-footer">
+                <div class="sidebar-section-title" style="padding:0 12px 8px">
+                    <i class="fas fa-user"></i>
+                    <span>الحساب الشخصي</span>
+                </div>
+                <button class="settings-btn" id="sidebar-login-btn" onclick="openLoginModal()" aria-label="تسجيل الدخول">
+                    <i class="fas fa-right-to-bracket"></i>
+                    <span>دخول</span>
+                </button>
+                <button class="settings-btn" id="sidebar-register-btn" onclick="openRegisterModal()" aria-label="إنشاء حساب">
+                    <i class="fas fa-user-plus"></i>
+                    <span>تسجيل</span>
+                </button>
+                <div id="sidebar-user-info" style="display:none;padding:0 12px">
+                    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)">
+                        <span style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#d4af37,#f59e0b);display:flex;align-items:center;justify-content:center;font-size:14px">👤</span>
+                        <span style="flex:1;font-size:13px;color:#e2e8f0" id="sidebar-username">مستخدم</span>
+                    </div>
+                    <button class="settings-btn" id="sidebar-logout-btn" onclick="doLogout()" style="display:none;margin-top:4px">
+                        <i class="fas fa-right-from-bracket"></i>
+                        <span>تسجيل الخروج</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- MAIN CONTENT                           -->
+        <!-- ═══════════════════════════════════════ -->
+        <main class="main-content" role="main" aria-label="محتوى المحادثة">
+            <div class="chat-container">
+                <!-- Welcome Screen -->
+                <div class="welcome-screen" id="welcome-screen" aria-label="شاشة الترحيب">
+                    <div class="welcome-logo">👑</div>
+                    <h1>KING2 AI</h1>
+                    <p>مساعدك الذكي المدعوم بالذكاء الاصطناعي المتقدم</p>
+
+                    <!-- Feature Badges -->
+                    <div class="welcome-features">
+                        <span class="feature-badge"><i class="fas fa-robot"></i> ذكاء اصطناعي متقدم</span>
+                        <span class="feature-badge"><i class="fas fa-bolt"></i> ردود سريعة</span>
+                        <span class="feature-badge"><i class="fas fa-globe"></i> يدعم العربية</span>
+                        <span class="feature-badge"><i class="fas fa-image"></i> تحليل الصور</span>
+                    </div>
+
+                    <!-- Quick Action Cards -->
+                    <div class="quick-cards" role="group" aria-label="إجراءات سريعة">
+                        <div class="quick-card" onclick="quickAction('اكتب مقالاً عن الذكاء الاصطناعي')" tabindex="0" role="button" aria-label="اكتب مقالاً">
+                            <div class="quick-card-icon"><i class="fas fa-pen-fancy"></i></div>
+                            <div class="quick-card-text">اكتب مقالاً</div>
+                        </div>
+                        <div class="quick-card" onclick="quickAction('اكتب كود Python لحل مشكلة')" tabindex="0" role="button" aria-label="أنشئ كود">
+                            <div class="quick-card-icon"><i class="fas fa-code"></i></div>
+                            <div class="quick-card-text">أنشئ كود</div>
+                        </div>
+                        <div class="quick-card" onclick="quickAction('ساعدني في حل مشكلة برمجية')" tabindex="0" role="button" aria-label="حل مشكلة برمجية">
+                            <div class="quick-card-icon"><i class="fas fa-wrench"></i></div>
+                            <div class="quick-card-text">حل مشكلة برمجية</div>
+                        </div>
+                        <div class="quick-card" onclick="quickAction('لخص لي هذا النص')" tabindex="0" role="button" aria-label="لخص ملف">
+                            <div class="quick-card-icon"><i class="fas fa-file-lines"></i></div>
+                            <div class="quick-card-text">لخص ملف</div>
+                        </div>
+                        <div class="quick-card" onclick="quickAction('ارسم صورة لـ')" tabindex="0" role="button" aria-label="أنشئ صورة">
+                            <div class="quick-card-icon"><i class="fas fa-palette"></i></div>
+                            <div class="quick-card-text">أنشئ صورة</div>
+                        </div>
+                        <div class="quick-card" onclick="quickAction('ابحث في الإنترنت عن')" tabindex="0" role="button" aria-label="ابحث في الإنترنت">
+                            <div class="quick-card-icon"><i class="fas fa-magnifying-glass"></i></div>
+                            <div class="quick-card-text">ابحث في الإنترنت</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-messages hidden" id="chat-messages" role="log" aria-label="رسائل المحادثة" aria-live="polite"></div>
+            </div>
+
+            <!-- ═══════════════════════════════════ -->
+            <!-- MODERN INPUT AREA                  -->
+            <!-- ═══════════════════════════════════ -->
+            <div class="input-container" role="form" aria-label="منطقة إدخال الرسائل">
+                <!-- Image Preview -->
+                <div class="image-preview-container hidden" id="image-preview-container">
+                    <img id="image-preview" src="" alt="معاينة الصورة المرفقة">
+                    <div class="image-preview-info" id="image-preview-info"></div>
+                    <button class="remove-img-btn" onclick="removeImage()" aria-label="إزالة الصورة المرفقة">
+                        <i class="fas fa-xmark"></i>
+                    </button>
+                </div>
+
+                <!-- Input Wrapper -->
+                <div class="input-wrapper">
+                    <!-- Top row: Model Selector -->
+                    <div class="input-top-row">
+                        <div class="model-selector" id="model-selector">
+                            <button class="model-selector-btn" id="model-selector-btn" onclick="toggleModelSelector()" aria-label="اختيار النموذج" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="model-icon">👑</span>
+                                <span class="model-name">KING2 AI</span>
+                                <i class="fas fa-chevron-down model-arrow"></i>
+                            </button>
+                            <div class="model-dropdown" id="model-dropdown" role="listbox" aria-label="قائمة النماذج">
+                                <div class="model-option active" role="option" aria-selected="true" onclick="selectModel('king2', 'KING2 AI', '👑')">
+                                    <span class="model-option-icon">👑</span>
+                                    <span class="model-option-name">KING2 AI</span>
+                                    <i class="fas fa-check model-check"></i>
+                                </div>
+                                <div class="model-option" role="option" aria-selected="false" onclick="selectModel('groq', 'Groq Lightning', '⚡')">
+                                    <span class="model-option-icon">⚡</span>
+                                    <span class="model-option-name">Groq Lightning</span>
+                                    <i class="fas fa-check model-check"></i>
+                                </div>
+                                <div class="model-option" role="option" aria-selected="false" onclick="selectModel('gemini', 'Gemini Pro', '🔮')">
+                                    <span class="model-option-icon">🔮</span>
+                                    <span class="model-option-name">Gemini Pro</span>
+                                    <i class="fas fa-check model-check"></i>
+                                </div>
+                                <div class="model-option" role="option" aria-selected="false" onclick="selectModel('openrouter', 'OpenRouter', '🌐')">
+                                    <span class="model-option-icon">🌐</span>
+                                    <span class="model-option-name">OpenRouter</span>
+                                    <i class="fas fa-check model-check"></i>
+                                </div>
+                                <div class="model-option" role="option" aria-selected="false" onclick="selectModel('gemma', 'Gemma 4 (محلي)', '💎')">
+                                    <span class="model-option-icon">💎</span>
+                                    <span class="model-option-name">Gemma 4 (محلي)</span>
+                                    <i class="fas fa-check model-check"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input Row -->
+                    <div class="input-row">
+                        <!-- Attach Button -->
+                        <label class="input-action-btn attach-btn" for="image-input" title="إرفاق صورة" aria-label="إرفاق صورة">
+                            <i class="fas fa-paperclip"></i>
+                        </label>
+                        <input type="file" id="image-input" accept="image/*" style="display:none" onchange="handleImage(this)" aria-label="اختيار صورة">
+
+                        <!-- Textarea -->
+                        <textarea
+                            id="message-input"
+                            class="message-input"
+                            placeholder="اكتب رسالتك هنا..."
+                            rows="1"
+                            onkeydown="handleKeyDown(event)"
+                            aria-label="رسالة النص"
+                        ></textarea>
+
+                        <!-- Voice Button -->
+                        <button class="input-action-btn voice-btn" id="voice-btn" onclick="toggleVoice()" title="إدخال صوتي" aria-label="إدخال صوتي">
+                            <i class="fas fa-microphone"></i>
+                        </button>
+
+                        <!-- Stop Button (hidden by default) -->
+                        <button class="input-action-btn stop-btn hidden" id="stop-btn" onclick="stopGeneration()" title="إيقاف التوليد" aria-label="إيقاف توليد الرد">
+                            <i class="fas fa-stop"></i>
+                        </button>
+
+                        <!-- Send Button -->
+                        <button class="send-btn" id="send-btn" onclick="sendMessage()" disabled aria-label="إرسال الرسالة" aria-disabled="true">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- TOAST NOTIFICATION                         -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="toast" id="toast" role="alert" aria-live="assertive">
+        <i class="fas fa-check-circle"></i>
+        <span>تم النسخ!</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- LOADING SKELETON TEMPLATE                  -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="skeleton-message hidden" id="skeleton-template" aria-hidden="true">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-content">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line short"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- LOGIN MODAL                                -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="login-modal-overlay" id="login-modal" style="display:none" onclick="closeLoginOnOverlay(event)" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+        <div class="login-modal">
+            <button class="login-close-btn" onclick="closeLoginModal()" aria-label="إغلاق">
+                <i class="fas fa-xmark"></i>
+            </button>
+            <div class="crown-icon">👑</div>
+            <h2 id="login-modal-title">مرحباً بعودتك</h2>
+            <p class="subtitle">سجل دخولك للوصول إلى المساعد الذكي</p>
+
+            <!-- Google Button -->
+            <button class="oauth-btn oauth-google" onclick="oauthLogin('google')" aria-label="تسجيل الدخول عبر Google">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                <span>تسجيل الدخول عبر Google</span>
+            </button>
+
+            <!-- GitHub Button -->
+            <button class="oauth-btn oauth-github" onclick="oauthLogin('github')" aria-label="تسجيل الدخول عبر GitHub">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M12 .3C5.37.3 0 5.67 0 12.3c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.57 0-.285-.015-1.23-.015-2.235-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.399s2.04.132 3 .399c2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.3 0 .315.21.69.825.57A12.02 12.02 0 0024 12.3c0-6.63-5.37-12-12-12z"/></svg>
+                <span>تسجيل الدخول عبر GitHub</span>
+            </button>
+
+            <!-- Divider -->
+            <div class="oauth-divider"><span>أو بكلمة المرور</span></div>
+
+            <input type="text" id="login-username" placeholder="اسم المستخدم" autocomplete="username">
+            <input type="password" id="login-password" placeholder="كلمة المرور" autocomplete="current-password">
+            <button class="login-btn" onclick="doLogin()">دخول</button>
+            <div class="login-error" id="login-error"></div>
+            <div class="login-footer">
+                <a href="#" onclick="event.preventDefault();openRegisterModal()">إنشاء حساب جديد</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- REGISTER MODAL                             -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="login-modal-overlay" id="register-modal" style="display:none" onclick="closeRegisterOnOverlay(event)" role="dialog" aria-modal="true" aria-labelledby="register-modal-title">
+        <div class="login-modal">
+            <button class="login-close-btn" onclick="closeRegisterModal()" aria-label="إغلاق">
+                <i class="fas fa-xmark"></i>
+            </button>
+            <div class="crown-icon">👑</div>
+            <h2 id="register-modal-title">انضم إلينا</h2>
+            <p class="subtitle">أنشئ حساباً وابدأ رحلتك مع KING2</p>
+            <input type="text" id="register-username" placeholder="اسم المستخدم" autocomplete="username">
+            <input type="password" id="register-password" placeholder="كلمة المرور" autocomplete="new-password">
+            <input type="password" id="register-confirm" placeholder="تأكيد كلمة المرور" autocomplete="new-password">
+            <button class="login-btn" onclick="doRegister()">إنشاء الحساب</button>
+            <div class="login-error" id="register-error"></div>
+            <div class="login-footer">
+                <a href="#" onclick="event.preventDefault();closeRegisterModal();document.getElementById('login-modal').style.display='flex'">لديك حساب؟ تسجيل الدخول</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!-- SETTINGS MODAL                             -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="settings-modal-overlay" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+        <div class="settings-modal">
+            <div class="settings-header">
+                <h2 id="settings-modal-title"><span>👑</span> لوحة تحكم KING2</h2>
+                <button class="settings-close-btn" onclick="closeSettings()" aria-label="إغلاق الإعدادات">
+                    <i class="fas fa-xmark"></i>
+                </button>
+            </div>
+            <div class="settings-db-bar" id="settings-db-bar">
+                <div class="settings-db-badge settings-db-ok" id="settings-db-badge">
+                    <i class="fas fa-circle-notch fa-spin"></i>
+                    <span>جاري التحميل...</span>
+                </div>
+                <div style="color:#94a3b8;font-size:0.8rem" id="settings-db-info">—</div>
+                <div style="margin-right:auto;color:#64748b;font-size:0.75rem" id="settings-last-updated">—</div>
+            </div>
+            <div class="settings-stats" id="settings-stats">
+                <div class="settings-card"><div class="settings-card-icon">💬</div><div class="settings-card-val" id="sstat-msgs">—</div><div class="settings-card-lbl">إجمالي الرسائل</div></div>
+                <div class="settings-card"><div class="settings-card-icon">👥</div><div class="settings-card-val" id="sstat-users">—</div><div class="settings-card-lbl">المستخدمون</div></div>
+                <div class="settings-card"><div class="settings-card-icon">🧠</div><div class="settings-card-val" id="sstat-kb">—</div><div class="settings-card-lbl">قاعدة المعرفة</div></div>
+                <div class="settings-card"><div class="settings-card-icon">⚡</div><div class="settings-card-val" id="sstat-api">—</div><div class="settings-card-lbl">استدعاءات API</div></div>
+                <div class="settings-card"><div class="settings-card-icon">🧬</div><div class="settings-card-val" id="sstat-algos">—</div><div class="settings-card-lbl">الخوارزميات</div></div>
+                <div class="settings-card"><div class="settings-card-icon">🔧</div><div class="settings-card-val" id="sstat-corr">—</div><div class="settings-card-lbl">Self-Corrections</div></div>
+            </div>
+            <div class="settings-tabs" id="settings-tabs-bar" role="tablist" aria-label="تبويبات الإعدادات">
+                <button class="settings-tab active" role="tab" aria-selected="true" onclick="switchSettingsTab('chats', this)"><i class="fas fa-comments"></i> المحادثات</button>
+                <button class="settings-tab" role="tab" aria-selected="false" onclick="switchSettingsTab('kaggle', this)"><i class="fas fa-brain"></i> Kaggle</button>
+                <button class="settings-tab" role="tab" aria-selected="false" onclick="switchSettingsTab('health', this)"><i class="fas fa-database"></i> قاعدة البيانات</button>
+                <button class="settings-tab" role="tab" aria-selected="false" onclick="switchSettingsTab('video', this)"><i class="fas fa-film"></i> المونتاج</button>
+                <button class="settings-tab" id="admin-mode-btn" role="tab" aria-selected="false" onclick="switchSettingsTab('admin', this)" style="display:none;color:#d4af37;border-color:#d4af37"><i class="fas fa-crown"></i> لوحة التحكم الملكية</button>
+            </div>
+            <div class="settings-content" id="settings-content-chats" role="tabpanel">
+                <input class="settings-search" id="settings-chat-search" placeholder="🔍 بحث في المحادثات..." oninput="debounceSettingsSearch()" aria-label="بحث في المحادثات">
+                <div style="overflow-x:auto">
+                    <table>
+                        <thead><tr><th>#</th><th>المستخدم</th><th>الرسالة</th><th>الرد</th><th>النموذج</th><th>الوقت</th></tr></thead>
+                        <tbody id="settings-chat-tbody"><tr><td colspan="6"><div class="settings-empty"><i class="fas fa-circle-notch fa-spin"></i></div></td></tr></tbody>
+                    </table>
+                </div>
+                <div class="settings-pager">
+                    <button class="settings-pager-btn" onclick="pageSettingsChats(-1)"><i class="fas fa-chevron-right"></i> السابق</button>
+                    <span class="settings-pager-info" id="settings-chat-pager">—</span>
+                    <button class="settings-pager-btn" onclick="pageSettingsChats(1)">التالي <i class="fas fa-chevron-left"></i></button>
+                </div>
+            </div>
+            <div class="settings-content" id="settings-content-kaggle" style="display:none" role="tabpanel">
+                <div class="settings-kaggle-grid">
+                    <div class="settings-kg-item"><div class="settings-kg-num" id="skg-algos">0</div><div class="settings-kg-lbl">خوارزمية</div></div>
+                    <div class="settings-kg-item"><div class="settings-kg-num" id="skg-notebooks">0</div><div class="settings-kg-lbl">Notebooks</div></div>
+                    <div class="settings-kg-item"><div class="settings-kg-num" id="skg-datasets">0</div><div class="settings-kg-lbl">Datasets</div></div>
+                    <div class="settings-kg-item"><div class="settings-kg-num" id="skg-corr">0</div><div class="settings-kg-lbl">تصحيحات</div></div>
+                </div>
+                <div class="settings-kg-msg" id="skg-msg">—</div>
+                <div style="text-align:center;margin-top:16px">
+                    <span class="settings-badge settings-badge-idle" id="skg-phase">idle</span>
+                    <span style="margin-right:12px;color:#94a3b8;font-size:0.8rem" id="skg-available">—</span>
+                </div>
+            </div>
+            <div class="settings-content" id="settings-content-health" style="display:none" role="tabpanel">
+                <table>
+                    <thead><tr><th>العنصر</th><th>الحالة</th></tr></thead>
+                    <tbody id="settings-health-tbody">
+                        <tr><td>الاتصال بقاعدة البيانات</td><td id="sh-db-status">—</td></tr>
+                        <tr><td>نوع قاعدة البيانات</td><td id="sh-db-type">—</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="settings-content" id="settings-content-video" style="display:none" role="tabpanel">
+                <div style="text-align:center;padding:30px 20px">
+                    <div style="font-size:48px;margin-bottom:16px">🎬</div>
+                    <h3 style="color:#d4af37;margin-bottom:8px">محرك المونتاج الذكي</h3>
+                    <p style="color:#64748b;font-size:0.85rem;margin-bottom:24px">أنشئ مشاريع فيديو ذكية بتحليل المشاهد والصوت</p>
+                    <div style="display:flex;flex-direction:column;gap:12px;max-width:400px;margin:0 auto">
+                        <input type="text" id="video-project-name" placeholder="اسم المشروع" style="padding:12px;border-radius:8px;border:1px solid #334155;background:#0f1d32;color:#fff">
+                        <div style="display:flex;gap:10px">
+                            <button class="settings-pager-btn" onclick="videoCreateProject()" style="flex:1;padding:12px;font-size:0.85rem;background:#d4af37;color:#050a14;font-weight:700"><i class="fas fa-plus"></i> مشروع جديد</button>
+                            <button class="settings-pager-btn" onclick="videoAddFiles()" style="flex:1;padding:12px;font-size:0.85rem"><i class="fas fa-video"></i> إضافة فيديوهات</button>
+                        </div>
+                        <input type="file" id="video-file-input" multiple accept="video/*" style="display:none" onchange="handleVideoUpload(this)">
+                        <button class="settings-pager-btn" onclick="videoDetectScenes()" style="padding:12px;font-size:0.85rem"><i class="fas fa-film"></i> تحليل المشاهد</button>
+                        <button class="settings-pager-btn" onclick="videoRender()" style="padding:12px;font-size:0.85rem;background:#10b981"><i class="fas fa-play"></i> تصيير المونتاج</button>
+                    </div>
+                    <div id="video-status" style="margin-top:20px;padding:16px;background:rgba(15,20,40,0.6);border-radius:12px;border:1px solid rgba(212,175,55,0.1)">
+                        <div style="color:#d4af37;margin-bottom:8px;font-weight:600">حالة المشروع</div>
+                        <div id="video-project-status" style="color:#64748b">—</div>
+                    </div>
+                </div>
+            </div>
+            <div class="settings-content" id="settings-content-admin" style="display:none" role="tabpanel">
+                <div style="text-align:center;padding:40px 20px">
+                    <div style="font-size:48px;margin-bottom:16px">👑</div>
+                    <h3 style="color:#d4af37;margin-bottom:8px">لوحة التحكم الملكية</h3>
+                    <p style="color:#64748b;font-size:0.85rem;margin-bottom:24px">مرحباً بك يا الملك. هذه لوحة التحكم الإدارية الكاملة.</p>
+                    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+                        <button class="settings-pager-btn" onclick="refreshAllSettings()" style="padding:10px 20px;font-size:0.85rem"><i class="fas fa-sync-alt"></i> تحديث البيانات</button>
+                        <button class="settings-pager-btn" onclick="exportAllData()" style="padding:10px 20px;font-size:0.85rem"><i class="fas fa-download"></i> تصدير البيانات</button>
+                    </div>
+                    <div id="admin-full-stats" style="margin-top:24px;text-align:right">
+                        <div style="background:rgba(15,20,40,0.6);border-radius:12px;padding:20px;border:1px solid rgba(212,175,55,0.1)">
+                            <h4 style="color:#d4af37;margin-bottom:16px;font-size:0.9rem"><i class="fas fa-chart-bar"></i> إحصائيات شاملة</h4>
+                            <div id="admin-stats-detail">جاري التحميل...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- HELP MODAL                             -->
+    <!-- ═══════════════════════════════════════ -->
+    <div class="login-modal-overlay" id="help-modal" style="display:none" onclick="if(event.target===this)closeHelp()" role="dialog" aria-modal="true">
+        <div class="login-modal" style="max-width:500px;padding:0;overflow:hidden">
+            <button class="modal-close-btn" onclick="closeHelp()" aria-label="إغلاق"><i class="fas fa-xmark"></i></button>
+            <div style="padding:40px 32px 32px">
+                <div style="text-align:center;margin-bottom:24px">
+                    <div style="font-size:48px;margin-bottom:8px">👑</div>
+                    <h2 style="color:#e2e8f0;margin:0">المساعدة</h2>
+                    <p style="color:#64748b;font-size:0.85rem;margin-top:8px">كيف يمكننا مساعدتك؟</p>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:12px">
+                    <div style="background:rgba(15,20,40,0.6);border-radius:12px;padding:16px;border:1px solid rgba(212,175,55,0.1)">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                            <i class="fas fa-comment" style="color:#d4af37;font-size:1.2rem"></i>
+                            <span style="color:#e2e8f0;font-weight:600">كيف أستخدم KING2 AI؟</span>
+                        </div>
+                        <p style="color:#94a3b8;font-size:0.85rem;margin:0;line-height:1.6">ما عليك سوى كتابة سؤالك في مربع النص والضغط على إرسال. يمكنك أيضاً إرفاق الصور لتحليلها، أو طلب إنشاء صور.</p>
+                    </div>
+                    <div style="background:rgba(15,20,40,0.6);border-radius:12px;padding:16px;border:1px solid rgba(212,175,55,0.1)">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                            <i class="fas fa-robot" style="color:#d4af37;font-size:1.2rem"></i>
+                            <span style="color:#e2e8f0;font-weight:600">ما هي النماذج المستخدمة؟</span>
+                        </div>
+                        <p style="color:#94a3b8;font-size:0.85rem;margin:0;line-height:1.6">يدعم KING2 AI عدة مزودين: Gemini، Groq، OpenRouter، و OpenCode لضمان أفضل استجابة ممكنة.</p>
+                    </div>
+                    <div style="background:rgba(15,20,40,0.6);border-radius:12px;padding:16px;border:1px solid rgba(212,175,55,0.1)">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+                            <i class="fas fa-image" style="color:#d4af37;font-size:1.2rem"></i>
+                            <span style="color:#e2e8f0;font-weight:600">هل يمكنني إنشاء صور؟</span>
+                        </div>
+                        <p style="color:#94a3b8;font-size:0.85rem;margin:0;line-height:1.6">نعم، يمكنك طلب إنشاء صور وسيقوم النظام بتوليدها تلقائياً باستخدام أفضل نماذج توليد الصور.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/script.js"></script>
+</body>
+</html>

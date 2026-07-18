@@ -1,0 +1,97 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="50%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="720" fill="url(#bg)"/>
+
+  <!-- Sky gradient -->
+  <rect x="0" y="0" width="1280" height="400" fill="url(#sky)" opacity="0.3"/>
+
+  <!-- Ground blocks -->
+  <rect x="0" y="480" width="1280" height="240" fill="#2d5a27"/>
+  <rect x="0" y="480" width="1280" height="4" fill="#4ade80"/>
+
+  <!-- Voxel blocks (3D isometric illusion) -->
+  <!-- Block 1 -->
+  <polygon points="300,320 340,300 380,320 340,340" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+  <polygon points="300,320 340,340 340,380 300,360" fill="#4f46e5" stroke="#818cf8" stroke-width="1"/>
+  <polygon points="340,340 380,320 380,360 340,380" fill="#4338ca" stroke="#818cf8" stroke-width="1"/>
+  <!-- Block 2 -->
+  <polygon points="380,300 420,280 460,300 420,320" fill="#6366f1" stroke="#818cf8" stroke-width="2"/>
+  <polygon points="380,300 420,320 420,360 380,340" fill="#4f46e5" stroke="#818cf8" stroke-width="1"/>
+  <polygon points="420,320 460,300 460,340 420,360" fill="#4338ca" stroke="#818cf8" stroke-width="1"/>
+  <!-- Block 3 -->
+  <polygon points="460,280 500,260 540,280 500,300" fill="#f59e0b" stroke="#fbbf24" stroke-width="2"/>
+  <polygon points="460,280 500,300 500,340 460,320" fill="#d97706" stroke="#fbbf24" stroke-width="1"/>
+  <polygon points="500,300 540,280 540,320 500,340" fill="#b45309" stroke="#fbbf24" stroke-width="1"/>
+  <!-- Block 4 - gold -->
+  <polygon points="540,260 580,240 620,260 580,280" fill="#10b981" stroke="#34d399" stroke-width="2"/>
+  <polygon points="540,260 580,280 580,320 540,300" fill="#059669" stroke="#34d399" stroke-width="1"/>
+  <polygon points="580,280 620,260 620,300 580,320" fill="#047857" stroke="#34d399" stroke-width="1"/>
+  <!-- Tree -->
+  <rect x="700" y="340" width="20" height="80" fill="#8b5cf6"/>
+  <circle cx="710" cy="310" r="40" fill="#4ade80" opacity="0.8"/>
+  <circle cx="690" cy="330" r="30" fill="#22c55e" opacity="0.8"/>
+  <circle cx="730" cy="330" r="30" fill="#22c55e" opacity="0.8"/>
+  <!-- Second tree -->
+  <rect x="920" y="360" width="16" height="60" fill="#8b5cf6"/>
+  <circle cx="928" cy="330" r="32" fill="#4ade80" opacity="0.7"/>
+  <circle cx="910" cy="345" r="24" fill="#22c55e" opacity="0.7"/>
+  <circle cx="946" cy="345" r="24" fill="#22c55e" opacity="0.7"/>
+
+  <!-- Player character (third person) -->
+  <!-- Body -->
+  <rect x="580" y="400" width="24" height="36" rx="4" fill="#6366f1"/>
+  <!-- Head -->
+  <circle cx="592" cy="388" r="14" fill="#fbbf24"/>
+  <!-- Eyes -->
+  <circle cx="587" cy="386" r="3" fill="#1e293b"/>
+  <circle cx="597" cy="386" r="3" fill="#1e293b"/>
+  <!-- Legs -->
+  <rect x="582" y="436" width="8" height="16" rx="3" fill="#4f46e5"/>
+  <rect x="594" y="436" width="8" height="16" rx="3" fill="#4f46e5"/>
+  <!-- Arms -->
+  <rect x="558" y="402" width="14" height="6" rx="3" fill="#818cf8"/>
+  <rect x="612" y="402" width="14" height="6" rx="3" fill="#818cf8"/>
+
+  <!-- Crosshair -->
+  <line x1="640" y1="350" x2="640" y2="370" stroke="#fff" stroke-width="2" opacity="0.8"/>
+  <line x1="630" y1="360" x2="650" y2="360" stroke="#fff" stroke-width="2" opacity="0.8"/>
+
+  <!-- Clouds -->
+  <ellipse cx="200" cy="120" rx="80" ry="30" fill="#fff" opacity="0.08"/>
+  <ellipse cx="900" cy="150" rx="100" ry="35" fill="#fff" opacity="0.06"/>
+  <ellipse cx="500" cy="80" rx="60" ry="20" fill="#fff" opacity="0.05"/>
+
+  <!-- HUD overlay elements -->
+  <!-- Hotbar -->
+  <rect x="480" y="620" width="320" height="48" rx="8" fill="rgba(0,0,0,0.5)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <rect x="488" y="628" width="40" height="32" rx="4" fill="rgba(56,189,248,0.2)" stroke="#38bdf8" stroke-width="1"/>
+  <rect x="532" y="628" width="40" height="32" rx="4" fill="rgba(255,255,255,0.05)"/>
+  <rect x="576" y="628" width="40" height="32" rx="4" fill="rgba(255,255,255,0.05)"/>
+  <rect x="620" y="628" width="40" height="32" rx="4" fill="rgba(255,255,255,0.05)"/>
+  <rect x="664" y="628" width="40" height="32" rx="4" fill="rgba(255,255,255,0.05)"/>
+  <rect x="708" y="628" width="40" height="32" rx="4" fill="rgba(255,255,255,0.05)"/>
+  <rect x="752" y="628" width="40" height="32" rx="4" fill="rgba(255,255,255,0.05)"/>
+
+  <!-- Health bar -->
+  <rect x="480" y="584" width="120" height="12" rx="6" fill="rgba(0,0,0,0.5)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <rect x="482" y="586" width="80" height="8" rx="4" fill="#ef4444"/>
+
+  <!-- Hunger bar -->
+  <rect x="620" y="584" width="120" height="12" rx="6" fill="rgba(0,0,0,0.5)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+  <rect x="622" y="586" width="90" height="8" rx="4" fill="#f59e0b"/>
+
+  <!-- Title -->
+  <text x="640" y="80" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="48" font-weight="900" fill="#fff" opacity="0.3">KingCraft</text>
+</svg>

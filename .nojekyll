@@ -1,0 +1,2 @@
+# This file tells GitHub Pages not to run the Jekyll processing engine.
+# This prevents issues with folders starting with underscores and speeds up deployment.

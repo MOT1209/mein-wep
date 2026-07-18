@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A practical guide to turning a vanilla JavaScript site into an installable Progressive Web App with a Service Worker, offline caching, and a web app manifest.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/blog/building-a-pwa-with-service-workers.html">
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Building a PWA with Service Workers: Offline-First in Plain JavaScript">
+    <meta property="og:description" content="How I made my portfolio installable and offline-capable using a Service Worker, cache strategies, and a manifest — no frameworks.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/blog/building-a-pwa-with-service-workers.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Building a PWA with Service Workers">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <title>Building a PWA with Service Workers — Rashid Blog</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": "Building a PWA with Service Workers: Offline-First in Plain JavaScript",
+      "description": "How I made my portfolio installable and offline-capable using a Service Worker, cache strategies, and a web app manifest — with no frameworks.",
+      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209","url":"https://rashid-wep.vercel.app"},
+      "datePublished": "2026-06-13",
+      "image": "https://rashid-wep.vercel.app/images/logo.webp",
+      "url": "https://rashid-wep.vercel.app/blog/building-a-pwa-with-service-workers.html",
+      "keywords": ["PWA","Service Worker","JavaScript","Offline","Web Dev"]
+    }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css?v=9.2">
+    <link rel="stylesheet" href="../css/blog-post.css?v=1.0">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "https://rashid-wep.vercel.app/blog/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 3,
+      "name": "Building a PWA with Service Workers: Offline-First in Plain JavaScript",
+      "item": "https://rashid-wep.vercel.app/blog/building-a-pwa-with-service-workers.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="dark-mode">
+    <nav class="navbar" role="navigation">
+        <div class="nav-inner">
+            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
+            <div class="nav-links">
+                <a href="../index.html">Home</a>
+                <a href="index.html">Blog</a>
+                <a href="../index.html#projects">Projects</a>
+                <a href="../index.html#contact">Contact</a>
+            </div>
+            <div class="nav-actions">
+                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="blog-post">
+        <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
+
+        <div class="post-meta">
+            <span><i aria-hidden="true" class="fas fa-calendar"></i> June 13, 2026</span>
+            <span><i aria-hidden="true" class="fas fa-clock"></i> 8 min read</span>
+            <span class="post-tag">Web Dev</span>
+            <span class="post-tag">PWA</span>
+        </div>
+
+        <h1>Building a PWA with Service Workers: Offline-First in Plain JavaScript</h1>
+
+        <div class="post-content">
+            <p>My portfolio is built with vanilla HTML, CSS, and JavaScript — no build step, no framework. That makes it fast, but it also means I had to wire up Progressive Web App (PWA) features by hand. The payoff is real: the site is installable on a phone home screen, opens instantly on repeat visits, and still loads core pages with no network. Here is exactly how the pieces fit together.</p>
+
+            <h2>What Makes a Site a PWA</h2>
+            <p>Three ingredients turn an ordinary website into an installable app:</p>
+            <ul>
+                <li>A <strong>web app manifest</strong> — JSON metadata describing the app's name, icons, and colors.</li>
+                <li>A <strong>Service Worker</strong> — a background script that intercepts network requests and serves cached responses.</li>
+                <li><strong>HTTPS</strong> — required for Service Workers (localhost is exempt for development).</li>
+            </ul>
+            <p>Get all three right and browsers show an "Install" prompt, and the site keeps working when the connection drops.</p>
+
+            <h2>The Web App Manifest</h2>
+            <p>The manifest lives at <code>manifest.json</code> and is referenced from the <code>&lt;head&gt;</code> with <code>&lt;link rel="manifest" href="manifest.json"&gt;</code>. A minimal but complete version looks like this:</p>
+            <pre><code>{
+  "name": "Rashid — Developer Portfolio",
+  "short_name": "Rashid",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#050507",
+  "theme_color": "#6366f1",
+  "icons": [
+    { "src": "/images/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/images/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}</code></pre>
+            <p>The two icon sizes matter: <strong>192×192</strong> for the home-screen icon and <strong>512×512</strong> for the splash screen. <code>display: standalone</code> is what hides the browser chrome so it feels like a native app.</p>
+
+            <h2>Registering the Service Worker</h2>
+            <p>Registration is one small block in the main script. I guard it behind a feature check so older browsers simply ignore it:</p>
+            <pre><code>if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () =&gt; {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then(reg =&gt; console.log('SW registered:', reg.scope))
+      .catch(err =&gt; console.warn('SW failed:', err));
+  });
+}</code></pre>
+            <p>Registering on the <code>load</code> event keeps the Service Worker from competing with the critical resources the page needs to render first.</p>
+
+            <h2>The Cache Lifecycle</h2>
+            <p>A Service Worker has three lifecycle events that matter: <strong>install</strong>, <strong>activate</strong>, and <strong>fetch</strong>. During install I pre-cache an "app shell" — the handful of files needed to render any page:</p>
+            <pre><code>const CACHE = 'Rashid-v11';
+const SHELL = [
+  '/', '/index.html', '/offline.html',
+  '/css/style.css', '/src/js/main.js',
+  '/images/logo.webp'
+];
+
+self.addEventListener('install', e =&gt; {
+  e.waitUntil(
+    caches.open(CACHE).then(c =&gt; c.addAll(SHELL))
+  );
+  self.skipWaiting();
+});</code></pre>
+            <p>The cache name carries a version (<code>Rashid-v11</code>). Bumping that number is how I force a clean update — the old cache is deleted on activate:</p>
+            <pre><code>self.addEventListener('activate', e =&gt; {
+  e.waitUntil(
+    caches.keys().then(keys =&gt;
+      Promise.all(
+        keys.filter(k =&gt; k !== CACHE)
+            .map(k =&gt; caches.delete(k))
+      )
+    )
+  );
+  self.clients.claim();
+});</code></pre>
+
+            <h2>Choosing a Fetch Strategy</h2>
+            <p>The fetch handler is where you decide what to serve. There is no single "right" strategy — it depends on the resource:</p>
+            <ul>
+                <li><strong>Cache-first</strong> — best for static assets (CSS, fonts, logos) that rarely change. Fast, but can serve stale files until the cache version bumps.</li>
+                <li><strong>Network-first</strong> — best for HTML and API data you want fresh. Falls back to cache when offline.</li>
+                <li><strong>Stale-while-revalidate</strong> — serve the cached copy instantly, then update the cache in the background for next time.</li>
+            </ul>
+            <p>I use network-first for navigation requests so visitors always get the latest content, with a graceful offline page as the fallback:</p>
+            <pre><code>self.addEventListener('fetch', e =&gt; {
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() =&gt;
+        caches.match('/offline.html')
+      )
+    );
+    return;
+  }
+  // cache-first for everything else
+  e.respondWith(
+    caches.match(e.request).then(hit =&gt;
+      hit || fetch(e.request)
+    )
+  );
+});</code></pre>
+
+            <h2>The Offline Fallback Page</h2>
+            <p>Every PWA should ship an <code>offline.html</code> — a tiny self-contained page (no external CSS, no fonts) that explains the user is offline and offers a retry button. Keep it under a few kilobytes so it caches instantly and renders even on the worst connection.</p>
+
+            <h2>Testing and Debugging</h2>
+            <p>Chrome DevTools has an <strong>Application</strong> tab that became my best friend here:</p>
+            <ul>
+                <li><strong>Service Workers</strong> panel — see the active worker, force an update, or toggle "Offline" to simulate no network.</li>
+                <li><strong>Cache Storage</strong> — inspect exactly what got cached under each version key.</li>
+                <li><strong>Manifest</strong> — Chrome validates your manifest and warns about missing icons or fields.</li>
+                <li><strong>Lighthouse</strong> — the PWA audit catches the common mistakes (no <code>theme_color</code>, no 512px icon, not served over HTTPS).</li>
+            </ul>
+
+            <h2>The Update Trap</h2>
+            <p>The single most confusing thing about Service Workers is caching the Service Worker itself. A new <code>sw.js</code> only takes over after every tab is closed unless you call <code>skipWaiting()</code> and <code>clients.claim()</code>. I learned this the hard way after shipping a fix that "didn't deploy" — it had deployed, the old worker just kept serving stale files. Always bump the cache version with every meaningful release.</p>
+
+            <h2>Was It Worth It?</h2>
+            <p>For a portfolio, absolutely. Repeat loads feel instant because the shell comes straight from cache, the site survives flaky mobile connections, and visitors can pin it to their home screen. None of it required a framework — just a manifest, one background script, and a clear caching strategy. If you run a static site, you can add the same offline-first behavior in an afternoon.</p>
+
+            <p>You can see this in action across the whole site — try loading a page, going offline, and navigating around.</p>
+        </div>
+    </main>
+    <div id="reading-progress"></div>
+    <script src="../src/js/main.js" type="module"></script>
+    <script>
+    (function() {
+        var bar = document.getElementById('reading-progress');
+        window.addEventListener('scroll', function() {
+            var h = document.documentElement;
+            var scrollTop = h.scrollTop || document.body.scrollTop;
+            var scrollHeight = h.scrollHeight - h.clientHeight;
+            bar.style.width = (scrollTop / scrollHeight) * 100 + '%';
+        });
+        document.querySelectorAll('.post-content pre').forEach(function(pre) {
+            var btn = document.createElement('button');
+            btn.className = 'copy-code-btn';
+            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+            pre.style.position = 'relative';
+            pre.appendChild(btn);
+            btn.addEventListener('click', function() {
+                var code = pre.querySelector('code');
+                var text = code ? code.textContent : pre.textContent;
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(function() {
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        btn.classList.add('copied');
+                        setTimeout(function() { btn.innerHTML = '<i class="fas fa-copy"></i> Copy'; btn.classList.remove('copied'); }, 2000);
+                    });
+                }
+            });
+        });
+        var currentId = 'building-a-pwa-with-service-workers';
+        fetch('posts.json?_=' + Date.now())
+            .then(function(r) { return r.json(); })
+            .then(function(posts) {
+                var post = posts.find(function(p) { return p.id === currentId; });
+                if (!post) return;
+                var related = posts.filter(function(p) {
+                    return p.id !== currentId && p.categories.some(function(c) { return post.categories.indexOf(c) !== -1; });
+                }).slice(0, 3);
+                var main = document.querySelector('.blog-post');
+                if (!main || related.length === 0) return;
+                var section = document.createElement('div');
+                section.className = 'related-posts';
+                section.innerHTML = '<h2><i class="fas fa-link" style="color:var(--accent);"></i> Related Articles</h2><div class="related-grid">' +
+                    related.map(function(p) {
+                        var d = new Date(p.date + 'T00:00:00Z');
+                        var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        return '<a href="' + p.id + '.html" class="related-card"><h3>' + p.title + '</h3><p>' + p.description + '</p><div class="related-meta"><span>' + ds + '</span><span> · </span><span>' + p.readTime + ' min</span></div></a>';
+                    }).join('') + '</div>';
+                main.appendChild(section);
+            })
+            .catch(function() {});
+    })();
+    </script>
+
+</body>
+</html>

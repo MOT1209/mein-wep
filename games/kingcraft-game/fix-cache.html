@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>Voxel Realm — تنظيف الكاش</title>
+<style>
+body{background:#1a1a2e;color:#eee;font:16px/1.6 system-ui;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center;direction:rtl}
+.card{background:#16213e;padding:32px 40px;border-radius:16px;max-width:460px}
+h2{color:#7ec0ee;margin:0 0 12px}
+p{margin:8px 0;color:#aaa}
+.status{color:#f4c542;margin-top:16px;font-size:14px}
+.done{color:#4caf50}
+</style>
+</head>
+<body>
+<div class="card">
+<h2>جاري تنظيف الكاش</h2>
+<p>يتم مسح التخزين المؤقت لـ Service Worker القديم...</p>
+<p class="status" id="status">جاري المسح...</p>
+</div>
+<script>
+(async function(){
+  var s = document.getElementById('status');
+  try {
+    if ('caches' in window) {
+      var keys = await caches.keys();
+      await Promise.all(keys.map(function(k) { return caches.delete(k); }));
+      s.textContent = '✓ تم مسح ' + keys.length + ' كاش';
+    }
+    if ('serviceWorker' in navigator) {
+      var regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(function(r) { return r.unregister(); }));
+      s.textContent += ' ✓ تم إلغاء ' + regs.length + ' Service Worker';
+    }
+    s.className = 'status done';
+    s.textContent = '✓ تم التنظيف! سيتم تحويلك...';
+    setTimeout(function(){ location.href = 'index.html'; }, 1500);
+  } catch(e) {
+    s.textContent = 'خطأ: ' + e.message;
+  }
+})();
+</script>
+</body>
+</html>

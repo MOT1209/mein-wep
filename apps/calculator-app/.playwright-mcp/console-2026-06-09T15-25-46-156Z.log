@@ -1,0 +1,4 @@
+[  106442ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8765/js/app-controls.js:0
+[  108004ms] [LOG] [Vault] SW registered: ServiceWorkerRegistration @ http://localhost:8765/:246
+[  108508ms] [ERROR] Failed to load resource: the server responded with a status of 404 (File not found) @ http://localhost:8765/favicon.ico:0
+[  108541ms] [WARNING] Error while trying to use the following icon from the Manifest: http://localhost:8765/icons/icon-192.png (Download error or resource isn't a valid image) @ http://localhost:8765/:0

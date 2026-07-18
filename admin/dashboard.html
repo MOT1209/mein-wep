@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Command Center | Rashid</title>
+    <meta name="description" content="Rashid Admin Command Center — Manage projects, content, and system settings.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/admin/dashboard.html">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google AdSense (deferred until consent) -->
+    <script>if (localStorage.getItem('cookieConsent') === 'accepted') { var s=document.createElement('script'); s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958'; s.crossOrigin='anonymous'; document.head.appendChild(s); }</script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { opacity: 0; }
+        body.auth-ok { opacity: 1; transition: opacity 0.3s; }
+        :root {
+            --bg: #09090b;
+            --sidebar: #18181b;
+            --card: #27272a;
+            --primary: #8b5cf6;
+            /* Violet */
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        aside {
+            width: 280px;
+            background: var(--sidebar);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #3f3f46;
+            transition: 0.3s;
+        }
+
+        .brand {
+            padding: 30px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-links {
+            flex: 1;
+            padding: 0 15px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px 20px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 12px;
+            transition: 0.2s;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            background: rgba(139, 92, 246, 0.1);
+            color: var(--primary);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-panel {
+            padding: 20px;
+            border-top: 1px solid #3f3f46;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        /* Main Content */
+        main {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .date-display {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #3f3f46;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .stat-card .label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .stat-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .stat-card .icon {
+            align-self: flex-end;
+            margin-top: -40px;
+            font-size: 2rem;
+            opacity: 0.2;
+        }
+
+        /* Sections */
+        .dashboard-section {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .dashboard-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Project Management */
+        .controls-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .control-row {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #3f3f46;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 26px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #3f3f46;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: var(--primary);
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        /* Inputs */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        textarea,
+        input[type="text"] {
+            width: 100%;
+            background: #18181b;
+            border: 1px solid #3f3f46;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: inherit;
+            resize: vertical;
+        }
+
+        .btn-save {
+            background: var(--primary);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-save:hover {
+            background: #7c3aed;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            aside {
+                position: fixed;
+                left: -280px;
+                height: 100%;
+                z-index: 100;
+            }
+
+            aside.open {
+                left: 0;
+            }
+
+            main {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <aside id="sidebar">
+        <div class="brand">
+            <i class="fas fa-layer-group"></i> Rashid Admin
+        </div>
+        <nav class="nav-links">
+            <div class="nav-item active" onclick="showSection('overview', this)">
+                <i class="fas fa-chart-pie"></i> Overview
+            </div>
+            <div class="nav-item" onclick="showSection('projects', this)">
+                <i class="fas fa-cube"></i> Project Manager
+            </div>
+            <div class="nav-item" onclick="showSection('content', this)">
+                <i class="fas fa-pen-nib"></i> Content Editor
+            </div>
+            <div class="nav-item" onclick="showSection('lessons', this)">
+                <i class="fas fa-book"></i> Lessons
+            </div>
+            <div class="nav-item" onclick="showSection('models', this)">
+                <i class="fas fa-cube"></i> Models
+            </div>
+            <div class="nav-item" onclick="showSection('vault', this)">
+                <i class="fas fa-vault"></i> Vault Manager
+            </div>
+            <div class="nav-item" onclick="showSection('bot', this)">
+                <i class="fas fa-robot"></i> Bot Knowledge
+            </div>
+            <div class="nav-item" onclick="showSection('messages', this)">
+                <i class="fas fa-envelope"></i> Messages <span id="messages-badge" style="display:none;background:var(--danger,#ef4444);color:#fff;border-radius:10px;padding:1px 7px;font-size:0.7rem;margin-left:4px;"></span>
+            </div>
+            <div class="nav-item" onclick="showSection('updates', this)">
+                <i class="fas fa-cloud-arrow-up"></i> App Updates
+            </div>
+            <div class="nav-item" onclick="showSection('settings', this)">
+                <i class="fas fa-cog"></i> System Settings
+            </div>
+        </nav>
+        <div class="user-panel">
+            <button class="btn-logout" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+            <a href="../index.html"
+                style="display:block; text-align:center; margin-top:15px; color:#fff; text-decoration:none; font-size:0.8rem; opacity:0.5;">
+                <i class="fas fa-external-link-alt"></i> Go to Live Site
+            </a>
+        </div>
+    </aside>
+
+    <main>
+        <header>
+            <h1 id="page-title">Dashboard Overview</h1>
+            <div class="date-display" id="date-display">...</div>
+        </header>
+
+        <!-- Overview Section -->
+        <div id="overview" class="dashboard-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="label">Total Visitors</span>
+                    <span class="value" id="stat-visitors">0</span>
+                    <i class="fas fa-users icon"></i>
+                </div>
+                <div class="stat-card">
+                    <span class="label">Projects Active</span>
+                    <span class="value" id="stat-projects">4</span>
+                    <i class="fas fa-project-diagram icon"></i>
+                </div>
+                <div class="stat-card">
+                    <span class="label">System Status</span>
+                    <span class="value" style="color:var(--success); font-size:1.5rem;">Operational</span>
+                    <i class="fas fa-check-circle icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Project Controls Section -->
+        <div id="projects" class="dashboard-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Managed Projects</h2>
+                <button class="btn-save" onclick="openProjectModal()">
+                    <i class="fas fa-plus"></i> Add Project
+                </button>
+            </div>
+
+            <div class="controls-grid" id="projects-list-container">
+                <!-- Projects will be injected here via JS -->
+                <p style="text-align:center; color:var(--text-muted);">Loading projects...</p>
+            </div>
+        </div>
+
+        <!-- Vault Manager Section -->
+        <div id="vault" class="dashboard-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2>Vault Content Manager</h2>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <select id="vault-table-select" style="background:#18181b;color:white;border:1px solid #3f3f46;padding:10px 16px;border-radius:8px;font-family:inherit;">
+                        <option value="prompts">Prompts</option>
+                        <option value="codes">Code Snippets</option>
+                        <option value="images">Images</option>
+                        <option value="media">Media</option>
+                    </select>
+                    <button class="btn-save" onclick="loadVaultItems()"><i class="fas fa-sync"></i> Load</button>
+                </div>
+            </div>
+            <div class="controls-grid" id="vault-list-container">
+                <p style="text-align:center;color:var(--text-muted);">Select a vault table and click Load.</p>
+            </div>
+        </div>
+
+        <!-- Lessons Section -->
+        <div id="lessons" class="dashboard-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2>Lessons Manager</h2>
+                <button class="btn-save" onclick="editLesson(null)">
+                    <i class="fas fa-plus"></i> Add Lesson
+                </button>
+            </div>
+            <div class="controls-grid" id="lessons-list-container">
+                <p style="text-align:center;color:var(--text-muted);">Open this tab to load lessons.</p>
+            </div>
+        </div>
+
+        <!-- Models Section -->
+        <div id="models" class="dashboard-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2>Models Manager</h2>
+                <button class="btn-save" onclick="editModel(null)">
+                    <i class="fas fa-plus"></i> Add Model
+                </button>
+            </div>
+            <div class="controls-grid" id="models-list-container">
+                <p style="text-align:center;color:var(--text-muted);">Open this tab to load models.</p>
+            </div>
+        </div>
+
+        <!-- Bot Knowledge Section -->
+        <div id="bot" class="dashboard-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2>Bot Knowledge Base</h2>
+                <button class="btn-save" onclick="editBotKnowledge(null)">
+                    <i class="fas fa-plus"></i> Add Knowledge
+                </button>
+            </div>
+            <div class="controls-grid" id="bot-list-container">
+                <p style="text-align:center;color:var(--text-muted);">Open this tab to load knowledge items.</p>
+            </div>
+        </div>
+
+        <!-- Content Editor Section -->
+        <div id="content" class="dashboard-section">
+            <div class="form-group">
+                <label>Main Hero Title</label>
+                <input type="text" id="hero-title-input" placeholder="e.g. Creative Developer & Designer">
+            </div>
+
+            <div class="form-group">
+                <label>About Me Text</label>
+                <textarea id="about-text-input" rows="6"
+                    placeholder="Write something amazing about yourself..."></textarea>
+            </div>
+
+            <button class="btn-save" onclick="saveContent()">Publish Changes</button>
+            <p id="save-msg" style="color:var(--success); margin-top:10px; display:none;">Changes saved successfully!
+            </p>
+        </div>
+
+        <!-- Messages (contact form submissions) -->
+        <div id="messages" class="dashboard-section">
+            <div class="section-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <p style="color:var(--text-muted);margin:0;">Messages sent through the site's contact form.</p>
+                <button class="btn-save" onclick="fetchMessages()"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+            <div class="controls-grid" id="messages-list-container">
+                <p style="text-align:center;color:var(--text-muted);">Open this tab to load messages.</p>
+            </div>
+        </div>
+
+        <!-- App Updates (OTA publisher) -->
+        <div id="updates" class="dashboard-section">
+            <div class="section-header" style="margin-bottom:16px;">
+                <p style="color:var(--text-muted);margin:0;">انشر تحديثاً → يظهر إشعار للمستخدمين الذين لديهم نسخة أقدم.</p>
+            </div>
+            <div style="background:var(--card-bg,#18181b);border:1px solid var(--border,#27272a);border-radius:12px;padding:20px;max-width:560px;margin-bottom:24px;">
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>التطبيق</label>
+                    <select id="upd-app" onchange="fillUpdateForm()" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;font-family:inherit;">
+                        <option value="com.rashid.kingcraft">KingCraft</option>
+                        <option value="com.rashid.rustsurvival">Rust Construction</option>
+                        <option value="com.rashid.farmempire">Farm Empire</option>
+                        <option value="com.rashid.quranpro">Quran Pro</option>
+                        <option value="com.rashid.smartvault">Calculator Vault</option>
+                        <option value="com.rashid.quizmaster">Quiz Master</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>الإصدار الجديد (مثل 0.7.0)</label>
+                    <input type="text" id="upd-version" placeholder="0.7.0" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;">
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>رابط APK</label>
+                    <input type="text" id="upd-url" placeholder="/apks/kingcraft-game-v0.7.0.apk" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;">
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                    <label>ملاحظات التحديث (كل سطر = نقطة)</label>
+                    <textarea id="upd-notes" rows="4" placeholder="إضافة ميزة جديدة&#10;إصلاح أخطاء وتحسين الأداء" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;font-family:inherit;"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label>التاريخ</label>
+                    <input type="date" id="upd-date" style="width:100%;background:#101014;color:#fff;border:1px solid #3f3f46;padding:10px 12px;border-radius:8px;">
+                </div>
+                <button class="btn-save" onclick="publishUpdate()"><i class="fas fa-cloud-arrow-up"></i> نشر التحديث</button>
+                <p id="upd-msg" style="margin-top:10px;display:none;"></p>
+            </div>
+            <h3 style="margin-bottom:12px;font-size:1rem;color:var(--text-muted);">الإصدارات المنشورة حالياً</h3>
+            <div class="controls-grid" id="updates-list-container">
+                <p style="text-align:center;color:var(--text-muted);">افتح هذا التبويب لتحميل الإصدارات.</p>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div id="settings" class="dashboard-section">
+            <div class="control-row">
+                <div>
+                    <h3>Maintenance Mode</h3>
+                    <p style="color:var(--text-muted);">Disables the entire site for visitors.</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="maintenance-toggle" onchange="toggleMaintenance(this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div
+                style="margin-top:20px; padding:20px; background:var(--card); border-radius:12px; border:1px solid #ef4444;">
+                <h3 style="color:#ef4444; margin-top:0;">Danger Zone</h3>
+                <button onclick="localStorage.clear(); alert('Storage Cleared!'); location.reload();"
+                    style="background:#ef4444; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">Reset
+                    All Data</button>
+            </div>
+        </div>
+
+    <!-- Lesson Modal -->
+    <div id="lesson-modal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;">
+        <div style="background:var(--card);padding:30px;border-radius:12px;width:90%;max-width:500px;border:1px solid #3f3f46;">
+            <h2 id="l-modal-title" style="margin-top:0;">Add Lesson</h2>
+            <form id="lesson-form">
+                <input type="hidden" id="l-id">
+                <div class="form-group"><label>Title</label><input type="text" id="l-title" required></div>
+                <div class="form-group"><label>Description</label><textarea id="l-desc" rows="3" required></textarea></div>
+                <div class="form-group"><label>Category</label><input type="text" id="l-category" placeholder="e.g. Programming, Web"></div>
+                <div class="form-group"><label>Progress (%)</label><input type="number" id="l-progress" min="0" max="100" value="0"></div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                    <button type="button" onclick="document.getElementById('lesson-modal').style.display='none'" style="background:transparent;color:white;border:1px solid #ccc;padding:10px 20px;border-radius:6px;cursor:pointer;">Cancel</button>
+                    <button type="submit" class="btn-save">Save Lesson</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Model Modal -->
+    <div id="model-modal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;">
+        <div style="background:var(--card);padding:30px;border-radius:12px;width:90%;max-width:500px;border:1px solid #3f3f46;">
+            <h2 id="m-modal-title" style="margin-top:0;">Add Model</h2>
+            <form id="model-form">
+                <input type="hidden" id="m-id">
+                <div class="form-group"><label>Title</label><input type="text" id="m-title" required></div>
+                <div class="form-group"><label>Description</label><textarea id="m-desc" rows="3" required></textarea></div>
+                <div class="form-group"><label>Link</label><input type="text" id="m-link" placeholder="URL or path"></div>
+                <div class="form-group"><label>Specs (comma separated)</label><input type="text" id="m-specs" placeholder="e.g. Three.js, Real-time"></div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                    <button type="button" onclick="document.getElementById('model-modal').style.display='none'" style="background:transparent;color:white;border:1px solid #ccc;padding:10px 20px;border-radius:6px;cursor:pointer;">Cancel</button>
+                    <button type="submit" class="btn-save">Save Model</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bot Knowledge Modal -->
+    <div id="bot-modal" class="modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:1000;justify-content:center;align-items:center;">
+        <div style="background:var(--card);padding:30px;border-radius:12px;width:90%;max-width:500px;border:1px solid #3f3f46;">
+            <h2 id="b-modal-title" style="margin-top:0;">Add Knowledge</h2>
+            <form id="bot-form">
+                <input type="hidden" id="b-id">
+                <div class="form-group"><label>Keywords (comma separated)</label><input type="text" id="b-keywords" placeholder="e.g. price, cost, pricing" required></div>
+                <div class="form-group"><label>Response (English)</label><textarea id="b-response-en" rows="3" required></textarea></div>
+                <div class="form-group"><label>Response (Arabic)</label><textarea id="b-response-ar" rows="3"></textarea></div>
+                <div class="form-group"><label>Action URL (optional)</label><input type="text" id="b-action" placeholder="https://..."></div>
+                <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px;">
+                    <button type="button" onclick="document.getElementById('bot-modal').style.display='none'" style="background:transparent;color:white;border:1px solid #ccc;padding:10px 20px;border-radius:6px;cursor:pointer;">Cancel</button>
+                    <button type="submit" class="btn-save">Save Knowledge</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    </main>
+
+    <!-- Project Modal -->
+    <div id="project-modal" class="modal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+        <div
+            style="background:var(--card); padding:30px; border-radius:12px; width:90%; max-width:500px; border:1px solid #3f3f46;">
+            <h2 id="modal-title" style="margin-top:0;">Add New Project</h2>
+            <form id="project-form">
+                <input type="hidden" id="p-id">
+                <div class="form-group">
+                    <label>Project Title</label>
+                    <input type="text" id="p-title" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="p-desc" rows="3" style="width:100%; background:#18181b; color:white; padding:10px;"
+                        required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="p-category"
+                        style="width:100%; padding:10px; background:#18181b; color:white; border:1px solid #3f3f46; border-radius:8px;">
+                        <option value="Game">Game (3D Universe)</option>
+                        <option value="App">App (Pro Tools)</option>
+                        <option value="Open Source">Open Source (Code)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Image URL (or FontAwesome Icon Class)</label>
+                    <input type="text" id="p-image" placeholder="e.g. images/game1.jpg OR fas fa-gamepad">
+                </div>
+                <div class="form-group">
+                    <label>Project Link (Demo)</label>
+                    <input type="text" id="p-link" placeholder="Folder path or URL">
+                </div>
+                <div class="form-group">
+                    <label>Source Code Link (GitHub/Rashid)</label>
+                    <input type="text" id="p-github" placeholder="URL to source code">
+                </div>
+                <div class="form-group">
+                    <label>Tags (comma separated)</label>
+                    <input type="text" id="p-tags" placeholder="e.g. 3D, WebGL, React">
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+                    <button type="button" onclick="closeProjectModal()"
+                        style="background:transparent; color:white; border:1px solid #ccc; padding:10px 20px; border-radius:6px; cursor:pointer;">Cancel</button>
+                    <button type="submit" class="btn-save">Save Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../js/supabase-config.js"></script>
+
+    <!-- 🔒 Protect dashboard: redirect if not authenticated -->
+    <script>
+    (async function() {
+      if (!window.supabaseClient) {
+        window.location.replace('login.html');
+        return;
+      }
+      const { data: { session } } = await window.supabaseClient.auth.getSession();
+      if (!session) {
+        window.location.replace('login.html');
+        return;
+      }
+      const { data: isAdmin, error: adminCheckError } = await window.supabaseClient.rpc('is_admin');
+      if (adminCheckError || !isAdmin) {
+        window.location.replace('login.html');
+        return;
+      }
+      document.body.classList.add('auth-ok');
+    })();
+    </script>
+
+    <!-- Admin Logic -->
+    <script src="../js/admin.js?v=4.0"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateDisplay = document.getElementById('date-display');
+            if (dateDisplay) {
+                dateDisplay.innerText = new Date().toLocaleDateString('en-US', {
+                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+                });
+            }
+        });
+
+        function showSection(id, btn) {
+            if (typeof switchTab === 'function') switchTab(id);
+            document.getElementById('page-title').textContent = {
+                'overview': 'Dashboard Overview',
+                'projects': 'Project Manager',
+                'vault': 'Vault Manager',
+                'lessons': 'Lessons Manager',
+                'models': 'Models Manager',
+                'bot': 'Bot Knowledge Base',
+                'messages': 'Contact Messages',
+                'updates': 'App Updates',
+                'content': 'Content Editor',
+                'settings': 'System Settings'
+            }[id] || 'Dashboard';
+            if (id === 'lessons' && typeof fetchLessons === 'function') fetchLessons();
+            if (id === 'models' && typeof fetchModels === 'function') fetchModels();
+            if (id === 'bot' && typeof fetchBotKnowledge === 'function') fetchBotKnowledge();
+            if (id === 'messages' && typeof fetchMessages === 'function') fetchMessages();
+            if (id === 'updates' && typeof fetchAppUpdates === 'function') fetchAppUpdates();
+        }
+
+        function logout() {
+            if (typeof adminLogout === 'function') adminLogout();
+        }
+
+        window.addEventListener('load', () => {
+            const dashboard = document.querySelector('main');
+            if (dashboard) dashboard.id = 'admin-dashboard';
+        });
+
+        function escapeHTML(value) {
+            const div = document.createElement('div');
+            div.textContent = value == null ? '' : String(value);
+            return div.innerHTML;
+        }
+
+        window.loadVaultItems = async function () {
+            const client = window.supabaseClient;
+            if (!client) { alert('Supabase not available'); return; }
+            const table = document.getElementById('vault-table-select').value;
+            const container = document.getElementById('vault-list-container');
+            if (!container) return;
+            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
+
+            const { data, error } = await client.from(table).select('*').order('created_at', { ascending: false });
+            if (error) { container.innerHTML = `<p style="color:var(--danger)">Error: ${escapeHTML(error.message)}</p>`; return; }
+            if (!data || data.length === 0) {
+                container.innerHTML = `<p style="text-align:center;color:var(--text-muted);">No items in ${table}. Add via Supabase dashboard.</p>`;
+                return;
+            }
+            container.innerHTML = '';
+            data.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'control-row';
+                div.innerHTML = `
+                    <div>
+                        <h3>${escapeHTML(item.title || item.name || 'Untitled')}</h3>
+                        <p style="color:var(--text-muted);font-size:0.8rem;">${item.language || ''} ${item.status ? '| ' + item.status : ''}</p>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <button onclick="deleteVaultItem('${table}','${item.id}')" style="background:var(--danger);border:none;color:white;padding:5px 10px;border-radius:4px;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                        <label class="toggle-switch" style="margin-left:10px;">
+                            <input type="checkbox" ${item.status === 'Public' ? 'checked' : ''} onchange="toggleVaultStatus('${table}','${item.id}', this.checked)">
+                            <span class="slider"></span>
+                        </label>
+                    </div>`;
+                container.appendChild(div);
+            });
+        };
+
+        window.deleteVaultItem = async function (table, id) {
+            const client = window.supabaseClient;
+            if (!client || !confirm('Delete this item?')) return;
+            const { error } = await client.from(table).delete().eq('id', id);
+            if (error) alert(error.message);
+            else loadVaultItems();
+        };
+
+        window.fetchMessages = async function () {
+            const client = window.supabaseClient;
+            const container = document.getElementById('messages-list-container');
+            if (!container) return;
+            if (!client) { container.innerHTML = '<p style="color:var(--danger)">Supabase not available.</p>'; return; }
+            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
+
+            const { data, error } = await client.from('contact_messages').select('*').order('created_at', { ascending: false });
+            const badge = document.getElementById('messages-badge');
+            if (error) { container.innerHTML = `<p style="color:var(--danger)">Error: ${escapeHTML(error.message)}</p>`; return; }
+            if (!data || data.length === 0) {
+                container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No messages yet.</p>';
+                if (badge) badge.style.display = 'none';
+                return;
+            }
+            if (badge) { badge.textContent = data.length; badge.style.display = 'inline-block'; }
+            container.innerHTML = '';
+            data.forEach(m => {
+                const when = m.created_at ? new Date(m.created_at).toLocaleString() : '';
+                const div = document.createElement('div');
+                div.className = 'control-row';
+                div.style.alignItems = 'flex-start';
+                div.innerHTML = `
+                    <div style="flex:1;min-width:0;">
+                        <h3 style="margin:0 0 4px;">${escapeHTML(m.name || 'Anonymous')}
+                            <span style="color:var(--text-muted);font-size:0.8rem;font-weight:400;">&lt;${escapeHTML(m.email || '')}&gt;</span>
+                        </h3>
+                        <p style="color:var(--text-muted);font-size:0.75rem;margin:0 0 8px;">${escapeHTML(when)}</p>
+                        <p style="white-space:pre-wrap;word-break:break-word;margin:0;">${escapeHTML(m.message || '')}</p>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;margin-left:12px;">
+                        <a href="mailto:${encodeURIComponent(m.email || '')}?subject=Re:%20your%20message" title="Reply" style="background:var(--accent,#6366f1);color:#fff;padding:6px 10px;border-radius:4px;text-decoration:none;"><i class="fas fa-reply"></i></a>
+                        <button onclick="deleteMessage('${m.id}')" title="Delete" style="background:var(--danger,#ef4444);border:none;color:white;padding:6px 10px;border-radius:4px;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                    </div>`;
+                container.appendChild(div);
+            });
+        };
+
+        window.deleteMessage = async function (id) {
+            const client = window.supabaseClient;
+            if (!client || !confirm('Delete this message?')) return;
+            const { error } = await client.from('contact_messages').delete().eq('id', id);
+            if (error) alert(error.message);
+            else fetchMessages();
+        };
+
+        // ── App Updates (OTA publisher) ──
+        let _appUpdates = {};
+        const APP_NAMES = {
+            'com.rashid.kingcraft': 'KingCraft', 'com.rashid.rustsurvival': 'Rust Construction',
+            'com.rashid.farmempire': 'Farm Empire', 'com.rashid.quranpro': 'Quran Pro',
+            'com.rashid.smartvault': 'Calculator Vault', 'com.rashid.quizmaster': 'Quiz Master'
+        };
+        window.fetchAppUpdates = async function () {
+            const client = window.supabaseClient;
+            const container = document.getElementById('updates-list-container');
+            if (!container) return;
+            if (!client) { container.innerHTML = '<p style="color:var(--danger)">Supabase not available.</p>'; return; }
+            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
+            const { data, error } = await client.from('app_updates').select('*');
+            if (error) {
+                container.innerHTML = '<p style="color:var(--danger)">جدول app_updates غير موجود — شغّل SUPABASE_APP_UPDATES.sql أولاً. ' + escapeHTML(error.message) + '</p>';
+                return;
+            }
+            _appUpdates = {};
+            (data || []).forEach(r => { _appUpdates[r.app_id] = r; });
+            fillUpdateForm();
+            container.innerHTML = '';
+            Object.keys(APP_NAMES).forEach(id => {
+                const r = _appUpdates[id];
+                const div = document.createElement('div');
+                div.className = 'control-row';
+                div.innerHTML = `
+                    <div>
+                        <h3>${escapeHTML(APP_NAMES[id])}</h3>
+                        <p style="color:var(--text-muted);font-size:0.8rem;">${r ? 'v' + escapeHTML(r.version) + (r.release_date ? ' · ' + escapeHTML(r.release_date) : '') : 'لا يوجد إصدار منشور'}</p>
+                    </div>`;
+                container.appendChild(div);
+            });
+        };
+        window.fillUpdateForm = function () {
+            const id = document.getElementById('upd-app').value;
+            const r = _appUpdates[id];
+            document.getElementById('upd-version').value = r ? (r.version || '') : '';
+            document.getElementById('upd-url').value = r ? (r.url || '') : '';
+            document.getElementById('upd-notes').value = r ? (r.notes || '') : '';
+            document.getElementById('upd-date').value = r ? (r.release_date || '') : '';
+        };
+        window.publishUpdate = async function () {
+            const client = window.supabaseClient;
+            const msg = document.getElementById('upd-msg');
+            const show = (t, ok) => { msg.style.display = 'block'; msg.style.color = ok ? 'var(--success,#22c55e)' : 'var(--danger,#ef4444)'; msg.textContent = t; };
+            if (!client) return show('Supabase not available', false);
+            const id = document.getElementById('upd-app').value;
+            const version = document.getElementById('upd-version').value.trim();
+            if (!version) return show('أدخل رقم الإصدار', false);
+            const payload = {
+                app_id: id, name: APP_NAMES[id], version,
+                url: document.getElementById('upd-url').value.trim(),
+                notes: document.getElementById('upd-notes').value,
+                release_date: document.getElementById('upd-date').value || null,
+                updated_at: new Date().toISOString()
+            };
+            const { error } = await client.from('app_updates').upsert(payload, { onConflict: 'app_id' });
+            if (error) return show('فشل النشر: ' + error.message, false);
+            show('✓ تم نشر التحديث — سيظهر الإشعار للمستخدمين بإصدار أقدم.', true);
+            fetchAppUpdates();
+        };
+
+        window.toggleVaultStatus = async function (table, id, isPublic) {
+            const client = window.supabaseClient;
+            if (!client) return;
+            const { error } = await client.from(table).update({ status: isPublic ? 'Public' : 'Private' }).eq('id', id);
+            if (error) alert(error.message);
+        };
+    </script>
+</body>
+
+</html>

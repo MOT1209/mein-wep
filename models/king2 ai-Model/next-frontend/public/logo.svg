@@ -1,0 +1,37 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="KING2">
+  <defs>
+    <linearGradient id="k2-gold" x1="64" y1="30" x2="64" y2="100" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fbe7a8"/>
+      <stop offset="0.45" stop-color="#e8c168"/>
+      <stop offset="1" stop-color="#c08a36"/>
+    </linearGradient>
+    <linearGradient id="k2-band" x1="22" y1="80" x2="106" y2="96" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#e8c168"/>
+      <stop offset="1" stop-color="#b8863f"/>
+    </linearGradient>
+    <radialGradient id="k2-gem" cx="0.5" cy="0.4" r="0.6">
+      <stop offset="0" stop-color="#a5b4fc"/>
+      <stop offset="1" stop-color="#4f46e5"/>
+    </radialGradient>
+    <filter id="k2-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <g filter="url(#k2-glow)">
+    <!-- Crown body -->
+    <path d="M26 82 L26 48 L45 66 L64 34 L83 66 L102 48 L102 82 Z"
+          fill="url(#k2-gold)" stroke="#8a6320" stroke-width="1.5" stroke-linejoin="round"/>
+    <!-- Base band -->
+    <rect x="22" y="80" width="84" height="16" rx="5" fill="url(#k2-band)" stroke="#8a6320" stroke-width="1.5"/>
+    <!-- Band inner line -->
+    <line x1="28" y1="88" x2="100" y2="88" stroke="#fbe7a8" stroke-width="1.5" stroke-opacity="0.5"/>
+
+    <!-- Tip gems -->
+    <circle cx="26" cy="48" r="5" fill="url(#k2-gem)" stroke="#fbe7a8" stroke-width="1"/>
+    <circle cx="64" cy="33" r="6.5" fill="url(#k2-gem)" stroke="#fbe7a8" stroke-width="1"/>
+    <circle cx="102" cy="48" r="5" fill="url(#k2-gem)" stroke="#fbe7a8" stroke-width="1"/>
+    <!-- Band center gem -->
+    <circle cx="64" cy="88" r="4" fill="url(#k2-gem)" stroke="#fbe7a8" stroke-width="1"/>
+  </g>
+</svg>

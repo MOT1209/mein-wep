@@ -1,0 +1,96 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.env.vercel
+
+# Kaggle Credentials
+kaggle.json
+
+# Secrets / tokens / cookies — never commit
+token*.txt
+_token*.txt
+cookies*.txt
+_cookies*.txt
+_g.txt
+_gh.txt
+_ght.txt
+_gt.txt
+king2-signin-*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploads
+uploads/
+*.jpg
+*.jpeg
+*.png
+*.gif
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual Environment
+ENV/
+env/
+.vercel
+.temp_videos/
+temp_*.py
+knowledge_base_pre_*.json
+Alking_Memory/
+.next/
+.cache/
+.claude/
+.codex/
+.minimax/
+nul
+nul_backup
+node_modules/
+tsconfig.tsbuildinfo
+opencode.json
+.opencode/
+.playwright-mcp/
+memory.json
+
+
+ecosystem.config.js
+next-frontend/app/api/vision/
+temp_videos/
+

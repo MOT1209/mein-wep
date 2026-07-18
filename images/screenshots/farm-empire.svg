@@ -1,0 +1,155 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a1628"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="soil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2d5a27"/>
+      <stop offset="100%" stop-color="#1a3a15"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect width="1280" height="300" fill="url(#sky)"/>
+
+  <!-- Sun -->
+  <circle cx="1100" cy="80" r="50" fill="#fbbf24" opacity="0.8"/>
+  <circle cx="1100" cy="80" r="70" fill="#fbbf24" opacity="0.15"/>
+
+  <!-- Clouds -->
+  <ellipse cx="300" cy="100" rx="90" ry="30" fill="#fff" opacity="0.06"/>
+  <ellipse cx="320" cy="95" rx="60" ry="25" fill="#fff" opacity="0.08"/>
+  <ellipse cx="800" cy="130" rx="70" ry="25" fill="#fff" opacity="0.05"/>
+
+  <!-- Ground -->
+  <rect x="0" y="350" width="1280" height="370" fill="#1a3a15"/>
+
+  <!-- Plowed fields (rows) -->
+  <rect x="0" y="370" width="1280" height="280" fill="#2d5a27" opacity="0.6"/>
+  <g fill="#3a7a30" opacity="0.4">
+    <rect x="0" y="380" width="1280" height="6"/>
+    <rect x="0" y="400" width="1280" height="6"/>
+    <rect x="0" y="420" width="1280" height="6"/>
+    <rect x="0" y="440" width="1280" height="6"/>
+    <rect x="0" y="460" width="1280" height="6"/>
+    <rect x="0" y="480" width="1280" height="6"/>
+    <rect x="0" y="500" width="1280" height="6"/>
+    <rect x="0" y="520" width="1280" height="6"/>
+    <rect x="0" y="540" width="1280" height="6"/>
+  </g>
+
+  <!-- Fence -->
+  <rect x="0" y="340" width="1280" height="3" fill="#8b5cf6" opacity="0.5"/>
+  <rect x="100" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="200" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="300" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="400" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="500" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="600" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="700" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="800" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="900" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="1000" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+  <rect x="1100" y="330" width="4" height="20" fill="#8b5cf6" opacity="0.6"/>
+
+  <!-- Wheat/crop rows -->
+  <g fill="#fbbf24" opacity="0.7">
+    <line x1="50" y1="380" x2="50" y2="350" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="80" y1="380" x2="80" y2="345" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="110" y1="380" x2="110" y2="348" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="140" y1="380" x2="140" y2="352" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="170" y1="380" x2="170" y2="346" stroke="#fbbf24" stroke-width="2"/>
+  </g>
+  <g fill="#fbbf24" opacity="0.5">
+    <line x1="230" y1="400" x2="230" y2="372" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="260" y1="400" x2="260" y2="368" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="290" y1="400" x2="290" y2="370" stroke="#fbbf24" stroke-width="2"/>
+    <line x1="320" y1="400" x2="320" y2="374" stroke="#fbbf24" stroke-width="2"/>
+  </g>
+
+  <!-- Barn -->
+  <rect x="730" y="240" width="140" height="110" rx="4" fill="#dc2626" stroke="#ef4444" stroke-width="2"/>
+  <!-- Roof -->
+  <polygon points="720,240 800,180 880,240" fill="#b91c1c" stroke="#ef4444" stroke-width="2"/>
+  <!-- Barn door -->
+  <rect x="770" y="290" width="60" height="60" rx="2" fill="#1e293b"/>
+  <rect x="770" y="290" width="30" height="60" fill="#0f172a"/>
+  <rect x="800" y="290" width="30" height="60" fill="#0f172a"/>
+  <!-- Hay loft -->
+  <rect x="745" y="255" width="110" height="25" fill="#fbbf24" opacity="0.4"/>
+
+  <!-- Silo -->
+  <rect x="900" y="230" width="50" height="120" rx="25" fill="#64748b" stroke="#94a3b8" stroke-width="2"/>
+  <ellipse cx="925" cy="240" rx="30" ry="12" fill="#94a3b8"/>
+  <rect x="900" y="260" width="50" height="60" fill="#475569" opacity="0.5"/>
+  
+  <!-- Windmill -->
+  <rect x="190" y="210" width="20" height="130" fill="#94a3b8"/>
+  <polygon points="200,210 160,250 240,250" fill="#64748b"/>
+  <!-- Blades -->
+  <line x1="200" y1="200" x2="200" y2="160" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="200" y1="190" x2="230" y2="170" stroke="#94a3b8" stroke-width="4"/>
+  <line x1="200" y1="190" x2="170" y2="170" stroke="#94a3b8" stroke-width="4"/>
+  <circle cx="200" cy="190" r="6" fill="#cbd5e1"/>
+
+  <!-- Animals - Cow -->
+  <ellipse cx="500" cy="360" rx="25" ry="15" fill="#f1f5f9"/>
+  <ellipse cx="500" cy="350" rx="15" ry="12" fill="#f1f5f9"/>
+  <ellipse cx="493" cy="345" rx="4" ry="3" fill="#1e293b"/>
+  <ellipse cx="507" cy="345" rx="4" ry="3" fill="#1e293b"/>
+  <ellipse cx="495" cy="340" rx="2" ry="1.5" fill="#333"/>
+  <ellipse cx="505" cy="340" rx="2" ry="1.5" fill="#333"/>
+  <!-- Cow spots -->
+  <ellipse cx="490" cy="358" rx="6" ry="5" fill="#1e293b"/>
+  <ellipse cx="510" cy="356" rx="5" ry="4" fill="#1e293b"/>
+  <ellipse cx="505" cy="365" rx="7" ry="4" fill="#1e293b"/>
+
+  <!-- Animals - Sheep -->
+  <ellipse cx="580" cy="362" rx="20" ry="14" fill="#fff" opacity="0.9"/>
+  <ellipse cx="580" cy="352" rx="12" ry="10" fill="#fff" opacity="0.9"/>
+  <ellipse cx="575" cy="348" rx="3" ry="2.5" fill="#1e293b"/>
+  <ellipse cx="585" cy="348" rx="3" ry="2.5" fill="#1e293b"/>
+  <!-- Woolly texture -->
+  <circle cx="570" cy="358" r="4" fill="#e2e8f0"/>
+  <circle cx="580" cy="356" r="4" fill="#e2e8f0"/>
+  <circle cx="590" cy="358" r="4" fill="#e2e8f0"/>
+
+  <!-- Chicken -->
+  <ellipse cx="440" cy="368" rx="10" ry="8" fill="#fff"/>
+  <circle cx="440" cy="362" r="5" fill="#fff"/>
+  <polygon points="447,360 452,362 447,364" fill="#f59e0b"/>
+  <circle cx="437" cy="361" r="1.5" fill="#1e293b"/>
+
+  <!-- Trees -->
+  <rect x="90" y="270" width="12" height="50" fill="#78350f"/>
+  <circle cx="96" cy="255" r="25" fill="#22c55e" opacity="0.8"/>
+  <circle cx="80" cy="265" r="18" fill="#16a34a" opacity="0.7"/>
+  <circle cx="110" cy="265" r="18" fill="#16a34a" opacity="0.7"/>
+
+  <rect x="650" y="280" width="10" height="40" fill="#78350f"/>
+  <circle cx="655" cy="265" r="20" fill="#22c55e" opacity="0.7"/>
+  <circle cx="642" cy="272" r="15" fill="#16a34a" opacity="0.6"/>
+  <circle cx="668" cy="272" r="15" fill="#16a34a" opacity="0.6"/>
+
+  <!-- Water pond -->
+  <ellipse cx="350" cy="480" rx="60" ry="25" fill="#0ea5e9" opacity="0.6"/>
+  <ellipse cx="350" cy="478" rx="50" ry="18" fill="#38bdf8" opacity="0.3"/>
+
+  <!-- HUD UI -->
+  <rect x="50" y="50" width="180" height="36" rx="8" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="65" y="74" font-family="monospace" font-size="13" fill="#fbbf24">🌾 Day 24</text>
+
+  <rect x="250" y="50" width="180" height="36" rx="8" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="265" y="74" font-family="monospace" font-size="13" fill="#4ade80">💰 $12,450</text>
+
+  <rect x="1050" y="50" width="180" height="36" rx="8" fill="rgba(0,0,0,0.4)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="1065" y="74" font-family="monospace" font-size="13" fill="#38bdf8">🌡️ 72°F Sunny</text>
+
+  <!-- Title -->
+  <text x="640" y="690" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="28" font-weight="900" fill="#22c55e" opacity="0.5">Farm Empire</text>
+</svg>

@@ -1,0 +1,14 @@
+{
+  "appId": "com.rashid.calculatorapp",
+  "appName": "Smart Vault",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "releaseType": "APK",
+      "signingType": "apksigner"
+    }
+  }
+}

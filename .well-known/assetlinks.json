@@ -1,0 +1,50 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rashid.kingcraft",
+      "sha256_cert_fingerprints": ["4B:08:7F:62:BA:75:60:84:EB:43:BA:FF:A4:D9:75:7C:9A:84:42:D5:45:68:BE:2A:3F:9A:44:64:3C:25:B6:CB"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rashid.rustsurvival",
+      "sha256_cert_fingerprints": ["4B:08:7F:62:BA:75:60:84:EB:43:BA:FF:A4:D9:75:7C:9A:84:42:D5:45:68:BE:2A:3F:9A:44:64:3C:25:B6:CB"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rashid.farmempire",
+      "sha256_cert_fingerprints": ["4B:08:7F:62:BA:75:60:84:EB:43:BA:FF:A4:D9:75:7C:9A:84:42:D5:45:68:BE:2A:3F:9A:44:64:3C:25:B6:CB"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rashid.quranpro",
+      "sha256_cert_fingerprints": ["4B:08:7F:62:BA:75:60:84:EB:43:BA:FF:A4:D9:75:7C:9A:84:42:D5:45:68:BE:2A:3F:9A:44:64:3C:25:B6:CB"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rashid.smartvault",
+      "sha256_cert_fingerprints": ["4B:08:7F:62:BA:75:60:84:EB:43:BA:FF:A4:D9:75:7C:9A:84:42:D5:45:68:BE:2A:3F:9A:44:64:3C:25:B6:CB"]
+    }
+  },
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.rashid.quizmaster",
+      "sha256_cert_fingerprints": ["4B:08:7F:62:BA:75:60:84:EB:43:BA:FF:A4:D9:75:7C:9A:84:42:D5:45:68:BE:2A:3F:9A:44:64:3C:25:B6:CB"]
+    }
+  }
+]

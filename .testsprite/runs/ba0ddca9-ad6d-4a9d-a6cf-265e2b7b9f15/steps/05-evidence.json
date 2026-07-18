@@ -1,0 +1,8 @@
+[
+  {
+    "kind": "snapshot",
+    "stepIndex": 5,
+    "summary": "Step 5 'Click the 'تسجيل الدخول بـ GitHub' (Sign in with GitHub) button to verify it redirects to github.com' passed.",
+    "path": "steps/05-snapshot.html"
+  }
+]
