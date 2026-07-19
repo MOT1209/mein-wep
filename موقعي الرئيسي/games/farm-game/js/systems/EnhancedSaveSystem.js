@@ -25,8 +25,10 @@ GAME.EnhancedSaveSystem = {
   BACKUP_KEY_PREFIX: 'farmGameBackup_',
   MAX_BACKUPS: 3,
   AUTO_SAVE_INTERVAL: 60000,  // 60 ثانية
-  SAVE_VERSION: '2.5.0',
+  SAVE_VERSION: '3.0.0',
   ENCRYPTION_KEY: 'FarmGame3D_Enhanced_2024', // مفتاح تشفير بسيط
+  USE_CLOUD_SAVE: true, // تفعيل الحفظ السحابي
+  CLOUD_SAVE_SLOT: 1, // رقم_SLOT الافتراضي
 
   // --- الحالة ---
   autoSaveTimer: null,
@@ -58,9 +60,9 @@ GAME.EnhancedSaveSystem = {
   },
 
   // ============================================================
-  // 💾 الحفظ الرئيسي
+  // 💾 الحفظ الرئيسي (يدعم السحابة + المحلي)
   // ============================================================
-  save: function() {
+  save: async function() {
     if (!this.game) {
       console.warn('[EnhancedSaveSystem] ⚠️ No game reference — save aborted');
       return false;
@@ -73,12 +75,20 @@ GAME.EnhancedSaveSystem = {
       // 2. حفظ نسخة احتياطية قبل الكتابة
       this.createBackup();
 
-      // 3. تشفير وحفظ
+      // 3. حفظ سحابي إذا كان متاحاً
+      if (this.USE_CLOUD_SAVE && GAME.DatabaseService && GAME.DatabaseService.isConnected) {
+        var cloudResult = await GAME.DatabaseService.saveGame(this.CLOUD_SAVE_SLOT, saveData);
+        if (cloudResult.success) {
+          console.log('[EnhancedSaveSystem] ☁️ Saved to cloud (slot ' + this.CLOUD_SAVE_SLOT + ')');
+        }
+      }
+
+      // 4. حفظ محلي دائماً كنسخة احتياطية
       var serialized = JSON.stringify(saveData);
       var encrypted = this.encrypt(serialized);
       localStorage.setItem(this.SAVE_KEY, encrypted);
 
-      // 4. تحديث الإحصائيات
+      // 5. تحديث الإحصائيات
       this._lastSaveTime = Date.now();
       this._saveCount++;
 
@@ -92,9 +102,29 @@ GAME.EnhancedSaveSystem = {
   },
 
   // ============================================================
-  // 📂 التحميل الرئيسي
+  // 📂 التحميل الرئيسي (يدعم السحابة + المحلي)
   // ============================================================
-  load: function() {
+  load: async function() {
+    // محاولة التحميل من السحابة أولاً
+    if (this.USE_CLOUD_SAVE && GAME.DatabaseService && GAME.DatabaseService.isConnected && GAME.DatabaseService.user) {
+      try {
+        var cloudResult = await GAME.DatabaseService.loadGame(this.CLOUD_SAVE_SLOT);
+        if (cloudResult.data) {
+          console.log('[EnhancedSaveSystem] ☁️ Loaded from cloud (slot ' + this.CLOUD_SAVE_SLOT + ')');
+          
+          // فحص سلامة البيانات
+          if (!this.validateSaveData(cloudResult.data)) {
+            console.warn('[EnhancedSaveSystem] ⚠️ Cloud save validation failed — trying local');
+          } else {
+            return cloudResult.data;
+          }
+        }
+      } catch (e) {
+        console.warn('[EnhancedSaveSystem] ⚠️ Cloud load failed:', e.message);
+      }
+    }
+    
+    // التحميل من التخزين المحلي
     try {
       var encrypted = localStorage.getItem(this.SAVE_KEY);
       if (!encrypted) {

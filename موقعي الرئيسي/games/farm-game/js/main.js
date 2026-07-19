@@ -129,6 +129,7 @@ Object.assign(GAME.game, {
       // نظام التعليم التفاعلي
       this._safe('TutorialSystem.init', function() { GAME.TutorialSystem.init(self); });
       // === الأنظمة المتبقية ===
+      this._safe('DatabaseService.init', function() { GAME.DatabaseService.init(); });
       this._safe('ObjectPool.init', function() { GAME.ObjectPool.init(); });
       this._safe('DisposeManager.init', function() { GAME.DisposeManager.init(); });
       this._safe('CombatSystem.init', function() { GAME.CombatSystem.init(self); });
