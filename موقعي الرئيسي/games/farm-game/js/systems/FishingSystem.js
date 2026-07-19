@@ -686,7 +686,7 @@ GAME.FishingSystem = {
     var progressBar = document.createElement('div');
     progressBar.id = 'fishing-progress';
     progressBar.style.cssText = 'width:100%;height:8px;background:#333;border-radius:4px;overflow:hidden;';
-    progressBar.textContent = '<div id="fishing-progress-bar" style="width:100%;height:100%;background:#4FC3F7;transition:width 0.1s linear;"></div>';
+    progressBar.innerHTML = '<div id="fishing-progress-bar" style="width:100%;height:100%;background:#4FC3F7;transition:width 0.1s linear;"></div>';
     this.uiElement.appendChild(progressBar);
 
     // معلومات الصعوبة

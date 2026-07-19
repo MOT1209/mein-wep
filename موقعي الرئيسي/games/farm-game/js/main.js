@@ -293,194 +293,89 @@ Object.assign(GAME.game, {
     GAME.ui.showInteractionHint(null);
   },
 
-  // Unified action dispatcher — delegates to AnimalsSystem then tool-based farming
+  // --- Unified action dispatcher --- Delegates directly to new systems ---
   doAction: function() {
     var p = GAME.player.mesh.position;
-
-    // --- Animal interactions first (trough / collect) ---
-    var distToTrough = Math.sqrt((p.x - 16) * (p.x - 16) + (p.z + 12) * (p.z + 12));
-    if (distToTrough < 4 && GAME.animals) {
-      var fed = GAME.animals.feed(p.x, p.z);
-      if (fed) { GAME.audio.play('chime'); return; }
-    }
-    if (GAME.animals) {
-      var collected = GAME.animals.collect(p.x, p.z);
-      if (collected) { GAME.audio.play('coin'); return; }
-    }
-
-    // --- Tool-based farming actions (via FarmingSystem) ---
     var tool = this.state.selectedTool;
-    var actions = [
-      { fn: 'plowClosest',     sound: 'step' },    // 0: Hoe
-      { fn: 'waterClosest',    sound: 'water' },   // 1: Watering Can
-      { fn: 'plantClosest',    sound: 'step', args: 'wheat' },   // 2: Wheat Seed
-      { fn: 'plantClosest',    sound: 'step', args: 'tomato' },  // 3: Tomato Seed
-      { fn: 'plantClosest',    sound: 'step', args: 'carrot' },  // 4: Carrot Seed
-      { fn: 'harvestClosest',  sound: 'harvest' }, // 5: Sickle
-      { fn: 'plantClosest',    sound: 'step', args: 'apple' },   // 6: Apple Seed
-      { fn: 'fertilizeClosest',sound: 'step' }     // 7: Fertilizer
-    ];
-    var action = actions[tool];
-    if (action) {
-      this[action.fn](action.args);
-      GAME.audio.play(action.sound);
-    }
-  },
 
-  fertilizeClosest: function() {
-    var idx = this.findClosestPlot('planted');
-    if (idx === null) {
-      // Try to find ready plants too
-      idx = this.findClosestPlot('ready');
+    // --- 1. Animal interactions (feed / collect) via AnimalsSystem ---
+    var distToTrough = Math.sqrt((p.x - 16) * (p.x - 16) + (p.z + 12) * (p.z + 12));
+    if (distToTrough < 4 && GAME.AnimalsSystem) {
+      var closestAnimal = GAME.AnimalsSystem.findClosestAnimal(p.x, p.z, null, 3);
+      if (closestAnimal) {
+        if (!closestAnimal.isFedToday && GAME.AnimalsSystem.feedAnimal(closestAnimal.id)) {
+          GAME.audio.play('chime');
+          if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('feed');
+          return;
+        }
+        if (closestAnimal.productsReady > 0 && GAME.AnimalsSystem.collectProduct(closestAnimal.id)) {
+          GAME.audio.play('coin');
+          return;
+        }
+      }
     }
-    if (idx === null) {
-      GAME.ui.showNotification('❌ No plants nearby to fertilize', 'error');
+
+    // --- 2. Tool-based farming actions (via FarmingSystem) ---
+    var toolMap = [
+      { action: 'plow',      state: 'empty',   sound: 'step' },
+      { action: 'water',     state: 'planted', sound: 'water' },
+      { action: 'plant',     state: 'plowed',  sound: 'step', crop: 'wheat' },
+      { action: 'plant',     state: 'plowed',  sound: 'step', crop: 'tomato' },
+      { action: 'plant',     state: 'plowed',  sound: 'step', crop: 'carrot' },
+      { action: 'harvest',   state: 'ready',   sound: 'harvest' },
+      { action: 'plant',     state: 'plowed',  sound: 'step', crop: 'apple' },
+      { action: 'fertilize', state: 'planted', sound: 'step' }
+    ];
+    var mapping = toolMap[tool];
+    if (!mapping) return;
+
+    // Fertilize also accepts 'ready' plots
+    var plotIdx = GAME.FarmingSystem.findClosestPlot(p.x, p.z, mapping.state, 3);
+    if (plotIdx === null && mapping.action === 'fertilize') {
+      plotIdx = GAME.FarmingSystem.findClosestPlot(p.x, p.z, 'ready', 3);
+    }
+    if (plotIdx === null) {
+      var hints = {
+        plow: 'No empty plots nearby', water: 'No planted crops nearby',
+        plant: 'No plowed plots nearby', harvest: 'No crops ready to harvest',
+        fertilize: 'No plants nearby to fertilize'
+      };
+      GAME.ui.showNotification('❌ ' + (hints[mapping.action] || 'Nothing to do'), 'error');
       return;
     }
-    // Use basic fertilizer by default
-    GAME.FarmingSystem.fertilize(idx, 'basic');
-  },
-  
 
-
-  findClosestPlot: function(state) {
-    var p = GAME.player.mesh.position;
-    return GAME.FarmingSystem.findClosestPlot(p.x, p.z, state, 3);
-  },
-
-  plowClosest: function() {
-    var idx = this.findClosestPlot('empty');
-    if (idx === null) { GAME.ui.showNotification('❌ No empty plots nearby', 'error'); return; }
-    GAME.FarmingSystem.plow(idx);
-    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('plow');
-  },
-
-  waterClosest: function() {
-    var idx = this.findClosestPlot('planted');
-    if (idx === null) { GAME.ui.showNotification('❌ No planted crops nearby', 'error'); return; }
-    GAME.FarmingSystem.water(idx);
-    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('water');
-  },
-
-  // Delegate to FarmingSystem — handles energy, seeds/money, visuals, particles, XP
-  plantClosest: function(crop) {
-    var idx = this.findClosestPlot('plowed');
-    if (idx === null) { GAME.ui.showNotification('❌ No plowed plots nearby', 'error'); return; }
-    GAME.FarmingSystem.plant(idx, crop);
-    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('plant');
-  },
-
-  harvestClosest: function() {
-    var idx = this.findClosestPlot('ready');
-    if (idx === null) { GAME.ui.showNotification('❌ No crops ready to harvest', 'error'); return; }
-    GAME.FarmingSystem.harvest(idx);
-    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('harvest');
-  },
-
-  // Delegate crafting to EconomySystem (handles resource deduction, XP, notifications)
-  craftItem: function(recipeId) {
-    if (GAME.EconomySystem && GAME.EconomySystem.craftItem) {
-      GAME.EconomySystem.craftItem(recipeId, 1);
-    } else {
-      // Fallback: use legacy inline logic
-      var recipe = this.recipes[recipeId];
-      if (!recipe) return;
-      for (var ingredient in recipe.inputs) {
-        var needed = recipe.inputs[ingredient];
-        var have = this.state.inventory[ingredient] || 0;
-        if (have < needed) {
-          GAME.ui.showNotification('❌ Need ' + needed + ' ' + ingredient + ' for ' + recipe.name, 'error');
-          return;
-        }
-      }
-      for (var ingredient in recipe.inputs) {
-        this.state.inventory[ingredient] -= recipe.inputs[ingredient];
-      }
-      this.state.crafted[recipeId] = (this.state.crafted[recipeId] || 0) + 1;
-      this.addXP(recipe.xpReward);
-      GAME.quests.track('craft', 1);
-      this.state.stats.totalCrafted++;
-      GAME.achievements.checkAll();
-      GAME.ui.showNotification('🔨 Crafted ' + recipe.name + '! +' + recipe.xpReward + ' XP', 'success');
-      GAME.audio.play('chime');
-      GAME.ui.refreshInventory();
+    var success = false;
+    switch (mapping.action) {
+      case 'plow':      success = GAME.FarmingSystem.plow(plotIdx); break;
+      case 'water':     success = GAME.FarmingSystem.water(plotIdx); break;
+      case 'plant':     success = GAME.FarmingSystem.plant(plotIdx, mapping.crop); break;
+      case 'harvest':   success = GAME.FarmingSystem.harvest(plotIdx); break;
+      case 'fertilize': success = GAME.FarmingSystem.fertilize(plotIdx, 'basic'); break;
+    }
+    if (success) {
+      GAME.audio.play(mapping.sound);
+      if (GAME.TutorialSystem) GAME.TutorialSystem.onAction(mapping.action);
     }
   },
 
-  // Delegate buying to EconomySystem
+  // --- Thin delegates to new systems (no fallback logic) ---
   buySeed: function(type) {
-    if (GAME.EconomySystem && GAME.EconomySystem.buyItem) {
-      GAME.EconomySystem.buyItem(type, 1, 'seed');
-    } else {
-      // Fallback
-      var prices = { wheat: 10, tomato: 20, carrot: 15, apple: 50 };
-      if (!prices[type]) return;
-      if (this.state.money < prices[type]) {
-        GAME.ui.showNotification('❌ Not enough money!', 'error');
-        return;
-      }
-      this.state.money -= prices[type];
-      this.state.inventory[type] = (this.state.inventory[type] || 0) + 1;
-      GAME.ui.showNotification('🌱 Bought ' + type + ' seed!', 'success');
-    }
+    if (GAME.EconomySystem) GAME.EconomySystem.buyItem(type, 1);
   },
 
-  // Delegate selling to EconomySystem
   sellItem: function(type) {
-    if (GAME.EconomySystem && GAME.EconomySystem.sellItem) {
-      GAME.EconomySystem.sellItem(type);
-    } else {
-      // Fallback
-      var producePrices = { wheat: 25, tomato: 40, carrot: 35, apple: 80 };
-      var craftedPrices = { bread: 65, ketchup: 100, juice: 80 };
-
-      if (craftedPrices[type] !== undefined) {
-        var amt = this.state.crafted[type] || 0;
-        if (amt <= 0) {
-          GAME.ui.showNotification('❌ No ' + type + ' to sell!', 'error');
-          return;
-        }
-        var bonus = this.getSellPriceBonus();
-        var price = Math.floor(craftedPrices[type] * bonus);
-        this.state.money += price * amt;
-        this.state.crafted[type] = 0;
-        GAME.quests.track('earn', price * amt);
-        this.state.stats.totalEarned += price * amt;
-        GAME.achievements.checkAll();
-        GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
-        return;
-      }
-
-      if (!this.state.inventory[type] || this.state.inventory[type] <= 0) {
-        GAME.ui.showNotification('❌ No ' + type + ' to sell!', 'error');
-        return;
-      }
-      var bonus = this.getSellPriceBonus();
-      var price = Math.floor((producePrices[type] || 25) * bonus);
-      var amt = this.state.inventory[type];
-      this.state.money += price * amt;
-      this.state.inventory[type] = 0;
-      GAME.quests.track('earn', price * amt);
-      this.state.stats.totalEarned += price * amt;
-      GAME.achievements.checkAll();
-      GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
-    }
+    if (GAME.EconomySystem) GAME.EconomySystem.sellItem(type, 1);
   },
 
-  // Delegate fertilizer buying to EconomySystem
   buyFertilizer: function() {
-    if (GAME.EconomySystem && GAME.EconomySystem.buyItem) {
-      GAME.EconomySystem.buyItem('basic', 1, 'fertilizer');
-    } else {
-      // Fallback
-      var price = 15;
-      if (this.state.money < price) {
-        GAME.ui.showNotification('❌ Not enough money! Need $' + price, 'error');
-        return;
-      }
-      this.state.money -= price;
-      this.state.inventory.fertilizer = (this.state.inventory.fertilizer || 0) + 1;
-      GAME.ui.showNotification('🌱 Bought fertilizer!', 'success');
+    if (GAME.EconomySystem) GAME.EconomySystem.buyItem('basic_fert', 1);
+  },
+
+  craftItem: function(recipeId) {
+    if (GAME.CraftingSystem && GAME.CraftingSystem.craft) {
+      GAME.CraftingSystem.craft(recipeId);
+    } else if (GAME.EconomySystem && GAME.EconomySystem.craft) {
+      GAME.EconomySystem.craft(recipeId);
     }
   },
 

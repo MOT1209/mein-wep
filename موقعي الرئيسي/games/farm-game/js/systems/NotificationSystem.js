@@ -553,7 +553,7 @@ GAME.NotificationSystem = {
     var self = this;
     var el = document.createElement('div');
     el.className = 'notification-grouped';
-    el.textContent = '<span>' + groupData.message + '</span><span class="group-count">x' + groupData.count + '</span>';
+    el.innerHTML =span>' + groupData.message + '</span><span class="group-count">x' + groupData.count + '</span>';
     
     this.groupContainer.appendChild(el);
     groupData.element = el;

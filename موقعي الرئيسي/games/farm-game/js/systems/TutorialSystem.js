@@ -322,7 +322,7 @@ GAME.TutorialSystem = {
 
     // عرض التعليمة
     if (this.tooltipEl) {
-      this.tooltipEl.textContent = html;
+      this.tooltipEl.innerHTML = html;
       this.tooltipEl.style.transform = 'translateY(0)';
       this.tooltipEl.style.opacity = '1';
     }

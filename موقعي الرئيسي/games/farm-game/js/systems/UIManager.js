@@ -585,7 +585,7 @@ GAME.UIManager = {
     if (!container) return;
 
     if (!GAME.QuestSystem) {
-      container.textContent = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Quest system not loaded</p>';
+      container.innerHTML =p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Quest system not loaded</p>';
       return;
     }
 
@@ -801,13 +801,13 @@ GAME.UIManager = {
     if (!grid) return;
 
     if (!GAME.UpgradesSystem) {
-      grid.textContent = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Upgrades system not loaded</p>';
+      grid.innerHTML =p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Upgrades system not loaded</p>';
       return;
     }
 
     var data = GAME.UPGRADES_DATA ? GAME.UPGRADES_DATA[category] : null;
     if (!data) {
-      grid.textContent = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No upgrades in this category</p>';
+      grid.innerHTML =p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No upgrades in this category</p>';
       return;
     }
 
