@@ -1,18 +1,68 @@
 'use client'
 
 import { useGameStore } from '@/store/gameStore'
-import { MainMenu } from '@/components/MainMenu'
-import { OfflineSetup } from '@/components/OfflineSetup'
-import { OnlineLobby } from '@/components/OnlineLobby'
-import { DrawingScreen } from '@/components/DrawingScreen'
-import { VotingScreen } from '@/components/VotingScreen'
-import { ResultsScreen } from '@/components/ResultsScreen'
-import { Leaderboard } from '@/components/Leaderboard'
-import { SettingsScreen } from '@/components/SettingsScreen'
-import { StatsScreen } from '@/components/StatsScreen'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { SkipToContent } from '@/components/AccessibilityProvider'
 import { AnimatePresence } from 'framer-motion'
+import dynamic from 'next/dynamic'
+
+// Loading spinner component
+const LoadingSpinner = () => (
+  <div className="min-h-screen flex items-center justify-center">
+    <div className="w-12 h-12 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+)
+
+// Dynamic imports for heavy components (code splitting)
+const MainMenu = dynamic(
+  () => import('@/components/MainMenu').then(mod => ({ default: mod.MainMenu })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const OfflineSetup = dynamic(
+  () => import('@/components/OfflineSetup').then(mod => ({ default: mod.OfflineSetup })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const OnlineLobby = dynamic(
+  () => import('@/components/OnlineLobby').then(mod => ({ default: mod.OnlineLobby })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const DrawingScreen = dynamic(
+  () => import('@/components/DrawingScreen').then(mod => ({ default: mod.DrawingScreen })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const VotingScreen = dynamic(
+  () => import('@/components/VotingScreen').then(mod => ({ default: mod.VotingScreen })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const ResultsScreen = dynamic(
+  () => import('@/components/ResultsScreen').then(mod => ({ default: mod.ResultsScreen })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const Leaderboard = dynamic(
+  () => import('@/components/Leaderboard').then(mod => ({ default: mod.Leaderboard })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const StatsScreen = dynamic(
+  () => import('@/components/StatsScreen').then(mod => ({ default: mod.StatsScreen })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const SettingsScreen = dynamic(
+  () => import('@/components/SettingsScreen').then(mod => ({ default: mod.SettingsScreen })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
+
+const PluginManager = dynamic(
+  () => import('@/components/PluginManager').then(mod => ({ default: mod.PluginManager })),
+  { loading: () => <LoadingSpinner />, ssr: false }
+)
 
 export default function Home() {
   const { phase } = useGameStore()
@@ -38,6 +88,8 @@ export default function Home() {
         return <StatsScreen key="stats" />
       case 'settings':
         return <SettingsScreen key="settings" />
+      case 'plugins':
+        return <PluginManager key="plugins" />
       default:
         return <MainMenu key="menu" />
     }

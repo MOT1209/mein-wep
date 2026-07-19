@@ -1,11 +1,34 @@
 import type { Metadata, Viewport } from 'next'
 import { Inter, Cairo } from 'next/font/google'
 import './globals.css'
-import { ThemeProvider } from '@/components/ThemeProvider'
-import { GameProvider } from '@/components/GameProvider'
-import { SocketProvider } from '@/components/SocketProvider'
-import { AuthProvider } from '@/components/AuthProvider'
-import { ServiceWorkerProvider } from '@/components/ServiceWorkerProvider'
+import * as Sentry from '@sentry/nextjs'
+import dynamic from 'next/dynamic'
+
+// Dynamic imports for client components (no SSR needed)
+const ThemeProvider = dynamic(
+  () => import('@/components/ThemeProvider').then(mod => ({ default: mod.ThemeProvider })),
+  { ssr: false }
+)
+
+const AuthProvider = dynamic(
+  () => import('@/components/AuthProvider').then(mod => ({ default: mod.AuthProvider })),
+  { ssr: false }
+)
+
+const SocketProvider = dynamic(
+  () => import('@/components/SocketProvider').then(mod => ({ default: mod.SocketProvider })),
+  { ssr: false }
+)
+
+const GameProvider = dynamic(
+  () => import('@/components/GameProvider').then(mod => ({ default: mod.GameProvider })),
+  { ssr: false }
+)
+
+const ServiceWorkerProvider = dynamic(
+  () => import('@/components/ServiceWorkerProvider').then(mod => ({ default: mod.ServiceWorkerProvider })),
+  { ssr: false }
+)
 
 const inter = Inter({ subsets: ['latin'] })
 const cairo = Cairo({ subsets: ['arabic'], variable: '--font-cairo' })

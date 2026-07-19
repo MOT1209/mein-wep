@@ -6,7 +6,7 @@ import type { Lang } from '@/lib/i18n'
 
 // Types
 export type GameMode = 'offline' | 'online' | null
-export type GamePhase = 'menu' | 'setup' | 'lobby' | 'playing' | 'drawing' | 'voting' | 'results' | 'leaderboard' | 'stats' | 'settings'
+export type GamePhase = 'menu' | 'setup' | 'lobby' | 'playing' | 'drawing' | 'voting' | 'results' | 'leaderboard' | 'stats' | 'settings' | 'plugins'
 
 export type GameType = 'classic' | 'letter' | 'category' | 'daily' | 'creative'
 

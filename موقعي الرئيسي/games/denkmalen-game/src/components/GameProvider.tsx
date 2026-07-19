@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, ReactNode } from 'react'
 import { useGameStore } from '@/store/gameStore'
 import { useSocket } from '@/components/SocketProvider'
+import { preloadDefaultWords, saveGameResult, updatePlayerStats, saveOfflineSettings } from '@/lib/offline-storage'
+import { analytics, trackSessionStart } from '@/lib/analytics'
 
 interface GameContextType {
   // Helper functions
@@ -90,6 +92,21 @@ export function GameProvider({ children }: { children: ReactNode }) {
     document.documentElement.lang = settings.language
   }, [settings.language])
 
+  // Preload default words for offline use on mount
+  useEffect(() => {
+    preloadDefaultWords()
+    trackSessionStart()
+  }, [])
+
+  // Save settings to offline storage when they change
+  useEffect(() => {
+    saveOfflineSettings({
+      language: settings.language,
+      theme: settings.theme,
+      soundEnabled: settings.sound,
+    })
+  }, [settings])
+
   const playSound = (sound: string) => {
     if (!settings.sound) return
     
@@ -144,6 +161,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   const startOfflineGame = (players: { name: string }[]) => {
+    // Track analytics
+    analytics.gameStart('offline', gameType)
+    analytics.buttonClick('start_game', 'offline_setup')
+
     const avatars = ['🎨', '🎭', '🎪', '🎯', '🎲', '🎮', '🎸', '🎹']
 
     const gamePlayers = players.map((p, i) => ({
@@ -194,6 +215,38 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }
 
   const endGame = () => {
+    // Save game result to offline storage
+    const state = useGameStore.getState()
+    const players = state.players
+    
+    // Track analytics
+    analytics.gameEnd({
+      players: players.length,
+      rounds: state.totalRounds,
+      mode: state.mode || 'offline',
+    })
+    
+    if (players.length > 0) {
+      // Find winner (highest score)
+      const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
+      const winner = sortedPlayers[0]
+      
+      // Save result
+      saveGameResult({
+        id: `offline-${Date.now()}`,
+        date: Date.now(),
+        players: players.map(p => ({ name: p.name, score: p.score })),
+        winner: winner.name,
+        rounds: state.totalRounds,
+        mode: 'offline',
+      })
+      
+      // Update player stats
+      players.forEach(p => {
+        updatePlayerStats(p.id, p.score)
+      })
+    }
+    
     updateStats({
       gamesPlayed: 1,
     })

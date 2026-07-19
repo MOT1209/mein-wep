@@ -4,12 +4,18 @@ import { motion } from 'framer-motion'
 import { useGameStore } from '@/store/gameStore'
 import { t } from '@/lib/i18n'
 import { useGame } from '@/components/GameProvider'
-import { FaArrowLeft, FaChartBar, FaGamepad, FaTrophy, FaStar, FaClock, FaPaintBrush, FaHome } from 'react-icons/fa'
+import { getOfflineStats, getRecentResults, getStorageUsageFormatted } from '@/lib/offline-storage'
+import { FaArrowLeft, FaChartBar, FaGamepad, FaTrophy, FaStar, FaClock, FaPaintBrush, FaHome, FaWifi, FaWifiOff } from 'react-icons/fa'
 
 export function StatsScreen() {
   const { stats, setPhase, settings } = useGameStore()
   const lang = settings.language
   const { playSound, vibrate } = useGame()
+  
+  // Get offline statistics
+  const offlineStats = getOfflineStats()
+  const recentResults = getRecentResults()
+  const storageUsage = getStorageUsageFormatted()
 
   const statItems = [
     { icon: FaGamepad, label: t('stats.gamesPlayed', lang), value: stats.gamesPlayed, color: 'text-blue-500', bg: 'from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20' },
@@ -151,6 +157,92 @@ export function StatsScreen() {
             </div>
           </motion.div>
         )}
+
+        {/* Offline Stats Section */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.0 }}
+          className="bg-gradient-to-r from-cyan-50 to-teal-100 dark:from-cyan-900/20 dark:to-teal-800/20 rounded-2xl p-4 border border-white/50 dark:border-slate-700/50"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-md">
+              <FaWifiOff className="text-xl text-cyan-500" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Offline Games</p>
+              <p className="text-2xl font-bold text-slate-800 dark:text-white">{offlineStats.gamesPlayed}</p>
+            </div>
+          </div>
+          {offlineStats.gamesPlayed > 0 && (
+            <div className="mt-3 pt-3 border-t border-cyan-200 dark:border-cyan-800">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-lg font-bold text-slate-800 dark:text-white">{offlineStats.gamesWon}</p>
+                  <p className="text-xs text-slate-500">Wins</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-slate-800 dark:text-white">{offlineStats.averageScore}</p>
+                  <p className="text-xs text-slate-500">Avg Score</p>
+                </div>
+                <div>
+                  <p className="text-lg font-bold text-slate-800 dark:text-white">{offlineStats.highestScore}</p>
+                  <p className="text-xs text-slate-500">Best</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Recent Results */}
+        {recentResults.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 1.1 }}
+            className="bg-gradient-to-r from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-800/20 rounded-2xl p-4 border border-white/50 dark:border-slate-700/50"
+          >
+            <div className="flex items-center gap-4 mb-3">
+              <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-md text-2xl">
+                🕐
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-slate-500 dark:text-slate-400">Recent Games</p>
+                <p className="text-lg font-bold text-slate-800 dark:text-white">{recentResults.length} games</p>
+              </div>
+            </div>
+            <div className="space-y-2 max-h-32 overflow-y-auto">
+              {recentResults.slice(0, 5).map((result, index) => (
+                <div key={result.id} className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600 dark:text-slate-400">
+                    {new Date(result.date).toLocaleDateString()}
+                  </span>
+                  <span className="font-medium text-slate-800 dark:text-white">
+                    🏆 {result.winner}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Storage Usage */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 1.2 }}
+          className="bg-gradient-to-r from-slate-50 to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl p-4 border border-white/50 dark:border-slate-700/50"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-md">
+              <FaChartBar className="text-xl text-slate-500" />
+            </div>
+            <div className="flex-1">
+              <p className="text-sm text-slate-500 dark:text-slate-400">Local Storage</p>
+              <p className="text-lg font-bold text-slate-800 dark:text-white">{storageUsage}</p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
       {/* Home Button */}

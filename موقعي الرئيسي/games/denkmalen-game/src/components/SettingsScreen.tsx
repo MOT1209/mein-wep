@@ -7,7 +7,7 @@ import { useTheme } from '@/components/ThemeProvider'
 import { useAuth } from '@/components/AuthProvider'
 import {
   FaArrowLeft, FaMoon, FaSun, FaVolumeUp, FaVolumeMute,
-  FaMusic, FaMobileAlt, FaGlobe, FaPalette, FaUser, FaSignOutAlt
+  FaMusic, FaMobileAlt, FaGlobe, FaPalette, FaUser, FaSignOutAlt, FaPuzzlePiece
 } from 'react-icons/fa'
 import { t, LANGUAGE_OPTIONS } from '@/lib/i18n'
 
@@ -279,6 +279,32 @@ export function SettingsScreen() {
               </>
             )}
           </div>
+        </div>
+
+        {/* Plugins */}
+        <div className="card">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-white mb-4 flex items-center gap-2">
+            <FaPuzzlePiece className="text-purple-500" />
+            {t('plugins.title', lang)}
+          </h2>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => { playSound('click'); vibrate(); setPhase('plugins') }}
+            className="w-full p-3 bg-white dark:bg-slate-600 border-2 border-slate-200
+                       dark:border-slate-500 rounded-xl flex items-center gap-3"
+          >
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400
+                            flex items-center justify-center text-white text-xl">
+              <FaPuzzlePiece />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="font-medium text-slate-800 dark:text-white">{t('plugins.title', lang)}</span>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t('plugins.subtitle', lang)}</p>
+            </div>
+            <span className="text-slate-400">→</span>
+          </motion.button>
         </div>
 
         {/* About */}

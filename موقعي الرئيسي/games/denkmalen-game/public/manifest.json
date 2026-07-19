@@ -58,11 +58,21 @@
   ],
   "screenshots": [
     {
-      "src": "/denkmalen/og.svg",
+      "src": "/denkmalen/og.png",
       "sizes": "1200x630",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "form_factor": "wide",
       "label": "Denkmalen Game"
+    }
+  ],
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "Play Offline",
+      "short_name": "Offline",
+      "description": "Start an offline game",
+      "url": "/denkmalen/?mode=offline",
+      "icons": [{ "src": "/denkmalen/icons/icon-96.png", "sizes": "96x96" }]
     }
   ]
 }
