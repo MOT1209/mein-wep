@@ -106,6 +106,8 @@ Object.assign(GAME.game, {
       GAME.FarmingSystem.init(this.scene);
       // إنشاء قطع الأراضي
       GAME.game.initPlots();
+      // نظام إدارة الذاكرة (Object Pooling + Safe Disposal)
+      // لا يحتاج init — يُحمّل تلقائياً عند تحميل الملف
       // أنظمة ثانوية معزولة — فشل أيها لا يمنع تشغيل اللعبة
       this._safe('animals.init', function() { GAME.animals.init(self.scene); });
       this._safe('weather.init', function() { GAME.weather.init(self.scene); });
@@ -118,10 +120,32 @@ Object.assign(GAME.game, {
       this._safe('EconomySystem.init', function() { GAME.EconomySystem.init(); });
       this._safe('NPCsSystem.init', function() { GAME.NPCsSystem.init(self.scene, GAME.TimeSystem); });
       this._safe('WorldExpansion.init', function() { GAME.WorldExpansionInstance = new GAME.WorldExpansion({ events: null, ui: GAME.ui, shop: null }); });
+      this._safe('CraftingSystem.init', function() { GAME.CraftingSystem.init(self); });
+      this._safe('CookingSystem.init', function() { GAME.CookingSystem.init(self); });
+      // نظام الحفظ المحسّن
+      this._safe('EnhancedSaveSystem.init', function() { GAME.EnhancedSaveSystem.init(self); });
       // تحسينات الواجهة
       this._safe('UIEnhancements.init', function() { GAME.UIEnhancements.init(); });
+      // نظام التعليم التفاعلي
+      this._safe('TutorialSystem.init', function() { GAME.TutorialSystem.init(self); });
+      // === الأنظمة المتبقية ===
+      this._safe('ObjectPool.init', function() { GAME.ObjectPool.init(); });
+      this._safe('DisposeManager.init', function() { GAME.DisposeManager.init(); });
+      this._safe('CombatSystem.init', function() { GAME.CombatSystem.init(self); });
+      this._safe('FishingSystem.init', function() { GAME.FishingSystem.init(self); });
+      this._safe('SeasonalEvents.init', function() { GAME.SeasonalEvents.init(self); });
+      this._safe('QuestSystem.init', function() { GAME.QuestSystem.init(self); });
+      this._safe('AchievementSystem.init', function() { GAME.AchievementSystem.init(self); });
+      this._safe('LeaderboardSystem.init', function() { GAME.LeaderboardSystem.init(self); });
+      this._safe('NotificationSystem.init', function() { GAME.NotificationSystem.init(self); });
+      this._safe('AudioManager.init', function() { GAME.AudioManager.init(self); });
+      this._safe('WeatherSystem.init', function() { GAME.WeatherSystem.init(self); });
+      this._safe('DayNightCycle.init', function() { GAME.DayNightCycle.init(self); });
+      this._safe('UpgradesSystem.init', function() { GAME.UpgradesSystem.init(self); });
 
-      this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
+      // الحفظ التلقائي عبر EnhancedSaveSystem (يبدأ تلقائياً في init)
+      // الاحتفاظ بالحالة القديمة للتوافق
+      this._autoSave = null;  // EnhancedSaveSystem يدير الحفظ التلقائي
 
       var muteBtn = document.getElementById('mute-btn');
       if (muteBtn && GAME.audio && GAME.audio.muted) muteBtn.textContent = '🔇';
@@ -162,8 +186,14 @@ Object.assign(GAME.game, {
     this.state = {
       health: 100, energy: 100, money: 200,
       day: 1, time: 6,
-      inventory: { wheat: 0, tomato: 0, carrot: 0, apple: 0, fertilizer: 0 },
-      crafted: { bread: 0, ketchup: 0, juice: 0 },
+      // FarmingSystem-compatible inventory (seeds + harvest + products)
+      inventory: {
+        seeds: { wheat: 5, tomato: 3, carrot: 3, apple: 1 },
+        harvest: { wheat: 0, tomato: 0, carrot: 0, apple: 0 },
+        fertilizer: { basic: 2, quality: 0, premium: 0 },
+        animal: { egg: 0, milk: 0, truffle: 0, duck_egg: 0, wool: 0 },
+        crafted: { bread: 0, flour: 0, cheese: 0, butter: 0, ice_cream: 0, cake: 0, ketchup: 0, juice: 0, mayonnaise: 0 }},
+      crafted: { bread: 0, ketchup: 0, juice: 0 },  // legacy compat for sellItem
       selectedTool: 0,
       plots: [],
       timeScale: 60,
@@ -185,6 +215,11 @@ Object.assign(GAME.game, {
     GAME.ui.hideMenu();
     GAME.ui.showNotification('🌾 Welcome to your new farm!', 'success');
     GAME.audio.play('chime');
+    // بدء التعليم إذا لم يكتمل بعد
+    if (GAME.TutorialSystem && !GAME.TutorialSystem.isComplete) {
+      var self = this;
+      setTimeout(function() { GAME.TutorialSystem.start(); }, 1500);
+    }
   },
 
   togglePause: function() {
@@ -230,6 +265,7 @@ Object.assign(GAME.game, {
     if (distToMarket < 5) {
       toggleShop();
       GAME.audio.play('chime');
+      if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('shop');
       return;
     }
     var distToHouse = Math.sqrt((p.x + 15) * (p.x + 15) + (p.z + 15) * (p.z + 15));
@@ -242,7 +278,10 @@ Object.assign(GAME.game, {
     if (distToTrough < 4) {
       if (GAME.animals) {
         var fed = GAME.animals.feed(p.x, p.z);
-        if (fed) GAME.audio.play('chime');
+        if (fed) {
+          GAME.audio.play('chime');
+          if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('feed');
+        }
       }
       return;
     }
@@ -253,28 +292,38 @@ Object.assign(GAME.game, {
     GAME.ui.showInteractionHint(null);
   },
 
+  // Unified action dispatcher — delegates to AnimalsSystem then tool-based farming
   doAction: function() {
     var p = GAME.player.mesh.position;
+
+    // --- Animal interactions first (trough / collect) ---
     var distToTrough = Math.sqrt((p.x - 16) * (p.x - 16) + (p.z + 12) * (p.z + 12));
-    if (distToTrough < 4) {
-      if (GAME.animals) {
-        var fed = GAME.animals.feed(p.x, p.z);
-        if (fed) { GAME.audio.play('chime'); return; }
-      }
+    if (distToTrough < 4 && GAME.animals) {
+      var fed = GAME.animals.feed(p.x, p.z);
+      if (fed) { GAME.audio.play('chime'); return; }
     }
     if (GAME.animals) {
       var collected = GAME.animals.collect(p.x, p.z);
       if (collected) { GAME.audio.play('coin'); return; }
     }
+
+    // --- Tool-based farming actions (via FarmingSystem) ---
     var tool = this.state.selectedTool;
-    if (tool === 0) { this.plowClosest(); GAME.audio.play('step'); }
-    else if (tool === 1) { this.waterClosest(); GAME.audio.play('water'); }
-    else if (tool === 2) { this.plantClosest('wheat'); GAME.audio.play('step'); }
-    else if (tool === 3) { this.plantClosest('tomato'); GAME.audio.play('step'); }
-    else if (tool === 4) { this.plantClosest('carrot'); GAME.audio.play('step'); }
-    else if (tool === 5) { this.harvestClosest(); GAME.audio.play('harvest'); }
-    else if (tool === 6) { this.plantClosest('apple'); GAME.audio.play('step'); }
-    else if (tool === 7) { this.fertilizeClosest(); GAME.audio.play('step'); }
+    var actions = [
+      { fn: 'plowClosest',     sound: 'step' },    // 0: Hoe
+      { fn: 'waterClosest',    sound: 'water' },   // 1: Watering Can
+      { fn: 'plantClosest',    sound: 'step', args: 'wheat' },   // 2: Wheat Seed
+      { fn: 'plantClosest',    sound: 'step', args: 'tomato' },  // 3: Tomato Seed
+      { fn: 'plantClosest',    sound: 'step', args: 'carrot' },  // 4: Carrot Seed
+      { fn: 'harvestClosest',  sound: 'harvest' }, // 5: Sickle
+      { fn: 'plantClosest',    sound: 'step', args: 'apple' },   // 6: Apple Seed
+      { fn: 'fertilizeClosest',sound: 'step' }     // 7: Fertilizer
+    ];
+    var action = actions[tool];
+    if (action) {
+      this[action.fn](action.args);
+      GAME.audio.play(action.sound);
+    }
   },
 
   fertilizeClosest: function() {
@@ -291,237 +340,6 @@ Object.assign(GAME.game, {
     GAME.FarmingSystem.fertilize(idx, 'basic');
   },
   
-  addGrowthMarkers: function(plot) {
-    // Add water marker (animated water droplets)
-    if (!plot.waterMarker) {
-      // Create a group for water droplets
-      var waterGroup = new THREE.Group();
-      
-      // Create multiple water droplets for animation effect
-      for (var i = 0; i < 3; i++) {
-        var dropletGeo = new THREE.SphereGeometry(0.1, 8, 8);
-        var dropletMat = new THREE.MeshBasicMaterial({ 
-          color: 0x3498db, 
-          transparent: true, 
-          opacity: 0 
-        });
-        var droplet = new THREE.Mesh(dropletGeo, dropletMat);
-        droplet.position.set(
-          plot.x + (Math.random() - 0.5) * 0.3,
-          0.1 + i * 0.15,
-          plot.z + (Math.random() - 0.5) * 0.3
-        );
-        droplet.userData = {
-          originalY: droplet.position.y,
-          speed: 0.5 + Math.random() * 0.5
-        };
-        waterGroup.add(droplet);
-      }
-      
-      plot.waterMarker = waterGroup;
-      this.scene.add(plot.waterMarker);
-    }
-    
-    // Add fertilizer marker (animated fertilizer packets)
-    if (!plot.fertilizerMarker) {
-      // Create a group for fertilizer packets
-      var fertGroup = new THREE.Group();
-      
-      // Create fertilizer packet visual
-      var packetGeo = new THREE.BoxGeometry(0.2, 0.1, 0.2);
-      var packetMat = new THREE.MeshBasicMaterial({ 
-        color: 0x8B4513, 
-        transparent: true, 
-        opacity: 0 
-      });
-      var packet = new THREE.Mesh(packetGeo, packetMat);
-      packet.position.set(plot.x, 0.1, plot.z);
-      
-      // Add a small bag-like shape on top
-      var bagGeo = new THREE.ConeGeometry(0.12, 0.08, 4);
-      var bagMat = new THREE.MeshBasicMaterial({ 
-        color: 0x654321, 
-        transparent: true, 
-        opacity: 0 
-      });
-      var bag = new THREE.Mesh(bagGeo, bagMat);
-      bag.position.set(0, 0.05, 0);
-      bag.rotation.x = Math.PI / 2;
-      
-      packet.add(bag);
-      fertGroup.add(packet);
-      
-      plot.fertilizerMarker = fertGroup;
-      this.scene.add(plot.fertilizerMarker);
-    }
-  },
-  
-  updatePlantVisual: function(plot, delta) {
-    // If delta is not provided, use a default value for animation
-    if (delta === undefined) delta = 0.016; // Approximately 60 FPS
-    // Update water marker animation
-    if (plot.waterMarker) {
-      // Animate water droplets when plant is watered
-      if (plot.watered) {
-        // Animate droplets rising and fading
-        for (var i = 0; i < plot.waterMarker.children.length; i++) {
-          var droplet = plot.waterMarker.children[i];
-          droplet.position.y += droplet.userData.speed * (delta || 0.016);
-          
-          // Fade out as it goes up
-          var progress = (droplet.position.y - droplet.userData.originalY) / 0.3;
-          droplet.material.opacity = Math.max(0, 0.8 - progress * 0.8);
-          
-          // Reset droplet when it goes too high
-          if (droplet.position.y > droplet.userData.originalY + 0.3) {
-            droplet.position.y = droplet.userData.originalY;
-            droplet.material.opacity = 0;
-          }
-        }
-      } else {
-        // Fade out droplets when not watered
-        for (var i = 0; i < plot.waterMarker.children.length; i++) {
-          var droplet = plot.waterMarker.children[i];
-          if (droplet.material.opacity > 0) {
-            droplet.material.opacity -= 0.02;
-          }
-        }
-      }
-    }
-    
-    // Update fertilizer marker (pulse when active)
-    if (plot.fertilizerMarker) {
-      if (plot.fertilized) {
-        // Pulse the fertilizer packet
-        var pulse = Math.sin(Date.now() * 0.003) * 0.2 + 0.8; // Oscillate between 0.6 and 1.0
-        plot.fertilizerMarker.children[0].material.opacity = 0.6 * pulse;
-        // Also pulse the bag
-        plot.fertilizerMarker.children[0].children[0].material.opacity = 0.6 * pulse;
-      } else {
-        // Fade out when not fertilized
-        for (var i = 0; i < plot.fertilizerMarker.children.length; i++) {
-          var obj = plot.fertilizerMarker.children[i];
-          if (obj.material.opacity > 0) {
-            obj.material.opacity -= 0.02;
-          }
-          if (obj.children && obj.children.length > 0 && obj.children[0].material.opacity > 0) {
-            obj.children[0].material.opacity -= 0.02;
-          }
-        }
-      }
-    }
-    
-    // Define growth stages for different crops
-    var growthStages = {
-      wheat: [
-        { height: 0.2, color: 0x8b4513 }, // Seed (brown)
-        { height: 0.3, color: 0x8b4513 }, // Sprout (brown)
-        { height: 0.5, color: 0x228b22 }, // Seedling (green)
-        { height: 0.8, color: 0x228b22 }, // Mature (green)
-        { height: 1.0, color: 0xdaa520 }  // Ready (golden)
-      ],
-      tomato: [
-        { height: 0.2, color: 0x8b4513 }, // Seed (brown)
-        { height: 0.3, color: 0x8b4513 }, // Sprout (brown)
-        { height: 0.5, color: 0x228b22 }, // Seedling (green)
-        { height: 0.8, color: 0xff4500 }, // Mature (orange-red)
-        { height: 1.0, color: 0xff4444 }  // Ready (red)
-      ],
-      carrot: [
-        { height: 0.2, color: 0x8b4513 }, // Seed (brown)
-        { height: 0.3, color: 0x8b4513 }, // Sprout (brown)
-        { height: 0.4, color: 0xff8c00 }, // Seedling (orange)
-        { height: 0.6, color: 0xff8c00 }, // Mature (orange)
-        { height: 1.0, color: 0xff8c00 }  // Ready (orange)
-      ],
-      apple: [
-        { height: 0.2, color: 0x8b5a2b }, // Sapling (brown)
-        { height: 0.4, color: 0x8b5a2b }, // Young tree (brown)
-        { height: 0.6, color: 0x8b5a2b }, // Growing tree (brown)
-        { height: 0.8, color: 0x8b5a2b }, // Mature tree (brown)
-        { height: 1.0, color: 0x8b5a2b }  // Fruit-bearing (brown with apples - handled separately)
-      ]
-    };
-    
-    var stages = growthStages[plot.crop] || growthStages.wheat; // Default to wheat
-    var stage = stages[Math.min(plot.growthStage, stages.length - 1)];
-    
-    if (plot.crop === 'apple') {
-      // For apple trees, we don't scale the trunk/leaves, but we could add fruit visualization
-      // For simplicity, we'll just ensure the tree exists
-      if (!plot.mesh) {
-        // Create tree if it doesn't exist
-        var trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
-        var leafMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
-        var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.5), trunkMat);
-        trunk.position.set(plot.x, 0.3, plot.z);
-        this.scene.add(trunk);
-        var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 6), leafMat);
-        leaf.position.set(plot.x, 0.8, plot.z);
-        leaf.scale.y = 0.7;
-        this.scene.add(leaf);
-        var group = new THREE.Group();
-        group.add(trunk);
-        group.add(leaf);
-        plot.mesh = group;
-        
-        // Add apples when tree is mature (growthStage >= 3)
-        if (plot.growthStage >= 3) {
-          // Add some apples
-          for (var i = 0; i < 3; i++) {
-            var appleGeo = new THREE.SphereGeometry(0.08, 6, 6);
-            var appleMat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
-            var apple = new THREE.Mesh(appleGeo, appleMat);
-            // Position apple randomly around the tree
-            var angle = Math.random() * Math.PI * 2;
-            var radius = 0.3 + Math.random() * 0.2;
-            apple.position.set(
-              plot.x + Math.cos(angle) * radius,
-              0.6 + Math.random() * 0.3,
-              plot.z + Math.sin(angle) * radius
-            );
-            this.scene.add(apple);
-            // Store reference to apples so we can remove them when harvesting
-            if (!plot.apples) plot.apples = [];
-            plot.apples.push(apple);
-          }
-        }
-      } else if (plot.growthStage >= 3 && plot.apples) {
-        // Ensure apples are visible when tree is mature
-        for (var i = 0; i < plot.apples.length; i++) {
-          plot.apples[i].visible = true;
-        }
-      }
-    } else if (plot.mesh) {
-      // For crops, update the plant mesh
-      plot.mesh.scale.set(0.2, stage.height, 0.2);
-      var mat = new THREE.MeshLambertMaterial({ color: stage.color });
-      plot.mesh.material = mat;
-      
-      // Add growth stage indicator (small floating number)
-      if (!plot.stageIndicator) {
-        // Create a simple text sprite for growth stage
-        // Since we don't have text rendering easily, we'll use a colored sphere
-        var indicatorGeo = new THREE.SphereGeometry(0.05, 6, 6);
-        var indicatorMat = new THREE.MeshBasicMaterial({ 
-          color: 0xffff00, 
-          transparent: true, 
-          opacity: 0.7 
-        });
-        plot.stageIndicator = new THREE.Mesh(indicatorGeo, indicatorMat);
-        plot.stageIndicator.position.set(plot.x, 0.2 + stage.height, plot.z);
-        this.scene.add(plot.stageIndicator);
-      }
-      
-      // Update indicator position and visibility
-      if (plot.stageIndicator) {
-        plot.stageIndicator.position.set(plot.x, 0.2 + stage.height * 1.1, plot.z);
-        // Show indicator for early growth stages
-        plot.stageIndicator.material.opacity = plot.growthStage < 2 ? 0.7 : 0;
-      }
-    }
-  },
-  
 
 
   findClosestPlot: function(state) {
@@ -533,161 +351,136 @@ Object.assign(GAME.game, {
     var idx = this.findClosestPlot('empty');
     if (idx === null) { GAME.ui.showNotification('❌ No empty plots nearby', 'error'); return; }
     GAME.FarmingSystem.plow(idx);
+    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('plow');
   },
 
   waterClosest: function() {
     var idx = this.findClosestPlot('planted');
     if (idx === null) { GAME.ui.showNotification('❌ No planted crops nearby', 'error'); return; }
     GAME.FarmingSystem.water(idx);
+    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('water');
   },
 
+  // Delegate to FarmingSystem — handles energy, seeds/money, visuals, particles, XP
   plantClosest: function(crop) {
     var idx = this.findClosestPlot('plowed');
     if (idx === null) { GAME.ui.showNotification('❌ No plowed plots nearby', 'error'); return; }
-    var prices = { wheat: 10, tomato: 20, carrot: 15, apple: 50 };
-    var energyBase = { wheat: 8, tomato: 8, carrot: 8, apple: 12 };
-    var cost = this.getEnergyCost(energyBase[crop] || 8);
-    if (!prices[crop]) return;
-    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
-    if ((this.state.inventory[crop] || 0) > 0) {
-      this.state.inventory[crop]--;
-    } else if (this.state.money >= prices[crop]) {
-      this.state.money -= prices[crop];
-    } else {
-      GAME.ui.showNotification('❌ Need $' + prices[crop] + ' or a seed in inventory!', 'error');
-      return;
-    }
-    this.state.energy -= cost;
-    this.state.plots[idx].state = 'planted';
-    this.state.plots[idx].crop = crop;
-    this.state.plots[idx].growth = 0;
-    this.state.plots[idx].watered = false;
-    this.state.plots[idx].fertilized = false;
-    this.state.plots[idx].growthStage = 0;
-    var plot = this.state.plots[idx];
-    var isTree = crop === 'apple';
-
-    if (isTree) {
-      var trunkMat = new THREE.MeshLambertMaterial({ color: 0x8B5A2B });
-      var leafMat = new THREE.MeshLambertMaterial({ color: 0x3a7d2c });
-      var trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.12, 0.5), trunkMat);
-      trunk.position.set(plot.x, 0.3, plot.z);
-      this.scene.add(trunk);
-      var leaf = new THREE.Mesh(new THREE.SphereGeometry(0.5, 6, 6), leafMat);
-      leaf.position.set(plot.x, 0.8, plot.z);
-      leaf.scale.y = 0.7;
-      this.scene.add(leaf);
-      var group = new THREE.Group();
-      group.add(trunk);
-      group.add(leaf);
-      plot.mesh = group;
-    } else {
-      var cropMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
-      var plant = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.15, 0.3), cropMat);
-      plant.position.set(plot.x, 0.2, plot.z);
-      this.scene.add(plant);
-      plot.mesh = plant;
-      
-      // Add water and fertilizer markers
-      this.addGrowthMarkers(plot);
-    }
-    this.addXP(8);
-    GAME.quests.track('plant', 1);
-    this.state.stats.totalPlanted++;
-    GAME.achievements.checkAll();
-    GAME.ui.showNotification('🌱 Planted ' + crop + '! +8 XP', 'success');
-    // 🎆 جسيمات الزراعة
-    var plantColors = { wheat: 0x228B22, tomato: 0x228B22, carrot: 0x228B22, apple: 0x8B5A2B };
-    this.spawnParticles(plot.x, 0.5, plot.z, plantColors[crop] || 0x228B22, 12, 2, 0.08, 0.6);
+    GAME.FarmingSystem.plant(idx, crop);
+    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('plant');
   },
 
   harvestClosest: function() {
     var idx = this.findClosestPlot('ready');
     if (idx === null) { GAME.ui.showNotification('❌ No crops ready to harvest', 'error'); return; }
     GAME.FarmingSystem.harvest(idx);
+    if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('harvest');
   },
 
+  // Delegate crafting to EconomySystem (handles resource deduction, XP, notifications)
   craftItem: function(recipeId) {
-    var recipe = this.recipes[recipeId];
-    if (!recipe) return;
-    for (var ingredient in recipe.inputs) {
-      var needed = recipe.inputs[ingredient];
-      var have = this.state.inventory[ingredient] || 0;
-      if (have < needed) {
-        GAME.ui.showNotification('❌ Need ' + needed + ' ' + ingredient + ' for ' + recipe.name, 'error');
+    if (GAME.EconomySystem && GAME.EconomySystem.craftItem) {
+      GAME.EconomySystem.craftItem(recipeId, 1);
+    } else {
+      // Fallback: use legacy inline logic
+      var recipe = this.recipes[recipeId];
+      if (!recipe) return;
+      for (var ingredient in recipe.inputs) {
+        var needed = recipe.inputs[ingredient];
+        var have = this.state.inventory[ingredient] || 0;
+        if (have < needed) {
+          GAME.ui.showNotification('❌ Need ' + needed + ' ' + ingredient + ' for ' + recipe.name, 'error');
+          return;
+        }
+      }
+      for (var ingredient in recipe.inputs) {
+        this.state.inventory[ingredient] -= recipe.inputs[ingredient];
+      }
+      this.state.crafted[recipeId] = (this.state.crafted[recipeId] || 0) + 1;
+      this.addXP(recipe.xpReward);
+      GAME.quests.track('craft', 1);
+      this.state.stats.totalCrafted++;
+      GAME.achievements.checkAll();
+      GAME.ui.showNotification('🔨 Crafted ' + recipe.name + '! +' + recipe.xpReward + ' XP', 'success');
+      GAME.audio.play('chime');
+      GAME.ui.refreshInventory();
+    }
+  },
+
+  // Delegate buying to EconomySystem
+  buySeed: function(type) {
+    if (GAME.EconomySystem && GAME.EconomySystem.buyItem) {
+      GAME.EconomySystem.buyItem(type, 1, 'seed');
+    } else {
+      // Fallback
+      var prices = { wheat: 10, tomato: 20, carrot: 15, apple: 50 };
+      if (!prices[type]) return;
+      if (this.state.money < prices[type]) {
+        GAME.ui.showNotification('❌ Not enough money!', 'error');
         return;
       }
+      this.state.money -= prices[type];
+      this.state.inventory[type] = (this.state.inventory[type] || 0) + 1;
+      GAME.ui.showNotification('🌱 Bought ' + type + ' seed!', 'success');
     }
-    for (var ingredient in recipe.inputs) {
-      this.state.inventory[ingredient] -= recipe.inputs[ingredient];
-    }
-    this.state.crafted[recipeId] = (this.state.crafted[recipeId] || 0) + 1;
-    this.addXP(recipe.xpReward);
-    GAME.quests.track('craft', 1);
-    this.state.stats.totalCrafted++;
-    GAME.achievements.checkAll();
-    GAME.ui.showNotification('🔨 Crafted ' + recipe.name + '! +' + recipe.xpReward + ' XP', 'success');
-    GAME.audio.play('chime');
-    GAME.ui.refreshInventory();
   },
 
-  buySeed: function(type) {
-    var prices = { wheat: 10, tomato: 20, carrot: 15, apple: 50 };
-    if (!prices[type]) return;
-    if (this.state.money < prices[type]) {
-      GAME.ui.showNotification('❌ Not enough money!', 'error');
-      return;
-    }
-    this.state.money -= prices[type];
-    this.state.inventory[type] = (this.state.inventory[type] || 0) + 1;
-    GAME.ui.showNotification('🌱 Bought ' + type + ' seed!', 'success');
-  },
-
+  // Delegate selling to EconomySystem
   sellItem: function(type) {
-    var producePrices = { wheat: 25, tomato: 40, carrot: 35, apple: 80 };
-    var craftedPrices = { bread: 65, ketchup: 100, juice: 80 };
+    if (GAME.EconomySystem && GAME.EconomySystem.sellItem) {
+      GAME.EconomySystem.sellItem(type);
+    } else {
+      // Fallback
+      var producePrices = { wheat: 25, tomato: 40, carrot: 35, apple: 80 };
+      var craftedPrices = { bread: 65, ketchup: 100, juice: 80 };
 
-    if (craftedPrices[type] !== undefined) {
-      var amt = this.state.crafted[type] || 0;
-      if (amt <= 0) {
+      if (craftedPrices[type] !== undefined) {
+        var amt = this.state.crafted[type] || 0;
+        if (amt <= 0) {
+          GAME.ui.showNotification('❌ No ' + type + ' to sell!', 'error');
+          return;
+        }
+        var bonus = this.getSellPriceBonus();
+        var price = Math.floor(craftedPrices[type] * bonus);
+        this.state.money += price * amt;
+        this.state.crafted[type] = 0;
+        GAME.quests.track('earn', price * amt);
+        this.state.stats.totalEarned += price * amt;
+        GAME.achievements.checkAll();
+        GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
+        return;
+      }
+
+      if (!this.state.inventory[type] || this.state.inventory[type] <= 0) {
         GAME.ui.showNotification('❌ No ' + type + ' to sell!', 'error');
         return;
       }
       var bonus = this.getSellPriceBonus();
-      var price = Math.floor(craftedPrices[type] * bonus);
+      var price = Math.floor((producePrices[type] || 25) * bonus);
+      var amt = this.state.inventory[type];
       this.state.money += price * amt;
-      this.state.crafted[type] = 0;
+      this.state.inventory[type] = 0;
       GAME.quests.track('earn', price * amt);
       this.state.stats.totalEarned += price * amt;
       GAME.achievements.checkAll();
       GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
-      return;
     }
-
-    if (!this.state.inventory[type] || this.state.inventory[type] <= 0) {
-      GAME.ui.showNotification('❌ No ' + type + ' to sell!', 'error');
-      return;
-    }
-    var bonus = this.getSellPriceBonus();
-    var price = Math.floor((producePrices[type] || 25) * bonus);
-    var amt = this.state.inventory[type];
-    this.state.money += price * amt;
-    this.state.inventory[type] = 0;
-    GAME.quests.track('earn', price * amt);
-    this.state.stats.totalEarned += price * amt;
-    GAME.achievements.checkAll();
-    GAME.ui.showNotification('💰 Sold ' + amt + ' ' + type + ' for $' + (price * amt), 'success');
   },
 
+  // Delegate fertilizer buying to EconomySystem
   buyFertilizer: function() {
-    var price = 15;
-    if (this.state.money < price) {
-      GAME.ui.showNotification('❌ Not enough money! Need $' + price, 'error');
-      return;
+    if (GAME.EconomySystem && GAME.EconomySystem.buyItem) {
+      GAME.EconomySystem.buyItem('basic', 1, 'fertilizer');
+    } else {
+      // Fallback
+      var price = 15;
+      if (this.state.money < price) {
+        GAME.ui.showNotification('❌ Not enough money! Need $' + price, 'error');
+        return;
+      }
+      this.state.money -= price;
+      this.state.inventory.fertilizer = (this.state.inventory.fertilizer || 0) + 1;
+      GAME.ui.showNotification('🌱 Bought fertilizer!', 'success');
     }
-    this.state.money -= price;
-    this.state.inventory.fertilizer = (this.state.inventory.fertilizer || 0) + 1;
-    GAME.ui.showNotification('🌱 Bought fertilizer!', 'success');
   },
 
   sleep: function() {
@@ -735,63 +528,7 @@ Object.assign(GAME.game, {
     if (state.health < 100) state.health += delta * 0.5;
     if (state.health > 100) state.health = 100;
     
-    // ===== دمج التحديث البصري + النمو في حلقة واحدة =====
-    for (var i = 0; i < state.plots.length; i++) {
-      var plot = state.plots[i];
-      
-      // تحديث العلامات البصرية (مياه، سماد)
-      this.updatePlantVisual(plot, delta);
-      
-      if (plot.state === 'planted') {
-        // معدل النمو الأساسي
-        var baseGrowthRate = 0.5;
-        
-        // مكافأة السقي
-        if (plot.watered) baseGrowthRate = 1.5;
-        
-        // مكافأة التسميد
-        if (plot.fertilized) baseGrowthRate *= 1.5;
-        
-        // تأثير الطقس
-        var weatherMult = 1.0;
-        if (GAME.weather) {
-          if (GAME.weather.current === 'rainy') weatherMult = 1.3;
-          else if (GAME.weather.current === 'stormy') weatherMult = 0.8;
-        }
-        
-        // معدل نمو حسب نوع المحصول
-        var cropRates = { wheat: 1.0, tomato: 1.2, carrot: 0.9, apple: 0.35 };
-        var cropMult = cropRates[plot.crop] || 1.0;
-        
-        // مكافأة المستوى
-        var levelMult = 1 + (state.level - 1) * 0.02;
-        
-        // الحساب النهائي
-        var growthRate = baseGrowthRate * weatherMult * cropMult * levelMult;
-        plot.growth += delta * growthRate * 0.02;
-        
-        // تحديث مرحلة النمو (0-4: بذرة، برعم، شتلة، ناضج، جاهز)
-        var newStage = Math.min(4, Math.floor(plot.growth * 4));
-        if (newStage > plot.growthStage) {
-          plot.growthStage = newStage;
-          this.updatePlantVisual(plot, delta);
-        }
-        
-        // المحصول جاهز للحصاد
-        if (plot.growth >= 1) {
-          plot.state = 'ready';
-          plot.growth = 1;
-          plot.growthStage = 4;
-          this.updatePlantVisual(plot, delta);
-          // ⭐ أشجار التفاح تبقى في حالة 'ready' حتى يحصدها اللاعب!
-        } else if (plot.mesh && plot.crop !== 'apple') {
-          // حركة نمو سلسة للمحاصيل العادية
-          var s = 0.2 + plot.growth * 0.8;
-          plot.mesh.scale.set(s, s, s);
-        }
-      }
-    }
-    // ===== نظام الزراعة الجديد =====
+    // ===== تحديث الأنظمة الجديدة (FarmingSystem يدير النمو والبصريات) =====
     this._safe('TimeSystem', function() { GAME.TimeSystem.update(delta); });
     this._safe('FarmingSystem', function() { GAME.FarmingSystem.update(delta); });
     // === تحديث الأنظمة الجديدة ===
@@ -799,8 +536,24 @@ Object.assign(GAME.game, {
     this._safe('BuildingsSystem', function() { GAME.BuildingsSystem.update(delta); });
     if (GAME.WorldExpansionInstance) this._safe('WorldExpansion', function() { GAME.WorldExpansionInstance.update(delta); });
     this._safe('NPCsSystem', function() { GAME.NPCsSystem.update(delta); });
+    this._safe('CraftingSystem', function() { GAME.CraftingSystem.update(delta); });
+    this._safe('CookingSystem', function() { GAME.CookingSystem.update(delta); });
     // تحسينات الواجهة
     this._safe('UIEnhancements', function() { GAME.UIEnhancements.update(delta); });
+    // === تحديث الأنظمة المتبقية ===
+    this._safe('CombatSystem', function() { GAME.CombatSystem.update(delta); });
+    this._safe('FishingSystem', function() { GAME.FishingSystem.update(delta); });
+    this._safe('SeasonalEvents', function() { GAME.SeasonalEvents.update(delta); });
+    this._safe('QuestSystem', function() { GAME.QuestSystem.update(delta); });
+    this._safe('AchievementSystem', function() { GAME.AchievementSystem.update(delta); });
+    this._safe('LeaderboardSystem', function() { GAME.LeaderboardSystem.update(delta); });
+    this._safe('NotificationSystem', function() { GAME.NotificationSystem.update(delta); });
+    this._safe('AudioManager', function() { GAME.AudioManager.update(delta); });
+    this._safe('WeatherSystem', function() { GAME.WeatherSystem.update(delta); });
+    this._safe('DayNightCycle', function() { GAME.DayNightCycle.update(delta); });
+    this._safe('UpgradesSystem', function() { GAME.UpgradesSystem.update(delta); });
+    this._safe('ObjectPool', function() { GAME.ObjectPool.update(delta); });
+    this._safe('DisposeManager', function() { GAME.DisposeManager.update(delta); });
     
     // 🛡️ كل نظام معزول — خطأٌ في أحدها لا يوقف البقية ولا يطرد اللاعب للقائمة
     var self = this;
@@ -860,16 +613,12 @@ Object.assign(GAME.game, {
   // Helper: properly dispose a plot's crop/tree mesh
   _disposePlotMesh: function(plot) {
     if (!plot.mesh) return;
-    this.scene.remove(plot.mesh);
-    if (plot.mesh.geometry) plot.mesh.geometry.dispose();
-    if (plot.mesh.material) plot.mesh.material.dispose();
-    // If mesh is a Group, dispose children recursively
-    if (plot.mesh.isGroup && plot.mesh.children) {
-      for (var i = 0; i < plot.mesh.children.length; i++) {
-        var child = plot.mesh.children[i];
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) child.material.dispose();
-      }
+    if (GAME.DisposeManager) {
+      GAME.DisposeManager.disposeMesh(plot.mesh);
+    } else {
+      this.scene.remove(plot.mesh);
+      if (plot.mesh.geometry) plot.mesh.geometry.dispose();
+      if (plot.mesh.material) plot.mesh.material.dispose();
     }
     plot.mesh = null;
   },
@@ -878,16 +627,20 @@ Object.assign(GAME.game, {
   _disposePlotMarker: function(plot, key) {
     var marker = plot[key];
     if (!marker) return;
-    this.scene.remove(marker);
-    if (marker.children) {
-      for (var i = 0; i < marker.children.length; i++) {
-        var child = marker.children[i];
-        if (child.geometry) child.geometry.dispose();
-        if (child.material) child.material.dispose();
+    if (GAME.DisposeManager) {
+      GAME.DisposeManager.disposeMesh(marker);
+    } else {
+      this.scene.remove(marker);
+      if (marker.children) {
+        for (var i = 0; i < marker.children.length; i++) {
+          var child = marker.children[i];
+          if (child.geometry) child.geometry.dispose();
+          if (child.material) child.material.dispose();
+        }
       }
+      if (marker.geometry) marker.geometry.dispose();
+      if (marker.material) marker.material.dispose();
     }
-    if (marker.geometry) marker.geometry.dispose();
-    if (marker.material) marker.material.dispose();
     plot[key] = null;
   },
 
@@ -1162,3 +915,10 @@ Object.assign(GAME.game, {
 });
 
 GAME.game.init();
+
+// ─── Cleanup on page unload (prevent memory leaks) ───────────
+window.addEventListener('beforeunload', function() {
+  if (GAME.DisposeManager) {
+    GAME.DisposeManager.disposeAll();
+  }
+});
