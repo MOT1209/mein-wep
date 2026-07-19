@@ -262,7 +262,7 @@ GAME.UIEnhancements._enhanceHUD = function() {
   if (levelStat) {
     var xpBar = document.createElement('div');
     xpBar.className = 'hud-xp-bar';
-    xpBar.innerHTML =div class="hud-xp-fill" id="ue-xp-fill"></div>';
+    xpBar.innerHTML = '<div class="hud-xp-fill" id="ue-xp-fill"></div>';
     var xpText = document.createElement('span');
     xpText.className = 'hud-xp-text';
     xpText.id = 'ue-xp-text';
@@ -336,7 +336,7 @@ GAME.UIEnhancements._enhanceNotifications = function() {
     var icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
     var icon = icons[type] || 'ℹ️';
 
-    el.innerHTML =span class="notif-icon">' + icon + '</span>' +
+    el.innerHTML = '<span class="notif-icon">' + icon + '</span>' +
                    '<span class="notif-text">' + text + '</span>' +
                    '<div class="notif-progress"></div>';
 
@@ -364,7 +364,7 @@ GAME.UIEnhancements._enhanceMinimap = function() {
     // إنشاء خريطة مصغرة إذا لم تكن موجودة
     var mm = document.createElement('div');
     mm.id = 'minimap';
-    mm.innerHTML =canvas id="minimap-canvas" width="140" height="140"></canvas>' +
+    mm.innerHTML = '<canvas id="minimap-canvas" width="140" height="140"></canvas>' +
                    '<div id="minimap-label">MAP</div>';
     document.body.appendChild(mm);
   }
