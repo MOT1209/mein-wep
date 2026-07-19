@@ -1,19 +1,14 @@
 /**
  * Supabase Configuration for Farm Game
- * 
- * للاستخدام:
- * 1. أنشئ حساباً على supabase.com
- * 2. أنشئ مشروع جديد
- * 3. انسخ URL و anon key
- * 4. ضعهما في ملف .env أو استبدلهما هنا
+ * يستخدم إعدادات Supabase المشتركة مع الموقع الرئيسي
  */
 
 var GAME = GAME || {};
 
 GAME.config = {
-  // استبدل هذه القيم ببيانات مشروعك على Supabase
-  supabaseUrl: 'https://YOUR_PROJECT_ID.supabase.co',
-  supabaseAnonKey: 'YOUR_ANON_KEY',
+  // استخدام إعدادات Supabase من الموقع الرئيسي
+  supabaseUrl: 'https://kcltollasghlvuoxvjqa.supabase.co',
+  supabaseAnonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjbHRvbGxhc2dobHZ1b3h2anFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODI5NDksImV4cCI6MjA5Njg1ODk0OX0.w-op2d4THYCrKjql9t1j7BiBZM2krDEkw-vdOwFzXFE',
   
   // إعدادات إضافية
   autoSaveInterval: 300000, // 5 دقائق
