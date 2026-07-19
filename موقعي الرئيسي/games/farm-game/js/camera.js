@@ -38,6 +38,7 @@ GAME.camera = {
       var dy = e.movementY * sens * (self.invertY ? -1 : 1);
       self.targetTheta -= dx;
       self.targetPhi = Math.max(0.1, Math.min(1.2, self.targetPhi + dy));
+      if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('rotate');
     });
     document.addEventListener('wheel', function(e) {
       self.targetDistance = Math.max(self.minDist, Math.min(self.maxDist, self.targetDistance + e.deltaY * 0.01));

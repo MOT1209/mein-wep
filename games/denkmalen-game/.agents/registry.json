@@ -1,0 +1,282 @@
+{
+  "version": "1.0.0",
+  "project": "Denkmalen - Drawing Battle Game",
+  "agents": [
+    {
+      "id": "project-manager",
+      "name": "🎯 Project Manager",
+      "role": "Orchestrator",
+      "domain": "Task coordination, planning, progress tracking",
+      "subAgents": [
+        { "id": "task-decomposer", "name": "📋 Task Decomposer" },
+        { "id": "progress-tracker", "name": "📊 Progress Tracker" }
+      ],
+      "dependencies": [],
+      "manages": ["all"]
+    },
+    {
+      "id": "architect",
+      "name": "🏗️ Architect",
+      "role": "System Design",
+      "domain": "Architecture, patterns, code review",
+      "subAgents": [
+        { "id": "tech-planner", "name": "📐 Tech Planner" },
+        { "id": "code-reviewer", "name": "🔍 Code Reviewer" }
+      ],
+      "dependencies": ["project-manager"],
+      "interacts": ["frontend", "backend", "database"]
+    },
+    {
+      "id": "frontend",
+      "name": "🎨 Frontend / UI",
+      "role": "UI Components",
+      "domain": "React components, CSS, responsive design",
+      "subAgents": [
+        { "id": "component-builder", "name": "🧩 Component Builder" },
+        { "id": "animation-expert", "name": "✨ Animation Expert" }
+      ],
+      "dependencies": ["architect", "design-system"],
+      "interacts": ["backend", "realtime", "i18n-a11y", "accessibility"]
+    },
+    {
+      "id": "backend",
+      "name": "⚙️ Backend / API",
+      "role": "Server-side Logic",
+      "domain": "API routes, Socket.IO, business logic",
+      "subAgents": [
+        { "id": "api-builder", "name": "🔌 API Builder" },
+        { "id": "socket-engineer", "name": "🔌 Socket Engineer" }
+      ],
+      "dependencies": ["architect", "security"],
+      "interacts": ["frontend", "database", "realtime", "ai-ml"]
+    },
+    {
+      "id": "ai-ml",
+      "name": "🧠 AI / ML Integration",
+      "role": "AI Features",
+      "domain": "Gemini API, evaluation, word generation",
+      "subAgents": [
+        { "id": "gemini-integrator", "name": "🔗 Gemini Integrator" },
+        { "id": "eval-engine", "name": "📊 Eval Engine" }
+      ],
+      "dependencies": ["backend", "security"],
+      "interacts": ["plugin-system", "testing-qa"]
+    },
+    {
+      "id": "database",
+      "name": "🗄️ Database / Storage",
+      "role": "Data Layer",
+      "domain": "Supabase, IndexedDB, data modeling",
+      "subAgents": [
+        { "id": "schema-designer", "name": "📐 Schema Designer" },
+        { "id": "query-optimizer", "name": "⚡ Query Optimizer" }
+      ],
+      "dependencies": ["architect", "security"],
+      "interacts": ["backend", "realtime"]
+    },
+    {
+      "id": "testing-qa",
+      "name": "🧪 Testing / QA",
+      "role": "Quality Assurance",
+      "domain": "Unit tests, integration, E2E",
+      "subAgents": [
+        { "id": "unit-tester", "name": "🔬 Unit Tester" },
+        { "id": "e2e-tester", "name": "🎭 E2E Tester" }
+      ],
+      "dependencies": ["frontend", "backend"],
+      "interacts": ["performance", "security"]
+    },
+    {
+      "id": "performance",
+      "name": "⚡ Performance",
+      "role": "Optimization",
+      "domain": "Bundle size, Core Web Vitals, profiling",
+      "subAgents": [
+        { "id": "profiler", "name": "🔍 Profiler" },
+        { "id": "bundle-optimizer", "name": "📦 Bundle Optimizer" }
+      ],
+      "dependencies": ["frontend", "backend"],
+      "interacts": ["testing-qa", "devops"]
+    },
+    {
+      "id": "security",
+      "name": "🔒 Security",
+      "role": "Protection",
+      "domain": "Auth, validation, XSS, CSRF",
+      "subAgents": [
+        { "id": "auth-specialist", "name": "🔐 Auth Specialist" },
+        { "id": "vulnerability-scanner", "name": "🛡️ Vulnerability Scanner" }
+      ],
+      "dependencies": ["architect"],
+      "interacts": ["backend", "database", "testing-qa"]
+    },
+    {
+      "id": "i18n-a11y",
+      "name": "🌍 i18n / Accessibility",
+      "role": "Localization",
+      "domain": "Translations, RTL, ARIA, keyboard nav",
+      "subAgents": [
+        { "id": "translator", "name": "🌐 Translator" },
+        { "id": "a11y-auditor", "name": "♿ Accessibility Auditor" }
+      ],
+      "dependencies": ["frontend"],
+      "interacts": ["content-copy", "accessibility"]
+    },
+    {
+      "id": "mobile-pwa",
+      "name": "📱 Mobile / PWA",
+      "role": "Mobile Experience",
+      "domain": "Touch, PWA, offline, device features",
+      "subAgents": [
+        { "id": "pwa-engineer", "name": "🔧 PWA Engineer" },
+        { "id": "touch-optimizer", "name": "👆 Touch Optimizer" }
+      ],
+      "dependencies": ["frontend", "performance"],
+      "interacts": ["devops", "testing-qa"]
+    },
+    {
+      "id": "plugin-system",
+      "name": "🔌 Plugin System",
+      "role": "Extensibility",
+      "domain": "Plugin lifecycle, events, modules",
+      "subAgents": [
+        { "id": "plugin-architect", "name": "🏗️ Plugin Architect" },
+        { "id": "plugin-dev", "name": "🔧 Plugin Developer" }
+      ],
+      "dependencies": ["architect"],
+      "interacts": ["ai-ml", "frontend"]
+    },
+    {
+      "id": "realtime",
+      "name": "⚡ Realtime",
+      "role": "WebSocket",
+      "domain": "Socket.IO, live sync, rooms",
+      "subAgents": [
+        { "id": "socket-architect", "name": "🔌 Socket Architect" },
+        { "id": "sync-engineer", "name": "🔄 Sync Engineer" }
+      ],
+      "dependencies": ["backend", "database"],
+      "interacts": ["frontend", "mobile-pwa"]
+    },
+    {
+      "id": "content-copy",
+      "name": "📝 Content / Copywriting",
+      "role": "Copywriter",
+      "domain": "UI copy, error messages, SEO",
+      "subAgents": [
+        { "id": "ui-writer", "name": "✍️ UI Writer" },
+        { "id": "seo-writer", "name": "🔍 SEO Writer" }
+      ],
+      "dependencies": ["i18n-a11y"],
+      "interacts": ["design-system", "docs"]
+    },
+    {
+      "id": "design-system",
+      "name": "🎨 Design System",
+      "role": "Visual Design",
+      "domain": "Tokens, colors, typography, components",
+      "subAgents": [
+        { "id": "token-manager", "name": "🎨 Token Manager" },
+        { "id": "component-designer", "name": "🧩 Component Designer" }
+      ],
+      "dependencies": ["architect"],
+      "interacts": ["frontend", "content-copy"]
+    },
+    {
+      "id": "analytics",
+      "name": "📊 Analytics",
+      "role": "Metrics",
+      "domain": "Event tracking, insights, A/B tests",
+      "subAgents": [
+        { "id": "event-tracker", "name": "📈 Event Tracker" },
+        { "id": "insight-analyzer", "name": "💡 Insight Analyzer" }
+      ],
+      "dependencies": ["backend"],
+      "interacts": ["project-manager", "devops"]
+    },
+    {
+      "id": "docs",
+      "name": "📚 Documentation",
+      "role": "Knowledge Management",
+      "domain": "API docs, guides, architecture docs",
+      "subAgents": [
+        { "id": "api-docs", "name": "📖 API Docs" },
+        { "id": "user-guide", "name": "👤 User Guide" }
+      ],
+      "dependencies": ["architect", "content-copy"],
+      "interacts": ["all"]
+    },
+    {
+      "id": "devops",
+      "name": "🚀 DevOps",
+      "role": "Infrastructure",
+      "domain": "CI/CD, deployment, monitoring",
+      "subAgents": [
+        { "id": "ci-engineer", "name": "🔧 CI Engineer" },
+        { "id": "deploy-specialist", "name": "🌐 Deploy Specialist" }
+      ],
+      "dependencies": ["testing-qa", "performance"],
+      "interacts": ["analytics", "mobile-pwa"]
+    },
+    {
+      "id": "sound-audio",
+      "name": "🔊 Sound / Audio",
+      "role": "Audio Experience",
+      "domain": "Sound effects, music, audio feedback",
+      "subAgents": [
+        { "id": "sfx-engineer", "name": "🎵 SFX Engineer" },
+        { "id": "music-curator", "name": "🎼 Music Curator" }
+      ],
+      "dependencies": ["frontend"],
+      "interacts": ["plugin-system", "mobile-pwa"]
+    },
+    {
+      "id": "accessibility",
+      "name": "♿ Accessibility",
+      "role": "Inclusive Design",
+      "domain": "Screen readers, keyboard nav, ARIA",
+      "subAgents": [
+        { "id": "screen-reader", "name": "🖥️ Screen Reader Specialist" },
+        { "id": "keyboard-nav", "name": "⌨️ Keyboard Navigator" }
+      ],
+      "dependencies": ["frontend", "i18n-a11y"],
+      "interacts": ["testing-qa", "content-copy"]
+    }
+  ],
+  "workflows": [
+    {
+      "id": "new-feature",
+      "name": "New Feature Development",
+      "phases": ["planning", "development", "quality", "polish", "deployment"],
+      "estimatedHours": "10-18"
+    },
+    {
+      "id": "bug-fix",
+      "name": "Bug Fix",
+      "phases": ["triage", "diagnosis", "fix", "verify", "deploy"],
+      "estimatedHours": "3-7"
+    },
+    {
+      "id": "performance-audit",
+      "name": "Performance Audit",
+      "phases": ["measurement", "analysis", "optimization", "validation"],
+      "estimatedHours": "7-14"
+    },
+    {
+      "id": "release",
+      "name": "Release",
+      "phases": ["pre-release", "code-freeze", "deployment", "post-release"],
+      "estimatedHours": "5-9"
+    }
+  ],
+  "projectStack": {
+    "frontend": ["Next.js 14", "React 18", "TypeScript", "Tailwind CSS", "Framer Motion"],
+    "state": ["Zustand"],
+    "realtime": ["Socket.IO"],
+    "ai": ["Google Gemini"],
+    "database": ["Supabase"],
+    "audio": ["Howler.js"],
+    "testing": ["Jest", "React Testing Library"],
+    "deployment": ["Vercel", "Railway/Render"]
+  }
+}

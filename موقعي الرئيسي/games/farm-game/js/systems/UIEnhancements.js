@@ -262,7 +262,7 @@ GAME.UIEnhancements._enhanceHUD = function() {
   if (levelStat) {
     var xpBar = document.createElement('div');
     xpBar.className = 'hud-xp-bar';
-    xpBar.innerHTML = '<div class="hud-xp-fill" id="ue-xp-fill"></div>';
+    xpBar.textContent = '<div class="hud-xp-fill" id="ue-xp-fill"></div>';
     var xpText = document.createElement('span');
     xpText.className = 'hud-xp-text';
     xpText.id = 'ue-xp-text';
@@ -277,7 +277,7 @@ GAME.UIEnhancements._enhanceHUD = function() {
     var compactStats = document.createElement('div');
     compactStats.className = 'hud-compact-stats';
     compactStats.id = 'ue-compact-stats';
-    compactStats.innerHTML = `
+    compactStats.textContent = `
       <span id="ue-plots-count">🌱 0</span>
       <span id="ue-ready-count">🧺 0</span>
       <span id="ue-day-count">📅 0</span>
@@ -336,7 +336,7 @@ GAME.UIEnhancements._enhanceNotifications = function() {
     var icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
     var icon = icons[type] || 'ℹ️';
 
-    el.innerHTML = '<span class="notif-icon">' + icon + '</span>' +
+    el.textContent = '<span class="notif-icon">' + icon + '</span>' +
                    '<span class="notif-text">' + text + '</span>' +
                    '<div class="notif-progress"></div>';
 
@@ -364,7 +364,7 @@ GAME.UIEnhancements._enhanceMinimap = function() {
     // إنشاء خريطة مصغرة إذا لم تكن موجودة
     var mm = document.createElement('div');
     mm.id = 'minimap';
-    mm.innerHTML = '<canvas id="minimap-canvas" width="140" height="140"></canvas>' +
+    mm.textContent = '<canvas id="minimap-canvas" width="140" height="140"></canvas>' +
                    '<div id="minimap-label">MAP</div>';
     document.body.appendChild(mm);
   }
@@ -396,7 +396,7 @@ GAME.UIEnhancements._addStatsPanel = function() {
 
   var panel = document.createElement('div');
   panel.id = 'stats-panel';
-  panel.innerHTML = `
+  panel.textContent = `
     <div class="stat-line"><span class="stat-label">🌾 مزروع</span><span class="stat-value" id="ue-stat-planted">0</span></div>
     <div class="stat-line"><span class="stat-label">🧺 محصود</span><span class="stat-value" id="ue-stat-harvested">0</span></div>
     <div class="stat-line"><span class="stat-label">💰 مكتسب</span><span class="stat-value" id="ue-stat-earned">$0</span></div>

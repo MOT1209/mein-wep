@@ -67,6 +67,7 @@ GAME.player = {
 
     this.isMoving = move.lengthSq() > 0.001;
     if (this.isMoving) {
+      if (GAME.TutorialSystem) GAME.TutorialSystem.onAction('move');
       move.normalize().multiplyScalar(this.speed * delta);
       var newPos = this.mesh.position.clone().add(move);
       GAME.collision.resolveCollision(newPos, this.radius);

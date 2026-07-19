@@ -4,6 +4,15 @@ GAME.game = GAME.game || {};
 
 GAME.game.loadGame = function() {
   try {
+    // محاولة التحميل عبر EnhancedSaveSystem أولاً
+    if (GAME.EnhancedSaveSystem && GAME.EnhancedSaveSystem._initialized) {
+      var restored = GAME.EnhancedSaveSystem.tryRestoreLastSession();
+      if (restored) {
+        GAME.ui.showNotification('🌾 Welcome back, farmer! (Enhanced Save)', 'success');
+        return;
+      }
+    }
+    // fallback: التحميل القديم
     var saved = localStorage.getItem('farmGameSave');
     if (saved) {
       var data = JSON.parse(saved);
@@ -43,7 +52,18 @@ GAME.game.loadGame = function() {
 };
 
 GAME.game.saveGame = function() {
-  if (!this.state) return; // لا حفظ قبل بدء اللعبة (الحفظ التلقائي يعمل حتى في القائمة)
+  if (!this.state) return;
+  // محاولة الحفظ عبر EnhancedSaveSystem أولاً
+  if (GAME.EnhancedSaveSystem && GAME.EnhancedSaveSystem._initialized) {
+    var success = GAME.EnhancedSaveSystem.save();
+    if (success) {
+      GAME.ui.showNotification('\uD83D\uDCBE Game saved! (Enhanced)', 'success');
+    } else {
+      GAME.ui.showNotification('\u274C Save failed!', 'error');
+    }
+    return;
+  }
+  // fallback: الحفظ القديم
   try {
     var data = {
       health: this.state.health,

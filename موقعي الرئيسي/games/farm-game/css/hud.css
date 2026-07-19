@@ -1,0 +1,916 @@
+/* ═══════════════════════════════════════════════════════
+   HUD Styles — Farm Game UI
+   Health, Energy, Money, XP, Level, Time, Weather,
+   Tool Slots, Mini-map, Notifications, Quest Tracker
+   RTL + Mobile Responsive
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Root Variables ── */
+:root {
+  --hud-bg: rgba(0, 0, 0, 0.5);
+  --hud-bg-strong: rgba(0, 0, 0, 0.7);
+  --hud-blur: blur(10px);
+  --hud-border: rgba(255, 255, 255, 0.2);
+  --hud-radius: 15px;
+  --hud-radius-sm: 10px;
+  --hud-radius-xs: 8px;
+  --hud-padding: 10px 20px;
+  --hud-gap: 10px;
+  --health-color: #ff6b6b;
+  --health-color-end: #ee5a5a;
+  --energy-color: #4ecdc4;
+  --energy-color-end: #44a08d;
+  --money-color: #ffd700;
+  --money-border: rgba(255, 215, 0, 0.3);
+  --xp-color: #a855f7;
+  --xp-color-end: #9333ea;
+  --xp-border: rgba(168, 85, 247, 0.3);
+  --level-color: #a855f7;
+  --accent-primary: #667eea;
+  --quest-color: #38ef7d;
+  --quest-color-end: #11998e;
+}
+
+/* ── Main HUD Container ── */
+.game-hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* ── Top Layout ── */
+.hud-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.hud-left,
+.hud-right {
+  display: flex;
+  flex-direction: column;
+  gap: var(--hud-gap);
+}
+
+.hud-center {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--hud-gap);
+}
+
+/* ═══════════════════════════════════════════════════════
+   Health Bar
+   ═══════════════════════════════════════════════════════ */
+.health-bar {
+  position: relative;
+  width: 200px;
+  height: 20px;
+  background: var(--hud-bg);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--hud-border);
+}
+
+.health-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--health-color) 0%, var(--health-color-end) 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.health-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Energy Bar
+   ═══════════════════════════════════════════════════════ */
+.energy-bar {
+  position: relative;
+  width: 200px;
+  height: 20px;
+  background: var(--hud-bg);
+  border-radius: 10px;
+  overflow: hidden;
+  border: 2px solid var(--hud-border);
+}
+
+.energy-bar-fill {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, var(--energy-color) 0%, var(--energy-color-end) 100%);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.energy-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Money Display
+   ═══════════════════════════════════════════════════════ */
+.money-display {
+  background: var(--hud-bg);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius);
+  padding: var(--hud-padding);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--money-border);
+  transition: transform 0.2s ease;
+}
+
+.money-display:hover {
+  transform: scale(1.05);
+}
+
+.money-icon {
+  font-size: 20px;
+}
+
+.money-amount {
+  color: var(--money-color);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════
+   XP Bar
+   ═══════════════════════════════════════════════════════ */
+.xp-bar {
+  position: relative;
+  width: 150px;
+  height: 15px;
+  background: var(--hud-bg);
+  border-radius: var(--hud-radius-xs);
+  overflow: hidden;
+  border: 2px solid var(--hud-border);
+}
+
+.xp-bar-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--xp-color) 0%, var(--xp-color-end) 100%);
+  border-radius: var(--hud-radius-xs);
+  transition: width 0.3s ease;
+}
+
+.xp-bar-text {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Level Display
+   ═══════════════════════════════════════════════════════ */
+.level-display {
+  background: var(--hud-bg);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius);
+  padding: var(--hud-padding);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--xp-border);
+  transition: transform 0.2s ease;
+}
+
+.level-display:hover {
+  transform: scale(1.05);
+}
+
+.level-icon {
+  font-size: 20px;
+}
+
+.level-number {
+  color: var(--level-color);
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Time Display
+   ═══════════════════════════════════════════════════════ */
+.time-display {
+  background: var(--hud-bg);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius);
+  padding: var(--hud-padding);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--hud-border);
+}
+
+.time-icon {
+  font-size: 20px;
+}
+
+.time-text {
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Weather Display
+   ═══════════════════════════════════════════════════════ */
+.weather-display {
+  background: var(--hud-bg);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius);
+  padding: var(--hud-padding);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--hud-border);
+}
+
+.weather-icon {
+  font-size: 20px;
+}
+
+.weather-text {
+  color: #fff;
+  font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Tool Slots (Bottom Bar)
+   ═══════════════════════════════════════════════════════ */
+.tool-slots {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--hud-gap);
+  background: var(--hud-bg);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius);
+  padding: 10px;
+  border: 1px solid var(--hud-border);
+  pointer-events: auto;
+}
+
+.tool-slot {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid var(--hud-border);
+  border-radius: var(--hud-radius-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  user-select: none;
+}
+
+.tool-slot:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.tool-slot.selected {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 15px rgba(102, 126, 234, 0.5);
+  background: rgba(102, 126, 234, 0.15);
+}
+
+.tool-slot-icon {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.tool-slot-key {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: 3px;
+  font-family: monospace;
+}
+
+/* Cooldown overlay */
+.tool-slot .cooldown-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: var(--hud-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Mini Map
+   ═══════════════════════════════════════════════════════ */
+.mini-map {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 150px;
+  height: 150px;
+  background: var(--hud-bg-strong);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius-sm);
+  border: 2px solid var(--hud-border);
+  overflow: hidden;
+  pointer-events: auto;
+  transition: transform 0.3s ease;
+}
+
+.mini-map:hover {
+  transform: scale(1.1);
+}
+
+.mini-map-canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mini-map-player {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  border: 2px solid #fff;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px rgba(102, 126, 234, 0.8);
+  animation: playerPulse 2s ease-in-out infinite;
+}
+
+.mini-map-label {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+@keyframes playerPulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(102, 126, 234, 0.8); }
+  50% { box-shadow: 0 0 12px rgba(102, 126, 234, 1); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Notifications
+   ═══════════════════════════════════════════════════════ */
+.notification-container {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: var(--hud-gap);
+  pointer-events: none;
+  z-index: 200;
+}
+
+.notification {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius-sm);
+  padding: 15px 25px;
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  border: 1px solid var(--hud-border);
+  animation: notifSlideIn 0.3s ease, notifFadeOut 0.3s ease 2.7s forwards;
+  white-space: nowrap;
+}
+
+/* Notification variants */
+.notification.success {
+  border-color: rgba(52, 211, 153, 0.5);
+  background: rgba(6, 78, 59, 0.85);
+}
+
+.notification.warning {
+  border-color: rgba(251, 191, 36, 0.5);
+  background: rgba(120, 53, 15, 0.85);
+}
+
+.notification.error {
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(127, 29, 29, 0.85);
+}
+
+.notification.info {
+  border-color: rgba(96, 165, 250, 0.5);
+  background: rgba(30, 58, 138, 0.85);
+}
+
+@keyframes notifSlideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes notifFadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   Quest Tracker (Compact Widget)
+   ═══════════════════════════════════════════════════════ */
+.quest-tracker {
+  position: fixed;
+  top: 100px;
+  left: 20px;
+  width: 250px;
+  background: var(--hud-bg-strong);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: var(--hud-radius-sm);
+  padding: 15px;
+  border: 1px solid var(--hud-border);
+  pointer-events: auto;
+}
+
+.quest-tracker-title {
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quest-tracker-title .icon {
+  font-size: 16px;
+}
+
+.quest-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--hud-radius-xs);
+  padding: 10px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: background 0.2s ease;
+}
+
+.quest-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.quest-item:last-child {
+  margin-bottom: 0;
+}
+
+.quest-item-title {
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.quest-item-progress {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.quest-item-progress-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--quest-color) 0%, var(--quest-color-end) 100%);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.quest-item-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 10px;
+  margin-top: 5px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Quick Slots (Secondary Hotbar)
+   ═══════════════════════════════════════════════════════ */
+.quick-slots {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  background: var(--hud-bg);
+  backdrop-filter: var(--hud-blur);
+  -webkit-backdrop-filter: var(--hud-blur);
+  border-radius: 12px;
+  padding: 6px 10px;
+  border: 1px solid var(--hud-border);
+  pointer-events: auto;
+}
+
+.quick-slot {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--hud-border);
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 18px;
+}
+
+.quick-slot:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.quick-slot .quick-slot-count {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(0, 0, 0, 0.5);
+  padding: 0 3px;
+  border-radius: 3px;
+  line-height: 1.3;
+}
+
+/* ═══════════════════════════════════════════════════════
+   HUD Animations
+   ═══════════════════════════════════════════════════════ */
+
+/* Low health pulse */
+.health-bar.low .health-bar-fill {
+  animation: lowHealthPulse 1s ease-in-out infinite;
+}
+
+@keyframes lowHealthPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* XP gain flash */
+.xp-bar.gain .xp-bar-fill {
+  animation: xpGain 0.5s ease;
+}
+
+@keyframes xpGain {
+  0% { filter: brightness(1); }
+  50% { filter: brightness(1.8); }
+  100% { filter: brightness(1); }
+}
+
+/* Money change bounce */
+.money-display.gain .money-amount {
+  animation: moneyBounce 0.3s ease;
+}
+
+.money-display.loss .money-amount {
+  animation: moneyBounceLoss 0.3s ease;
+}
+
+@keyframes moneyBounce {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); color: #4ade80; }
+  100% { transform: scale(1); }
+}
+
+@keyframes moneyBounceLoss {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); color: #ef4444; }
+  100% { transform: scale(1); }
+}
+
+/* Tool slot equip animation */
+.tool-slot.equip {
+  animation: toolEquip 0.3s ease;
+}
+
+@keyframes toolEquip {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+/* Notification popup variants */
+.notification.toast {
+  border-left: 4px solid var(--accent-primary);
+}
+
+.notification.achievement-unlock {
+  border-left: 4px solid var(--money-color);
+  background: linear-gradient(135deg, rgba(120, 53, 15, 0.85), rgba(30, 58, 138, 0.85));
+  animation: notifSlideIn 0.3s ease, achievementGlow 0.5s ease 0.3s, notifFadeOut 0.3s ease 3.7s forwards;
+}
+
+@keyframes achievementGlow {
+  0% { box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+  50% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+  100% { box-shadow: 0 0 0 rgba(255, 215, 0, 0); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   RTL Support
+   ═══════════════════════════════════════════════════════ */
+[dir="rtl"] .game-hud {
+  direction: rtl;
+}
+
+[dir="rtl"] .mini-map {
+  right: auto;
+  left: 20px;
+}
+
+[dir="rtl"] .quest-tracker {
+  left: auto;
+  right: 20px;
+}
+
+[dir="rtl"] .notification {
+  direction: rtl;
+  text-align: right;
+}
+
+[dir="rtl"] .notification.toast {
+  border-left: none;
+  border-right: 4px solid var(--accent-primary);
+}
+
+[dir="rtl"] .notification.achievement-unlock {
+  border-left: none;
+  border-right: 4px solid var(--money-color);
+}
+
+[dir="rtl"] .money-display,
+[dir="rtl"] .level-display,
+[dir="rtl"] .time-display,
+[dir="rtl"] .weather-display {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .tool-slot-key {
+  font-family: inherit;
+}
+
+/* ═══════════════════════════════════════════════════════
+   Mobile Responsive
+   ═══════════════════════════════════════════════════════ */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .mini-map {
+    width: 120px;
+    height: 120px;
+  }
+
+  .quest-tracker {
+    width: 220px;
+  }
+}
+
+/* Large phones */
+@media (max-width: 768px) {
+  .hud-top {
+    padding: 12px;
+  }
+
+  .health-bar,
+  .energy-bar {
+    width: 160px;
+    height: 18px;
+  }
+
+  .xp-bar {
+    width: 120px;
+    height: 12px;
+  }
+
+  .tool-slots {
+    bottom: 12px;
+    padding: 8px;
+    gap: 6px;
+  }
+
+  .tool-slot {
+    width: 50px;
+    height: 50px;
+  }
+
+  .tool-slot-icon {
+    font-size: 20px;
+  }
+
+  .mini-map {
+    width: 100px;
+    height: 100px;
+    bottom: 12px;
+    right: 12px;
+  }
+
+  .quest-tracker {
+    display: none;
+  }
+
+  .quick-slots {
+    bottom: 75px;
+  }
+
+  .quick-slot {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .money-display,
+  .level-display,
+  .time-display,
+  .weather-display {
+    padding: 8px 14px;
+    border-radius: 12px;
+  }
+
+  .money-amount,
+  .level-number {
+    font-size: 15px;
+  }
+
+  .notification-container {
+    top: 80px;
+    padding: 0 10px;
+  }
+
+  .notification {
+    padding: 10px 18px;
+    font-size: 13px;
+  }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+  .hud-top {
+    padding: 8px;
+  }
+
+  .hud-center {
+    top: 8px;
+  }
+
+  .health-bar,
+  .energy-bar {
+    width: 130px;
+    height: 16px;
+  }
+
+  .xp-bar {
+    width: 100px;
+    height: 10px;
+  }
+
+  .tool-slots {
+    bottom: 8px;
+    padding: 6px;
+    gap: 4px;
+  }
+
+  .tool-slot {
+    width: 44px;
+    height: 44px;
+  }
+
+  .tool-slot-icon {
+    font-size: 18px;
+  }
+
+  .tool-slot-key {
+    font-size: 8px;
+  }
+
+  .mini-map {
+    width: 80px;
+    height: 80px;
+    bottom: 8px;
+    right: 8px;
+  }
+
+  .quick-slots {
+    bottom: 65px;
+    padding: 4px 8px;
+    gap: 4px;
+  }
+
+  .quick-slot {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .money-display,
+  .level-display,
+  .time-display,
+  .weather-display {
+    padding: 6px 12px;
+    border-radius: 10px;
+    gap: 6px;
+  }
+
+  .money-icon,
+  .level-icon,
+  .time-icon,
+  .weather-icon {
+    font-size: 16px;
+  }
+
+  .money-amount,
+  .level-number {
+    font-size: 13px;
+  }
+
+  .time-text,
+  .weather-text {
+    font-size: 12px;
+  }
+
+  .notification {
+    padding: 8px 14px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+
+  /* Hide some HUD elements on very small screens */
+  .time-display,
+  .weather-display {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}

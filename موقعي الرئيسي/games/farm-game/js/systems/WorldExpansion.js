@@ -26,15 +26,15 @@ GAME.WORLD_ZONES = {
     icon: '🌾',
     description: 'مزرعتك الشخصية - مكان الزراعة والأنشطة اليومية',
     descriptionAr: 'مزرعتك الشخصية - مكان الزراعة والأنشطة اليومية',
-    unlocked: true, // مفتوحة افتراضياً
+    unlocked: true,
     unlockCost: 0,
-    size: { width: 64, depth: 64 }, // حجم المنطقة بالمربعات
-    spawnPoint: { x: 0, y: 0, z: 0 }, // نقطة الظهور
-    color: 0x7EC850, // لون أخضر
+    size: { width: 64, depth: 64 },
+    spawnPoint: { x: 0, y: 0, z: 0 },
+    color: 0x7EC850,
     bgMusic: 'farm_theme',
     ambientSounds: ['birds', 'wind', 'insects'],
-    resources: [], // لا توجد موارد قابلة للجمع - المزرعة للزراعة فقط
-    enemies: [], // لا أعداء
+    resources: [],
+    enemies: [],
     pointsOfInterest: [
       {
         id: 'farmhouse', name: 'Farmhouse', nameAr: 'البيت',
@@ -62,7 +62,7 @@ GAME.WORLD_ZONES = {
     description: 'قرية المزارعين - تجارة و NPCs ومهمات',
     descriptionAr: 'قرية المزارعين - تجارة و شخصيات ومهمات',
     unlocked: false,
-    unlockCost: 0, // مفتوحة بالعديد من المزرعة
+    unlockCost: 0,
     size: { width: 48, depth: 48 },
     spawnPoint: { x: 0, y: 0, z: -28 },
     color: 0xD4A574,
@@ -162,7 +162,7 @@ GAME.WORLD_ZONES = {
       {
         id: 'wood', name: 'Wood', nameAr: 'خشب',
         icon: '🪵', type: 'tree',
-        respawnTime: 60, // ثانية
+        respawnTime: 60,
         quantity: { min: 2, max: 5 },
         toolRequired: 'axe',
         harvestAnimation: 'chop',
@@ -194,7 +194,7 @@ GAME.WORLD_ZONES = {
         toolRequired: null,
         harvestAnimation: 'pick',
         value: 80,
-        spawnChance: 0.15 // 15% فقط
+        spawnChance: 0.15
       },
       {
         id: 'herbs', name: 'Wild Herbs', nameAr: 'أعشاب برية',
@@ -238,7 +238,7 @@ GAME.WORLD_ZONES = {
         ],
         xpReward: 30,
         aggroRange: 6,
-        chargeAttack: true, // يهاجم بسرعة
+        chargeAttack: true,
         color: 0x8B4513,
         size: { width: 0.8, height: 0.6, depth: 1.0 }
       }
@@ -249,7 +249,7 @@ GAME.WORLD_ZONES = {
         icon: '🌳', position: { x: 10, y: 0, z: -15 },
         radius: 5, interactable: true,
         type: 'harvest_bonus',
-        bonusMultiplier: 2, // ضعف المحاصيل حولها
+        bonusMultiplier: 2,
         description: 'شجرة ضخمة عتيقة - المحاصيل حولها أفضل',
         descriptionAr: 'شجرة ضخمة عتيقة - المحاصيل حولها أفضل'
       },
@@ -259,7 +259,7 @@ GAME.WORLD_ZONES = {
         radius: 3, interactable: true,
         type: 'healing',
         healAmount: 50,
-        cooldown: 180, // ثانية
+        cooldown: 180,
         description: 'ينبوع سحري يشفيك',
         descriptionAr: 'ينبوع سحري يشفيك'
       },
@@ -334,7 +334,7 @@ GAME.WORLD_ZONES = {
         toolRequired: 'pickaxe',
         harvestAnimation: 'mine',
         value: 50,
-        minLevel: 5 // مستوى اللاعب الأدنى
+        minLevel: 5
       },
       {
         id: 'gold_ore', name: 'Gold Ore', nameAr: 'خام الذهب',
@@ -380,7 +380,7 @@ GAME.WORLD_ZONES = {
         ],
         xpReward: 20,
         aggroRange: 10,
-        flying: true, // يطير
+        flying: true,
         color: 0x4A4A4A,
         size: { width: 0.4, height: 0.3, depth: 0.4 }
       },
@@ -395,7 +395,7 @@ GAME.WORLD_ZONES = {
         ],
         xpReward: 60,
         aggroRange: 5,
-        armor: 10, // درع يقلل الضرر
+        armor: 10,
         color: 0x8B7355,
         size: { width: 1.2, height: 1.5, depth: 1.0 }
       }
@@ -406,7 +406,7 @@ GAME.WORLD_ZONES = {
         icon: '🕳️', position: { x: -8, y: -1, z: -20 },
         radius: 3, interactable: true,
         type: 'dungeon_entrance',
-        targetDepth: 1, // مستوى أول
+        targetDepth: 1,
         description: 'بئر يقود إلى طوابق أعمق',
         descriptionAr: 'بئر يقود إلى طوابق أعمق'
       },
@@ -426,7 +426,7 @@ GAME.WORLD_ZONES = {
         radius: 3, interactable: true,
         type: 'rest_point',
         services: ['repair_tools'],
-        description: 'مخيم ل修工具 وإعادة الطاقة',
+        description: 'مخيم لإصلاح الأدوات وإعادة الطاقة',
         descriptionAr: 'مخيم لإصلاح الأدوات وإعادة الطاقة'
       },
       {
@@ -708,33 +708,40 @@ GAME.WORLD_ZONES = {
 };
 
 // ============================================================
-// 🎮 فئة WorldExpansion - نظام توسيع العالم
+// 🎮 نظام WorldExpansion - نظام توسيع العالم (Object Literal)
 // ============================================================
-GAME.WorldExpansion = class WorldExpansion {
-  constructor(game) {
-    this.game = game;
-    this.currentZone = 'farm'; // المنطقة الحالية
+GAME.WorldExpansion = {
+  // ---- الخصائص ----
+  game: null,
+  currentZone: 'farm',
+  zones: null,
+  playerPosition: { x: 0, y: 0, z: 0 },
+  playerDirection: { x: 0, z: 1 },
+  discoveredPOIs: {},
+  resourceNodes: {},
+  enemies: {},
+  transitioning: false,
+  unlockedZones: { farm: true },
+  totalResourcesGathered: {},
+
+  // ---- التهيئة ----
+  init: function(game) {
+    this.game = game || null;
+    this.currentZone = 'farm';
     this.zones = JSON.parse(JSON.stringify(GAME.WORLD_ZONES));
     this.playerPosition = { x: 0, y: 0, z: 0 };
     this.playerDirection = { x: 0, z: 1 };
-    this.discoveredPOIs = {}; // نقاط الاهتمام المكتشفة
-    this.resourceNodes = {}; // عقد الموارد الحالية
-    this.enemies = {}; // الأعداء الحاليون
-    this.transitioning = false; // هل يوجد انتقال جارٍ
-    this.unlockedZones = { farm: true }; // المناطق المفتوحة
-    this.totalResourcesGathered = {}; // إجمالي الموارد المجمعة
+    this.discoveredPOIs = {};
+    this.resourceNodes = {};
+    this.enemies = {};
+    this.transitioning = false;
+    this.unlockedZones = { farm: true };
+    this.totalResourcesGathered = {};
 
-    this.init();
-  }
-
-  // ---- التهيئة ----
-  init() {
     console.log('🗺️ تم تهيئة نظام توسيع العالم');
-
-    // تهيئة عقد الموارد والأعداء للمنطقة الحالية
     this.spawnResourceNodes(this.currentZone);
     this.spawnEnemies(this.currentZone);
-  }
+  },
 
   // ============================================================
   // 🚀 نظام الانتقال بين المناطق
@@ -745,13 +752,13 @@ GAME.WorldExpansion = class WorldExpansion {
    * @param {string} zoneId - معرف المنطقة المستهدفة
    * @returns {boolean} - هل نجح الانتقال
    */
-  travelToZone(zoneId) {
+  travelToZone: function(zoneId) {
     if (this.transitioning) {
       console.warn('⚠️ انتقال جارٍ - لا يمكن الانتقال مرة أخرى');
       return false;
     }
 
-    const targetZone = this.zones[zoneId];
+    var targetZone = this.zones[zoneId];
     if (!targetZone) {
       console.error('❌ المنطقة غير موجودة:', zoneId);
       return false;
@@ -759,66 +766,60 @@ GAME.WorldExpansion = class WorldExpansion {
 
     // التحقق من فتح المنطقة
     if (!this.unlockedZones[zoneId]) {
-      // محاولة فتح المنطقة
       if (!this.unlockZone(zoneId)) {
         return false;
       }
     }
 
     this.transitioning = true;
-    console.log(`🔄 الانتقال من ${this.getCurrentZone().nameAr} إلى ${targetZone.nameAr}...`);
+    console.log('🔄 الانتقال من ' + this.getCurrentZone().nameAr + ' إلى ' + targetZone.nameAr + '...');
 
-    // تنفيذ الانتقال
     this.executeTransition(zoneId);
     return true;
-  }
+  },
 
   /**
    * تنفيذ الانتقال الفعلي
    */
-  executeTransition(zoneId) {
-    const targetZone = this.zones[zoneId];
-    const previousZone = this.currentZone;
+  executeTransition: function(zoneId) {
+    var targetZone = this.zones[zoneId];
+    var previousZone = this.currentZone;
 
-    // تحديث المنطقة الحالية
     this.currentZone = zoneId;
+    this.playerPosition = {
+      x: targetZone.spawnPoint.x,
+      y: targetZone.spawnPoint.y,
+      z: targetZone.spawnPoint.z
+    };
 
-    // نقل اللاعب إلى نقطة الظهور
-    this.playerPosition = { ...targetZone.spawnPoint };
-
-    // إعادة توليد الموارد والأعداء
     this.spawnResourceNodes(zoneId);
     this.spawnEnemies(zoneId);
 
-    // إطلاق حدث الانتقال
     if (this.game && this.game.events) {
       this.game.events.emit('zoneChanged', {
-        previousZone,
+        previousZone: previousZone,
         currentZone: zoneId,
         zoneData: targetZone
       });
     }
 
-    console.log(`✅ وصلت إلى ${targetZone.nameAr}`);
-
+    console.log('✅ وصلت إلى ' + targetZone.nameAr);
     this.transitioning = false;
-
-    // عرض رسالة ترحيب
     this.showZoneWelcome(targetZone);
-  }
+  },
 
   /**
    * عرض رسالة ترحيب بالمنطقة
    */
-  showZoneWelcome(zone) {
+  showZoneWelcome: function(zone) {
     if (this.game && this.game.ui) {
       this.game.ui.showMessage(
-        `${zone.icon} ${zone.nameAr}`,
+        zone.icon + ' ' + zone.nameAr,
         zone.descriptionAr,
-        3000 // 3 ثواني
+        3000
       );
     }
-  }
+  },
 
   // ============================================================
   // 🔓 نظام فتح المناطق
@@ -827,70 +828,70 @@ GAME.WorldExpansion = class WorldExpansion {
   /**
    * محاولة فتح منطقة جديدة
    */
-  unlockZone(zoneId) {
-    const zone = this.zones[zoneId];
+  unlockZone: function(zoneId) {
+    var zone = this.zones[zoneId];
     if (!zone) return false;
 
     if (this.unlockedZones[zoneId]) {
-      console.log(`ℹ️ المنطقة ${zone.nameAr} مفتوحة بالفعل`);
+      console.log('ℹ️ المنطقة ' + zone.nameAr + ' مفتوحة بالفعل');
       return true;
     }
 
-    // التحقق من التكلفة
-    const playerGold = this.getPlayerGold();
+    var playerGold = this.getPlayerGold();
     if (playerGold < zone.unlockCost) {
-      console.warn(`❌ لا تملك ما يكفي لفتح ${zone.nameAr}. تحتاج ${zone.unlockCost} ذهب، لديك ${playerGold}`);
+      console.warn('❌ لا تملك ما يكفي لفتح ' + zone.nameAr + '. تحتاج ' + zone.unlockCost + ' ذهب، لديك ' + playerGold);
       if (this.game && this.game.ui) {
         this.game.ui.showMessage(
           '❌ منطقة مقفلة',
-          `تحتاج ${zone.unlockCost} ذهب لفتح ${zone.nameAr}`,
+          'تحتاج ' + zone.unlockCost + ' ذهب لفتح ' + zone.nameAr,
           3000
         );
       }
       return false;
     }
 
-    // خصم التكلفة
     this.spendPlayerGold(zone.unlockCost);
     this.unlockedZones[zoneId] = true;
     zone.unlocked = true;
 
-    console.log(`🔓 تم فتح منطقة ${zone.nameAr} بتكلفة ${zone.unlockCost} ذهب`);
+    console.log('🔓 تم فتح منطقة ' + zone.nameAr + ' بتكلفة ' + zone.unlockCost + ' ذهب');
 
     if (this.game && this.game.ui) {
       this.game.ui.showMessage(
-        `🔓 تم فتح ${zone.nameAr}!`,
-        `يمكنك الآن زيارة ${zone.nameAr}`,
+        '🔓 تم فتح ' + zone.nameAr + '!',
+        'يمكنك الآن زيارة ' + zone.nameAr,
         4000
       );
     }
 
     return true;
-  }
+  },
 
   /**
    * التحقق مما إذا كانت المنطقة مفتوحة
    */
-  isZoneUnlocked(zoneId) {
+  isZoneUnlocked: function(zoneId) {
     return !!this.unlockedZones[zoneId];
-  }
+  },
 
   /**
    * الحصول على قائمة المناطق المفتوحة
    */
-  getUnlockedZones() {
+  getUnlockedZones: function() {
+    var self = this;
     return Object.keys(this.unlockedZones)
-      .filter(id => this.unlockedZones[id])
-      .map(id => this.zones[id]);
-  }
+      .filter(function(id) { return self.unlockedZones[id]; })
+      .map(function(id) { return self.zones[id]; });
+  },
 
   /**
    * الحصول على قائمة المناطق المقفلة
    */
-  getLockedZones() {
+  getLockedZones: function() {
+    var self = this;
     return Object.values(this.zones)
-      .filter(z => !this.unlockedZones[z.id]);
-  }
+      .filter(function(z) { return !self.unlockedZones[z.id]; });
+  },
 
   // ============================================================
   // 📍 نظام نقاط الاهتمام (POI)
@@ -899,125 +900,110 @@ GAME.WorldExpansion = class WorldExpansion {
   /**
    * الحصول على نقاط الاهتمام القريبة
    */
-  getNearbyPOIs(radius = 10) {
-    const zone = this.getCurrentZone();
+  getNearbyPOIs: function(radius) {
+    radius = radius || 10;
+    var zone = this.getCurrentZone();
     if (!zone) return [];
 
-    return zone.pointsOfInterest.filter(poi => {
-      const dx = poi.position.x - this.playerPosition.x;
-      const dz = poi.position.z - this.playerPosition.z;
-      const distance = Math.sqrt(dx * dx + dz * dz);
+    var self = this;
+    return zone.pointsOfInterest.filter(function(poi) {
+      var dx = poi.position.x - self.playerPosition.x;
+      var dz = poi.position.z - self.playerPosition.z;
+      var distance = Math.sqrt(dx * dx + dz * dz);
       return distance <= (radius || poi.radius);
     });
-  }
+  },
 
   /**
    * التفاعل مع نقطة اهتمام
    */
-  interactWithPOI(poiId) {
-    const zone = this.getCurrentZone();
-    const poi = zone.pointsOfInterest.find(p => p.id === poiId);
+  interactWithPOI: function(poiId) {
+    var zone = this.getCurrentZone();
+    var poi = zone.pointsOfInterest.find(function(p) { return p.id === poiId; });
     if (!poi) {
       console.error('❌ نقطة الاهتمام غير موجودة:', poiId);
       return null;
     }
 
-    // التحقق من المسافة
-    const dx = poi.position.x - this.playerPosition.x;
-    const dz = poi.position.z - this.playerPosition.z;
-    const distance = Math.sqrt(dx * dx + dz * dz);
+    var dx = poi.position.x - this.playerPosition.x;
+    var dz = poi.position.z - this.playerPosition.z;
+    var distance = Math.sqrt(dx * dx + dz * dz);
 
     if (distance > poi.radius + 2) {
       console.warn('⚠️ أنت بعيد عن هذه النقطة');
       return { error: 'too_far' };
     }
 
-    // تسجيل الاكتشاف
     this.discoveredPOIs[poiId] = true;
-
-    // معالجة حسب النوع
     return this.handlePOIInteraction(poi);
-  }
+  },
 
   /**
    * معالجة التفاعل حسب نوع النقطة
    */
-  handlePOIInteraction(poi) {
+  handlePOIInteraction: function(poi) {
     switch (poi.type) {
       case 'zone_exit':
         return this.handleZoneExit(poi);
-
       case 'shop':
         return this.handleShop(poi);
-
       case 'upgrade':
         return this.handleUpgrade(poi);
-
       case 'healing':
         return this.handleHealing(poi);
-
       case 'rest_point':
         return this.handleRestPoint(poi);
-
       case 'fishing_bonus':
       case 'resource_bonus':
         return this.handleResourceBonus(poi);
-
       case 'harvest_bonus':
         return this.handleHarvestBonus(poi);
-
       case 'viewpoint':
         return this.handleViewpoint(poi);
-
       case 'treasure':
         return this.handleTreasure(poi);
-
       case 'cooking':
         return this.handleCooking(poi);
-
       case 'save_point':
         return this.handleSavePoint(poi);
-
       case 'quest_location':
         return this.handleQuestLocation(poi);
-
       case 'dungeon_entrance':
         return this.handleDungeonEntrance(poi);
-
       default:
-        console.log(`ℹ️ تفاعل مع: ${poi.nameAr}`);
+        console.log('ℹ️ تفاعل مع: ' + poi.nameAr);
         return { type: poi.type, data: poi };
     }
-  }
+  },
 
   // ---- معالجات أنواع نقاط الاهتمام ----
 
-  handleZoneExit(poi) {
-    console.log(`🚪 الانتقال إلى ${poi.targetZone}`);
+  handleZoneExit: function(poi) {
+    console.log('🚪 الانتقال إلى ' + poi.targetZone);
     this.travelToZone(poi.targetZone);
     return { type: 'travel', target: poi.targetZone };
-  }
+  },
 
-  handleShop(poi) {
-    console.log(`🏪 فتح المتجر: ${poi.nameAr}`);
+  handleShop: function(poi) {
+    console.log('🏪 فتح المتجر: ' + poi.nameAr);
     if (this.game && this.game.shop) {
       this.game.shop.open(poi.shopType);
     }
     return { type: 'shop', shopType: poi.shopType };
-  }
+  },
 
-  handleUpgrade(poi) {
-    console.log(`🔨 فتح ورشة: ${poi.nameAr}`);
+  handleUpgrade: function(poi) {
+    console.log('🔨 فتح ورشة: ' + poi.nameAr);
     if (this.game && this.game.upgrade) {
       this.game.upgrade.open(poi.services);
     }
     return { type: 'upgrade', services: poi.services };
-  }
+  },
 
-  handleHealing(poi) {
+  handleHealing: function(poi) {
     if (this.game && this.game.player) {
-      const currentHealth = this.game.player.health || 100;
-      const maxHealth = this.game.player.maxHealth || 100;
+      var currentHealth = this.game.player.health || 100;
+      var maxHealth = this.game.player.maxHealth || 100;
 
       if (currentHealth >= maxHealth) {
         console.log('❤️ صحتك ممتلئة بالفعل');
@@ -1025,76 +1011,74 @@ GAME.WorldExpansion = class WorldExpansion {
       }
 
       this.game.player.health = Math.min(currentHealth + poi.healAmount, maxHealth);
-      console.log(`❤️ شُفيت بـ ${poi.healAmount} نقطة صحة`);
+      console.log('❤️ شُفيت بـ ' + poi.healAmount + ' نقطة صحة');
       return { type: 'healing', healed: true, amount: poi.healAmount };
     }
     return { type: 'healing', healed: false, reason: 'no_player' };
-  }
+  },
 
-  handleRestPoint(poi) {
-    console.log(`⛺ الراحة في ${poi.nameAr}`);
+  handleRestPoint: function(poi) {
+    console.log('⛺ الراحة في ' + poi.nameAr);
     if (this.game && this.game.player) {
-      // إعادة الطاقة.partially
       if (this.game.player.stamina !== undefined) {
         this.game.player.stamina = this.game.player.maxStamina || 100;
       }
     }
     return { type: 'rest' };
-  }
+  },
 
-  handleResourceBonus(poi) {
-    console.log(`✨ مكافأة الموارد: ${poi.bonusMultiplier}x`);
+  handleResourceBonus: function(poi) {
+    console.log('✨ مكافأة الموارد: ' + poi.bonusMultiplier + 'x');
     return { type: 'resource_bonus', resourceId: poi.resourceId, multiplier: poi.bonusMultiplier };
-  }
+  },
 
-  handleHarvestBonus(poi) {
-    console.log(`🌳 مكافأة الحصاد: ${poi.bonusMultiplier}x حول الشجرة القديمة`);
+  handleHarvestBonus: function(poi) {
+    console.log('🌳 مكافأة الحصاد: ' + poi.bonusMultiplier + 'x حول الشجرة القديمة');
     return { type: 'harvest_bonus', multiplier: poi.bonusMultiplier };
-  }
+  },
 
-  handleViewpoint(poi) {
-    console.log(`👁️ كشف الخريطة: ${poi.nameAr}`);
+  handleViewpoint: function(poi) {
+    console.log('👁️ كشف الخريطة: ' + poi.nameAr);
     if (poi.revealsMap) {
       return { type: 'viewpoint', revealed: true, zone: this.currentZone };
     }
     return { type: 'viewpoint', revealed: false };
-  }
+  },
 
-  handleTreasure(poi) {
+  handleTreasure: function(poi) {
     if (poi.locked) {
-      console.log(`🔒 الكنز مقفل - تحتاج ${poi.keyRequired}`);
+      console.log('🔒 الكنز مقفل - تحتاج ' + poi.keyRequired);
       return { type: 'treasure', locked: true, keyRequired: poi.keyRequired };
     }
-
-    console.log(`💰 فتح الكنز: ${poi.nameAr}`);
+    console.log('💰 فتح الكنز: ' + poi.nameAr);
     return { type: 'treasure', locked: false, loot: poi.loot };
-  }
+  },
 
-  handleCooking(poi) {
-    console.log(`🍳 الطهي في ${poi.nameAr}`);
+  handleCooking: function(poi) {
+    console.log('🍳 الطهي في ' + poi.nameAr);
     if (this.game && this.game.cooking) {
       this.game.cooking.open();
     }
     return { type: 'cooking' };
-  }
+  },
 
-  handleSavePoint(poi) {
-    console.log(`💾 حفظ التقدم في ${poi.nameAr}`);
+  handleSavePoint: function(poi) {
+    console.log('💾 حفظ التقدم في ' + poi.nameAr);
     if (this.game && this.game.save) {
       this.game.save();
     }
     return { type: 'save' };
-  }
+  },
 
-  handleQuestLocation(poi) {
-    console.log(`📋 موقع المهمة: ${poi.nameAr}`);
+  handleQuestLocation: function(poi) {
+    console.log('📋 موقع المهمة: ' + poi.nameAr);
     return { type: 'quest', location: poi };
-  }
+  },
 
-  handleDungeonEntrance(poi) {
-    console.log(`🕳️ دخول الزنزانة: المستوى ${poi.targetDepth}`);
+  handleDungeonEntrance: function(poi) {
+    console.log('🕳️ دخول الزنزانة: المستوى ' + poi.targetDepth);
     return { type: 'dungeon', depth: poi.targetDepth };
-  }
+  },
 
   // ============================================================
   // 🌿 نظام الموارد
@@ -1103,23 +1087,24 @@ GAME.WorldExpansion = class WorldExpansion {
   /**
    * توليد عقد الموارد لمنطقة معينة
    */
-  spawnResourceNodes(zoneId) {
-    const zone = this.zones[zoneId];
+  spawnResourceNodes: function(zoneId) {
+    var zone = this.zones[zoneId];
     if (!zone) return;
 
     this.resourceNodes[zoneId] = [];
+    var self = this;
 
-    zone.resources.forEach(resource => {
-      const count = this.getRandomResourceCount(resource);
+    zone.resources.forEach(function(resource) {
+      var count = self.getRandomResourceCount(resource);
 
-      for (let i = 0; i < count; i++) {
-        const position = this.getRandomPosition(zone.size);
+      for (var i = 0; i < count; i++) {
+        var position = self.getRandomPosition(zone.size);
 
-        this.resourceNodes[zoneId].push({
-          id: `${resource.id}_${i}`,
+        self.resourceNodes[zoneId].push({
+          id: resource.id + '_' + i,
           resourceId: resource.id,
-          position,
-          quantity: this.getRandomInt(resource.quantity.min, resource.quantity.max),
+          position: position,
+          quantity: self.getRandomInt(resource.quantity.min, resource.quantity.max),
           depleted: false,
           respawnTimer: 0,
           data: resource
@@ -1127,46 +1112,45 @@ GAME.WorldExpansion = class WorldExpansion {
       }
     });
 
-    console.log(`🌿 تم توليد ${this.resourceNodes[zoneId].length} مورد في ${zone.nameAr}`);
-  }
+    console.log('🌿 تم توليد ' + this.resourceNodes[zoneId].length + ' مورد في ' + zone.nameAr);
+  },
 
   /**
    * الحصول على عدد عشوائي من الموارد
    */
-  getRandomResourceCount(resource) {
-    // بعض الموارد نادرة (لديها spawnChance)
+  getRandomResourceCount: function(resource) {
     if (resource.spawnChance) {
       if (Math.random() > resource.spawnChance) return 0;
     }
-
     return this.getRandomInt(3, 8);
-  }
+  },
 
   /**
    * جمع مورد
    */
-  gatherResource(nodeId) {
-    const nodes = this.resourceNodes[this.currentZone];
+  gatherResource: function(nodeId) {
+    var nodes = this.resourceNodes[this.currentZone];
     if (!nodes) return null;
 
-    const node = nodes.find(n => n.id === nodeId);
+    var node = null;
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i].id === nodeId) { node = nodes[i]; break; }
+    }
     if (!node || node.depleted) {
       console.warn('⚠️ المورد غير متاح');
       return null;
     }
 
-    const resource = node.data;
+    var resource = node.data;
 
-    // التحقق من الأداة المطلوبة
     if (resource.toolRequired) {
       if (!this.hasRequiredTool(resource.toolRequired)) {
-        console.warn(`⚠️ تحتاج ${resource.toolRequired} لجمع ${resource.nameAr}`);
+        console.warn('⚠️ تحتاج ' + resource.toolRequired + ' لجمع ' + resource.nameAr);
         return { error: 'tool_required', tool: resource.toolRequired };
       }
     }
 
-    // جمع المورد
-    const gathered = {
+    var gathered = {
       id: resource.id,
       name: resource.name,
       nameAr: resource.nameAr,
@@ -1175,76 +1159,75 @@ GAME.WorldExpansion = class WorldExpansion {
       value: resource.value
     };
 
-    // تسجيل الإجمالي
     if (!this.totalResourcesGathered[resource.id]) {
       this.totalResourcesGathered[resource.id] = 0;
     }
     this.totalResourcesGathered[resource.id] += node.quantity;
 
-    // تفريغ العقدة
     node.depleted = true;
     node.respawnTimer = resource.respawnTime;
 
-    console.log(`✅ تم جمع ${node.quantity}x ${resource.nameAr}`);
+    console.log('✅ تم جمع ' + node.quantity + 'x ' + resource.nameAr);
 
-    // إضافة للمخزون
     if (this.game && this.game.inventory) {
       this.game.inventory.addItem(resource.id, node.quantity);
     }
 
-    // إطلاق حدث
     if (this.game && this.game.events) {
       this.game.events.emit('resourceGathered', gathered);
     }
 
     return gathered;
-  }
+  },
 
   /**
    * تحديث موارد (يُنادى كل ثانية)
    */
-  updateResources(deltaTime) {
-    const nodes = this.resourceNodes[this.currentZone];
+  updateResources: function(deltaTime) {
+    var nodes = this.resourceNodes[this.currentZone];
     if (!nodes) return;
 
-    nodes.forEach(node => {
+    var self = this;
+    nodes.forEach(function(node) {
       if (node.depleted && node.respawnTimer > 0) {
         node.respawnTimer -= deltaTime;
         if (node.respawnTimer <= 0) {
           node.depleted = false;
-          node.quantity = this.getRandomInt(
+          node.quantity = self.getRandomInt(
             node.data.quantity.min,
             node.data.quantity.max
           );
-          console.log(`🌱 عاد مورد ${node.data.nameAr}`);
+          console.log('🌱 عاد مورد ' + node.data.nameAr);
         }
       }
     });
-  }
+  },
 
   /**
    * الحصول على الموارد المتوفرة
    */
-  getAvailableResources() {
-    const nodes = this.resourceNodes[this.currentZone];
+  getAvailableResources: function() {
+    var nodes = this.resourceNodes[this.currentZone];
     if (!nodes) return [];
-    return nodes.filter(n => !n.depleted);
-  }
+    return nodes.filter(function(n) { return !n.depleted; });
+  },
 
   /**
    * البحث عن مورد بالقرب
    */
-  findNearestResource(resourceId, maxDistance = 15) {
-    const nodes = this.resourceNodes[this.currentZone];
+  findNearestResource: function(resourceId, maxDistance) {
+    maxDistance = maxDistance || 15;
+    var nodes = this.resourceNodes[this.currentZone];
     if (!nodes) return null;
 
-    let nearest = null;
-    let nearestDist = maxDistance;
+    var self = this;
+    var nearest = null;
+    var nearestDist = maxDistance;
 
-    nodes.filter(n => !n.depleted && n.resourceId === resourceId).forEach(node => {
-      const dx = node.position.x - this.playerPosition.x;
-      const dz = node.position.z - this.playerPosition.z;
-      const dist = Math.sqrt(dx * dx + dz * dz);
+    nodes.filter(function(n) { return !n.depleted && n.resourceId === resourceId; }).forEach(function(node) {
+      var dx = node.position.x - self.playerPosition.x;
+      var dz = node.position.z - self.playerPosition.z;
+      var dist = Math.sqrt(dx * dx + dz * dz);
 
       if (dist < nearestDist) {
         nearestDist = dist;
@@ -1253,7 +1236,7 @@ GAME.WorldExpansion = class WorldExpansion {
     });
 
     return nearest;
-  }
+  },
 
   // ============================================================
   // 👾 نظام الأعداء
@@ -1262,183 +1245,180 @@ GAME.WorldExpansion = class WorldExpansion {
   /**
    * توليد أعداء المنطقة
    */
-  spawnEnemies(zoneId) {
-    const zone = this.zones[zoneId];
+  spawnEnemies: function(zoneId) {
+    var zone = this.zones[zoneId];
     if (!zone) return;
 
     this.enemies[zoneId] = [];
+    var self = this;
 
-    zone.enemies.forEach(enemyType => {
-      const count = this.getRandomInt(3, 6);
+    zone.enemies.forEach(function(enemyType) {
+      var count = self.getRandomInt(3, 6);
 
-      for (let i = 0; i < count; i++) {
-        const position = this.getRandomPosition(zone.size);
+      for (var i = 0; i < count; i++) {
+        var position = self.getRandomPosition(zone.size);
 
-        this.enemies[zoneId].push({
-          id: `${enemyType.id}_${i}`,
+        self.enemies[zoneId].push({
+          id: enemyType.id + '_' + i,
           type: enemyType.id,
-          position: { ...position },
+          position: { x: position.x, y: position.y, z: position.z },
           health: enemyType.health,
           maxHealth: enemyType.health,
           damage: enemyType.damage,
           speed: enemyType.speed,
           alive: true,
           data: enemyType,
-          patrol: this.generatePatrolPath(position, zone.size),
+          patrol: self.generatePatrolPath(position, zone.size),
           patrolIndex: 0,
           lastAttack: 0
         });
       }
     });
 
-    console.log(`👾 تم توليد ${this.enemies[zoneId].length} عدو في ${zone.nameAr}`);
-  }
+    console.log('👾 تم توليد ' + this.enemies[zoneId].length + ' عدو في ' + zone.nameAr);
+  },
 
   /**
    * تحديث أعداء المنطقة
    */
-  updateEnemies(deltaTime) {
-    const enemies = this.enemies[this.currentZone];
+  updateEnemies: function(deltaTime) {
+    var enemies = this.enemies[this.currentZone];
     if (!enemies) return;
 
-    const now = Date.now();
+    var now = Date.now();
+    var self = this;
 
-    enemies.forEach(enemy => {
+    enemies.forEach(function(enemy) {
       if (!enemy.alive) return;
 
-      // حركة الدورية
-      this.moveEnemyPatrol(enemy, deltaTime);
+      self.moveEnemyPatrol(enemy, deltaTime);
 
-      // التحقق من مسافة اللاعب
-      const dx = this.playerPosition.x - enemy.position.x;
-      const dz = this.playerPosition.z - enemy.position.z;
-      const distToPlayer = Math.sqrt(dx * dx + dz * dz);
+      var dx = self.playerPosition.x - enemy.position.x;
+      var dz = self.playerPosition.z - enemy.position.z;
+      var distToPlayer = Math.sqrt(dx * dx + dz * dz);
 
-      // مهاجمة اللاعب إذا كان قريبًا
       if (distToPlayer <= enemy.data.aggroRange) {
-        // التوجه نحو اللاعب
         enemy.position.x += (dx / distToPlayer) * enemy.speed * deltaTime * 0.5;
         enemy.position.z += (dz / distToPlayer) * enemy.speed * deltaTime * 0.5;
 
-        // هجوم إذا كان قريبًا بما يكفي
         if (distToPlayer <= 2) {
-          if (now - enemy.lastAttack > 1500) { // هجوم كل 1.5 ثانية
-            this.enemyAttackPlayer(enemy);
+          if (now - enemy.lastAttack > 1500) {
+            self.enemyAttackPlayer(enemy);
             enemy.lastAttack = now;
           }
         }
       }
     });
-  }
+  },
 
   /**
    * هجوم العدو على اللاعب
    */
-  enemyAttackPlayer(enemy) {
+  enemyAttackPlayer: function(enemy) {
     if (this.game && this.game.player) {
-      let damage = enemy.damage;
+      var damage = enemy.damage;
 
-      // هجوم الشحن
       if (enemy.data.chargeAttack && Math.random() < 0.3) {
         damage *= 2;
-        console.log(`⚡ ${enemy.data.nameAr} يهاجم بشدة!`);
+        console.log('⚡ ' + enemy.data.nameAr + ' يهاجم بشدة!');
       }
 
       this.game.player.takeDamage(damage);
-      console.log(`💔 تلقيت ${damage} ضرر من ${enemy.data.nameAr}`);
+      console.log('💔 تلقيت ' + damage + ' ضرر من ' + enemy.data.nameAr);
 
       if (this.game && this.game.events) {
-        this.game.events.emit('enemyAttack', { enemy, damage });
+        this.game.events.emit('enemyAttack', { enemy: enemy, damage: damage });
       }
     }
-  }
+  },
 
   /**
    * هجوم اللاعب على العدو
    */
-  playerAttackEnemy(enemyId, damage = 10) {
-    const enemies = this.enemies[this.currentZone];
+  playerAttackEnemy: function(enemyId, damage) {
+    damage = damage || 10;
+    var enemies = this.enemies[this.currentZone];
     if (!enemies) return null;
 
-    const enemy = enemies.find(e => e.id === enemyId);
+    var enemy = null;
+    for (var i = 0; i < enemies.length; i++) {
+      if (enemies[i].id === enemyId) { enemy = enemies[i]; break; }
+    }
     if (!enemy || !enemy.alive) return null;
 
-    // تطبيق الدروع
-    const actualDamage = Math.max(1, damage - (enemy.data.armor || 0));
+    var actualDamage = Math.max(1, damage - (enemy.data.armor || 0));
     enemy.health -= actualDamage;
 
-    console.log(`⚔️ ضربت ${enemy.data.nameAr} بـ ${actualDamage} ضرر`);
+    console.log('⚔️ ضربت ' + enemy.data.nameAr + ' بـ ' + actualDamage + ' ضرر');
 
     if (enemy.health <= 0) {
       return this.killEnemy(enemy);
     }
 
     return { enemy: enemy.id, damage: actualDamage, alive: true, health: enemy.health };
-  }
+  },
 
   /**
    * قتل العدو
    */
-  killEnemy(enemy) {
+  killEnemy: function(enemy) {
     enemy.alive = false;
-    console.log(`☠️ قتلت ${enemy.data.nameAr}!`);
+    console.log('☠️ قتلت ' + enemy.data.nameAr + '!');
 
-    // إسقاط الأغراض
-    const drops = [];
+    var drops = [];
+    var self = this;
     if (enemy.data.drops) {
-      enemy.data.drops.forEach(drop => {
+      enemy.data.drops.forEach(function(drop) {
         if (Math.random() < drop.chance) {
           drops.push({ id: drop.id, nameAr: drop.nameAr, value: drop.value });
-          if (this.game && this.game.inventory) {
-            this.game.inventory.addItem(drop.id, 1);
+          if (self.game && self.game.inventory) {
+            self.game.inventory.addItem(drop.id, 1);
           }
         }
       });
     }
 
-    // إضافة خبرة
     if (this.game && this.game.player) {
       this.game.player.addXP(enemy.data.xpReward);
     }
 
-    // إعادة توليد العدو بعد مدة
-    setTimeout(() => {
-      this.respawnEnemy(enemy);
-    }, 30000); // 30 ثانية
+    setTimeout(function() {
+      self.respawnEnemy(enemy);
+    }, 30000);
 
     if (this.game && this.game.events) {
-      this.game.events.emit('enemyKilled', { enemy, drops });
+      this.game.events.emit('enemyKilled', { enemy: enemy, drops: drops });
     }
 
     return {
       enemy: enemy.id,
       damage: 0,
       alive: false,
-      drops,
+      drops: drops,
       xp: enemy.data.xpReward
     };
-  }
+  },
 
   /**
    * إعادة توليد العدو
    */
-  respawnEnemy(enemy) {
-    const zone = this.zones[this.currentZone];
+  respawnEnemy: function(enemy) {
+    var zone = this.zones[this.currentZone];
     enemy.position = this.getRandomPosition(zone.size);
     enemy.health = enemy.maxHealth;
     enemy.alive = true;
-    console.log(`🔄 عاد ${enemy.data.nameAr}`);
-  }
+    console.log('🔄 عاد ' + enemy.data.nameAr);
+  },
 
   /**
    * توليد مسار دورية عشوائي
    */
-  generatePatrolPath(center, zoneSize) {
-    const path = [];
-    const numPoints = 4;
-    const range = 8;
+  generatePatrolPath: function(center, zoneSize) {
+    var path = [];
+    var numPoints = 4;
+    var range = 8;
 
-    for (let i = 0; i < numPoints; i++) {
+    for (var i = 0; i < numPoints; i++) {
       path.push({
         x: center.x + (Math.random() - 0.5) * range * 2,
         z: center.z + (Math.random() - 0.5) * range * 2
@@ -1446,43 +1426,43 @@ GAME.WorldExpansion = class WorldExpansion {
     }
 
     return path;
-  }
+  },
 
   /**
    * تحريك العدو في مسار الدورية
    */
-  moveEnemyPatrol(enemy, deltaTime) {
+  moveEnemyPatrol: function(enemy, deltaTime) {
     if (!enemy.patrol || enemy.patrol.length === 0) return;
 
-    const target = enemy.patrol[enemy.patrolIndex];
-    const dx = target.x - enemy.position.x;
-    const dz = target.z - enemy.position.z;
-    const dist = Math.sqrt(dx * dx + dz * dz);
+    var target = enemy.patrol[enemy.patrolIndex];
+    var dx = target.x - enemy.position.x;
+    var dz = target.z - enemy.position.z;
+    var dist = Math.sqrt(dx * dx + dz * dz);
 
     if (dist < 0.5) {
-      // وصل إلى النقطة - انتقل للتالية
       enemy.patrolIndex = (enemy.patrolIndex + 1) % enemy.patrol.length;
     } else {
-      // التحرك نحو النقطة
       enemy.position.x += (dx / dist) * enemy.speed * deltaTime * 0.3;
       enemy.position.z += (dz / dist) * enemy.speed * deltaTime * 0.3;
     }
-  }
+  },
 
   /**
    * الحصول على الأعداء القريبة
    */
-  getNearbyEnemies(radius = 15) {
-    const enemies = this.enemies[this.currentZone];
+  getNearbyEnemies: function(radius) {
+    radius = radius || 15;
+    var enemies = this.enemies[this.currentZone];
     if (!enemies) return [];
 
-    return enemies.filter(e => {
+    var self = this;
+    return enemies.filter(function(e) {
       if (!e.alive) return false;
-      const dx = e.position.x - this.playerPosition.x;
-      const dz = e.position.z - this.playerPosition.z;
+      var dx = e.position.x - self.playerPosition.x;
+      var dz = e.position.z - self.playerPosition.z;
       return Math.sqrt(dx * dx + dz * dz) <= radius;
     });
-  }
+  },
 
   // ============================================================
   // 🔄 تحديث عام
@@ -1491,15 +1471,11 @@ GAME.WorldExpansion = class WorldExpansion {
   /**
    * تحديث نظام العالم (يُنادى كل إطار)
    */
-  update(deltaTime) {
+  update: function(deltaTime) {
     if (this.transitioning) return;
-
-    // تحديث الموارد
     this.updateResources(deltaTime);
-
-    // تحديث الأعداء
     this.updateEnemies(deltaTime);
-  }
+  },
 
   // ============================================================
   // 💾 حفظ وتحميل
@@ -1508,20 +1484,20 @@ GAME.WorldExpansion = class WorldExpansion {
   /**
    * حفظ حالة نظام العالم
    */
-  saveState() {
+  saveState: function() {
     return {
       currentZone: this.currentZone,
-      playerPosition: { ...this.playerPosition },
-      unlockedZones: { ...this.unlockedZones },
-      discoveredPOIs: { ...this.discoveredPOIs },
-      totalResourcesGathered: { ...this.totalResourcesGathered }
+      playerPosition: { x: this.playerPosition.x, y: this.playerPosition.y, z: this.playerPosition.z },
+      unlockedZones: JSON.parse(JSON.stringify(this.unlockedZones)),
+      discoveredPOIs: JSON.parse(JSON.stringify(this.discoveredPOIs)),
+      totalResourcesGathered: JSON.parse(JSON.stringify(this.totalResourcesGathered))
     };
-  }
+  },
 
   /**
    * تحميل حالة نظام العالم
    */
-  loadState(state) {
+  loadState: function(state) {
     if (!state) return;
 
     this.currentZone = state.currentZone || 'farm';
@@ -1530,12 +1506,11 @@ GAME.WorldExpansion = class WorldExpansion {
     this.discoveredPOIs = state.discoveredPOIs || {};
     this.totalResourcesGathered = state.totalResourcesGathered || {};
 
-    // إعادة توليد الموارد والأعداء
     this.spawnResourceNodes(this.currentZone);
     this.spawnEnemies(this.currentZone);
 
     console.log('💾 تم تحميل حالة نظام العالم');
-  }
+  },
 
   // ============================================================
   // 🔧 أدوات مساعدة
@@ -1544,119 +1519,125 @@ GAME.WorldExpansion = class WorldExpansion {
   /**
    * الحصول على المنطقة الحالية
    */
-  getCurrentZone() {
+  getCurrentZone: function() {
     return this.zones[this.currentZone];
-  }
+  },
 
   /**
    * الحصول على معرف المنطقة الحالية
    */
-  getCurrentZoneId() {
+  getCurrentZoneId: function() {
     return this.currentZone;
-  }
+  },
 
   /**
    * الحصول على مواقع الأعداء (للعرض)
    */
-  getEnemyPositions() {
-    const enemies = this.enemies[this.currentZone];
+  getEnemyPositions: function() {
+    var enemies = this.enemies[this.currentZone];
     if (!enemies) return [];
-    return enemies.filter(e => e.alive).map(e => ({
-      id: e.id,
-      type: e.type,
-      position: e.position,
-      health: e.health,
-      maxHealth: e.maxHealth,
-      data: e.data
-    }));
-  }
+    return enemies.filter(function(e) { return e.alive; }).map(function(e) {
+      return {
+        id: e.id,
+        type: e.type,
+        position: e.position,
+        health: e.health,
+        maxHealth: e.maxHealth,
+        data: e.data
+      };
+    });
+  },
 
   /**
    * الحصول على مواقع الموارد (للعرض)
    */
-  getResourcePositions() {
-    const nodes = this.resourceNodes[this.currentZone];
+  getResourcePositions: function() {
+    var nodes = this.resourceNodes[this.currentZone];
     if (!nodes) return [];
-    return nodes.filter(n => !n.depleted).map(n => ({
-      id: n.id,
-      resourceId: n.resourceId,
-      position: n.position,
-      quantity: n.quantity,
-      data: n.data
-    }));
-  }
+    return nodes.filter(function(n) { return !n.depleted; }).map(function(n) {
+      return {
+        id: n.id,
+        resourceId: n.resourceId,
+        position: n.position,
+        quantity: n.quantity,
+        data: n.data
+      };
+    });
+  },
 
   /**
    * تحديث موقع اللاعب
    */
-  updatePlayerPosition(x, y, z) {
-    this.playerPosition = { x, y, z };
-  }
+  updatePlayerPosition: function(x, y, z) {
+    this.playerPosition = { x: x, y: y, z: z };
+  },
 
   /**
    * الحصول على ذهب اللاعب
    */
-  getPlayerGold() {
+  getPlayerGold: function() {
     if (this.game && this.game.economy) {
       return this.game.economy.getGold ? this.game.economy.getGold() : 0;
     }
     return 0;
-  }
+  },
 
   /**
    * إنفاق ذهب اللاعب
    */
-  spendPlayerGold(amount) {
+  spendPlayerGold: function(amount) {
     if (this.game && this.game.economy) {
       if (this.game.economy.spendGold) {
         return this.game.economy.spendGold(amount);
       }
     }
     return false;
-  }
+  },
 
   /**
    * التحقق من توفر الأداة
    */
-  hasRequiredTool(toolId) {
+  hasRequiredTool: function(toolId) {
     if (this.game && this.game.inventory) {
       return this.game.inventory.hasItem ? this.game.inventory.hasItem(toolId) : false;
     }
     return false;
-  }
+  },
 
   /**
    * توليد موقع عشوائي داخل المنطقة
    */
-  getRandomPosition(zoneSize) {
-    const halfW = zoneSize.width / 2;
-    const halfD = zoneSize.depth / 2;
+  getRandomPosition: function(zoneSize) {
     return {
       x: (Math.random() - 0.5) * zoneSize.width * 0.8,
       y: 0,
       z: (Math.random() - 0.5) * zoneSize.depth * 0.8
     };
-  }
+  },
 
   /**
    * الحصول على عدد عشوائي
    */
-  getRandomInt(min, max) {
+  getRandomInt: function(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
+  },
 
   /**
    * الحصول على إحصائيات نظام العالم
    */
-  getStats() {
+  getStats: function() {
+    var totalPOIs = 0;
+    var self = this;
+    Object.values(this.zones).forEach(function(z) {
+      totalPOIs += z.pointsOfInterest.length;
+    });
+
     return {
       currentZone: this.currentZone,
       unlockedZones: Object.keys(this.unlockedZones).length,
       totalZones: Object.keys(this.zones).length,
       discoveredPOIs: Object.keys(this.discoveredPOIs).length,
-      totalPOIs: Object.values(this.zones).reduce(
-        (sum, z) => sum + z.pointsOfInterest.length, 0
-      ),
+      totalPOIs: totalPOIs,
       resourcesGathered: this.totalResourcesGathered
     };
   }
@@ -1698,7 +1679,7 @@ GAME.WORLD_MAP_CONNECTIONS = {
   forest: { village: 'west' },
   mine: { village: 'east' },
   beach: { village: 'northwest' },
-  mountain: { village: 'north' } // Mountain متاحة من القرية أيضاً (قريبة)
+  mountain: { village: 'north' }
 };
 
 // إضافة خيار الوصول للجبل من القرية
