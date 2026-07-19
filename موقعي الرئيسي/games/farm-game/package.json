@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "farm-game",
   "version": "2.5.0",
   "private": true,
@@ -10,8 +10,9 @@
     "cap:open": "npx cap open android"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
     "@capacitor/core": "^8.0.0",
-    "@capacitor/android": "^8.0.0"
+    "firecrawl": "^4.30.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0"

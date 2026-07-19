@@ -101,12 +101,25 @@ Object.assign(GAME.game, {
       GAME.camera.init();
       GAME.world.init(this.scene);
       GAME.player.init(this.scene);
+      // نظام الزراعة الجديد
+      GAME.TimeSystem.init();
+      GAME.FarmingSystem.init(this.scene);
+      // إنشاء قطع الأراضي
+      GAME.game.initPlots();
       // أنظمة ثانوية معزولة — فشل أيها لا يمنع تشغيل اللعبة
       this._safe('animals.init', function() { GAME.animals.init(self.scene); });
       this._safe('weather.init', function() { GAME.weather.init(self.scene); });
       this._safe('audio.init', function() { GAME.audio.init(); });
       this._safe('AIAgent.init', function() { GAME.AIAgent.init(self.scene); });
       this._safe('achievements.init', function() { GAME.achievements.init(); });
+      // === الأنظمة الجديدة ===
+      this._safe('AnimalsSystem.init', function() { GAME.AnimalsSystem.init(self.scene); });
+      this._safe('BuildingsSystem.init', function() { GAME.BuildingsSystem.init(self.scene); });
+      this._safe('EconomySystem.init', function() { GAME.EconomySystem.init(); });
+      this._safe('NPCsSystem.init', function() { GAME.NPCsSystem.init(self.scene, GAME.TimeSystem); });
+      this._safe('WorldExpansion.init', function() { GAME.WorldExpansionInstance = new GAME.WorldExpansion({ events: null, ui: GAME.ui, shop: null }); });
+      // تحسينات الواجهة
+      this._safe('UIEnhancements.init', function() { GAME.UIEnhancements.init(); });
 
       this._autoSave = setInterval(function() { self.saveGame(); }, 30000);
 
@@ -274,24 +287,8 @@ Object.assign(GAME.game, {
       GAME.ui.showNotification('❌ No plants nearby to fertilize', 'error');
       return;
     }
-    if ((this.state.inventory.fertilizer || 0) <= 0) {
-      GAME.ui.showNotification('❌ No fertilizer in inventory', 'error');
-      return;
-    }
-    this.state.plots[idx].fertilized = true;
-    this.state.inventory.fertilizer--;
-    var plot = this.state.plots[idx];
-    this.spawnFertilizerParticles(plot.x, plot.z); // 🎆 جسيمات السماد
-    
-    // Update fertilizer marker
-    this.updatePlantVisual(plot);
-
-    this.addXP(4);
-    GAME.quests.track('fertilize', 1);
-    this.state.stats.totalFertilized++;
-    GAME.achievements.checkAll();
-    GAME.ui.showNotification('🌱 Fertilized! Growth boosted. +4 XP', 'success');
-    GAME.ui.refreshInventory();
+    // Use basic fertilizer by default
+    GAME.FarmingSystem.fertilize(idx, 'basic');
   },
   
   addGrowthMarkers: function(plot) {
@@ -529,60 +526,19 @@ Object.assign(GAME.game, {
 
   findClosestPlot: function(state) {
     var p = GAME.player.mesh.position;
-    var closest = null, minDist = 3;
-    for (var i = 0; i < this.state.plots.length; i++) {
-      var plot = this.state.plots[i];
-      if (state && plot.state !== state) continue;
-      var dx = p.x - plot.x, dz = p.z - plot.z;
-      var dist = Math.sqrt(dx * dx + dz * dz);
-      if (dist < minDist) {
-        minDist = dist;
-        closest = i;
-      }
-    }
-    return closest;
+    return GAME.FarmingSystem.findClosestPlot(p.x, p.z, state, 3);
   },
 
   plowClosest: function() {
     var idx = this.findClosestPlot('empty');
     if (idx === null) { GAME.ui.showNotification('❌ No empty plots nearby', 'error'); return; }
-    var cost = this.getEnergyCost(5);
-    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
-    this.state.plots[idx].state = 'plowed';
-    this.state.plots[idx].crop = null;
-    this.state.plots[idx].growth = 0;
-    this.state.plots[idx].watered = false;
-    this.state.plots[idx].fertilized = false;
-    this.state.energy -= cost;
-    var plot = this.state.plots[idx];
-    var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
-    var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
-    mesh.position.set(plot.x, 0.08, plot.z);
-    mesh.receiveShadow = true;
-    this.scene.add(mesh);
-    plot.mesh = mesh;
-    this.spawnPlowParticles(plot.x, plot.z); // 🎆 جسيمات الحرث
-    this.addXP(5);
-    GAME.ui.showNotification('✅ Plowed! +5 XP', 'success');
+    GAME.FarmingSystem.plow(idx);
   },
 
   waterClosest: function() {
     var idx = this.findClosestPlot('planted');
     if (idx === null) { GAME.ui.showNotification('❌ No planted crops nearby', 'error'); return; }
-    var cost = this.getEnergyCost(3);
-    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
-    this.state.plots[idx].watered = true;
-    this.state.energy -= cost;
-    this.addXP(3);
-    GAME.quests.track('water', 1);
-    this.state.stats.totalWatered++;
-    GAME.achievements.checkAll();
-    GAME.ui.showNotification('💧 Watered crops! +3 XP', 'success');
-    var plot = this.state.plots[idx];
-    this.spawnWaterParticles(plot.x, plot.z); // 🎆 جسيمات الماء
-    
-    // Update water marker visibility
-    this.updatePlantVisual(plot);
+    GAME.FarmingSystem.water(idx);
   },
 
   plantClosest: function(crop) {
@@ -648,58 +604,7 @@ Object.assign(GAME.game, {
   harvestClosest: function() {
     var idx = this.findClosestPlot('ready');
     if (idx === null) { GAME.ui.showNotification('❌ No crops ready to harvest', 'error'); return; }
-    var cost = this.getEnergyCost(10);
-    if (this.state.energy < cost) { GAME.ui.showNotification('❌ Too tired!', 'error'); return; }
-    var plot = this.state.plots[idx];
-    var cropType = plot.crop;
-    var prices = { wheat: 25, tomato: 40, carrot: 35, apple: 80 };
-    var bonus = this.getSellPriceBonus();
-    var salePrice = Math.floor((prices[cropType] || 25) * bonus);
-    this.state.money += salePrice;
-    this.state.energy -= cost;
-    // 🎆 جسيمات الحصاد
-    this.spawnHarvestParticles(plot.x, plot.z, cropType);
-
-    if (cropType === 'apple') {
-      // For apple trees, reset growth but keep the tree
-      if (plot.mesh) {
-        // Keep the tree structure, just reset growth visuals
-        plot.growth = 0;
-        plot.growthStage = 0;
-        plot.state = 'planted';
-        plot.watered = false;
-        plot.fertilized = false;
-        this.updatePlantVisual(plot);
-      }
-      GAME.ui.showNotification('🍎 Apple harvested! Tree regrowing... +$' + salePrice, 'success');
-    } else {
-      // For crops, remove plant and reset to plowed state
-      this._disposePlotMesh(plot);
-      
-      // Remove growth markers
-      this._disposePlotMarker(plot, 'waterMarker');
-      this._disposePlotMarker(plot, 'fertilizerMarker');
-      
-      var dirtMat = new THREE.MeshLambertMaterial({ color: 0x4a2a0a });
-      var mesh = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.12, 2.2), dirtMat);
-      mesh.position.set(plot.x, 0.08, plot.z);
-      mesh.receiveShadow = true;
-      this.scene.add(mesh);
-      plot.mesh = mesh;
-      plot.state = 'plowed';
-      plot.crop = null;
-      plot.growth = 0;
-      plot.growthStage = 0;
-      plot.watered = false;
-      plot.fertilized = false;
-      this.state.inventory[cropType] = (this.state.inventory[cropType] || 0) + 1;
-      GAME.ui.showNotification('💰 Harvested ' + cropType + '! +$' + salePrice, 'success');
-    }
-    this.addXP(15);
-    GAME.quests.track('harvest', 1);
-    this.state.stats.totalHarvested++;
-    if (cropType === 'apple') this.state.stats.totalApples++;
-    GAME.achievements.checkAll();
+    GAME.FarmingSystem.harvest(idx);
   },
 
   craftItem: function(recipeId) {
@@ -886,6 +791,17 @@ Object.assign(GAME.game, {
         }
       }
     }
+    // ===== نظام الزراعة الجديد =====
+    this._safe('TimeSystem', function() { GAME.TimeSystem.update(delta); });
+    this._safe('FarmingSystem', function() { GAME.FarmingSystem.update(delta); });
+    // === تحديث الأنظمة الجديدة ===
+    this._safe('AnimalsSystem', function() { GAME.AnimalsSystem.update(delta); });
+    this._safe('BuildingsSystem', function() { GAME.BuildingsSystem.update(delta); });
+    if (GAME.WorldExpansionInstance) this._safe('WorldExpansion', function() { GAME.WorldExpansionInstance.update(delta); });
+    this._safe('NPCsSystem', function() { GAME.NPCsSystem.update(delta); });
+    // تحسينات الواجهة
+    this._safe('UIEnhancements', function() { GAME.UIEnhancements.update(delta); });
+    
     // 🛡️ كل نظام معزول — خطأٌ في أحدها لا يوقف البقية ولا يطرد اللاعب للقائمة
     var self = this;
     this._safe('player', function() {

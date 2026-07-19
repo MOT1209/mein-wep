@@ -1,0 +1,151 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" width="128" height="32">
+  <!-- Horse Sprite Sheet - 4 frames (idle, walk1, walk2, eat) -->
+  
+  <!-- Frame 1: Idle -->
+  <g transform="translate(0,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="14" rx="12" ry="6" fill="#8B4513"/>
+    <!-- Neck -->
+    <rect x="22" y="6" width="4" height="10" fill="#8B4513"/>
+    <!-- Head -->
+    <ellipse cx="28" cy="6" rx="5" ry="4" fill="#8B4513"/>
+    <!-- Mane -->
+    <path d="M24,2 Q26,0 28,2 Q30,0 32,2 Q34,0 34,4" fill="#654321"/>
+    <!-- Eye -->
+    <circle cx="30" cy="5" r="1.5" fill="#000"/>
+    <!-- Nose -->
+    <ellipse cx="33" cy="7" rx="2" ry="1.5" fill="#A0522D"/>
+    <!-- Nostril -->
+    <circle cx="34" cy="7" r="0.8" fill="#000"/>
+    <!-- Ears -->
+    <path d="M24,2 L23,0 L25,1" fill="#8B4513"/>
+    <path d="M28,2 L27,0 L29,1" fill="#8B4513"/>
+    <!-- Legs -->
+    <rect x="6" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="12" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="16" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="22" y="18" width="3" height="10" fill="#8B4513"/>
+    <!-- Hooves -->
+    <rect x="6" y="26" width="3" height="2" fill="#000"/>
+    <rect x="12" y="26" width="3" height="2" fill="#000"/>
+    <rect x="16" y="26" width="3" height="2" fill="#000"/>
+    <rect x="22" y="26" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M2,12 Q0,16 2,20 Q4,16 2,12" fill="#654321"/>
+    <!-- Saddle -->
+    <ellipse cx="14" cy="12" rx="6" ry="2" fill="#8B0000"/>
+    <rect x="10" y="10" width="8" height="2" fill="#8B0000"/>
+  </g>
+  
+  <!-- Frame 2: Walk 1 -->
+  <g transform="translate(32,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="14" rx="12" ry="6" fill="#8B4513"/>
+    <!-- Neck -->
+    <rect x="22" y="6" width="4" height="10" fill="#8B4513"/>
+    <!-- Head -->
+    <ellipse cx="28" cy="6" rx="5" ry="4" fill="#8B4513"/>
+    <!-- Mane -->
+    <path d="M24,2 Q26,0 28,2 Q30,0 32,2 Q34,0 34,4" fill="#654321"/>
+    <!-- Eye -->
+    <circle cx="30" cy="5" r="1.5" fill="#000"/>
+    <!-- Nose -->
+    <ellipse cx="33" cy="7" rx="2" ry="1.5" fill="#A0522D"/>
+    <!-- Nostril -->
+    <circle cx="34" cy="7" r="0.8" fill="#000"/>
+    <!-- Ears -->
+    <path d="M24,2 L23,0 L25,1" fill="#8B4513"/>
+    <path d="M28,2 L27,0 L29,1" fill="#8B4513"/>
+    <!-- Legs - walking -->
+    <rect x="4" y="18" width="3" height="10" fill="#8B4513" transform="rotate(-10, 5, 18)"/>
+    <rect x="12" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="16" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="24" y="18" width="3" height="10" fill="#8B4513" transform="rotate(10, 25, 18)"/>
+    <!-- Hooves -->
+    <rect x="4" y="26" width="3" height="2" fill="#000"/>
+    <rect x="12" y="26" width="3" height="2" fill="#000"/>
+    <rect x="16" y="26" width="3" height="2" fill="#000"/>
+    <rect x="24" y="26" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M2,12 Q0,16 2,20 Q4,16 2,12" fill="#654321"/>
+    <!-- Saddle -->
+    <ellipse cx="14" cy="12" rx="6" ry="2" fill="#8B0000"/>
+    <rect x="10" y="10" width="8" height="2" fill="#8B0000"/>
+  </g>
+  
+  <!-- Frame 3: Walk 2 -->
+  <g transform="translate(64,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="14" rx="12" ry="6" fill="#8B4513"/>
+    <!-- Neck -->
+    <rect x="22" y="6" width="4" height="10" fill="#8B4513"/>
+    <!-- Head -->
+    <ellipse cx="28" cy="6" rx="5" ry="4" fill="#8B4513"/>
+    <!-- Mane -->
+    <path d="M24,2 Q26,0 28,2 Q30,0 32,2 Q34,0 34,4" fill="#654321"/>
+    <!-- Eye -->
+    <circle cx="30" cy="5" r="1.5" fill="#000"/>
+    <!-- Nose -->
+    <ellipse cx="33" cy="7" rx="2" ry="1.5" fill="#A0522D"/>
+    <!-- Nostril -->
+    <circle cx="34" cy="7" r="0.8" fill="#000"/>
+    <!-- Ears -->
+    <path d="M24,2 L23,0 L25,1" fill="#8B4513"/>
+    <path d="M28,2 L27,0 L29,1" fill="#8B4513"/>
+    <!-- Legs - walking -->
+    <rect x="8" y="18" width="3" height="10" fill="#8B4513" transform="rotate(10, 9, 18)"/>
+    <rect x="14" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="18" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="20" y="18" width="3" height="10" fill="#8B4513" transform="rotate(-10, 21, 18)"/>
+    <!-- Hooves -->
+    <rect x="8" y="26" width="3" height="2" fill="#000"/>
+    <rect x="14" y="26" width="3" height="2" fill="#000"/>
+    <rect x="18" y="26" width="3" height="2" fill="#000"/>
+    <rect x="20" y="26" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M2,12 Q0,16 2,20 Q4,16 2,12" fill="#654321"/>
+    <!-- Saddle -->
+    <ellipse cx="14" cy="12" rx="6" ry="2" fill="#8B0000"/>
+    <rect x="10" y="10" width="8" height="2" fill="#8B0000"/>
+  </g>
+  
+  <!-- Frame 4: Eating -->
+  <g transform="translate(96,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="14" rx="12" ry="6" fill="#8B4513"/>
+    <!-- Neck (lowered) -->
+    <rect x="22" y="10" width="4" height="10" fill="#8B4513" transform="rotate(30, 24, 15)"/>
+    <!-- Head (lowered) -->
+    <ellipse cx="28" cy="20" rx="5" ry="4" fill="#8B4513"/>
+    <!-- Mane -->
+    <path d="M24,16 Q26,14 28,16 Q30,14 32,16 Q34,14 34,16" fill="#654321"/>
+    <!-- Eye -->
+    <circle cx="30" cy="19" r="1.5" fill="#000"/>
+    <!-- Nose -->
+    <ellipse cx="33" cy="22" rx="2" ry="1.5" fill="#A0522D"/>
+    <!-- Nostril -->
+    <circle cx="34" cy="22" r="0.8" fill="#000"/>
+    <!-- Ears -->
+    <path d="M24,16 L23,14 L25,15" fill="#8B4513"/>
+    <path d="M28,16 L27,14 L29,15" fill="#8B4513"/>
+    <!-- Legs -->
+    <rect x="6" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="12" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="16" y="18" width="3" height="10" fill="#8B4513"/>
+    <rect x="22" y="18" width="3" height="10" fill="#8B4513"/>
+    <!-- Hooves -->
+    <rect x="6" y="26" width="3" height="2" fill="#000"/>
+    <rect x="12" y="26" width="3" height="2" fill="#000"/>
+    <rect x="16" y="26" width="3" height="2" fill="#000"/>
+    <rect x="22" y="26" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M2,12 Q0,16 2,20 Q4,16 2,12" fill="#654321"/>
+    <!-- Saddle -->
+    <ellipse cx="14" cy="12" rx="6" ry="2" fill="#8B0000"/>
+    <rect x="10" y="10" width="8" height="2" fill="#8B0000"/>
+    <!-- Hay -->
+    <line x1="26" y1="28" x2="30" y2="28" stroke="#DAA520" stroke-width="1"/>
+    <line x1="28" y1="26" x2="32" y2="28" stroke="#DAA520" stroke-width="1"/>
+    <line x1="24" y1="28" x2="28" y2="26" stroke="#DAA520" stroke-width="1"/>
+  </g>
+</svg>

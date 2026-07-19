@@ -31,28 +31,19 @@ GAME.game.recipes = {
 };
 
 GAME.game.initPlots = function() {
-  var plots = [];
+  // إنشاء 36 قطعة أرض باستخدام FarmingSystem
   var rows = 6, cols = 6;
   var spacing = 2.8;
   var startX = -(cols - 1) * spacing / 2;
   var startZ = 2;
+  var plotIndex = 0;
   for (var r = 0; r < rows; r++) {
     for (var c = 0; c < cols; c++) {
-      plots.push({
-        row: r, col: c,
-        x: startX + c * spacing,
-        z: startZ + r * spacing,
-        state: 'empty',
-        crop: null,
-        growth: 0,
-        watered: false,
-        fertilized: false,
-        growthStage: 0,
-        mesh: null,
-        waterMarker: null,
-        fertilizerMarker: null
-      });
+      var x = startX + c * spacing;
+      var z = startZ + r * spacing;
+      GAME.FarmingSystem.createPlot(x, z, plotIndex);
+      plotIndex++;
     }
   }
-  this.state.plots = plots;
+  console.log('[FarmGame] 🌱 Created ' + plotIndex + ' farming plots');
 };

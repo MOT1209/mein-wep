@@ -1,0 +1,85 @@
+{
+  "version": "1.0.0",
+  "crops": {
+    "wheat": {
+      "sprite": "sprites/crops/wheat.png",
+      "frames": 6
+    },
+    "tomato": {
+      "sprite": "sprites/crops/tomato.png",
+      "frames": 6
+    },
+    "carrot": {
+      "sprite": "sprites/crops/carrot.png",
+      "frames": 6
+    },
+    "corn": {
+      "sprite": "sprites/crops/corn.png",
+      "frames": 6
+    },
+    "pumpkin": {
+      "sprite": "sprites/crops/pumpkin.png",
+      "frames": 7
+    },
+    "apple": {
+      "sprite": "sprites/crops/apple.png",
+      "frames": 8,
+      "isTree": true
+    }
+  },
+  "animals": {
+    "chicken": {
+      "sprite": "sprites/animals/chicken.svg",
+      "frames": 4,
+      "frameWidth": 32,
+      "frameHeight": 32
+    },
+    "cow": {
+      "sprite": "sprites/animals/cow.svg",
+      "frames": 4,
+      "frameWidth": 32,
+      "frameHeight": 32
+    },
+    "pig": {
+      "sprite": "sprites/animals/pig.svg",
+      "frames": 4,
+      "frameWidth": 32,
+      "frameHeight": 32
+    },
+    "duck": {
+      "sprite": "sprites/animals/duck.svg",
+      "frames": 4,
+      "frameWidth": 32,
+      "frameHeight": 32
+    },
+    "horse": {
+      "sprite": "sprites/animals/horse.svg",
+      "frames": 4,
+      "frameWidth": 32,
+      "frameHeight": 32
+    }
+  },
+  "ui": {
+    "buttons": "sprites/ui/buttons.png",
+    "icons": "sprites/ui/icons.png",
+    "inventory": "sprites/ui/inventory.png"
+  },
+  "tiles": {
+    "grass": "tiles/grass.png",
+    "dirt": "tiles/dirt.png",
+    "water": "tiles/water.png",
+    "path": "tiles/path.png"
+  },
+  "audio": {
+    "sfx": {
+      "harvest": "audio/sfx/harvest.wav",
+      "plant": "audio/sfx/plant.wav",
+      "water": "audio/sfx/water.wav",
+      "step": "audio/sfx/step.wav",
+      "coin": "audio/sfx/coin.wav"
+    },
+    "music": {
+      "farm": "audio/music/farm_theme.mp3"
+    }
+  }
+}

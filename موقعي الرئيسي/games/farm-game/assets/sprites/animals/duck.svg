@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" width="128" height="32">
+  <!-- Duck Sprite Sheet - 4 frames (idle, walk1, walk2, eat) -->
+  
+  <!-- Frame 1: Idle -->
+  <g transform="translate(0,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="18" rx="10" ry="6" fill="#FFFFFF"/>
+    <!-- Head -->
+    <circle cx="24" cy="10" r="5" fill="#FFFFFF"/>
+    <!-- Eye -->
+    <circle cx="26" cy="9" r="1.5" fill="#000"/>
+    <!-- Beak -->
+    <polygon points="28,10 32,11 28,12" fill="#FF8C00"/>
+    <!-- Wing -->
+    <ellipse cx="10" cy="18" rx="6" ry="4" fill="#E8E8E8"/>
+    <!-- Tail feathers -->
+    <path d="M4,16 L2,12 L6,14" fill="#E8E8E8"/>
+    <!-- Legs -->
+    <line x1="12" y1="24" x2="12" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <line x1="18" y1="24" x2="18" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <!-- Webbed feet -->
+    <path d="M9,30 L12,28 L15,30 L12,31 L9,30" fill="#FF8C00"/>
+    <path d="M15,30 L18,28 L21,30 L18,31 L15,30" fill="#FF8C00"/>
+  </g>
+  
+  <!-- Frame 2: Walk 1 -->
+  <g transform="translate(32,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="18" rx="10" ry="6" fill="#FFFFFF"/>
+    <!-- Head -->
+    <circle cx="24" cy="10" r="5" fill="#FFFFFF"/>
+    <!-- Eye -->
+    <circle cx="26" cy="9" r="1.5" fill="#000"/>
+    <!-- Beak -->
+    <polygon points="28,10 32,11 28,12" fill="#FF8C00"/>
+    <!-- Wing -->
+    <ellipse cx="10" cy="18" rx="6" ry="4" fill="#E8E8E8"/>
+    <!-- Tail feathers -->
+    <path d="M4,16 L2,12 L6,14" fill="#E8E8E8"/>
+    <!-- Legs - walking -->
+    <line x1="10" y1="24" x2="8" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <line x1="20" y1="24" x2="20" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <!-- Webbed feet -->
+    <path d="M5,30 L8,28 L11,30 L8,31 L5,30" fill="#FF8C00"/>
+    <path d="M17,30 L20,28 L23,30 L20,31 L17,30" fill="#FF8C00"/>
+  </g>
+  
+  <!-- Frame 3: Walk 2 -->
+  <g transform="translate(64,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="18" rx="10" ry="6" fill="#FFFFFF"/>
+    <!-- Head -->
+    <circle cx="24" cy="10" r="5" fill="#FFFFFF"/>
+    <!-- Eye -->
+    <circle cx="26" cy="9" r="1.5" fill="#000"/>
+    <!-- Beak -->
+    <polygon points="28,10 32,11 28,12" fill="#FF8C00"/>
+    <!-- Wing -->
+    <ellipse cx="10" cy="18" rx="6" ry="4" fill="#E8E8E8"/>
+    <!-- Tail feathers -->
+    <path d="M4,16 L2,12 L6,14" fill="#E8E8E8"/>
+    <!-- Legs - walking -->
+    <line x1="14" y1="24" x2="14" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <line x1="22" y1="24" x2="24" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <!-- Webbed feet -->
+    <path d="M11,30 L14,28 L17,30 L14,31 L11,30" fill="#FF8C00"/>
+    <path d="M21,30 L24,28 L27,30 L24,31 L21,30" fill="#FF8C00"/>
+  </g>
+  
+  <!-- Frame 4: Eating (dabbling) -->
+  <g transform="translate(96,0)">
+    <!-- Body -->
+    <ellipse cx="14" cy="18" rx="10" ry="6" fill="#FFFFFF"/>
+    <!-- Head (lowered) -->
+    <circle cx="24" cy="18" r="5" fill="#FFFFFF"/>
+    <!-- Eye -->
+    <circle cx="26" cy="17" r="1.5" fill="#000"/>
+    <!-- Beak (in water/ground) -->
+    <polygon points="28,20 32,22 28,23" fill="#FF8C00"/>
+    <!-- Wing -->
+    <ellipse cx="10" cy="18" rx="6" ry="4" fill="#E8E8E8"/>
+    <!-- Tail feathers -->
+    <path d="M4,16 L2,12 L6,14" fill="#E8E8E8"/>
+    <!-- Legs -->
+    <line x1="12" y1="24" x2="12" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <line x1="18" y1="24" x2="18" y2="30" stroke="#FF8C00" stroke-width="2"/>
+    <!-- Webbed feet -->
+    <path d="M9,30 L12,28 L15,30 L12,31 L9,30" fill="#FF8C00"/>
+    <path d="M15,30 L18,28 L21,30 L18,31 L15,30" fill="#FF8C00"/>
+    <!-- Water splash -->
+    <circle cx="30" cy="24" r="1" fill="#87CEEB" opacity="0.6"/>
+    <circle cx="32" cy="26" r="0.8" fill="#87CEEB" opacity="0.6"/>
+    <circle cx="28" cy="27" r="0.6" fill="#87CEEB" opacity="0.6"/>
+  </g>
+</svg>

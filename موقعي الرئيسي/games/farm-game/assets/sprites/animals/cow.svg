@@ -1,0 +1,159 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" width="128" height="32">
+  <!-- Cow Sprite Sheet - 4 frames (idle, walk1, walk2, eat) -->
+  
+  <!-- Frame 1: Idle -->
+  <g transform="translate(0,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="12" ry="8" fill="#FFFFFF"/>
+    <!-- Spots -->
+    <ellipse cx="12" cy="14" rx="3" ry="2" fill="#8B4513"/>
+    <ellipse cx="20" cy="18" rx="4" ry="2" fill="#8B4513"/>
+    <!-- Head -->
+    <circle cx="28" cy="10" r="5" fill="#FFFFFF"/>
+    <!-- Snout -->
+    <ellipse cx="31" cy="12" rx="3" ry="2" fill="#FFB6C1"/>
+    <!-- Nostrils -->
+    <circle cx="30" cy="12" r="0.8" fill="#000"/>
+    <circle cx="32" cy="12" r="0.8" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="27" cy="9" r="1.5" fill="#000"/>
+    <circle cx="30" cy="9" r="1.5" fill="#000"/>
+    <!-- Horns -->
+    <path d="M26,5 L25,2 L27,4" fill="#8B4513"/>
+    <path d="M30,5 L31,2 L29,4" fill="#8B4513"/>
+    <!-- Ears -->
+    <ellipse cx="24" cy="8" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <ellipse cx="32" cy="8" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <!-- Legs -->
+    <rect x="8" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="14" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="18" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="24" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <!-- Hooves -->
+    <rect x="8" y="28" width="3" height="2" fill="#000"/>
+    <rect x="14" y="28" width="3" height="2" fill="#000"/>
+    <rect x="18" y="28" width="3" height="2" fill="#000"/>
+    <rect x="24" y="28" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M4,14 Q2,16 4,18" fill="none" stroke="#8B4513" stroke-width="1.5"/>
+    <!-- Udder -->
+    <ellipse cx="16" cy="22" rx="3" ry="2" fill="#FFB6C1"/>
+  </g>
+  
+  <!-- Frame 2: Walk 1 (legs spread) -->
+  <g transform="translate(32,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="12" ry="8" fill="#FFFFFF"/>
+    <!-- Spots -->
+    <ellipse cx="12" cy="14" rx="3" ry="2" fill="#8B4513"/>
+    <ellipse cx="20" cy="18" rx="4" ry="2" fill="#8B4513"/>
+    <!-- Head -->
+    <circle cx="28" cy="10" r="5" fill="#FFFFFF"/>
+    <!-- Snout -->
+    <ellipse cx="31" cy="12" rx="3" ry="2" fill="#FFB6C1"/>
+    <!-- Nostrils -->
+    <circle cx="30" cy="12" r="0.8" fill="#000"/>
+    <circle cx="32" cy="12" r="0.8" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="27" cy="9" r="1.5" fill="#000"/>
+    <circle cx="30" cy="9" r="1.5" fill="#000"/>
+    <!-- Horns -->
+    <path d="M26,5 L25,2 L27,4" fill="#8B4513"/>
+    <path d="M30,5 L31,2 L29,4" fill="#8B4513"/>
+    <!-- Ears -->
+    <ellipse cx="24" cy="8" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <ellipse cx="32" cy="8" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <!-- Legs - walking -->
+    <rect x="6" y="24" width="3" height="6" fill="#FFFFFF" transform="rotate(-10, 7, 24)"/>
+    <rect x="14" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="18" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="26" y="24" width="3" height="6" fill="#FFFFFF" transform="rotate(10, 27, 24)"/>
+    <!-- Hooves -->
+    <rect x="6" y="28" width="3" height="2" fill="#000"/>
+    <rect x="14" y="28" width="3" height="2" fill="#000"/>
+    <rect x="18" y="28" width="3" height="2" fill="#000"/>
+    <rect x="26" y="28" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M4,14 Q2,16 4,18" fill="none" stroke="#8B4513" stroke-width="1.5"/>
+    <!-- Udder -->
+    <ellipse cx="16" cy="22" rx="3" ry="2" fill="#FFB6C1"/>
+  </g>
+  
+  <!-- Frame 3: Walk 2 (legs together) -->
+  <g transform="translate(64,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="12" ry="8" fill="#FFFFFF"/>
+    <!-- Spots -->
+    <ellipse cx="12" cy="14" rx="3" ry="2" fill="#8B4513"/>
+    <ellipse cx="20" cy="18" rx="4" ry="2" fill="#8B4513"/>
+    <!-- Head -->
+    <circle cx="28" cy="10" r="5" fill="#FFFFFF"/>
+    <!-- Snout -->
+    <ellipse cx="31" cy="12" rx="3" ry="2" fill="#FFB6C1"/>
+    <!-- Nostrils -->
+    <circle cx="30" cy="12" r="0.8" fill="#000"/>
+    <circle cx="32" cy="12" r="0.8" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="27" cy="9" r="1.5" fill="#000"/>
+    <circle cx="30" cy="9" r="1.5" fill="#000"/>
+    <!-- Horns -->
+    <path d="M26,5 L25,2 L27,4" fill="#8B4513"/>
+    <path d="M30,5 L31,2 L29,4" fill="#8B4513"/>
+    <!-- Ears -->
+    <ellipse cx="24" cy="8" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <ellipse cx="32" cy="8" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <!-- Legs - walking -->
+    <rect x="10" y="24" width="3" height="6" fill="#FFFFFF" transform="rotate(10, 11, 24)"/>
+    <rect x="16" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="20" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="22" y="24" width="3" height="6" fill="#FFFFFF" transform="rotate(-10, 23, 24)"/>
+    <!-- Hooves -->
+    <rect x="10" y="28" width="3" height="2" fill="#000"/>
+    <rect x="16" y="28" width="3" height="2" fill="#000"/>
+    <rect x="20" y="28" width="3" height="2" fill="#000"/>
+    <rect x="22" y="28" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M4,14 Q2,16 4,18" fill="none" stroke="#8B4513" stroke-width="1.5"/>
+    <!-- Udder -->
+    <ellipse cx="16" cy="22" rx="3" ry="2" fill="#FFB6C1"/>
+  </g>
+  
+  <!-- Frame 4: Eating (head down) -->
+  <g transform="translate(96,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="12" ry="8" fill="#FFFFFF"/>
+    <!-- Spots -->
+    <ellipse cx="12" cy="14" rx="3" ry="2" fill="#8B4513"/>
+    <ellipse cx="20" cy="18" rx="4" ry="2" fill="#8B4513"/>
+    <!-- Head (lowered) -->
+    <circle cx="28" cy="20" r="5" fill="#FFFFFF"/>
+    <!-- Snout -->
+    <ellipse cx="31" cy="22" rx="3" ry="2" fill="#FFB6C1"/>
+    <!-- Nostrils -->
+    <circle cx="30" cy="22" r="0.8" fill="#000"/>
+    <circle cx="32" cy="22" r="0.8" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="27" cy="19" r="1.5" fill="#000"/>
+    <circle cx="30" cy="19" r="1.5" fill="#000"/>
+    <!-- Horns -->
+    <path d="M26,15 L25,12 L27,14" fill="#8B4513"/>
+    <path d="M30,15 L31,12 L29,14" fill="#8B4513"/>
+    <!-- Ears -->
+    <ellipse cx="24" cy="18" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <ellipse cx="32" cy="18" rx="2" ry="1.5" fill="#FFB6C1"/>
+    <!-- Legs -->
+    <rect x="8" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="14" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="18" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <rect x="24" y="24" width="3" height="6" fill="#FFFFFF"/>
+    <!-- Hooves -->
+    <rect x="8" y="28" width="3" height="2" fill="#000"/>
+    <rect x="14" y="28" width="3" height="2" fill="#000"/>
+    <rect x="18" y="28" width="3" height="2" fill="#000"/>
+    <rect x="24" y="28" width="3" height="2" fill="#000"/>
+    <!-- Tail -->
+    <path d="M4,14 Q2,16 4,18" fill="none" stroke="#8B4513" stroke-width="1.5"/>
+    <!-- Udder -->
+    <ellipse cx="16" cy="22" rx="3" ry="2" fill="#FFB6C1"/>
+  </g>
+</svg>

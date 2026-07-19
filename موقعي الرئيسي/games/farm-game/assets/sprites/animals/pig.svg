@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" width="128" height="32">
+  <!-- Pig Sprite Sheet - 4 frames (idle, walk1, walk2, eat) -->
+  
+  <!-- Frame 1: Idle -->
+  <g transform="translate(0,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="10" ry="7" fill="#FFB6C1"/>
+    <!-- Head -->
+    <circle cx="26" cy="12" r="6" fill="#FFB6C1"/>
+    <!-- Snout -->
+    <ellipse cx="30" cy="14" rx="4" ry="3" fill="#FF69B4"/>
+    <!-- Nostrils -->
+    <circle cx="29" cy="14" r="1" fill="#000"/>
+    <circle cx="31" cy="14" r="1" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="25" cy="10" r="1.5" fill="#000"/>
+    <circle cx="28" cy="10" r="1.5" fill="#000"/>
+    <!-- Ears -->
+    <path d="M22,6 L20,2 L24,5" fill="#FF69B4"/>
+    <path d="M28,6 L30,2 L26,5" fill="#FF69B4"/>
+    <!-- Legs -->
+    <rect x="8" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="14" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="18" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="24" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <!-- Hooves -->
+    <rect x="8" y="26" width="3" height="2" fill="#000"/>
+    <rect x="14" y="26" width="3" height="2" fill="#000"/>
+    <rect x="18" y="26" width="3" height="2" fill="#000"/>
+    <rect x="24" y="26" width="3" height="2" fill="#000"/>
+    <!-- Curly tail -->
+    <path d="M6,14 Q4,12 6,10 Q8,12 6,14" fill="none" stroke="#FF69B4" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Frame 2: Walk 1 -->
+  <g transform="translate(32,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="10" ry="7" fill="#FFB6C1"/>
+    <!-- Head -->
+    <circle cx="26" cy="12" r="6" fill="#FFB6C1"/>
+    <!-- Snout -->
+    <ellipse cx="30" cy="14" rx="4" ry="3" fill="#FF69B4"/>
+    <!-- Nostrils -->
+    <circle cx="29" cy="14" r="1" fill="#000"/>
+    <circle cx="31" cy="14" r="1" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="25" cy="10" r="1.5" fill="#000"/>
+    <circle cx="28" cy="10" r="1.5" fill="#000"/>
+    <!-- Ears -->
+    <path d="M22,6 L20,2 L24,5" fill="#FF69B4"/>
+    <path d="M28,6 L30,2 L26,5" fill="#FF69B4"/>
+    <!-- Legs - walking -->
+    <rect x="6" y="22" width="3" height="6" fill="#FFB6C1" transform="rotate(-10, 7, 22)"/>
+    <rect x="14" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="18" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="26" y="22" width="3" height="6" fill="#FFB6C1" transform="rotate(10, 27, 22)"/>
+    <!-- Hooves -->
+    <rect x="6" y="26" width="3" height="2" fill="#000"/>
+    <rect x="14" y="26" width="3" height="2" fill="#000"/>
+    <rect x="18" y="26" width="3" height="2" fill="#000"/>
+    <rect x="26" y="26" width="3" height="2" fill="#000"/>
+    <!-- Curly tail -->
+    <path d="M6,14 Q4,12 6,10 Q8,12 6,14" fill="none" stroke="#FF69B4" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Frame 3: Walk 2 -->
+  <g transform="translate(64,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="10" ry="7" fill="#FFB6C1"/>
+    <!-- Head -->
+    <circle cx="26" cy="12" r="6" fill="#FFB6C1"/>
+    <!-- Snout -->
+    <ellipse cx="30" cy="14" rx="4" ry="3" fill="#FF69B4"/>
+    <!-- Nostrils -->
+    <circle cx="29" cy="14" r="1" fill="#000"/>
+    <circle cx="31" cy="14" r="1" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="25" cy="10" r="1.5" fill="#000"/>
+    <circle cx="28" cy="10" r="1.5" fill="#000"/>
+    <!-- Ears -->
+    <path d="M22,6 L20,2 L24,5" fill="#FF69B4"/>
+    <path d="M28,6 L30,2 L26,5" fill="#FF69B4"/>
+    <!-- Legs - walking -->
+    <rect x="10" y="22" width="3" height="6" fill="#FFB6C1" transform="rotate(10, 11, 22)"/>
+    <rect x="16" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="20" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="22" y="22" width="3" height="6" fill="#FFB6C1" transform="rotate(-10, 23, 22)"/>
+    <!-- Hooves -->
+    <rect x="10" y="26" width="3" height="2" fill="#000"/>
+    <rect x="16" y="26" width="3" height="2" fill="#000"/>
+    <rect x="20" y="26" width="3" height="2" fill="#000"/>
+    <rect x="22" y="26" width="3" height="2" fill="#000"/>
+    <!-- Curly tail -->
+    <path d="M6,14 Q4,12 6,10 Q8,12 6,14" fill="none" stroke="#FF69B4" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Frame 4: Eating -->
+  <g transform="translate(96,0)">
+    <!-- Body -->
+    <ellipse cx="16" cy="16" rx="10" ry="7" fill="#FFB6C1"/>
+    <!-- Head (lowered) -->
+    <circle cx="26" cy="20" r="6" fill="#FFB6C1"/>
+    <!-- Snout -->
+    <ellipse cx="30" cy="22" rx="4" ry="3" fill="#FF69B4"/>
+    <!-- Nostrils -->
+    <circle cx="29" cy="22" r="1" fill="#000"/>
+    <circle cx="31" cy="22" r="1" fill="#000"/>
+    <!-- Eyes -->
+    <circle cx="25" cy="18" r="1.5" fill="#000"/>
+    <circle cx="28" cy="18" r="1.5" fill="#000"/>
+    <!-- Ears -->
+    <path d="M22,14 L20,10 L24,13" fill="#FF69B4"/>
+    <path d="M28,14 L30,10 L26,13" fill="#FF69B4"/>
+    <!-- Legs -->
+    <rect x="8" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="14" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="18" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <rect x="24" y="22" width="3" height="6" fill="#FFB6C1"/>
+    <!-- Hooves -->
+    <rect x="8" y="26" width="3" height="2" fill="#000"/>
+    <rect x="14" y="26" width="3" height="2" fill="#000"/>
+    <rect x="18" y="26" width="3" height="2" fill="#000"/>
+    <rect x="24" y="26" width="3" height="2" fill="#000"/>
+    <!-- Curly tail -->
+    <path d="M6,14 Q4,12 6,10 Q8,12 6,14" fill="none" stroke="#FF69B4" stroke-width="1.5"/>
+  </g>
+</svg>
