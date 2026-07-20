@@ -119,7 +119,7 @@ Object.assign(GAME.game, {
       this._safe('BuildingsSystem.init', function() { GAME.BuildingsSystem.init(self.scene); });
       this._safe('EconomySystem.init', function() { GAME.EconomySystem.init(); });
       this._safe('NPCsSystem.init', function() { GAME.NPCsSystem.init(self.scene, GAME.TimeSystem); });
-      this._safe('WorldExpansion.init', function() { GAME.WorldExpansionInstance = new GAME.WorldExpansion({ events: null, ui: GAME.ui, shop: null }); });
+      this._safe('WorldExpansion.init', function() { GAME.WorldExpansion.init(self); GAME.WorldExpansionInstance = GAME.WorldExpansion; });
       this._safe('CraftingSystem.init', function() { GAME.CraftingSystem.init(self); });
       this._safe('CookingSystem.init', function() { GAME.CookingSystem.init(self); });
       // نظام الحفظ المحسّن
@@ -130,8 +130,8 @@ Object.assign(GAME.game, {
       this._safe('TutorialSystem.init', function() { GAME.TutorialSystem.init(self); });
       // === الأنظمة المتبقية ===
       this._safe('DatabaseService.init', function() { GAME.DatabaseService.init(); });
-      this._safe('ObjectPool.init', function() { GAME.ObjectPool.init(); });
-      this._safe('DisposeManager.init', function() { GAME.DisposeManager.init(); });
+      this._safe('TextureStreaming.init', function() { GAME.TextureStreaming.init(self); });
+      // ObjectPool/DisposeManager: أدوات تُستدعى عند الحاجة فقط — لا init/update دوري (راجع تعليق أعلاه)
       this._safe('CombatSystem.init', function() { GAME.CombatSystem.init(self); });
       this._safe('FishingSystem.init', function() { GAME.FishingSystem.init(self); });
       this._safe('SeasonalEvents.init', function() { GAME.SeasonalEvents.init(self); });
@@ -186,7 +186,7 @@ Object.assign(GAME.game, {
   startNew: function() {
     this.state = {
       health: 100, energy: 100, money: 200,
-      day: 1, time: 6,
+      day: 1, time: 8, // كانت 6 (فجر معتم) — الآن تبدأ اللعبة في صباح مضيء بالكامل
       // FarmingSystem-compatible inventory (seeds + harvest + products)
       inventory: {
         seeds: { wheat: 5, tomato: 3, carrot: 3, apple: 1 },
@@ -197,7 +197,7 @@ Object.assign(GAME.game, {
       crafted: { bread: 0, ketchup: 0, juice: 0 },  // legacy compat for sellItem
       selectedTool: 0,
       plots: [],
-      timeScale: 60,
+      timeScale: 5, // كان 60 (يوم كامل كل 40 ثانية فقط) — الآن يوم واحد ≈ 8 دقائق حقيقية
       xp: 0,
       level: 1,
       quests: [],
@@ -441,15 +441,12 @@ Object.assign(GAME.game, {
     this._safe('FishingSystem', function() { GAME.FishingSystem.update(delta); });
     this._safe('SeasonalEvents', function() { GAME.SeasonalEvents.update(delta); });
     this._safe('QuestSystem', function() { GAME.QuestSystem.update(delta); });
-    this._safe('AchievementSystem', function() { GAME.AchievementSystem.update(delta); });
-    this._safe('LeaderboardSystem', function() { GAME.LeaderboardSystem.update(delta); });
-    this._safe('NotificationSystem', function() { GAME.NotificationSystem.update(delta); });
+    // AchievementSystem/LeaderboardSystem/NotificationSystem/UpgradesSystem: أنظمة تعتمد على أحداث صريحة
+    // (unlock/addScore/show/upgrade) وليس تحديثاً دورياً — لا تملك update()
     this._safe('AudioManager', function() { GAME.AudioManager.update(delta); });
     this._safe('WeatherSystem', function() { GAME.WeatherSystem.update(delta); });
     this._safe('DayNightCycle', function() { GAME.DayNightCycle.update(delta); });
-    this._safe('UpgradesSystem', function() { GAME.UpgradesSystem.update(delta); });
-    this._safe('ObjectPool', function() { GAME.ObjectPool.update(delta); });
-    this._safe('DisposeManager', function() { GAME.DisposeManager.update(delta); });
+    // ObjectPool/DisposeManager: أدوات تُستدعى عند الحاجة فقط — لا update دوري
     
     // 🛡️ كل نظام معزول — خطأٌ في أحدها لا يوقف البقية ولا يطرد اللاعب للقائمة
     var self = this;

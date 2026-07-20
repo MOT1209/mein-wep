@@ -277,11 +277,18 @@ GAME.UIEnhancements._enhanceHUD = function() {
     var compactStats = document.createElement('div');
     compactStats.className = 'hud-compact-stats';
     compactStats.id = 'ue-compact-stats';
-    compactStats.textContent = `
-      <span id="ue-plots-count">🌱 0</span>
-      <span id="ue-ready-count">🧺 0</span>
-      <span id="ue-day-count">📅 0</span>
-    `;
+    var plotsSpan = document.createElement('span');
+    plotsSpan.id = 'ue-plots-count';
+    plotsSpan.textContent = '🌱 0';
+    var readySpan = document.createElement('span');
+    readySpan.id = 'ue-ready-count';
+    readySpan.textContent = '🧺 0';
+    var daySpan = document.createElement('span');
+    daySpan.id = 'ue-day-count';
+    daySpan.textContent = '📅 0';
+    compactStats.appendChild(plotsSpan);
+    compactStats.appendChild(readySpan);
+    compactStats.appendChild(daySpan);
     hudTopLeft.appendChild(compactStats);
   }
 };
@@ -396,12 +403,12 @@ GAME.UIEnhancements._addStatsPanel = function() {
 
   var panel = document.createElement('div');
   panel.id = 'stats-panel';
-  panel.textContent = `
-    <div class="stat-line"><span class="stat-label">🌾 مزروع</span><span class="stat-value" id="ue-stat-planted">0</span></div>
-    <div class="stat-line"><span class="stat-label">🧺 محصود</span><span class="stat-value" id="ue-stat-harvested">0</span></div>
-    <div class="stat-line"><span class="stat-label">💰 مكتسب</span><span class="stat-value" id="ue-stat-earned">$0</span></div>
-    <div class="stat-line"><span class="stat-label">🔨 مصنوع</span><span class="stat-value" id="ue-stat-crafted">0</span></div>
-  `;
+  // محتوى ثابت بدون أي بيانات مستخدم — innerHTML آمن هنا (القيم تُحدَّث لاحقاً عبر textContent على كل span بمعرفه)
+  panel.innerHTML =
+    '<div class="stat-line"><span class="stat-label">🌾 مزروع</span><span class="stat-value" id="ue-stat-planted">0</span></div>' +
+    '<div class="stat-line"><span class="stat-label">🧺 محصود</span><span class="stat-value" id="ue-stat-harvested">0</span></div>' +
+    '<div class="stat-line"><span class="stat-label">💰 مكتسب</span><span class="stat-value" id="ue-stat-earned">$0</span></div>' +
+    '<div class="stat-line"><span class="stat-label">🔨 مصنوع</span><span class="stat-value" id="ue-stat-crafted">0</span></div>';
   document.body.appendChild(panel);
 
   // إظهار الإحصائيات عند الضغط على مفتاح P

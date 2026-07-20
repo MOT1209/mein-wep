@@ -18,7 +18,7 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
-const DIRS_TO_COPY = ['css', 'js', 'icons', 'images', 'screenshots', 'fonts'];
+const DIRS_TO_COPY = ['css', 'js', 'icons', 'images', 'screenshots', 'fonts', 'assets'];
 const FILES_TO_COPY = ['index.html', 'manifest.json', 'sw.js', 'version.json'];
 
 function copyDir(src, dest) {

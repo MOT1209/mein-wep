@@ -201,10 +201,34 @@ GAME.AudioManager = {
     // تحميل الأصوات المهمة مسبقاً
     var criticalSfx = ['click', 'success', 'error', 'coins'];
     var self = this;
-    
+
     criticalSfx.forEach(function(name) {
       self._loadSFX(name);
     });
+  },
+
+  /**
+   * تحميل مؤثر صوتي إلى الكاش مسبقاً (بدون تشغيله)
+   * @param {string} name - اسم المؤثر في this.sfx
+   */
+  _loadSFX: function(name) {
+    var sfxData = this.sfx[name];
+    if (!sfxData || !this._audioContext || this._cache[sfxData.file]) return;
+
+    var self = this;
+    var request = new XMLHttpRequest();
+    request.open('GET', sfxData.file, true);
+    request.responseType = 'arraybuffer';
+
+    request.onload = function() {
+      self._audioContext.decodeAudioData(request.response, function(buffer) {
+        self._cache[sfxData.file] = buffer;
+      }, function(error) {
+        console.warn('[AudioManager] خطأ في تحميل SFX:', sfxData.file, error);
+      });
+    };
+
+    request.send();
   },
 
   // ═══════════════════════════════════════════════════════
