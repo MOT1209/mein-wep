@@ -1206,14 +1206,17 @@ function toggleSurahBookmark(surahNumber, surahName) {
 
 function saveBookmarks() {
     localStorage.setItem('quranBookmarks', JSON.stringify(state.bookmarks));
+    if (typeof SupabaseSync !== 'undefined') SupabaseSync.syncToCloud();
 }
 
 function saveReadingProgress() {
     localStorage.setItem('quranReadingProgress', JSON.stringify(state.readingProgress));
+    if (typeof SupabaseSync !== 'undefined') SupabaseSync.syncToCloud();
 }
 
 function saveSettings() {
     localStorage.setItem('quranSettings', JSON.stringify(state.settings));
+    if (typeof SupabaseSync !== 'undefined') SupabaseSync.syncToCloud();
 }
 
 // ==================== Display Bookmarks ====================
@@ -2053,8 +2056,8 @@ function initApp() {
         });
     }
 
-    console.log('🕌 Quran App v5.0 - Full Featured');
-    console.log('📖 Features: 30 Juz, Media Session, Last Position, Lazy Loading');
+    console.log('🕌 Quran Pro v6.0 - Full Featured with Cloud Sync');
+    console.log('📖 Features: 30 Juz, Media Session, Last Position, Lazy Loading, Supabase Sync');
 }
 
 // Start the app when DOM is ready

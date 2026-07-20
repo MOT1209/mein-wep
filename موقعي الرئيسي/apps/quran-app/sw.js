@@ -1,5 +1,5 @@
-﻿// Quran App Service Worker - Offline Support
-const CACHE_NAME = 'quran-app-v4';
+﻿// Quran Pro Service Worker - Offline Support
+const CACHE_NAME = 'quran-pro-v1';
 const STATIC_ASSETS = [
     '/apps/quran-app/',
     '/apps/quran-app/index.html',
@@ -168,8 +168,8 @@ async function syncBookmarks() {
 self.addEventListener('push', (event) => {
     const options = {
         body: event.data?.text() || 'Notification from Quran App',
-        icon: '/apps/quran-app/images/icon-192x192.png',
-        badge: '/apps/quran-app/images/badge-72x72.png',
+        icon: '/apps/quran-app/icons/icon-192x192.png',
+        badge: '/apps/quran-app/icons/icon-72x72.png',
         vibrate: [100, 50, 100],
         data: {
             url: '/apps/quran-app/'
@@ -177,7 +177,7 @@ self.addEventListener('push', (event) => {
     };
     
     event.waitUntil(
-        self.registration.showNotification('Quran App', options)
+        self.registration.showNotification('Quran Pro', options)
     );
 });
 

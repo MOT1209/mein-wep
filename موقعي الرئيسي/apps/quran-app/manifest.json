@@ -1,7 +1,7 @@
 {
-  "name": "القرآن الكريم - Quran App",
-  "short_name": "القرآن",
-  "description": "تطبيق القرآن الكريم - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة",
+  "name": "Quran Pro - القرآن الكريم",
+  "short_name": "Quran Pro",
+  "description": "Quran Pro - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة. يدعم 20+ قارئ و 30 جزء مع مزامنة سحابية.",
   "start_url": "/apps/quran-app/",
   "display": "standalone",
   "background_color": "#020617",
@@ -10,6 +10,9 @@
   "scope": "/apps/quran-app/",
   "lang": "ar",
   "dir": "rtl",
+  "id": "/apps/quran-app/",
+  "categories": ["books", "education", "lifestyle"],
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icons/icon-72x72.png",
@@ -59,7 +62,5 @@
       "type": "image/png",
       "purpose": "maskable any"
     }
-  ],
-  "categories": ["books", "education", "lifestyle"],
-  "prefer_related_applications": false
+  ]
 }

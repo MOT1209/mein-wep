@@ -1,20 +1,14 @@
 ﻿{
-  "name": "quran-app",
-  "version": "1.0.0",
-  "private": true,
-  "type": "module",
+  "name": "quran-pro",
+  "version": "1.1.0",
+  "description": "Quran Pro - القرآن الكريم | قراءة واستماع مع مزامنة سحابية",
+  "main": "index.js",
   "scripts": {
-    "build:web": "node ../../scripts/copy-to-www.mjs .",
-    "cap:sync": "npx cap sync android",
-    "cap:build": "npx cap build android",
-    "cap:open": "npx cap open android"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "dependencies": {
-    "@capacitor/core": "^8.0.0",
-    "@capacitor/android": "^8.0.0",
-    "@capacitor-community/admob": "^8.0.0"
-  },
-  "devDependencies": {
-    "@capacitor/cli": "^8.0.0"
-  }
+  "keywords": ["quran", "islam", "prayer", "recitation", "supabase"],
+  "author": "Rashid",
+  "license": "MIT"
 }
