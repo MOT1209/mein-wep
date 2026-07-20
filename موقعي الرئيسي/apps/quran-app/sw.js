@@ -1,16 +1,18 @@
 ﻿// Quran App Service Worker - Offline Support
-const CACHE_NAME = 'quran-app-v3';
+const CACHE_NAME = 'quran-app-v4';
 const STATIC_ASSETS = [
     '/apps/quran-app/',
     '/apps/quran-app/index.html',
     '/apps/quran-app/css/style.css',
     '/apps/quran-app/js/app.js',
-    '/apps/quran-app/js/quran-data.js'
+    '/apps/quran-app/offline.html'
 ];
 
 // API Cache Configuration
-const API_CACHE_NAME = 'quran-api-cache-v2';
+const API_CACHE_NAME = 'quran-api-cache-v3';
 const API_CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
+const AUDIO_CACHE_NAME = 'quran-audio-cache-v1';
+const MAX_AUDIO_CACHE_SIZE = 50; // Max 50 audio files cached
 
 // Install Event - Cache static assets
 self.addEventListener('install', (event) => {
@@ -44,54 +46,57 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
-// Fetch Event - Network first, then cache
+// Fetch Event - Smart caching strategies
 self.addEventListener('fetch', (event) => {
     const { request } = event;
     const url = new URL(request.url);
 
-    // Handle API requests
+    // Handle API requests (alquran.cloud) - Stale while revalidate
     if (url.hostname.includes('alquran.cloud')) {
-        event.respondWith(handleAPIRequest(request));
+        event.respondWith(staleWhileRevalidate(request));
         return;
     }
 
-    // Handle static assets
-    event.respondWith(
-        caches.match(request).then(response => {
-            if (response) {
-                return response;
-            }
-            return fetch(request)
-                .then(networkResponse => {
-                    if (!networkResponse || networkResponse.status !== 200) {
-                        return networkResponse;
-                    }
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(request, responseToCache);
-                    });
-                    return networkResponse;
-                })
-                .catch(() => {
-                    // Return offline fallback
-                    return new Response(
-                        '<h1 style="text-align:center;font-family:sans-serif;padding:50px;">أنت في وضع عدم الاتصال<br>Offline Mode</h1>',
-                        { headers: { 'Content-Type': 'text/html' } }
-                    );
-                });
-        })
-    );
+    // Handle audio files - Cache first with size limit
+    if (url.hostname.includes('mp3quran.net') || request.url.endsWith('.mp3')) {
+        event.respondWith(cacheFirstWithLimit(request, AUDIO_CACHE_NAME, MAX_AUDIO_CACHE_SIZE));
+        return;
+    }
+
+    // Handle static assets - Cache first
+    event.respondWith(cacheFirst(request));
 });
 
-// Handle API requests with smart caching
-async function handleAPIRequest(request) {
-    const cache = await caches.open(API_CACHE_NAME);
-    
-    // Try network first
+// ==================== Caching Strategies ====================
+
+// Cache First - For static assets
+async function cacheFirst(request) {
+    const cached = await caches.match(request);
+    if (cached) return cached;
+
     try {
         const networkResponse = await fetch(request);
-        if (networkResponse.status === 200) {
-            // Store with timestamp
+        if (networkResponse.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            cache.put(request, networkResponse.clone());
+        }
+        return networkResponse;
+    } catch (error) {
+        // Return offline page for navigation requests
+        if (request.mode === 'navigate') {
+            return caches.match('/apps/quran-app/offline.html');
+        }
+        return new Response('Offline', { status: 503 });
+    }
+}
+
+// Stale While Revalidate - For API calls (show cache, update in background)
+async function staleWhileRevalidate(request) {
+    const cache = await caches.open(API_CACHE_NAME);
+    const cachedResponse = await cache.match(request);
+
+    const fetchPromise = fetch(request).then(networkResponse => {
+        if (networkResponse.ok) {
             const responseToCache = networkResponse.clone();
             const headers = new Headers(responseToCache.headers);
             headers.append('sw-cache-timestamp', Date.now().toString());
@@ -105,22 +110,45 @@ async function handleAPIRequest(request) {
             cache.put(request, responseWithTimestamp);
         }
         return networkResponse;
-    } catch (error) {
-        // Network failed, try cache
-        const cachedResponse = await cache.match(request);
-        if (cachedResponse) {
-            // Check if cache is still valid
-            const timestamp = cachedResponse.headers.get('sw-cache-timestamp');
-            if (timestamp && (Date.now() - parseInt(timestamp)) < API_CACHE_DURATION) {
-                console.log('[SW] Serving from cache:', request.url);
-                return cachedResponse;
-            }
+    }).catch(() => null);
+
+    // Return cached response if available, otherwise wait for network
+    if (cachedResponse) {
+        // Check if cache is still valid
+        const timestamp = cachedResponse.headers.get('sw-cache-timestamp');
+        if (timestamp && (Date.now() - parseInt(timestamp)) < API_CACHE_DURATION) {
+            console.log('[SW] Serving from cache:', request.url);
+            return cachedResponse;
         }
-        // Return offline error
-        return new Response(
-            JSON.stringify({ error: 'Offline mode - No cached data available' }),
-            { headers: { 'Content-Type': 'application/json' } }
-        );
+    }
+
+    return fetchPromise || new Response(
+        JSON.stringify({ error: 'Offline mode - No cached data available' }),
+        { headers: { 'Content-Type': 'application/json' } }
+    );
+}
+
+// Cache First with Size Limit - For audio files
+async function cacheFirstWithLimit(request, cacheName, maxSize) {
+    const cache = await caches.open(cacheName);
+    const cached = await cache.match(request);
+    if (cached) return cached;
+
+    try {
+        const networkResponse = await fetch(request);
+        if (networkResponse.ok) {
+            // Check cache size and evict if needed
+            const keys = await cache.keys();
+            if (keys.length >= maxSize) {
+                // Remove oldest entry
+                await cache.delete(keys[0]);
+                console.log('[SW] Evicted oldest audio from cache');
+            }
+            cache.put(request, networkResponse.clone());
+        }
+        return networkResponse;
+    } catch (error) {
+        return new Response('Audio offline', { status: 503 });
     }
 }
 

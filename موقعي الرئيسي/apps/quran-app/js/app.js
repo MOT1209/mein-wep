@@ -123,7 +123,41 @@ const APP_CONFIG = {
         'ar.mahermuaiqly': 'ماهر المعيقلي',
         'ar.yasseraldossari': 'ياسر الدوسري',
         'ar.shaatree': 'أبو بكر الشاطري'
-    }
+    },
+
+    // بيانات الأجزاء (30 جزء)
+    JUZ_DATA: [
+        { number: 1, name: 'الجزء الأول', startSurah: 1, startVerse: 1, endSurah: 2, endVerse: 141 },
+        { number: 2, name: 'الجزء الثاني', startSurah: 2, startVerse: 142, endSurah: 2, endVerse: 252 },
+        { number: 3, name: 'الجزء الثالث', startSurah: 2, startVerse: 253, endSurah: 3, endVerse: 92 },
+        { number: 4, name: 'الجزء الرابع', startSurah: 3, startVerse: 93, endSurah: 4, endVerse: 23 },
+        { number: 5, name: 'الجزء الخامس', startSurah: 4, startVerse: 24, endSurah: 4, endVerse: 147 },
+        { number: 6, name: 'الجزء السادس', startSurah: 4, startVerse: 148, endSurah: 5, endVerse: 81 },
+        { number: 7, name: 'الجزء السابع', startSurah: 5, startVerse: 82, endSurah: 6, endVerse: 110 },
+        { number: 8, name: 'الجزء الثامن', startSurah: 6, startVerse: 111, endSurah: 7, endVerse: 87 },
+        { number: 9, name: 'الجزء التاسع', startSurah: 7, startVerse: 88, endSurah: 8, endVerse: 40 },
+        { number: 10, name: 'الجزء العاشر', startSurah: 8, startVerse: 41, endSurah: 9, endVerse: 92 },
+        { number: 11, name: 'الجزء الحادي عشر', startSurah: 9, startVerse: 93, endSurah: 11, endVerse: 5 },
+        { number: 12, name: 'الجزء الثاني عشر', startSurah: 11, startVerse: 6, endSurah: 12, endVerse: 52 },
+        { number: 13, name: 'الجزء الثالث عشر', startSurah: 12, startVerse: 53, endSurah: 14, endVerse: 52 },
+        { number: 14, name: 'الجزء الرابع عشر', startSurah: 15, startVerse: 1, endSurah: 16, endVerse: 128 },
+        { number: 15, name: 'الجزء الخامس عشر', startSurah: 17, startVerse: 1, endSurah: 18, endVerse: 74 },
+        { number: 16, name: 'الجزء السادس عشر', startSurah: 18, startVerse: 75, endSurah: 20, endVerse: 135 },
+        { number: 17, name: 'الجزء السابع عشر', startSurah: 21, startVerse: 1, endSurah: 22, endVerse: 78 },
+        { number: 18, name: 'الجزء الثامن عشر', startSurah: 23, startVerse: 1, endSurah: 25, endVerse: 20 },
+        { number: 19, name: 'الجزء التاسع عشر', startSurah: 25, startVerse: 21, endSurah: 27, endVerse: 55 },
+        { number: 20, name: 'الجزء العشرون', startSurah: 27, startVerse: 56, endSurah: 29, endVerse: 45 },
+        { number: 21, name: 'الجزء الحادي والعشرون', startSurah: 29, startVerse: 46, endSurah: 33, endVerse: 30 },
+        { number: 22, name: 'الجزء الثاني والعشرون', startSurah: 33, startVerse: 31, endSurah: 36, endVerse: 27 },
+        { number: 23, name: 'الجزء الثالث والعشرون', startSurah: 36, startVerse: 28, endSurah: 39, endVerse: 31 },
+        { number: 24, name: 'الجزء الرابع والعشرون', startSurah: 39, startVerse: 32, endSurah: 41, endVerse: 46 },
+        { number: 25, name: 'الجزء الخامس والعشرون', startSurah: 41, startVerse: 47, endSurah: 45, endVerse: 37 },
+        { number: 26, name: 'الجزء السادس والعشرون', startSurah: 46, startVerse: 1, endSurah: 51, endVerse: 30 },
+        { number: 27, name: 'الجزء السابع والعشرون', startSurah: 51, startVerse: 31, endSurah: 57, endVerse: 29 },
+        { number: 28, name: 'الجزء الثامن والعشرون', startSurah: 58, startVerse: 1, endSurah: 66, endVerse: 12 },
+        { number: 29, name: 'الجزء التاسع والعشرون', startSurah: 67, startVerse: 1, endSurah: 77, endVerse: 50 },
+        { number: 30, name: 'الجزء الثلاثون', startSurah: 78, startVerse: 1, endSurah: 114, endVerse: 6 }
+    ]
 };
 
 // ==================== State Management ====================
@@ -165,7 +199,7 @@ function initializeElements() {
         'bookmarks-list', 'reciter-select', 'increase-font', 'decrease-font',
         'save-surah-main', 'last-read-btn', 'tafsir-btn', 'tafsir-select', 'tafsir-content',
         'surah-search', 'auto-play-btn', 'toast-container', 'reading-progress', 'progress-text',
-        'audio-mode-toggle'
+        'audio-mode-toggle', 'juz-list', 'view-toggle'
     ];
 
     ids.forEach(id => {
@@ -173,7 +207,256 @@ function initializeElements() {
     });
 }
 
+// ==================== Juz (Parts) System ====================
+let currentView = 'surahs'; // 'surahs' أو 'juz'
+
+function displayJuzList() {
+    const list = elements['juz-list'] || elements['surah-list'];
+    if (!list) return;
+
+    list.innerHTML = '';
+
+    APP_CONFIG.JUZ_DATA.forEach(juz => {
+        const juzItem = document.createElement('div');
+        juzItem.className = 'surah-item juz-item';
+        juzItem.dataset.juz = juz.number;
+        juzItem.onclick = () => loadJuz(juz.number);
+
+        const numberDiv = document.createElement('div');
+        numberDiv.className = 'surah-number juz-number';
+        numberDiv.textContent = juz.number;
+        juzItem.appendChild(numberDiv);
+
+        const infoCard = document.createElement('div');
+        infoCard.className = 'surah-info-card';
+
+        const nameAr = document.createElement('div');
+        nameAr.className = 'surah-name-ar';
+        nameAr.textContent = juz.name;
+        infoCard.appendChild(nameAr);
+
+        const meta = document.createElement('div');
+        meta.className = 'surah-meta';
+
+        const startSurah = state.allSurahs.find(s => s.number === juz.startSurah);
+        const endSurah = state.allSurahs.find(s => s.number === juz.endSurah);
+
+        if (startSurah && endSurah) {
+            const metaItem = document.createElement('span');
+            metaItem.className = 'meta-item';
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-book';
+            metaItem.appendChild(icon);
+            metaItem.appendChild(document.createTextNode(` من ${startSurah.name} إلى ${endSurah.name}`));
+            meta.appendChild(metaItem);
+        }
+
+        infoCard.appendChild(meta);
+        juzItem.appendChild(infoCard);
+        list.appendChild(juzItem);
+    });
+}
+
+async function loadJuz(juzNumber) {
+    const juz = APP_CONFIG.JUZ_DATA.find(j => j.number === juzNumber);
+    if (!juz) return;
+
+    showToast(`جاري تحميل ${juz.name}...`, 'info');
+
+    // تحميل السورة الأولى في الجزء
+    await loadSurah(juz.startSurah);
+
+    // التمرير إلى الآية البداية
+    if (juz.startSurah === juz.endSurah) {
+        // نفس السورة
+        const verseIndex = juz.startVerse - 1;
+        scrollToVerse(verseIndex);
+    } else {
+        // سورة مختلفة - ابدأ من البداية
+        scrollToVerse(0);
+    }
+}
+
+function scrollToVerse(verseIndex) {
+    setTimeout(() => {
+        const element = document.getElementById(`verse-${verseIndex}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.classList.add('highlight');
+            setTimeout(() => element.classList.remove('highlight'), 2000);
+        }
+    }, 500);
+}
+
+function toggleView() {
+    currentView = currentView === 'surahs' ? 'juz' : 'surahs';
+
+    const viewBtn = elements['view-toggle'];
+    if (viewBtn) {
+        viewBtn.innerHTML = currentView === 'surahs'
+            ? '<i class="fas fa-list"></i> السور'
+            : '<i class="fas fa-layer-group"></i> الأجزاء';
+    }
+
+    if (currentView === 'juz') {
+        displayJuzList();
+    } else {
+        displaySurahs(state.allSurahs);
+    }
+}
+
+// ==================== Media Session API ====================
+function setupMediaSession() {
+    if (!('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: 'القرآن الكريم',
+        artist: 'تلاوة',
+        album: 'Quran App',
+        artwork: [
+            { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+        ]
+    });
+
+    navigator.mediaSession.setActionHandler('play', () => {
+        if (state.audioElement) state.audioElement.play();
+    });
+
+    navigator.mediaSession.setActionHandler('pause', () => {
+        if (state.audioElement) state.audioElement.pause();
+    });
+
+    navigator.mediaSession.setActionHandler('previoustrack', () => {
+        if (state.audioElement) state.audioElement.currentTime -= 10;
+    });
+
+    navigator.mediaSession.setActionHandler('nexttrack', () => {
+        if (state.audioElement) state.audioElement.currentTime += 10;
+    });
+}
+
+// ==================== PWA Install Prompt ====================
+let deferredPrompt = null;
+
+function setupInstallPrompt() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallBanner();
+    });
+
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        hideInstallBanner();
+        showToast('تم تثبيت التطبيق بنجاح', 'success');
+    });
+}
+
+function showInstallBanner() {
+    // Don't show if already dismissed
+    if (localStorage.getItem('quranInstallDismissed')) return;
+
+    const banner = document.createElement('div');
+    banner.id = 'install-banner';
+    banner.className = 'install-banner';
+    banner.innerHTML = `
+        <div class="install-content">
+            <i class="fas fa-mobile-alt"></i>
+            <span>تثبيت التطبيق</span>
+        </div>
+        <div class="install-actions">
+            <button class="install-btn" onclick="installApp()">تثبيت</button>
+            <button class="dismiss-btn" onclick="dismissInstall()">لاحقاً</button>
+        </div>
+    `;
+    document.body.appendChild(banner);
+}
+
+function hideInstallBanner() {
+    const banner = document.getElementById('install-banner');
+    if (banner) banner.remove();
+}
+
+async function installApp() {
+    if (!deferredPrompt) return;
+
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+        showToast('جاري تثبيت التطبيق...', 'info');
+    }
+
+    deferredPrompt = null;
+    hideInstallBanner();
+}
+
+function dismissInstall() {
+    localStorage.setItem('quranInstallDismissed', 'true');
+    hideInstallBanner();
+}
+
+function updateMediaSession() {
+    if (!('mediaSession' in navigator) || !state.currentSurah) return;
+
+    const ayah = state.currentSurah.ayahs[state.currentVerseIndex];
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: `سورة ${state.currentSurah.name}`,
+        artist: `الآية ${ayah?.numberInSurah || 1}`,
+        album: 'Quran App',
+        artwork: [
+            { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+        ]
+    });
+}
+
+// ==================== Last Position Save ====================
+function saveLastPosition() {
+    if (!state.currentSurah) return;
+
+    const position = {
+        surahNumber: state.currentSurah.number,
+        verseIndex: state.currentVerseIndex,
+        timestamp: Date.now()
+    };
+
+    localStorage.setItem('quranLastPosition', JSON.stringify(position));
+}
+
+function loadLastPosition() {
+    try {
+        const saved = localStorage.getItem('quranLastPosition');
+        if (saved) {
+            return JSON.parse(saved);
+        }
+    } catch (e) {
+        console.warn('Error loading last position:', e);
+    }
+    return null;
+}
+
+function restoreLastPosition() {
+    const position = loadLastPosition();
+    if (position) {
+        loadSurah(position.surahNumber).then(() => {
+            setTimeout(() => {
+                scrollToVerse(position.verseIndex);
+            }, 500);
+        });
+    }
+}
+
 // ==================== Enhanced Toast Notification ====================
+
+/**
+ * عرض إشعار منبثق
+ * @param {string} message - الرسالة المراد عرضها
+ * @param {'success'|'error'|'info'|'warning'} type - نوع الإشعار
+ * @param {number} duration - مدة العرض بالمللي ثانية
+ * @returns {void}
+ */
 function showToast(message, type = 'success', duration = 3000) {
     const container = elements['toast-container'];
     if (!container) return;
@@ -188,10 +471,13 @@ function showToast(message, type = 'success', duration = 3000) {
         warning: 'fa-exclamation-triangle'
     };
 
-    toast.innerHTML = `
-        <i class="fas ${icons[type] || icons.success}"></i>
-        <span>${message}</span>
-    `;
+    const icon = document.createElement('i');
+    icon.className = `fas ${icons[type] || icons.success}`;
+    toast.appendChild(icon);
+
+    const span = document.createElement('span');
+    span.textContent = message;
+    toast.appendChild(span);
 
     container.appendChild(toast);
 
@@ -264,6 +550,11 @@ async function fetchWithCache(url, cacheKey) {
 }
 
 // ==================== Load Surahs ====================
+
+/**
+ * تحميل قائمة السور من API
+ * @returns {Promise<void>}
+ */
 async function loadSurahs() {
     try {
         const data = await fetchWithCache(
@@ -277,55 +568,122 @@ async function loadSurahs() {
     } catch (error) {
         console.error('Error loading surahs:', error);
         showToast('حدث خطأ في تحميل السور', 'error');
-        elements['surah-list'].innerHTML = `
-            <div class="loading">
-                <i class="fas fa-exclamation-circle" style="color: var(--error);"></i>
-                <p>حدث خطأ في التحميل. تحقق من اتصالك بالإنترنت.</p>
-            </div>
-        `;
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'loading';
+        const errorIcon = document.createElement('i');
+        errorIcon.className = 'fas fa-exclamation-circle';
+        errorIcon.style.color = 'var(--error)';
+        errorDiv.appendChild(errorIcon);
+        const errorMsg = document.createElement('p');
+        errorMsg.textContent = 'حدث خطأ في التحميل. تحقق من اتصالك بالإنترنت.';
+        errorDiv.appendChild(errorMsg);
+        elements['surah-list'].innerHTML = '';
+        elements['surah-list'].appendChild(errorDiv);
     }
 }
 
 // ==================== Display Surahs ====================
+
+/**
+ * عرض قائمة السور في الواجهة
+ * @param {Array<Object>} surahs - مصفوفة بيانات السور
+ * @returns {void}
+ */
 function displaySurahs(surahs) {
     const list = elements['surah-list'];
     if (!list) return;
 
     if (surahs.length === 0) {
-        list.innerHTML = '<div class="empty-state"><i class="fas fa-search"></i><p>لا توجد نتائج</p></div>';
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state';
+        const searchIcon = document.createElement('i');
+        searchIcon.className = 'fas fa-search';
+        emptyDiv.appendChild(searchIcon);
+        const emptyText = document.createElement('p');
+        emptyText.textContent = 'لا توجد نتائج';
+        emptyDiv.appendChild(emptyText);
+        list.innerHTML = '';
+        list.appendChild(emptyDiv);
         return;
     }
 
-    list.innerHTML = surahs.map(surah => {
+    list.innerHTML = '';
+    surahs.forEach(surah => {
         const isBookmarked = state.bookmarks.some(b => b.type === 'surah' && b.surah === surah.number);
         const isRead = state.readingProgress[surah.number];
 
-        return `
-            <div class="surah-item ${isRead ? 'read' : ''}" data-number="${surah.number}" onclick="loadSurah(${surah.number})">
-                <div class="surah-number">${surah.number}</div>
-                <div class="surah-info-card">
-                    <div class="surah-name-ar">${surah.name}</div>
-                    <div class="surah-meta">
-                        <span class="meta-item"><i class="fas fa-globe"></i> ${surah.englishName}</span>
-                        <span class="meta-item"><i class="fas fa-list-ol"></i> ${surah.numberOfAyahs} آية</span>
-                        <span class="meta-item"><i class="fas ${surah.revelationType === 'Meccan' ? 'fa-kaaba' : 'fa-mosque'}"></i> ${surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية'}</span>
-                        ${isBookmarked ? '<span class="meta-item"><i class="fas fa-star" style="color: var(--accent-gold);"></i></span>' : ''}
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+        const surahItem = document.createElement('div');
+        surahItem.className = `surah-item ${isRead ? 'read' : ''}`;
+        surahItem.dataset.number = surah.number;
+        surahItem.onclick = () => loadSurah(surah.number);
+
+        const numberDiv = document.createElement('div');
+        numberDiv.className = 'surah-number';
+        numberDiv.textContent = surah.number;
+        surahItem.appendChild(numberDiv);
+
+        const infoCard = document.createElement('div');
+        infoCard.className = 'surah-info-card';
+
+        const nameAr = document.createElement('div');
+        nameAr.className = 'surah-name-ar';
+        nameAr.textContent = surah.name;
+        infoCard.appendChild(nameAr);
+
+        const meta = document.createElement('div');
+        meta.className = 'surah-meta';
+
+        const metaItems = [
+            { icon: 'fa-globe', text: surah.englishName },
+            { icon: 'fa-list-ol', text: `${surah.numberOfAyahs} آية` },
+            { icon: surah.revelationType === 'Meccan' ? 'fa-kaaba' : 'fa-mosque', text: surah.revelationType === 'Meccan' ? 'مكية' : 'مدنية' }
+        ];
+
+        metaItems.forEach(item => {
+            const span = document.createElement('span');
+            span.className = 'meta-item';
+            const i = document.createElement('i');
+            i.className = `fas ${item.icon}`;
+            span.appendChild(i);
+            span.appendChild(document.createTextNode(` ${item.text}`));
+            meta.appendChild(span);
+        });
+
+        if (isBookmarked) {
+            const starSpan = document.createElement('span');
+            starSpan.className = 'meta-item';
+            const starIcon = document.createElement('i');
+            starIcon.className = 'fas fa-star';
+            starIcon.style.color = 'var(--accent-gold)';
+            starSpan.appendChild(starIcon);
+            meta.appendChild(starSpan);
+        }
+
+        infoCard.appendChild(meta);
+        surahItem.appendChild(infoCard);
+        list.appendChild(surahItem);
+    });
 }
 
 // ==================== Load Surah ====================
+
+/**
+ * تحميل سورة محددة وعرض آياتها
+ * @param {number} surahNumber - رقم السورة (1-114)
+ * @returns {Promise<void>}
+ */
 async function loadSurah(surahNumber) {
     try {
-        elements['verses-container'].innerHTML = `
-            <div class="loading">
-                <div class="spinner"></div>
-                <p>جاري تحميل السورة...</p>
-            </div>
-        `;
+        const loadingDiv = document.createElement('div');
+        loadingDiv.className = 'loading';
+        const spinner = document.createElement('div');
+        spinner.className = 'spinner';
+        loadingDiv.appendChild(spinner);
+        const loadingText = document.createElement('p');
+        loadingText.textContent = 'جاري تحميل السورة...';
+        loadingDiv.appendChild(loadingText);
+        elements['verses-container'].innerHTML = '';
+        elements['verses-container'].appendChild(loadingDiv);
 
         // إيقاف الصوت الحالي
         if (state.audioElement) {
@@ -382,7 +740,11 @@ function updateSurahHeader() {
 
     const badge = document.getElementById('surah-badge');
     if (badge) {
-        badge.innerHTML = `<span class="surah-number-badge">${surah.number}</span>`;
+        badge.innerHTML = '';
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'surah-number-badge';
+        badgeSpan.textContent = surah.number;
+        badge.appendChild(badgeSpan);
     }
 
     const isBookmarked = state.bookmarks.some(b => b.type === 'surah' && b.surah === surah.number);
@@ -394,9 +756,11 @@ function updateSaveButton(isBookmarked) {
     if (!btn) return;
 
     btn.classList.toggle('saved', isBookmarked);
-    btn.innerHTML = isBookmarked
-        ? '<i class="fas fa-star"></i> تم الحفظ'
-        : '<i class="far fa-star"></i> حفظ السورة';
+    btn.innerHTML = '';
+    const icon = document.createElement('i');
+    icon.className = isBookmarked ? 'fas fa-star' : 'far fa-star';
+    btn.appendChild(icon);
+    btn.appendChild(document.createTextNode(` ${isBookmarked ? 'تم الحفظ' : 'حفظ السورة'}`));
 }
 
 // ==================== Display Verses ====================
@@ -404,60 +768,119 @@ function displayVerses() {
     if (!state.currentSurah) return;
 
     const fontSize = state.settings.fontSize;
-    const verses = state.currentSurah.ayahs.map((ayah, index) => {
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'verses-wrapper';
+    wrapper.style.fontSize = `${fontSize}rem`;
+
+    // Surah header
+    const header = document.createElement('div');
+    header.className = 'surah-header-mushaf';
+    const sideText1 = document.createElement('span');
+    sideText1.className = 'side-text';
+    sideText1.textContent = `سُورَةُ ${state.currentSurah.name}`;
+    header.appendChild(sideText1);
+    const sideText2 = document.createElement('span');
+    sideText2.className = 'side-text';
+    sideText2.textContent = `الجزء ${state.currentSurah.ayahs[0]?.juz || 1}`;
+    header.appendChild(sideText2);
+    wrapper.appendChild(header);
+
+    // Bismillah
+    if (state.currentSurah.number !== 1 && state.currentSurah.number !== 9) {
+        const bismillah = document.createElement('p');
+        bismillah.className = 'bismillah';
+        bismillah.textContent = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
+        wrapper.appendChild(bismillah);
+    }
+
+    // Verses container
+    const versesText = document.createElement('div');
+    versesText.className = 'verses-text';
+
+    state.currentSurah.ayahs.forEach((ayah, index) => {
         const isBookmarked = state.bookmarks.some(b =>
             b.type === 'verse' && b.surah === state.currentSurah.number && b.verse === ayah.numberInSurah
         );
         const isPlaying = state.currentVerseIndex === index && state.isPlaying;
 
-        return `
-            <span class="verse-item ${isBookmarked ? 'bookmarked' : ''} ${isPlaying ? 'playing' : ''}" 
-                  id="verse-${index}" 
-                  data-verse-index="${index}" 
-                  data-verse-number="${ayah.numberInSurah}"
-                  onclick="handleVerseClick(${index})">
-                ${ayah.text}
-                <span class="verse-number" 
-                      onclick="event.stopPropagation(); toggleBookmark(${state.currentSurah.number}, ${ayah.numberInSurah}, '${escapeHtml(ayah.text)}', '${state.currentSurah.name}')"
-                      title="${isBookmarked ? 'إزالة من المفضلة' : 'إضافة للمفضلة'}">
-                    ${ayah.numberInSurah}
-                </span>
-            </span>
-        `;
-    }).join('');
+        const verseSpan = document.createElement('span');
+        verseSpan.className = `verse-item ${isBookmarked ? 'bookmarked' : ''} ${isPlaying ? 'playing' : ''}`;
+        verseSpan.id = `verse-${index}`;
+        verseSpan.dataset.verseIndex = index;
+        verseSpan.dataset.verseNumber = ayah.numberInSurah;
+        verseSpan.onclick = () => handleVerseClick(index);
 
-    const bismillah = state.currentSurah.number !== 1 && state.currentSurah.number !== 9
-        ? '<p class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>'
-        : '';
+        // Verse text
+        verseSpan.appendChild(document.createTextNode(ayah.text));
 
-    elements['verses-container'].innerHTML = `
-        <div class="verses-wrapper" style="font-size: ${fontSize}rem;">
-            <div class="surah-header-mushaf">
-                <span class="side-text">سُورَةُ ${state.currentSurah.name}</span>
-                <span class="side-text">الجزء ${state.currentSurah.ayahs[0]?.juz || 1}</span>
-            </div>
-            ${bismillah}
-            <div class="verses-text">
-                ${verses}
-            </div>
-        </div>
-    `;
+        // Verse number
+        const verseNum = document.createElement('span');
+        verseNum.className = 'verse-number';
+        verseNum.title = isBookmarked ? 'إزالة من المفضلة' : 'إضافة للمفضلة';
+        verseNum.onclick = (e) => {
+            e.stopPropagation();
+            toggleBookmark(state.currentSurah.number, ayah.numberInSurah, ayah.text, state.currentSurah.name);
+        };
+        verseNum.textContent = ayah.numberInSurah;
+        verseSpan.appendChild(verseNum);
+
+        versesText.appendChild(verseSpan);
+    });
+
+    wrapper.appendChild(versesText);
+
+    elements['verses-container'].innerHTML = '';
+    elements['verses-container'].appendChild(wrapper);
 }
 
+// ==================== Safe DOM Helpers ====================
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
 }
 
+function safeSetText(element, text) {
+    if (element) element.textContent = text;
+}
+
+function safeSetHTML(element, html) {
+    if (element) element.innerHTML = html;
+}
+
+function createSafeElement(tag, attrs = {}, children = []) {
+    const el = document.createElement(tag);
+    Object.entries(attrs).forEach(([key, value]) => {
+        if (key === 'className') el.className = value;
+        else if (key === 'textContent') el.textContent = value;
+        else if (key === 'innerHTML') el.innerHTML = value;
+        else if (key.startsWith('on')) el.addEventListener(key.slice(2).toLowerCase(), value);
+        else el.setAttribute(key, value);
+    });
+    children.forEach(child => {
+        if (typeof child === 'string') el.appendChild(document.createTextNode(child));
+        else if (child) el.appendChild(child);
+    });
+    return el;
+}
+
 // ==================== NEW: Full Surah Audio System ====================
 
-// تحويل رقم السورة إلى تنسق ثلاثي الأرقام (001, 002, ...)
+/**
+ * تحويل رقم السورة إلى تنسق ثلاثي الأرقام
+ * @param {number} surahNumber - رقم السورة
+ * @returns {string} - رقم السورة بتنسيق ثلاثي (001, 002, ...)
+ */
 function getSurahFileName(surahNumber) {
     return surahNumber.toString().padStart(3, '0');
 }
 
-// تشغيل السورة كاملة مع MP3
+/**
+ * تشغيل السورة كاملة مع MP3
+ * @param {number} startVerseIndex - فهرس الآية للبدء منها
+ * @returns {Promise<void>}
+ */
 async function playFullSurah(startVerseIndex = 0) {
     if (!state.currentSurah) {
         showToast('اختر سورة أولاً', 'warning');
@@ -702,9 +1125,10 @@ function updatePlayPauseButton() {
     const btn = elements['play-pause'];
     if (!btn) return;
 
-    btn.innerHTML = state.isPlaying
-        ? '<i class="fas fa-pause"></i>'
-        : '<i class="fas fa-play"></i>';
+    btn.innerHTML = '';
+    const icon = document.createElement('i');
+    icon.className = state.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+    btn.appendChild(icon);
 }
 
 function highlightCurrentVerse(index) {
@@ -803,49 +1227,75 @@ function displayBookmarks(filter = 'all') {
     }
 
     if (filtered.length === 0) {
-        list.innerHTML = `
-            <div class="empty-state">
-                <i class="fas fa-bookmark"></i>
-                <p>لا توجد ${filter === 'all' ? 'عناصر' : filter === 'surah' ? 'سور' : 'آيات'} محفوظة بعد</p>
-            </div>
-        `;
+        const emptyDiv = document.createElement('div');
+        emptyDiv.className = 'empty-state';
+        const bookmarkIcon = document.createElement('i');
+        bookmarkIcon.className = 'fas fa-bookmark';
+        emptyDiv.appendChild(bookmarkIcon);
+        const emptyText = document.createElement('p');
+        emptyText.textContent = `لا توجد ${filter === 'all' ? 'عناصر' : filter === 'surah' ? 'سور' : 'آيات'} محفوظة بعد`;
+        emptyDiv.appendChild(emptyText);
+        list.innerHTML = '';
+        list.appendChild(emptyDiv);
         return;
     }
 
     filtered.sort((a, b) => b.date - a.date);
+    list.innerHTML = '';
 
-    list.innerHTML = filtered.map((item, index) => {
+    filtered.forEach((item, index) => {
+        const bookmarkItem = document.createElement('div');
+        bookmarkItem.className = 'bookmark-item';
+
+        const info = document.createElement('div');
+        info.className = 'bookmark-info';
+
+        const title = document.createElement('div');
+        title.className = 'bookmark-title';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-bookmark';
+        deleteBtn.onclick = (e) => {
+            e.stopPropagation();
+            deleteBookmark(index);
+        };
+        const trashIcon = document.createElement('i');
+        trashIcon.className = 'fas fa-trash';
+        deleteBtn.appendChild(trashIcon);
+
         if (item.type === 'surah') {
-            return `
-                <div class="bookmark-item" onclick="loadSurah(${item.surah})">
-                    <div class="bookmark-info">
-                        <div class="bookmark-title">
-                            <i class="fas fa-star" style="color: var(--accent-gold);"></i>
-                            سورة ${item.surahName}
-                        </div>
-                    </div>
-                    <button class="delete-bookmark" onclick="event.stopPropagation(); deleteBookmark(${index})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
+            bookmarkItem.onclick = () => loadSurah(item.surah);
+
+            const starIcon = document.createElement('i');
+            starIcon.className = 'fas fa-star';
+            starIcon.style.color = 'var(--accent-gold)';
+            title.appendChild(starIcon);
+            title.appendChild(document.createTextNode(` سورة ${item.surahName}`));
+
+            info.appendChild(title);
+            bookmarkItem.appendChild(info);
+            bookmarkItem.appendChild(deleteBtn);
+            list.appendChild(bookmarkItem);
         } else {
-            return `
-                <div class="bookmark-item" onclick="loadSurahAndScroll(${item.surah}, ${item.verse})">
-                    <div class="bookmark-info">
-                        <div class="bookmark-title">
-                            <i class="fas fa-book-open" style="color: var(--primary);"></i>
-                            سورة ${item.surahName} - الآية ${item.verse}
-                        </div>
-                        <div class="bookmark-text">${item.text.substring(0, 100)}...</div>
-                    </div>
-                    <button class="delete-bookmark" onclick="event.stopPropagation(); deleteBookmark(${index})">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            `;
+            bookmarkItem.onclick = () => loadSurahAndScroll(item.surah, item.verse);
+
+            const bookIcon = document.createElement('i');
+            bookIcon.className = 'fas fa-book-open';
+            bookIcon.style.color = 'var(--primary)';
+            title.appendChild(bookIcon);
+            title.appendChild(document.createTextNode(` سورة ${item.surahName} - الآية ${item.verse}`));
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'bookmark-text';
+            textDiv.textContent = `${item.text.substring(0, 100)}...`;
+
+            info.appendChild(title);
+            info.appendChild(textDiv);
+            bookmarkItem.appendChild(info);
+            bookmarkItem.appendChild(deleteBtn);
+            list.appendChild(bookmarkItem);
         }
-    }).join('');
+    });
 }
 
 function deleteBookmark(index) {
@@ -886,12 +1336,16 @@ function setupSearch() {
         const query = e.target.value.trim();
 
         if (query.length < 2) {
-            elements['search-results'].innerHTML = `
-                <div class="search-hint">
-                    <i class="fas fa-keyboard"></i>
-                    <p>اكتب كلمة للبحث عنها في القرآن الكريم</p>
-                </div>
-            `;
+            const hintDiv = document.createElement('div');
+            hintDiv.className = 'search-hint';
+            const keyboardIcon = document.createElement('i');
+            keyboardIcon.className = 'fas fa-keyboard';
+            hintDiv.appendChild(keyboardIcon);
+            const hintText = document.createElement('p');
+            hintText.textContent = 'اكتب كلمة للبحث عنها في القرآن الكريم';
+            hintDiv.appendChild(hintText);
+            elements['search-results'].innerHTML = '';
+            elements['search-results'].appendChild(hintDiv);
             return;
         }
 
@@ -901,7 +1355,13 @@ function setupSearch() {
 
 async function searchQuran(query) {
     const resultsContainer = elements['search-results'];
-    resultsContainer.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    loadingDiv.appendChild(spinner);
+    resultsContainer.innerHTML = '';
+    resultsContainer.appendChild(loadingDiv);
 
     try {
         const data = await fetchWithCache(
@@ -910,34 +1370,59 @@ async function searchQuran(query) {
         );
 
         if (data.data.matches.length === 0) {
-            resultsContainer.innerHTML = `
-                <div class="search-hint">
-                    <i class="fas fa-search"></i>
-                    <p>لم يتم العثور على نتائج</p>
-                </div>
-            `;
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'search-hint';
+            const searchIcon = document.createElement('i');
+            searchIcon.className = 'fas fa-search';
+            noResultsDiv.appendChild(searchIcon);
+            const noResultsText = document.createElement('p');
+            noResultsText.textContent = 'لم يتم العثور على نتائج';
+            noResultsDiv.appendChild(noResultsText);
+            resultsContainer.innerHTML = '';
+            resultsContainer.appendChild(noResultsDiv);
             return;
         }
 
         const results = data.data.matches.slice(0, 20);
-        resultsContainer.innerHTML = results.map(match => `
-            <div class="search-result-item" onclick="loadSurah(${match.surah.number}); closeModal('search-modal')">
-                <div class="result-surah">
-                    <i class="fas fa-book"></i>
-                    ${match.surah.name} - الآية ${match.numberInSurah}
-                </div>
-                <div class="result-text">${match.text}</div>
-            </div>
-        `).join('');
+        resultsContainer.innerHTML = '';
+
+        results.forEach(match => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'search-result-item';
+            resultItem.onclick = () => {
+                loadSurah(match.surah.number);
+                closeModal('search-modal');
+            };
+
+            const resultSurah = document.createElement('div');
+            resultSurah.className = 'result-surah';
+            const bookIcon = document.createElement('i');
+            bookIcon.className = 'fas fa-book';
+            resultSurah.appendChild(bookIcon);
+            resultSurah.appendChild(document.createTextNode(` ${match.surah.name} - الآية ${match.numberInSurah}`));
+
+            const resultText = document.createElement('div');
+            resultText.className = 'result-text';
+            resultText.textContent = match.text;
+
+            resultItem.appendChild(resultSurah);
+            resultItem.appendChild(resultText);
+            resultsContainer.appendChild(resultItem);
+        });
 
     } catch (error) {
         console.error('Search error:', error);
-        resultsContainer.innerHTML = `
-            <div class="search-hint">
-                <i class="fas fa-exclamation-circle" style="color: var(--error);"></i>
-                <p>حدث خطأ في البحث</p>
-            </div>
-        `;
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'search-hint';
+        const errorIcon = document.createElement('i');
+        errorIcon.className = 'fas fa-exclamation-circle';
+        errorIcon.style.color = 'var(--error)';
+        errorDiv.appendChild(errorIcon);
+        const errorText = document.createElement('p');
+        errorText.textContent = 'حدث خطأ في البحث';
+        errorDiv.appendChild(errorText);
+        resultsContainer.innerHTML = '';
+        resultsContainer.appendChild(errorDiv);
     }
 }
 
@@ -948,12 +1433,16 @@ async function loadTafsir(verseIndex) {
     const ayah = state.currentSurah.ayahs[verseIndex];
     const edition = elements['tafsir-select']?.value || 'ar.jalalayn';
 
-    elements['tafsir-content'].innerHTML = `
-        <div class="loading">
-            <div class="spinner"></div>
-            <p>جاري تحميل التفسير...</p>
-        </div>
-    `;
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'loading';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    loadingDiv.appendChild(spinner);
+    const loadingText = document.createElement('p');
+    loadingText.textContent = 'جاري تحميل التفسير...';
+    loadingDiv.appendChild(loadingText);
+    elements['tafsir-content'].innerHTML = '';
+    elements['tafsir-content'].appendChild(loadingDiv);
 
     try {
         const data = await fetchWithCache(
@@ -961,23 +1450,42 @@ async function loadTafsir(verseIndex) {
             `tafsir_${ayah.number}_${edition}`
         );
 
-        elements['tafsir-content'].innerHTML = `
-            <div class="tafsir-header">
-                <div class="tafsir-verse-text">${ayah.text}</div>
-            </div>
-            <div class="tafsir-text">${data.data.text}</div>
-            <div style="margin-top: 2rem; text-align: center; color: var(--text-muted); font-size: 0.85rem;">
-                المصدر: ${data.data.edition.name}
-            </div>
-        `;
+        elements['tafsir-content'].innerHTML = '';
+
+        const tafsirHeader = document.createElement('div');
+        tafsirHeader.className = 'tafsir-header';
+        const verseText = document.createElement('div');
+        verseText.className = 'tafsir-verse-text';
+        verseText.textContent = ayah.text;
+        tafsirHeader.appendChild(verseText);
+        elements['tafsir-content'].appendChild(tafsirHeader);
+
+        const tafsirText = document.createElement('div');
+        tafsirText.className = 'tafsir-text';
+        tafsirText.textContent = data.data.text;
+        elements['tafsir-content'].appendChild(tafsirText);
+
+        const sourceDiv = document.createElement('div');
+        sourceDiv.style.marginTop = '2rem';
+        sourceDiv.style.textAlign = 'center';
+        sourceDiv.style.color = 'var(--text-muted)';
+        sourceDiv.style.fontSize = '0.85rem';
+        sourceDiv.textContent = `المصدر: ${data.data.edition.name}`;
+        elements['tafsir-content'].appendChild(sourceDiv);
+
     } catch (error) {
         console.error('Error loading tafsir:', error);
-        elements['tafsir-content'].innerHTML = `
-            <div class="tafsir-hint">
-                <i class="fas fa-exclamation-circle" style="color: var(--error);"></i>
-                <p>حدث خطأ في تحميل التفسير</p>
-            </div>
-        `;
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'tafsir-hint';
+        const errorIcon = document.createElement('i');
+        errorIcon.className = 'fas fa-exclamation-circle';
+        errorIcon.style.color = 'var(--error)';
+        errorDiv.appendChild(errorIcon);
+        const errorText = document.createElement('p');
+        errorText.textContent = 'حدث خطأ في تحميل التفسير';
+        errorDiv.appendChild(errorText);
+        elements['tafsir-content'].innerHTML = '';
+        elements['tafsir-content'].appendChild(errorDiv);
     }
 }
 
@@ -1249,6 +1757,16 @@ function setupEventListeners() {
         displaySurahs(filtered);
     });
 
+    // View toggle (Surahs/Juz)
+    elements['view-toggle']?.addEventListener('click', toggleView);
+
+    // Save position on verse change
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.verse-item')) {
+            setTimeout(saveLastPosition, 100);
+        }
+    });
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.key === 'k') {
@@ -1352,10 +1870,140 @@ function handleVerseClick(index) {
     }
 }
 
+// ==================== Error Handling ====================
+
+/**
+ * معالج الأخطاء العام
+ */
+class ErrorHandler {
+    static init() {
+        window.onerror = (msg, url, line, col, error) => {
+            console.error('Global Error:', { msg, url, line, col, error });
+            ErrorHandler.report('JavaScript Error', { msg, url, line, error });
+            return false;
+        };
+
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled Promise Rejection:', event.reason);
+            ErrorHandler.report('Unhandled Promise Rejection', event.reason);
+        });
+    }
+
+    static report(type, details) {
+        // Log to console in development
+        if (location.hostname === 'localhost') {
+            console.table({ type, details, timestamp: new Date().toISOString() });
+        }
+
+        // Store last errors for debugging
+        try {
+            const errors = JSON.parse(localStorage.getItem('quranAppErrors') || '[]');
+            errors.push({ type, details: String(details), timestamp: Date.now() });
+            if (errors.length > 50) errors.shift(); // Keep last 50
+            localStorage.setItem('quranAppErrors', JSON.stringify(errors));
+        } catch (e) {
+            // Ignore storage errors
+        }
+    }
+
+    static getErrors() {
+        try {
+            return JSON.parse(localStorage.getItem('quranAppErrors') || '[]');
+        } catch {
+            return [];
+        }
+    }
+
+    static clearErrors() {
+        localStorage.removeItem('quranAppErrors');
+    }
+}
+
+// Initialize error handler
+ErrorHandler.init();
+
+// ==================== Performance Optimization ====================
+
+/**
+ * تحميل كسول للآيات باستخدام Intersection Observer
+ */
+let verseObserver = null;
+
+function setupVerseLazyLoading() {
+    if (verseObserver) verseObserver.disconnect();
+    
+    verseObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const verse = entry.target;
+                verse.classList.add('visible');
+                verseObserver.unobserve(verse);
+            }
+        });
+    }, {
+        rootMargin: '100px',
+        threshold: 0.1
+    });
+}
+
+/**
+ * تأخير تنفيذ الدالة
+ * @param {Function} func - الدالة المراد تأخيرها
+ * @param {number} wait - وقت الانتظار بالمللي ثانية
+ * @returns {Function}
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+/**
+ * تقييد تنفيذ الدالة
+ * @param {Function} func - الدالة المراد تقييدها
+ * @param {number} limit - الحد الأدنى للوقت بين التنفيذات
+ * @returns {Function}
+ */
+function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+/**
+ * تغليف الدالة باستخدام requestAnimationFrame
+ * @param {Function} func - الدالة المراد تغليفها
+ * @returns {Function}
+ */
+function rafThrottle(func) {
+    let ticking = false;
+    return function(...args) {
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                func.apply(this, args);
+                ticking = false;
+            });
+            ticking = true;
+        }
+    };
+}
+
 // ==================== Initialize App ====================
 function initApp() {
     initializeElements();
     setupEventListeners();
+    setupVerseLazyLoading();
 
     // Load saved settings
     if (state.settings.theme === 'light') {
@@ -1383,11 +2031,30 @@ function initApp() {
         document.body.appendChild(state.audioElement);
     }
 
-    // Load surahs
+    // Setup Media Session API
+    setupMediaSession();
+
+    // Setup PWA Install Prompt
+    setupInstallPrompt();
+
+    // Load surahs with lazy loading
     loadSurahs();
 
-    console.log('🕌 Quran App v3.0 - Full Surah Audio System');
-    console.log('📖 Features: Complete Surah MP3, Smooth Playback, 20+ Reciters');
+    // Add performance monitoring
+    if ('performance' in window) {
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const perfData = performance.getEntriesByType('navigation')[0];
+                if (perfData) {
+                    console.log(`⚡ Page Load: ${Math.round(perfData.loadEventEnd - perfData.startTime)}ms`);
+                    console.log(`⚡ DOM Ready: ${Math.round(perfData.domContentLoadedEventEnd - perfData.startTime)}ms`);
+                }
+            }, 0);
+        });
+    }
+
+    console.log('🕌 Quran App v5.0 - Full Featured');
+    console.log('📖 Features: 30 Juz, Media Session, Last Position, Lazy Loading');
 }
 
 // Start the app when DOM is ready
@@ -1403,3 +2070,7 @@ window.shareCurrentSurah = shareCurrentSurah;
 window.downloadCurrentSurah = downloadCurrentSurah;
 window.closeModal = closeModal;
 window.playFullSurah = playFullSurah;
+window.loadJuz = loadJuz;
+window.toggleView = toggleView;
+window.installApp = installApp;
+window.dismissInstall = dismissInstall;

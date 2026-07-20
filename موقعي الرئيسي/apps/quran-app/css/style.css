@@ -74,6 +74,7 @@
 
 html {
     scroll-behavior: smooth;
+    contain: layout style;
 }
 
 body {
@@ -84,6 +85,43 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
     min-height: 100vh;
+    contain: layout style paint;
+}
+
+/* Performance optimizations */
+.sidebar {
+    contain: layout style;
+    will-change: transform;
+}
+
+.content {
+    contain: layout style;
+    will-change: scroll-position;
+}
+
+.verses-container {
+    contain: layout style;
+    will-change: scroll-position;
+}
+
+/* Optimize animations */
+.loading-screen,
+.audio-player,
+.modal {
+    will-change: opacity, transform;
+    contain: layout style paint;
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
 
 /* ==================== Loading Screen ==================== */
@@ -2156,11 +2194,85 @@ body {
     }
 }
 
+/* ==================== Accessibility ==================== */
+
+/* Skip link for keyboard users */
+.skip-link {
+    position: absolute;
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--primary);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 0 0 8px 8px;
+    font-weight: 600;
+    z-index: 99999;
+    transition: top 0.3s ease;
+    text-decoration: none;
+}
+
+.skip-link:focus {
+    top: 0;
+}
+
 /* Focus styles for accessibility */
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
-    outline: 2px solid var(--primary);
+select:focus-visible,
+[tabindex]:focus-visible {
+    outline: 3px solid var(--primary);
+    outline-offset: 3px;
+}
+
+/* Reduced motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .verse-number {
+        border: 2px solid currentColor;
+    }
+
+    .surah-item {
+        border: 2px solid var(--border-color);
+    }
+
+    .icon-btn,
+    .control-btn {
+        border: 2px solid currentColor;
+    }
+}
+
+/* Screen reader only content */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus indicator for interactive elements */
+a:focus,
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+    outline: 3px solid var(--primary);
     outline-offset: 2px;
 }
 
@@ -2172,4 +2284,120 @@ select:focus-visible {
 
 .dark-mode ::selection {
     background: rgba(52, 211, 153, 0.3);
+}
+
+/* ==================== Juz (Parts) Styles ==================== */
+.juz-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.juz-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateX(-5px);
+}
+
+.juz-number {
+    background: linear-gradient(135deg, var(--primary), var(--accent-gold)) !important;
+    color: white !important;
+    font-weight: bold;
+}
+
+/* ==================== Install Banner ==================== */
+.install-banner {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 1000;
+    box-shadow: var(--shadow-xl);
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from { transform: translateX(-50%) translateY(100px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+.install-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.install-content i {
+    font-size: 1.5rem;
+    color: var(--primary);
+}
+
+.install-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.install-btn {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.install-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
+}
+
+.dismiss-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dismiss-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ==================== Verse Highlight Animation ==================== */
+.verse-item.highlight {
+    animation: verseHighlight 2s ease;
+}
+
+@keyframes verseHighlight {
+    0% { background: rgba(5, 150, 105, 0.3); }
+    100% { background: transparent; }
+}
+
+/* ==================== View Toggle Button ==================== */
+#view-toggle {
+    background: linear-gradient(135deg, var(--primary), var(--accent-gold));
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#view-toggle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.4);
 }

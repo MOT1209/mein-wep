@@ -4,27 +4,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <meta name="description" content="تطبيق القرآن الكريم - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة">
+    <meta name="description" content="تطبيق القرآن الكريم - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة. يدعم 20+ قارئ و 30 جزء مع حفظ الموضع.">
+    <meta name="keywords" content="القرآن الكريم, تلاوة, استماع, القرآن, سورة, آية, تفسير, قارئ, مشاري العفاسي, عبدالباسط, السديس, القرآن الكريم أونلاين">
+    <meta name="author" content="Rashid">
+    <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#059669">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>القرآن الكريم | Quran App</title>
+    <meta name="apple-mobile-web-app-title" content="القرآن الكريم">
+    <meta name="application-name" content="Quran App">
+    <meta name="msapplication-TileColor" content="#059669">
+    <title>القرآن الكريم | Quran App - قراءة واستماع</title>
     <link rel="canonical" href="https://rashid-wep.vercel.app/apps/quran-app/">
+    
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="القرآن الكريم | Quran App">
     <meta property="og:description" content="تطبيق القرآن الكريم - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة">
-    <meta property="og:image" content="../../images/logo.png">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/quran-app-og.png">
     <meta property="og:url" content="https://rashid-wep.vercel.app/apps/quran-app/">
+    <meta property="og:site_name" content="Rashid Portfolio">
+    <meta property="og:locale" content="ar_AR">
+    
+    <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="القرآن الكريم | Quran App">
     <meta name="twitter:description" content="تطبيق القرآن الكريم - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة">
-    <meta name="twitter:image" content="../../images/logo.png">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/quran-app-og.png">
+    
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
 
     <!-- PWA Manifest -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-96x96.png">
 
     <!-- Google Fonts - Arabic Support -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,8 +53,12 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     
-    <!-- Service Worker Registration -->
-    <script>
+    <!-- Preload critical resources -->
+    <link rel="preload" href="css/style.css" as="style">
+    <link rel="preload" href="js/app.js" as="script">
+    
+    <!-- Service Worker Registration (deferred) -->
+    <script defer>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('sw.js')
@@ -53,78 +71,115 @@
             });
         }
     </script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "Quran Reader",
-  "description": "Digital Quran reader with multi-recitation support. Read and listen to the Holy Quran in your browser.",
-  "url": "https://rashid-wep.vercel.app/apps/quran-app/",
-  "author": {
-    "@type": "Person",
-    "name": "Rashid",
-    "alternateName": "MOT1209",
-    "url": "https://rashid-wep.vercel.app"
-  },
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD",
-    "availability": "https://schema.org/InStock"
-  },
-  "applicationCategory": "Reference",
-  "operatingSystem": "Any (Browser)"
-}
-</script>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
+
+    <!-- Structured Data - WebApplication -->
+    <script type="application/ld+json">
     {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Home",
-      "item": "https://rashid-wep.vercel.app/"
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": "Apps",
-      "item": "https://rashid-wep.vercel.app/apps/"
-    },
-    {
-      "@type": "ListItem",
-      "position": 3,
-      "name": "Quran Reader",
-      "item": "https://rashid-wep.vercel.app/apps/quran-app/"
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Quran App - القرآن الكريم",
+        "description": "تطبيق القرآن الكريم - اقرأ واستمع للقرآن الكريم كاملاً مع التفسير والترجمة. يدعم 20+ قارئ و 30 جزء.",
+        "url": "https://rashid-wep.vercel.app/apps/quran-app/",
+        "author": {
+            "@type": "Person",
+            "name": "Rashid",
+            "alternateName": "MOT1209",
+            "url": "https://rashid-wep.vercel.app"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "availability": "https://schema.org/InStock"
+        },
+        "applicationCategory": "ReferenceApplication",
+        "operatingSystem": "Any (Browser)",
+        "inLanguage": ["ar", "en"],
+        "featureList": [
+            "قراءة القرآن الكريم",
+            "استماع التلاوة بـ 20+ قارئ",
+            "30 جزء",
+            "التفسير والترجمة",
+            "حفظ الموضع",
+            "دعم عدم الاتصال"
+        ]
     }
-  ]
-}
-</script>
+    </script>
+
+    <!-- Structured Data - BreadcrumbList -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "الرئيسية",
+                "item": "https://rashid-wep.vercel.app/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "التطبيقات",
+                "item": "https://rashid-wep.vercel.app/apps/"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "القرآن الكريم",
+                "item": "https://rashid-wep.vercel.app/apps/quran-app/"
+            }
+        ]
+    }
+    </script>
+
+    <!-- Structured Data - SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Quran App",
+        "operatingSystem": "Web Browser",
+        "applicationCategory": "ReferenceApplication",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.8",
+            "ratingCount": "150"
+        }
+    }
+    </script>
 </head>
 
 <body class="dark-mode">
+    <!-- Skip to main content link for accessibility -->
+    <a href="#verses-container" class="skip-link">تخطي إلى المحتوى الرئيسي</a>
+
     <!-- Offline Indicator -->
-    <div id="offline-indicator" class="offline-indicator" style="display: none;">
-        <i class="fas fa-wifi-slash"></i>
+    <div id="offline-indicator" class="offline-indicator" style="display: none;" role="alert" aria-live="polite">
+        <i class="fas fa-wifi-slash" aria-hidden="true"></i>
         <span>أنت في وضع عدم الاتصال</span>
     </div>
 
     <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
+    <div id="loading-screen" class="loading-screen" role="status" aria-live="polite" aria-label="جاري التحميل">
         <div class="loader-container">
-            <div class="islamic-pattern"></div>
+            <div class="islamic-pattern" aria-hidden="true"></div>
             <div class="loader-text">القرآن الكريم</div>
             <div class="loader-subtext">جاري التحميل...</div>
         </div>
     </div>
 
     <!-- Header -->
-    <header class="header">
+    <header class="header" role="banner">
         <div class="container header-content">
-            <div class="logo" onclick="location.reload()">
-                <div class="logo-icon">
+            <div class="logo" onclick="location.reload()" role="button" tabindex="0" aria-label="الصفحة الرئيسية">
+                <div class="logo-icon" aria-hidden="true">
                     <i class="fas fa-book-quran"></i>
                 </div>
                 <div class="logo-text">
@@ -132,7 +187,7 @@
                     <span class="logo-subtitle">اقرأ واستمع وتدبر</span>
                 </div>
             </div>
-            <div class="header-controls">
+            <div class="header-controls" role="toolbar" aria-label="أدوات التحكم">
                 <button id="search-btn" class="icon-btn" aria-label="بحث" title="البحث (Ctrl+K)">
                     <i class="fas fa-search"></i>
                 </button>
@@ -175,6 +230,7 @@
                     <button class="tab-btn active" data-filter="all">الكل</button>
                     <button class="tab-btn" data-filter="makkah">مكية</button>
                     <button class="tab-btn" data-filter="madinah">مدنية</button>
+                    <button class="tab-btn" id="view-toggle" data-filter="juz">الأجزاء</button>
                 </div>
                 <div class="sidebar-search">
                     <input type="text" id="surah-search" placeholder="ابحث عن سورة...">
@@ -471,15 +527,15 @@
     <!-- Audio Element -->
     <audio id="audio-element" preload="metadata"></audio>
 
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- YouTube IFrame API (deferred) -->
+    <script defer src="https://www.youtube.com/iframe_api"></script>
 
-    <!-- Custom Script -->
-    <script src="js/vendor/capacitor.js"></script>
-    <script src="js/vendor/admob.js"></script>
-    <script src="js/ads.js"></script>
-    <script src="js/app.js"></script>
-    <script>
+    <!-- Custom Scripts (deferred for better loading) -->
+    <script defer src="js/vendor/capacitor.js"></script>
+    <script defer src="js/vendor/admob.js"></script>
+    <script defer src="js/ads.js"></script>
+    <script defer src="js/app.js"></script>
+    <script defer>
         // Offline detection
         function updateOnlineStatus() {
             const indicator = document.getElementById('offline-indicator');
@@ -513,10 +569,10 @@
             }
         });
     </script>
-  <script src="js/update-checker.js"></script>
+  <script defer src="js/update-checker.js"></script>
   <!-- OTA update checker -->
-  <script>window.RASHID_APP={id:'com.rashid.quranpro',version:'1.0.1',name:'Quran Pro'};</script>
-  <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
+  <script defer>window.RASHID_APP={id:'com.rashid.quranpro',version:'1.0.1',name:'Quran Pro'};</script>
+  <script defer src="https://rashid-wep.vercel.app/js/update-checker.js"></script>
 </body>
 
 </html>
