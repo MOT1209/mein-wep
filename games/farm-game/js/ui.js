@@ -510,14 +510,25 @@ function craftItem(recipeId) {
 GAME.ui.refreshInventory = function() {
   var s = GAME.game && GAME.game.state;
   if (!s) return;
-  var map = { wheat: 'inv-wheat', tomato: 'inv-tomato', carrot: 'inv-carrot', apple: 'inv-apple',
-              bread: 'inv-bread', ketchup: 'inv-ketchup', juice: 'inv-juice', fertilizer: 'inv-fertilizer' };
-  for (var key in map) {
-    var el = document.getElementById(map[key]);
-    if (el) {
-      if (s.inventory[key] !== undefined) el.textContent = s.inventory[key];
-      else       if (s.crafted[key] !== undefined) el.textContent = s.crafted[key];
-    }
+  // المحاصيل المحصودة تعيش تحت inventory.harvest، والسماد تحت inventory.fertilizer (عدة درجات)
+  var cropMap = { wheat: 'inv-wheat', tomato: 'inv-tomato', carrot: 'inv-carrot', apple: 'inv-apple' };
+  var harvest = s.inventory.harvest || {};
+  for (var cropKey in cropMap) {
+    var cropEl = document.getElementById(cropMap[cropKey]);
+    if (cropEl) cropEl.textContent = harvest[cropKey] !== undefined ? harvest[cropKey] : (s.inventory[cropKey] || 0);
+  }
+  var fertEl = document.getElementById('inv-fertilizer');
+  if (fertEl) {
+    var fert = s.inventory.fertilizer;
+    fertEl.textContent = (fert && typeof fert === 'object')
+      ? (fert.basic || 0) + (fert.quality || 0) + (fert.premium || 0)
+      : (fert || 0);
+  }
+  // المنتجات المصنّعة (bread/ketchup/juice) محفوظة أيضاً في state.crafted للتوافق
+  var craftedMap = { bread: 'inv-bread', ketchup: 'inv-ketchup', juice: 'inv-juice' };
+  for (var craftedKey in craftedMap) {
+    var craftedEl = document.getElementById(craftedMap[craftedKey]);
+    if (craftedEl && s.crafted[craftedKey] !== undefined) craftedEl.textContent = s.crafted[craftedKey];
   }
   // Refresh quests list
   GAME.ui.refreshQuests();
