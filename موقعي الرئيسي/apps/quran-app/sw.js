@@ -1,11 +1,11 @@
 ﻿// Quran Pro Service Worker - Offline Support
 const CACHE_NAME = 'quran-pro-v1';
 const STATIC_ASSETS = [
-    '/apps/quran-app/',
-    '/apps/quran-app/index.html',
-    '/apps/quran-app/css/style.css',
-    '/apps/quran-app/js/app.js',
-    '/apps/quran-app/offline.html'
+    '/quran-app/',
+    '/quran-app/index.html',
+    '/quran-app/css/style.css',
+    '/quran-app/js/app.js',
+    '/quran-app/offline.html'
 ];
 
 // API Cache Configuration
@@ -84,7 +84,7 @@ async function cacheFirst(request) {
     } catch (error) {
         // Return offline page for navigation requests
         if (request.mode === 'navigate') {
-            return caches.match('/apps/quran-app/offline.html');
+            return caches.match('/quran-app/offline.html');
         }
         return new Response('Offline', { status: 503 });
     }
@@ -168,11 +168,11 @@ async function syncBookmarks() {
 self.addEventListener('push', (event) => {
     const options = {
         body: event.data?.text() || 'Notification from Quran App',
-        icon: '/apps/quran-app/icons/icon-192x192.png',
-        badge: '/apps/quran-app/icons/icon-72x72.png',
+        icon: '/quran-app/icons/icon-192x192.png',
+        badge: '/quran-app/icons/icon-72x72.png',
         vibrate: [100, 50, 100],
         data: {
-            url: '/apps/quran-app/'
+            url: '/quran-app/'
         }
     };
     
