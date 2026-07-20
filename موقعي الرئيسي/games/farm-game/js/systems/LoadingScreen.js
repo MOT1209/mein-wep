@@ -9,7 +9,7 @@
  *   GAME.LoadingScreen.hide();
  */
 
-const GAME = window.GAME || {};
+var GAME = window.GAME || {};
 
 GAME.LoadingScreen = {
   screen: null,
@@ -222,20 +222,54 @@ GAME.LoadingScreen = {
     // Create loading screen element
     this.screen = document.createElement('div');
     this.screen.className = 'loading-screen';
-    this.screen.innerHTML = `
-      <div class="loading-particles" id="loading-particles"></div>
-      <div class="loading-spinner"></div>
-      <div class="loading-title"><span class="emoji">🌾</span> Farm Game</div>
-      <div class="loading-subtitle">A farming adventure</div>
-      <div class="loading-bar-container">
-        <div class="loading-bar">
-          <div class="loading-fill"></div>
-        </div>
-      </div>
-      <div class="loading-percentage">0%</div>
-      <div class="loading-text">Initializing...</div>
-      <div class="loading-tip">${this.tips[0]}</div>
-    `;
+
+    const particlesDiv = document.createElement('div');
+    particlesDiv.className = 'loading-particles';
+    particlesDiv.id = 'loading-particles';
+    this.screen.appendChild(particlesDiv);
+
+    const spinnerDiv = document.createElement('div');
+    spinnerDiv.className = 'loading-spinner';
+    this.screen.appendChild(spinnerDiv);
+
+    const titleDiv = document.createElement('div');
+    titleDiv.className = 'loading-title';
+    const emojiSpan = document.createElement('span');
+    emojiSpan.className = 'emoji';
+    emojiSpan.textContent = '🌾';
+    titleDiv.appendChild(emojiSpan);
+    titleDiv.appendChild(document.createTextNode(' Farm Game'));
+    this.screen.appendChild(titleDiv);
+
+    const subtitleDiv = document.createElement('div');
+    subtitleDiv.className = 'loading-subtitle';
+    subtitleDiv.textContent = 'A farming adventure';
+    this.screen.appendChild(subtitleDiv);
+
+    const barContainer = document.createElement('div');
+    barContainer.className = 'loading-bar-container';
+    const barEl = document.createElement('div');
+    barEl.className = 'loading-bar';
+    const fillEl = document.createElement('div');
+    fillEl.className = 'loading-fill';
+    barEl.appendChild(fillEl);
+    barContainer.appendChild(barEl);
+    this.screen.appendChild(barContainer);
+
+    const percentageDiv = document.createElement('div');
+    percentageDiv.className = 'loading-percentage';
+    percentageDiv.textContent = '0%';
+    this.screen.appendChild(percentageDiv);
+
+    const textDiv = document.createElement('div');
+    textDiv.className = 'loading-text';
+    textDiv.textContent = 'Initializing...';
+    this.screen.appendChild(textDiv);
+
+    const tipDiv = document.createElement('div');
+    tipDiv.className = 'loading-tip';
+    tipDiv.textContent = this.tips[0];
+    this.screen.appendChild(tipDiv);
 
     document.body.appendChild(this.screen);
 
@@ -384,10 +418,5 @@ GAME.LoadingScreen = {
     this.tip = null;
   }
 };
-
-// Export for module systems
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = GAME.LoadingScreen;
-}
 
 window.GAME = GAME;

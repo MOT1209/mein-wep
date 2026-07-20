@@ -119,7 +119,7 @@ Object.assign(GAME.game, {
       this._safe('BuildingsSystem.init', function() { GAME.BuildingsSystem.init(self.scene); });
       this._safe('EconomySystem.init', function() { GAME.EconomySystem.init(); });
       this._safe('NPCsSystem.init', function() { GAME.NPCsSystem.init(self.scene, GAME.TimeSystem); });
-      this._safe('WorldExpansion.init', function() { GAME.WorldExpansionInstance = new GAME.WorldExpansion({ events: null, ui: GAME.ui, shop: null }); });
+      this._safe('WorldExpansion.init', function() { GAME.WorldExpansion.init({ events: null, ui: GAME.ui, shop: null }); GAME.WorldExpansionInstance = GAME.WorldExpansion; });
       this._safe('CraftingSystem.init', function() { GAME.CraftingSystem.init(self); });
       this._safe('CookingSystem.init', function() { GAME.CookingSystem.init(self); });
       // نظام الحفظ المحسّن
@@ -130,8 +130,6 @@ Object.assign(GAME.game, {
       this._safe('TutorialSystem.init', function() { GAME.TutorialSystem.init(self); });
       // === الأنظمة المتبقية ===
       this._safe('DatabaseService.init', function() { GAME.DatabaseService.init(); });
-      this._safe('ObjectPool.init', function() { GAME.ObjectPool.init(); });
-      this._safe('DisposeManager.init', function() { GAME.DisposeManager.init(); });
       this._safe('CombatSystem.init', function() { GAME.CombatSystem.init(self); });
       this._safe('FishingSystem.init', function() { GAME.FishingSystem.init(self); });
       this._safe('SeasonalEvents.init', function() { GAME.SeasonalEvents.init(self); });
@@ -441,16 +439,10 @@ Object.assign(GAME.game, {
     this._safe('FishingSystem', function() { GAME.FishingSystem.update(delta); });
     this._safe('SeasonalEvents', function() { GAME.SeasonalEvents.update(delta); });
     this._safe('QuestSystem', function() { GAME.QuestSystem.update(delta); });
-    this._safe('AchievementSystem', function() { GAME.AchievementSystem.update(delta); });
-    this._safe('LeaderboardSystem', function() { GAME.LeaderboardSystem.update(delta); });
-    this._safe('NotificationSystem', function() { GAME.NotificationSystem.update(delta); });
     this._safe('AudioManager', function() { GAME.AudioManager.update(delta); });
     this._safe('WeatherSystem', function() { GAME.WeatherSystem.update(delta); });
     this._safe('DayNightCycle', function() { GAME.DayNightCycle.update(delta); });
-    this._safe('UpgradesSystem', function() { GAME.UpgradesSystem.update(delta); });
-    this._safe('ObjectPool', function() { GAME.ObjectPool.update(delta); });
-    this._safe('DisposeManager', function() { GAME.DisposeManager.update(delta); });
-    
+
     // 🛡️ كل نظام معزول — خطأٌ في أحدها لا يوقف البقية ولا يطرد اللاعب للقائمة
     var self = this;
     this._safe('player', function() {

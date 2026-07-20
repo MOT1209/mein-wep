@@ -509,15 +509,31 @@ function craftItem(recipeId) {
 
 GAME.ui.refreshInventory = function() {
   var s = GAME.game && GAME.game.state;
-  if (!s) return;
-  var map = { wheat: 'inv-wheat', tomato: 'inv-tomato', carrot: 'inv-carrot', apple: 'inv-apple',
-              bread: 'inv-bread', ketchup: 'inv-ketchup', juice: 'inv-juice', fertilizer: 'inv-fertilizer' };
+  if (!s || !s.inventory) return;
+  // كل مفتاح يشير لمصدره الفعلي في inventory المتداخل (وليس inventory[key] مباشرة)
+  var map = {
+    wheat: { id: 'inv-wheat', path: 'harvest' },
+    tomato: { id: 'inv-tomato', path: 'harvest' },
+    carrot: { id: 'inv-carrot', path: 'harvest' },
+    apple: { id: 'inv-apple', path: 'harvest' },
+    bread: { id: 'inv-bread', path: 'crafted' },
+    ketchup: { id: 'inv-ketchup', path: 'crafted' },
+    juice: { id: 'inv-juice', path: 'crafted' },
+    fertilizer: { id: 'inv-fertilizer', path: 'fertilizer', sum: true }
+  };
   for (var key in map) {
-    var el = document.getElementById(map[key]);
-    if (el) {
-      if (s.inventory[key] !== undefined) el.textContent = s.inventory[key];
-      else       if (s.crafted[key] !== undefined) el.textContent = s.crafted[key];
+    var cfg = map[key];
+    var el = document.getElementById(cfg.id);
+    if (!el) continue;
+    var group = s.inventory[cfg.path] || {};
+    var value;
+    if (cfg.sum) {
+      value = 0;
+      for (var subKey in group) { value += group[subKey] || 0; }
+    } else {
+      value = group[key] || 0;
     }
+    el.textContent = value;
   }
   // Refresh quests list
   GAME.ui.refreshQuests();
@@ -533,20 +549,39 @@ GAME.ui.refreshQuests = function() {
     container.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No quests today. Sleep to get new ones!</p>';
     return;
   }
-  var html = '';
+  container.textContent = '';
   for (var i = 0; i < quests.length; i++) {
     var q = quests[i];
     var pct = Math.min(100, Math.floor((q.current / q.target) * 100));
-    var done = q.completed ? '✅' : '';
-    html += '<div class="quest-row' + (q.completed ? ' quest-done' : '') + '">' +
-      '<div class="quest-header">' +
-        '<span class="quest-title">' + (q.completed ? '✅ ' : '📋 ') + q.title + ' — ' + q.desc + ' (' + q.current + '/' + q.target + ')</span>' +
-        '<span class="quest-reward">+' + q.rewardXP + ' XP</span>' +
-      '</div>' +
-      '<div class="quest-bar-wrap"><div class="quest-bar-fill" style="width:' + pct + '%"></div></div>' +
-    '</div>';
+
+    var row = document.createElement('div');
+    row.className = 'quest-row' + (q.completed ? ' quest-done' : '');
+
+    var header = document.createElement('div');
+    header.className = 'quest-header';
+
+    var titleSpan = document.createElement('span');
+    titleSpan.className = 'quest-title';
+    titleSpan.textContent = (q.completed ? '✅ ' : '📋 ') + q.title + ' — ' + q.desc + ' (' + q.current + '/' + q.target + ')';
+    header.appendChild(titleSpan);
+
+    var rewardSpan = document.createElement('span');
+    rewardSpan.className = 'quest-reward';
+    rewardSpan.textContent = '+' + q.rewardXP + ' XP';
+    header.appendChild(rewardSpan);
+
+    row.appendChild(header);
+
+    var barWrap = document.createElement('div');
+    barWrap.className = 'quest-bar-wrap';
+    var barFill = document.createElement('div');
+    barFill.className = 'quest-bar-fill';
+    barFill.style.width = pct + '%';
+    barWrap.appendChild(barFill);
+    row.appendChild(barWrap);
+
+    container.appendChild(row);
   }
-  container.innerHTML = html;
 };
 
 GAME.ui.refreshAchievements = function() {
@@ -558,19 +593,42 @@ GAME.ui.refreshAchievements = function() {
     return;
   }
   var unlocked = state.achievements || [];
-  var html = '';
+  container.textContent = '';
   for (var i = 0; i < GAME.achievements.list.length; i++) {
     var ach = GAME.achievements.list[i];
     var isUnlocked = unlocked.indexOf(ach.id) !== -1;
     var canUnlock = !isUnlocked && ach.check(state);
-    html += '<div class="ach-row' + (isUnlocked ? ' ach-unlocked' : '') + (canUnlock ? ' ach-ready' : '') + '">' +
-      '<div class="ach-icon">' + ach.icon + '</div>' +
-      '<div class="ach-info">' +
-        '<div class="ach-title">' + (isUnlocked ? '✅ ' : '🔒 ') + ach.title + '</div>' +
-        '<div class="ach-desc">' + ach.desc + '</div>' +
-      '</div>' +
-      '<div class="ach-reward">+' + ach.rewardXP + ' XP<br/>+$' + ach.rewardMoney + '</div>' +
-    '</div>';
+
+    var row = document.createElement('div');
+    row.className = 'ach-row' + (isUnlocked ? ' ach-unlocked' : '') + (canUnlock ? ' ach-ready' : '');
+
+    var iconDiv = document.createElement('div');
+    iconDiv.className = 'ach-icon';
+    iconDiv.textContent = ach.icon;
+    row.appendChild(iconDiv);
+
+    var infoDiv = document.createElement('div');
+    infoDiv.className = 'ach-info';
+
+    var titleDiv = document.createElement('div');
+    titleDiv.className = 'ach-title';
+    titleDiv.textContent = (isUnlocked ? '✅ ' : '🔒 ') + ach.title;
+    infoDiv.appendChild(titleDiv);
+
+    var descDiv = document.createElement('div');
+    descDiv.className = 'ach-desc';
+    descDiv.textContent = ach.desc;
+    infoDiv.appendChild(descDiv);
+
+    row.appendChild(infoDiv);
+
+    var rewardDiv = document.createElement('div');
+    rewardDiv.className = 'ach-reward';
+    rewardDiv.appendChild(document.createTextNode('+' + ach.rewardXP + ' XP'));
+    rewardDiv.appendChild(document.createElement('br'));
+    rewardDiv.appendChild(document.createTextNode('+$' + ach.rewardMoney));
+    row.appendChild(rewardDiv);
+
+    container.appendChild(row);
   }
-  container.innerHTML = html;
 };

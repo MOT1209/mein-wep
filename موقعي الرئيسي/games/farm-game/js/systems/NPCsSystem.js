@@ -532,7 +532,7 @@ GAME.NPCsSystem = {
       group.userData = { npcId: npcId, type: 'npc' };
 
       // إضافة اسم الـ NPC فوق الرأس
-      this.createNPCLabel(group, npcData.nameAr, data.size.height + 0.5);
+      this.createNPCLabel(group, data.nameAr, data.size.height + 0.5);
 
       // إضافة للمشهد
       this.scene.add(group);
@@ -1074,8 +1074,3 @@ GAME.NPCsSystem = {
     return stats;
   }
 };
-
-// تصدير النظام للاستخدام في ملفات أخرى
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = GAME.NPCsSystem;
-}

@@ -37,17 +37,44 @@
       'transform:translateY(100%);transition:transform 0.4s ease;' +
       'direction:rtl;text-align:right';
 
-    banner.innerHTML =
-      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:600px;margin:0 auto">' +
-        '<div style="flex:1;min-width:200px">' +
-          '<div style="font-size:16px;font-weight:700;margin-bottom:4px">🔄 تحديث متاح v' + remote.version + '</div>' +
-          (remote.changelog ? '<div style="font-size:13px;opacity:0.8">' + remote.changelog + '</div>' : '') +
-        '</div>' +
-        '<div style="display:flex;gap:8px;flex-shrink:0">' +
-          '<button id="update-dismiss" style="padding:8px 16px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;background:transparent;color:#fff;cursor:pointer;font-size:13px">لاحقاً</button>' +
-          '<a href="' + remote.apkUrl + '" download style="padding:8px 18px;border:none;border-radius:8px;background:#22c55e;color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-decoration:none">📥 تحميل APK</a>' +
-        '</div>' +
-      '</div>';
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;max-width:600px;margin:0 auto';
+
+    const infoDiv = document.createElement('div');
+    infoDiv.style.cssText = 'flex:1;min-width:200px';
+
+    const titleDiv = document.createElement('div');
+    titleDiv.style.cssText = 'font-size:16px;font-weight:700;margin-bottom:4px';
+    titleDiv.textContent = '🔄 تحديث متاح v' + remote.version;
+    infoDiv.appendChild(titleDiv);
+
+    if (remote.changelog) {
+      const changelogDiv = document.createElement('div');
+      changelogDiv.style.cssText = 'font-size:13px;opacity:0.8';
+      changelogDiv.textContent = remote.changelog;
+      infoDiv.appendChild(changelogDiv);
+    }
+
+    wrap.appendChild(infoDiv);
+
+    const actionsDiv = document.createElement('div');
+    actionsDiv.style.cssText = 'display:flex;gap:8px;flex-shrink:0';
+
+    const dismissBtn = document.createElement('button');
+    dismissBtn.id = 'update-dismiss';
+    dismissBtn.style.cssText = 'padding:8px 16px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;background:transparent;color:#fff;cursor:pointer;font-size:13px';
+    dismissBtn.textContent = 'لاحقاً';
+    actionsDiv.appendChild(dismissBtn);
+
+    const downloadLink = document.createElement('a');
+    downloadLink.href = remote.apkUrl;
+    downloadLink.setAttribute('download', '');
+    downloadLink.style.cssText = 'padding:8px 18px;border:none;border-radius:8px;background:#22c55e;color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-decoration:none';
+    downloadLink.textContent = '📥 تحميل APK';
+    actionsDiv.appendChild(downloadLink);
+
+    wrap.appendChild(actionsDiv);
+    banner.appendChild(wrap);
 
     document.body.appendChild(banner);
 
@@ -55,7 +82,7 @@
       banner.style.transform = 'translateY(0)';
     });
 
-    document.getElementById('update-dismiss').onclick = function () {
+    dismissBtn.onclick = function () {
       localStorage.setItem(DISMISS_KEY, remote.version);
       banner.style.transform = 'translateY(100%)';
       setTimeout(() => banner.remove(), 400);

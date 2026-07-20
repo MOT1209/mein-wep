@@ -555,8 +555,3 @@ GAME.AnimationManager = {
     console.log('[AnimationManager] تم التخلص من الموارد');
   }
 };
-
-// تصدير النظام
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = GAME.AnimationManager;
-}

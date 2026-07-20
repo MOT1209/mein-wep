@@ -201,10 +201,50 @@ GAME.AudioManager = {
     // تحميل الأصوات المهمة مسبقاً
     var criticalSfx = ['click', 'success', 'error', 'coins'];
     var self = this;
-    
+
     criticalSfx.forEach(function(name) {
       self._loadSFX(name);
     });
+  },
+
+  /**
+   * تحميل مؤثر صوتي مسبقاً وتخزينه في الكاش دون تشغيله
+   * (يُستخدم بواسطة _preloadCriticalAssets عند التهيئة)
+   * @param {string} name - اسم المؤثر كما هو معرّف في this.sfx
+   */
+  _loadSFX: function(name) {
+    var sfxData = this.sfx[name];
+    if (!sfxData) {
+      console.warn('[AudioManager] لا يمكن تحميل مؤثر غير موجود:', name);
+      return;
+    }
+
+    // بدون Web Audio API لا يوجد شيء لتحميله مسبقاً (سيتم التشغيل عبر Audio element عند الحاجة)
+    if (!this._audioContext) return;
+
+    // متوفر بالفعل في الكاش
+    if (this._cache[sfxData.file]) return;
+
+    var self = this;
+    var request = new XMLHttpRequest();
+    request.open('GET', sfxData.file, true);
+    request.responseType = 'arraybuffer';
+
+    request.onload = function() {
+      var decodePromise = self._audioContext.decodeAudioData(request.response, function(buffer) {
+        self._cache[sfxData.file] = buffer;
+      }, function(error) {
+        console.warn('[AudioManager] خطأ في التحميل المسبق لـ:', sfxData.file, error);
+      });
+      // decodeAudioData يُعيد Promise حتى بصيغة callbacks — نتجاهله بأمان لتفادي unhandled rejection في Console
+      if (decodePromise && typeof decodePromise.catch === 'function') decodePromise.catch(function() {});
+    };
+
+    request.onerror = function() {
+      console.warn('[AudioManager] فشل التحميل المسبق:', sfxData.file);
+    };
+
+    request.send();
   },
 
   // ═══════════════════════════════════════════════════════
@@ -608,14 +648,15 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
     
     request.onload = function() {
-      self._audioContext.decodeAudioData(request.response, function(buffer) {
+      var decodePromise = self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[url] = buffer;
         self._playBuffer(buffer, callback);
       }, function(error) {
         console.warn('[AudioManager] خطأ في تحميل الصوت:', url, error);
       });
+      if (decodePromise && typeof decodePromise.catch === 'function') decodePromise.catch(function() {});
     };
-    
+
     request.onerror = function() {
       console.warn('[AudioManager] فشل تحميل:', url);
     };
@@ -653,14 +694,15 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
     
     request.onload = function() {
-      self._audioContext.decodeAudioData(request.response, function(buffer) {
+      var decodePromise = self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
         self._playSFXBuffer(buffer, volume, sfxData.id, options);
       }, function(error) {
         console.warn('[AudioManager] خطأ في تحميل SFX:', sfxData.file, error);
       });
+      if (decodePromise && typeof decodePromise.catch === 'function') decodePromise.catch(function() {});
     };
-    
+
     request.send();
   },
 
@@ -721,12 +763,19 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
     
     request.onload = function() {
-      self._audioContext.decodeAudioData(request.response, function(buffer) {
+      var decodePromise = self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
         self._startAmbientLoop(buffer, volume, name);
+      }, function(error) {
+        console.warn('[AudioManager] خطأ في تحميل الصوت المحيطي:', sfxData.file, error);
       });
+      if (decodePromise && typeof decodePromise.catch === 'function') decodePromise.catch(function() {});
     };
-    
+
+    request.onerror = function() {
+      console.warn('[AudioManager] فشل تحميل الصوت المحيطي:', sfxData.file);
+    };
+
     request.send();
   },
 

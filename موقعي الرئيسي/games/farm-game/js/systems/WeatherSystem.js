@@ -1073,8 +1073,3 @@ GAME.WeatherSystem = {
         console.log('[WeatherSystem] تم الإغلاق');
     }
 };
-
-// تصدير النظام
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = GAME.WeatherSystem;
-}

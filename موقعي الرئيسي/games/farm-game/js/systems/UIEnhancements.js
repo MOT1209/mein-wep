@@ -277,11 +277,22 @@ GAME.UIEnhancements._enhanceHUD = function() {
     var compactStats = document.createElement('div');
     compactStats.className = 'hud-compact-stats';
     compactStats.id = 'ue-compact-stats';
-    compactStats.textContent = `
-      <span id="ue-plots-count">🌱 0</span>
-      <span id="ue-ready-count">🧺 0</span>
-      <span id="ue-day-count">📅 0</span>
-    `;
+
+    var plotsSpan = document.createElement('span');
+    plotsSpan.id = 'ue-plots-count';
+    plotsSpan.textContent = '🌱 0';
+
+    var readySpan = document.createElement('span');
+    readySpan.id = 'ue-ready-count';
+    readySpan.textContent = '🧺 0';
+
+    var daySpan = document.createElement('span');
+    daySpan.id = 'ue-day-count';
+    daySpan.textContent = '📅 0';
+
+    compactStats.appendChild(plotsSpan);
+    compactStats.appendChild(readySpan);
+    compactStats.appendChild(daySpan);
     hudTopLeft.appendChild(compactStats);
   }
 };
@@ -336,9 +347,19 @@ GAME.UIEnhancements._enhanceNotifications = function() {
     var icons = { success: '✅', error: '❌', info: 'ℹ️', warning: '⚠️' };
     var icon = icons[type] || 'ℹ️';
 
-    el.innerHTML = '<span class="notif-icon">' + icon + '</span>' +
-                   '<span class="notif-text">' + text + '</span>' +
-                   '<div class="notif-progress"></div>';
+    var iconEl = document.createElement('span');
+    iconEl.className = 'notif-icon';
+    iconEl.textContent = icon;
+    el.appendChild(iconEl);
+
+    var textEl = document.createElement('span');
+    textEl.className = 'notif-text';
+    textEl.textContent = text;
+    el.appendChild(textEl);
+
+    var progressEl = document.createElement('div');
+    progressEl.className = 'notif-progress';
+    el.appendChild(progressEl);
 
     container.appendChild(el);
 
@@ -396,12 +417,30 @@ GAME.UIEnhancements._addStatsPanel = function() {
 
   var panel = document.createElement('div');
   panel.id = 'stats-panel';
-  panel.textContent = `
-    <div class="stat-line"><span class="stat-label">🌾 مزروع</span><span class="stat-value" id="ue-stat-planted">0</span></div>
-    <div class="stat-line"><span class="stat-label">🧺 محصود</span><span class="stat-value" id="ue-stat-harvested">0</span></div>
-    <div class="stat-line"><span class="stat-label">💰 مكتسب</span><span class="stat-value" id="ue-stat-earned">$0</span></div>
-    <div class="stat-line"><span class="stat-label">🔨 مصنوع</span><span class="stat-value" id="ue-stat-crafted">0</span></div>
-  `;
+
+  function addStatLine(labelText, valueId, initialValue) {
+    var line = document.createElement('div');
+    line.className = 'stat-line';
+
+    var label = document.createElement('span');
+    label.className = 'stat-label';
+    label.textContent = labelText;
+
+    var value = document.createElement('span');
+    value.className = 'stat-value';
+    value.id = valueId;
+    value.textContent = initialValue;
+
+    line.appendChild(label);
+    line.appendChild(value);
+    panel.appendChild(line);
+  }
+
+  addStatLine('🌾 مزروع', 'ue-stat-planted', '0');
+  addStatLine('🧺 محصود', 'ue-stat-harvested', '0');
+  addStatLine('💰 مكتسب', 'ue-stat-earned', '$0');
+  addStatLine('🔨 مصنوع', 'ue-stat-crafted', '0');
+
   document.body.appendChild(panel);
 
   // إظهار الإحصائيات عند الضغط على مفتاح P

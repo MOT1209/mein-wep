@@ -300,42 +300,117 @@ GAME.UIManager = {
     var shopBody = document.querySelector('#shop-ui .modal-body');
     if (!shopBody) return;
 
-    var html = '<div class="shop-section"><h3>🌱 Seeds</h3>';
+    var self = this;
+    shopBody.textContent = '';
+
+    // بناء صف عنصر متجر واحد كعناصر DOM حقيقية (بدون innerHTML)
+    function buildShopItem(icon, name, qtyText, priceText, btnClass, btnLabel, onClick) {
+      var row = document.createElement('div');
+      row.className = 'shop-item';
+
+      if (icon !== null) {
+        var iconEl = document.createElement('span');
+        iconEl.className = 'item-icon';
+        iconEl.textContent = icon;
+        row.appendChild(iconEl);
+      }
+
+      var nameEl = document.createElement('span');
+      nameEl.className = 'item-name';
+      nameEl.textContent = name;
+      row.appendChild(nameEl);
+
+      if (qtyText !== null) {
+        var qtyEl = document.createElement('span');
+        qtyEl.className = 'item-qty';
+        qtyEl.textContent = qtyText;
+        row.appendChild(qtyEl);
+      }
+
+      var priceEl = document.createElement('span');
+      priceEl.className = 'item-price';
+      priceEl.textContent = priceText;
+      row.appendChild(priceEl);
+
+      var btn = document.createElement('button');
+      btn.className = btnClass;
+      btn.textContent = btnLabel;
+      btn.addEventListener('click', onClick);
+      row.appendChild(btn);
+
+      return row;
+    }
+
+    // ── Seeds ──
+    var seedsSection = document.createElement('div');
+    seedsSection.className = 'shop-section';
+    var seedsHeader = document.createElement('h3');
+    seedsHeader.textContent = '🌱 Seeds';
+    seedsSection.appendChild(seedsHeader);
+
     seeds.forEach(function (item) {
-      html += '<div class="shop-item">' +
-        '<span class="item-icon">' + (item.icon || '🌱') + '</span>' +
-        '<span class="item-name">' + (item.name || item.id) + '</span>' +
-        '<span class="item-price">$' + (item.price || 0) + '</span>' +
-        '<button class="shop-buy-btn" onclick="GAME.UIManager.buySeed(\'' + (item.id || item.key) + '\')">Buy</button>' +
-        '</div>';
+      var itemId = item.id || item.key;
+      seedsSection.appendChild(buildShopItem(
+        item.icon || '🌱',
+        item.name || item.id,
+        null,
+        '$' + (item.price || 0),
+        'shop-buy-btn',
+        'Buy',
+        function () { self.buySeed(itemId); }
+      ));
     });
-    html += '</div>';
+    shopBody.appendChild(seedsSection);
 
     // ── Animals ──
-    html += '<div class="shop-section"><h3>🐑 Animals</h3>';
-    html += '<div class="shop-item"><span class="item-icon">🐔</span><span class="item-name">Chicken</span><span class="item-price">$50</span><button class="shop-buy-btn" onclick="GAME.UIManager.buyAnimal(\'chicken\')">Buy</button></div>';
-    html += '<div class="shop-item"><span class="item-icon">🐄</span><span class="item-name">Cow</span><span class="item-price">$200</span><button class="shop-buy-btn" onclick="GAME.UIManager.buyAnimal(\'cow\')">Buy</button></div>';
-    html += '<div class="shop-item"><span class="item-icon">🐑</span><span class="item-name">Sheep</span><span class="item-price">$150</span><button class="shop-buy-btn" onclick="GAME.UIManager.buyAnimal(\'sheep\')">Buy</button></div>';
-    html += '</div>';
+    var animalsSection = document.createElement('div');
+    animalsSection.className = 'shop-section';
+    var animalsHeader = document.createElement('h3');
+    animalsHeader.textContent = '🐑 Animals';
+    animalsSection.appendChild(animalsHeader);
+
+    var animals = [
+      { icon: '🐔', name: 'Chicken', price: 50, type: 'chicken' },
+      { icon: '🐄', name: 'Cow', price: 200, type: 'cow' },
+      { icon: '🐑', name: 'Sheep', price: 150, type: 'sheep' }
+    ];
+    animals.forEach(function (animal) {
+      animalsSection.appendChild(buildShopItem(
+        animal.icon,
+        animal.name,
+        null,
+        '$' + animal.price,
+        'shop-buy-btn',
+        'Buy',
+        function () { self.buyAnimal(animal.type); }
+      ));
+    });
+    shopBody.appendChild(animalsSection);
 
     // ── Sell ──
-    html += '<div class="shop-section"><h3>💰 Sell Produce</h3>';
+    var sellSection = document.createElement('div');
+    sellSection.className = 'shop-section';
+    var sellHeader = document.createElement('h3');
+    sellHeader.textContent = '💰 Sell Produce';
+    sellSection.appendChild(sellHeader);
+
     var sellItems = ['wheat', 'tomato', 'carrot', 'apple'];
     sellItems.forEach(function (id) {
       var qty = (GAME.state && GAME.state.inventory) ? (GAME.state.inventory[id] || 0) : 0;
       if (qty > 0) {
         var price = GAME.EconomySystem.sellPrice ? GAME.EconomySystem.sellPrice(id) : 25;
-        html += '<div class="shop-item">' +
-          '<span class="item-name">' + id + '</span>' +
-          '<span class="item-qty">x' + qty + '</span>' +
-          '<span class="item-price">$' + price + ' / ea</span>' +
-          '<button class="shop-sell-btn" onclick="GAME.UIManager.sellItem(\'' + id + '\')">Sell All</button>' +
-          '</div>';
+        sellSection.appendChild(buildShopItem(
+          null,
+          id,
+          'x' + qty,
+          '$' + price + ' / ea',
+          'shop-sell-btn',
+          'Sell All',
+          function () { self.sellItem(id); }
+        ));
       }
     });
-    html += '</div>';
-
-    shopBody.innerHTML = html;
+    shopBody.appendChild(sellSection);
   },
 
   _getDefaultSeeds: function () {
@@ -408,47 +483,81 @@ GAME.UIManager = {
 
   updateInventoryUI: function () {
     var inv = (GAME.state && GAME.state.inventory) ? GAME.state.inventory : {};
+    // كل عنصر مصدره جزء مختلف من inventory: المحاصيل من harvest، الأسمدة كائن فرعي
+    // بثلاثة أنواع (يُجمع لرقم واحد)، والمصنَّع/منتجات الحيوانات من crafted/animal
     var items = [
-      { key: 'wheat',      icon: '🌾', name: 'Wheat' },
-      { key: 'tomato',     icon: '🍅', name: 'Tomato' },
-      { key: 'carrot',     icon: '🥕', name: 'Carrot' },
-      { key: 'apple',      icon: '🍎', name: 'Apple' },
-      { key: 'corn',       icon: '🌽', name: 'Corn' },
-      { key: 'potato',     icon: '🥔', name: 'Potato' },
-      { key: 'strawberry', icon: '🍓', name: 'Strawberry' },
-      { key: 'fertilizer', icon: '🧪', name: 'Fertilizer' },
-      { key: 'bread',      icon: '🍞', name: 'Bread' },
-      { key: 'ketchup',    icon: '🥫', name: 'Ketchup' },
-      { key: 'juice',      icon: '🧃', name: 'Carrot Juice' },
-      { key: 'cheese',     icon: '🧀', name: 'Cheese' },
-      { key: 'milk',       icon: '🥛', name: 'Milk' },
-      { key: 'egg',        icon: '🥚', name: 'Egg' },
-      { key: 'wool',       icon: '🧶', name: 'Wool' }
+      { key: 'wheat',      path: 'harvest',    icon: '🌾', name: 'Wheat' },
+      { key: 'tomato',     path: 'harvest',    icon: '🍅', name: 'Tomato' },
+      { key: 'carrot',     path: 'harvest',    icon: '🥕', name: 'Carrot' },
+      { key: 'apple',      path: 'harvest',    icon: '🍎', name: 'Apple' },
+      { key: 'corn',       path: 'harvest',    icon: '🌽', name: 'Corn' },
+      { key: 'potato',     path: 'harvest',    icon: '🥔', name: 'Potato' },
+      { key: 'strawberry', path: 'harvest',    icon: '🍓', name: 'Strawberry' },
+      { key: 'fertilizer', path: 'fertilizer', icon: '🧪', name: 'Fertilizer', sum: true },
+      { key: 'bread',      path: 'crafted',    icon: '🍞', name: 'Bread' },
+      { key: 'ketchup',    path: 'crafted',    icon: '🥫', name: 'Ketchup' },
+      { key: 'juice',      path: 'crafted',    icon: '🧃', name: 'Carrot Juice' },
+      { key: 'cheese',     path: 'crafted',    icon: '🧀', name: 'Cheese' },
+      { key: 'milk',       path: 'animal',     icon: '🥛', name: 'Milk' },
+      { key: 'egg',        path: 'animal',     icon: '🥚', name: 'Egg' },
+      { key: 'wool',       path: 'animal',     icon: '🧶', name: 'Wool' }
     ];
 
     var self = this;
     items.forEach(function (item) {
       var el = document.getElementById('inv-' + item.key);
-      if (el) {
-        el.textContent = inv[item.key] || 0;
+      if (!el) return;
+      var group = inv[item.path] || {};
+      var value;
+      if (item.sum) {
+        value = 0;
+        for (var subKey in group) { value += group[subKey] || 0; }
+      } else {
+        value = group[item.key] || 0;
       }
+      el.textContent = value;
     });
 
     // تحديث واجهة المخزون الديناميكية (إذا وُجد grid)
     var grid = document.querySelector('.inventory-grid');
     if (grid) {
-      var html = '';
+      grid.textContent = '';
+      var hasItems = false;
       items.forEach(function (item) {
-        var qty = inv[item.key] || 0;
+        var itemGroup = inv[item.path] || {};
+        var qty = item.sum
+          ? Object.keys(itemGroup).reduce(function (sum, k) { return sum + (itemGroup[k] || 0); }, 0)
+          : (itemGroup[item.key] || 0);
         if (qty > 0) {
-          html += '<div class="inv-item" data-id="' + item.key + '">' +
-            '<div class="inv-item-icon">' + item.icon + '</div>' +
-            '<div class="inv-item-count">' + qty + '</div>' +
-            '<div class="inv-item-name">' + item.name + '</div>' +
-            '</div>';
+          hasItems = true;
+          var itemEl = document.createElement('div');
+          itemEl.className = 'inv-item';
+          itemEl.dataset.id = item.key;
+
+          var iconEl = document.createElement('div');
+          iconEl.className = 'inv-item-icon';
+          iconEl.textContent = item.icon;
+          itemEl.appendChild(iconEl);
+
+          var countEl = document.createElement('div');
+          countEl.className = 'inv-item-count';
+          countEl.textContent = qty;
+          itemEl.appendChild(countEl);
+
+          var nameEl = document.createElement('div');
+          nameEl.className = 'inv-item-name';
+          nameEl.textContent = item.name;
+          itemEl.appendChild(nameEl);
+
+          grid.appendChild(itemEl);
         }
       });
-      grid.innerHTML = html || '<p class="inv-empty">Inventory is empty</p>';
+      if (!hasItems) {
+        var emptyEl = document.createElement('p');
+        emptyEl.className = 'inv-empty';
+        emptyEl.textContent = 'Inventory is empty';
+        grid.appendChild(emptyEl);
+      }
     }
 
     // تحديث Crafting tab
@@ -498,35 +607,76 @@ GAME.UIManager = {
       var container = document.getElementById('inv-crafting');
       if (!container) return;
 
-      var html = '';
+      var self = this;
+      container.textContent = '';
+      var hasRecipes = false;
+
       for (var id in recipes) {
+        hasRecipes = true;
         var r = recipes[id];
         var check = GAME.CraftingSystem.canCraft(id);
         var canCraft = check && check.canCraft;
 
-        html += '<div class="craft-recipe' + (canCraft ? '' : ' craft-locked') + '" data-recipe="' + id + '">';
-        html += '<div class="craft-info">';
-        html += '<span class="craft-icon">' + (r.icon || '🔨') + '</span>';
-        html += '<span class="craft-name">' + (r.name || id) + '</span>';
+        var recipeEl = document.createElement('div');
+        recipeEl.className = 'craft-recipe' + (canCraft ? '' : ' craft-locked');
+        recipeEl.dataset.recipe = id;
+
+        var infoEl = document.createElement('div');
+        infoEl.className = 'craft-info';
+
+        var iconEl = document.createElement('span');
+        iconEl.className = 'craft-icon';
+        iconEl.textContent = r.icon || '🔨';
+        infoEl.appendChild(iconEl);
+
+        var nameEl = document.createElement('span');
+        nameEl.className = 'craft-name';
+        nameEl.textContent = r.name || id;
+        infoEl.appendChild(nameEl);
 
         // المكونات
         var inputs = r.inputs || {};
-        var inputStr = '';
+        var costEl = document.createElement('div');
+        costEl.className = 'craft-cost';
         for (var ing in inputs) {
           var have = inv[ing] || 0;
           var need = inputs[ing];
           var ok = have >= need;
-          inputStr += '<span class="craft-ingredient ' + (ok ? 'has' : 'missing') + '">' +
-            ing + ' ' + have + '/' + need + '</span> ';
+          var ingEl = document.createElement('span');
+          ingEl.className = 'craft-ingredient ' + (ok ? 'has' : 'missing');
+          ingEl.textContent = ing + ' ' + have + '/' + need;
+          costEl.appendChild(ingEl);
+          costEl.appendChild(document.createTextNode(' '));
         }
-        html += '<div class="craft-cost">' + inputStr + '</div>';
-        html += '<span class="craft-result">→ ' + (r.quantity || 1) + ' ' + (r.name || id) + '</span>';
-        html += '</div>';
-        html += '<button class="craft-btn" ' + (canCraft ? '' : 'disabled') +
-          ' onclick="GAME.UIManager.doCraft(\'' + id + '\')">Craft</button>';
-        html += '</div>';
+        infoEl.appendChild(costEl);
+
+        var resultEl = document.createElement('span');
+        resultEl.className = 'craft-result';
+        resultEl.textContent = '→ ' + (r.quantity || 1) + ' ' + (r.name || id);
+        infoEl.appendChild(resultEl);
+
+        recipeEl.appendChild(infoEl);
+
+        var btn = document.createElement('button');
+        btn.className = 'craft-btn';
+        btn.disabled = !canCraft;
+        btn.textContent = 'Craft';
+        (function (recipeId) {
+          btn.addEventListener('click', function () { self.doCraft(recipeId); });
+        })(id);
+        recipeEl.appendChild(btn);
+
+        container.appendChild(recipeEl);
       }
-      container.innerHTML = html || '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No recipes available</p>';
+
+      if (!hasRecipes) {
+        var emptyEl = document.createElement('p');
+        emptyEl.style.color = 'rgba(255,255,255,0.5)';
+        emptyEl.style.textAlign = 'center';
+        emptyEl.style.padding = '20px';
+        emptyEl.textContent = 'No recipes available';
+        container.appendChild(emptyEl);
+      }
       return;
     }
 
@@ -584,8 +734,15 @@ GAME.UIManager = {
     var container = document.getElementById('quests-list') || document.getElementById('inv-quests');
     if (!container) return;
 
+    container.textContent = '';
+
     if (!GAME.QuestSystem) {
-      container.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Quest system not loaded</p>';
+      var noSysEl = document.createElement('p');
+      noSysEl.style.color = 'rgba(255,255,255,0.5)';
+      noSysEl.style.textAlign = 'center';
+      noSysEl.style.padding = '20px';
+      noSysEl.textContent = 'Quest system not loaded';
+      container.appendChild(noSysEl);
       return;
     }
 
@@ -593,83 +750,96 @@ GAME.UIManager = {
       ? GAME.QuestSystem.getActiveQuests()
       : (GAME.QuestSystem.activeQuests || []);
 
-    var html = '';
+    function buildQuestCard(q, withComplete, withRewards) {
+      var progress = q.progress || 0;
+      var target = (q.target && q.target.amount) ? q.target.amount : 1;
+      var pct = Math.min(100, Math.round((progress / target) * 100));
+      var complete = pct >= 100;
+
+      var card = document.createElement('div');
+      card.className = 'quest-card' + (withComplete && complete ? ' quest-complete' : '');
+
+      var header = document.createElement('div');
+      header.className = 'quest-header';
+
+      var nameEl = document.createElement('span');
+      nameEl.className = 'quest-name';
+      nameEl.textContent = q.descriptionEn || q.description || q.id;
+      header.appendChild(nameEl);
+
+      var badgeEl = document.createElement('span');
+      badgeEl.className = 'quest-progress-badge';
+      badgeEl.textContent = progress + '/' + target;
+      header.appendChild(badgeEl);
+
+      card.appendChild(header);
+
+      var bar = document.createElement('div');
+      bar.className = 'quest-bar';
+      var barFill = document.createElement('div');
+      barFill.className = 'quest-bar-fill';
+      barFill.style.width = pct + '%';
+      bar.appendChild(barFill);
+      card.appendChild(bar);
+
+      if (withRewards && q.rewards) {
+        var rewardsEl = document.createElement('div');
+        rewardsEl.className = 'quest-rewards';
+        if (q.rewards.money) {
+          var moneyEl = document.createElement('span');
+          moneyEl.className = 'quest-reward';
+          moneyEl.textContent = '💰 $' + q.rewards.money;
+          rewardsEl.appendChild(moneyEl);
+        }
+        if (q.rewards.xp) {
+          var xpEl = document.createElement('span');
+          xpEl.className = 'quest-reward';
+          xpEl.textContent = '⭐ ' + q.rewards.xp + ' XP';
+          rewardsEl.appendChild(xpEl);
+        }
+        card.appendChild(rewardsEl);
+      }
+
+      return card;
+    }
+
+    function buildSection(title, list, withComplete, withRewards) {
+      if (list.length === 0) return null;
+      var section = document.createElement('div');
+      section.className = 'quest-section';
+      var h3 = document.createElement('h3');
+      h3.textContent = title;
+      section.appendChild(h3);
+      list.forEach(function (q) {
+        section.appendChild(buildQuestCard(q, withComplete, withRewards));
+      });
+      return section;
+    }
 
     // ── يومية ──
     var daily = quests.filter(function (q) { return q.type === 'daily'; });
-    if (daily.length > 0) {
-      html += '<div class="quest-section"><h3>📅 Daily Quests</h3>';
-      daily.forEach(function (q, i) {
-        var progress = q.progress || 0;
-        var target = (q.target && q.target.amount) ? q.target.amount : 1;
-        var pct = Math.min(100, Math.round((progress / target) * 100));
-        var complete = pct >= 100;
-
-        html += '<div class="quest-card' + (complete ? ' quest-complete' : '') + '">';
-        html += '<div class="quest-header">';
-        html += '<span class="quest-name">' + (q.descriptionEn || q.description || q.id) + '</span>';
-        html += '<span class="quest-progress-badge">' + progress + '/' + target + '</span>';
-        html += '</div>';
-        html += '<div class="quest-bar"><div class="quest-bar-fill" style="width:' + pct + '%"></div></div>';
-        if (q.rewards) {
-          html += '<div class="quest-rewards">';
-          if (q.rewards.money) html += '<span class="quest-reward">💰 $' + q.rewards.money + '</span>';
-          if (q.rewards.xp) html += '<span class="quest-reward">⭐ ' + q.rewards.xp + ' XP</span>';
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
     // ── أسبوعية ──
     var weekly = quests.filter(function (q) { return q.type === 'weekly'; });
-    if (weekly.length > 0) {
-      html += '<div class="quest-section"><h3>📆 Weekly Quests</h3>';
-      weekly.forEach(function (q) {
-        var progress = q.progress || 0;
-        var target = (q.target && q.target.amount) ? q.target.amount : 1;
-        var pct = Math.min(100, Math.round((progress / target) * 100));
-        var complete = pct >= 100;
-
-        html += '<div class="quest-card' + (complete ? ' quest-complete' : '') + '">';
-        html += '<div class="quest-header">';
-        html += '<span class="quest-name">' + (q.descriptionEn || q.description || q.id) + '</span>';
-        html += '<span class="quest-progress-badge">' + progress + '/' + target + '</span>';
-        html += '</div>';
-        html += '<div class="quest-bar"><div class="quest-bar-fill" style="width:' + pct + '%"></div></div>';
-        if (q.rewards) {
-          html += '<div class="quest-rewards">';
-          if (q.rewards.money) html += '<span class="quest-reward">💰 $' + q.rewards.money + '</span>';
-          if (q.rewards.xp) html += '<span class="quest-reward">⭐ ' + q.rewards.xp + ' XP</span>';
-          html += '</div>';
-        }
-        html += '</div>';
-      });
-      html += '</div>';
-    }
-
     // ── قصة ──
     var story = quests.filter(function (q) { return q.type === 'story'; });
-    if (story.length > 0) {
-      html += '<div class="quest-section"><h3>📖 Story Quests</h3>';
-      story.forEach(function (q) {
-        var progress = q.progress || 0;
-        var target = (q.target && q.target.amount) ? q.target.amount : 1;
-        var pct = Math.min(100, Math.round((progress / target) * 100));
 
-        html += '<div class="quest-card">';
-        html += '<div class="quest-header">';
-        html += '<span class="quest-name">' + (q.descriptionEn || q.description || q.id) + '</span>';
-        html += '<span class="quest-progress-badge">' + progress + '/' + target + '</span>';
-        html += '</div>';
-        html += '<div class="quest-bar"><div class="quest-bar-fill" style="width:' + pct + '%"></div></div>';
-        html += '</div>';
-      });
-      html += '</div>';
+    var dailySection = buildSection('📅 Daily Quests', daily, true, true);
+    var weeklySection = buildSection('📆 Weekly Quests', weekly, true, true);
+    var storySection = buildSection('📖 Story Quests', story, false, false);
+
+    var hasAny = false;
+    [dailySection, weeklySection, storySection].forEach(function (sec) {
+      if (sec) { container.appendChild(sec); hasAny = true; }
+    });
+
+    if (!hasAny) {
+      var emptyEl = document.createElement('p');
+      emptyEl.style.color = 'rgba(255,255,255,0.5)';
+      emptyEl.style.textAlign = 'center';
+      emptyEl.style.padding = '20px';
+      emptyEl.textContent = 'No active quests';
+      container.appendChild(emptyEl);
     }
-
-    container.innerHTML = html || '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No active quests</p>';
   },
 
   // ═══════════════════════════════════════════
@@ -710,8 +880,9 @@ GAME.UIManager = {
       }
     }
 
-    var html = '';
+    container.textContent = '';
     var categories = { farming: '🌾 Farming', animals: '🐄 Animals', economy: '💰 Economy', social: '💬 Social', exploration: '🗺️ Exploration' };
+    var hasAny = false;
 
     for (var cat in categories) {
       var catItems = [];
@@ -720,9 +891,14 @@ GAME.UIManager = {
         if (a.category === cat) catItems.push({ id: id, data: a });
       }
       if (catItems.length === 0) continue;
+      hasAny = true;
 
-      html += '<div class="achievement-section">';
-      html += '<h3>' + categories[cat] + '</h3>';
+      var section = document.createElement('div');
+      section.className = 'achievement-section';
+      var h3 = document.createElement('h3');
+      h3.textContent = categories[cat];
+      section.appendChild(h3);
+
       catItems.forEach(function (item) {
         var a = item.data;
         var unlocked = a.unlocked || a.earned || false;
@@ -730,23 +906,65 @@ GAME.UIManager = {
         var total = a.total || 1;
         var pct = Math.min(100, Math.round((progress / total) * 100));
 
-        html += '<div class="achievement-card' + (unlocked ? ' unlocked' : '') + '">';
-        html += '<div class="achievement-icon">' + (a.icon || '🏅') + '</div>';
-        html += '<div class="achievement-info">';
-        html += '<div class="achievement-name">' + (a.name || item.id) + '</div>';
-        html += '<div class="achievement-desc">' + (a.description || '') + '</div>';
+        var card = document.createElement('div');
+        card.className = 'achievement-card' + (unlocked ? ' unlocked' : '');
+
+        var iconEl = document.createElement('div');
+        iconEl.className = 'achievement-icon';
+        iconEl.textContent = a.icon || '🏅';
+        card.appendChild(iconEl);
+
+        var infoEl = document.createElement('div');
+        infoEl.className = 'achievement-info';
+
+        var nameEl = document.createElement('div');
+        nameEl.className = 'achievement-name';
+        nameEl.textContent = a.name || item.id;
+        infoEl.appendChild(nameEl);
+
+        var descEl = document.createElement('div');
+        descEl.className = 'achievement-desc';
+        descEl.textContent = a.description || '';
+        infoEl.appendChild(descEl);
+
         if (!unlocked && total > 1) {
-          html += '<div class="achievement-bar"><div class="achievement-bar-fill" style="width:' + pct + '%"></div></div>';
-          html += '<span class="achievement-progress-text">' + progress + ' / ' + total + '</span>';
+          var barEl = document.createElement('div');
+          barEl.className = 'achievement-bar';
+          var barFillEl = document.createElement('div');
+          barFillEl.className = 'achievement-bar-fill';
+          barFillEl.style.width = pct + '%';
+          barEl.appendChild(barFillEl);
+          infoEl.appendChild(barEl);
+
+          var progTextEl = document.createElement('span');
+          progTextEl.className = 'achievement-progress-text';
+          progTextEl.textContent = progress + ' / ' + total;
+          infoEl.appendChild(progTextEl);
         }
-        html += '</div>';
-        if (unlocked) html += '<div class="achievement-badge">✅</div>';
-        html += '</div>';
+
+        card.appendChild(infoEl);
+
+        if (unlocked) {
+          var badgeEl = document.createElement('div');
+          badgeEl.className = 'achievement-badge';
+          badgeEl.textContent = '✅';
+          card.appendChild(badgeEl);
+        }
+
+        section.appendChild(card);
       });
-      html += '</div>';
+
+      container.appendChild(section);
     }
 
-    container.innerHTML = html || '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No achievements yet — keep farming!</p>';
+    if (!hasAny) {
+      var emptyEl = document.createElement('p');
+      emptyEl.style.color = 'rgba(255,255,255,0.5)';
+      emptyEl.style.textAlign = 'center';
+      emptyEl.style.padding = '20px';
+      emptyEl.textContent = 'No achievements yet — keep farming!';
+      container.appendChild(emptyEl);
+    }
   },
 
   // ═══════════════════════════════════════════
@@ -800,14 +1018,24 @@ GAME.UIManager = {
     var grid = document.getElementById('upgrades-grid');
     if (!grid) return;
 
+    function showMessage(text) {
+      grid.textContent = '';
+      var msgEl = document.createElement('p');
+      msgEl.style.color = 'rgba(255,255,255,0.5)';
+      msgEl.style.textAlign = 'center';
+      msgEl.style.padding = '20px';
+      msgEl.textContent = text;
+      grid.appendChild(msgEl);
+    }
+
     if (!GAME.UpgradesSystem) {
-      grid.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">Upgrades system not loaded</p>';
+      showMessage('Upgrades system not loaded');
       return;
     }
 
     var data = GAME.UPGRADES_DATA ? GAME.UPGRADES_DATA[category] : null;
     if (!data) {
-      grid.innerHTML = '<p style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">No upgrades in this category</p>';
+      showMessage('No upgrades in this category');
       return;
     }
 
@@ -815,7 +1043,9 @@ GAME.UIManager = {
     var money = (GAME.state && GAME.state.money !== undefined) ? GAME.state.money : 0;
     var playerLevel = (GAME.state && GAME.state.level !== undefined) ? GAME.state.level : 1;
 
-    var html = '';
+    var self = this;
+    grid.textContent = '';
+
     for (var id in data) {
       var upg = data[id];
       var check = GAME.UpgradesSystem.canUpgrade ? GAME.UpgradesSystem.canUpgrade(category, id) : { canUpgrade: false, missing: [] };
@@ -826,52 +1056,90 @@ GAME.UIManager = {
       // فحص المستوى المطلوب
       var levelOk = !upg.requiredLevel || playerLevel >= upg.requiredLevel;
 
-      html += '<div class="upgrade-card' +
+      var card = document.createElement('div');
+      card.className = 'upgrade-card' +
         (isPurchased ? ' purchased' : '') +
-        (locked || !levelOk ? ' locked' : '') + '">';
-      html += '<div class="upgrade-icon">' + (upg.icon || '⬆️') + '</div>';
-      html += '<div class="upgrade-info">';
-      html += '<div class="upgrade-name">' + (upg.nameAr || upg.name || id) + '</div>';
-      html += '<div class="upgrade-desc">' + (upg.descriptionAr || upg.description || '') + '</div>';
+        (locked || !levelOk ? ' locked' : '');
+
+      var iconEl = document.createElement('div');
+      iconEl.className = 'upgrade-icon';
+      iconEl.textContent = upg.icon || '⬆️';
+      card.appendChild(iconEl);
+
+      var infoEl = document.createElement('div');
+      infoEl.className = 'upgrade-info';
+
+      var nameEl = document.createElement('div');
+      nameEl.className = 'upgrade-name';
+      nameEl.textContent = upg.nameAr || upg.name || id;
+      infoEl.appendChild(nameEl);
+
+      var descEl = document.createElement('div');
+      descEl.className = 'upgrade-desc';
+      descEl.textContent = upg.descriptionAr || upg.description || '';
+      infoEl.appendChild(descEl);
 
       // التكلفة
       if (upg.cost && !isPurchased) {
-        html += '<div class="upgrade-cost">';
+        var costEl = document.createElement('div');
+        costEl.className = 'upgrade-cost';
         if (upg.cost.money) {
           var hasMoney = money >= upg.cost.money;
-          html += '<span class="cost-item ' + (hasMoney ? 'has' : 'missing') + '">💰 $' + upg.cost.money + '</span>';
+          var moneyEl = document.createElement('span');
+          moneyEl.className = 'cost-item ' + (hasMoney ? 'has' : 'missing');
+          moneyEl.textContent = '💰 $' + upg.cost.money;
+          costEl.appendChild(moneyEl);
         }
         if (upg.cost.wood) {
           var hasWood = (state.wood || 0) >= upg.cost.wood;
-          html += '<span class="cost-item ' + (hasWood ? 'has' : 'missing') + '">🪵 ' + (state.wood || 0) + '/' + upg.cost.wood + '</span>';
+          var woodEl = document.createElement('span');
+          woodEl.className = 'cost-item ' + (hasWood ? 'has' : 'missing');
+          woodEl.textContent = '🪵 ' + (state.wood || 0) + '/' + upg.cost.wood;
+          costEl.appendChild(woodEl);
         }
         if (upg.cost.stone) {
           var hasStone = (state.stone || 0) >= upg.cost.stone;
-          html += '<span class="cost-item ' + (hasStone ? 'has' : 'missing') + '">🪨 ' + (state.stone || 0) + '/' + upg.cost.stone + '</span>';
+          var stoneEl = document.createElement('span');
+          stoneEl.className = 'cost-item ' + (hasStone ? 'has' : 'missing');
+          stoneEl.textContent = '🪨 ' + (state.stone || 0) + '/' + upg.cost.stone;
+          costEl.appendChild(stoneEl);
         }
-        html += '</div>';
+        infoEl.appendChild(costEl);
       }
 
       if (upg.requiredLevel && !levelOk) {
-        html += '<div class="upgrade-req">🔒 Requires Level ' + upg.requiredLevel + '</div>';
+        var reqLevelEl = document.createElement('div');
+        reqLevelEl.className = 'upgrade-req';
+        reqLevelEl.textContent = '🔒 Requires Level ' + upg.requiredLevel;
+        infoEl.appendChild(reqLevelEl);
       }
       if (locked && check.missing) {
-        html += '<div class="upgrade-req">🔒 Requires: ' + check.missing.join(', ') + '</div>';
+        var reqMissingEl = document.createElement('div');
+        reqMissingEl.className = 'upgrade-req';
+        reqMissingEl.textContent = '🔒 Requires: ' + check.missing.join(', ');
+        infoEl.appendChild(reqMissingEl);
       }
 
-      html += '</div>';
+      card.appendChild(infoEl);
 
       if (isPurchased) {
-        html += '<div class="upgrade-status purchased-badge">✅ Owned</div>';
+        var statusEl = document.createElement('div');
+        statusEl.className = 'upgrade-status purchased-badge';
+        statusEl.textContent = '✅ Owned';
+        card.appendChild(statusEl);
       } else {
-        html += '<button class="upgrade-buy-btn" ' + (canBuy && levelOk ? '' : 'disabled') +
-          ' onclick="GAME.UIManager.buyUpgrade(\'' + category + '\',\'' + id + '\')">Upgrade</button>';
+        var btn = document.createElement('button');
+        btn.className = 'upgrade-buy-btn';
+        btn.disabled = !(canBuy && levelOk);
+        btn.textContent = 'Upgrade';
+        (function (cat, upgradeId) {
+          btn.addEventListener('click', function () { self.buyUpgrade(cat, upgradeId); });
+        })(category, id);
+        card.appendChild(btn);
       }
 
-      html += '</div>';
+      grid.appendChild(card);
     }
-
-    grid.innerHTML = html;
   },
 
   buyUpgrade: function (category, upgradeId) {

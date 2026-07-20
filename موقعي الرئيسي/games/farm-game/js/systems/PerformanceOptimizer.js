@@ -347,8 +347,3 @@ const PerformanceOptimizer = {
 if (typeof GAME !== 'undefined') {
   GAME.PerformanceOptimizer = PerformanceOptimizer;
 }
-
-// تصدير للوحدات
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = PerformanceOptimizer;
-}

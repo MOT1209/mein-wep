@@ -284,45 +284,66 @@ GAME.TutorialSystem = {
     }
 
     // بناء محتوى التعليمة
-    var html = '';
-    html += '<div style="margin-bottom:6px;font-size:13px;opacity:0.7;letter-spacing:1px;">';
-    html += 'STEP ' + stepNum + ' / ' + total;
-    html += '</div>';
-    html += '<div style="font-size:28px;margin-bottom:6px;">' + step.icon + '</div>';
-    html += '<div style="font-size:18px;font-weight:700;margin-bottom:6px;">' + step.title + '</div>';
-    html += '<div style="font-size:14px;opacity:0.9;margin-bottom:10px;line-height:1.5;">' + desc + '</div>';
-    html += '<div style="font-size:12px;opacity:0.6;font-style:italic;">💡 ' + tip + '</div>';
-
-    // أزرار التحكم
-    html += '<div style="margin-top:14px;display:flex;gap:10px;justify-content:center;">';
-
-    // زر التخطي
-    html += '<button id="tutorial-skip-btn" style="';
-    html += 'padding:8px 20px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;';
-    html += 'background:rgba(255,255,255,0.1);color:#fff;font-size:13px;cursor:pointer;';
-    html += 'transition:background 0.2s;"';
-    html += 'onmouseover="this.style.background=\'rgba(255,255,255,0.2)\'"';
-    html += 'onmouseout="this.style.background=\'rgba(255,255,255,0.1)\'"';
-    html += '>Skip Tutorial ✕</button>';
-
-    // زر المتابعة (للخطوات بدون إجراء)
-    if (!step.action) {
-      html += '<button id="tutorial-next-btn" style="';
-      html += 'padding:8px 24px;border:none;border-radius:8px;';
-      html += 'background:linear-gradient(135deg,#4CAF50,#8BC34A);color:#fff;';
-      html += 'font-size:13px;font-weight:600;cursor:pointer;';
-      html += 'transition:transform 0.2s,box-shadow 0.2s;';
-      html += 'box-shadow:0 4px 12px rgba(76,175,80,0.4);"';
-      html += 'onmouseover="this.style.transform=\'scale(1.05)\'"';
-      html += 'onmouseout="this.style.transform=\'scale(1)\'"';
-      html += '>OK →</button>';
-    }
-
-    html += '</div>';
-
-    // عرض التعليمة
     if (this.tooltipEl) {
-      this.tooltipEl.innerHTML = html;
+      this.tooltipEl.textContent = '';
+
+      var stepCounter = document.createElement('div');
+      stepCounter.style.cssText = 'margin-bottom:6px;font-size:13px;opacity:0.7;letter-spacing:1px;';
+      stepCounter.textContent = 'STEP ' + stepNum + ' / ' + total;
+      this.tooltipEl.appendChild(stepCounter);
+
+      var iconDiv = document.createElement('div');
+      iconDiv.style.cssText = 'font-size:28px;margin-bottom:6px;';
+      iconDiv.textContent = step.icon;
+      this.tooltipEl.appendChild(iconDiv);
+
+      var titleDiv = document.createElement('div');
+      titleDiv.style.cssText = 'font-size:18px;font-weight:700;margin-bottom:6px;';
+      titleDiv.textContent = step.title;
+      this.tooltipEl.appendChild(titleDiv);
+
+      var descDiv = document.createElement('div');
+      descDiv.style.cssText = 'font-size:14px;opacity:0.9;margin-bottom:10px;line-height:1.5;';
+      descDiv.textContent = desc;
+      this.tooltipEl.appendChild(descDiv);
+
+      var tipDiv = document.createElement('div');
+      tipDiv.style.cssText = 'font-size:12px;opacity:0.6;font-style:italic;';
+      tipDiv.textContent = '💡 ' + tip;
+      this.tooltipEl.appendChild(tipDiv);
+
+      // أزرار التحكم
+      var btnRow = document.createElement('div');
+      btnRow.style.cssText = 'margin-top:14px;display:flex;gap:10px;justify-content:center;';
+
+      // زر التخطي
+      var skipButton = document.createElement('button');
+      skipButton.id = 'tutorial-skip-btn';
+      skipButton.style.cssText = 'padding:8px 20px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;' +
+        'background:rgba(255,255,255,0.1);color:#fff;font-size:13px;cursor:pointer;' +
+        'transition:background 0.2s;';
+      skipButton.textContent = 'Skip Tutorial ✕';
+      skipButton.addEventListener('mouseover', function() { skipButton.style.background = 'rgba(255,255,255,0.2)'; });
+      skipButton.addEventListener('mouseout', function() { skipButton.style.background = 'rgba(255,255,255,0.1)'; });
+      btnRow.appendChild(skipButton);
+
+      // زر المتابعة (للخطوات بدون إجراء)
+      if (!step.action) {
+        var nextButton = document.createElement('button');
+        nextButton.id = 'tutorial-next-btn';
+        nextButton.style.cssText = 'padding:8px 24px;border:none;border-radius:8px;' +
+          'background:linear-gradient(135deg,#4CAF50,#8BC34A);color:#fff;' +
+          'font-size:13px;font-weight:600;cursor:pointer;' +
+          'transition:transform 0.2s,box-shadow 0.2s;' +
+          'box-shadow:0 4px 12px rgba(76,175,80,0.4);';
+        nextButton.textContent = 'OK →';
+        nextButton.addEventListener('mouseover', function() { nextButton.style.transform = 'scale(1.05)'; });
+        nextButton.addEventListener('mouseout', function() { nextButton.style.transform = 'scale(1)'; });
+        btnRow.appendChild(nextButton);
+      }
+
+      this.tooltipEl.appendChild(btnRow);
+
       this.tooltipEl.style.transform = 'translateY(0)';
       this.tooltipEl.style.opacity = '1';
     }

@@ -553,8 +553,16 @@ GAME.NotificationSystem = {
     var self = this;
     var el = document.createElement('div');
     el.className = 'notification-grouped';
-    el.innerHTML = '<span>' + groupData.message + '</span><span class="group-count">x' + groupData.count + '</span>';
-    
+
+    var msgSpan = document.createElement('span');
+    msgSpan.textContent = groupData.message;
+    el.appendChild(msgSpan);
+
+    var countSpan = document.createElement('span');
+    countSpan.className = 'group-count';
+    countSpan.textContent = 'x' + groupData.count;
+    el.appendChild(countSpan);
+
     this.groupContainer.appendChild(el);
     groupData.element = el;
     
@@ -837,8 +845,3 @@ GAME.NotificationSystem = {
     this.groupedNotifications = {};
   }
 };
-
-// تصدير للاستخدام كوحدة
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = GAME.NotificationSystem;
-}
