@@ -57,6 +57,9 @@
     { "source": "/games/rust-construction", "destination": "/games/rust-game" },
     { "source": "/games/rust-construction/", "destination": "/games/rust-game/" },
     { "source": "/games/rust-construction/:path*", "destination": "/games/rust-game/:path*" },
+    { "source": "/farm-game", "destination": "/games/farm-game/" },
+    { "source": "/farm-game/", "destination": "/games/farm-game/" },
+    { "source": "/farm-game/:path*", "destination": "/games/farm-game/:path*" },
 
     { "source": "/downloads", "destination": "/downloads.html" },
     { "source": "/downloads/", "destination": "/downloads.html" },
