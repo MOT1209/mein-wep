@@ -9,12 +9,29 @@
 size = Vector3(40, 0.2, 40)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(213.76709, 0.2, 40)
+size = Vector3(40, 0.2, 40)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
 albedo_color = Color(0.32, 0.55, 0.25, 1)
 
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_env"]
+sky_top_color = Color(0.38, 0.58, 0.92, 1)
+sky_horizon_color = Color(0.75, 0.82, 0.85, 1)
+ground_bottom_color = Color(0.3, 0.28, 0.25, 1)
+ground_horizon_color = Color(0.75, 0.82, 0.85, 1)
+
+[sub_resource type="Sky" id="Sky_env"]
+sky_material = SubResource("ProceduralSkyMaterial_env")
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 2
+sky = SubResource("Sky_env")
+ambient_light_energy = 0.6
+
 [node name="Main" type="Node3D" unique_id=1648700760]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1852102903]
 
@@ -22,7 +39,6 @@ albedo_color = Color(0.32, 0.55, 0.25, 1)
 shape = SubResource("BoxShape3D_ground")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=308892676]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9.803001, 0, 0)
 mesh = SubResource("BoxMesh_ground")
 surface_material_override/0 = SubResource("StandardMaterial3D_ground")
 
