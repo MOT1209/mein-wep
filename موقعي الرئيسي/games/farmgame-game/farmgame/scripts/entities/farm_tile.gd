@@ -2,6 +2,8 @@ extends StaticBody3D
 ## قطعة أرض واحدة في شبكة المزرعة: حرث -> غراسة -> نمو -> حصاد
 
 const CropScene: PackedScene = preload("res://scenes/entities/crop.tscn")
+const GrassMaterial: Material = preload("res://assets/materials/grass_tile.tres")
+const SoilMaterial: Material = preload("res://assets/materials/soil_tilled.tres")
 
 enum State { EMPTY, TILLED, PLANTED }
 
@@ -62,8 +64,6 @@ func _update_visual() -> void:
 		return
 	match state:
 		State.EMPTY:
-			mesh_instance.material_override = null
+			mesh_instance.material_override = GrassMaterial
 		State.TILLED, State.PLANTED:
-			var mat: StandardMaterial3D = StandardMaterial3D.new()
-			mat.albedo_color = Color(0.36, 0.24, 0.14)
-			mesh_instance.material_override = mat
+			mesh_instance.material_override = SoilMaterial

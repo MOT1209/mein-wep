@@ -1,7 +1,8 @@
 extends Node3D
 ## محصول مزروع في التربة: ينمو بمرور الأيام ويمكن حصاده عند النضج
 
-@onready var mesh_instance: MeshInstance3D = $MeshInstance3D
+@onready var stage_a: Node3D = $StageA
+@onready var stage_b: Node3D = $StageB
 
 var crop_id: String = "wheat"
 var crop_info: Dictionary = {}
@@ -37,11 +38,21 @@ func _on_day_changed(_day: int, _day_of_week: int) -> void:
 
 
 func _update_visual() -> void:
-	if mesh_instance == null:
+	if stage_a == null or stage_b == null:
 		return
+
 	var total_stages: int = maxi(crop_info.get("growth_stages", 5), 1)
-	var scale_ratio: float = 0.2 + (0.8 * float(growth_stage) / float(total_stages - 1) if total_stages > 1 else 1.0)
-	mesh_instance.scale = Vector3.ONE * scale_ratio
+	var midpoint: int = maxi(int(ceil(total_stages / 2.0)), 1)
+	var use_stage_b: bool = growth_stage >= midpoint
+
+	stage_a.visible = not use_stage_b
+	stage_b.visible = use_stage_b
+
+	var active: Node3D = stage_b if use_stage_b else stage_a
+	var phase_stage_count: int = (total_stages - midpoint) if use_stage_b else midpoint
+	var phase_index: int = (growth_stage - midpoint) if use_stage_b else growth_stage
+	var scale_ratio: float = 0.4 + 0.6 * (float(phase_index) / float(maxi(phase_stage_count - 1, 1)))
+	active.scale = Vector3.ONE * scale_ratio
 
 
 func interact(_player: Node) -> void:

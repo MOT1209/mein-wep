@@ -1,15 +1,13 @@
 [gd_scene format=3 uid="uid://c1x2v3n4h5j6k"]
 
 [ext_resource type="Script" path="res://scripts/entities/crop.gd" id="1_crop"]
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_1"]
-top_radius = 0.05
-bottom_radius = 0.15
-height = 0.6
+[ext_resource type="PackedScene" path="res://assets/models/crops/crops_wheatStageA.glb" id="2_stageA"]
+[ext_resource type="PackedScene" path="res://assets/models/crops/crops_wheatStageB.glb" id="3_stageB"]
 
 [node name="Crop" type="Node3D"]
 script = ExtResource("1_crop")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
-mesh = SubResource("CylinderMesh_1")
+[node name="StageA" parent="." instance=ExtResource("2_stageA")]
+
+[node name="StageB" parent="." instance=ExtResource("3_stageB")]
+visible = false

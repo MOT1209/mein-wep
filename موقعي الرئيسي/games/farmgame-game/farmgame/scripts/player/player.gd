@@ -10,6 +10,7 @@ const INTERACTION_ENERGY_COST: float = 2.0
 @onready var camera: Camera3D = $CameraPivot/Camera3D
 @onready var interaction_ray: RayCast3D = $CameraPivot/Camera3D/InteractionRay
 @onready var stats: Node = $PlayerStats
+@onready var animation_player: AnimationPlayer = $CharacterModel/AnimationPlayer
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 
@@ -50,8 +51,16 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
+	_update_animation(direction != Vector3.ZERO)
+
 	move_and_slide()
 	EventBus.player_moved.emit(global_position)
+
+
+func _update_animation(is_moving: bool) -> void:
+	var target_animation: String = "walk" if is_moving else "idle"
+	if animation_player.current_animation != target_animation:
+		animation_player.play(target_animation)
 
 
 func _try_interact() -> void:

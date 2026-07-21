@@ -4,15 +4,8 @@
 [ext_resource type="PackedScene" uid="uid://bdgea7yrdt3b7" path="res://scenes/world/farm.tscn" id="2_farm"]
 [ext_resource type="Script" uid="uid://begxxhr16vd45" path="res://scripts/core/day_night_light.gd" id="3_light"]
 [ext_resource type="PackedScene" uid="uid://dd3ewxmr0uqcu" path="res://scenes/ui/hud.tscn" id="4_hud"]
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(40, 0.2, 40)
-
-[sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(40, 0.2, 40)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ground"]
-albedo_color = Color(0.32, 0.55, 0.25, 1)
+[ext_resource type="Material" path="res://assets/materials/grass_ground.tres" id="5_grass_mat"]
+[ext_resource type="Script" path="res://scripts/core/nature_scatter.gd" id="6_scatter"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_env"]
 sky_top_color = Color(0.38, 0.58, 0.92, 1)
@@ -28,9 +21,15 @@ background_mode = 2
 sky = SubResource("Sky_env")
 ambient_light_energy = 0.6
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
+size = Vector3(40, 0.2, 40)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ground"]
+size = Vector3(40, 0.2, 40)
+
 [node name="Main" type="Node3D" unique_id=1648700760]
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1000443610]
 environment = SubResource("Environment_main")
 
 [node name="Ground" type="StaticBody3D" parent="." unique_id=1852102903]
@@ -40,12 +39,15 @@ shape = SubResource("BoxShape3D_ground")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Ground" unique_id=308892676]
 mesh = SubResource("BoxMesh_ground")
-surface_material_override/0 = SubResource("StandardMaterial3D_ground")
+surface_material_override/0 = ExtResource("5_grass_mat")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1109472319]
 transform = Transform3D(1, 0, 0, 0, 0.7071, 0.7071, 0, -0.7071, 0.7071, 0, 5, 0)
 shadow_enabled = true
 script = ExtResource("3_light")
+
+[node name="NatureScatter" type="Node3D" parent="."]
+script = ExtResource("6_scatter")
 
 [node name="Farm" parent="." unique_id=1084475428 instance=ExtResource("2_farm")]
 
