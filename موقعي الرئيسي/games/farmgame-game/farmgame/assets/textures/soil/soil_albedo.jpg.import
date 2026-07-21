@@ -3,15 +3,16 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dr570h3e8iin6"
-path="res://.godot/imported/soil_albedo.jpg-38cacc4c4eec5014f780c913d611d7c5.ctex"
+path.s3tc="res://.godot/imported/soil_albedo.jpg-38cacc4c4eec5014f780c913d611d7c5.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/textures/soil/soil_albedo.jpg"
-dest_files=["res://.godot/imported/soil_albedo.jpg-38cacc4c4eec5014f780c913d611d7c5.ctex"]
+dest_files=["res://.godot/imported/soil_albedo.jpg-38cacc4c4eec5014f780c913d611d7c5.s3tc.ctex"]
 
 [params]
 
