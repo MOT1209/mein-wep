@@ -19,13 +19,13 @@ func _ready() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
+		return
+
 	if event is InputEventMouseMotion:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		camera_pivot.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
 		camera_pivot.rotation.x = clampf(camera_pivot.rotation.x, deg_to_rad(-80), deg_to_rad(80))
-
-	if event.is_action_pressed("ui_cancel"):
-		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if Input.mouse_mode == Input.MOUSE_MODE_CAPTURED else Input.MOUSE_MODE_CAPTURED
 
 	if event.is_action_pressed("interact"):
 		_try_interact()
@@ -35,10 +35,12 @@ func _physics_process(delta: float) -> void:
 	if not is_on_floor():
 		velocity.y -= gravity * delta
 
-	if Input.is_action_just_pressed("jump") and is_on_floor():
+	var menu_open: bool = Input.mouse_mode != Input.MOUSE_MODE_CAPTURED
+
+	if not menu_open and Input.is_action_just_pressed("jump") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
 
-	var input_dir: Vector2 = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var input_dir: Vector2 = Vector2.ZERO if menu_open else Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var direction: Vector3 = (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	if direction:

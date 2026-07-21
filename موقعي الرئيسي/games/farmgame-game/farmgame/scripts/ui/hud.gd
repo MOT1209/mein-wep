@@ -6,6 +6,9 @@ extends Control
 @onready var money_label: Label = $TopBar/MoneyLabel
 @onready var energy_bar: ProgressBar = $BottomBar/EnergyBar
 @onready var hunger_bar: ProgressBar = $BottomBar/HungerBar
+@onready var inventory_panel: Control = $InventoryPanel
+@onready var shop_panel: Control = $ShopPanel
+@onready var pause_menu: Control = $PauseMenu
 
 
 func _ready() -> void:
@@ -14,10 +17,42 @@ func _ready() -> void:
 	EventBus.season_changed.connect(_on_season_changed)
 	EventBus.money_changed.connect(_on_money_changed)
 	EventBus.player_stats_changed.connect(_on_player_stats_changed)
+	pause_menu.resume_requested.connect(_close_all_menus)
 
 	_on_hour_changed(TimeSystem.current_hour)
 	_on_day_changed(TimeSystem.current_day, TimeSystem.current_day_of_week)
 	_on_money_changed(EconomySystem.money)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_inventory"):
+		_toggle_menu(inventory_panel)
+	elif event.is_action_pressed("toggle_shop"):
+		_toggle_menu(shop_panel)
+	elif event.is_action_pressed("ui_cancel"):
+		if inventory_panel.visible or shop_panel.visible:
+			_close_all_menus()
+		else:
+			_toggle_menu(pause_menu)
+
+
+func _toggle_menu(menu: Control) -> void:
+	if menu.visible:
+		_close_all_menus()
+		return
+
+	_close_all_menus()
+	menu.open()
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	TimeSystem.pause()
+
+
+func _close_all_menus() -> void:
+	inventory_panel.close()
+	shop_panel.close()
+	pause_menu.close()
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	TimeSystem.resume()
 
 
 func _on_hour_changed(_hour: int) -> void:
