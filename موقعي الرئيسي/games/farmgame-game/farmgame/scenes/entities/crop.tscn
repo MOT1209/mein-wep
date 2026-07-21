@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://c1x2v3n4h5j6k"]
+
+[ext_resource type="Script" path="res://scripts/entities/crop.gd" id="1_crop"]
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_1"]
+top_radius = 0.05
+bottom_radius = 0.15
+height = 0.6
+
+[node name="Crop" type="Node3D"]
+script = ExtResource("1_crop")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+mesh = SubResource("CylinderMesh_1")

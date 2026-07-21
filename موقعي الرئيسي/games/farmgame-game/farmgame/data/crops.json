@@ -1,0 +1,12 @@
+{
+	"wheat": {
+		"name": "Wheat",
+		"growth_stages": 5,
+		"days_to_mature": 10,
+		"season": "Spring",
+		"sell_price": 100,
+		"seed_id": "wheat_seed",
+		"seed_cost": 20,
+		"yield_item": "wheat"
+	}
+}

@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://8b25sy62v81"]
+
+[ext_resource type="Script" path="res://scripts/entities/farm_tile.gd" id="1_tile"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(1.8, 0.1, 1.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_1"]
+size = Vector3(1.8, 0.1, 1.8)
+
+[node name="FarmTile" type="StaticBody3D"]
+script = ExtResource("1_tile")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_1")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_1")
