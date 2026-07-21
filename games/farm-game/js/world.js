@@ -78,11 +78,16 @@ GAME.world = {
   },
 
   // ---- تحميل نسيج CC0 وتطبيقه على مادة موجودة (غير متزامن — لا يوقف الرسم) ----
+  // ملاحظة: TextureStreaming يخزّن ويرجع نفس كائن Texture لكل طلبات نفس الملف،
+  // فإذا عدّلنا .repeat على الكائن المشترك مباشرة، كل الأسطح اللي تستخدم نفس الملف
+  // بتتأثر بآخر تكرار انضبط (مهما كان تكرارها المطلوب). لازم كل سطح ياخذ استنساخاً خاصاً به.
   _applyTexture: function(mat, path, repeatX, repeatY) {
     if (!GAME.TextureStreaming) return;
     GAME.TextureStreaming.loadTexture(path).then(function(tex) {
-      tex.repeat.set(repeatX, repeatY);
-      mat.map = tex;
+      var t = tex.clone();
+      t.needsUpdate = true;
+      t.repeat.set(repeatX, repeatY);
+      mat.map = t;
       mat.needsUpdate = true;
     }).catch(function() {});
   },
