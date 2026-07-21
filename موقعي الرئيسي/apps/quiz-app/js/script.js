@@ -712,7 +712,7 @@ function openLevelSelect(category) {
     }
     const meta = CATEGORY_META[category] || { label: category, icon: 'fas fa-layer-group' };
     const titleEl = document.getElementById('level-title');
-    if (titleEl) titleEl.innerHTML = `<i class="${meta.icon}"></i> ${meta.label}`;
+    if (titleEl) titleEl.innerHTML = `<i class="${meta.icon}"></i> ${escapeHTML(meta.label)}`;
 
     const grid = document.getElementById('level-grid');
     const unlocked = getUnlockedLevel(category);

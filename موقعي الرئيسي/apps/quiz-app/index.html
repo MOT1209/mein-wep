@@ -312,6 +312,12 @@
 
     <!-- Mobile Navigation Functions -->
     <script>
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.appendChild(document.createTextNode(String(str)));
+            return div.innerHTML;
+        }
+
         const CATEGORY_LABELS = {
             programming: 'البرمجة', general: 'ثقافة عامة', science: 'العلوم',
             history: 'التاريخ', islamic: 'إسلاميات', sports: 'رياضة'
@@ -360,12 +366,12 @@
             const pct = r.isMax ? 100 : Math.round((r.into / r.span) * 100);
             const nextLine = r.isMax
                 ? 'أعلى رتبة — أنت من النخبة! 👑'
-                : `${r.into}/${r.span} XP للوصول إلى <b>${r.next}</b>`;
+                : `${r.into}/${r.span} XP للوصول إلى <b>${escapeHTML(r.next)}</b>`;
             return `
                 <div class="rank-card">
                     <div class="rank-icon">${r.icon}</div>
                     <div class="rank-info">
-                        <div class="rank-name">${r.name}</div>
+                        <div class="rank-name">${escapeHTML(r.name)}</div>
                         <div class="rank-xp">${r.xp} XP</div>
                         <div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%"></div></div>
                         <div class="rank-next">${nextLine}</div>
@@ -380,10 +386,11 @@
                 const unlocked = Math.min(QuizApp.getUnlockedLevel(cat) + 1, total);
                 const best = QuizApp.getBestScore(cat);
                 const pct = Math.round((unlocked / total) * 100);
+                const label = escapeHTML(CATEGORY_LABELS[cat] || cat);
                 return `
                     <div class="progress-row">
                         <div class="progress-row-head">
-                            <strong>${CATEGORY_LABELS[cat] || cat}</strong>
+                            <strong>${label}</strong>
                             <span>المستوى ${unlocked}/${total}</span>
                         </div>
                         <div class="mini-bar"><div class="mini-bar-fill" style="width:${pct}%"></div></div>
@@ -411,8 +418,8 @@
                 return `
                     <div class="lb-row${isMe}">
                         <div class="lb-pos">${rankMark}</div>
-                        <div class="lb-name">${e.name}</div>
-                        <div class="lb-meta">${QuizApp.categoryLabel(e.category)} · م${e.level}</div>
+                        <div class="lb-name">${escapeHTML(e.name)}</div>
+                        <div class="lb-meta">${escapeHTML(QuizApp.categoryLabel(e.category))} · م${e.level}</div>
                         <div class="lb-score">${e.score}/${e.total}</div>
                     </div>`;
             }).join('');
@@ -424,12 +431,12 @@
             const review = QuizApp.getLastReview();
             if (!review.length) { openModal('مراجعة الإجابات', '<p>لا توجد إجابات للمراجعة.</p>'); return; }
             const html = review.map((item, i) => {
-                const correctTxt = item.options[item.correct];
+                const correctTxt = escapeHTML(item.options[item.correct]);
                 const isRight = item.chosen === item.correct;
-                const chosenTxt = item.chosen >= 0 ? item.options[item.chosen] : 'لم تُجب (انتهى الوقت)';
+                const chosenTxt = item.chosen >= 0 ? escapeHTML(item.options[item.chosen]) : 'لم تُجب (انتهى الوقت)';
                 return `
                     <div class="review-item ${isRight ? 'right' : 'wrong'}">
-                        <div class="review-q"><span class="review-num">${i + 1}</span> ${item.question}</div>
+                        <div class="review-q"><span class="review-num">${i + 1}</span> ${escapeHTML(item.question)}</div>
                         ${isRight
                             ? `<div class="review-line ok"><i class="fas fa-check"></i> ${correctTxt}</div>`
                             : `<div class="review-line bad"><i class="fas fa-xmark"></i> إجابتك: ${chosenTxt}</div>
@@ -558,7 +565,7 @@
             const rankBox = document.getElementById('welcome-rank');
             if (saved && rankBox) {
                 const r = QuizApp.getRank();
-                rankBox.innerHTML = `أهلاً بعودتك، <b>${saved}</b> · ${r.icon} ${r.name} (${r.xp} XP)`;
+                rankBox.textContent = `أهلاً بعودتك، ${saved} · ${r.icon} ${r.name} (${r.xp} XP)`;
                 rankBox.style.display = 'block';
             }
 
