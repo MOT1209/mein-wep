@@ -579,9 +579,9 @@ GAME.EnhancedSaveSystem = {
         game.state.xp = data.player.xp || 0;
         game.state.level = data.player.level || 1;
         game.state.day = data.player.day || 1;
-        game.state.time = data.player.time || 6;
+        game.state.time = data.player.time || 8;
         game.state.selectedTool = data.player.selectedTool || 0;
-        game.state.timeScale = data.player.timeScale || 60;
+        game.state.timeScale = data.player.timeScale || 5;
 
         // استعادة موقع اللاعب
         if (data.player.position && GAME.player && GAME.player.mesh) {

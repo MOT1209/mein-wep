@@ -77,6 +77,21 @@ GAME.world = {
     return { r: r * v, g: g * v, b: b * v };
   },
 
+  // ---- تحميل نسيج CC0 وتطبيقه على مادة موجودة (غير متزامن — لا يوقف الرسم) ----
+  // ملاحظة: TextureStreaming يخزّن ويرجع نفس كائن Texture لكل طلبات نفس الملف،
+  // فإذا عدّلنا .repeat على الكائن المشترك مباشرة، كل الأسطح اللي تستخدم نفس الملف
+  // بتتأثر بآخر تكرار انضبط (مهما كان تكرارها المطلوب). لازم كل سطح ياخذ استنساخاً خاصاً به.
+  _applyTexture: function(mat, path, repeatX, repeatY) {
+    if (!GAME.TextureStreaming) return;
+    GAME.TextureStreaming.loadTexture(path).then(function(tex) {
+      var t = tex.clone();
+      t.needsUpdate = true;
+      t.repeat.set(repeatX, repeatY);
+      mat.map = t;
+      mat.needsUpdate = true;
+    }).catch(function() {});
+  },
+
   // ============================================================
   // 🌄 Sky (unchanged from v2 — dynamic day/night shader)
   // ============================================================
@@ -227,6 +242,10 @@ GAME.world = {
     this.scene.add(mesh);
     this.objects.push(mesh);
     this.terrainMesh = mesh;
+
+    // ملاحظة: جُرِّب نسيج عشب حقيقي هنا (grass.jpg) لكنه كان يُسبب سواداً كاملاً لمعظم الأرض
+    // في اختبارات حية متكررة (بينما نفس آلية التحميل تعمل بشكل صحيح مع wood/dirt/path/roof) —
+    // لم يُحدَّد السبب الجذري بثقة، فأُبقيت الأرض بتدرّج الألوان الإجرائي المضمون العمل بدل المخاطرة.
   },
 
   // ============================================================
@@ -241,12 +260,14 @@ GAME.world = {
     wall.castShadow = true;
     wall.receiveShadow = true;
     group.add(wall);
+    this._applyTexture(wallMat, 'assets/textures/wood.jpg', Math.max(1, Math.round(Math.max(w, d) / 1.5)), Math.max(1, Math.round(height / 1.5)));
     var roofMat = new THREE.MeshLambertMaterial({ color: roofColor });
     var roof = new THREE.Mesh(new THREE.ConeGeometry(Math.max(w, d) * 0.7, 1.8, 4), roofMat);
     roof.position.y = height + 0.9;
     roof.rotation.y = Math.PI / 4;
     roof.castShadow = true;
     group.add(roof);
+    this._applyTexture(roofMat, 'assets/textures/roof.jpg', 4, 2);
     group.position.set(x, 0, z);
     this.scene.add(group);
     this.objects.push(group);
@@ -473,6 +494,7 @@ GAME.world = {
         group.add(post);
       }
     }
+    this._applyTexture(postMat, 'assets/textures/wood.jpg', 1, 3);
     var roof = new THREE.Mesh(new THREE.BoxGeometry(5, 0.2, 5), roofMat);
     roof.position.y = 2.6; roof.castShadow = true; roof.receiveShadow = true;
     group.add(roof);
@@ -484,7 +506,7 @@ GAME.world = {
       side.rotation.y = -angle;
       group.add(side);
     }
-    var counter = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 0.8), new THREE.MeshLambertMaterial({ color: 0x8B7355 }));
+    var counter = new THREE.Mesh(new THREE.BoxGeometry(2, 0.8, 0.8), postMat);
     counter.position.set(0, 0.4, 0.5);
     group.add(counter);
     group.position.set(0, 0, -22);
@@ -518,6 +540,7 @@ GAME.world = {
     edgeInst.instanceMatrix.needsUpdate = true;
     this.scene.add(dirtInst); this.objects.push(dirtInst);
     this.scene.add(edgeInst); this.objects.push(edgeInst);
+    this._applyTexture(dirtMat, 'assets/textures/dirt.jpg', 2, 2);
 
     // Fence around plots
     var fenceMat = new THREE.MeshLambertMaterial({ color: 0x8B7355 });
@@ -536,6 +559,7 @@ GAME.world = {
       f.castShadow = true;
       this.scene.add(f); this.objects.push(f);
     }
+    this._applyTexture(fenceMat, 'assets/textures/wood.jpg', 6, 1);
   },
 
   // ============================================================
@@ -774,11 +798,11 @@ GAME.world = {
       [22, 5], [-8, -5], [8, -5]
     ];
     for (var i = 0; i < bushPositions.length; i++) {
+      var bushColor = new THREE.Color();
+      bushColor.setHSL(0.28 + Math.random() * 0.08, 0.45 + Math.random() * 0.2, 0.22 + Math.random() * 0.12);
       var bush = new THREE.Mesh(
         new THREE.SphereGeometry(0.4 + Math.random() * 0.3, 5, 5),
-        new THREE.MeshLambertMaterial({
-          color: 0x2d6b1e + Math.floor(Math.random() * 0x307020)
-        })
+        new THREE.MeshLambertMaterial({ color: bushColor })
       );
       bush.position.set(bushPositions[i][0], 0.2, bushPositions[i][1]);
       bush.scale.set(1, 0.4 + Math.random() * 0.3, 1);
@@ -858,6 +882,8 @@ GAME.world = {
         this.scene.add(post); this.objects.push(post);
       }
     }
+    this._applyTexture(fenceMat, 'assets/textures/wood.jpg', 10, 1);
+    this._applyTexture(postsMat, 'assets/textures/wood.jpg', 1, 2);
   },
 
   // ============================================================
@@ -937,11 +963,11 @@ GAME.world = {
       [-12, -23], [-8.5, -31]
     ];
     for (var i = 0; i < rockPos.length; i++) {
+      var rockColor = new THREE.Color();
+      rockColor.setHSL(0, 0, 0.42 + Math.random() * 0.2);
       var rock = new THREE.Mesh(
         new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.5),
-        new THREE.MeshLambertMaterial({
-          color: 0x777777 + Math.floor(Math.random() * 0x444444)
-        })
+        new THREE.MeshLambertMaterial({ color: rockColor })
       );
       rock.position.set(rockPos[i][0], 0.08, rockPos[i][1]);
       rock.rotation.set(Math.random(), Math.random(), Math.random());
@@ -998,16 +1024,21 @@ GAME.world = {
         this.scene.add(post); this.objects.push(post);
       }
     }
+    this._applyTexture(fenceMat, 'assets/textures/wood.jpg', 8, 1);
+    this._applyTexture(postsMat, 'assets/textures/wood.jpg', 1, 2);
     var coopMat = new THREE.MeshLambertMaterial({ color: 0xcc6644 });
     var coop = new THREE.Mesh(new THREE.BoxGeometry(1.5, 1.0, 1.2), coopMat);
     coop.position.set(11.5, 0.5, -6.5);
     coop.castShadow = true;
     this.scene.add(coop); this.objects.push(coop);
-    var coopRoof = new THREE.Mesh(new THREE.ConeGeometry(1.2, 0.5, 4), new THREE.MeshLambertMaterial({ color: 0x993311 }));
+    this._applyTexture(coopMat, 'assets/textures/wood.jpg', 2, 1);
+    var coopRoofMat = new THREE.MeshLambertMaterial({ color: 0x993311 });
+    var coopRoof = new THREE.Mesh(new THREE.ConeGeometry(1.2, 0.5, 4), coopRoofMat);
     coopRoof.position.set(11.5, 1.25, -6.5);
     coopRoof.rotation.y = Math.PI / 4;
     coopRoof.castShadow = true;
     this.scene.add(coopRoof); this.objects.push(coopRoof);
+    this._applyTexture(coopRoofMat, 'assets/textures/roof.jpg', 2, 1);
   },
 
   createDirtPath: function() {
@@ -1027,6 +1058,7 @@ GAME.world = {
       this.scene.add(path);
       this.objects.push(path);
     }
+    this._applyTexture(mat, 'assets/textures/path.jpg', 2, 10);
   },
 
   createScarecrow: function() {
@@ -1339,16 +1371,17 @@ GAME.world = {
   updateLighting: function(time) {
     if (!this.skyMat) return;
 
+    // شدة إضاءة مرفوعة عن النسخة الأصلية (كانت تصل لشبه سواد كامل عند 6ص — وقت بداية اللعبة الافتراضي)
     var kf = [
-      { t:  0,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
-      { t:  4.5,top:0x0a0a25, hor:0x0f1030, fog:0x08081a, sC:0x3355bb, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
-      { t:  5.5,top:0x1a2255, hor:0xff7733, fog:0xff9944, sC:0xff8800, sI:0.25, aI:0.08, hS:0x2233aa, hG:0x220e00, hI:0.25 },
-      { t:  7,  top:0x1a66cc, hor:0x88bbff, fog:0x99ccff, sC:0xffd090, sI:0.75, aI:0.20, hS:0x55aadd, hG:0x3d6020, hI:0.50 },
+      { t:  0,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.10, aI:0.08, hS:0x0d1425, hG:0x030303, hI:0.18 },
+      { t:  4.5,top:0x0a0a25, hor:0x0f1030, fog:0x08081a, sC:0x3355bb, sI:0.10, aI:0.08, hS:0x0d1425, hG:0x030303, hI:0.18 },
+      { t:  5.5,top:0x1a2255, hor:0xff7733, fog:0xff9944, sC:0xff8800, sI:0.45, aI:0.16, hS:0x2233aa, hG:0x220e00, hI:0.38 },
+      { t:  7,  top:0x1a66cc, hor:0x88bbff, fog:0x99ccff, sC:0xffd090, sI:0.85, aI:0.25, hS:0x55aadd, hG:0x3d6020, hI:0.55 },
       { t: 12,  top:0x004fbb, hor:0x44aaff, fog:0x87ceeb, sC:0xffffff, sI:1.00, aI:0.30, hS:0x87ceeb, hG:0x7ec850, hI:0.65 },
       { t: 17,  top:0x0d4499, hor:0x66aaff, fog:0x88bbdd, sC:0xffe0aa, sI:0.85, aI:0.25, hS:0x77aabb, hG:0x508030, hI:0.55 },
-      { t: 19,  top:0x110022, hor:0xff5500, fog:0xff6622, sC:0xff4400, sI:0.30, aI:0.08, hS:0x220033, hG:0x110500, hI:0.18 },
-      { t: 21,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 },
-      { t: 24,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.04, aI:0.03, hS:0x0d1425, hG:0x030303, hI:0.10 }
+      { t: 19,  top:0x110022, hor:0xff5500, fog:0xff6622, sC:0xff4400, sI:0.40, aI:0.14, hS:0x220033, hG:0x110500, hI:0.28 },
+      { t: 21,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.10, aI:0.08, hS:0x0d1425, hG:0x030303, hI:0.18 },
+      { t: 24,  top:0x020208, hor:0x080818, fog:0x05050f, sC:0x3344aa, sI:0.10, aI:0.08, hS:0x0d1425, hG:0x030303, hI:0.18 }
     ];
 
     var k0 = kf[0], k1 = kf[1];
