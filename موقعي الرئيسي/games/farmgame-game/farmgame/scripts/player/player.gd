@@ -11,7 +11,7 @@ const INTERACTION_ENERGY_COST: float = 2.0
 @onready var camera_arm: Node3D = $CameraPivot/CameraArm
 @onready var interaction_ray: RayCast3D = $CameraPivot/CameraArm/Camera3D/InteractionRay
 @onready var stats: Node = $PlayerStats
-@onready var animation_player: AnimationPlayer = $CharacterModel/AnimationPlayer
+@onready var animation_player: AnimationPlayer = $CharacterModel.get_node_or_null("AnimationPlayer") as AnimationPlayer
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _dust_particles: GPUParticles3D = null
@@ -93,7 +93,6 @@ func _physics_process(delta: float) -> void:
 		velocity.x = move_toward(velocity.x, 0, SPEED)
 		velocity.z = move_toward(velocity.z, 0, SPEED)
 
-	var was_moving: bool = _is_moving
 	_is_moving = direction != Vector3.ZERO
 
 	## تشغيل/إيقاف particles الحركة
@@ -107,6 +106,8 @@ func _physics_process(delta: float) -> void:
 
 
 func _update_animation(is_moving: bool) -> void:
+	if animation_player == null:
+		return
 	var target_animation: String = "walk" if is_moving else "idle"
 	if animation_player.current_animation != target_animation:
 		animation_player.play(target_animation)

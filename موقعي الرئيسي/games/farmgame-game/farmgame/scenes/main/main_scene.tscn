@@ -8,7 +8,7 @@
 [ext_resource type="Script" uid="uid://g308y0t2c0" path="res://scripts/core/nature_scatter.gd" id="6_scatter"]
 [ext_resource type="PackedScene" uid="uid://bnmlendpd134x" path="res://assets/models/buildings/windmill.glb" id="7_windmill"]
 [ext_resource type="PackedScene" uid="uid://ya75idrcolel" path="res://assets/models/paths/path_stone.glb" id="8_path"]
-[ext_resource type="Script" path="res://scripts/core/building_manager.gd" id="9_buildings"]
+[ext_resource type="Script" uid="uid://ddqc7b0j6hblc" path="res://scripts/core/building_manager.gd" id="9_buildings"]
 [ext_resource type="PackedScene" path="res://scenes/entities/barn_animal.tscn" id="10_barn"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_env"]
@@ -28,11 +28,11 @@ ambient_light_energy = 0.6
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(80, 0.2, 80)
 
-[sub_resource type="BoxShape3D" id="BoxShape3D_windmill"]
-size = Vector3(3.0, 8.0, 3.0)
-
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
 size = Vector3(81.629395, 0.2, 80)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_windmill"]
+size = Vector3(3, 8, 3)
 
 [node name="Main" type="Node3D" unique_id=1648700760]
 
@@ -61,25 +61,25 @@ script = ExtResource("3_light")
 [node name="NatureScatter" type="Node3D" parent="." unique_id=804031722]
 script = ExtResource("6_scatter")
 
-[node name="BuildingManager" type="Node3D" parent="."]
+[node name="BuildingManager" type="Node3D" parent="." unique_id=1490749332]
 script = ExtResource("9_buildings")
 
-[node name="BarnAnimal" parent="." instance=ExtResource("10_barn")]
+[node name="BarnAnimal" parent="." unique_id=494125383 instance=ExtResource("10_barn")]
 
 [node name="Windmill" parent="." unique_id=664516539 instance=ExtResource("7_windmill")]
 transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -15.378255, 4.3194904, -16.526257)
 
-[node name="WindmillCollision" type="StaticBody3D" parent="Windmill"]
+[node name="WindmillCollision" type="StaticBody3D" parent="Windmill" unique_id=217962218]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Windmill/WindmillCollision"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Windmill/WindmillCollision" unique_id=931641366]
 shape = SubResource("BoxShape3D_windmill")
 
 [node name="Windmill2" parent="." unique_id=475263054 instance=ExtResource("7_windmill")]
 transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -2.8056173, 4.3194904, -15)
 
-[node name="WindmillCollision" type="StaticBody3D" parent="Windmill2"]
+[node name="WindmillCollision" type="StaticBody3D" parent="Windmill2" unique_id=707601676]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Windmill2/WindmillCollision"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Windmill2/WindmillCollision" unique_id=130541874]
 shape = SubResource("BoxShape3D_windmill")
 
 [node name="EntrancePath" type="Node3D" parent="." unique_id=1578342787]
