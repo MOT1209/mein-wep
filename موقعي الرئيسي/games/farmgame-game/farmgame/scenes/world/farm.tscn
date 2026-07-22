@@ -1,6 +1,10 @@
 [gd_scene format=3 uid="uid://bdgea7yrdt3b7"]
 
 [ext_resource type="Script" path="res://scripts/core/farm_manager.gd" id="1_farm"]
+[ext_resource type="Script" path="res://scripts/core/farm_fence.gd" id="2_fence"]
 
 [node name="Farm" type="Node3D"]
 script = ExtResource("1_farm")
+
+[node name="FarmFence" type="Node3D" parent="."]
+script = ExtResource("2_fence")

@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://begxxhr16vd45" path="res://scripts/core/day_night_light.gd" id="3_light"]
 [ext_resource type="PackedScene" uid="uid://dd3ewxmr0uqcu" path="res://scenes/ui/hud.tscn" id="4_hud"]
 [ext_resource type="Material" path="res://assets/materials/grass_ground.tres" id="5_grass_mat"]
-[ext_resource type="Script" path="res://scripts/core/nature_scatter.gd" id="6_scatter"]
+[ext_resource type="Script" uid="uid://g308y0t2c0" path="res://scripts/core/nature_scatter.gd" id="6_scatter"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_env"]
 sky_top_color = Color(0.38, 0.58, 0.92, 1)
@@ -46,7 +46,7 @@ transform = Transform3D(1, 0, 0, 0, 0.7071, 0.7071, 0, -0.7071, 0.7071, 0, 5, 0)
 shadow_enabled = true
 script = ExtResource("3_light")
 
-[node name="NatureScatter" type="Node3D" parent="."]
+[node name="NatureScatter" type="Node3D" parent="." unique_id=804031722]
 script = ExtResource("6_scatter")
 
 [node name="Farm" parent="." unique_id=1084475428 instance=ExtResource("2_farm")]
