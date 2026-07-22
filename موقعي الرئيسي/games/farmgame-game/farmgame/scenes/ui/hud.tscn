@@ -1,9 +1,13 @@
-[gd_scene load_steps=5 format=3 uid="uid://dd3ewxmr0uqcu"]
+[gd_scene load_steps=8 format=3 uid="uid://dd3ewxmr0uqcu"]
 
 [ext_resource type="Script" path="res://scripts/ui/hud.gd" id="1_hud"]
 [ext_resource type="PackedScene" path="res://scenes/ui/inventory_panel.tscn" id="2_inventory"]
 [ext_resource type="PackedScene" path="res://scenes/ui/shop_panel.tscn" id="3_shop"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="4_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/minimap.tscn" id="5_minimap"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tooltip.tscn" id="6_tooltip"]
+[ext_resource type="PackedScene" path="res://scenes/ui/notification.tscn" id="7_notification"]
+[ext_resource type="PackedScene" path="res://scenes/ui/craft_panel.tscn" id="8_craft"]
 
 [node name="HUD" type="Control"]
 layout_mode = 3
@@ -69,4 +73,16 @@ layout_mode = 1
 layout_mode = 1
 
 [node name="PauseMenu" parent="." instance=ExtResource("4_pause")]
+layout_mode = 1
+
+[node name="Minimap" parent="." instance=ExtResource("5_minimap")]
+layout_mode = 1
+
+[node name="Tooltip" parent="." instance=ExtResource("6_tooltip")]
+layout_mode = 1
+
+[node name="Notification" parent="." instance=ExtResource("7_notification")]
+layout_mode = 1
+
+[node name="CraftPanel" parent="." instance=ExtResource("8_craft")]
 layout_mode = 1

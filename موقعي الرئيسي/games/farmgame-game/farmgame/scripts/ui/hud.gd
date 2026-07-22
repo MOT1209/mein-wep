@@ -1,5 +1,6 @@
 extends Control
 ## واجهة اللعبة الرئيسية: الوقت، اليوم، الفصل، المال، الطاقة والجوع
+## تم إضافة: خريطة مصغرة، tooltips، إشعارات، لوحة تصنيع
 
 @onready var time_label: Label = $TopBar/TimeLabel
 @onready var day_label: Label = $TopBar/DayLabel
@@ -10,9 +11,14 @@ extends Control
 @onready var inventory_panel: Control = $InventoryPanel
 @onready var shop_panel: Control = $ShopPanel
 @onready var pause_menu: Control = $PauseMenu
+@onready var minimap: Control = $Minimap
+@onready var tooltip: Control = $Tooltip
+@onready var notification: Control = $Notification
+@onready var craft_panel: Control = $CraftPanel
 
 
 func _ready() -> void:
+	add_to_group("hud")
 	EventBus.hour_changed.connect(_on_hour_changed)
 	EventBus.day_changed.connect(_on_day_changed)
 	EventBus.season_changed.connect(_on_season_changed)
@@ -33,7 +39,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("toggle_shop"):
 		_toggle_menu(shop_panel)
 	elif event.is_action_pressed("ui_cancel"):
-		if inventory_panel.visible or shop_panel.visible:
+		if inventory_panel.visible or shop_panel.visible or craft_panel.visible:
 			_close_all_menus()
 		else:
 			_toggle_menu(pause_menu)
@@ -54,8 +60,16 @@ func _close_all_menus() -> void:
 	inventory_panel.close()
 	shop_panel.close()
 	pause_menu.close()
+	craft_panel.close()
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	TimeSystem.resume()
+
+
+func open_craft_panel(station: Node) -> void:
+	_close_all_menus()
+	craft_panel.open(station)
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	TimeSystem.pause()
 
 
 func _on_hour_changed(_hour: int) -> void:

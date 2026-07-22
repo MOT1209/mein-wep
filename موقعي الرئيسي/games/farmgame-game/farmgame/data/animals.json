@@ -1,0 +1,44 @@
+{
+	"chicken": {
+		"name": "Chicken",
+		"cost": 50,
+		"product": "egg",
+		"product_name": "Egg",
+		"product_price": 25,
+		"production_days": 2,
+		"feed_cost": 5,
+		"hunger_decay_per_day": 20.0,
+		"happiness_decay_per_day": 10.0,
+		"max_stat": 100.0,
+		"color": [0.9, 0.9, 0.8],
+		"size": [0.4, 0.5, 0.4]
+	},
+	"cow": {
+		"name": "Cow",
+		"cost": 200,
+		"product": "milk",
+		"product_name": "Milk",
+		"product_price": 50,
+		"production_days": 1,
+		"feed_cost": 15,
+		"hunger_decay_per_day": 30.0,
+		"happiness_decay_per_day": 15.0,
+		"max_stat": 100.0,
+		"color": [0.8, 0.7, 0.6],
+		"size": [1.2, 1.0, 2.0]
+	},
+	"pig": {
+		"name": "Pig",
+		"cost": 150,
+		"product": "truffle",
+		"product_name": "Truffle",
+		"product_price": 80,
+		"production_days": 3,
+		"feed_cost": 10,
+		"hunger_decay_per_day": 25.0,
+		"happiness_decay_per_day": 12.0,
+		"max_stat": 100.0,
+		"color": [0.9, 0.7, 0.7],
+		"size": [0.8, 0.7, 1.2]
+	}
+}

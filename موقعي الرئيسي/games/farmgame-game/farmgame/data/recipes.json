@@ -1,0 +1,74 @@
+{
+	"bread": {
+		"name": "Bread",
+		"station": "oven",
+		"inputs": {"wheat": 2},
+		"output": {"bread": 1},
+		"craft_time": 5,
+		"sell_price": 250,
+		"description": "خبز طازج من القمح"
+	},
+	"juice": {
+		"name": "Juice",
+		"station": "juicer",
+		"inputs": {"carrot": 3},
+		"output": {"juice": 1},
+		"craft_time": 3,
+		"sell_price": 150,
+		"description": "عصير جزر طازج"
+	},
+	"cheese": {
+		"name": "Cheese",
+		"station": "cheese_maker",
+		"inputs": {"milk": 2},
+		"output": {"cheese": 1},
+		"craft_time": 8,
+		"sell_price": 120,
+		"description": "جبنة طازجة من الحليب"
+	},
+	"corn_bread": {
+		"name": "Corn Bread",
+		"station": "oven",
+		"inputs": {"corn": 3, "wheat": 1},
+		"output": {"corn_bread": 1},
+		"craft_time": 6,
+		"sell_price": 300,
+		"description": "خبز ذرة لذيذ"
+	},
+	"pumpkin_pie": {
+		"name": "Pumpkin Pie",
+		"station": "oven",
+		"inputs": {"pumpkin": 2, "wheat": 2},
+		"output": {"pumpkin_pie": 1},
+		"craft_time": 10,
+		"sell_price": 400,
+		"description": "فطيرة يقطين تقليدية"
+	},
+	"salad": {
+		"name": "Salad",
+		"station": "juicer",
+		"inputs": {"carrot": 2, "turnip": 2},
+		"output": {"salad": 1},
+		"craft_time": 4,
+		"sell_price": 180,
+		"description": "سلطة خضار طازجة"
+	},
+	"egg_basket": {
+		"name": "Egg Basket",
+		"station": "crafting_table",
+		"inputs": {"egg": 5},
+		"output": {"egg_basket": 1},
+		"craft_time": 3,
+		"sell_price": 150,
+		"description": "سلسلة بيض مجمعة"
+	},
+	"truffle_risotto": {
+		"name": "Truffle Risotto",
+		"station": "oven",
+		"inputs": {"truffle": 1, "wheat": 3},
+		"output": {"truffle_risotto": 1},
+		"craft_time": 12,
+		"sell_price": 500,
+		"description": "أرز بالكمأة الفاخر"
+	}
+}

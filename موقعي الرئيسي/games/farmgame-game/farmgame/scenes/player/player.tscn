@@ -23,8 +23,11 @@ script = ExtResource("2_stats")
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
-[node name="Camera3D" type="Camera3D" parent="CameraPivot"]
+[node name="CameraArm" type="Node3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 6.0)
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/CameraArm"]
 current = true
 
-[node name="InteractionRay" type="RayCast3D" parent="CameraPivot/Camera3D"]
-target_position = Vector3(0, 0, -3)
+[node name="InteractionRay" type="RayCast3D" parent="CameraPivot/CameraArm/Camera3D"]
+target_position = Vector3(0, 0, -4)
