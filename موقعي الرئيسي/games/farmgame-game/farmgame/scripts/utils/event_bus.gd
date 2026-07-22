@@ -29,6 +29,7 @@ signal money_changed(new_amount: int)
 signal item_added(item_id: String, quantity: int)
 signal item_removed(item_id: String, quantity: int)
 signal inventory_full
+signal selected_seed_changed(seed_id: String)
 
 # -- إشارات عامة --
 signal tool_used(tool_type: String, target: Node)

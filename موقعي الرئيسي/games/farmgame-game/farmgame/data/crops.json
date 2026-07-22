@@ -8,5 +8,45 @@
 		"seed_id": "wheat_seed",
 		"seed_cost": 20,
 		"yield_item": "wheat"
+	},
+	"corn": {
+		"name": "Corn",
+		"growth_stages": 8,
+		"days_to_mature": 14,
+		"season": "Summer",
+		"sell_price": 150,
+		"seed_id": "corn_seed",
+		"seed_cost": 30,
+		"yield_item": "corn"
+	},
+	"carrot": {
+		"name": "Carrot",
+		"growth_stages": 3,
+		"days_to_mature": 6,
+		"season": "Spring",
+		"sell_price": 60,
+		"seed_id": "carrot_seed",
+		"seed_cost": 10,
+		"yield_item": "carrot"
+	},
+	"pumpkin": {
+		"name": "Pumpkin",
+		"growth_stages": 4,
+		"days_to_mature": 16,
+		"season": "Fall",
+		"sell_price": 200,
+		"seed_id": "pumpkin_seed",
+		"seed_cost": 35,
+		"yield_item": "pumpkin"
+	},
+	"turnip": {
+		"name": "Turnip",
+		"growth_stages": 3,
+		"days_to_mature": 5,
+		"season": "Spring",
+		"sell_price": 50,
+		"seed_id": "turnip_seed",
+		"seed_cost": 8,
+		"yield_item": "turnip"
 	}
 }

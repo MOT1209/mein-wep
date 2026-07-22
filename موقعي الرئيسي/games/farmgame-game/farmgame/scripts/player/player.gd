@@ -31,6 +31,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		_try_interact()
 
+	if event.is_action_pressed("cycle_seed"):
+		InventorySystem.cycle_selected_seed()
+
 
 func _physics_process(delta: float) -> void:
 	if not is_on_floor():

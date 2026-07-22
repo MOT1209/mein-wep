@@ -4,6 +4,7 @@ extends Control
 @onready var time_label: Label = $TopBar/TimeLabel
 @onready var day_label: Label = $TopBar/DayLabel
 @onready var money_label: Label = $TopBar/MoneyLabel
+@onready var seed_label: Label = $TopBar/SeedLabel
 @onready var energy_bar: ProgressBar = $BottomBar/EnergyBar
 @onready var hunger_bar: ProgressBar = $BottomBar/HungerBar
 @onready var inventory_panel: Control = $InventoryPanel
@@ -17,11 +18,13 @@ func _ready() -> void:
 	EventBus.season_changed.connect(_on_season_changed)
 	EventBus.money_changed.connect(_on_money_changed)
 	EventBus.player_stats_changed.connect(_on_player_stats_changed)
+	EventBus.selected_seed_changed.connect(_on_selected_seed_changed)
 	pause_menu.resume_requested.connect(_close_all_menus)
 
 	_on_hour_changed(TimeSystem.current_hour)
 	_on_day_changed(TimeSystem.current_day, TimeSystem.current_day_of_week)
 	_on_money_changed(EconomySystem.money)
+	_on_selected_seed_changed(InventorySystem.selected_seed_id)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -76,3 +79,7 @@ func _on_player_stats_changed(stat_name: String, value: float) -> void:
 		energy_bar.value = value
 	elif stat_name == "hunger":
 		hunger_bar.value = value
+
+
+func _on_selected_seed_changed(seed_id: String) -> void:
+	seed_label.text = "Seed: %s" % (CropData.get_display_name(seed_id) if seed_id != "" else "-")

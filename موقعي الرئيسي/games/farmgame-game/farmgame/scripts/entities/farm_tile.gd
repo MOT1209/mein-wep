@@ -11,8 +11,6 @@ enum State { EMPTY, TILLED, PLANTED }
 
 var state: State = State.EMPTY
 var planted_crop: Node3D = null
-var seed_to_plant: String = "wheat_seed"
-var crop_id_to_plant: String = "wheat"
 
 
 func _ready() -> void:
@@ -36,7 +34,12 @@ func _till() -> void:
 
 
 func _plant() -> void:
-	if not InventorySystem.has_item(seed_to_plant, 1):
+	var seed_to_plant: String = InventorySystem.selected_seed_id
+	if seed_to_plant == "" or not InventorySystem.has_item(seed_to_plant, 1):
+		return
+
+	var crop_id_to_plant: String = CropData.get_crop_id_by_seed(seed_to_plant)
+	if crop_id_to_plant == "":
 		return
 
 	InventorySystem.remove_item(seed_to_plant, 1)

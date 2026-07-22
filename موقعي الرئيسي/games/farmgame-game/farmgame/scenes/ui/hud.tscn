@@ -37,6 +37,11 @@ layout_mode = 2
 horizontal_alignment = 2
 text = "$500"
 
+[node name="SeedLabel" type="Label" parent="TopBar"]
+layout_mode = 2
+horizontal_alignment = 2
+text = "Seed: -"
+
 [node name="BottomBar" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 12

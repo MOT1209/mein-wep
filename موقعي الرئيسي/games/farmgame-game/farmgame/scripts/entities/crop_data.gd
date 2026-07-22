@@ -17,6 +17,14 @@ static func get_all() -> Dictionary:
 	return _cache
 
 
+static func get_crop_id_by_seed(seed_id: String) -> String:
+	_ensure_loaded()
+	for crop_id: String in _cache:
+		if _cache[crop_id].get("seed_id", "") == seed_id:
+			return crop_id
+	return ""
+
+
 static func get_display_name(item_id: String) -> String:
 	_ensure_loaded()
 	for crop_id: String in _cache:
