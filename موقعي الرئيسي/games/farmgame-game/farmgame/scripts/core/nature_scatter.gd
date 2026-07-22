@@ -1,25 +1,29 @@
 extends Node3D
-## يوزّع عناصر بيئية (أشجار/صخور/شجيرات) حول محيط المزرعة بمواقع عشوائية ثابتة
+## يوزّع عناصر بيئية حول محيط المزرعة بمواقع عشوائية ثابتة
 ##
-## نماذج Nature Kit مصمَّمة بحجم أصغر بكثير من تناسب شخصية اللاعب الواقعية (1.8 وحدة طولاً) -
-## مثلاً السياج ارتفاعه الأصلي 0.345 فقط والشجرة 1.2-1.7. لذا كل نموذج له معامل تكبير مستقل
-## بدل استخدام حجمه الافتراضي، حتى يبدو العالم متناسباً مع حجم اللاعب الحقيقي.
+## المصدر الأساسي: Quaternius' Stylized Nature MegaKit (CC0, عبر Godot Asset Store) - مقاييسه
+## الحقيقية مُتحقَّق منها (سكربت AABB headless) فجاءت واقعية مباشرة (أشجار 7-9 أمتار) فلا تحتاج
+## تكبيراً كبيراً، على عكس Nature Kit القديم. عنصران فقط (الجذع وكومة الحطب) لا يزالان من
+## Nature Kit القديم لعدم وجود بديل مكافئ في المجموعة الجديدة، فيحتاجان معامل تكبير + إصلاح
+## المعدنية (PropMaterialFix) كما في farm_fence.gd.
 
 const PROP_SCALES: Dictionary = {
-	"res://assets/models/nature/tree_default.glb": 3.2,
-	"res://assets/models/nature/tree_oak.glb": 3.2,
-	"res://assets/models/nature/tree_pineTallA_detailed.glb": 3.2,
-	"res://assets/models/nature/rock_largeA.glb": 3.0,
-	"res://assets/models/nature/rock_smallA.glb": 2.2,
-	"res://assets/models/nature/rock_tallA.glb": 3.0,
-	"res://assets/models/nature/plant_bushLarge.glb": 3.5,
-	"res://assets/models/nature/flower_yellowA.glb": 2.0,
-	"res://assets/models/nature/flower_purpleA.glb": 2.0,
-	"res://assets/models/nature/flower_redA.glb": 2.0,
-	"res://assets/models/nature/mushroom_red.glb": 2.0,
+	"res://assets/models/megakit/CommonTree_1.gltf": 1.0,
+	"res://assets/models/megakit/CommonTree_2.gltf": 1.0,
+	"res://assets/models/megakit/CommonTree_3.gltf": 1.0,
+	"res://assets/models/megakit/Bush_Common.gltf": 0.65,
+	"res://assets/models/megakit/Grass_Common_Short.gltf": 0.4,
+	"res://assets/models/megakit/Grass_Common_Tall.gltf": 0.45,
+	"res://assets/models/megakit/Mushroom_Common.gltf": 0.8,
+	"res://assets/models/megakit/Pebble_Round_1.gltf": 1.4,
+	"res://assets/models/megakit/Pebble_Square_1.gltf": 1.4,
+	"res://assets/models/megakit/Flower_3_Single.gltf": 0.25,
+	"res://assets/models/megakit/Clover_1.gltf": 0.26,
 	"res://assets/models/nature/stump_round.glb": 2.5,
 	"res://assets/models/nature/log_stack.glb": 2.5,
 }
+
+const LEGACY_KIT_PREFIX: String = "res://assets/models/nature/"
 
 const PROP_COUNT: int = 140
 const SCATTER_SEED: int = 20260721
@@ -53,5 +57,6 @@ func _ready() -> void:
 		prop.position = Vector3(x, 0, z)
 		prop.rotate_y(rng.randf_range(0, TAU))
 		prop.scale = Vector3.ONE * float(PROP_SCALES[prop_path])
-		PropMaterialFix.remove_metallic(prop)
+		if prop_path.begins_with(LEGACY_KIT_PREFIX):
+			PropMaterialFix.remove_metallic(prop)
 		placed += 1
