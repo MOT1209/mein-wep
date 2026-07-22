@@ -68,7 +68,7 @@ func _build_edge(center: Vector3, direction: Vector3, half_extent: float, has_ga
 
 			var col: CollisionShape3D = CollisionShape3D.new()
 			col.shape = BoxShape3D.new()
-			col.shape.size = Vector3(3.0, 2.5, 0.3)
+			col.shape.size = Vector3(3.3, 2.5, 0.5)
 			col.position = Vector3(0, 1.25, 0)
 			static_body.add_child(col)
 
@@ -90,6 +90,6 @@ func _place_corner(pos: Vector3, rotation_steps: int) -> void:
 
 	var col: CollisionShape3D = CollisionShape3D.new()
 	col.shape = BoxShape3D.new()
-	col.shape.size = Vector3(3.0, 2.5, 3.0)
+	col.shape.size = Vector3(3.3, 2.5, 3.3)
 	col.position = Vector3(0, 1.25, 0)
 	static_body.add_child(col)

@@ -28,7 +28,7 @@ func _process(delta: float) -> void:
 
 	## تحديث مؤشر التقدم
 	if _progress_indicator:
-		var progress_ratio: float = craft_progress / craft_time
+		var progress_ratio: float = craft_progress / maxf(craft_time, 0.1)
 		_progress_indicator.scale.y = 0.1 + 0.9 * progress_ratio
 		_progress_indicator.position.y = 2.0 + progress_ratio * 0.5
 

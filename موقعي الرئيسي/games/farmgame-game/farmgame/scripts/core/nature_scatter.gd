@@ -1,5 +1,5 @@
 extends Node3D
-## يوزّع عناصر بيENVية حول محيط المزرعة بمواقع عشوائية ثابتة
+## يوزّع عناصر بيئية حول محيط المزرعة بمواقع عشوائية ثابتة
 ##
 ## المصدر الأساسي: Quaternius' Stylized Nature MegaKit (CC0, عبر Godot Asset Store) - مقاييسه
 ## الحقيقية مُتحقَّق منها (سكربت AABB headless) فجاءت واقعية مباشرة (أشجار 7-9 أمتار) فلا تحتاج
@@ -57,6 +57,7 @@ const WELL_CENTER: Vector2 = Vector2(-18.0, -8.0)
 const WELL_CLEARANCE: float = 3.0
 
 var _prop_paths: Array = PROP_SCALES.keys()
+var _scene_cache: Dictionary = {}
 
 
 func _ready() -> void:
@@ -85,7 +86,10 @@ func _ready() -> void:
 			continue
 
 		var prop_path: String = _prop_paths[rng.randi_range(0, _prop_paths.size() - 1)]
-		var prop_scene: PackedScene = load(prop_path)
+		var prop_scene: PackedScene = _scene_cache.get(prop_path)
+		if prop_scene == null:
+			prop_scene = load(prop_path)
+			_scene_cache[prop_path] = prop_scene
 		var prop: Node3D = prop_scene.instantiate()
 		add_child(prop)
 		prop.position = Vector3(x, 0, z)

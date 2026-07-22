@@ -160,4 +160,5 @@ func _create_interaction_effect(position: Vector3) -> void:
 
 	## حذف التأثير بعد انتهاءه
 	await get_tree().create_timer(0.5).timeout
-	effect.queue_free()
+	if is_instance_valid(effect):
+		effect.queue_free()

@@ -27,7 +27,7 @@ func _ready() -> void:
 	_update_visual()
 
 
-func _process(delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	_move_timer += delta
 	if _move_timer >= _move_interval:
 		_move_timer = 0.0
@@ -40,7 +40,8 @@ func _process(delta: float) -> void:
 		var move_speed: float = 2.0 * delta
 		global_position += direction.normalized() * move_speed
 		## تدوير الحيوان نحو الاتجاه
-		look_at(_target_position, Vector3.UP)
+		if direction.length_squared() > 0.01:
+			look_at(global_position + direction, Vector3.UP)
 
 
 func _create_visuals() -> void:
@@ -186,7 +187,6 @@ func collect_product() -> bool:
 		return false
 
 	var product_id: String = animal_info.get("product", "")
-	var product_name: String = animal_info.get("product_name", "")
 	InventorySystem.add_item(product_id, 1)
 	is_product_ready = false
 	days_since_last_product = 0
