@@ -6,8 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://dd3ewxmr0uqcu" path="res://scenes/ui/hud.tscn" id="4_hud"]
 [ext_resource type="Material" path="res://assets/materials/grass_ground.tres" id="5_grass_mat"]
 [ext_resource type="Script" uid="uid://g308y0t2c0" path="res://scripts/core/nature_scatter.gd" id="6_scatter"]
-[ext_resource type="PackedScene" path="res://assets/models/buildings/windmill.glb" id="7_windmill"]
-[ext_resource type="PackedScene" path="res://assets/models/paths/path_stone.glb" id="8_path"]
+[ext_resource type="PackedScene" uid="uid://bnmlendpd134x" path="res://assets/models/buildings/windmill.glb" id="7_windmill"]
+[ext_resource type="PackedScene" uid="uid://ya75idrcolel" path="res://assets/models/paths/path_stone.glb" id="8_path"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_env"]
 sky_top_color = Color(0.38, 0.58, 0.92, 1)
@@ -51,24 +51,24 @@ script = ExtResource("3_light")
 [node name="NatureScatter" type="Node3D" parent="." unique_id=804031722]
 script = ExtResource("6_scatter")
 
-[node name="Windmill" parent="." instance=ExtResource("7_windmill")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1.556607, -15)
+[node name="Windmill" parent="." unique_id=664516539 instance=ExtResource("7_windmill")]
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -20, 3.4245354, -15)
 
-[node name="EntrancePath" type="Node3D" parent="."]
+[node name="EntrancePath" type="Node3D" parent="." unique_id=1578342787]
 
-[node name="Path1" parent="EntrancePath" instance=ExtResource("8_path")]
+[node name="Path1" parent="EntrancePath" unique_id=865941374 instance=ExtResource("8_path")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.5)
 
-[node name="Path2" parent="EntrancePath" instance=ExtResource("8_path")]
+[node name="Path2" parent="EntrancePath" unique_id=792649489 instance=ExtResource("8_path")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.5)
 
-[node name="Path3" parent="EntrancePath" instance=ExtResource("8_path")]
+[node name="Path3" parent="EntrancePath" unique_id=314085063 instance=ExtResource("8_path")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 9.5)
 
-[node name="Path4" parent="EntrancePath" instance=ExtResource("8_path")]
+[node name="Path4" parent="EntrancePath" unique_id=1524269971 instance=ExtResource("8_path")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10.5)
 
-[node name="Path5" parent="EntrancePath" instance=ExtResource("8_path")]
+[node name="Path5" parent="EntrancePath" unique_id=372142625 instance=ExtResource("8_path")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11.5)
 
 [node name="Farm" parent="." unique_id=1084475428 instance=ExtResource("2_farm")]
@@ -79,5 +79,9 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 6)
 [node name="UILayer" type="CanvasLayer" parent="." unique_id=1889837207]
 
 [node name="HUD" parent="UILayer" unique_id=24020264 instance=ExtResource("4_hud")]
+offset_left = 1.0
+offset_top = -32.0
+offset_right = 1.0
+offset_bottom = -32.0
 grow_horizontal = 2
 grow_vertical = 2

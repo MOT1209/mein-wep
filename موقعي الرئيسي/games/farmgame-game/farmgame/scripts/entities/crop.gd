@@ -1,6 +1,10 @@
 extends Node3D
 ## محصول مزروع في التربة: ينمو بمرور الأيام ويمكن حصاده عند النضج
 
+## نموذج القمح من Nature Kit صغير جداً (ارتفاعه الطبيعي ~0.53 وحدة) مقارنة بشخصية اللاعب
+## (1.8 وحدة) - هذا المعامل يكبّره لطول سنبلة قمح واقعي أكثر، مضروباً في نسبة نمو المرحلة
+const WHEAT_SCALE: float = 1.8
+
 @onready var stage_a: Node3D = $StageA
 @onready var stage_b: Node3D = $StageB
 
@@ -54,7 +58,7 @@ func _update_visual() -> void:
 	var phase_stage_count: int = (total_stages - midpoint) if use_stage_b else midpoint
 	var phase_index: int = (growth_stage - midpoint) if use_stage_b else growth_stage
 	var scale_ratio: float = 0.4 + 0.6 * (float(phase_index) / float(maxi(phase_stage_count - 1, 1)))
-	active.scale = Vector3.ONE * scale_ratio
+	active.scale = Vector3.ONE * scale_ratio * WHEAT_SCALE
 
 
 func interact(_player: Node) -> void:
