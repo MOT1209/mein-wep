@@ -37,12 +37,11 @@ func refresh() -> void:
 	for child in recipe_list.get_children():
 		child.queue_free()
 
-	var recipes: Dictionary = RecipeData.get_all()
 	var station_type: String = str(current_station.get("station_type")) if current_station.get("station_type") else ""
+	var recipes: Dictionary = RecipeData.get_recipes_by_station(station_type)
 	for recipe_id: String in recipes:
 		var recipe: Dictionary = recipes[recipe_id]
-		if recipe.get("station", "") == station_type:
-			recipe_list.add_child(_build_recipe_row(recipe_id, recipe))
+		recipe_list.add_child(_build_recipe_row(recipe_id, recipe))
 
 
 func _build_recipe_row(recipe_id: String, recipe: Dictionary) -> Control:

@@ -110,7 +110,8 @@ func _create_till_particles() -> void:
 
 	## حذف الجسيمات بعد انتهاءها
 	await get_tree().create_timer(0.6).timeout
-	particles.queue_free()
+	if is_instance_valid(particles):
+		particles.queue_free()
 
 
 func _create_plant_particles() -> void:
@@ -147,7 +148,8 @@ func _create_plant_particles() -> void:
 
 	## حذف الجسيمات بعد انتهاءها
 	await get_tree().create_timer(0.5).timeout
-	particles.queue_free()
+	if is_instance_valid(particles):
+		particles.queue_free()
 
 
 func _create_harvest_particles() -> void:
@@ -184,4 +186,5 @@ func _create_harvest_particles() -> void:
 
 	## حذف الجسيمات بعد انتهاءها
 	await get_tree().create_timer(0.6).timeout
-	particles.queue_free()
+	if is_instance_valid(particles):
+		particles.queue_free()
