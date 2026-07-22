@@ -14,6 +14,8 @@ var is_ripe: bool = false
 func _ready() -> void:
 	crop_info = CropData.get_crop(crop_id)
 	EventBus.day_changed.connect(_on_day_changed)
+	PropMaterialFix.remove_metallic(stage_a)
+	PropMaterialFix.remove_metallic(stage_b)
 	_update_visual()
 
 

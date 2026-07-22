@@ -6,6 +6,8 @@
 [ext_resource type="PackedScene" uid="uid://dd3ewxmr0uqcu" path="res://scenes/ui/hud.tscn" id="4_hud"]
 [ext_resource type="Material" path="res://assets/materials/grass_ground.tres" id="5_grass_mat"]
 [ext_resource type="Script" uid="uid://g308y0t2c0" path="res://scripts/core/nature_scatter.gd" id="6_scatter"]
+[ext_resource type="PackedScene" path="res://assets/models/buildings/windmill.glb" id="7_windmill"]
+[ext_resource type="PackedScene" path="res://assets/models/paths/path_stone.glb" id="8_path"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_env"]
 sky_top_color = Color(0.38, 0.58, 0.92, 1)
@@ -22,10 +24,10 @@ sky = SubResource("Sky_env")
 ambient_light_energy = 0.6
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
-size = Vector3(40, 0.2, 40)
+size = Vector3(80, 0.2, 80)
 
 [sub_resource type="BoxMesh" id="BoxMesh_ground"]
-size = Vector3(40, 0.2, 40)
+size = Vector3(80, 0.2, 80)
 
 [node name="Main" type="Node3D" unique_id=1648700760]
 
@@ -48,6 +50,26 @@ script = ExtResource("3_light")
 
 [node name="NatureScatter" type="Node3D" parent="." unique_id=804031722]
 script = ExtResource("6_scatter")
+
+[node name="Windmill" parent="." instance=ExtResource("7_windmill")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 1.556607, -15)
+
+[node name="EntrancePath" type="Node3D" parent="."]
+
+[node name="Path1" parent="EntrancePath" instance=ExtResource("8_path")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 7.5)
+
+[node name="Path2" parent="EntrancePath" instance=ExtResource("8_path")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 8.5)
+
+[node name="Path3" parent="EntrancePath" instance=ExtResource("8_path")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 9.5)
+
+[node name="Path4" parent="EntrancePath" instance=ExtResource("8_path")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10.5)
+
+[node name="Path5" parent="EntrancePath" instance=ExtResource("8_path")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 11.5)
 
 [node name="Farm" parent="." unique_id=1084475428 instance=ExtResource("2_farm")]
 

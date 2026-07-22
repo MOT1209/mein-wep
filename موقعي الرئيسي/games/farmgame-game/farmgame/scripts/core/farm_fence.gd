@@ -44,6 +44,7 @@ func _build_edge(center: Vector3, direction: Vector3, half_extent: float, has_ga
 		segment.position = center + direction * offset
 		if rotate_segments:
 			segment.rotate_y(PI / 2.0)
+		PropMaterialFix.remove_metallic(segment)
 
 
 func _place_corner(pos: Vector3, rotation_steps: int) -> void:
@@ -51,3 +52,4 @@ func _place_corner(pos: Vector3, rotation_steps: int) -> void:
 	add_child(corner)
 	corner.position = pos
 	corner.rotate_y(rotation_steps * PI / 2.0)
+	PropMaterialFix.remove_metallic(corner)
