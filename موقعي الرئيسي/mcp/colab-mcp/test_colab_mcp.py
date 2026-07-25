@@ -60,6 +60,43 @@ def execute():
     return flask.jsonify({"status": "error", "error": "No code or command"}), 400
 
 
+@mock_app.route("/generate_image", methods=["POST"])
+def generate_image():
+    if not _check_auth(flask.request):
+        return flask.jsonify({"status": "error", "error": "Unauthorized"}), 401
+
+    data = flask.request.get_json(force=True, silent=True) or {}
+    if not data.get("prompt"):
+        return flask.jsonify({"status": "error", "error": "Prompt is required"}), 400
+    model = data.get("model", "king2")
+    return flask.jsonify(
+        {
+            "status": "success",
+            "path": f"/content/generated/{model}_123.png",
+            "model": model,
+            "width": data.get("width", 1024),
+            "height": data.get("height", 1024),
+        }
+    )
+
+
+@mock_app.route("/download_file", methods=["POST"])
+def download_file():
+    if not _check_auth(flask.request):
+        return flask.jsonify({"status": "error", "error": "Unauthorized"}), 401
+
+    import base64 as b64
+
+    fake_png = b"\x89PNG-fake-image-bytes"
+    return flask.jsonify(
+        {
+            "status": "success",
+            "content_b64": b64.b64encode(fake_png).decode("ascii"),
+            "size": len(fake_png),
+        }
+    )
+
+
 @mock_app.route("/read_file", methods=["POST"])
 def read_file():
     if not _check_auth(flask.request):
@@ -129,6 +166,10 @@ async def main() -> None:
 
     importlib.reload(server_module)
 
+    import tempfile
+
+    download_target = os.path.join(tempfile.gettempdir(), "colab_mcp_test_download.png")
+
     tests = [
         ("colab_get_status", server_module.colab_get_status(), "online"),
         ("colab_execute_python", server_module.colab_execute_python("print('hello')"), "ran python"),
@@ -136,6 +177,17 @@ async def main() -> None:
         ("colab_read_file", server_module.colab_read_file("/content/test.txt"), "fake content"),
         ("colab_write_file", server_module.colab_write_file("/content/test.txt", "hello"), "written successfully"),
         ("colab_list_files", server_module.colab_list_files("/content"), "file1.txt"),
+        ("colab_generate_image", server_module.colab_generate_image("a golden falcon", model="king2"), "generated"),
+        (
+            "colab_generate_image (mage-flow + save_to)",
+            server_module.colab_generate_image("desert at night", model="mage-flow", save_to=download_target),
+            "saved locally",
+        ),
+        (
+            "colab_download_file",
+            server_module.colab_download_file("/content/generated/king2_123.png", download_target),
+            "saved locally",
+        ),
     ]
 
     for name, coro, expected in tests:
@@ -143,6 +195,12 @@ async def main() -> None:
         result = await coro
         assert expected.lower() in result.lower(), f"{name} failed: {result}"
         print(f"  OK: {result[:80]}")
+
+    # The downloaded file must contain the mock agent's bytes.
+    with open(download_target, "rb") as fh:
+        assert fh.read() == b"\x89PNG-fake-image-bytes", "downloaded file content mismatch"
+    os.remove(download_target)
+    print("  OK: downloaded file content verified")
 
     print("\nAll tests passed!")
 

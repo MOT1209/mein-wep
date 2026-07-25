@@ -172,6 +172,15 @@ Or with `uv`:
 | `colab_read_file(path)` | Read a text file from Colab. |
 | `colab_write_file(path, content)` | Write text content to a file in Colab. |
 | `colab_list_files(path)` | List files and directories in a Colab path. |
+| `colab_generate_image(prompt, model, ...)` | Generate an image on the Colab GPU. `model` is `king2` ([RASHID778/king2-image](https://hf.co/RASHID778/king2-image), SDXL LoRA, Arabic/English) or `mage-flow` ([microsoft/Mage-Flow](https://hf.co/microsoft/Mage-Flow)). Optional `save_to` downloads the result locally. |
+| `colab_download_file(remote_path, local_path)` | Download a binary file (e.g. a generated image) from Colab to this machine. |
+
+### 🎨 Image generation notes
+
+- Use a **GPU runtime** in Colab (Runtime → Change runtime type → T4 GPU or better).
+- The first call per model downloads several GB of weights — it can take a few minutes. Later calls are fast.
+- Only one model is kept in VRAM at a time; switching between `king2` and `mage-flow` reloads automatically.
+- Generated images are saved in `/content/generated/` inside Colab.
 
 ---
 

@@ -10,6 +10,7 @@ COLAB_NGROK_URL   : Public URL of the Colab agent (e.g. https://xxx.ngrok-free.a
 COLAB_API_SECRET  : Bearer token shared with the Colab agent.
 """
 
+import base64
 import os
 from pathlib import Path
 
@@ -58,6 +59,7 @@ async def _call_colab(
     endpoint: str = "execute",
     *,
     method: str = "POST",
+    timeout: float = 120.0,
 ) -> dict:
     """Forward a JSON payload to the Colab agent."""
     url, secret = _get_config()
@@ -72,7 +74,7 @@ async def _call_colab(
             request_kwargs = {
                 "url": f"{url.rstrip('/')}/{endpoint}",
                 "headers": {"Authorization": f"Bearer {secret}"},
-                "timeout": 120.0,
+                "timeout": timeout,
             }
             if method.upper() == "GET":
                 response = await client.get(**request_kwargs)
@@ -190,6 +192,102 @@ async def colab_list_files(path: str) -> str:
         files_text = "\n".join(files) if files else "(empty directory)"
         return f"✅ Files in {path}:\n\n{files_text}"
     return f"❌ Failed to list files.\n\nError:\n{result.get('error', 'Unknown error')}"
+
+
+@mcp.tool()
+async def colab_generate_image(
+    prompt: str,
+    model: str = "king2",
+    negative_prompt: str = "",
+    steps: int = 30,
+    width: int = 1024,
+    height: int = 1024,
+    guidance_scale: float = 7.5,
+    seed: int = -1,
+    save_to: str = "",
+) -> str:
+    """
+    Generate an image on the Colab GPU using one of the configured models.
+
+    Parameters
+    ----------
+    prompt : str
+        Text description of the image (Arabic or English).
+    model : str
+        'king2' (RASHID778/king2-image, SDXL LoRA) or 'mage-flow' (microsoft/Mage-Flow).
+    negative_prompt : str
+        What to avoid in the image (optional).
+    steps : int
+        Number of inference steps (default 30).
+    width, height : int
+        Image dimensions in pixels (default 1024x1024).
+    guidance_scale : float
+        Prompt adherence strength (default 7.5).
+    seed : int
+        Random seed for reproducibility; -1 for random.
+    save_to : str
+        Optional local file path; when set, the generated image is downloaded
+        from Colab and saved there.
+
+    Note: the first call per model downloads several GB of weights and can
+    take a few minutes; later calls are fast.
+    """
+    result = await _call_colab(
+        {
+            "prompt": prompt,
+            "model": model,
+            "negative_prompt": negative_prompt,
+            "steps": steps,
+            "width": width,
+            "height": height,
+            "guidance_scale": guidance_scale,
+            "seed": seed,
+        },
+        endpoint="generate_image",
+        timeout=600.0,
+    )
+    if result.get("status") != "success":
+        return f"❌ Image generation failed.\n\nError:\n{result.get('error', 'Unknown error')}"
+
+    remote_path = result.get("path", "")
+    message = (
+        f"✅ Image generated with '{result.get('model', model)}'.\n\n"
+        f"Colab path: {remote_path} ({result.get('width')}x{result.get('height')})"
+    )
+
+    if save_to and remote_path:
+        saved = await _download_to_local(remote_path, save_to)
+        message += f"\n{saved}"
+    return message
+
+
+async def _download_to_local(remote_path: str, local_path: str) -> str:
+    """Fetch a file from Colab as base64 and write it to a local path."""
+    result = await _call_colab({"path": remote_path}, endpoint="download_file", timeout=300.0)
+    if result.get("status") != "success":
+        return f"❌ Download failed: {result.get('error', 'Unknown error')}"
+    try:
+        target = Path(local_path).expanduser()
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(base64.b64decode(result.get("content_b64", "")))
+        return f"✅ Saved locally: {target} ({result.get('size', '?')} bytes)"
+    except Exception as exc:  # noqa: BLE001
+        return f"❌ Failed to save locally: {exc}"
+
+
+@mcp.tool()
+async def colab_download_file(remote_path: str, local_path: str) -> str:
+    """
+    Download a binary file (e.g. a generated image) from Colab to this machine.
+
+    Parameters
+    ----------
+    remote_path : str
+        Absolute path in Colab, e.g. '/content/generated/king2_123.png'.
+    local_path : str
+        Local destination path, e.g. 'C:/Users/me/Pictures/out.png'.
+    """
+    return await _download_to_local(remote_path, local_path)
 
 
 # ---------------------------------------------------------------------------
