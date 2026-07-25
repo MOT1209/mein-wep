@@ -11,6 +11,7 @@ COLAB_API_SECRET  : Bearer token shared with the Colab agent.
 """
 
 import os
+from pathlib import Path
 
 import httpx
 from mcp.server.fastmcp import FastMCP
@@ -19,6 +20,26 @@ from mcp.server.fastmcp import FastMCP
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
+def _load_dotenv() -> None:
+    """Load KEY=VALUE pairs from the .env file next to this script.
+
+    Real environment variables take precedence over .env values.
+    """
+    env_file = Path(__file__).resolve().parent / ".env"
+    if not env_file.exists():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        key, value = key.strip(), value.strip().strip("'\"")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+_load_dotenv()
+
 COLAB_NGROK_URL: str = os.environ.get("COLAB_NGROK_URL", "")
 COLAB_API_SECRET: str = os.environ.get("COLAB_API_SECRET", "")
 
