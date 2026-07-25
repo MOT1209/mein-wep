@@ -399,3 +399,42 @@ textarea:focus { outline: 2px solid var(--accent); border-color: transparent; }
   .frame-cell { width: 80px; }
   .gallery-grid .frame-cell { width: 110px; }
 }
+
+/* Agent Log */
+.agent-log {
+  margin-top: 12px;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.agent-log-entry {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  animation: fadeIn 0.2s ease;
+}
+
+.agent-thinking { color: var(--text-dim); background: var(--panel-2); }
+.agent-idea { color: #f1c40f; background: #f1c40f10; }
+.agent-done { color: #2ecc71; background: #2ecc7110; }
+.agent-error { color: var(--danger); background: #e74c3c10; }
+
+.agent-log-icon { flex-shrink: 0; font-size: 0.9rem; }
+
+.agent-log-img {
+  max-width: 120px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+}

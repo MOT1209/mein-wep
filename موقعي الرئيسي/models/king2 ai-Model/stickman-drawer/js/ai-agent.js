@@ -1,0 +1,346 @@
+import { showToast, showConfirm } from './toast.js';
+
+const STORAGE_KEY = 'stickman-agent-state';
+
+const AGENT_TEXT_MODELS = [
+  'HuggingFaceH4/zephyr-7b-beta',
+  'mistralai/Mistral-7B-Instruct-v0.3',
+  'google/gemma-2-2b-it',
+];
+
+const IDEA_CATEGORIES = [
+  'stick figure poses and actions',
+  'stick figure emotions and expressions',
+  'stick figure sports and activities',
+  'stick figure daily life scenes',
+  'stick figure adventures and fantasy',
+  'stick figure comedy and funny situations',
+  'stick figure animals and creatures',
+  'stick figure vehicles and transportation',
+];
+
+function getApiKey() {
+  return document.getElementById('agentApiKey')?.value || document.getElementById('apiKey')?.value || '';
+}
+
+function getProvider() {
+  return document.getElementById('agentProvider')?.value || 'huggingface';
+}
+
+// ===================== Text Generation (Idea Brain) =====================
+
+async function generateText(prompt, signal, progressEl) {
+  const provider = getProvider();
+
+  if (provider === 'huggingface') {
+    return generateTextHuggingFace(prompt, signal, progressEl);
+  }
+
+  if (provider === 'openai') {
+    return generateTextOpenAI(prompt, signal, progressEl);
+  }
+
+  throw new Error('provider غير معروف للنصوص');
+}
+
+async function generateTextHuggingFace(prompt, signal, progressEl) {
+  for (const model of AGENT_TEXT_MODELS) {
+    try {
+      if (progressEl) progressEl.textContent = `🧠 جاري التفكير بـ ${model.split('/').pop()}...`;
+
+      const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(getApiKey() ? { 'Authorization': `Bearer ${getApiKey()}` } : {}),
+        },
+        body: JSON.stringify({
+          inputs: prompt,
+          parameters: { max_new_tokens: 300, temperature: 0.9, return_full_text: false },
+        }),
+        signal,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (res.status === 503) {
+          const wait = Math.min(err.estimated_time || 30, 60);
+          if (progressEl) progressEl.textContent = `الموديل يتحمل... انتظر ${Math.ceil(wait)} ثانية`;
+          await new Promise(r => setTimeout(r, wait * 1000));
+          return generateTextHuggingFace(prompt, signal, progressEl);
+        }
+        throw new Error(err.error || `HTTP ${res.status}`);
+      }
+
+      const data = await res.json();
+      const text = Array.isArray(data) ? (data[0]?.generated_text || '') : (data.generated_text || '');
+      return text.trim();
+    } catch (err) {
+      if (err.name === 'AbortError') throw err;
+      continue;
+    }
+  }
+  throw new Error('فشل توليد النص — جرّب موديل ثاني');
+}
+
+async function generateTextOpenAI(prompt, signal, progressEl) {
+  const key = getApiKey();
+  if (!key) throw new Error('ضع OpenAI API Key أولاً');
+
+  if (progressEl) progressEl.textContent = '🧠 جاري التفكير بـ GPT...';
+
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 300,
+      temperature: 0.9,
+    }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `OpenAI HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices[0].message.content.trim();
+}
+
+// ===================== Idea Generation =====================
+
+async function generateIdeas(count, theme, signal, progressEl) {
+  const systemPrompt = `You are a creative director for a stick figure animation studio.
+Generate exactly ${count} unique stick figure image prompts.
+Each prompt must be a single line describing a stick figure doing something specific.
+Style: "simple black and white stick figure line drawing, minimal, clean lines, white background"
+Theme focus: ${theme || 'random creative ideas'}
+Be creative, fun, and diverse. Include actions, emotions, poses, objects.
+NO numbering, NO quotes, NO extra text. Just one prompt per line.
+Example: a stickman riding a skateboard doing a kickflip, simple black line drawing, white background`;
+
+  const text = await generateText(systemPrompt, signal, progressEl);
+  const lines = text.split('\n').map(l => l.replace(/^\d+[\.\)]\s*/, '').replace(/^[-*]\s*/, '').trim()).filter(l => l.length > 10);
+  return lines.slice(0, count);
+}
+
+// ===================== Image Generation =====================
+
+async function generateImageBlob(prompt, size, signal, progressEl) {
+  const provider = document.getElementById('apiProvider')?.value || 'huggingface';
+  const apiKey = getApiKey();
+
+  if (provider === 'openai') {
+    const res = await fetch('https://api.openai.com/v1/images/generations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
+      body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size: '1024x1024', response_format: 'b64_json' }),
+      signal,
+    });
+    if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`);
+    const data = await res.json();
+    const bin = atob(data.data[0].b64_json);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: 'image/png' });
+  }
+
+  const [w, h] = size.split('x').map(Number);
+  const models = ['black-forest-labs/FLUX.1-schnell', 'stabilityai/stable-diffusion-xl-base-1.0', 'runwayml/stable-diffusion-v1-5'];
+  for (const model of models) {
+    const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {}) },
+      body: JSON.stringify({ inputs: prompt, parameters: { width: w, height: h } }),
+      signal,
+    });
+    if (!res.ok) {
+      if (res.status === 503) {
+        const err = await res.json().catch(() => ({}));
+        const wait = Math.min(err.estimated_time || 30, 60);
+        if (progressEl) progressEl.textContent = `⏳ انتظر ${Math.ceil(wait)} ثانية...`;
+        await new Promise(r => setTimeout(r, wait * 1000));
+        continue;
+      }
+      continue;
+    }
+    const blob = await res.blob();
+    if (blob.type.startsWith('image/')) return blob;
+  }
+  throw new Error('فشل توليد الصورة');
+}
+
+// ===================== Gallery Helpers =====================
+
+function blobToDataUrl(blob) {
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function addToGallery(blob, prompt) {
+  const dataUrl = await blobToDataUrl(blob);
+  const item = { id: Date.now() + '_' + Math.random().toString(36).slice(2, 6), dataUrl, prompt, timestamp: new Date().toISOString() };
+  return item;
+}
+
+function importSingleFrame(item) {
+  const flipbookKey = 'stickman-drawer-flipbook-v2';
+  let frames = [];
+  try { frames = JSON.parse(localStorage.getItem(flipbookKey) || '[]'); } catch {}
+  const id = frames.length ? Math.max(...frames.map(f => f.id)) + 1 : 1;
+  frames.push({ id, dataUrl: item.dataUrl, caption: item.prompt });
+  localStorage.setItem(flipbookKey, JSON.stringify(frames));
+  window.dispatchEvent(new CustomEvent('flipbook-frames-updated'));
+}
+
+// ===================== Agent Log =====================
+
+function appendLog(container, type, text, imageUrl) {
+  const entry = document.createElement('div');
+  entry.className = `agent-log-entry agent-${type}`;
+
+  if (type === 'thinking' || type === 'idea' || type === 'error' || type === 'done') {
+    const icon = document.createElement('span');
+    icon.className = 'agent-log-icon';
+    icon.textContent = type === 'thinking' ? '🧠' : type === 'idea' ? '💡' : type === 'error' ? '❌' : '✅';
+    entry.appendChild(icon);
+  }
+
+  const msg = document.createElement('span');
+  msg.textContent = text;
+  entry.appendChild(msg);
+
+  if (imageUrl) {
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.className = 'agent-log-img';
+    img.alt = text;
+    entry.appendChild(img);
+  }
+
+  container.appendChild(entry);
+  container.scrollTop = container.scrollHeight;
+}
+
+// ===================== Main Agent Loop =====================
+
+let agentAbort = null;
+
+async function runAgent(count, theme, size, autoImport) {
+  const logContainer = document.getElementById('agentLog');
+  const startBtn = document.getElementById('agentStartBtn');
+  const stopBtn = document.getElementById('agentStopBtn');
+  const progressBar = document.getElementById('agentProgressBar');
+  const progressFill = document.getElementById('agentProgressFill');
+  const progressText = document.getElementById('agentProgressText');
+
+  logContainer.replaceChildren();
+  startBtn.style.display = 'none';
+  stopBtn.style.display = '';
+  progressBar.style.display = '';
+
+  agentAbort = new AbortController();
+  const signal = agentAbort.signal;
+
+  let generated = 0;
+  const galleryItems = [];
+
+  try {
+    appendLog(logContainer, 'thinking', `أبدأ بـ ${count} فكرة — الثيم: ${theme || 'عشوائي'}`);
+
+    let ideas = [];
+    try {
+      ideas = await generateIdeas(count, theme, signal, progressText);
+    } catch (err) {
+      if (signal.aborted) return;
+      appendLog(logContainer, 'error', `فشل توليد الأفكار: ${err.message}`);
+      appendLog(logContainer, 'thinking', 'سأستخدم أفكاراً محفوظة...');
+      ideas = [
+        'a stickman riding a bicycle on a tightrope, simple black line drawing, white background',
+        'a stickman juggling three balls while balancing on one foot, simple black line drawing, white background',
+        'a stickman dancing in the rain with an umbrella, simple black line drawing, white background',
+        'a stickman playing basketball and dunking, simple black line drawing, white background',
+        'a stickman doing a magic trick with a rabbit, simple black line drawing, white background',
+        'a stickman skydiving with a parachute, simple black line drawing, white background',
+        'a stickman cooking in the kitchen with a chef hat, simple black line drawing, white background',
+        'a stickman riding a skateboard doing a kickflip, simple black line drawing, white background',
+      ].slice(0, count);
+    }
+
+    for (const idea of ideas) {
+      if (signal.aborted) break;
+
+      appendLog(logContainer, 'idea', idea);
+      progressFill.style.width = `${(generated / count) * 100}%`;
+      progressText.textContent = `صورة ${generated + 1} من ${count}`;
+
+      try {
+        const blob = await generateImageBlob(idea, size, signal, progressText);
+        const item = await addToGallery(blob, idea);
+        galleryItems.push(item);
+
+        if (autoImport) importSingleFrame(item);
+
+        appendLog(logContainer, 'done', `تم توليد الصورة ${generated + 1}`, item.dataUrl);
+        generated++;
+        progressFill.style.width = `${(generated / count) * 100}%`;
+      } catch (err) {
+        if (signal.aborted) break;
+        appendLog(logContainer, 'error', `فشل الصورة: ${err.message}`);
+      }
+    }
+
+    if (!signal.aborted) {
+      const msg = `✅ انتهيت! تم توليد ${generated} صورة${autoImport ? ' واستيرادها للفليبوك' : ''}`;
+      appendLog(logContainer, 'done', msg);
+      progressText.textContent = msg;
+      showToast(msg);
+    }
+  } catch (err) {
+    if (err.name !== 'AbortError') {
+      appendLog(logContainer, 'error', `خطأ: ${err.message}`);
+    }
+  } finally {
+    startBtn.style.display = '';
+    stopBtn.style.display = 'none';
+    if (signal.aborted) {
+      progressText.textContent = 'تم الإيقاف';
+      appendLog(logContainer, 'thinking', '⏹️ تم إيقاف الوكيل');
+    }
+  }
+}
+
+// ===================== Init =====================
+
+export function initAIAgent() {
+  const startBtn = document.getElementById('agentStartBtn');
+  const stopBtn = document.getElementById('agentStopBtn');
+  const countSlider = document.getElementById('agentCount');
+  const countLabel = document.getElementById('agentCountLabel');
+  const themeInput = document.getElementById('agentTheme');
+  const autoImportCheck = document.getElementById('agentAutoImport');
+  const imageSize = document.getElementById('imageSize');
+
+  if (!startBtn) return;
+
+  countSlider?.addEventListener('input', () => { countLabel.textContent = countSlider.value; });
+
+  startBtn.addEventListener('click', async () => {
+    const count = Number(countSlider.value);
+    const theme = themeInput.value.trim();
+    const size = imageSize?.value || '768x768';
+    const autoImport = autoImportCheck?.checked ?? true;
+    await runAgent(count, theme, size, autoImport);
+  });
+
+  stopBtn?.addEventListener('click', () => { if (agentAbort) agentAbort.abort(); });
+}

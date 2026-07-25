@@ -185,6 +185,42 @@
     </div>
   </div>
 
+  <!-- ============ AI AGENT ============ -->
+  <div class="panel-card">
+    <h2>🤖 الوكيل الذكي — ي想了想 ويرسم لحاله</h2>
+    <p class="hint" style="margin-top:0">الوكيل يولّد أفكاراً إبداعية تلقائياً ثم يحوّلها لصور — بدون ما تكتب شي!</p>
+
+    <div class="toolbar">
+      <select id="agentProvider">
+        <option value="huggingface" selected>HuggingFace (مجاني — للنصوص)</option>
+        <option value="openai">OpenAI GPT (أسرع)</option>
+      </select>
+      <input type="password" id="agentApiKey" placeholder="API Key (اختياري)" style="min-width:200px">
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="agentTheme" placeholder="ثيم / موضوع (اختياري): مثلاً رياضة، مغامرة، حيوانات..." style="min-width:300px">
+    </div>
+
+    <div class="toolbar">
+      <div class="slider-group">
+        <span>عدد الأفكار</span>
+        <input type="range" id="agentCount" min="1" max="10" value="4">
+        <span id="agentCountLabel">4</span>
+      </div>
+      <label class="checkbox"><input type="checkbox" id="agentAutoImport" checked> استيراد تلقائي للفليبوك</label>
+      <button id="agentStartBtn" class="primary" type="button" style="font-size:1rem;padding:12px 28px">🧠 ابدأ التفكير والرسم</button>
+      <button id="agentStopBtn" class="danger" type="button" style="display:none">⏹️ إيقاف الوكيل</button>
+    </div>
+
+    <div id="agentProgressBar" style="display:none;margin-top:12px">
+      <div class="progress-track"><div class="progress-fill" id="agentProgressFill"></div></div>
+      <p class="hint" id="agentProgressText">جاري التفكير...</p>
+    </div>
+
+    <div id="agentLog" class="agent-log"></div>
+  </div>
+
   <!-- ============ SHAPE-TWEEN GENERATOR ============ -->
   <div class="panel-card">
     <h2>🔷 مولّد حركة الأشكال</h2>
