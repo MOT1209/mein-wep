@@ -532,7 +532,6 @@ const cacheManager = {
 async function fetchWithCache(url, cacheKey) {
     const cached = await cacheManager.get(cacheKey);
     if (cached) {
-        console.log('Serving from cache:', cacheKey);
         return cached;
     }
 
@@ -682,7 +681,7 @@ async function loadSurah(surahNumber) {
         const loadingText = document.createElement('p');
         loadingText.textContent = 'جاري تحميل السورة...';
         loadingDiv.appendChild(loadingText);
-        elements['verses-container'].innerHTML = '';
+        elements['verses-container'].textContent = '';
         elements['verses-container'].appendChild(loadingDiv);
 
         // إيقاف الصوت الحالي
@@ -724,6 +723,11 @@ async function loadSurah(surahNumber) {
 
         showToast(`تم تحميل سورة ${state.currentSurah.name}`, 'success');
 
+        // عرض إعلان Interstitial عند تبديل السورة
+        if (window.MaarifahAds && window.MaarifahAds.initialized) {
+            window.MaarifahAds.showInterstitialOnSurahChange();
+        }
+
     } catch (error) {
         console.error('Error loading surah:', error);
         showToast('حدث خطأ في تحميل السورة', 'error');
@@ -740,7 +744,7 @@ function updateSurahHeader() {
 
     const badge = document.getElementById('surah-badge');
     if (badge) {
-        badge.innerHTML = '';
+        badge.textContent = '';
         const badgeSpan = document.createElement('span');
         badgeSpan.className = 'surah-number-badge';
         badgeSpan.textContent = surah.number;
@@ -756,7 +760,7 @@ function updateSaveButton(isBookmarked) {
     if (!btn) return;
 
     btn.classList.toggle('saved', isBookmarked);
-    btn.innerHTML = '';
+    btn.textContent = '';
     const icon = document.createElement('i');
     icon.className = isBookmarked ? 'fas fa-star' : 'far fa-star';
     btn.appendChild(icon);
@@ -830,7 +834,7 @@ function displayVerses() {
 
     wrapper.appendChild(versesText);
 
-    elements['verses-container'].innerHTML = '';
+    elements['verses-container'].textContent = '';
     elements['verses-container'].appendChild(wrapper);
 }
 
@@ -899,7 +903,7 @@ async function playFullSurah(startVerseIndex = 0) {
     const surahFileName = getSurahFileName(state.currentSurah.number);
     const audioUrl = `${reciter.baseUrl}/${surahFileName}.mp3`;
 
-    console.log('Loading full surah audio:', audioUrl);
+
 
     try {
         // إظهار حالة التحميل
@@ -1063,9 +1067,13 @@ function updateCurrentVerseFromTime(currentTime, duration) {
 }
 
 function handleAudioEnded() {
-    console.log('Audio ended');
     state.isPlaying = false;
     updatePlayPauseButton();
+
+    // عرض إعلان Interstitial عند انتهاء السورة
+    if (window.MaarifahAds && window.MaarifahAds.initialized) {
+        window.MaarifahAds.showInterstitialOnSurahEnd();
+    }
 
     if (state.settings.autoNextSurah && state.currentSurah.number < 114) {
         showToast('جاري الانتقال للسورة التالية...', 'info');
@@ -1125,7 +1133,7 @@ function updatePlayPauseButton() {
     const btn = elements['play-pause'];
     if (!btn) return;
 
-    btn.innerHTML = '';
+    btn.textContent = '';
     const icon = document.createElement('i');
     icon.className = state.isPlaying ? 'fas fa-pause' : 'fas fa-play';
     btn.appendChild(icon);
@@ -1238,13 +1246,13 @@ function displayBookmarks(filter = 'all') {
         const emptyText = document.createElement('p');
         emptyText.textContent = `لا توجد ${filter === 'all' ? 'عناصر' : filter === 'surah' ? 'سور' : 'آيات'} محفوظة بعد`;
         emptyDiv.appendChild(emptyText);
-        list.innerHTML = '';
+        list.textContent = '';
         list.appendChild(emptyDiv);
         return;
     }
 
     filtered.sort((a, b) => b.date - a.date);
-    list.innerHTML = '';
+    list.textContent = '';
 
     filtered.forEach((item, index) => {
         const bookmarkItem = document.createElement('div');
@@ -1347,7 +1355,7 @@ function setupSearch() {
             const hintText = document.createElement('p');
             hintText.textContent = 'اكتب كلمة للبحث عنها في القرآن الكريم';
             hintDiv.appendChild(hintText);
-            elements['search-results'].innerHTML = '';
+            elements['search-results'].textContent = '';
             elements['search-results'].appendChild(hintDiv);
             return;
         }
@@ -1363,7 +1371,7 @@ async function searchQuran(query) {
     const spinner = document.createElement('div');
     spinner.className = 'spinner';
     loadingDiv.appendChild(spinner);
-    resultsContainer.innerHTML = '';
+    resultsContainer.textContent = '';
     resultsContainer.appendChild(loadingDiv);
 
     try {
@@ -1381,13 +1389,13 @@ async function searchQuran(query) {
             const noResultsText = document.createElement('p');
             noResultsText.textContent = 'لم يتم العثور على نتائج';
             noResultsDiv.appendChild(noResultsText);
-            resultsContainer.innerHTML = '';
+            resultsContainer.textContent = '';
             resultsContainer.appendChild(noResultsDiv);
             return;
         }
 
         const results = data.data.matches.slice(0, 20);
-        resultsContainer.innerHTML = '';
+        resultsContainer.textContent = '';
 
         results.forEach(match => {
             const resultItem = document.createElement('div');
@@ -1424,7 +1432,7 @@ async function searchQuran(query) {
         const errorText = document.createElement('p');
         errorText.textContent = 'حدث خطأ في البحث';
         errorDiv.appendChild(errorText);
-        resultsContainer.innerHTML = '';
+        resultsContainer.textContent = '';
         resultsContainer.appendChild(errorDiv);
     }
 }
@@ -1444,7 +1452,7 @@ async function loadTafsir(verseIndex) {
     const loadingText = document.createElement('p');
     loadingText.textContent = 'جاري تحميل التفسير...';
     loadingDiv.appendChild(loadingText);
-    elements['tafsir-content'].innerHTML = '';
+    elements['tafsir-content'].textContent = '';
     elements['tafsir-content'].appendChild(loadingDiv);
 
     try {
@@ -1453,7 +1461,7 @@ async function loadTafsir(verseIndex) {
             `tafsir_${ayah.number}_${edition}`
         );
 
-        elements['tafsir-content'].innerHTML = '';
+        elements['tafsir-content'].textContent = '';
 
         const tafsirHeader = document.createElement('div');
         tafsirHeader.className = 'tafsir-header';
@@ -1487,7 +1495,7 @@ async function loadTafsir(verseIndex) {
         const errorText = document.createElement('p');
         errorText.textContent = 'حدث خطأ في تحميل التفسير';
         errorDiv.appendChild(errorText);
-        elements['tafsir-content'].innerHTML = '';
+        elements['tafsir-content'].textContent = '';
         elements['tafsir-content'].appendChild(errorDiv);
     }
 }
@@ -1810,7 +1818,7 @@ async function shareCurrentSurah() {
             await navigator.share(shareData);
             showToast('تمت المشاركة بنجاح', 'success');
         } catch (err) {
-            console.log('Share canceled');
+
         }
     } else {
         try {
@@ -2049,15 +2057,13 @@ function initApp() {
             setTimeout(() => {
                 const perfData = performance.getEntriesByType('navigation')[0];
                 if (perfData) {
-                    console.log(`⚡ Page Load: ${Math.round(perfData.loadEventEnd - perfData.startTime)}ms`);
-                    console.log(`⚡ DOM Ready: ${Math.round(perfData.domContentLoadedEventEnd - perfData.startTime)}ms`);
+
                 }
             }, 0);
         });
     }
 
-    console.log('🕌 Quran Pro v6.0 - Full Featured with Cloud Sync');
-    console.log('📖 Features: 30 Juz, Media Session, Last Position, Lazy Loading, Supabase Sync');
+
 }
 
 // Start the app when DOM is ready
