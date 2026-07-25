@@ -40,5 +40,33 @@
 		"max_stat": 100.0,
 		"color": [0.9, 0.7, 0.7],
 		"size": [0.8, 0.7, 1.2]
+	},
+	"sheep": {
+		"name": "Sheep",
+		"cost": 120,
+		"product": "wool",
+		"product_name": "Wool",
+		"product_price": 60,
+		"production_days": 3,
+		"feed_cost": 8,
+		"hunger_decay_per_day": 20.0,
+		"happiness_decay_per_day": 10.0,
+		"max_stat": 100.0,
+		"color": [0.95, 0.95, 0.9],
+		"size": [0.7, 0.8, 1.1]
+	},
+	"duck": {
+		"name": "Duck",
+		"cost": 60,
+		"product": "feather",
+		"product_name": "Feather",
+		"product_price": 20,
+		"production_days": 2,
+		"feed_cost": 6,
+		"hunger_decay_per_day": 20.0,
+		"happiness_decay_per_day": 10.0,
+		"max_stat": 100.0,
+		"color": [0.9, 0.9, 0.85],
+		"size": [0.35, 0.4, 0.45]
 	}
 }

@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://8t4u8o8k2anp" path="res://assets/textures/ground/grass_normal.jpg" id="2_normal"]
 
 [resource]
+albedo_color = Color(0.72, 0.62, 0.32, 1)
 albedo_texture = ExtResource("1_albedo")
 roughness = 0.95
 normal_enabled = true

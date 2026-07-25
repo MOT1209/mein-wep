@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "colab-remote-control": {
+      "command": "python",
+      "args": ["server.py"],
+      "cwd": "mcp/colab-mcp",
+      "env": {
+        "COLAB_NGROK_URL": "https://xxxx-xxx.ngrok-free.app",
+        "COLAB_API_SECRET": "CHANGE_ME_SUPER_SECRET_TOKEN"
+      }
+    }
+  }
+}

@@ -41,9 +41,18 @@ var _stage_nodes: Array[Node3D] = []
 
 func _ready() -> void:
 	crop_info = CropData.get_crop(crop_id)
+	_recalculate_growth_state()
 	EventBus.day_changed.connect(_on_day_changed)
 	_spawn_stage_models()
 	_update_visual()
+
+
+func _recalculate_growth_state() -> void:
+	var total_stages: int = crop_info.get("growth_stages", 5)
+	var days_to_mature: int = crop_info.get("days_to_mature", 10)
+	var days_per_stage: float = float(days_to_mature) / float(total_stages)
+	growth_stage = clampi(int(float(days_planted) / days_per_stage), 0, total_stages - 1)
+	is_ripe = days_planted >= days_to_mature
 
 
 func _spawn_stage_models() -> void:
@@ -62,18 +71,14 @@ func _on_day_changed(_day: int, _day_of_week: int) -> void:
 		return
 
 	days_planted += 1
-	var total_stages: int = crop_info.get("growth_stages", 5)
-	var days_to_mature: int = crop_info.get("days_to_mature", 10)
-	var days_per_stage: float = float(days_to_mature) / float(total_stages)
-	var new_stage: int = clampi(int(float(days_planted) / days_per_stage), 0, total_stages - 1)
+	var old_stage: int = growth_stage
+	_recalculate_growth_state()
 
-	if new_stage != growth_stage:
-		growth_stage = new_stage
+	if growth_stage != old_stage:
 		EventBus.crop_growth_stage_changed.emit(self, growth_stage)
 		_update_visual()
 
-	if days_planted >= days_to_mature:
-		is_ripe = true
+	if is_ripe:
 		EventBus.crop_ready_to_harvest.emit(self)
 
 

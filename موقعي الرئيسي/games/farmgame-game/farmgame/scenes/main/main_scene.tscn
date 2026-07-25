@@ -9,7 +9,10 @@
 [ext_resource type="PackedScene" uid="uid://bnmlendpd134x" path="res://assets/models/buildings/windmill.glb" id="7_windmill"]
 [ext_resource type="PackedScene" uid="uid://ya75idrcolel" path="res://assets/models/paths/path_stone.glb" id="8_path"]
 [ext_resource type="Script" uid="uid://ddqc7b0j6hblc" path="res://scripts/core/building_manager.gd" id="9_buildings"]
+[ext_resource type="Script" path="res://scripts/core/main_scene.gd" id="13_mainscene"]
 [ext_resource type="PackedScene" path="res://scenes/entities/barn_animal.tscn" id="10_barn"]
+[ext_resource type="Script" path="res://scripts/core/wildlife_scatter.gd" id="11_wildlife"]
+[ext_resource type="Script" path="res://scripts/core/grass_field.gd" id="12_grassfield"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_env"]
 sky_top_color = Color(0.38, 0.58, 0.92, 1)
@@ -23,7 +26,14 @@ sky_material = SubResource("ProceduralSkyMaterial_env")
 [sub_resource type="Environment" id="Environment_main"]
 background_mode = 2
 sky = SubResource("Sky_env")
-ambient_light_energy = 0.6
+ambient_light_source = 2
+ambient_light_color = Color(0.92, 0.88, 0.8, 1)
+ambient_light_energy = 0.5
+fog_enabled = true
+fog_light_color = Color(0.75, 0.82, 0.85, 1)
+fog_light_energy = 1.0
+fog_density = 0.015
+fog_sky_affect = 1.0
 
 [sub_resource type="BoxShape3D" id="BoxShape3D_ground"]
 size = Vector3(80, 0.2, 80)
@@ -35,6 +45,7 @@ size = Vector3(81.629395, 0.2, 80)
 size = Vector3(3, 8, 3)
 
 [node name="Main" type="Node3D" unique_id=1648700760]
+script = ExtResource("13_mainscene")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1000443610]
 environment = SubResource("Environment_main")
@@ -64,6 +75,12 @@ script = ExtResource("6_scatter")
 [node name="BuildingManager" type="Node3D" parent="." unique_id=1490749332]
 script = ExtResource("9_buildings")
 
+[node name="WildlifeScatter" type="Node3D" parent="." unique_id=275839461]
+script = ExtResource("11_wildlife")
+
+[node name="GrassField" type="Node3D" parent="." unique_id=1037462916]
+script = ExtResource("12_grassfield")
+
 [node name="BarnAnimal" parent="." unique_id=494125383 instance=ExtResource("10_barn")]
 
 [node name="Windmill" parent="." unique_id=664516539 instance=ExtResource("7_windmill")]
@@ -75,7 +92,7 @@ transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -15.378255, 4.3194904, 
 shape = SubResource("BoxShape3D_windmill")
 
 [node name="Windmill2" parent="." unique_id=475263054 instance=ExtResource("7_windmill")]
-transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -2.8056173, 4.3194904, -15)
+transform = Transform3D(2.2, 0, 0, 0, 2.2, 0, 0, 0, 2.2, -24.288437, 4.873535, -15.263461)
 
 [node name="WindmillCollision" type="StaticBody3D" parent="Windmill2" unique_id=707601676]
 

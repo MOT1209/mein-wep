@@ -2,6 +2,27 @@ extends StaticBody3D
 ## حيوان مزرعة: يتحرك عشوائياً حول موقع حظيرته، يتغذى، ينتج منتجات
 ## الجذر StaticBody3D حتى يلتقطه InteractionRay الخاص باللاعب (نفس نمط farm_tile)
 
+## نماذج حقيقية اختيارية لبعض الأنواع (بديل عن صندوق _create_procedural_visual الإجرائي)؛
+## الأنواع غير المذكورة هنا تستمر بالصندوق الإجرائي كما كانت (chicken/cow/pig)
+const MODEL_PATHS: Dictionary = {
+	"sheep": "res://assets/models/animals/sheep/sheep.obj",
+	"duck": "res://assets/models/animals/duck/duck.obj",
+}
+
+## sheep.obj مصدره thefree3dmodels.com بوحدة أمتار وY-up (مطابق لـ Godot) فلا يحتاج تصغيراً؛
+## duck.obj مصدره TurboSquid #12249 مُصدَّر من 3ds Max بوحدة سم (قياس مباشر لصندوق الحدود:
+## ارتفاع 54.77 وحدة خام) فيحتاج القسمة على 100
+const MODEL_SCALES: Dictionary = {
+	"sheep": 1.0,
+	"duck": 0.01,
+}
+
+## نماذج 3ds Max/TurboSquid هذه مُصدَّرة Z-up (تحقّقنا: كل صندوق حدودها يبدأ من Z=0 تقريباً وليس Y)
+## بعكس Y-up الافتراضي في Godot، فتحتاج تدوير -90° حول X لتقف منتصبة
+const MODEL_NEEDS_ZUP_FIX: Dictionary = {
+	"duck": true,
+}
+
 var animal_id: String = "chicken"
 var animal_info: Dictionary = {}
 var hunger: float = 100.0
@@ -45,12 +66,46 @@ func _physics_process(delta: float) -> void:
 
 
 func _create_visuals() -> void:
-	var color: Color = Color(animal_info.get("color", [0.8, 0.8, 0.8])[0],
-		animal_info.get("color", [0.8, 0.8, 0.8])[1],
-		animal_info.get("color", [0.8, 0.8, 0.8])[2])
 	var size: Vector3 = Vector3(animal_info.get("size", [0.5, 0.5, 0.5])[0],
 		animal_info.get("size", [0.5, 0.5, 0.5])[1],
 		animal_info.get("size", [0.5, 0.5, 0.5])[2])
+
+	## التصادم على الجذر مباشرة حتى يصل إليه الـ raycast (مشترك بين النموذج الحقيقي والصندوق الإجرائي)
+	var col: CollisionShape3D = CollisionShape3D.new()
+	col.shape = CapsuleShape3D.new()
+	col.shape.radius = maxf(size.x, size.z) * 0.6
+	col.shape.height = maxf(size.y * 1.5, size.y + 0.4)
+	col.position = Vector3(0, size.y * 0.5, 0)
+	add_child(col)
+
+	if MODEL_PATHS.has(animal_id):
+		_create_model_visual()
+	else:
+		_create_procedural_visual(size)
+
+
+func _create_model_visual() -> void:
+	var path: String = MODEL_PATHS[animal_id]
+	var resource: Resource = load(path)
+	var visual: Node3D
+
+	if resource is PackedScene:
+		visual = resource.instantiate()
+	else:
+		var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+		mesh_instance.mesh = resource
+		visual = mesh_instance
+
+	if MODEL_NEEDS_ZUP_FIX.get(animal_id, false):
+		visual.rotation_degrees.x = -90.0
+	visual.scale = Vector3.ONE * float(MODEL_SCALES.get(animal_id, 1.0))
+	add_child(visual)
+
+
+func _create_procedural_visual(size: Vector3) -> void:
+	var color: Color = Color(animal_info.get("color", [0.8, 0.8, 0.8])[0],
+		animal_info.get("color", [0.8, 0.8, 0.8])[1],
+		animal_info.get("color", [0.8, 0.8, 0.8])[2])
 
 	## الجسم
 	_body = MeshInstance3D.new()
@@ -63,14 +118,6 @@ func _create_visuals() -> void:
 	mat.albedo_color = color
 	mat.roughness = 0.8
 	_body.material_override = mat
-
-	## التصادم على الجذر مباشرة حتى يصل إليه الـ raycast
-	var col: CollisionShape3D = CollisionShape3D.new()
-	col.shape = CapsuleShape3D.new()
-	col.shape.radius = maxf(size.x, size.z) * 0.6
-	col.shape.height = maxf(size.y * 1.5, size.y + 0.4)
-	col.position = Vector3(0, size.y * 0.5, 0)
-	add_child(col)
 
 	## الرأس (كبيّة أصغر)
 	var head: MeshInstance3D = MeshInstance3D.new()

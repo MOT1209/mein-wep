@@ -1,26 +1,44 @@
 extends CharacterBody3D
 ## الشخصية الرئيسية: حركة WASD، جاذبية، والتفاعل مع المحاصيل عبر Raycast
 ## تم إضافة particles للحركة
+## الكاميرا: SpringArm3D يمنع اختراق الجدران/المباني، مع 3 وضعيات تُبدَّل بـ F5
 
 const SPEED: float = 5.0
 const JUMP_VELOCITY: float = 4.5
 const MOUSE_SENSITIVITY: float = 0.003
 const INTERACTION_ENERGY_COST: float = 2.0
+const PITCH_MIN: float = -89.0
+const PITCH_MAX: float = 89.0
+
+## بأسلوب ماين كرافت بالضبط: F5 يدور خلفي -> أمامي (سيلفي) -> منظور أول -> خلفي...
+enum CameraMode { THIRD_PERSON_BACK, THIRD_PERSON_FRONT, FIRST_PERSON }
+
+## spring_rot_y بالدرجات: يحدد اتجاه امتداد الذراع (0=خلف اللاعب، 180=أمامه كالسيلفي)
+## تحقق تجريبياً عبر اختبار معزول: spring_rot_y=0 -> الكاميرا خلف اللاعب وتنظر بنفس اتجاهه،
+## spring_rot_y=180 -> الكاميرا أمام اللاعب وتنظر نحوه (Camera3D لا يحتاج أي دوران في الحالتين)
+const CAMERA_MODE_CONFIG: Dictionary = {
+	CameraMode.THIRD_PERSON_BACK: {"spring_length": 6.0, "arm_height": 2.0, "character_visible": true, "spring_rot_y": 0.0},
+	CameraMode.THIRD_PERSON_FRONT: {"spring_length": 5.0, "arm_height": 2.0, "character_visible": true, "spring_rot_y": 180.0},
+	CameraMode.FIRST_PERSON: {"spring_length": 0.0, "arm_height": 0.0, "character_visible": false, "spring_rot_y": 0.0},
+}
 
 @onready var camera_pivot: Node3D = $CameraPivot
-@onready var camera_arm: Node3D = $CameraPivot/CameraArm
-@onready var interaction_ray: RayCast3D = $CameraPivot/CameraArm/Camera3D/InteractionRay
+@onready var spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
+@onready var interaction_ray: RayCast3D = $CameraPivot/InteractionRay
 @onready var stats: Node = $PlayerStats
+@onready var character_model: Node3D = $CharacterModel
 @onready var animation_player: AnimationPlayer = $CharacterModel.get_node_or_null("AnimationPlayer") as AnimationPlayer
 
 var gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity")
 var _dust_particles: GPUParticles3D = null
 var _is_moving: bool = false
+var camera_mode: CameraMode = CameraMode.THIRD_PERSON_BACK
 
 
 func _ready() -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	_create_dust_particles()
+	_apply_camera_mode(camera_mode)
 
 
 func _create_dust_particles() -> void:
@@ -59,19 +77,37 @@ func _create_dust_particles() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F5:
+		_cycle_camera_mode()
+		return
+
 	if Input.mouse_mode != Input.MOUSE_MODE_CAPTURED:
 		return
 
 	if event is InputEventMouseMotion:
 		rotate_y(-event.relative.x * MOUSE_SENSITIVITY)
 		camera_pivot.rotate_x(-event.relative.y * MOUSE_SENSITIVITY)
-		camera_pivot.rotation.x = clampf(camera_pivot.rotation.x, deg_to_rad(-80), deg_to_rad(80))
+		camera_pivot.rotation.x = clampf(camera_pivot.rotation.x, deg_to_rad(PITCH_MIN), deg_to_rad(PITCH_MAX))
 
 	if event.is_action_pressed("interact"):
 		_try_interact()
 
 	if event.is_action_pressed("cycle_seed"):
 		InventorySystem.cycle_selected_seed()
+
+
+func _cycle_camera_mode() -> void:
+	var next_mode: int = (camera_mode + 1) % CameraMode.size()
+	_apply_camera_mode(next_mode)
+
+
+func _apply_camera_mode(mode: CameraMode) -> void:
+	camera_mode = mode
+	var config: Dictionary = CAMERA_MODE_CONFIG[mode]
+	spring_arm.spring_length = config["spring_length"]
+	spring_arm.position.y = config["arm_height"]
+	spring_arm.rotation_degrees.y = config["spring_rot_y"]
+	character_model.visible = config["character_visible"]
 
 
 func _physics_process(delta: float) -> void:

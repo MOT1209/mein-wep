@@ -12,6 +12,7 @@ enum State { EMPTY, TILLED, PLANTED }
 
 var state: State = State.EMPTY
 var planted_crop: Node3D = null
+var grid_position: Vector2i = Vector2i.ZERO
 
 
 func _ready() -> void:
@@ -54,7 +55,7 @@ func _plant() -> void:
 	planted_crop.tree_exited.connect(_on_crop_removed)
 
 	state = State.PLANTED
-	EventBus.crop_planted.emit(planted_crop, Vector2i.ZERO)
+	EventBus.crop_planted.emit(planted_crop, grid_position)
 	_update_visual()
 	_create_plant_particles()
 
@@ -64,6 +65,37 @@ func _on_crop_removed() -> void:
 	state = State.TILLED
 	_update_visual()
 	_create_harvest_particles()
+
+
+func get_save_data() -> Dictionary:
+	var data: Dictionary = {
+		"grid_position": {"x": grid_position.x, "y": grid_position.y},
+		"state": state,
+	}
+	if state == State.PLANTED and planted_crop and is_instance_valid(planted_crop):
+		data["crop_id"] = planted_crop.crop_id
+		data["days_planted"] = planted_crop.days_planted
+	return data
+
+
+func load_save_data(data: Dictionary) -> void:
+	if planted_crop and is_instance_valid(planted_crop):
+		if planted_crop.tree_exited.is_connected(_on_crop_removed):
+			planted_crop.tree_exited.disconnect(_on_crop_removed)
+		planted_crop.queue_free()
+		planted_crop = null
+
+	state = data.get("state", State.EMPTY)
+
+	if state == State.PLANTED:
+		planted_crop = CropScene.instantiate()
+		planted_crop.crop_id = data.get("crop_id", "wheat")
+		planted_crop.days_planted = data.get("days_planted", 0)
+		add_child(planted_crop)
+		planted_crop.position = Vector3(0, 0.05, 0)
+		planted_crop.tree_exited.connect(_on_crop_removed)
+
+	_update_visual()
 
 
 func _update_visual() -> void:

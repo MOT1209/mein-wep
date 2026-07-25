@@ -8,8 +8,8 @@
     "theme_color": "#09090b",
     "orientation": "portrait",
     "categories": ["developer-tools", "utilities", "productivity"],
-    "lang": "en",
-    "dir": "ltr",
+    "lang": "ar",
+    "dir": "rtl",
     "display_override": ["window-controls-overlay", "standalone"],
     "scope": "./",
     "edge_side_panel": {
@@ -70,7 +70,7 @@
             "sizes": "512x512",
             "type": "image/webp",
             "form_factor": "wide",
-            "label": "Rashid AI Workspace Dashboard"
+            "label": "Rashid AI Workspace - Main Interface"
         }
     ],
     "shortcuts": [

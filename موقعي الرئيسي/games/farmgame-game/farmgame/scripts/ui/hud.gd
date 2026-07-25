@@ -25,8 +25,13 @@ func _ready() -> void:
 	EventBus.money_changed.connect(_on_money_changed)
 	EventBus.player_stats_changed.connect(_on_player_stats_changed)
 	EventBus.selected_seed_changed.connect(_on_selected_seed_changed)
+	EventBus.game_loaded.connect(_refresh_all)
 	pause_menu.resume_requested.connect(_close_all_menus)
 
+	_refresh_all()
+
+
+func _refresh_all() -> void:
 	_on_hour_changed(TimeSystem.current_hour)
 	_on_day_changed(TimeSystem.current_day, TimeSystem.current_day_of_week)
 	_on_money_changed(EconomySystem.money)

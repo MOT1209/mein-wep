@@ -4,6 +4,7 @@ extends Node
 const SAVE_PATH: String = "user://savegame.json"
 
 var is_game_running: bool = false
+var pending_load: bool = false
 
 
 func _ready() -> void:
@@ -16,6 +17,10 @@ func save_game() -> void:
 		"economy": EconomySystem.get_save_data(),
 		"inventory": InventorySystem.get_save_data(),
 	}
+
+	var farm_manager: Node = get_tree().get_first_node_in_group("farm_manager")
+	if farm_manager:
+		save_data["farm"] = farm_manager.get_save_data()
 
 	var file: FileAccess = FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file == null:
@@ -48,6 +53,10 @@ func load_game() -> bool:
 	TimeSystem.load_save_data(save_data.get("time", {}))
 	EconomySystem.load_save_data(save_data.get("economy", {}))
 	InventorySystem.load_save_data(save_data.get("inventory", {}))
+
+	var farm_manager: Node = get_tree().get_first_node_in_group("farm_manager")
+	if farm_manager and save_data.has("farm"):
+		farm_manager.load_save_data(save_data["farm"])
 
 	EventBus.game_loaded.emit()
 	return true

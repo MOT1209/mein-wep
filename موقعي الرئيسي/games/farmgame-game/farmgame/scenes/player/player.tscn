@@ -9,6 +9,8 @@ radius = 0.4
 height = 1.8
 
 [node name="Player" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 1
 script = ExtResource("1_player")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -23,11 +25,13 @@ script = ExtResource("2_stats")
 [node name="CameraPivot" type="Node3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, 0)
 
-[node name="CameraArm" type="Node3D" parent="CameraPivot"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 6.0)
-
-[node name="Camera3D" type="Camera3D" parent="CameraPivot/CameraArm"]
-current = true
-
-[node name="InteractionRay" type="RayCast3D" parent="CameraPivot/CameraArm/Camera3D"]
+[node name="InteractionRay" type="RayCast3D" parent="CameraPivot"]
 target_position = Vector3(0, 0, -12)
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.0, 0)
+spring_length = 6.0
+margin = 0.2
+
+[node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D"]
+current = true

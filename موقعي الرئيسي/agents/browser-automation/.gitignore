@@ -1,0 +1,19 @@
+# Environment variables - never commit credentials
+.env
+
+# Session storage contains sensitive cookies
+sessions/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Logs
+*.log
+logs/
+
+# Screenshots (if saved by default)
+screenshots/
