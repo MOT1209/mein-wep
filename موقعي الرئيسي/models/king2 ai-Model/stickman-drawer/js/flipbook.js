@@ -6,6 +6,7 @@ import { floodFill, pickColor, sprayDab, pathStar, pathArrow } from './tools.js'
 
 const EXPORT_SIZE = 1024;
 const STORAGE_KEY = 'stickman-drawer-flipbook-v2';
+const CANVAS_SIZE_KEY = 'stickman-drawer-canvas-size';
 const DRAG_SHAPE_TOOLS = new Set(['line', 'rect', 'ellipse', 'triangle', 'arrow', 'star']);
 const CLICK_TOOLS = new Set(['fill', 'eyedropper', 'text']);
 
@@ -60,10 +61,29 @@ export function initFlipbook(root) {
   let dragStart = null;
   let dragSnapshotData = null;
   let history = [];
+  let redoStack = [];
   let frames = []; // { id, dataUrl, caption }
   let activeFrameId = null;
   let playing = false;
   let playTimer = null;
+
+  // Zoom & Pan state
+  let zoom = 1;
+  let panX = 0;
+  let panY = 0;
+  let isPanning = false;
+  let panStart = null;
+  let spaceHeld = false;
+  const MIN_ZOOM = 0.25;
+  const MAX_ZOOM = 5;
+  const zoomLevelEl = root.querySelector('#zoomLevel');
+  const zoomInBtn = root.querySelector('#zoomInBtn');
+  const zoomOutBtn = root.querySelector('#zoomOutBtn');
+  const zoomResetBtn = root.querySelector('#zoomResetBtn');
+  const redoBtn = root.querySelector('#redoBtn');
+  const canvasWidthInput = root.querySelector('#canvasWidth');
+  const canvasHeightInput = root.querySelector('#canvasHeight');
+  const applySizeBtn = root.querySelector('#applySizeBtn');
 
   // Shape-tween generator state
   let tweenShapeType = 'circle';
@@ -109,9 +129,99 @@ export function initFlipbook(root) {
   const applyFit = fitCanvasToParent(canvas, ({ resized }) => { if (resized) fillWhite(); });
   const applyOnionFit = fitCanvasToParent(onionCanvas, () => {});
 
+  // ===================== Zoom & Pan =====================
+
+  function updateZoomUI() {
+    zoomLevelEl.textContent = Math.round(zoom * 100) + '%';
+  }
+
+  function setZoom(newZoom, cx, cy) {
+    const prev = zoom;
+    zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newZoom));
+    if (cx !== undefined && cy !== undefined) {
+      panX = cx - (cx - panX) * (zoom / prev);
+      panY = cy - (cy - panY) * (zoom / prev);
+    }
+    updateZoomUI();
+    applyZoomTransform();
+  }
+
+  function applyZoomTransform() {
+    canvas.style.transformOrigin = '0 0';
+    canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+    onionCanvas.style.transformOrigin = '0 0';
+    onionCanvas.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom})`;
+  }
+
+  function resetZoom() {
+    zoom = 1;
+    panX = 0;
+    panY = 0;
+    updateZoomUI();
+    applyZoomTransform();
+  }
+
+  zoomInBtn.addEventListener('click', () => setZoom(zoom + 0.25));
+  zoomOutBtn.addEventListener('click', () => setZoom(zoom - 0.25));
+  zoomResetBtn.addEventListener('click', resetZoom);
+
+  // Mouse wheel zoom
+  canvas.addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const delta = e.deltaY > 0 ? -0.15 : 0.15;
+      setZoom(zoom + delta, cx, cy);
+    }
+  }, { passive: false });
+
+  // Pan with middle mouse or space+drag
+  canvas.addEventListener('pointerdown', (e) => {
+    if (e.button === 1 || spaceHeld) {
+      e.preventDefault();
+      isPanning = true;
+      panStart = { x: e.clientX - panX, y: e.clientY - panY };
+      canvas.classList.add('panning');
+      try { canvas.setPointerCapture(e.pointerId); } catch {}
+      return;
+    }
+  });
+
+  canvas.addEventListener('pointermove', (e) => {
+    if (isPanning && panStart) {
+      panX = e.clientX - panStart.x;
+      panY = e.clientY - panStart.y;
+      applyZoomTransform();
+    }
+  });
+
+  canvas.addEventListener('pointerup', (e) => {
+    if (isPanning) {
+      isPanning = false;
+      panStart = null;
+      canvas.classList.remove('panning');
+    }
+  });
+
+  canvas.addEventListener('pointercancel', () => {
+    isPanning = false;
+    panStart = null;
+    canvas.classList.remove('panning');
+  });
+
   function pushHistory() {
     history.push(canvas.toDataURL());
     if (history.length > 25) history.shift();
+    redoStack = [];
+  }
+
+  async function redo() {
+    if (!redoStack.length) return;
+    const dataUrl = redoStack.pop();
+    history.push(canvas.toDataURL());
+    await restoreSnapshot(dataUrl);
   }
 
   function restoreSnapshot(dataUrl) {
@@ -131,7 +241,9 @@ export function initFlipbook(root) {
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+    const x = (e.clientX - rect.left - panX) / zoom;
+    const y = (e.clientY - rect.top - panY) / zoom;
+    return { x, y };
   }
 
   function strokeStyleFor() {
@@ -292,7 +404,7 @@ export function initFlipbook(root) {
   }
 
   function startDraw(e) {
-    if (playing || tweenPreviewPlaying) return;
+    if (playing || tweenPreviewPlaying || isPanning || spaceHeld) return;
     const p = getPos(e);
 
     if (pendingTweenPoint) {
@@ -392,7 +504,15 @@ export function initFlipbook(root) {
   undoBtn.addEventListener('click', async () => {
     commitMoveSelection();
     if (!history.length) return;
+    redoStack.push(canvas.toDataURL());
     await restoreSnapshot(history.pop());
+  });
+
+  redoBtn.addEventListener('click', async () => {
+    commitMoveSelection();
+    if (!redoStack.length) return;
+    history.push(canvas.toDataURL());
+    await restoreSnapshot(redoStack.pop());
   });
 
   clearBtn.addEventListener('click', () => {
@@ -824,14 +944,91 @@ export function initFlipbook(root) {
     renderFrames();
   }
 
+  // ===================== Keyboard Shortcuts =====================
+
+  const TOOL_SHORTCUTS = {
+    b: 'pen', e: 'eraser', g: 'fill',
+    i: 'eyedropper', t: 'text', v: 'move',
+    s: 'spray', l: 'line', r: 'rect',
+    o: 'ellipse',
+  };
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+
+    if (e.key === ' ') {
+      e.preventDefault();
+      if (!spaceHeld) { spaceHeld = true; canvas.classList.add('panning'); }
+      return;
+    }
+
+    if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+      e.preventDefault();
+      undoBtn.click();
+      return;
+    }
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z') || (e.shiftKey && e.key === 'z'))) {
+      e.preventDefault();
+      redoBtn.click();
+      return;
+    }
+
+    if (e.key === '=' || e.key === '+') { e.preventDefault(); setZoom(zoom + 0.25); return; }
+    if (e.key === '-') { e.preventDefault(); setZoom(zoom - 0.25); return; }
+    if (e.key === '0') { e.preventDefault(); resetZoom(); return; }
+
+    if (TOOL_SHORTCUTS[e.key.toLowerCase()]) {
+      setTool(TOOL_SHORTCUTS[e.key.toLowerCase()]);
+    }
+  });
+
+  document.addEventListener('keyup', (e) => {
+    if (e.key === ' ') {
+      spaceHeld = false;
+      if (!isPanning) canvas.classList.remove('panning');
+    }
+  });
+
+  // ===================== Canvas Resize =====================
+
+  function loadCanvasSize() {
+    try {
+      const raw = localStorage.getItem(CANVAS_SIZE_KEY);
+      if (raw) {
+        const s = JSON.parse(raw);
+        canvasWidthInput.value = s.w;
+        canvasHeightInput.value = s.h;
+      }
+    } catch {}
+  }
+
+  applySizeBtn.addEventListener('click', async () => {
+    const w = Number(canvasWidthInput.value);
+    const h = Number(canvasHeightInput.value);
+    if (w < 256 || h < 256 || w > 2048 || h > 2048) {
+      showToast('الحجم يجب أن يكون بين 256 و 2048');
+      return;
+    }
+    if (frames.length > 0) {
+      if (!(await showConfirm('تغيير الحجم قد يؤثر على الإطارات الموجودة. متأكد؟'))) return;
+    }
+    try { localStorage.setItem(CANVAS_SIZE_KEY, JSON.stringify({ w, h })); } catch {}
+    applyFit();
+    showToast(`تم تغيير الحجم إلى ${w}×${h}`);
+  });
+
+  loadCanvasSize();
   loadPersisted();
   setTool('pen');
+  updateZoomUI();
 
   return {
     refit() {
       applyFit();
       applyOnionFit();
       updateOnionSkin();
+      applyZoomTransform();
     },
+    resetZoom,
   };
 }

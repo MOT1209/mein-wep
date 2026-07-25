@@ -54,7 +54,54 @@ h1 { font-size: 1.3rem; margin: 0 0 4px; text-align: center; }
 
 canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
 
+canvas.panning { cursor: grab; }
+canvas.panning:active { cursor: grabbing; }
+
 #onionCanvas { position: absolute; inset: 0; pointer-events: none; }
+
+/* Zoom bar */
+.zoom-bar {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #000a;
+  backdrop-filter: blur(6px);
+  border-radius: 8px;
+  padding: 4px 8px;
+  z-index: 10;
+  user-select: none;
+}
+
+.zoom-bar button {
+  width: 28px;
+  height: 28px;
+  min-height: unset;
+  padding: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-bar button:hover { background: #fff2; }
+
+.zoom-bar span {
+  font-size: 0.75rem;
+  color: #ddd;
+  min-width: 40px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Redo button */
+#redoBtn { margin-inline-end: 4px; }
 
 /* Toolbar */
 .toolbar {
@@ -209,6 +256,21 @@ select {
   border-radius: 6px;
   padding: 6px 8px;
 }
+
+input[type="number"] {
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: var(--panel-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  width: 72px;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
 /* Toasts + custom confirm (non-blocking alert()/confirm() replacements) */
 .toast-host {
