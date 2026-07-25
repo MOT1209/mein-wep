@@ -139,11 +139,126 @@ async function generateStability(prompt, size, signal, progressEl) {
   return await res.blob();
 }
 
+async function generateGemini(prompt, size, signal, progressEl) {
+  const key = getApiKey();
+  if (!key) throw new Error('ضع Gemini API Key أولاً — مجانٍ من ai.google.dev');
+
+  if (progressEl) progressEl.textContent = '🎨 جاري التوليد بـ Gemini...';
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: `Generate an image: ${prompt}` }] }],
+        generationConfig: {
+          responseModalities: ['image', 'text'],
+        },
+      }),
+      signal,
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Gemini HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const parts = data.candidates?.[0]?.content?.parts || [];
+  for (const part of parts) {
+    if (part.inlineData) {
+      const bin = atob(part.inlineData.data);
+      const arr = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+      return new Blob([arr], { type: part.inlineData.mimeType || 'image/png' });
+    }
+  }
+  throw new Error('Gemini لم يُرجع صورة');
+}
+
+async function generateOpenRouter(prompt, size, signal, progressEl) {
+  const key = getApiKey();
+  if (!key) throw new Error('ضع OpenRouter API Key أولاً — من openrouter.ai/keys');
+
+  if (progressEl) progressEl.textContent = '🎨 جاري التوليد بـ OpenRouter...';
+
+  const res = await fetch('https://openrouter.ai/api/v1/images', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'Stickman Drawer',
+    },
+    body: JSON.stringify({
+      prompt,
+      model: 'black-forest-labs/flux.1-schnell',
+      response_format: 'b64_json',
+    }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `OpenRouter HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const b64 = data.data[0].b64_json;
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: 'image/png' });
+}
+
+async function generateCustom(prompt, size, signal, progressEl) {
+  const key = getApiKey();
+  const apiUrl = document.getElementById('customApiUrl')?.value;
+  const model = document.getElementById('customModel')?.value || 'default';
+  if (!apiUrl) throw new Error('ضع رابط الـ API أولاً في الإعدادات');
+
+  if (progressEl) progressEl.textContent = `🎨 جاري التوليد بـ ${model}...`;
+
+  const res = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(key ? { 'Authorization': `Bearer ${key}` } : {}),
+    },
+    body: JSON.stringify({
+      model,
+      prompt,
+      n: 1,
+      size: size,
+      response_format: 'b64_json',
+    }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Custom API HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const b64 = data.data?.[0]?.b64_json;
+  if (!b64) throw new Error('الرد لا يحتوي على صورة b64_json');
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return new Blob([arr], { type: 'image/png' });
+}
+
 async function generateImage(prompt, size, signal, progressEl) {
   const provider = document.getElementById('apiProvider').value;
   if (provider === 'huggingface') return generateHuggingFace(prompt, size, signal, progressEl);
   if (provider === 'openai') return generateOpenAI(prompt, size, signal, progressEl);
   if (provider === 'stability') return generateStability(prompt, size, signal, progressEl);
+  if (provider === 'gemini') return generateGemini(prompt, size, signal, progressEl);
+  if (provider === 'openrouter') return generateOpenRouter(prompt, size, signal, progressEl);
+  if (provider === 'custom') return generateCustom(prompt, size, signal, progressEl);
   throw new Error('provider غير معروف');
 }
 
@@ -359,6 +474,12 @@ export function initAIGenerator() {
       apiKeyInput.placeholder = 'OpenAI API Key (مطلوب)';
     } else if (apiProvider.value === 'stability') {
       apiKeyInput.placeholder = 'Stability AI API Key (مطلوب)';
+    } else if (apiProvider.value === 'gemini') {
+      apiKeyInput.placeholder = 'Gemini API Key (مجاني — ai.google.dev)';
+    } else if (apiProvider.value === 'openrouter') {
+      apiKeyInput.placeholder = 'OpenRouter API Key (من openrouter.ai)';
+    } else if (apiProvider.value === 'custom') {
+      apiKeyInput.placeholder = 'API Key (إن وجد)';
     }
   });
 

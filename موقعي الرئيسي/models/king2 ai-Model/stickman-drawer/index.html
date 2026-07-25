@@ -92,8 +92,11 @@
     <div class="toolbar">
       <select id="apiProvider">
         <option value="huggingface" selected>Hugging Face (مجاني)</option>
+        <option value="gemini">Gemini (مجاني — google)</option>
+        <option value="openrouter">OpenRouter (متعدد الموديلات)</option>
         <option value="openai">OpenAI DALL-E</option>
         <option value="stability">Stability AI</option>
+        <option value="custom">API مخصص (OpenCode/Zen/غيره)</option>
       </select>
       <input type="password" id="apiKey" placeholder="API Key (مطلوب لـ OpenAI / Stability)" style="min-width:280px">
       <label class="checkbox"><input type="checkbox" id="saveApiKey" checked> حفظ المفتاح محلياً</label>
@@ -103,7 +106,7 @@
       <input type="text" id="customApiUrl" placeholder="رابط الـ API endpoint" style="min-width:300px">
       <input type="text" id="customModel" placeholder="اسم الموديل (model)" style="min-width:200px">
     </div>
-    <p class="hint">Hugging Face مجاني بدون مفتاح — لكن أبطأ. OpenAI أسرع وأجود.</p>
+    <p class="hint">مجاني: HuggingFace + Gemini | أسرع: OpenRouter + OpenAI | مخصص: أي API يدعم OpenAI format (OpenCode/Zen/غيره)</p>
 
     <textarea id="promptInput" rows="2" placeholder="اكتب وصف الصورة هنا... مثال: a cute stickman walking, simple black line drawing"></textarea>
 
@@ -193,7 +196,10 @@
     <div class="toolbar">
       <select id="agentProvider">
         <option value="huggingface" selected>HuggingFace (مجاني — للنصوص)</option>
+        <option value="gemini">Gemini (مجاني — google)</option>
+        <option value="openrouter">OpenRouter (مجاني — للنصوص)</option>
         <option value="openai">OpenAI GPT (أسرع)</option>
+        <option value="custom">API مخصص (OpenCode/Zen/غيره)</option>
       </select>
       <input type="password" id="agentApiKey" placeholder="API Key (اختياري)" style="min-width:200px">
     </div>

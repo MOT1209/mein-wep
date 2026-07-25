@@ -40,6 +40,18 @@ async function generateText(prompt, signal, progressEl) {
     return generateTextOpenAI(prompt, signal, progressEl);
   }
 
+  if (provider === 'gemini') {
+    return generateTextGemini(prompt, signal, progressEl);
+  }
+
+  if (provider === 'openrouter') {
+    return generateTextOpenRouter(prompt, signal, progressEl);
+  }
+
+  if (provider === 'custom') {
+    return generateTextCustom(prompt, signal, progressEl);
+  }
+
   throw new Error('provider غير معروف للنصوص');
 }
 
@@ -111,6 +123,101 @@ async function generateTextOpenAI(prompt, signal, progressEl) {
 
   const data = await res.json();
   return data.choices[0].message.content.trim();
+}
+
+async function generateTextGemini(prompt, signal, progressEl) {
+  const key = getApiKey();
+  if (!key) throw new Error('ضع Gemini API Key أولاً — مجانٍ من ai.google.dev');
+
+  if (progressEl) progressEl.textContent = '🧠 جاري التفكير بـ Gemini...';
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.9,
+          maxOutputTokens: 800,
+        },
+      }),
+      signal,
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Gemini HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+}
+
+async function generateTextOpenRouter(prompt, signal, progressEl) {
+  const key = getApiKey();
+  if (!key) throw new Error('ضع OpenRouter API Key أولاً — من openrouter.ai/keys');
+
+  if (progressEl) progressEl.textContent = '🧠 جاري التفكير بـ OpenRouter...';
+
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${key}`,
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'Stickman Drawer Agent',
+    },
+    body: JSON.stringify({
+      model: 'mistralai/mistral-7b-instruct:free',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 300,
+      temperature: 0.9,
+    }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `OpenRouter HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices[0].message.content.trim();
+}
+
+async function generateTextCustom(prompt, signal, progressEl) {
+  const key = getApiKey();
+  const apiUrl = document.getElementById('agentCustomApiUrl')?.value || document.getElementById('customApiUrl')?.value;
+  const model = document.getElementById('agentCustomModel')?.value || document.getElementById('customModel')?.value || 'default';
+  if (!apiUrl) throw new Error('ضع رابط الـ API أولاً');
+
+  if (progressEl) progressEl.textContent = `🧠 جاري التفكير بـ ${model}...`;
+
+  const res = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(key ? { 'Authorization': `Bearer ${key}` } : {}),
+    },
+    body: JSON.stringify({
+      model,
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 300,
+      temperature: 0.9,
+    }),
+    signal,
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error?.message || `Custom API HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content?.trim() || '';
 }
 
 // ===================== Idea Generation =====================
