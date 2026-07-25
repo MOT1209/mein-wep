@@ -241,8 +241,8 @@ export function initFlipbook(root) {
 
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left - panX) / zoom;
-    const y = (e.clientY - rect.top - panY) / zoom;
+    const x = (e.clientX - rect.left) / zoom;
+    const y = (e.clientY - rect.top) / zoom;
     return { x, y };
   }
 
