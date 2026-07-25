@@ -11,9 +11,9 @@
   <div>
     <h1>🎨 استوديو الستيكمان</h1>
     <p class="subtitle">ارسم، لوّن، وحرّك — كل شيء ترسمه ملكك بالكامل</p>
-    <p class="hint" style="margin-bottom:0"><a href="generator.html" style="color:var(--accent)">🤖 افتح مولّد الصور بالـ AI</a></p>
   </div>
 
+  <!-- ============ CANVAS + DRAWING TOOLS ============ -->
   <div class="panel-card">
     <div class="canvas-box">
       <canvas id="drawCanvas"></canvas>
@@ -82,15 +82,113 @@
       <button id="applySizeBtn" type="button">📐 تطبيق الحجم</button>
     </div>
 
-    <p class="hint">ارسم إطار، احفظه، امسح اللوحة وارسم التالي — كرر لعمل فليبوك متحرك</p>
-    <p class="hint">🖐️ أداة "تحريك": اسحب لتحديد منطقة، ثم اسحبها من جديد لتغيير مكانها — تثبت تلقائياً لما تبدّل الأداة</p>
-    <p class="hint">⌨️ اختصارات: B قلم | E ممحاة | G تعبئة | I قطّارة | T نص | V تحريك | S رذاذ | L خط | R مستطيل | O دائرة | Ctrl+Z تراجع | Ctrl+Y إعادة | +/− تكبير/تصغير | 0 إعادة ضبط | مسافة للسحب</p>
+    <p class="hint">⌨️ اختصارات: B قلم | E ممحاة | G تعبئة | I قطّارة | T نص | V تحريك | Ctrl+Z تراجع | Ctrl+Y إعادة | +/− تكبير | 0 ضبط | مسافة للسحب</p>
   </div>
 
-  <!-- ============ SHAPE-TWEEN GENERATOR (feeds frames into the flipbook below) ============ -->
+  <!-- ============ AI IMAGE GENERATOR ============ -->
+  <div class="panel-card">
+    <h2>🤖 مولّد الصور بالذكاء الاصطناعي</h2>
+
+    <div class="toolbar">
+      <select id="apiProvider">
+        <option value="huggingface" selected>Hugging Face (مجاني)</option>
+        <option value="openai">OpenAI DALL-E</option>
+        <option value="stability">Stability AI</option>
+      </select>
+      <input type="password" id="apiKey" placeholder="API Key (مطلوب لـ OpenAI / Stability)" style="min-width:280px">
+      <label class="checkbox"><input type="checkbox" id="saveApiKey" checked> حفظ المفتاح محلياً</label>
+    </div>
+
+    <div class="toolbar" id="customApiRow" style="display:none">
+      <input type="text" id="customApiUrl" placeholder="رابط الـ API endpoint" style="min-width:300px">
+      <input type="text" id="customModel" placeholder="اسم الموديل (model)" style="min-width:200px">
+    </div>
+    <p class="hint">Hugging Face مجاني بدون مفتاح — لكن أبطأ. OpenAI أسرع وأجود.</p>
+
+    <textarea id="promptInput" rows="2" placeholder="اكتب وصف الصورة هنا... مثال: a cute stickman walking, simple black line drawing"></textarea>
+
+    <div class="toolbar">
+      <div class="slider-group">
+        <span>عدد الصور</span>
+        <input type="range" id="batchCount" min="1" max="10" value="1">
+        <span id="batchLabel">1</span>
+      </div>
+      <div class="slider-group">
+        <span>الحجم</span>
+        <select id="imageSize">
+          <option value="512x512">512×512</option>
+          <option value="768x768" selected>768×768</option>
+          <option value="1024x1024">1024×1024</option>
+        </select>
+      </div>
+      <label class="checkbox"><input type="checkbox" id="enhancePrompt" checked> تحسين الوصف</label>
+    </div>
+
+    <div class="toolbar">
+      <span style="font-size:0.8rem;color:var(--text-dim)">أوصاف سريعة:</span>
+      <button class="quick-prompt" type="button" data-prompt="a cute stickman waving hello, simple black line drawing, white background">👋 يلوّع</button>
+      <button class="quick-prompt" type="button" data-prompt="a stickman running fast, motion lines, simple black line drawing, white background">🏃 يركض</button>
+      <button class="quick-prompt" type="button" data-prompt="a stickman dancing happily, simple black line drawing, white background">💃 يرقص</button>
+      <button class="quick-prompt" type="button" data-prompt="a stickman sitting and thinking, simple black line drawing, white background">🤔 يفكّر</button>
+      <button class="quick-prompt" type="button" data-prompt="a stickman jumping with joy, simple black line drawing, white background">🦘 يقفز</button>
+      <button class="quick-prompt" type="button" data-prompt="two stickmen fighting, action pose, simple black line drawing, white background">🥊 يقاتل</button>
+      <button class="quick-prompt" type="button" data-prompt="a stickman reading a book, simple black line drawing, white background">📚 يقرأ</button>
+      <button class="quick-prompt" type="button" data-prompt="a stickman playing guitar, music notes, simple black line drawing, white background">🎸 يعزف</button>
+    </div>
+
+    <div class="toolbar">
+      <button id="generateBtn" class="primary" type="button" style="font-size:1rem;padding:12px 28px">🚀 ولّد الصور</button>
+      <button id="stopBtn" class="danger" type="button" style="display:none">⏹️ إيقاف</button>
+    </div>
+
+    <div id="progressBar" style="display:none;margin-top:12px">
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <p class="hint" id="progressText">جاري التوليد...</p>
+    </div>
+  </div>
+
+  <!-- ============ GENERATED GALLERY ============ -->
+  <div class="panel-card">
+    <div class="frames-header">
+      <h2>🖼️ الصور المتولّدة (<span id="genCount">0</span>)</h2>
+      <div class="frames-actions">
+        <button id="importAllBtn" class="primary" type="button">📥 استيراد الكل للفليبوك</button>
+        <button id="downloadAllGenBtn" type="button">⬇️ تنزيل الكل</button>
+        <button id="clearGalleryBtn" class="danger" type="button">🗑️ مسح</button>
+      </div>
+    </div>
+    <div id="galleryGrid" class="gallery-grid"></div>
+    <p id="galleryEmpty" class="empty-state">لسا ما فيه صور. اكتب وصف واضغط "ولّد الصور".</p>
+  </div>
+
+  <!-- ============ SEQUENCE GENERATOR ============ -->
+  <div class="panel-card">
+    <h2>🎬 توليد حركة تلقائي (Sequence)</h2>
+    <p class="hint" style="margin-top:0">ولّد سلسلة إطارات متحركة — كل إطار يختلف عن اللي قبله قليلاً</p>
+    <div class="toolbar">
+      <input type="text" id="sequenceBase" placeholder="الوصف الأساسي: a stickman" style="min-width:250px">
+      <div class="slider-group">
+        <span>عدد الإطارات</span>
+        <input type="range" id="sequenceCount" min="4" max="24" value="8">
+        <span id="sequenceLabel">8</span>
+      </div>
+      <select id="sequenceType">
+        <option value="walk">🚶 مشي</option>
+        <option value="run">🏃 ركض</option>
+        <option value="jump">🦘 قفز</option>
+        <option value="wave">👋 تلويح</option>
+        <option value="dance">💃 رقص</option>
+        <option value="custom">✏️ مخصص</option>
+      </select>
+      <input type="text" id="sequenceCustomSuffix" placeholder="suffix لكل إطار" style="min-width:200px;display:none">
+      <button id="generateSequenceBtn" class="primary" type="button">🎬 ولّد السلسلة</button>
+    </div>
+  </div>
+
+  <!-- ============ SHAPE-TWEEN GENERATOR ============ -->
   <div class="panel-card">
     <h2>🔷 مولّد حركة الأشكال</h2>
-    <p class="hint" style="margin-top:0">حرّك شكل من نقطة لنقطة وحوّله تلقائياً لإطارات تُضاف لنفس الفليبوك تحت — تقدر بعدين تفتح أي إطار متولّد وترسم فوقه بالقلم</p>
+    <p class="hint" style="margin-top:0">حرّك شكل من نقطة لنقطة وحوّله تلقائياً لإطارات</p>
 
     <div class="toolbar">
       <button data-tween-shape="circle" type="button">⚪ دائرة</button>
@@ -113,7 +211,7 @@
       <button id="setPointABtn" class="toggled" type="button">📍 حدّد نقطة البداية (A)</button>
       <button id="setPointBBtn" type="button">🏁 حدّد نقطة النهاية (B)</button>
     </div>
-    <p id="tweenStatus" class="hint">اضغط على الكانفاس بالأعلى لتحديد نقطة البداية</p>
+    <p id="tweenStatus" class="hint">اضغط على الكانفاس لتحديد نقطة البداية</p>
 
     <div class="toolbar">
       <div class="slider-group">
@@ -151,22 +249,22 @@
 
     <div class="toolbar">
       <button id="previewTweenBtn" type="button">▶️ معاينة سريعة</button>
-      <button id="generateFramesBtn" class="primary" type="button">🎬 ولّد الإطارات بالفليبوك</button>
+      <button id="generateFramesBtn" class="primary" type="button">🎬 ولّد الإطارات</button>
     </div>
   </div>
 
-  <!-- ============ FLIPBOOK (shared by hand-drawn + generated frames) ============ -->
+  <!-- ============ FLIPBOOK ============ -->
   <div class="panel-card">
     <div class="frames-header">
       <h2>🎞️ الإطارات (<span id="frameCount">0</span>)</h2>
       <div class="frames-actions">
-        <button id="downloadPngsBtn" type="button">⬇️ تنزيل PNG + بيانات</button>
-        <button id="downloadWebmBtn" type="button">🎬 تصدير فيديو WebM</button>
+        <button id="downloadPngsBtn" type="button">⬇️ تنزيل PNG</button>
+        <button id="downloadWebmBtn" type="button">🎬 تصدير WebM</button>
         <button id="clearAllFramesBtn" class="danger" type="button">حذف الكل</button>
       </div>
     </div>
     <div id="framesStrip" class="frames-strip"></div>
-    <p id="framesEmptyState" class="empty-state">لسا ما فيه إطارات. ارسم واحفظ بالأعلى، أو ولّد حركة شكل.</p>
+    <p id="framesEmptyState" class="empty-state">لسا ما فيه إطارات. ارسم واحفظ، أو ولّد بالـ AI.</p>
 
     <div class="playback-row">
       <button id="playBtn" type="button">▶️ تشغيل</button>
