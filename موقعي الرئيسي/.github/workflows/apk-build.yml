@@ -154,6 +154,9 @@ jobs:
             apps/calculator-app) ADMOB_APP_ID="ca-app-pub-6142754371257083~9020699769" ;;
             apps/quiz-app)       ADMOB_APP_ID="ca-app-pub-6142754371257083~1920938942" ;;
             apps/quran-app)      ADMOB_APP_ID="ca-app-pub-6142754371257083~8322283070" ;;
+            games/farm-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
+            games/kingcraft-game) ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
+            games/rust-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
             *) ADMOB_APP_ID="" ;;
           esac
           if [ -n "$ADMOB_APP_ID" ]; then
