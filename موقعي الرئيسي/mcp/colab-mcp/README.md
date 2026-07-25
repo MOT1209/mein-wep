@@ -173,14 +173,30 @@ Or with `uv`:
 | `colab_write_file(path, content)` | Write text content to a file in Colab. |
 | `colab_list_files(path)` | List files and directories in a Colab path. |
 | `colab_generate_image(prompt, model, ...)` | Generate an image on the Colab GPU. `model` is `king2` ([RASHID778/king2-image](https://hf.co/RASHID778/king2-image), SDXL LoRA, Arabic/English) or `mage-flow` ([microsoft/Mage-Flow](https://hf.co/microsoft/Mage-Flow)). Optional `save_to` downloads the result locally. |
+| `colab_edit_image(prompt, image, model, strength, ...)` | Image-to-image edit. `image` can be a local file (auto-uploaded) or a Colab path. `strength` (0-1) controls how much changes. Optional `save_to`. |
+| `colab_upload_file(local_path, remote_path)` | Upload a binary file (e.g. a source image) from this machine to Colab. |
 | `colab_download_file(remote_path, local_path)` | Download a binary file (e.g. a generated image) from Colab to this machine. |
+| `colab_list_images()` | List images generated/edited so far (`/content/generated`). |
+| `colab_gpu_info()` | Report the Colab GPU model and free/total VRAM. |
 
 ### 🎨 Image generation notes
 
-- Use a **GPU runtime** in Colab (Runtime → Change runtime type → T4 GPU or better).
+- Use a **GPU runtime** in Colab (Runtime → Change runtime type → T4 GPU or better). Check with `colab_gpu_info()`.
 - The first call per model downloads several GB of weights — it can take a few minutes. Later calls are fast.
-- Only one model is kept in VRAM at a time; switching between `king2` and `mage-flow` reloads automatically.
-- Generated images are saved in `/content/generated/` inside Colab.
+- Only one pipeline is kept in VRAM at a time; switching model **or** task (text-to-image ↔ image-to-image) reloads automatically.
+- Generated and edited images are saved in `/content/generated/`; uploaded sources go to `/content/uploads/`.
+
+**Example editing workflow:**
+
+```
+colab_edit_image(
+  prompt="اجعلها في الليل مع أضواء نيون",
+  image="C:/Users/me/Pictures/city.png",   # local file, uploaded automatically
+  model="king2",
+  strength=0.55,
+  save_to="C:/Users/me/Pictures/city_night.png",
+)
+```
 
 ---
 

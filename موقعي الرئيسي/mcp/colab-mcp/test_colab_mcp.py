@@ -80,6 +80,44 @@ def generate_image():
     )
 
 
+@mock_app.route("/edit_image", methods=["POST"])
+def edit_image():
+    if not _check_auth(flask.request):
+        return flask.jsonify({"status": "error", "error": "Unauthorized"}), 401
+
+    data = flask.request.get_json(force=True, silent=True) or {}
+    if not data.get("prompt"):
+        return flask.jsonify({"status": "error", "error": "Prompt is required"}), 400
+    if not data.get("image_path"):
+        return flask.jsonify({"status": "error", "error": "image_path is required"}), 400
+    model = data.get("model", "king2")
+    return flask.jsonify(
+        {"status": "success", "path": f"/content/generated/{model}_edit_123.png", "model": model}
+    )
+
+
+@mock_app.route("/upload_file", methods=["POST"])
+def upload_file():
+    if not _check_auth(flask.request):
+        return flask.jsonify({"status": "error", "error": "Unauthorized"}), 401
+
+    import base64 as b64
+
+    data = flask.request.get_json(force=True, silent=True) or {}
+    path = data.get("path", "")
+    raw = b64.b64decode(data.get("content_b64", ""))
+    return flask.jsonify({"status": "success", "path": path, "size": len(raw)})
+
+
+@mock_app.route("/gpu_info", methods=["POST"])
+def gpu_info():
+    if not _check_auth(flask.request):
+        return flask.jsonify({"status": "error", "error": "Unauthorized"}), 401
+    return flask.jsonify(
+        {"status": "success", "cuda": True, "name": "Tesla T4", "vram_free_gb": 14.5, "vram_total_gb": 15.0}
+    )
+
+
 @mock_app.route("/download_file", methods=["POST"])
 def download_file():
     if not _check_auth(flask.request):
@@ -169,19 +207,39 @@ async def main() -> None:
     import tempfile
 
     download_target = os.path.join(tempfile.gettempdir(), "colab_mcp_test_download.png")
+    upload_source = os.path.join(tempfile.gettempdir(), "colab_mcp_test_upload.png")
+    with open(upload_source, "wb") as fh:
+        fh.write(b"\x89PNG-local-source-bytes")
 
     tests = [
         ("colab_get_status", server_module.colab_get_status(), "online"),
+        ("colab_gpu_info", server_module.colab_gpu_info(), "Tesla T4"),
         ("colab_execute_python", server_module.colab_execute_python("print('hello')"), "ran python"),
         ("colab_execute_shell", server_module.colab_execute_shell("echo hi"), "ran shell"),
         ("colab_read_file", server_module.colab_read_file("/content/test.txt"), "fake content"),
         ("colab_write_file", server_module.colab_write_file("/content/test.txt", "hello"), "written successfully"),
         ("colab_list_files", server_module.colab_list_files("/content"), "file1.txt"),
+        ("colab_list_images", server_module.colab_list_images(), "file1.txt"),
         ("colab_generate_image", server_module.colab_generate_image("a golden falcon", model="king2"), "generated"),
         (
             "colab_generate_image (mage-flow + save_to)",
             server_module.colab_generate_image("desert at night", model="mage-flow", save_to=download_target),
             "saved locally",
+        ),
+        (
+            "colab_upload_file",
+            server_module.colab_upload_file(upload_source, "/content/uploads/source.png"),
+            "uploaded to colab",
+        ),
+        (
+            "colab_edit_image (local source auto-upload)",
+            server_module.colab_edit_image("make it snowy", upload_source, model="king2", save_to=download_target),
+            "edited",
+        ),
+        (
+            "colab_edit_image (remote source)",
+            server_module.colab_edit_image("make it night", "/content/uploads/source.png", model="mage-flow"),
+            "edited",
         ),
         (
             "colab_download_file",
@@ -200,6 +258,7 @@ async def main() -> None:
     with open(download_target, "rb") as fh:
         assert fh.read() == b"\x89PNG-fake-image-bytes", "downloaded file content mismatch"
     os.remove(download_target)
+    os.remove(upload_source)
     print("  OK: downloaded file content verified")
 
     print("\nAll tests passed!")

@@ -290,6 +290,147 @@ async def colab_download_file(remote_path: str, local_path: str) -> str:
     return await _download_to_local(remote_path, local_path)
 
 
+async def _upload_from_local(local_path: str, remote_path: str) -> dict:
+    """Read a local file and upload it to Colab as base64."""
+    try:
+        source = Path(local_path).expanduser()
+        if not source.exists():
+            return {"status": "error", "error": f"Local file not found: {source}"}
+        content_b64 = base64.b64encode(source.read_bytes()).decode("ascii")
+    except Exception as exc:  # noqa: BLE001
+        return {"status": "error", "error": f"Failed to read local file: {exc}"}
+    return await _call_colab(
+        {"path": remote_path, "content_b64": content_b64},
+        endpoint="upload_file",
+        timeout=300.0,
+    )
+
+
+@mcp.tool()
+async def colab_upload_file(local_path: str, remote_path: str) -> str:
+    """
+    Upload a binary file (e.g. a source image) from this machine to Colab.
+
+    Parameters
+    ----------
+    local_path : str
+        Local file path, e.g. 'C:/Users/me/Pictures/source.png'.
+    remote_path : str
+        Absolute destination path in Colab, e.g. '/content/uploads/source.png'.
+    """
+    result = await _upload_from_local(local_path, remote_path)
+    if result.get("status") == "success":
+        return f"✅ Uploaded to Colab: {result.get('path', remote_path)} ({result.get('size', '?')} bytes)"
+    return f"❌ Upload failed.\n\nError:\n{result.get('error', 'Unknown error')}"
+
+
+@mcp.tool()
+async def colab_edit_image(
+    prompt: str,
+    image: str,
+    model: str = "king2",
+    negative_prompt: str = "",
+    strength: float = 0.6,
+    steps: int = 30,
+    guidance_scale: float = 7.5,
+    seed: int = -1,
+    save_to: str = "",
+) -> str:
+    """
+    Edit / transform an existing image on the Colab GPU (image-to-image).
+
+    Parameters
+    ----------
+    prompt : str
+        Text describing the desired edit (Arabic or English).
+    image : str
+        Source image. Either a local file path on this machine (it will be
+        uploaded automatically) or an absolute path already inside Colab
+        (e.g. '/content/uploads/source.png').
+    model : str
+        'king2' (SDXL img2img + LoRA) or 'mage-flow' (microsoft/Mage-Flow editing).
+    negative_prompt : str
+        What to avoid in the result (optional).
+    strength : float
+        How much to change the source, 0.0-1.0 (default 0.6). Lower keeps more
+        of the original.
+    steps : int
+        Number of inference steps (default 30).
+    guidance_scale : float
+        Prompt adherence strength (default 7.5).
+    seed : int
+        Random seed; -1 for random.
+    save_to : str
+        Optional local path to download the edited image to.
+    """
+    remote_image = image
+    # If a local file is given, upload it to Colab first.
+    if Path(image).expanduser().exists():
+        upload = await _upload_from_local(image, f"/content/uploads/{Path(image).name}")
+        if upload.get("status") != "success":
+            return f"❌ Could not upload source image.\n\nError:\n{upload.get('error', 'Unknown error')}"
+        remote_image = upload.get("path", f"/content/uploads/{Path(image).name}")
+
+    result = await _call_colab(
+        {
+            "prompt": prompt,
+            "image_path": remote_image,
+            "model": model,
+            "negative_prompt": negative_prompt,
+            "strength": strength,
+            "steps": steps,
+            "guidance_scale": guidance_scale,
+            "seed": seed,
+        },
+        endpoint="edit_image",
+        timeout=600.0,
+    )
+    if result.get("status") != "success":
+        return f"❌ Image edit failed.\n\nError:\n{result.get('error', 'Unknown error')}"
+
+    remote_path = result.get("path", "")
+    message = (
+        f"✅ Image edited with '{result.get('model', model)}' (source: {remote_image}).\n\n"
+        f"Colab path: {remote_path}"
+    )
+    if save_to and remote_path:
+        saved = await _download_to_local(remote_path, save_to)
+        message += f"\n{saved}"
+    return message
+
+
+@mcp.tool()
+async def colab_list_images() -> str:
+    """
+    List images that have been generated or edited in Colab (/content/generated).
+    """
+    result = await _call_colab({"path": "/content/generated"}, endpoint="list_files")
+    if result.get("status") != "success":
+        return f"❌ Could not list images.\n\nError:\n{result.get('error', 'Unknown error')}"
+    files = [f for f in result.get("files", []) if not f.endswith("/")]
+    if not files:
+        return "ℹ️ No generated images yet (/content/generated is empty)."
+    listing = "\n".join(f"/content/generated/{f}" for f in files)
+    return f"✅ Generated images:\n\n{listing}"
+
+
+@mcp.tool()
+async def colab_gpu_info() -> str:
+    """
+    Report the Colab GPU model and free/total VRAM. Use this before generating
+    images to confirm a GPU runtime is active.
+    """
+    result = await _call_colab({}, endpoint="gpu_info")
+    if result.get("status") != "success":
+        return f"❌ Could not read GPU info.\n\nError:\n{result.get('error', 'Unknown error')}"
+    if not result.get("cuda"):
+        return "⚠️ No GPU detected. Switch the Colab runtime to a GPU (Runtime → Change runtime type → T4)."
+    return (
+        f"✅ GPU: {result.get('name', 'unknown')}\n"
+        f"VRAM: {result.get('vram_free_gb', '?')} GB free / {result.get('vram_total_gb', '?')} GB total"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
