@@ -30,7 +30,6 @@ window.MaarifahAds = {
     try {
       const cap = window.Capacitor;
       if (!cap || typeof cap.isNativePlatform !== 'function' || !cap.isNativePlatform()) {
-        console.log('[AdMob] Web — الإعلانات داخل التطبيق فقط');
         return false;
       }
       const lib = window.capacitorStripe || window.capacitorAdMob;
@@ -48,7 +47,6 @@ window.MaarifahAds = {
       });
 
       this.initialized = true;
-      console.log('[AdMob] ✅ تم التهيئة');
       return true;
     } catch (e) {
       console.warn('[AdMob] ⚠️ فشلت التهيئة:', e.message);

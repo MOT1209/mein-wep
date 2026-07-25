@@ -10,11 +10,9 @@ const STATIC_ASSETS = [
 
 // Install Event
 self.addEventListener('install', (event) => {
-    console.log('[Quiz SW] Installing...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[Quiz SW] Caching assets');
                 return cache.addAll(STATIC_ASSETS);
             })
             .catch(err => console.error('[Quiz SW] Cache failed:', err))
@@ -24,7 +22,6 @@ self.addEventListener('install', (event) => {
 
 // Activate Event
 self.addEventListener('activate', (event) => {
-    console.log('[Quiz SW] Activating...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(

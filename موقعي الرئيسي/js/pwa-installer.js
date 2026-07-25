@@ -66,7 +66,11 @@
             const { outcome } = await storedPrompt.userChoice;
 
             if (outcome === 'accepted') {
-                btn.innerHTML = '<i class="fas fa-check"></i> تم التثبيت';
+                btn.textContent = '';
+                const checkIcon = document.createElement('i');
+                checkIcon.className = 'fas fa-check';
+                btn.appendChild(checkIcon);
+                btn.appendChild(document.createTextNode(' تم التثبيت'));
                 btn.disabled = true;
             }
         } catch (err) {

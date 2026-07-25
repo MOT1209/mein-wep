@@ -9,7 +9,7 @@
     
     if (typeof window !== 'undefined' && window.supabase) {
         window.supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        console.log('✅ Quran Pro: Supabase connected');
+
     } else {
         console.warn('⚠️ Quran Pro: Supabase library not loaded');
     }

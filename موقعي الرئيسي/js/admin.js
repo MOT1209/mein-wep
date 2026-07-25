@@ -146,10 +146,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('projects-list-container');
         if (!container) return;
         const client = getClient();
-        if (!client) { container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Supabase not available</p>'; return; }
-        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading projects...</p>';
+        if (!client) { container.textContent = 'Supabase not available'; return; }
+        container.textContent = 'Loading projects...';
         const { data: projects, error } = await client.from('projects').select('*').order('created_at', { ascending: false });
-        if (error) { container.innerHTML = `<p style="color:var(--danger)">Error: ${escapeHTML(error.message)}</p>`; return; }
+        if (error) { container.textContent = `Error: ${error.message}`; return; }
         if (projects) { allProjects = projects; renderProjectsList(projects); }
     }
 
@@ -157,10 +157,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const container = document.getElementById('projects-list-container');
         if (!container) return;
         if (!projects || projects.length === 0) {
-            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No projects found. Add one!</p>';
+            container.textContent = 'No projects found. Add one!';
             return;
         }
-        container.innerHTML = '';
+        container.textContent = '';
         projects.forEach(p => {
             const div = document.createElement('div');
             div.className = 'control-row';
@@ -295,14 +295,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const client = getClient(); if (!client) return;
         const container = document.getElementById('lessons-list-container');
         if (!container) return;
-        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
+        container.textContent = 'Loading...';
         const { data, error } = await client.from('lessons').select('*').order('sort_order', { ascending: true });
-        if (error) { container.innerHTML = `<p style="color:var(--danger)">Error: ${escapeHTML(error.message)}</p>`; return; }
+        if (error) { container.textContent = `Error: ${error.message}`; return; }
         if (data) allLessons = data;
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No lessons found.</p>'; return;
+            container.textContent = 'No lessons found.'; return;
         }
-        container.innerHTML = '';
+        container.textContent = '';
         data.forEach(item => {
             const div = document.createElement('div'); div.className = 'control-row';
             div.innerHTML = `
@@ -374,14 +374,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const client = getClient(); if (!client) return;
         const container = document.getElementById('models-list-container');
         if (!container) return;
-        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
+        container.textContent = 'Loading...';
         const { data, error } = await client.from('models').select('*').order('sort_order', { ascending: true });
-        if (error) { container.innerHTML = `<p style="color:var(--danger)">Error: ${escapeHTML(error.message)}</p>`; return; }
+        if (error) { container.textContent = `Error: ${error.message}`; return; }
         if (data) allModels = data;
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No models found.</p>'; return;
+            container.textContent = 'No models found.'; return;
         }
-        container.innerHTML = '';
+        container.textContent = '';
         data.forEach(item => {
             const div = document.createElement('div'); div.className = 'control-row';
             div.innerHTML = `
@@ -453,14 +453,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const client = getClient(); if (!client) return;
         const container = document.getElementById('bot-list-container');
         if (!container) return;
-        container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
+        container.textContent = 'Loading...';
         const { data, error } = await client.from('bot_knowledge').select('*').order('created_at', { ascending: false });
-        if (error) { container.innerHTML = `<p style="color:var(--danger)">Error: ${escapeHTML(error.message)}</p>`; return; }
+        if (error) { container.textContent = `Error: ${error.message}`; return; }
         if (data) allBotKnowledge = data;
         if (!data || data.length === 0) {
-            container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">No knowledge items found.</p>'; return;
+            container.textContent = 'No knowledge items found.'; return;
         }
-        container.innerHTML = '';
+        container.textContent = '';
         data.forEach(item => {
             const div = document.createElement('div'); div.className = 'control-row';
             const keywords = Array.isArray(item.keywords) ? item.keywords.join(', ') : (item.keywords || '');

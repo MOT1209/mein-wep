@@ -58,12 +58,14 @@ export function initTypewriter() {
     // Create typewriter container inside heading
     const textSpan = document.createElement('span');
     textSpan.className = 'typewriter-wrapper';
-    textSpan.innerHTML = '<span class="typewriter-text"></span>';
+    const typewriterText = document.createElement('span');
+    typewriterText.className = 'typewriter-text';
+    textSpan.appendChild(typewriterText);
 
     // Replace the specific text gradient part or append it
     const textGradient = qs('#hero h1 .text-gradient');
     if (textGradient) {
-        textGradient.innerHTML = '';
+        textGradient.textContent = '';
         textGradient.appendChild(textSpan);
     } else {
         heroTitle.appendChild(textSpan);
@@ -136,12 +138,18 @@ export function initTechStackMarquee() {
     const track = document.createElement('div');
     track.className = 'marquee-track';
 
-    track.innerHTML = marqueeList.map(tech => `
-        <div class="tech-item">
-            <i class="${tech.icon}"></i>
-            <span>${escapeHTML(tech.name)}</span>
-        </div>
-    `).join('');
+    track.textContent = '';
+    marqueeList.forEach(tech => {
+        const item = document.createElement('div');
+        item.className = 'tech-item';
+        const icon = document.createElement('i');
+        icon.className = tech.icon;
+        item.appendChild(icon);
+        const span = document.createElement('span');
+        span.textContent = tech.name;
+        item.appendChild(span);
+        track.appendChild(item);
+    });
 
     container.appendChild(track);
     techSection.appendChild(container);
@@ -160,10 +168,19 @@ export async function initLiveStats() {
     // Add a live visitor count stat
     const liveStatItem = document.createElement('div');
     liveStatItem.className = 'stat live-stat';
-    liveStatItem.innerHTML = `
-        <span class="stat-num counting" id="live-visitors">1</span>
-        <span class="stat-label"><span class="live-dot"></span>Visitors</span>
-    `;
+    liveStatItem.textContent = '';
+    const statNum = document.createElement('span');
+    statNum.className = 'stat-num counting';
+    statNum.id = 'live-visitors';
+    statNum.textContent = '1';
+    liveStatItem.appendChild(statNum);
+    const statLabel = document.createElement('span');
+    statLabel.className = 'stat-label';
+    const liveDot = document.createElement('span');
+    liveDot.className = 'live-dot';
+    statLabel.appendChild(liveDot);
+    statLabel.appendChild(document.createTextNode('Visitors'));
+    liveStatItem.appendChild(statLabel);
     statsGrid.appendChild(liveStatItem);
 
     // Dynamic number counting animation
@@ -172,11 +189,11 @@ export async function initLiveStats() {
         const step = (timestamp) => {
             if (!startTimestamp) startTimestamp = timestamp;
             const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            obj.textContent = Math.floor(progress * (end - start) + start);
             if (progress < 1) {
                 window.requestAnimationFrame(step);
             } else {
-                obj.innerHTML = end;
+                obj.textContent = end;
             }
         };
         window.requestAnimationFrame(step);

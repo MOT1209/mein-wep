@@ -7,7 +7,6 @@
 import { qs, on, qsa } from '../utils/dom.js';
 
 export const initDevOS = (cached) => {
-    console.log('🚀 DevOS Core Initializing...');
     
     const sidebarItems = qsa('.nav-item[data-view]');
     const mainContent = qs('#main-content');
@@ -20,7 +19,6 @@ export const initDevOS = (cached) => {
     const initialView = localStorage.getItem('devos-last-view') || 'dashboard';
     
     const switchView = (viewId) => {
-        console.log(`[DevOS] Switching to: ${viewId}`);
         
         sidebarItems.forEach(item => {
             item.classList.toggle('active', item.getAttribute('data-view') === viewId);

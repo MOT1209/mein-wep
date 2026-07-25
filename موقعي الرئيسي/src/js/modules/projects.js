@@ -157,8 +157,8 @@ function renderFallback() {
 function renderProjects(projects) {
     const gamingGrid = qs('#gaming-grid');
     const appsGrid = qs('#apps-grid');
-    if (gamingGrid) gamingGrid.innerHTML = '';
-    if (appsGrid) appsGrid.innerHTML = '';
+    if (gamingGrid) gamingGrid.textContent = '';
+    if (appsGrid) appsGrid.textContent = '';
 
     const lang = getCurrentLanguage();
 

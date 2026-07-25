@@ -20,10 +20,10 @@ async function fetchLessons() {
         if (error) throw error;
 
         // Clear loading state
-        container.innerHTML = '';
+        container.textContent = '';
 
         if (!lessons || lessons.length === 0) {
-            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">No lessons found yet. Check back soon!</p>';
+            container.textContent = 'No lessons found yet. Check back soon!';
             return;
         }
 
@@ -35,12 +35,18 @@ async function fetchLessons() {
 
     } catch (err) {
         console.error('Error fetching lessons:', err);
-        container.innerHTML = `
-            <div style="grid-column: 1/-1; text-align: center; color: #ff4444;">
-                <i class="fas fa-exclamation-circle" style="font-size: 2rem;"></i>
-                <p style="margin-top: 15px;">Failed to load lessons. Please try again later.</p>
-            </div>
-        `;
+        container.textContent = '';
+        const errDiv = document.createElement('div');
+        errDiv.style.cssText = 'grid-column:1/-1;text-align:center;color:#ff4444';
+        const errIcon = document.createElement('i');
+        errIcon.className = 'fas fa-exclamation-circle';
+        errIcon.style.fontSize = '2rem';
+        errDiv.appendChild(errIcon);
+        const errText = document.createElement('p');
+        errText.style.marginTop = '15px';
+        errText.textContent = 'Failed to load lessons. Please try again later.';
+        errDiv.appendChild(errText);
+        container.appendChild(errDiv);
     }
 }
 

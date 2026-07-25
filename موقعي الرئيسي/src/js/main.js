@@ -161,7 +161,11 @@ const boot = async () => {
         submitContactMessage(nameVal, emailVal, msgVal),
         emailDelivery
       ]);
-      if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'Send Message <i class="fas fa-paper-plane"></i>'; }
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = '';
+        const planeIcon = document.createElement('i');
+        planeIcon.className = 'fas fa-paper-plane';
+        submitBtn.appendChild(planeIcon);
+        submitBtn.appendChild(document.createTextNode(' Send Message ')); }
       if (error && !emailed) {
         showToast('Saved locally — will sync when available.', 'info');
         const msgs = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');

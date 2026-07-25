@@ -10,11 +10,9 @@ const STATIC_ASSETS = [
 
 // Install Event
 self.addEventListener('install', (event) => {
-    console.log('[Rust Game SW] Installing...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[Rust Game SW] Caching assets');
                 return cache.addAll(STATIC_ASSETS);
             })
             .catch(err => console.error('[Rust Game SW] Cache failed:', err))
@@ -24,7 +22,6 @@ self.addEventListener('install', (event) => {
 
 // Activate Event
 self.addEventListener('activate', (event) => {
-    console.log('[Rust Game SW] Activating...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(

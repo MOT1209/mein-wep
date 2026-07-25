@@ -222,7 +222,10 @@ function createCard(item) {
   if (item.locked) {
     const badge = document.createElement('div');
     badge.className = 'vault-lock-badge';
-    badge.innerHTML = '<i class="fas fa-lock"></i>';
+    badge.textContent = '';
+    const lockIcon = document.createElement('i');
+    lockIcon.className = 'fas fa-lock';
+    badge.appendChild(lockIcon);
     card.appendChild(badge);
   }
 
@@ -248,10 +251,13 @@ function renderGrid() {
   if (!grid) return;
 
   const items = vaultStore.search(currentQuery, currentFilter);
-  grid.innerHTML = '';
+  grid.textContent = '';
 
   if (items.length === 0) {
-    grid.innerHTML = `<div class="vault-empty">No items found in <strong>${currentFilter}</strong>. Click <strong>+ Add</strong> to add one.</div>`;
+    const emptyDiv = document.createElement('div');
+    emptyDiv.className = 'vault-empty';
+    emptyDiv.textContent = `No items found in ${currentFilter}. Click + Add to add one.`;
+    grid.appendChild(emptyDiv);
     return;
   }
 

@@ -16,11 +16,9 @@ const MAX_AUDIO_CACHE_SIZE = 50; // Max 50 audio files cached
 
 // Install Event - Cache static assets
 self.addEventListener('install', (event) => {
-    console.log('[SW] Installing...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[SW] Caching static assets');
                 return cache.addAll(STATIC_ASSETS);
             })
             .catch(err => console.error('[SW] Cache failed:', err))
@@ -30,14 +28,13 @@ self.addEventListener('install', (event) => {
 
 // Activate Event - Clean old caches
 self.addEventListener('activate', (event) => {
-    console.log('[SW] Activating...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames
                     .filter(name => name !== CACHE_NAME && name !== API_CACHE_NAME)
                     .map(name => {
-                        console.log('[SW] Deleting old cache:', name);
+
                         return caches.delete(name);
                     })
             );
@@ -117,7 +114,7 @@ async function staleWhileRevalidate(request) {
         // Check if cache is still valid
         const timestamp = cachedResponse.headers.get('sw-cache-timestamp');
         if (timestamp && (Date.now() - parseInt(timestamp)) < API_CACHE_DURATION) {
-            console.log('[SW] Serving from cache:', request.url);
+
             return cachedResponse;
         }
     }
@@ -142,7 +139,7 @@ async function cacheFirstWithLimit(request, cacheName, maxSize) {
             if (keys.length >= maxSize) {
                 // Remove oldest entry
                 await cache.delete(keys[0]);
-                console.log('[SW] Evicted oldest audio from cache');
+
             }
             cache.put(request, networkResponse.clone());
         }
@@ -161,7 +158,7 @@ self.addEventListener('sync', (event) => {
 
 async function syncBookmarks() {
     // This would sync bookmarks with a server if available
-    console.log('[SW] Syncing bookmarks...');
+
 }
 
 // Push Notifications (for prayer times, optional)

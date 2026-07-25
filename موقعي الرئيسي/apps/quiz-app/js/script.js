@@ -717,7 +717,7 @@ function openLevelSelect(category) {
     const grid = document.getElementById('level-grid');
     const unlocked = getUnlockedLevel(category);
     const total = quizDatabase[category].length;
-    grid.innerHTML = '';
+    grid.textContent = '';
 
     for (let l = 0; l < total; l++) {
         const isLocked = l > unlocked;
@@ -758,7 +758,11 @@ restartBtn.addEventListener('click', () => {
 function updateStreakBadge() {
     if (!streakBadge) return;
     if (streak >= 2) {
-        streakBadge.innerHTML = `<i class="fas fa-fire"></i> ${streak}`;
+        streakBadge.textContent = '';
+        const fireIcon = document.createElement('i');
+        fireIcon.className = 'fas fa-fire';
+        streakBadge.appendChild(fireIcon);
+        streakBadge.appendChild(document.createTextNode(` ${streak}`));
         streakBadge.classList.add('show');
     } else {
         streakBadge.classList.remove('show');

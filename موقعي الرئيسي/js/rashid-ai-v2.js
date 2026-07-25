@@ -529,7 +529,11 @@ class RashidAI {
     toggleMute() {
         const muted = localStorage.getItem('rashid_muted');
         muted ? localStorage.removeItem('rashid_muted') : localStorage.setItem('rashid_muted', 'true');
-        document.getElementById('voice-speaker-toggle').innerHTML = `<i class="fas fa-volume-${muted ? 'up' : 'mute'}"></i>`;
+        const speakerBtn = document.getElementById('voice-speaker-toggle');
+        speakerBtn.textContent = '';
+        const volIcon = document.createElement('i');
+        volIcon.className = `fas fa-volume-${muted ? 'up' : 'mute'}`;
+        speakerBtn.appendChild(volIcon);
         if (!muted) this.synth.cancel();
     }
 }

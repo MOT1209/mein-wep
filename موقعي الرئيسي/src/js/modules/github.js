@@ -83,22 +83,37 @@ export async function renderGitHubStats(container) {
     if (!container) return;
 
     // Show loading state
-    container.innerHTML = `
-        <div class="github-loading">
-            <div class="spinner"></div>
-            <p>Loading GitHub data...</p>
-        </div>
-    `;
+    container.textContent = '';
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'github-loading';
+    const spinner = document.createElement('div');
+    spinner.className = 'spinner';
+    loadingDiv.appendChild(spinner);
+    const loadingP = document.createElement('p');
+    loadingP.textContent = 'Loading GitHub data...';
+    loadingDiv.appendChild(loadingP);
+    container.appendChild(loadingDiv);
 
     const data = await fetchGitHubStats();
 
     if (!data) {
-        container.innerHTML = `
-            <div class="github-error">
-                <i class="fab fa-github" aria-hidden="true"></i>
-                <p>Unable to load GitHub data. <a href="https://github.com/MOT1209" target="_blank" rel="noopener">Visit my GitHub →</a></p>
-            </div>
-        `;
+        container.textContent = '';
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'github-error';
+        const ghIcon = document.createElement('i');
+        ghIcon.className = 'fab fa-github';
+        ghIcon.setAttribute('aria-hidden', 'true');
+        errorDiv.appendChild(ghIcon);
+        const errorP = document.createElement('p');
+        errorP.textContent = 'Unable to load GitHub data. ';
+        const ghLink = document.createElement('a');
+        ghLink.href = 'https://github.com/MOT1209';
+        ghLink.target = '_blank';
+        ghLink.rel = 'noopener';
+        ghLink.textContent = 'Visit my GitHub →';
+        errorP.appendChild(ghLink);
+        errorDiv.appendChild(errorP);
+        container.appendChild(errorDiv);
         return;
     }
 

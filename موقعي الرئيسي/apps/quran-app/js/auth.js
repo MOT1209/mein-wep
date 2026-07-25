@@ -49,7 +49,7 @@ const SupabaseSync = {
                     state.settings = { ...data.settings, ...state.settings };
                 }
                 this.saveLocal();
-                console.log('☁️ Synced from cloud');
+
             }
         } catch (err) {
             console.error('Sync from cloud failed:', err);
@@ -71,7 +71,7 @@ const SupabaseSync = {
                     last_position: JSON.parse(localStorage.getItem('quranLastPosition') || '{}'),
                     last_sync: new Date().toISOString()
                 }, { onConflict: 'user_id' });
-                console.log('☁️ Synced to cloud');
+
             } catch (err) {
                 console.error('Sync to cloud failed:', err);
             }
