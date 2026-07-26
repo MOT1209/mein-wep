@@ -66,6 +66,18 @@ const ITEMS := {
 	"syringe": {"name": "Medical Syringe", "category": "medical", "color": "ef5350", "rarity": "rare", "recipe": {"iron": 20, "scrap": 5, "cloth": 10}, "desc": "Instant adrenaline-boosted recovery."},
 	"wooden_door": {"name": "Wooden Door", "category": "construction", "color": "5d4037", "rarity": "common", "recipe": {"wood": 300}, "desc": "Fits into doorways."},
 	"codelock": {"name": "Code Lock", "category": "items", "color": "78909c", "rarity": "rare", "recipe": {"frag": 100}, "desc": "Secure your doors with a 4-digit code."},
+	"berries": {"name": "Berries", "category": "resources", "color": "e57399", "rarity": "common", "desc": "Wild berries. Eat to restore hunger."},
+	"raw_meat": {"name": "Raw Meat", "category": "resources", "color": "ef9a9a", "rarity": "common", "desc": "Hunted meat. Cook it at a campfire before eating."},
+	"cooked_meat": {"name": "Cooked Meat", "category": "resources", "color": "a1887f", "rarity": "common", "desc": "A proper meal. Restores a lot of hunger."},
+}
+
+## Items that can be consumed with LMB while equipped in the belt.
+const CONSUMABLES := {
+	"berries": {"hunger": 25.0},
+	"raw_meat": {"hunger": 5.0, "health": -5.0},
+	"cooked_meat": {"hunger": 40.0, "health": 5.0},
+	"bandage": {"health": 15.0},
+	"syringe": {"health": 50.0},
 }
 
 const CATEGORIES := ["common", "construction", "items", "resources", "tools", "medical", "weapons"]
@@ -145,6 +157,24 @@ func craft(id: String, qty: int) -> bool:
 	add_item(id, qty)
 	notify("Crafted %s x%d" % [item.name, qty])
 	Sfx.play("upgrade")
+	return true
+
+
+func consume_item(id: String) -> bool:
+	if not CONSUMABLES.has(id) or get_count(id) <= 0:
+		return false
+	var c: Dictionary = CONSUMABLES[id]
+	remove_item(id, 1)
+	stats.health = clampf(stats.health + float(c.get("health", 0.0)), 1.0, 100.0)
+	stats.hunger = clampf(stats.hunger + float(c.get("hunger", 0.0)), 0.0, 100.0)
+	stats.thirst = clampf(stats.thirst + float(c.get("thirst", 0.0)), 0.0, 100.0)
+	if get_count(id) <= 0:
+		for i in belt.size():
+			if belt[i] == id:
+				belt[i] = null
+		belt_changed.emit()
+	notify("Consumed %s" % ITEMS[id].name)
+	Sfx.play("eat")
 	return true
 
 

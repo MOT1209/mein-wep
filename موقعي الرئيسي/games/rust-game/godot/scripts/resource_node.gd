@@ -32,6 +32,9 @@ func setup(t: String) -> void:
 		"crate":
 			health = 3
 			_build_crate()
+		"bush":
+			health = 3
+			_build_bush()
 
 
 func _build_tree() -> void:
@@ -48,20 +51,37 @@ func _build_tree() -> void:
 	trunk.position.y = 1.5
 	add_child(trunk)
 
+	# Slight per-tree hue variation so the forest isn't uniform
 	var leaf_mat := StandardMaterial3D.new()
-	leaf_mat.albedo_color = Color8(46, 125, 50)
+	leaf_mat.albedo_color = Color8(46, 125, 50).lerp(Color8(85, 139, 47), randf())
 	leaf_mat.roughness = 0.8
-	for j in 3:
-		var cluster := MeshInstance3D.new()
-		var sphere := SphereMesh.new()
-		sphere.radius = 1.2 - j * 0.2
-		sphere.height = (1.2 - j * 0.2) * 2.0
-		sphere.radial_segments = 7
-		sphere.rings = 4
-		sphere.material = leaf_mat
-		cluster.mesh = sphere
-		cluster.position = Vector3((randf() - 0.5) * 0.5, 2.5 + j * 0.8, (randf() - 0.5) * 0.5)
-		add_child(cluster)
+
+	if randf() < 0.5:
+		# Pine: stacked cones
+		for j in 3:
+			var cone_mi := MeshInstance3D.new()
+			var cone := CylinderMesh.new()
+			cone.top_radius = 0.0
+			cone.bottom_radius = 1.3 - j * 0.32
+			cone.height = 1.5
+			cone.radial_segments = 8
+			cone.material = leaf_mat
+			cone_mi.mesh = cone
+			cone_mi.position.y = 2.3 + j * 1.0
+			add_child(cone_mi)
+	else:
+		# Leafy: blobby clusters
+		for j in 3:
+			var cluster := MeshInstance3D.new()
+			var sphere := SphereMesh.new()
+			sphere.radius = 1.2 - j * 0.2
+			sphere.height = (1.2 - j * 0.2) * 2.0
+			sphere.radial_segments = 7
+			sphere.rings = 4
+			sphere.material = leaf_mat
+			cluster.mesh = sphere
+			cluster.position = Vector3((randf() - 0.5) * 0.5, 2.5 + j * 0.8, (randf() - 0.5) * 0.5)
+			add_child(cluster)
 
 	var cs := CollisionShape3D.new()
 	var shape := CylinderShape3D.new()
@@ -70,6 +90,9 @@ func _build_tree() -> void:
 	cs.shape = shape
 	cs.position.y = 1.5
 	add_child(cs)
+
+	# Size variation (uniform, so collision scales along)
+	scale = Vector3.ONE * randf_range(0.85, 1.35)
 
 
 func _build_boulder(color: Color, metallic: float, emission := Color.BLACK) -> void:
@@ -146,6 +169,48 @@ func _build_crate() -> void:
 	add_child(cs)
 
 
+func _build_bush() -> void:
+	var bush_mat := StandardMaterial3D.new()
+	bush_mat.albedo_color = Color8(56, 110, 45)
+	bush_mat.roughness = 0.9
+	var body := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.6
+	sphere.height = 0.9
+	sphere.radial_segments = 7
+	sphere.rings = 4
+	sphere.material = bush_mat
+	body.mesh = sphere
+	body.position.y = 0.4
+	add_child(body)
+
+	# Red berries dotted around the bush
+	var berry_mat := StandardMaterial3D.new()
+	berry_mat.albedo_color = Color8(211, 47, 47)
+	berry_mat.emission_enabled = true
+	berry_mat.emission = Color8(120, 10, 10)
+	berry_mat.emission_energy_multiplier = 0.4
+	var berry_mesh := SphereMesh.new()
+	berry_mesh.radius = 0.06
+	berry_mesh.height = 0.12
+	berry_mesh.radial_segments = 5
+	berry_mesh.rings = 3
+	berry_mesh.material = berry_mat
+	for i in 7:
+		var b := MeshInstance3D.new()
+		b.mesh = berry_mesh
+		var ang := randf() * TAU
+		b.position = Vector3(cos(ang) * 0.5, 0.35 + randf() * 0.35, sin(ang) * 0.5)
+		add_child(b)
+
+	var cs := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = 0.6
+	cs.shape = shape
+	cs.position.y = 0.4
+	add_child(cs)
+
+
 ## Called by the player on LMB hit. Grants resources, plays feedback,
 ## destroys the node when depleted.
 func hit_harvest() -> void:
@@ -165,6 +230,8 @@ func hit_harvest() -> void:
 		"crate":
 			Game.add_item("scrap", 5)
 			Game.add_item("frag", 5)
+		"bush":
+			Game.add_item("berries", 5)
 	Sfx.play("harvest")
 
 	# Small bounce feedback

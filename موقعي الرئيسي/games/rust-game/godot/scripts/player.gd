@@ -1,9 +1,11 @@
 extends CharacterBody3D
-## First/third-person player controller: mouse look, movement + jump,
-## interaction raycasts (harvest / attack / doors / hammer), belt slots
-## and building-plan input. Port of the PointerLockControls player.
+## First/third-person player controller: mouse look, movement + sprint +
+## jump, water slowdown, footsteps, torch light, interaction raycasts
+## (harvest / attack / doors / hammer / stations), consumables, drinking
+## from lakes, belt slots and building-plan input.
 
 const SPEED := 7.0
+const SPRINT_SPEED := 10.5
 const JUMP_VELOCITY := 9.5
 const GRAVITY := 26.0
 const MOUSE_SENS := 0.002
@@ -14,8 +16,13 @@ var head: Node3D
 var spring: SpringArm3D
 var camera: Camera3D
 var body_visual: Node3D
+var torch_light: OmniLight3D
 var third_person := false
 var looking_at_structure: Node3D = null
+var in_water := false
+
+var _step_distance := 0.0
+var _drink_cd := 0.0
 
 
 func _ready() -> void:
@@ -44,6 +51,14 @@ func _ready() -> void:
 	camera.current = true
 	camera.far = 2000.0
 	spring.add_child(camera)
+
+	torch_light = OmniLight3D.new()
+	torch_light.light_color = Color(1.0, 0.62, 0.28)
+	torch_light.omni_range = 9.0
+	torch_light.light_energy = 1.8
+	torch_light.position = Vector3(0, 1.5, 0)
+	torch_light.visible = false
+	add_child(torch_light)
 
 	_build_visual()
 
@@ -110,6 +125,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		elif event.button_index == MOUSE_BUTTON_RIGHT:
 			if Game.active_tool() == "building_plan":
 				hud.open_blueprint_menu()
+	elif event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F:
+		_try_drink()
 	elif event.is_action_pressed("blueprint"):
 		hud.open_blueprint_menu()
 	elif event.is_action_pressed("rotate_piece"):
@@ -141,6 +158,9 @@ func _toggle_view() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	_drink_cd = maxf(0.0, _drink_cd - delta)
+	in_water = world.is_in_water(global_position)
+
 	if not is_on_floor():
 		velocity.y -= GRAVITY * delta
 	elif Game.ui_open == "" and Input.is_action_just_pressed("jump"):
@@ -150,14 +170,34 @@ func _physics_process(delta: float) -> void:
 	if Game.ui_open == "":
 		input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var dir := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+
+	var speed := SPEED
+	if Input.is_physical_key_pressed(KEY_SHIFT) and not in_water:
+		speed = SPRINT_SPEED
+	if in_water:
+		speed *= 0.55
+
 	if dir != Vector3.ZERO:
-		velocity.x = dir.x * SPEED
-		velocity.z = dir.z * SPEED
+		velocity.x = dir.x * speed
+		velocity.z = dir.z * speed
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, SPEED * 10.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, SPEED * 10.0 * delta)
 
 	move_and_slide()
+
+	# Footsteps
+	if is_on_floor():
+		_step_distance += Vector2(velocity.x, velocity.z).length() * delta
+		if _step_distance > 2.4:
+			_step_distance = 0.0
+			Sfx.play("step")
+
+	# Torch: hold it in the belt to light your way at night
+	torch_light.visible = Game.active_tool() == "torch" and Game.get_count("torch") > 0
+	if torch_light.visible:
+		torch_light.light_energy = 1.7 + sin(world.clock * 9.0) * 0.25
+
 	_inspect_structures()
 
 
@@ -179,6 +219,15 @@ func _camera_ray(dist: float, mask: int) -> Dictionary:
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 
+func _try_drink() -> void:
+	if not in_water or _drink_cd > 0.0:
+		return
+	_drink_cd = 0.8
+	Game.stats.thirst = clampf(Game.stats.thirst + 35.0, 0.0, 100.0)
+	Game.notify("You drank from the lake")
+	Sfx.play("drink")
+
+
 func _primary_action() -> void:
 	var tool := Game.active_tool()
 
@@ -190,11 +239,30 @@ func _primary_action() -> void:
 			Game.notify("Right Click to select piece", Color(1.0, 0.63, 0.0))
 		return
 
-	# 2. Interact ray: structures (2) + resources (4) + NPCs (8)
+	# 2. Campfire / Furnace: place on the ground
+	if tool == "campfire" or tool == "furnace":
+		var ground_hit := _camera_ray(Game.BUILD_DISTANCE, 1)
+		if not ground_hit.is_empty():
+			world.place_station(tool, ground_hit.position)
+		else:
+			Game.notify("Aim at the ground to place", Color(1.0, 0.63, 0.0))
+		return
+
+	# 3. Consumables: eat / use
+	if Game.CONSUMABLES.has(tool):
+		Game.consume_item(tool)
+		return
+
+	# 4. Interact ray: structures (2) + resources (4) + NPCs (8)
 	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | 4 | 8)
 	if hit.is_empty():
 		return
 	var obj: Object = hit.collider
+
+	# Campfire / furnace interaction
+	if obj.has_method("interact_station"):
+		obj.interact_station()
+		return
 
 	# Doors toggle open/closed
 	if obj.has_method("toggle_door"):
@@ -217,11 +285,46 @@ func _primary_action() -> void:
 	if obj.has_method("npc_take_damage"):
 		obj.npc_take_damage(15.0)
 		Sfx.play("hit")
+		_spawn_hit_particles(hit.position, Color(0.8, 0.2, 0.2))
 		return
 
 	# Resource harvest
 	if obj.has_method("hit_harvest"):
+		var colors := {
+			"tree": Color(0.45, 0.3, 0.15), "rock": Color(0.6, 0.6, 0.6),
+			"iron": Color(0.65, 0.7, 0.75), "sulfur": Color(0.95, 0.85, 0.3),
+			"barrel": Color(0.1, 0.5, 0.8), "crate": Color(1.0, 0.65, 0.0),
+			"bush": Color(0.8, 0.2, 0.3),
+		}
+		_spawn_hit_particles(hit.position, colors.get(obj.res_type, Color.WHITE))
 		obj.hit_harvest()
+
+
+## One-shot burst of tiny cubes at the impact point.
+func _spawn_hit_particles(pos: Vector3, color: Color) -> void:
+	var parts := CPUParticles3D.new()
+	parts.one_shot = true
+	parts.emitting = true
+	parts.amount = 8
+	parts.lifetime = 0.5
+	parts.explosiveness = 1.0
+	parts.direction = Vector3(0, 1, 0)
+	parts.spread = 60.0
+	parts.initial_velocity_min = 1.5
+	parts.initial_velocity_max = 3.0
+	parts.gravity = Vector3(0, -9.0, 0)
+	var m := BoxMesh.new()
+	m.size = Vector3(0.07, 0.07, 0.07)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	m.material = mat
+	parts.mesh = m
+	world.add_child(parts)
+	parts.global_position = pos
+	var t := get_tree().create_timer(1.2)
+	t.timeout.connect(func():
+		if is_instance_valid(parts):
+			parts.queue_free())
 
 
 func _hammer_action() -> void:

@@ -6,9 +6,18 @@ extends SceneTree
 
 var frame := 0
 var world: Node3D
+var _save_backup := ""
+var _had_save := false
 
 
 func _initialize() -> void:
+	# Preserve any real player save while the test runs
+	if FileAccess.file_exists("user://rust_save.json"):
+		_had_save = true
+		var f := FileAccess.open("user://rust_save.json", FileAccess.READ)
+		_save_backup = f.get_as_text()
+		f.close()
+		DirAccess.remove_absolute("user://rust_save.json")
 	var scene: Node = load("res://scenes/main.tscn").instantiate()
 	root.add_child(scene)
 	world = scene
@@ -119,6 +128,72 @@ func _run_tests() -> void:
 		"terrain height is deterministic")
 	_check(absf(world.terrain_height(0.0, 0.0)) < 0.0001, "spawn area is flattened to 0")
 
+	# --- Consumables
+	game.add_item("berries", 3)
+	game.stats.hunger = 50.0
+	_check(game.consume_item("berries"), "eating berries succeeds")
+	_check(absf(float(game.stats.hunger) - 75.0) < 0.01, "berries restored 25 hunger")
+	_check(game.get_count("berries") == 2, "one berry portion consumed")
+	_check(not game.consume_item("wood"), "non-consumable rejected")
+
+	# --- Furnace smelting
+	var furnace = world._spawn_station("furnace", Vector3(8, 0, 8))
+	game.inventory["iron"] = 10
+	var frag0: int = game.get_count("frag")
+	furnace.interact_station()
+	_check(game.get_count("frag") == frag0 + 10, "furnace smelted 10 ore into frag")
+	_check(game.get_count("iron") == 0, "furnace consumed the ore")
+
+	# --- Campfire cooking (earlier NPC kills may have dropped meat too)
+	var campfire = world._spawn_station("campfire", Vector3(10, 0, 8))
+	game.add_item("raw_meat", 4)
+	var raw_before: int = game.get_count("raw_meat")
+	var cooked_before: int = game.get_count("cooked_meat")
+	campfire.interact_station()
+	_check(game.get_count("cooked_meat") == cooked_before + raw_before, "campfire cooked all raw meat")
+	_check(game.get_count("raw_meat") == 0, "campfire consumed raw meat")
+
+	# --- Berry bush harvest
+	var bush: Node = null
+	for c in world.get_children():
+		if c.has_method("hit_harvest") and c.res_type == "bush":
+			bush = c
+			break
+	_check(bush != null, "found a berry bush")
+	if bush != null:
+		var berries0: int = game.get_count("berries")
+		bush.hit_harvest()
+		_check(game.get_count("berries") == berries0 + 5, "bush yields 5 berries")
+
+	# --- Deer drops meat
+	var deer: Node = null
+	for c in world.get_children():
+		if c.has_method("npc_take_damage") and c.npc_type == "deer":
+			deer = c
+			break
+	_check(deer != null, "found a deer")
+	if deer != null:
+		var meat0: int = game.get_count("raw_meat")
+		deer.npc_take_damage(500.0)
+		_check(game.get_count("raw_meat") == meat0 + 3, "hunted deer dropped raw meat")
+
+	# --- Water: find a lake and verify the drink check
+	var water_pos := Vector3.ZERO
+	var found_water := false
+	for gx in range(-190, 190, 7):
+		for gz in range(-190, 190, 7):
+			var h = world.terrain_height(float(gx), float(gz))
+			if h < world.WATER_LEVEL - 0.4:
+				water_pos = Vector3(float(gx), h, float(gz))
+				found_water = true
+				break
+		if found_water:
+			break
+	_check(found_water, "map contains at least one lake")
+	if found_water:
+		_check(world.is_in_water(water_pos), "is_in_water true inside the lake")
+	_check(not world.is_in_water(Vector3(0, 0, 0)), "is_in_water false at spawn")
+
 	# --- Save / load round trip
 	world.save_game()
 	_check(FileAccess.file_exists("user://rust_save.json"), "save file written")
@@ -127,7 +202,12 @@ func _run_tests() -> void:
 	f.close()
 	_check(data is Dictionary and data.structures.size() == 3, "save contains 3 structures")
 	_check(int(data.player.inventory.hammer) == 3, "save contains crafted hammers")
+	_check(data.stations.size() == 2, "save contains 2 stations")
 
-	# Clean up the save so a normal launch starts fresh
+	# Restore the player's real save (or leave none, as before the test)
 	DirAccess.remove_absolute("user://rust_save.json")
+	if _had_save:
+		var rf := FileAccess.open("user://rust_save.json", FileAccess.WRITE)
+		rf.store_string(_save_backup)
+		rf.close()
 	print("SMOKE TEST DONE")

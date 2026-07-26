@@ -1,12 +1,14 @@
 extends Node3D
-## Main world: procedural terrain (FBM noise + vertex colors), resource
-## scatter, monuments/radiation zones, NPC spawning, day/night cycle,
-## respawn queue, autosave and save/load. Port of the Three.js engine body.
+## Main world: procedural terrain (FBM noise + vertex colors), water lakes,
+## dense grass layer, resource scatter, monuments/radiation zones, NPC
+## spawning, day/night cycle with sun+moon, respawn queue, autosave and
+## save/load. Port + expansion of the Three.js engine body.
 
 const ResourceNodeScript := preload("res://scripts/resource_node.gd")
 const NpcScript := preload("res://scripts/npc.gd")
 const PlayerScript := preload("res://scripts/player.gd")
 const StructureScript := preload("res://scripts/structure.gd")
+const StationScript := preload("res://scripts/station.gd")
 const BuildingSystemScript := preload("res://scripts/building_system.gd")
 const HudScript := preload("res://scripts/hud.gd")
 
@@ -15,11 +17,36 @@ const TREE_COUNT := 70
 const ROCK_COUNT := 40
 const SULFUR_COUNT := 25
 const BARREL_COUNT := 30
-const NPC_COUNT := 5
+const BUSH_COUNT := 25
+const WOLFBEAR_COUNT := 5
+const DEER_COUNT := 6
 const RESPAWN_DELAY := 30.0
 const TERRAIN_SEGMENTS := 120
+const WATER_LEVEL := -2.0
+const GRASS_COUNT := 2500
+
+const WATER_SHADER := "
+shader_type spatial;
+render_mode cull_disabled;
+uniform vec4 water_color : source_color = vec4(0.08, 0.32, 0.45, 0.72);
+void vertex() {
+	VERTEX.y += sin(TIME * 1.2 + VERTEX.x * 0.35) * 0.08
+		+ cos(TIME * 0.9 + VERTEX.z * 0.3) * 0.08;
+}
+void fragment() {
+	ALBEDO = water_color.rgb;
+	ALPHA = water_color.a;
+	ROUGHNESS = 0.12;
+	SPECULAR = 0.6;
+	NORMAL_MAP = vec3(
+		0.5 + 0.08 * sin(TIME * 1.1 + UV.x * 90.0),
+		0.5 + 0.08 * cos(TIME * 1.4 + UV.y * 90.0),
+		1.0);
+}
+"
 
 var sun: DirectionalLight3D
+var moon: DirectionalLight3D
 var env: Environment
 var player: CharacterBody3D
 var building: Node3D
@@ -28,6 +55,7 @@ var started := false
 
 var rad_zones: Array = []       # Array of Vector2 (x, z)
 var structures: Array = []      # placed structure nodes
+var stations: Array = []        # placed campfire/furnace nodes
 var respawn_queue: Array = []   # {type, pos, at}
 var clock := 0.0
 var _respawn_timer := 0.0
@@ -38,6 +66,8 @@ func _ready() -> void:
 	randomize()
 	_setup_environment()
 	_build_terrain()
+	_build_water()
+	_build_grass()
 	_scatter_resources()
 	_create_monument(40.0, -40.0)
 	_create_monument(-60.0, 50.0)
@@ -110,7 +140,10 @@ static func terrain_height(x: float, z: float) -> float:
 
 
 static func _terrain_color(y: float) -> Color:
-	if y < 0.5:
+	if y < WATER_LEVEL + 0.6:
+		# Sandy lake shore / bed
+		return Color(0.76, 0.7, 0.5)
+	elif y < 0.5:
 		var norm_y := (y + 4.0) / 16.0
 		return Color(0.6, 0.5 + norm_y * 0.2, 0.2)
 	elif y < 3.0:
@@ -183,6 +216,93 @@ func _build_terrain() -> void:
 	add_child(body)
 
 
+func _build_water() -> void:
+	var plane := PlaneMesh.new()
+	plane.size = Vector2(Game.WORLD_SIZE, Game.WORLD_SIZE)
+	plane.subdivide_width = 60
+	plane.subdivide_depth = 60
+	var shader := Shader.new()
+	shader.code = WATER_SHADER
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	var mi := MeshInstance3D.new()
+	mi.name = "Water"
+	mi.mesh = plane
+	mi.material_override = mat
+	mi.position.y = WATER_LEVEL
+	mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mi)
+
+
+func is_in_water(pos: Vector3) -> bool:
+	return terrain_height(pos.x, pos.z) < WATER_LEVEL - 0.15 and pos.y < WATER_LEVEL + 1.2
+
+
+func _build_grass() -> void:
+	var mm := MultiMesh.new()
+	mm.transform_format = MultiMesh.TRANSFORM_3D
+	mm.mesh = _make_grass_tuft_mesh()
+	mm.instance_count = GRASS_COUNT
+	var placed := 0
+	var tries := 0
+	while placed < GRASS_COUNT and tries < GRASS_COUNT * 12:
+		tries += 1
+		var x := (randf() - 0.5) * (Game.WORLD_SIZE - 20.0)
+		var z := (randf() - 0.5) * (Game.WORLD_SIZE - 20.0)
+		var y := terrain_height(x, z)
+		if y < 0.3 or y > 3.0:
+			continue
+		var basis := Basis(Vector3.UP, randf() * TAU).scaled(Vector3.ONE * randf_range(0.7, 1.5))
+		mm.set_instance_transform(placed, Transform3D(basis, Vector3(x, y, z)))
+		placed += 1
+	# Park any unplaced instances far underground
+	for i in range(placed, GRASS_COUNT):
+		mm.set_instance_transform(i, Transform3D(Basis().scaled(Vector3.ONE * 0.001), Vector3(0, -50, 0)))
+
+	var mmi := MultiMeshInstance3D.new()
+	mmi.name = "GrassField"
+	mmi.multimesh = mm
+	mmi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	add_child(mmi)
+
+
+func _make_grass_tuft_mesh() -> ArrayMesh:
+	# Two crossed triangle blades, vertex-colored dark->light green
+	var verts := PackedVector3Array()
+	var colors := PackedColorArray()
+	var normals := PackedVector3Array()
+	var indices := PackedInt32Array()
+	var base_col := Color(0.14, 0.32, 0.09)
+	var tip_col := Color(0.38, 0.62, 0.18)
+	var idx := 0
+	for ang in [0.0, PI / 2.0]:
+		var right := Vector3(cos(ang), 0, sin(ang))
+		verts.append(right * -0.2)
+		verts.append(right * 0.2)
+		verts.append(Vector3(0, 0.55, 0))
+		colors.append(base_col)
+		colors.append(base_col)
+		colors.append(tip_col)
+		for i in 3:
+			normals.append(Vector3.UP)
+		indices.append_array(PackedInt32Array([idx, idx + 1, idx + 2]))
+		idx += 3
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_INDEX] = indices
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	var mat := StandardMaterial3D.new()
+	mat.vertex_color_use_as_albedo = true
+	mat.roughness = 1.0
+	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	mesh.surface_set_material(0, mat)
+	return mesh
+
+
 func _setup_environment() -> void:
 	env = Environment.new()
 	var sky := Sky.new()
@@ -211,6 +331,12 @@ func _setup_environment() -> void:
 	sun.directional_shadow_max_distance = 150.0
 	add_child(sun)
 
+	moon = DirectionalLight3D.new()
+	moon.name = "Moon"
+	moon.light_color = Color(0.55, 0.65, 0.95)
+	moon.shadow_enabled = false
+	add_child(moon)
+
 
 # ==================== SPAWNING ====================
 
@@ -220,15 +346,26 @@ func _rand_pos(margin: float) -> Vector3:
 	return Vector3(x, terrain_height(x, z), z)
 
 
+## Random position guaranteed to be on dry land (not in a lake).
+func _rand_pos_land(margin: float) -> Vector3:
+	for i in 30:
+		var p := _rand_pos(margin)
+		if p.y > WATER_LEVEL + 0.5:
+			return p
+	return Vector3(10.0, terrain_height(10.0, 10.0), 10.0)
+
+
 func _scatter_resources() -> void:
 	for i in TREE_COUNT:
-		spawn_resource("tree", _rand_pos(40.0))
+		spawn_resource("tree", _rand_pos_land(40.0))
 	for i in ROCK_COUNT:
-		spawn_resource("iron" if randf() > 0.7 else "rock", _rand_pos(40.0))
+		spawn_resource("iron" if randf() > 0.7 else "rock", _rand_pos_land(40.0))
 	for i in SULFUR_COUNT:
-		spawn_resource("sulfur", _rand_pos(40.0))
+		spawn_resource("sulfur", _rand_pos_land(40.0))
 	for i in BARREL_COUNT:
-		spawn_resource("barrel", _rand_pos(60.0))
+		spawn_resource("barrel", _rand_pos_land(60.0))
+	for i in BUSH_COUNT:
+		spawn_resource("bush", _rand_pos_land(40.0))
 
 
 func spawn_resource(type: String, pos: Vector3) -> void:
@@ -274,12 +411,14 @@ func _create_monument(x: float, z: float) -> void:
 
 
 func _spawn_npcs() -> void:
-	for i in NPC_COUNT:
-		var pos := _rand_pos(0.0)
+	for i in WOLFBEAR_COUNT:
+		var pos := _rand_pos_land(0.0)
 		# Keep hostiles away from the spawn area
 		if Vector2(pos.x, pos.z).length() < 30.0:
 			pos.x += 60.0
 		spawn_npc("wolf" if randf() > 0.3 else "bear", pos)
+	for i in DEER_COUNT:
+		spawn_npc("deer", _rand_pos_land(40.0))
 
 
 func spawn_npc(type: String, pos: Vector3) -> void:
@@ -295,6 +434,27 @@ func _create_player() -> void:
 	player.world = self
 	add_child(player)
 	player.position = Vector3(0, terrain_height(0, 0) + 2.0, 0)
+
+
+# ==================== STATIONS (campfire / furnace) ====================
+
+func place_station(type: String, pos: Vector3) -> void:
+	if Game.get_count(type) <= 0:
+		Game.notify("Craft a %s first" % type, Color(0.9, 0.3, 0.3))
+		return
+	Game.remove_item(type, 1)
+	_spawn_station(type, pos)
+	Game.notify("Placed %s" % type)
+	Sfx.play("build")
+
+
+func _spawn_station(type: String, pos: Vector3) -> Node3D:
+	var s: StaticBody3D = StationScript.new()
+	s.setup(type)
+	s.position = pos
+	add_child(s)
+	stations.append(s)
+	return s
 
 
 # ==================== MAIN LOOP ====================
@@ -345,16 +505,27 @@ func _process(delta: float) -> void:
 		save_game()
 
 
-func _update_day_night(delta: float) -> void:
+func _update_day_night(_delta: float) -> void:
 	if started:
-		Game.day_time = fmod(Game.day_time + delta, Game.DAY_LENGTH)
+		Game.day_time = fmod(Game.day_time + _delta, Game.DAY_LENGTH)
 	var p := Game.day_time / Game.DAY_LENGTH
 	var a := p * TAU
+	var elev := sin(a)
+
 	var sun_pos := Vector3(cos(a) * 100.0, sin(a) * 100.0, 20.0)
 	sun.look_at_from_position(sun_pos, Vector3.ZERO, Vector3(0, 0, 1))
-	sun.light_energy = maxf(0.0, sin(a) * 1.5)
-	env.ambient_light_energy = maxf(0.15, sin(a) * 0.8)
-	env.background_energy_multiplier = clampf(sin(a) + 0.2, 0.05, 1.0)
+	sun.light_energy = maxf(0.0, elev * 1.5)
+	# Warm golden light near the horizon, white at noon
+	var warmth := clampf(1.0 - elev * 1.8, 0.0, 1.0)
+	sun.light_color = Color(1.0, 1.0, 0.95).lerp(Color(1.0, 0.55, 0.3), warmth)
+
+	moon.look_at_from_position(-sun_pos + Vector3(0, 0, -40.0), Vector3.ZERO, Vector3(0, 0, 1))
+	moon.light_energy = maxf(0.0, -elev) * 0.3
+
+	var night := clampf(0.5 - elev, 0.0, 1.0)
+	env.fog_light_color = Color(0.53, 0.8, 0.92).lerp(Color(0.03, 0.04, 0.08), night)
+	env.ambient_light_energy = maxf(0.12, elev * 0.8)
+	env.background_energy_multiplier = clampf(elev + 0.25, 0.06, 1.0)
 
 
 func _on_player_death() -> void:
@@ -380,7 +551,7 @@ func unregister_structure(s: Node3D) -> void:
 
 func save_game() -> void:
 	var data := {
-		"version": 1,
+		"version": 2,
 		"player": {
 			"pos": [player.position.x, player.position.y, player.position.z],
 			"yaw": player.rotation.y,
@@ -390,6 +561,7 @@ func save_game() -> void:
 		},
 		"time": Game.day_time,
 		"structures": [],
+		"stations": [],
 	}
 	for s in structures:
 		if not is_instance_valid(s):
@@ -400,6 +572,13 @@ func save_game() -> void:
 			"rot": s.base_rot,
 			"tier": s.tier,
 			"health": s.health,
+		})
+	for st in stations:
+		if not is_instance_valid(st):
+			continue
+		data.stations.append({
+			"type": st.station_type,
+			"pos": [st.position.x, st.position.y, st.position.z],
 		})
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
@@ -454,6 +633,13 @@ func load_game() -> void:
 		structures.append(s)
 		if type == "tool_cupboard":
 			Game.tool_cupboards.append(Vector2(s.position.x, s.position.z))
+
+	for st in parsed.get("stations", []):
+		if not (st is Dictionary):
+			continue
+		var st_type := str(st.get("type", "campfire"))
+		var st_pos: Array = st.get("pos", [0, 0, 0])
+		_spawn_station(st_type, Vector3(float(st_pos[0]), float(st_pos[1]), float(st_pos[2])))
 
 
 func _notification(what: int) -> void:

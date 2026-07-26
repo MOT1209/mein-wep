@@ -28,11 +28,16 @@ var _hotbar_slots: Array = []
 var _start_screen: Control
 var _pause_menu: Control
 var _bp_menu: Control
+var _hint_label: Label
+var _rad_overlay: ColorRect
+var _damage_flash: ColorRect
+var _last_health := 100.0
 var inventory_ui: Control
 
 
 func _ready() -> void:
 	layer = 1
+	_build_overlays()
 	_build_bars()
 	_build_resources()
 	_build_crosshair()
@@ -41,6 +46,7 @@ func _ready() -> void:
 	_build_blueprint_indicator()
 	_build_info_panel()
 	_build_privilege_label()
+	_build_hint_label()
 	_build_blueprint_menu()
 	_build_pause_menu()
 	_build_start_screen()
@@ -122,6 +128,7 @@ func _build_hotbar() -> void:
 		var panel := PanelContainer.new()
 		panel.custom_minimum_size = Vector2(72, 56)
 		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		style_panel(panel)
 		var lab := _label("%d" % (i + 1), 11)
 		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		lab.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
@@ -164,7 +171,56 @@ func _build_info_panel() -> void:
 	v.add_child(_info_upgrade)
 	_info_panel.add_child(v)
 	_info_panel.visible = false
+	style_panel(_info_panel)
 	add_child(_info_panel)
+
+
+func _build_overlays() -> void:
+	# Radiation vignette (green edges closing in as radiation rises)
+	_rad_overlay = ColorRect.new()
+	_rad_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_rad_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var shader := Shader.new()
+	shader.code = "
+shader_type canvas_item;
+uniform float strength = 0.0;
+void fragment() {
+	float d = distance(UV, vec2(0.5));
+	COLOR = vec4(0.15, 0.68, 0.38, smoothstep(0.3, 0.75, d) * strength);
+}
+"
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	_rad_overlay.material = mat
+	add_child(_rad_overlay)
+
+	# Red flash when taking damage
+	_damage_flash = ColorRect.new()
+	_damage_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_damage_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_damage_flash.color = Color(0.8, 0.0, 0.0, 0.0)
+	add_child(_damage_flash)
+
+
+func _build_hint_label() -> void:
+	_hint_label = _label("", 15, Color(1, 1, 1, 0.9))
+	_hint_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_hint_label.position = Vector2(-250, -110)
+	_hint_label.size = Vector2(500, 22)
+	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hint_label.visible = false
+	add_child(_hint_label)
+
+
+## Dark panel with a rust-orange border, applied to HUD panels.
+func style_panel(panel: PanelContainer) -> void:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.07, 0.07, 0.08, 0.9)
+	sb.border_color = Color(0.8, 0.36, 0.17, 0.85)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(5)
+	sb.set_content_margin_all(8)
+	panel.add_theme_stylebox_override("panel", sb)
 
 
 func _build_privilege_label() -> void:
@@ -414,3 +470,28 @@ func _process(delta: float) -> void:
 	# Building privilege indicator
 	if world != null and world.player != null:
 		_priv_label.visible = Game.has_building_privilege(world.player.position)
+
+	# Radiation vignette strength
+	_rad_overlay.material.set_shader_parameter("strength",
+		clampf(float(Game.stats.radiation) / 110.0, 0.0, 1.0))
+
+	# Damage flash: triggers on any health drop, then fades out
+	var hp := float(Game.stats.health)
+	if hp < _last_health - 0.5:
+		_damage_flash.color.a = 0.35
+	_last_health = hp
+	if _damage_flash.color.a > 0.0:
+		_damage_flash.color.a = maxf(0.0, _damage_flash.color.a - 1.2 * delta)
+
+	# Contextual hint (drinking / eating / placing stations)
+	var hint := ""
+	if world != null and world.player != null and Game.ui_open == "":
+		var tool: String = Game.active_tool()
+		if world.player.in_water:
+			hint = "Press F to drink"
+		elif Game.CONSUMABLES.has(tool) and Game.get_count(tool) > 0:
+			hint = "Click to consume %s" % Game.ITEMS[tool].name
+		elif (tool == "campfire" or tool == "furnace") and Game.get_count(tool) > 0:
+			hint = "Click on the ground to place the %s" % tool
+	_hint_label.text = hint
+	_hint_label.visible = hint != ""

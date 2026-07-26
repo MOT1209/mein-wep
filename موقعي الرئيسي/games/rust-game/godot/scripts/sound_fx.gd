@@ -15,6 +15,9 @@ func _ready() -> void:
 	_register("upgrade", _gen(0.25, 0.0, [[400.0, 0.12], [600.0, 0.08]]))
 	_register("ui_click", _gen(0.06, 0.0, [[800.0, 0.05]]))
 	_register("door", _gen(0.18, 0.1, [[150.0, 0.1]]))
+	_register("step", _gen(0.07, 0.05, []))
+	_register("eat", _gen(0.2, 0.05, [[220.0, 0.08], [180.0, 0.06]]))
+	_register("drink", _gen(0.25, 0.03, [[350.0, 0.06], [250.0, 0.05]]))
 
 
 func _register(sfx_name: String, stream: AudioStreamWAV) -> void:
@@ -28,6 +31,8 @@ func _register(sfx_name: String, stream: AudioStreamWAV) -> void:
 func play(sfx_name: String) -> void:
 	var p: AudioStreamPlayer = _players.get(sfx_name)
 	if p != null:
+		# Slight pitch variation keeps repeated sounds (footsteps) organic
+		p.pitch_scale = randf_range(0.9, 1.1) if sfx_name == "step" else 1.0
 		p.play()
 
 
