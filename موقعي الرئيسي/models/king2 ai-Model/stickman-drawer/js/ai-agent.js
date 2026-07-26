@@ -317,6 +317,9 @@ async function runAgent(count, theme, size, autoImport) {
   agentAbort = new AbortController();
   const signal = agentAbort.signal;
 
+  // M2: Save snapshot before batch agent generation
+  window.dispatchEvent(new CustomEvent('flipbook-batch-start', { detail: { label: 'صور الوكيل الذكي' } }));
+
   let generated = 0;
   const galleryItems = [];
 

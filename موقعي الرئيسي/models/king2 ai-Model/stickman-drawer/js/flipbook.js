@@ -34,6 +34,8 @@ export function initFlipbook(root) {
   const fpsInput = root.querySelector('#fpsInput');
   const downloadPngsBtn = root.querySelector('#downloadPngsBtn');
   const downloadWebmBtn = root.querySelector('#downloadWebmBtn');
+  const downloadGifBtn = root.querySelector('#downloadGifBtn');
+  const undoBatchBtn = root.querySelector('#undoBatchBtn');
   const clearAllBtn = root.querySelector('#clearAllFramesBtn');
   const emptyState = root.querySelector('#framesEmptyState');
   const gridToggle = root.querySelector('#gridToggle');
@@ -69,6 +71,7 @@ export function initFlipbook(root) {
   let activeFrameId = null;
   let playing = false;
   let playTimer = null;
+  let batchSnapshot = null; // { frames: [...], label: string } — for undoing batch ops
 
   // Zoom & Pan state
   let zoom = 1;
@@ -972,6 +975,8 @@ export function initFlipbook(root) {
       showToast('حدّد نقطتي البداية والنهاية أولاً');
       return;
     }
+    // M2: Save snapshot before batch tween generation
+    window.dispatchEvent(new CustomEvent('flipbook-batch-start', { detail: { label: 'إطارات الحركة' } }));
     const duration = Number(durationInput.value);
     const fps = Math.max(1, Number(tweenFpsInput.value) || 10);
     const total = Math.max(2, Math.round(duration * fps));
@@ -1112,6 +1117,23 @@ export function initFlipbook(root) {
     updateOnionSkin();
   });
 
+  // M2: Batch undo — save snapshot before batch operations
+  window.addEventListener('flipbook-batch-start', (e) => {
+    batchSnapshot = { frames: JSON.parse(JSON.stringify(frames)), label: e.detail?.label || 'الدفععة' };
+    showToast(`تم حفظ نسخة احتياطية — يمكن التراجع عن ${batchSnapshot.label}`);
+  });
+
+  function undoBatch() {
+    if (!batchSnapshot) { showToast('ما فيه دفععة للتراجع عنها'); return; }
+    frames = batchSnapshot.frames;
+    activeFrameId = null;
+    batchSnapshot = null;
+    persist();
+    renderFrames();
+    updateOnionSkin();
+    showToast('تم التراجع عن الدفععة last');
+  }
+
   return {
     refit() {
       applyFit();
@@ -1125,5 +1147,6 @@ export function initFlipbook(root) {
       renderFrames();
       updateOnionSkin();
     },
+    undoBatch,
   };
 }

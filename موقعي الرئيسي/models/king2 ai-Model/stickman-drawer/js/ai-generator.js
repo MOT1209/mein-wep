@@ -515,6 +515,9 @@ export function initAIGenerator() {
     progressBar.style.display = '';
     let done = 0;
 
+    // M2: Save snapshot before batch import
+    window.dispatchEvent(new CustomEvent('flipbook-batch-start', { detail: { label: 'سلسلة الإطارات' } }));
+
     try {
       for (const prompt of prompts) {
         if (signal.aborted) break;
