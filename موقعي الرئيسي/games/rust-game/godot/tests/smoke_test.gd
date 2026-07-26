@@ -4,6 +4,9 @@ extends SceneTree
 ## save/load. Run with:
 ##   godot --headless --path . --script res://tests/smoke_test.gd
 
+## Margin the HUD is expected to keep from the screen edges.
+const HUD_MARGIN_EXPECTED := 16.0
+
 var frame := 0
 var world: Node3D
 var _save_backup := ""
@@ -25,7 +28,14 @@ func _initialize() -> void:
 
 func _process(_delta: float) -> bool:
 	frame += 1
-	if frame == 5:
+	if frame == 2:
+		# Force the widest text the HUD will ever show, then let the
+		# containers re-sort over the following frames before measuring.
+		var g = root.get_node("/root/Game")
+		for res_id in ["wood", "stone", "iron"]:
+			g.inventory[res_id] = 999999
+		g.inventory_changed.emit()
+	if frame == 8:
 		_run_tests()
 		return true
 	return false
@@ -455,6 +465,65 @@ func _run_tests() -> void:
 	_check(slot_style is StyleBoxFlat and slot_style.bg_color.a < 1.0,
 		"hotbar slots have semi-transparent backgrounds")
 	_check(hud._hotbar_slots[0].icon.texture != null, "equipped belt item shows an icon")
+
+	# --- Stats panel: every label must fit its slot and stay on screen.
+	# The six-digit resource counts were primed several frames ago so the
+	# containers have already re-laid out at their widest.
+	_check(hud._bar_fills.size() == 5, "all five survival stats have a row")
+	hud._process(0.016)
+
+	var clipped := []
+	var stack: Array = [hud]
+	while not stack.is_empty():
+		var node = stack.pop_back()
+		for child in node.get_children():
+			stack.append(child)
+		if not (node is Label):
+			continue
+		var lab: Label = node
+		if lab.text == "" or not lab.is_visible_in_tree():
+			continue
+		var needed: float = lab.get_minimum_size().x
+		if lab.size.x + 0.5 < needed:
+			clipped.append("%s('%s') %.0f < %.0f" % [lab.name, lab.text, lab.size.x, needed])
+	_check(clipped.is_empty(), "no HUD label is narrower than its own text %s" % str(clipped))
+
+	# Screen-position assertions are useless here (headless renders into a
+	# tiny dummy window), so assert the invariant that actually prevents
+	# overflow instead: every edge-anchored HUD control must grow AWAY from
+	# the edge it is pinned to, never across it.
+	var bad_growth := []
+	for child in hud.get_children():
+		if not (child is Control):
+			continue
+		var c: Control = child
+		if not is_equal_approx(c.anchor_left, c.anchor_right):
+			continue   # stretched full width, nothing to overflow
+		var expected := Control.GROW_DIRECTION_BOTH
+		if is_equal_approx(c.anchor_left, 1.0):
+			expected = Control.GROW_DIRECTION_BEGIN
+		elif is_equal_approx(c.anchor_left, 0.0):
+			expected = Control.GROW_DIRECTION_END
+		if c.grow_horizontal != expected:
+			bad_growth.append("%s anchor=%.1f grow=%d expected=%d"
+				% [c.name, c.anchor_left, c.grow_horizontal, expected])
+	_check(bad_growth.is_empty(),
+		"every edge-anchored HUD control grows away from its edge %s" % str(bad_growth))
+
+	# bar -> row -> rows -> stats panel -> right-hand column
+	var stats_col: Control = hud._bar_fills["health"].bar \
+		.get_parent().get_parent().get_parent().get_parent()
+	_check(is_equal_approx(stats_col.anchor_left, 1.0) and is_equal_approx(stats_col.anchor_right, 1.0),
+		"stats panel is pinned to the right edge")
+	_check(is_equal_approx(stats_col.offset_right, -HUD_MARGIN_EXPECTED)
+		and is_equal_approx(stats_col.offset_top, HUD_MARGIN_EXPECTED),
+		"stats panel keeps its margin from the top-right corner")
+	_check(stats_col.grow_horizontal == Control.GROW_DIRECTION_BEGIN,
+		"stats panel grows leftwards, so long numbers can't push it off screen")
+	_check(hud._bar_fills["temperature"].bar is ProgressBar,
+		"stats use real ProgressBar nodes")
+	_check(hud._bar_fills["health"].value.text == str(roundi(float(game.stats.health))),
+		"each stat shows its numeric value")
 
 	# --- Pause menu
 	_check(not hud._pause_menu.visible, "pause menu hidden by default")

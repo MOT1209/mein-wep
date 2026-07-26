@@ -9,6 +9,17 @@ const IconFactory := preload("res://scripts/icon_factory.gd")
 const HOTBAR_SLOT_SIZE := Vector2(78, 78)
 const HOTBAR_BOTTOM_MARGIN := 28.0
 
+const HUD_MARGIN := 16.0
+const STAT_ROW_HEIGHT := 18.0
+const STAT_NAME_WIDTH := 96.0   # fits "Temperature", the longest stat name
+const STAT_BAR_WIDTH := 120.0
+const STAT_VALUE_WIDTH := 34.0
+const RES_NAME_WIDTH := 92.0    # fits "Metal Ore"
+const RES_COUNT_WIDTH := 52.0
+
+## Resources shown in the top-right readout.
+const TRACKED_RESOURCES := ["wood", "stone", "iron"]
+
 const BAR_DEFS := [
 	["health", Color(0.91, 0.3, 0.24)],
 	["hunger", Color(0.9, 0.49, 0.13)],
@@ -19,8 +30,8 @@ const BAR_DEFS := [
 
 var world: Node3D
 
-var _bar_fills: Dictionary = {}
-var _res_label: Label
+var _bar_fills: Dictionary = {}   # stat name -> {bar: ProgressBar, value: Label}
+var _res_counts: Dictionary = {}  # resource id -> Label
 var _toast_label: Label
 var _toast_left := 0.0
 var _bp_label: Label
@@ -48,8 +59,7 @@ func _ready() -> void:
 	# The HUD drives the pause menu, so it must keep running while paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_overlays()
-	_build_bars()
-	_build_resources()
+	_build_stats_panel()
 	_build_crosshair()
 	_build_hotbar()
 	_build_toast()
@@ -91,49 +101,192 @@ func _label(text: String, size: int = 14, color := Color.WHITE) -> Label:
 	return l
 
 
-func _build_bars() -> void:
-	var box := VBoxContainer.new()
-	box.position = Vector2(16, 16)
-	box.add_theme_constant_override("separation", 6)
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(box)
+## Top-right column: survival stats over the resource readout.
+##
+## Anchored to the right edge and grown leftwards (GROW_DIRECTION_BEGIN)
+## so a long line can never push its own right edge off-screen — which is
+## exactly what the old fixed-width, right-anchored label did once the
+## resource counts grew past four digits.
+func _build_stats_panel() -> void:
+	var column := VBoxContainer.new()
+	column.anchor_left = 1.0
+	column.anchor_right = 1.0
+	column.anchor_top = 0.0
+	column.anchor_bottom = 0.0
+	column.offset_left = -HUD_MARGIN
+	column.offset_right = -HUD_MARGIN
+	column.offset_top = HUD_MARGIN
+	column.offset_bottom = HUD_MARGIN
+	column.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	column.grow_vertical = Control.GROW_DIRECTION_END
+	column.add_theme_constant_override("separation", 8)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(column)
+
+	# --- Survival stats
+	var stats_panel := PanelContainer.new()
+	stats_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	style_panel(stats_panel)
+	var rows := VBoxContainer.new()
+	rows.add_theme_constant_override("separation", 5)
+	rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	stats_panel.add_child(rows)
+	column.add_child(stats_panel)
+
 	for def in BAR_DEFS:
-		var row := Control.new()
-		row.custom_minimum_size = Vector2(210, 20)
+		var stat_name: String = def[0]
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
 		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		var bg := ColorRect.new()
-		bg.color = Color(0, 0, 0, 0.55)
-		bg.size = Vector2(210, 20)
-		bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(bg)
-		var fill := ColorRect.new()
-		fill.color = def[1]
-		fill.position = Vector2(2, 2)
-		fill.size = Vector2(206, 16)
-		fill.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		row.add_child(fill)
-		var lab := _label(str(def[0]).capitalize(), 12)
-		lab.position = Vector2(8, 1)
-		row.add_child(lab)
-		box.add_child(row)
-		_bar_fills[def[0]] = fill
+
+		# Fixed name column, wide enough for the longest stat ("Temperature")
+		var name_lab := _label(stat_name.capitalize(), 13, Color(0.88, 0.88, 0.88))
+		name_lab.custom_minimum_size = Vector2(STAT_NAME_WIDTH, STAT_ROW_HEIGHT)
+		name_lab.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(name_lab)
+
+		var bar := ProgressBar.new()
+		bar.min_value = 0.0
+		bar.max_value = 100.0
+		bar.value = 100.0
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(STAT_BAR_WIDTH, STAT_ROW_HEIGHT)
+		bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_style_progress_bar(bar, def[1])
+		row.add_child(bar)
+
+		# Numeric readout, right-aligned so the digits stay put as they change
+		var value_lab := _label("100", 13, Color.WHITE)
+		value_lab.custom_minimum_size = Vector2(STAT_VALUE_WIDTH, STAT_ROW_HEIGHT)
+		value_lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		value_lab.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(value_lab)
+
+		rows.add_child(row)
+		_bar_fills[stat_name] = {"bar": bar, "value": value_lab}
+
+	# --- Resource readout, one line per resource so nothing is ever clipped
+	var res_panel := PanelContainer.new()
+	res_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	style_panel(res_panel)
+	var res_rows := VBoxContainer.new()
+	res_rows.add_theme_constant_override("separation", 3)
+	res_rows.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	res_panel.add_child(res_rows)
+	column.add_child(res_panel)
+
+	for res_id in TRACKED_RESOURCES:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		var icon := TextureRect.new()
+		icon.texture = IconFactory.get_icon(res_id)
+		icon.custom_minimum_size = Vector2(18, 18)
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		row.add_child(icon)
+
+		var name_lab := _label(Game.ITEMS[res_id].name, 13, Color(0.85, 0.85, 0.85))
+		name_lab.custom_minimum_size = Vector2(RES_NAME_WIDTH, 18)
+		name_lab.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(name_lab)
+
+		var count_lab := _label("0", 13, Color.WHITE)
+		count_lab.custom_minimum_size = Vector2(RES_COUNT_WIDTH, 18)
+		count_lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count_lab.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		row.add_child(count_lab)
+
+		res_rows.add_child(row)
+		_res_counts[res_id] = count_lab
 
 
-func _build_resources() -> void:
-	_res_label = _label("", 16)
-	_res_label.set_anchors_preset(Control.PRESET_TOP_RIGHT)
-	_res_label.position = Vector2(-320, 16)
-	_res_label.size = Vector2(300, 24)
-	_res_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	add_child(_res_label)
+## Edge-anchoring helpers.
+##
+## Every one of these pins a control to a screen edge with a zero-size
+## anchor and lets it grow *away* from that edge. Godot forces a control's
+## size up to its content's minimum size, so the older pattern of "anchor
+## to an edge, then set a fixed size" silently pushed long strings past
+## the screen edge once the content outgrew the guessed width.
+
+func _anchor_top_center(c: Control, y: float) -> void:
+	c.anchor_left = 0.5
+	c.anchor_right = 0.5
+	c.anchor_top = 0.0
+	c.anchor_bottom = 0.0
+	c.offset_left = 0.0
+	c.offset_right = 0.0
+	c.offset_top = y
+	c.offset_bottom = y
+	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	c.grow_vertical = Control.GROW_DIRECTION_END
+
+
+func _anchor_bottom_center(c: Control, up: float) -> void:
+	c.anchor_left = 0.5
+	c.anchor_right = 0.5
+	c.anchor_top = 1.0
+	c.anchor_bottom = 1.0
+	c.offset_left = 0.0
+	c.offset_right = 0.0
+	c.offset_top = -up
+	c.offset_bottom = -up
+	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	c.grow_vertical = Control.GROW_DIRECTION_BEGIN
+
+
+func _anchor_bottom_right(c: Control, up: float) -> void:
+	c.anchor_left = 1.0
+	c.anchor_right = 1.0
+	c.anchor_top = 1.0
+	c.anchor_bottom = 1.0
+	c.offset_left = -HUD_MARGIN
+	c.offset_right = -HUD_MARGIN
+	c.offset_top = -up
+	c.offset_bottom = -up
+	c.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	c.grow_vertical = Control.GROW_DIRECTION_BEGIN
+
+
+func _anchor_center_right(c: Control) -> void:
+	c.anchor_left = 1.0
+	c.anchor_right = 1.0
+	c.anchor_top = 0.5
+	c.anchor_bottom = 0.5
+	c.offset_left = -HUD_MARGIN
+	c.offset_right = -HUD_MARGIN
+	c.offset_top = 0.0
+	c.offset_bottom = 0.0
+	c.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	c.grow_vertical = Control.GROW_DIRECTION_BOTH
+
+
+func _style_progress_bar(bar: ProgressBar, color: Color) -> void:
+	var bg := StyleBoxFlat.new()
+	bg.bg_color = Color(0, 0, 0, 0.55)
+	bg.set_corner_radius_all(3)
+	bar.add_theme_stylebox_override("background", bg)
+	var fg := StyleBoxFlat.new()
+	fg.bg_color = color
+	fg.set_corner_radius_all(3)
+	bar.add_theme_stylebox_override("fill", fg)
 
 
 func _build_crosshair() -> void:
 	var c := ColorRect.new()
 	c.color = Color(1, 1, 1, 0.8)
-	c.set_anchors_preset(Control.PRESET_CENTER)
-	c.position = Vector2(-2, -2)
-	c.size = Vector2(4, 4)
+	c.anchor_left = 0.5
+	c.anchor_right = 0.5
+	c.anchor_top = 0.5
+	c.anchor_bottom = 0.5
+	c.offset_left = 0.0
+	c.offset_right = 0.0
+	c.offset_top = 0.0
+	c.offset_bottom = 0.0
+	c.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	c.grow_vertical = Control.GROW_DIRECTION_BOTH
+	c.custom_minimum_size = Vector2(4, 4)
 	c.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(c)
 
@@ -216,9 +369,7 @@ func _refresh_hotbar() -> void:
 
 func _build_toast() -> void:
 	_toast_label = _label("", 16)
-	_toast_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_toast_label.position = Vector2(-250, 90)
-	_toast_label.size = Vector2(500, 26)
+	_anchor_top_center(_toast_label, 90.0)
 	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast_label.visible = false
 	add_child(_toast_label)
@@ -226,17 +377,14 @@ func _build_toast() -> void:
 
 func _build_blueprint_indicator() -> void:
 	_bp_label = _label("", 15, Color(1, 0.84, 0))
-	_bp_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_bp_label.position = Vector2(-300, 56)
-	_bp_label.size = Vector2(600, 24)
+	_anchor_top_center(_bp_label, 56.0)
 	_bp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	add_child(_bp_label)
 
 
 func _build_info_panel() -> void:
 	_info_panel = PanelContainer.new()
-	_info_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
-	_info_panel.position = Vector2(-280, -50)
+	_anchor_center_right(_info_panel)
 	_info_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var v := VBoxContainer.new()
 	_info_tier = _label("", 14)
@@ -282,9 +430,7 @@ void fragment() {
 
 func _build_hint_label() -> void:
 	_hint_label = _label("", 15, Color(1, 1, 1, 0.9))
-	_hint_label.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_hint_label.position = Vector2(-250, -110)
-	_hint_label.size = Vector2(500, 22)
+	_anchor_bottom_center(_hint_label, 118.0)
 	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hint_label.visible = false
 	add_child(_hint_label)
@@ -303,23 +449,19 @@ func style_panel(panel: PanelContainer) -> void:
 
 func _build_privilege_label() -> void:
 	_priv_label = _label("BUILDING PRIVILEGE", 13, Color(0.18, 0.8, 0.44))
-	_priv_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_priv_label.position = Vector2(-220, -120)
-	_priv_label.size = Vector2(200, 20)
+	_anchor_bottom_right(_priv_label, 120.0)
+	_priv_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_priv_label.visible = false
 	add_child(_priv_label)
 
 	_bench_label = _label("", 13, Color(1.0, 0.72, 0.3))
-	_bench_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
-	_bench_label.position = Vector2(-220, -142)
-	_bench_label.size = Vector2(200, 20)
+	_anchor_bottom_right(_bench_label, 142.0)
+	_bench_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_bench_label.visible = false
 	add_child(_bench_label)
 
 	_cold_label = _label("FREEZING — find a fire", 16, Color(0.6, 0.85, 1.0))
-	_cold_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
-	_cold_label.position = Vector2(-200, 118)
-	_cold_label.size = Vector2(400, 22)
+	_anchor_top_center(_cold_label, 118.0)
 	_cold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_cold_label.visible = false
 	add_child(_cold_label)
@@ -511,8 +653,8 @@ func _on_toast(msg: String, color: Color) -> void:
 
 
 func _refresh_resources() -> void:
-	_res_label.text = "Wood: %d   Stone: %d   Metal Ore: %d" % [
-		Game.get_count("wood"), Game.get_count("stone"), Game.get_count("iron")]
+	for res_id in _res_counts:
+		_res_counts[res_id].text = str(Game.get_count(res_id))
 
 
 func update_build_info(s: Node3D) -> void:
@@ -548,10 +690,12 @@ func update_build_info(s: Node3D) -> void:
 
 
 func _process(delta: float) -> void:
-	# Stat bars
+	# Stat bars and their numeric readouts
 	for key in _bar_fills:
 		var v: float = clampf(float(Game.stats[key]), 0.0, 100.0)
-		_bar_fills[key].size.x = 206.0 * v / 100.0
+		var entry: Dictionary = _bar_fills[key]
+		entry.bar.value = v
+		entry.value.text = str(roundi(v))
 
 	# Toast fade
 	if _toast_left > 0.0:
