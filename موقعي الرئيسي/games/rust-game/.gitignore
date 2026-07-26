@@ -1,0 +1,6 @@
+# Third-party MCP servers, cloned locally as tooling (not part of the game)
+blender-mcp/
+godot-mcp/
+
+# Generated review artifacts from the Blender pipeline
+tools/blender/preview.png
