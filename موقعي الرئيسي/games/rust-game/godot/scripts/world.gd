@@ -25,6 +25,12 @@ const TERRAIN_SEGMENTS := 120
 const WATER_LEVEL := -2.0
 const GRASS_COUNT := 2500
 
+# Temperature model
+const FREEZING_POINT := 20.0
+const NIGHT_CHILL := 85.0
+const WATER_CHILL := 35.0
+const WARMTH_RATE := 5.0
+
 const WATER_SHADER := "
 shader_type spatial;
 render_mode cull_disabled;
@@ -58,6 +64,7 @@ var structures: Array = []      # placed structure nodes
 var stations: Array = []        # placed campfire/furnace nodes
 var respawn_queue: Array = []   # {type, pos, at}
 var clock := 0.0
+var _sun_elevation := 1.0   # sin of the sun angle; drives night-time cold
 var _respawn_timer := 0.0
 var _autosave_timer := 0.0
 
@@ -454,13 +461,41 @@ func _create_player() -> void:
 # ==================== STATIONS (campfire / furnace) ====================
 
 func place_station(type: String, pos: Vector3) -> void:
+	var label: String = Game.ITEMS.get(type, {}).get("name", type)
 	if Game.get_count(type) <= 0:
-		Game.notify("Craft a %s first" % type, Color(0.9, 0.3, 0.3))
+		Game.notify("Craft a %s first" % label, Color(0.9, 0.3, 0.3))
 		return
 	Game.remove_item(type, 1)
 	_spawn_station(type, pos)
-	Game.notify("Placed %s" % type)
+	Game.notify("Placed %s" % label)
 	Sfx.play("build")
+
+
+## One pass over the deployed stations each frame, feeding both the
+## temperature system and the workbench crafting gate.
+func _update_stations(delta: float) -> void:
+	var best_warmth := 0.0
+	var bench := 0
+	for st in stations:
+		if not is_instance_valid(st):
+			continue
+		var dist: float = st.position.distance_to(player.position)
+		var w: float = st.warmth()
+		if w > 0.0 and dist < Game.WARMTH_RADIUS:
+			# Closer to the fire is warmer
+			best_warmth = maxf(best_warmth, w * (1.0 - dist / Game.WARMTH_RADIUS))
+		if dist < Game.WORKBENCH_RADIUS:
+			bench = maxi(bench, st.workbench_level())
+	Game.workbench_level = bench
+
+	# Night and water pull warmth down; fires push it back up
+	var target := 100.0 - clampf(0.55 - _sun_elevation, 0.0, 1.0) * NIGHT_CHILL
+	if player.in_water:
+		target -= WATER_CHILL
+	if best_warmth > 0.0:
+		target = maxf(target, 55.0 + best_warmth * 45.0)
+	Game.stats.temperature = move_toward(
+		Game.stats.temperature, clampf(target, 0.0, 100.0), WARMTH_RATE * delta)
 
 
 func _spawn_station(type: String, pos: Vector3) -> Node3D:
@@ -484,6 +519,7 @@ func _process(delta: float) -> void:
 	# Survival stats (same rates as the JS version)
 	Game.stats.hunger = maxf(0.0, Game.stats.hunger - 0.05 * delta)
 	Game.stats.thirst = maxf(0.0, Game.stats.thirst - 0.08 * delta)
+	_update_stations(delta)
 
 	var in_rad := false
 	for z in rad_zones:
@@ -497,6 +533,9 @@ func _process(delta: float) -> void:
 
 	if Game.stats.hunger <= 0.0 or Game.stats.thirst <= 0.0 or Game.stats.radiation >= 100.0:
 		Game.stats.health -= 2.0 * delta
+	# Hypothermia: the colder you get past the threshold, the faster it hurts
+	if Game.stats.temperature < FREEZING_POINT:
+		Game.stats.health -= (FREEZING_POINT - Game.stats.temperature) * 0.06 * delta
 
 	if Game.stats.health <= 0.0:
 		_on_player_death()
@@ -526,6 +565,7 @@ func _update_day_night(_delta: float) -> void:
 	var p := Game.day_time / Game.DAY_LENGTH
 	var a := p * TAU
 	var elev := sin(a)
+	_sun_elevation = elev
 
 	var sun_pos := Vector3(cos(a) * 100.0, sin(a) * 100.0, 20.0)
 	sun.look_at_from_position(sun_pos, Vector3.ZERO, Vector3(0, 0, 1))
@@ -594,6 +634,7 @@ func save_game() -> void:
 		data.stations.append({
 			"type": st.station_type,
 			"pos": [st.position.x, st.position.y, st.position.z],
+			"stored": st.stored,
 		})
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
@@ -654,7 +695,12 @@ func load_game() -> void:
 			continue
 		var st_type := str(st.get("type", "campfire"))
 		var st_pos: Array = st.get("pos", [0, 0, 0])
-		_spawn_station(st_type, Vector3(float(st_pos[0]), float(st_pos[1]), float(st_pos[2])))
+		var node := _spawn_station(st_type,
+			Vector3(float(st_pos[0]), float(st_pos[1]), float(st_pos[2])))
+		var contents = st.get("stored", {})
+		if contents is Dictionary:
+			for k in contents:
+				node.stored[k] = int(contents[k])
 
 
 func _notification(what: int) -> void:

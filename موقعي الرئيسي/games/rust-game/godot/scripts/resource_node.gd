@@ -3,6 +3,8 @@ extends StaticBody3D
 ## Builds its own procedural visuals + collision. Yields items per hit,
 ## emits `depleted` when destroyed so the world can schedule a respawn.
 
+const ModelRegistry := preload("res://scripts/model_registry.gd")
+
 signal depleted(type: String, pos: Vector3)
 
 var res_type := "tree"
@@ -19,13 +21,13 @@ func setup(t: String) -> void:
 			_build_tree()
 		"rock":
 			health = 5
-			_build_boulder(Color8(117, 117, 117), 0.0)
+			_build_ore_node(Color8(117, 117, 117), 0.0)
 		"iron":
 			health = 5
-			_build_boulder(Color8(144, 164, 174), 0.4)
+			_build_ore_node(Color8(144, 164, 174), 0.4)
 		"sulfur":
 			health = 5
-			_build_boulder(Color8(253, 216, 53), 0.0, Color8(68, 68, 0))
+			_build_ore_node(Color8(253, 216, 53), 0.0, Color8(68, 68, 0))
 		"barrel":
 			health = 3
 			_build_barrel()
@@ -93,6 +95,25 @@ func _build_tree() -> void:
 
 	# Size variation (uniform, so collision scales along)
 	scale = Vector3.ONE * randf_range(0.85, 1.35)
+
+
+## Blender-built ore cluster when available, otherwise the old boulder.
+func _build_ore_node(color: Color, metallic: float, emission := Color.BLACK) -> void:
+	var model := ModelRegistry.spawn(res_type)
+	if model == null:
+		_build_boulder(color, metallic, emission)
+		return
+	model.rotation.y = randf() * TAU
+	var s := randf_range(0.85, 1.2)
+	model.scale = Vector3(s, s, s)
+	add_child(model)
+
+	var cs := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = 0.9 * s
+	cs.shape = shape
+	cs.position.y = 0.7 * s
+	add_child(cs)
 
 
 func _build_boulder(color: Color, metallic: float, emission := Color.BLACK) -> void:
@@ -211,19 +232,33 @@ func _build_bush() -> void:
 	add_child(cs)
 
 
-## Called by the player on LMB hit. Grants resources, plays feedback,
-## destroys the node when depleted.
-func hit_harvest() -> void:
-	health -= 1
+## Yield and damage multiplier per (node type, equipped tool). The right
+## tool gathers more per swing and breaks the node sooner; the drill is the
+## only thing that brings up crude oil.
+const TOOL_YIELD := {
+	"tree": {"stone_hatchet": 2, "metal_hatchet": 3, "machete": 2},
+	"rock": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4},
+	"iron": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4},
+	"sulfur": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4},
+}
+
+const OIL_PER_DRILL_HIT := 3
+
+
+## Called by the player on LMB hit. Grants resources scaled by the equipped
+## tool, plays feedback, and destroys the node when depleted.
+func hit_harvest(tool_id: String = "") -> void:
+	var mult: int = int(TOOL_YIELD.get(res_type, {}).get(tool_id, 1))
+	health -= mult
 	match res_type:
 		"tree":
-			Game.add_item("wood", 12)
+			Game.add_item("wood", 12 * mult)
 		"rock":
-			Game.add_item("stone", 10)
+			Game.add_item("stone", 10 * mult)
 		"iron":
-			Game.add_item("iron", 8)
+			Game.add_item("iron", 8 * mult)
 		"sulfur":
-			Game.add_item("sulfur", 8)
+			Game.add_item("sulfur", 8 * mult)
 		"barrel":
 			Game.add_item("scrap", 3)
 			Game.add_item("lgf", 2)
@@ -232,6 +267,8 @@ func hit_harvest() -> void:
 			Game.add_item("frag", 5)
 		"bush":
 			Game.add_item("berries", 5)
+	if tool_id == "drill" and TOOL_YIELD.has(res_type):
+		Game.add_item("oil", OIL_PER_DRILL_HIT)
 	Sfx.play("harvest")
 
 	# Small bounce feedback

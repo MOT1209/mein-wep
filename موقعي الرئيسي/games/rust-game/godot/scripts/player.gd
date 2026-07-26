@@ -236,8 +236,8 @@ func _primary_action() -> void:
 			Game.notify("Right Click to select piece", Color(1.0, 0.63, 0.0))
 		return
 
-	# 2. Campfire / Furnace: place on the ground
-	if tool == "campfire" or tool == "furnace":
+	# 2. Deployables (campfire, furnace, workbench, boxes...): place on ground
+	if Game.DEPLOYABLES.has(tool):
 		var ground_hit := _camera_ray(Game.BUILD_DISTANCE, 1)
 		if not ground_hit.is_empty():
 			world.place_station(tool, ground_hit.position)
@@ -294,7 +294,7 @@ func _primary_action() -> void:
 			"bush": Color(0.8, 0.2, 0.3),
 		}
 		_spawn_hit_particles(hit.position, colors.get(obj.res_type, Color.WHITE))
-		obj.hit_harvest()
+		obj.hit_harvest(tool)
 
 
 ## One-shot burst of tiny cubes at the impact point.

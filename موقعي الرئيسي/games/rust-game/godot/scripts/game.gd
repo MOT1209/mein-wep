@@ -14,24 +14,50 @@ const TC_RADIUS := 25.0
 const INTERACT_DISTANCE := 5.0
 const BUILD_DISTANCE := 10.0
 
-const TIER_ORDER := ["twig", "wood", "stone", "metal", "hqm"]
+## Upgrade path: twig -> wood -> stone -> sheet metal -> concrete -> armored.
+const TIER_ORDER := ["twig", "wood", "stone", "metal", "concrete", "hqm"]
 
 const BUILDING_TIERS := {
-	"twig": {"name": "Twig", "health": 10, "color": Color8(215, 204, 200), "cost": {}},
-	"wood": {"name": "Wood", "health": 250, "color": Color8(141, 110, 99), "cost": {"wood": 300}},
-	"stone": {"name": "Stone", "health": 500, "color": Color8(176, 190, 197), "cost": {"stone": 300}},
-	"metal": {"name": "Sheet Metal", "health": 1000, "color": Color8(144, 164, 174), "cost": {"frag": 200}},
-	"hqm": {"name": "Armored", "health": 2000, "color": Color8(236, 239, 241), "cost": {"hqm": 50}},
+	"twig": {"name": "Twig", "health": 10, "color": Color8(215, 204, 200), "cost": {},
+		"metallic": 0.0, "roughness": 0.95},
+	"wood": {"name": "Wood", "health": 250, "color": Color8(141, 110, 99), "cost": {"wood": 300},
+		"metallic": 0.0, "roughness": 0.85},
+	"stone": {"name": "Stone", "health": 500, "color": Color8(150, 150, 145), "cost": {"stone": 300},
+		"metallic": 0.0, "roughness": 0.95},
+	"metal": {"name": "Sheet Metal", "health": 1000, "color": Color8(144, 164, 174), "cost": {"frag": 200},
+		"metallic": 0.8, "roughness": 0.4},
+	"concrete": {"name": "Concrete", "health": 1500, "color": Color8(178, 176, 168), "cost": {"stone": 500, "frag": 100},
+		"metallic": 0.0, "roughness": 0.9},
+	"hqm": {"name": "Armored", "health": 2000, "color": Color8(226, 230, 234), "cost": {"hqm": 50},
+		"metallic": 0.9, "roughness": 0.25},
 }
 
 const BUILDING_TYPES := {
 	"foundation": {"name": "Foundation", "size": Vector3(3, 0.2, 3), "y": 0.1, "requires_support": false, "is_door": false},
 	"wall": {"name": "Wall", "size": Vector3(3, 3, 0.2), "y": 1.5, "requires_support": true, "is_door": false},
 	"doorway": {"name": "Doorway", "size": Vector3(3, 3, 0.2), "y": 1.5, "requires_support": true, "is_door": false},
+	"window_wall": {"name": "Window Wall", "size": Vector3(3, 3, 0.2), "y": 1.5, "requires_support": true, "is_door": false},
 	"ceiling": {"name": "Ceiling", "size": Vector3(3, 0.2, 3), "y": 3.0, "requires_support": true, "is_door": false},
+	"stairs": {"name": "Stairs", "size": Vector3(3, 3, 3), "y": 1.5, "requires_support": true, "is_door": false},
 	"tool_cupboard": {"name": "Tool Cupboard", "size": Vector3(1, 1.8, 0.8), "y": 0.9, "requires_support": true, "is_door": false},
 	"wooden_door": {"name": "Door", "size": Vector3(0.9, 2.1, 0.1), "y": 1.05, "requires_support": false, "is_door": true},
 }
+
+## Items that are placed into the world instead of being held. `warmth`
+## marks a heat source for the temperature system; `workbench` is the
+## crafting tier the station grants while the player stands near it.
+const DEPLOYABLES := {
+	"campfire": {"warmth": 1.0, "workbench": 0},
+	"furnace": {"warmth": 0.8, "workbench": 0},
+	"workbench_t1": {"warmth": 0.0, "workbench": 1},
+	"workbench_t2": {"warmth": 0.0, "workbench": 2},
+	"research_table": {"warmth": 0.0, "workbench": 0},
+	"storage_box": {"warmth": 0.0, "workbench": 0},
+	"large_box": {"warmth": 0.0, "workbench": 0},
+}
+
+const WARMTH_RADIUS := 8.0
+const WORKBENCH_RADIUS := 6.0
 
 const ITEMS := {
 	"wood": {"name": "Wood", "category": "resources", "color": "8d6e63", "rarity": "common", "desc": "Harvested from trees. Used for base building and fuel."},
@@ -66,6 +92,15 @@ const ITEMS := {
 	"syringe": {"name": "Medical Syringe", "category": "medical", "color": "ef5350", "rarity": "rare", "recipe": {"iron": 20, "scrap": 5, "cloth": 10}, "desc": "Instant adrenaline-boosted recovery."},
 	"wooden_door": {"name": "Wooden Door", "category": "construction", "color": "5d4037", "rarity": "common", "recipe": {"wood": 300}, "desc": "Fits into doorways."},
 	"codelock": {"name": "Code Lock", "category": "items", "color": "78909c", "rarity": "rare", "recipe": {"frag": 100}, "desc": "Secure your doors with a 4-digit code."},
+	"oil": {"name": "Crude Oil", "category": "resources", "color": "37474f", "rarity": "rare", "desc": "Drilled from the ground. Refines into low grade fuel."},
+	"metal_hatchet": {"name": "Hatchet", "category": "tools", "color": "90a4ae", "rarity": "rare", "recipe": {"wood": 100, "frag": 125}, "workbench": 1, "desc": "Steel head. Fells trees far faster than stone."},
+	"metal_pickaxe": {"name": "Pickaxe", "category": "tools", "color": "90a4ae", "rarity": "rare", "recipe": {"wood": 100, "frag": 125}, "workbench": 1, "desc": "Steel head. Breaks ore nodes far faster than stone."},
+	"drill": {"name": "Mining Drill", "category": "tools", "color": "8d6e63", "rarity": "elite", "recipe": {"frag": 250, "gear_comp": 2, "hqm": 10}, "workbench": 2, "desc": "Motorised auger. Extracts crude oil and tears through ore."},
+	"workbench_t1": {"name": "Workbench Level 1", "category": "items", "color": "a1887f", "rarity": "common", "recipe": {"wood": 500, "stone": 100, "frag": 50}, "desc": "Unlocks tier 1 crafting while you stand near it."},
+	"workbench_t2": {"name": "Workbench Level 2", "category": "items", "color": "78909c", "rarity": "rare", "recipe": {"frag": 500, "scrap": 250, "wood": 500}, "workbench": 1, "desc": "Unlocks tier 2 crafting while you stand near it."},
+	"research_table": {"name": "Research Table", "category": "items", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 200, "frag": 75, "scrap": 50}, "desc": "Study components to progress your tech tree."},
+	"storage_box": {"name": "Wood Storage Box", "category": "construction", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 100}, "desc": "Small container. Interact to stash your resources."},
+	"large_box": {"name": "Large Wood Box", "category": "construction", "color": "5d4037", "rarity": "common", "recipe": {"wood": 250, "frag": 20}, "workbench": 1, "desc": "Large container with more capacity."},
 	"berries": {"name": "Berries", "category": "resources", "color": "e57399", "rarity": "common", "desc": "Wild berries. Eat to restore hunger."},
 	"raw_meat": {"name": "Raw Meat", "category": "resources", "color": "ef9a9a", "rarity": "common", "desc": "Hunted meat. Cook it at a campfire before eating."},
 	"cooked_meat": {"name": "Cooked Meat", "category": "resources", "color": "a1887f", "rarity": "common", "desc": "A proper meal. Restores a lot of hunger."},
@@ -85,7 +120,12 @@ const CATEGORIES := ["common", "construction", "items", "resources", "tools", "m
 var inventory: Dictionary = {}
 var belt: Array = ["building_plan", "hammer", null, null, null, null]
 var selected_belt_slot: int = 0
-var stats: Dictionary = {"health": 100.0, "hunger": 100.0, "thirst": 100.0, "radiation": 0.0}
+var stats: Dictionary = {
+	"health": 100.0, "hunger": 100.0, "thirst": 100.0,
+	"temperature": 100.0, "radiation": 0.0,
+}
+## Highest workbench tier the player is currently standing next to.
+var workbench_level: int = 0
 var day_time: float = 300.0
 var tool_cupboards: Array = []  # Array of Vector2 (x, z)
 var selected_blueprint: String = ""
@@ -104,7 +144,11 @@ func reset_state() -> void:
 	}
 	belt = ["building_plan", "hammer", null, null, null, null]
 	selected_belt_slot = 0
-	stats = {"health": 100.0, "hunger": 100.0, "thirst": 100.0, "radiation": 0.0}
+	stats = {
+		"health": 100.0, "hunger": 100.0, "thirst": 100.0,
+		"temperature": 100.0, "radiation": 0.0,
+	}
+	workbench_level = 0
 	day_time = 300.0
 	tool_cupboards = []
 	selected_blueprint = ""
@@ -143,9 +187,18 @@ func consume(cost: Dictionary) -> void:
 	inventory_changed.emit()
 
 
+## Workbench tier an item needs before it can be crafted (0 = anywhere).
+func required_workbench(id: String) -> int:
+	return int(ITEMS.get(id, {}).get("workbench", 0))
+
+
 func craft(id: String, qty: int) -> bool:
 	var item: Dictionary = ITEMS.get(id, {})
 	if not item.has("recipe"):
+		return false
+	var bench := required_workbench(id)
+	if bench > workbench_level:
+		notify("Requires Workbench Level %d" % bench, Color(0.9, 0.3, 0.3))
 		return false
 	var total := {}
 	for res in item.recipe:

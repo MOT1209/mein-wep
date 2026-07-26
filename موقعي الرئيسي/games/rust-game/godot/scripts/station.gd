@@ -1,19 +1,84 @@
 extends StaticBody3D
-## Placeable utility station: campfire (cooks raw meat, gives warm light)
-## or furnace (smelts metal ore into fragments). Placed by equipping the
-## crafted item and clicking on the ground; interact with LMB.
+## A deployed station: campfire, furnace, workbench, research table or a
+## storage box. Model-backed types come from the Blender batch via
+## ModelRegistry; the campfire stays procedural because its fire, light and
+## ember particles are generated, not modelled.
+
+const ModelRegistry := preload("res://scripts/model_registry.gd")
+
+## Everything a storage box will accept.
+const STASHABLE := [
+	"wood", "stone", "iron", "sulfur", "hqm", "frag", "lgf", "cloth",
+	"leather", "scrap", "oil", "berries", "raw_meat", "cooked_meat",
+]
+
+## Research table output pool: components with no other source in the world.
+const RESEARCH_OUTPUTS := ["gear_comp", "pipe", "spring", "sewing"]
+const RESEARCH_COST := 25
 
 var station_type := "campfire"
+var stored: Dictionary = {}
 
 
 func setup(t: String) -> void:
 	station_type = t
 	collision_layer = 2
 	collision_mask = 0
-	if t == "campfire":
+
+	var model := ModelRegistry.spawn(t)
+	if model != null:
+		add_child(model)
+		if t == "workbench_t2":
+			# Same mesh as tier 1, recoloured so the upgrade reads at a glance
+			ModelRegistry.tint(model, Color8(120, 134, 145), 0.7, 0.4)
+		_add_collision_for(t)
+		if t == "furnace":
+			_add_fire_light(Vector3(0, 0.4, 0.6), 5.0, 0.9)
+	elif t == "campfire":
 		_build_campfire()
 	else:
-		_build_furnace()
+		_build_placeholder()
+
+
+func _add_collision_for(t: String) -> void:
+	# Footprints roughly match the Blender models' base dimensions
+	var sizes := {
+		"furnace": Vector3(1.2, 1.4, 1.25),
+		"workbench_t1": Vector3(1.6, 1.05, 0.9),
+		"workbench_t2": Vector3(1.6, 1.05, 0.9),
+		"research_table": Vector3(1.2, 1.2, 0.8),
+		"storage_box": Vector3(0.92, 0.6, 0.64),
+		"large_box": Vector3(1.43, 1.0, 0.85),
+	}
+	var size: Vector3 = sizes.get(t, Vector3(1, 1, 1))
+	var cs := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	cs.shape = shape
+	cs.position.y = size.y * 0.5
+	add_child(cs)
+
+
+func _add_fire_light(offset: Vector3, range_: float, energy: float) -> void:
+	var light := OmniLight3D.new()
+	light.light_color = Color(1.0, 0.55, 0.2)
+	light.omni_range = range_
+	light.light_energy = energy
+	light.position = offset
+	add_child(light)
+
+
+func _build_placeholder() -> void:
+	var mi := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(1, 1, 1)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color8(150, 120, 90)
+	box.material = mat
+	mi.mesh = box
+	mi.position.y = 0.5
+	add_child(mi)
+	_add_collision_for(station_type)
 
 
 func _build_campfire() -> void:
@@ -48,13 +113,7 @@ func _build_campfire() -> void:
 	flame.position.y = 0.4
 	add_child(flame)
 
-	# Warm light
-	var light := OmniLight3D.new()
-	light.light_color = Color(1.0, 0.6, 0.25)
-	light.omni_range = 8.0
-	light.light_energy = 1.6
-	light.position.y = 0.9
-	add_child(light)
+	_add_fire_light(Vector3(0, 0.9, 0), 8.0, 1.6)
 
 	# Rising embers
 	var embers := CPUParticles3D.new()
@@ -77,63 +136,39 @@ func _build_campfire() -> void:
 	embers.position.y = 0.4
 	add_child(embers)
 
-	_add_collision(0.55, 0.6)
-
-
-func _build_furnace() -> void:
-	# Stone chimney body
-	var body_mi := MeshInstance3D.new()
-	var body_mesh := CylinderMesh.new()
-	body_mesh.top_radius = 0.35
-	body_mesh.bottom_radius = 0.6
-	body_mesh.height = 1.4
-	var stone_mat := StandardMaterial3D.new()
-	stone_mat.albedo_color = Color8(96, 96, 96)
-	stone_mat.roughness = 1.0
-	body_mesh.material = stone_mat
-	body_mi.mesh = body_mesh
-	body_mi.position.y = 0.7
-	add_child(body_mi)
-
-	# Glowing opening
-	var mouth := MeshInstance3D.new()
-	var mouth_mesh := BoxMesh.new()
-	mouth_mesh.size = Vector3(0.3, 0.35, 0.15)
-	var glow_mat := StandardMaterial3D.new()
-	glow_mat.albedo_color = Color(1.0, 0.35, 0.05)
-	glow_mat.emission_enabled = true
-	glow_mat.emission = Color(1.0, 0.3, 0.02)
-	glow_mat.emission_energy_multiplier = 1.6
-	mouth_mesh.material = glow_mat
-	mouth.mesh = mouth_mesh
-	mouth.position = Vector3(0, 0.35, 0.5)
-	add_child(mouth)
-
-	var light := OmniLight3D.new()
-	light.light_color = Color(1.0, 0.45, 0.15)
-	light.omni_range = 5.0
-	light.light_energy = 0.9
-	light.position = Vector3(0, 0.5, 0.7)
-	add_child(light)
-
-	_add_collision(0.65, 1.4)
-
-
-func _add_collision(radius: float, height: float) -> void:
 	var cs := CollisionShape3D.new()
 	var shape := CylinderShape3D.new()
-	shape.radius = radius
-	shape.height = height
+	shape.radius = 0.55
+	shape.height = 0.6
 	cs.shape = shape
-	cs.position.y = height / 2.0
+	cs.position.y = 0.3
 	add_child(cs)
 
 
+## Heat contribution for the temperature system, 0 when this isn't a fire.
+func warmth() -> float:
+	return float(Game.DEPLOYABLES.get(station_type, {}).get("warmth", 0.0))
+
+
+## Crafting tier this station grants while the player is nearby.
+func workbench_level() -> int:
+	return int(Game.DEPLOYABLES.get(station_type, {}).get("workbench", 0))
+
+
 func interact_station() -> void:
-	if station_type == "campfire":
-		_cook()
-	else:
-		_smelt()
+	match station_type:
+		"campfire":
+			_cook()
+		"furnace":
+			_smelt()
+		"research_table":
+			_research()
+		"storage_box", "large_box":
+			_use_storage()
+		"workbench_t1", "workbench_t2":
+			Game.notify("Workbench Level %d — craft nearby to use it" % workbench_level())
+		_:
+			pass
 
 
 ## Campfire: 2 wood per raw meat -> cooked meat.
@@ -169,3 +204,44 @@ func _smelt() -> void:
 	Game.add_item("frag", can_smelt)
 	Game.notify("Smelted %d ore into fragments" % can_smelt)
 	Sfx.play("upgrade")
+
+
+## Research table: the only source of mechanical components in the world.
+func _research() -> void:
+	if Game.get_count("scrap") < RESEARCH_COST:
+		Game.notify("Research needs %d scrap" % RESEARCH_COST, Color(0.9, 0.3, 0.3))
+		return
+	Game.remove_item("scrap", RESEARCH_COST)
+	var out: String = RESEARCH_OUTPUTS[randi() % RESEARCH_OUTPUTS.size()]
+	Game.add_item(out, 1)
+	Game.notify("Researched: %s" % Game.ITEMS[out].name)
+	Sfx.play("upgrade")
+
+
+## No container UI yet: interacting stashes every raw resource you carry,
+## and interacting again with nothing to stash takes it all back out.
+func _use_storage() -> void:
+	var moved := 0
+	for id in STASHABLE:
+		var count := Game.get_count(id)
+		if count > 0:
+			stored[id] = int(stored.get(id, 0)) + count
+			Game.remove_item(id, count)
+			moved += count
+	if moved > 0:
+		Game.notify("Stashed %d items" % moved)
+		Sfx.play("door")
+		return
+
+	var taken := 0
+	for id in stored.keys():
+		var amount := int(stored[id])
+		if amount > 0:
+			Game.add_item(id, amount)
+			taken += amount
+	stored.clear()
+	if taken > 0:
+		Game.notify("Took %d items back" % taken)
+		Sfx.play("door")
+	else:
+		Game.notify("Box is empty", Color(1.0, 0.63, 0.0))

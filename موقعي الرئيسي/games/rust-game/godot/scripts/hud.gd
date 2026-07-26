@@ -13,6 +13,7 @@ const BAR_DEFS := [
 	["health", Color(0.91, 0.3, 0.24)],
 	["hunger", Color(0.9, 0.49, 0.13)],
 	["thirst", Color(0.2, 0.6, 0.86)],
+	["temperature", Color(0.55, 0.82, 0.95)],
 	["radiation", Color(0.18, 0.8, 0.44)],
 ]
 
@@ -28,6 +29,8 @@ var _info_tier: Label
 var _info_health: Label
 var _info_upgrade: Label
 var _priv_label: Label
+var _bench_label: Label
+var _cold_label: Label
 var _hotbar_slots: Array = []
 var _start_screen: Control
 var _pause_menu: Control
@@ -303,6 +306,21 @@ func _build_privilege_label() -> void:
 	_priv_label.visible = false
 	add_child(_priv_label)
 
+	_bench_label = _label("", 13, Color(1.0, 0.72, 0.3))
+	_bench_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_bench_label.position = Vector2(-220, -142)
+	_bench_label.size = Vector2(200, 20)
+	_bench_label.visible = false
+	add_child(_bench_label)
+
+	_cold_label = _label("FREEZING — find a fire", 16, Color(0.6, 0.85, 1.0))
+	_cold_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_cold_label.position = Vector2(-200, 118)
+	_cold_label.size = Vector2(400, 22)
+	_cold_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_cold_label.visible = false
+	add_child(_cold_label)
+
 
 func _dim_screen() -> ColorRect:
 	var dim := ColorRect.new()
@@ -535,9 +553,20 @@ func _process(delta: float) -> void:
 	else:
 		_bp_label.visible = false
 
-	# Building privilege indicator
+	# Building privilege / workbench indicators
 	if world != null and world.player != null:
 		_priv_label.visible = Game.has_building_privilege(world.player.position)
+	if Game.workbench_level > 0:
+		_bench_label.text = "WORKBENCH LEVEL %d" % Game.workbench_level
+		_bench_label.visible = true
+	else:
+		_bench_label.visible = false
+
+	# Freezing warning
+	var cold := float(Game.stats.temperature) < 25.0
+	_cold_label.visible = cold
+	if cold:
+		_cold_label.modulate.a = 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.006)
 
 	# Radiation vignette strength
 	_rad_overlay.material.set_shader_parameter("strength",

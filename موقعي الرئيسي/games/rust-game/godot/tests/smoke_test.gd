@@ -194,6 +194,117 @@ func _run_tests() -> void:
 		_check(world.is_in_water(water_pos), "is_in_water true inside the lake")
 	_check(not world.is_in_water(Vector3(0, 0, 0)), "is_in_water false at spawn")
 
+	# --- Blender model batch wired through ModelRegistry
+	var registry = load("res://scripts/model_registry.gd")
+	var missing := []
+	for mid in registry.MODELS:
+		if not registry.has_model(mid):
+			missing.append(mid)
+	_check(missing.is_empty(), "all %d registered models exist on disk %s"
+		% [registry.MODELS.size(), str(missing)])
+	var sample = registry.spawn("wall")
+	_check(sample is Node3D, "ModelRegistry instantiates a model")
+	if sample != null:
+		var meshes := 0
+		var stack: Array = [sample]
+		while not stack.is_empty():
+			var n = stack.pop_back()
+			if n is MeshInstance3D:
+				meshes += 1
+			for ch in n.get_children():
+				stack.append(ch)
+		_check(meshes > 0, "instantiated model carries mesh data")
+		sample.free()
+	_check(registry.spawn("no_such_model") == null, "unknown model id spawns nothing")
+
+	# --- Building pieces now use those models, collision still grid-sized
+	var modelled_wall = StructureScript.new()
+	modelled_wall.setup("wall")
+	world.add_child(modelled_wall)
+	_check(modelled_wall._fallback_mat == null, "wall uses the Blender model, not the box fallback")
+	var wall_shape: CollisionShape3D = null
+	for ch in modelled_wall.get_children():
+		if ch is CollisionShape3D:
+			wall_shape = ch
+	_check(wall_shape != null and wall_shape.shape.size == game.BUILDING_TYPES.wall.size,
+		"wall collision still matches the declared grid size")
+	modelled_wall.apply_tier("stone")
+	_check(modelled_wall.tier == "stone", "modelled piece still upgrades tiers")
+	_check(game.BUILDING_TYPES.has("stairs") and game.BUILDING_TYPES.has("window_wall"),
+		"stairs and window wall added as buildable pieces")
+	_check(game.TIER_ORDER == ["twig", "wood", "stone", "metal", "concrete", "hqm"],
+		"concrete sits between sheet metal and armored")
+
+	# --- Tool-specific gathering rates
+	var tree2: Node = null
+	var ore2: Node = null
+	for c in world.get_children():
+		if c.is_queued_for_deletion() or not c.has_method("hit_harvest"):
+			continue
+		if tree2 == null and c.res_type == "tree":
+			tree2 = c
+		elif ore2 == null and c.res_type == "iron":
+			ore2 = c
+	if tree2 != null:
+		var w0: int = game.get_count("wood")
+		tree2.hit_harvest("metal_hatchet")
+		_check(game.get_count("wood") == w0 + 36, "metal hatchet yields 3x wood per swing")
+	if ore2 != null:
+		var iron0: int = game.get_count("iron")
+		var oil0: int = game.get_count("oil")
+		ore2.hit_harvest("drill")
+		_check(game.get_count("iron") == iron0 + 32, "drill yields 4x metal ore per swing")
+		_check(game.get_count("oil") == oil0 + 3, "drill is the source of crude oil")
+
+	# --- Workbench tier gating
+	game.workbench_level = 0
+	game.inventory["wood"] = 2000
+	game.inventory["frag"] = 2000
+	_check(game.required_workbench("metal_hatchet") == 1, "hatchet is a tier 1 recipe")
+	_check(not game.craft("metal_hatchet", 1), "tier 1 recipe blocked with no workbench")
+	var bench = world._spawn_station("workbench_t1", world.player.position + Vector3(2, 0, 0))
+	_check(bench.workbench_level() == 1, "workbench_t1 station reports tier 1")
+	world._update_stations(0.1)
+	_check(game.workbench_level == 1, "standing near the bench raises the crafting tier")
+	_check(game.craft("metal_hatchet", 1), "tier 1 recipe unlocked at the workbench")
+
+	# --- Temperature survival stat
+	_check(game.stats.has("temperature"), "temperature is a tracked survival stat")
+	game.stats.temperature = 100.0
+	world._sun_elevation = -1.0
+	world.player.in_water = false
+	for i in 40:
+		world._update_stations(0.5)
+	_check(game.stats.temperature < 50.0,
+		"night drains body warmth (%.0f)" % game.stats.temperature)
+	var fire = world._spawn_station("campfire", world.player.position + Vector3(1, 0, 0))
+	_check(fire.warmth() > 0.0, "campfire registers as a heat source")
+	for i in 40:
+		world._update_stations(0.5)
+	_check(game.stats.temperature > 90.0,
+		"a nearby fire warms you back up (%.0f)" % game.stats.temperature)
+
+	# --- Storage box
+	var stash = world._spawn_station("storage_box", Vector3(6, 0, -6))
+	game.inventory["wood"] = 500
+	stash._use_storage()
+	_check(game.get_count("wood") == 0, "storage box takes resources in")
+	_check(int(stash.stored.get("wood", 0)) == 500, "storage box holds what it took")
+	stash._use_storage()
+	_check(game.get_count("wood") == 500, "interacting again withdraws everything")
+	_check(stash.stored.is_empty(), "box is empty after withdrawal")
+
+	# --- Research table is the only component source
+	var research = world._spawn_station("research_table", Vector3(-6, 0, 6))
+	game.inventory["scrap"] = 100
+	var comps_before: int = (game.get_count("gear_comp") + game.get_count("pipe")
+		+ game.get_count("spring") + game.get_count("sewing"))
+	research.interact_station()
+	_check(game.get_count("scrap") == 75, "research consumes 25 scrap")
+	var comps_after: int = (game.get_count("gear_comp") + game.get_count("pipe")
+		+ game.get_count("spring") + game.get_count("sewing"))
+	_check(comps_after == comps_before + 1, "research yields one component")
+
 	# --- Scene-authored environment & lighting (visible in the editor too)
 	var we = world.get_node_or_null("WorldEnvironment")
 	_check(we != null, "main.tscn contains a WorldEnvironment node")
@@ -266,7 +377,13 @@ func _run_tests() -> void:
 	f.close()
 	_check(data is Dictionary and data.structures.size() == 3, "save contains 3 structures")
 	_check(int(data.player.inventory.hammer) == 3, "save contains crafted hammers")
-	_check(data.stations.size() == 2, "save contains 2 stations")
+	_check(data.stations.size() == world.stations.size(),
+		"save contains all %d deployed stations" % world.stations.size())
+	var saved_box = null
+	for entry in data.stations:
+		if entry.type == "storage_box":
+			saved_box = entry
+	_check(saved_box != null and saved_box.has("stored"), "storage box contents are persisted")
 
 	# Restore the player's real save (or leave none, as before the test)
 	DirAccess.remove_absolute("user://rust_save.json")

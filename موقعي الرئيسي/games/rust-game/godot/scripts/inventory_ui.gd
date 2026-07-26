@@ -230,6 +230,18 @@ func _refresh_detail() -> void:
 	_detail_box.add_child(desc)
 
 	var can_craft := true
+	var bench := Game.required_workbench(selected_item)
+	if bench > 0:
+		var bench_line := Label.new()
+		bench_line.text = "Requires Workbench Level %d" % bench
+		bench_line.add_theme_font_size_override("font_size", 13)
+		if Game.workbench_level < bench:
+			can_craft = false
+			bench_line.add_theme_color_override("font_color", Color(0.9, 0.35, 0.35))
+		else:
+			bench_line.add_theme_color_override("font_color", Color(0.4, 0.85, 0.4))
+		_detail_box.add_child(bench_line)
+
 	for res in item.recipe:
 		var needed: int = int(item.recipe[res]) * craft_qty
 		var have := Game.get_count(res)
@@ -267,7 +279,7 @@ func _refresh_detail() -> void:
 	_detail_box.add_child(qty_row)
 
 	var craft_btn := Button.new()
-	craft_btn.text = "CRAFT"
+	craft_btn.text = "CRAFT" if Game.workbench_level >= bench else "LOCKED"
 	craft_btn.custom_minimum_size = Vector2(120, 40)
 	craft_btn.disabled = not can_craft
 	craft_btn.pressed.connect(func():

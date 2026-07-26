@@ -3,6 +3,8 @@ extends StaticBody3D
 ## cupboard or door). Holds tier/health, supports upgrade/repair coloring
 ## and door open/close.
 
+const ModelRegistry := preload("res://scripts/model_registry.gd")
+
 var build_type := "foundation"
 var tier := "twig"
 var health := 10.0
@@ -11,7 +13,8 @@ var is_door := false
 var is_open := false
 var base_rot := 0.0
 
-var _mat: StandardMaterial3D
+var _visual: Node3D          # Blender model, when one exists for this piece
+var _fallback_mat: StandardMaterial3D  # only used by the primitive fallback
 
 
 func setup(type: String) -> void:
@@ -21,15 +24,23 @@ func setup(type: String) -> void:
 	collision_layer = 2
 	collision_mask = 0
 
-	var mi := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = bt.size
-	_mat = StandardMaterial3D.new()
-	_mat.roughness = 0.8
-	box.material = _mat
-	mi.mesh = box
-	add_child(mi)
+	_visual = ModelRegistry.spawn(type)
+	if _visual != null:
+		add_child(_visual)
+	else:
+		# No model for this piece yet: fall back to the primitive block
+		var mi := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = bt.size
+		_fallback_mat = StandardMaterial3D.new()
+		_fallback_mat.roughness = 0.8
+		box.material = _fallback_mat
+		mi.mesh = box
+		add_child(mi)
+		_visual = mi
 
+	# Collision always comes from the declared grid size, never the mesh, so
+	# swapping a model can never shift a placed structure's hitbox.
 	var cs := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
 	shape.size = bt.size
@@ -46,7 +57,13 @@ func apply_tier(t: String) -> void:
 	var td: Dictionary = Game.BUILDING_TIERS[t]
 	max_health = float(td.health)
 	health = max_health
-	_mat.albedo_color = td.color
+	if _fallback_mat != null:
+		_fallback_mat.albedo_color = td.color
+	elif t == "wood":
+		# Wood keeps the model's own painted materials (planks, trim, hinges)
+		ModelRegistry.clear_tint(_visual)
+	else:
+		ModelRegistry.tint(_visual, td.color, float(td.metallic), float(td.roughness))
 
 
 func toggle_door() -> void:
