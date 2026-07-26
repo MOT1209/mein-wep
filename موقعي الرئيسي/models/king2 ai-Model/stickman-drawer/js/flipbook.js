@@ -219,6 +219,48 @@ export function initFlipbook(root) {
     }
   }, { passive: false });
 
+  // M6: Pinch-to-zoom (touch gestures)
+  let lastTouchDist = 0;
+  let lastTouchCenter = null;
+
+  canvas.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const t1 = e.touches[0], t2 = e.touches[1];
+      lastTouchDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      lastTouchCenter = {
+        x: (t1.clientX + t2.clientX) / 2,
+        y: (t1.clientY + t2.clientY) / 2,
+      };
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const t1 = e.touches[0], t2 = e.touches[1];
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      const center = {
+        x: (t1.clientX + t2.clientX) / 2,
+        y: (t1.clientY + t2.clientY) / 2,
+      };
+      const rect = canvas.getBoundingClientRect();
+      const cx = center.x - rect.left;
+      const cy = center.y - rect.top;
+      if (lastTouchDist > 0) {
+        const scale = dist / lastTouchDist;
+        setZoom(zoom * scale, cx, cy);
+      }
+      lastTouchDist = dist;
+      lastTouchCenter = center;
+    }
+  }, { passive: false });
+
+  canvas.addEventListener('touchend', () => {
+    lastTouchDist = 0;
+    lastTouchCenter = null;
+  });
+
   // Pan with middle mouse or space+drag
   canvas.addEventListener('pointerdown', (e) => {
     if (e.button === 1 || spaceHeld) {
@@ -1167,7 +1209,13 @@ export function initFlipbook(root) {
   // M2: Batch undo — save snapshot before batch operations
   window.addEventListener('flipbook-batch-start', (e) => {
     batchSnapshot = { frames: JSON.parse(JSON.stringify(frames)), label: e.detail?.label || 'الدفععة' };
+    undoBatchBtn.style.display = '';
     showToast(`تم حفظ نسخة احتياطية — يمكن التراجع عن ${batchSnapshot.label}`);
+  });
+
+  undoBatchBtn?.addEventListener('click', () => {
+    undoBatch();
+    undoBatchBtn.style.display = 'none';
   });
 
   function undoBatch() {
