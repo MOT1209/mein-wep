@@ -863,53 +863,6 @@ export function initFlipbook(root) {
     }
   });
 
-  // M3: GIF export
-  downloadGifBtn?.addEventListener('click', async () => {
-    if (frames.length < 2) {
-      showToast('تحتاج إطارين على الأقل عشان تصدّر GIF');
-      return;
-    }
-    if (typeof GIF === 'undefined') {
-      showToast('مكتبة GIF لم تُحمّل — تحقق من الاتصال بالإنترنت');
-      return;
-    }
-    downloadGifBtn.disabled = true;
-    downloadGifBtn.textContent = '⏳ يصدّر GIF…';
-    try {
-      const imgs = await loadFrameImages();
-      const fps = Math.max(1, Number(fpsInput.value) || 8);
-      const delay = Math.round(1000 / fps);
-      const gif = new GIF({
-        workers: 2,
-        quality: 10,
-        width: EXPORT_SIZE,
-        height: EXPORT_SIZE,
-        workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
-      });
-      for (const img of imgs) {
-        if (!img) continue;
-        const c = document.createElement('canvas');
-        c.width = EXPORT_SIZE;
-        c.height = EXPORT_SIZE;
-        const cx = c.getContext('2d');
-        cx.fillStyle = '#ffffff';
-        cx.fillRect(0, 0, EXPORT_SIZE, EXPORT_SIZE);
-        cx.drawImage(img, 0, 0, EXPORT_SIZE, EXPORT_SIZE);
-        gif.addFrame(c, { copy: true, delay });
-      }
-      gif.on('finished', (blob) => {
-        downloadBlob(blob, 'stickman-animation.gif');
-        downloadGifBtn.disabled = false;
-        downloadGifBtn.textContent = '🖼️ تصدير GIF';
-      });
-      gif.render();
-    } catch (err) {
-      showToast('فشل تصدير GIF: ' + err.message);
-      downloadGifBtn.disabled = false;
-      downloadGifBtn.textContent = '🖼️ تصدير GIF';
-    }
-  });
-
   // ===================== Shape-tween generator =====================
 
   tweenShapeButtons.forEach((btn) => btn.addEventListener('click', () => {
