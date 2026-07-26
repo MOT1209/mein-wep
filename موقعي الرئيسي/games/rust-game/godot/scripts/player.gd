@@ -1,0 +1,237 @@
+extends CharacterBody3D
+## First/third-person player controller: mouse look, movement + jump,
+## interaction raycasts (harvest / attack / doors / hammer), belt slots
+## and building-plan input. Port of the PointerLockControls player.
+
+const SPEED := 7.0
+const JUMP_VELOCITY := 9.5
+const GRAVITY := 26.0
+const MOUSE_SENS := 0.002
+
+var world: Node3D
+var hud: CanvasLayer
+var head: Node3D
+var spring: SpringArm3D
+var camera: Camera3D
+var body_visual: Node3D
+var third_person := false
+var looking_at_structure: Node3D = null
+
+
+func _ready() -> void:
+	collision_layer = 16
+	collision_mask = 7  # terrain + structures + resources
+
+	var cs := CollisionShape3D.new()
+	var cap := CapsuleShape3D.new()
+	cap.radius = 0.4
+	cap.height = 1.8
+	cs.shape = cap
+	cs.position.y = 0.9
+	add_child(cs)
+
+	head = Node3D.new()
+	head.position = Vector3(0, 1.6, 0)
+	add_child(head)
+
+	spring = SpringArm3D.new()
+	spring.spring_length = 0.0
+	spring.collision_mask = 3
+	head.add_child(spring)
+	spring.add_excluded_object(get_rid())
+
+	camera = Camera3D.new()
+	camera.current = true
+	camera.far = 2000.0
+	spring.add_child(camera)
+
+	_build_visual()
+
+
+func _build_visual() -> void:
+	# Blocky survivor body, visible only in third person
+	body_visual = Node3D.new()
+	add_child(body_visual)
+
+	var torso := MeshInstance3D.new()
+	var torso_mesh := BoxMesh.new()
+	torso_mesh.size = Vector3(0.6, 0.8, 0.3)
+	var torso_mat := StandardMaterial3D.new()
+	torso_mat.albedo_color = Color8(139, 50, 44)
+	torso_mesh.material = torso_mat
+	torso.mesh = torso_mesh
+	torso.position.y = 1.25
+	body_visual.add_child(torso)
+
+	var head_mi := MeshInstance3D.new()
+	var head_mesh := BoxMesh.new()
+	head_mesh.size = Vector3(0.3, 0.35, 0.3)
+	var head_mat := StandardMaterial3D.new()
+	head_mat.albedo_color = Color8(255, 219, 172)
+	head_mesh.material = head_mat
+	head_mi.mesh = head_mesh
+	head_mi.position.y = 1.85
+	body_visual.add_child(head_mi)
+
+	var leg_mesh := BoxMesh.new()
+	leg_mesh.size = Vector3(0.25, 0.8, 0.25)
+	var leg_mat := StandardMaterial3D.new()
+	leg_mat.albedo_color = Color8(34, 34, 34)
+	leg_mesh.material = leg_mat
+	for lx in [-0.15, 0.15]:
+		var leg := MeshInstance3D.new()
+		leg.mesh = leg_mesh
+		leg.position = Vector3(lx, 0.4, 0)
+		body_visual.add_child(leg)
+
+	body_visual.visible = false
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause"):
+		if hud != null:
+			hud.handle_escape()
+		return
+	if event.is_action_pressed("inventory"):
+		if hud != null and Game.ui_open in ["", "inventory"]:
+			hud.toggle_inventory()
+		return
+
+	if Game.ui_open != "":
+		return
+
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		rotate_y(-event.relative.x * MOUSE_SENS)
+		head.rotate_x(-event.relative.y * MOUSE_SENS)
+		head.rotation.x = clampf(head.rotation.x, -PI / 2.0, PI / 2.0)
+	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
+		if event.button_index == MOUSE_BUTTON_LEFT:
+			_primary_action()
+		elif event.button_index == MOUSE_BUTTON_RIGHT:
+			if Game.active_tool() == "building_plan":
+				hud.open_blueprint_menu()
+	elif event.is_action_pressed("blueprint"):
+		hud.open_blueprint_menu()
+	elif event.is_action_pressed("rotate_piece"):
+		if Game.selected_blueprint != "":
+			Game.blueprint_rotation = fmod(Game.blueprint_rotation + PI / 2.0, TAU)
+			Game.notify("Rotated %d°" % roundi(rad_to_deg(Game.blueprint_rotation)), Color(1.0, 0.63, 0.0))
+	elif event.is_action_pressed("cancel_build"):
+		if Game.selected_blueprint != "":
+			Game.selected_blueprint = ""
+			Game.notify("Build mode cancelled", Color(1.0, 0.63, 0.0))
+	elif event.is_action_pressed("hammer_action"):
+		_hammer_action()
+	elif event.is_action_pressed("toggle_view"):
+		_toggle_view()
+	else:
+		for i in 6:
+			if event.is_action_pressed("slot_%d" % (i + 1)):
+				Game.selected_belt_slot = i
+				Game.belt_changed.emit()
+				break
+
+
+func _toggle_view() -> void:
+	third_person = not third_person
+	spring.spring_length = 5.0 if third_person else 0.0
+	spring.position = Vector3(0, 0.4, 0) if third_person else Vector3.ZERO
+	body_visual.visible = third_person
+	Game.notify("View: %s" % ("THIRD" if third_person else "FIRST"), Color(0.2, 0.6, 0.9))
+
+
+func _physics_process(delta: float) -> void:
+	if not is_on_floor():
+		velocity.y -= GRAVITY * delta
+	elif Game.ui_open == "" and Input.is_action_just_pressed("jump"):
+		velocity.y = JUMP_VELOCITY
+
+	var input_dir := Vector2.ZERO
+	if Game.ui_open == "":
+		input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
+	var dir := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
+	if dir != Vector3.ZERO:
+		velocity.x = dir.x * SPEED
+		velocity.z = dir.z * SPEED
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, SPEED * 10.0 * delta)
+		velocity.z = move_toward(velocity.z, 0.0, SPEED * 10.0 * delta)
+
+	move_and_slide()
+	_inspect_structures()
+
+
+## Keeps the HUD build-info panel in sync with whatever structure is in view.
+func _inspect_structures() -> void:
+	looking_at_structure = null
+	if hud == null:
+		return
+	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2)
+	if not hit.is_empty() and hit.collider.has_method("toggle_door"):
+		looking_at_structure = hit.collider
+	hud.update_build_info(looking_at_structure)
+
+
+func _camera_ray(dist: float, mask: int) -> Dictionary:
+	var from := camera.global_position
+	var to := from + (-camera.global_transform.basis.z) * dist
+	var query := PhysicsRayQueryParameters3D.create(from, to, mask, [get_rid()])
+	return get_world_3d().direct_space_state.intersect_ray(query)
+
+
+func _primary_action() -> void:
+	var tool := Game.active_tool()
+
+	# 1. Building Plan: place selected piece
+	if tool == "building_plan":
+		if Game.selected_blueprint != "":
+			world.building.place_structure()
+		else:
+			Game.notify("Right Click to select piece", Color(1.0, 0.63, 0.0))
+		return
+
+	# 2. Interact ray: structures (2) + resources (4) + NPCs (8)
+	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | 4 | 8)
+	if hit.is_empty():
+		return
+	var obj: Object = hit.collider
+
+	# Doors toggle open/closed
+	if obj.has_method("toggle_door"):
+		if obj.is_door:
+			obj.toggle_door()
+			return
+		# Hammer: repair or upgrade
+		if tool == "hammer":
+			if obj.health < obj.max_health:
+				world.building.repair_structure(obj)
+			else:
+				world.building.upgrade_structure(obj)
+			return
+		# Bare fist on a structure chips it
+		obj.take_hit(1.0)
+		Sfx.play("hit")
+		return
+
+	# NPC melee
+	if obj.has_method("npc_take_damage"):
+		obj.npc_take_damage(15.0)
+		Sfx.play("hit")
+		return
+
+	# Resource harvest
+	if obj.has_method("hit_harvest"):
+		obj.hit_harvest()
+
+
+func _hammer_action() -> void:
+	if Game.active_tool() != "hammer":
+		Game.notify("Requires Hammer", Color(0.9, 0.3, 0.3))
+		return
+	if looking_at_structure == null:
+		return
+	var s := looking_at_structure
+	if s.health < s.max_health:
+		world.building.repair_structure(s)
+	else:
+		world.building.upgrade_structure(s)
