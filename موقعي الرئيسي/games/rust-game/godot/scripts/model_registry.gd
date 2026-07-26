@@ -40,6 +40,12 @@ const MODELS := {
 	"metal_pickaxe": "res://assets/models/tools/metal_pickaxe.glb",
 	"drill": "res://assets/models/tools/drill.glb",
 	"bow": "res://assets/models/tools/bow.glb",
+
+	# Raiding gear
+	"c4": "res://assets/models/explosives/c4.glb",
+	"grenade": "res://assets/models/explosives/grenade.glb",
+	"rocket": "res://assets/models/explosives/rocket.glb",
+	"rocket_launcher": "res://assets/models/explosives/rocket_launcher.glb",
 }
 
 static var _cache: Dictionary = {}

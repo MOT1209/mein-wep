@@ -250,6 +250,14 @@ func _primary_action() -> void:
 		Game.consume_item(tool)
 		return
 
+	# 4. Raiding gear
+	if Game.EXPLOSIVES.has(tool):
+		_use_explosive(tool)
+		return
+	if tool == "rocket_launcher":
+		_fire_rocket()
+		return
+
 	# 4. Interact ray: structures (2) + resources (4) + NPCs (8)
 	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | 4 | 8)
 	if hit.is_empty():
@@ -265,6 +273,10 @@ func _primary_action() -> void:
 	if obj.has_method("toggle_door"):
 		if obj.is_door:
 			obj.toggle_door()
+			return
+		# Tool Cupboard: stock it with upkeep materials
+		if obj.build_type == "tool_cupboard" and tool != "hammer":
+			obj.deposit_upkeep()
 			return
 		# Hammer: repair or upgrade
 		if tool == "hammer":
@@ -322,6 +334,53 @@ func _spawn_hit_particles(pos: Vector3, color: Color) -> void:
 	t.timeout.connect(func():
 		if is_instance_valid(parts):
 			parts.queue_free())
+
+
+## Satchel charges stick to whatever you are aiming at; grenades get lobbed.
+func _use_explosive(id: String) -> void:
+	if Game.get_count(id) <= 0:
+		return
+	var data: Dictionary = Game.EXPLOSIVES[id]
+	var forward := -camera.global_transform.basis.z
+
+	if data.mode == "place":
+		var hit := _camera_ray(Game.INTERACT_DISTANCE, 1 | 2)
+		if hit.is_empty():
+			Game.notify("Aim at a wall to plant the charge", Color(1.0, 0.63, 0.0))
+			return
+		# Sit slightly proud of the surface so the charge is visible
+		world.spawn_explosive(id, hit.position + hit.normal * 0.15)
+		Game.notify("Charge planted — %ds" % int(data.fuse), Color(1.0, 0.4, 0.2))
+	else:
+		var start := camera.global_position + forward * 0.8
+		world.spawn_explosive(id, start, forward * float(data.speed) + Vector3.UP * 2.0)
+		Game.notify("%s thrown" % Game.ITEMS[id].name, Color(1.0, 0.63, 0.0))
+
+	_consume_from_belt(id)
+	Sfx.play("build")
+
+
+func _fire_rocket() -> void:
+	if Game.get_count("rocket") <= 0:
+		Game.notify("Out of rockets", Color(0.9, 0.3, 0.3))
+		return
+	var data: Dictionary = Game.EXPLOSIVES["rocket"]
+	var forward := -camera.global_transform.basis.z
+	world.spawn_explosive("rocket", camera.global_position + forward * 1.2,
+		forward * float(data.speed))
+	Game.remove_item("rocket", 1)
+	Game.notify("Rocket away", Color(1.0, 0.4, 0.2))
+	Sfx.play("explosion")
+
+
+## Spends one of an item and clears the belt slot when the stack runs out.
+func _consume_from_belt(id: String) -> void:
+	Game.remove_item(id, 1)
+	if Game.get_count(id) <= 0:
+		for i in Game.belt.size():
+			if Game.belt[i] == id:
+				Game.belt[i] = null
+		Game.belt_changed.emit()
 
 
 func _hammer_action() -> void:

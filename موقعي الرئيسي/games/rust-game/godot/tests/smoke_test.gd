@@ -305,6 +305,104 @@ func _run_tests() -> void:
 		+ game.get_count("spring") + game.get_count("sewing"))
 	_check(comps_after == comps_before + 1, "research yields one component")
 
+	# --- Explosive crafting chain gives sulfur a purpose
+	game.workbench_level = 2
+	game.inventory["sulfur"] = 200
+	game.inventory["charcoal"] = 200
+	_check(game.craft("gunpowder", 2), "sulfur + charcoal makes gunpowder")
+	_check(game.get_count("sulfur") == 160 and game.get_count("charcoal") == 140,
+		"gunpowder consumed the right inputs")
+	game.inventory["gunpowder"] = 500
+	game.inventory["lgf"] = 50
+	game.inventory["frag"] = 500
+	_check(game.craft("explosives", 2), "gunpowder chains up into explosives")
+	game.inventory["explosives"] = 100
+	game.inventory["cloth"] = 50
+	_check(game.craft("c4", 1), "explosives make a satchel charge")
+	_check(game.required_workbench("c4") == 2, "C4 is gated behind workbench 2")
+
+	# --- Blast damage scales with the tier's resistance
+	var blast_targets := {}
+	for t in ["wood", "stone", "metal", "hqm"]:
+		var piece = StructureScript.new()
+		piece.setup("wall")
+		piece.position = Vector3(200, 5, 200)   # away from the rest of the base
+		world.add_child(piece)
+		world.register_structure(piece)
+		piece.apply_tier(t)
+		blast_targets[t] = piece
+	var wood_dealt: float = blast_targets["wood"].take_blast(100.0)
+	var stone_dealt: float = blast_targets["stone"].take_blast(100.0)
+	var metal_dealt: float = blast_targets["metal"].take_blast(100.0)
+	var hqm_dealt: float = blast_targets["hqm"].take_blast(100.0)
+	_check(wood_dealt > stone_dealt and stone_dealt > metal_dealt and metal_dealt > hqm_dealt,
+		"each tier absorbs more of the blast (%.0f/%.0f/%.0f/%.0f)"
+		% [wood_dealt, stone_dealt, metal_dealt, hqm_dealt])
+	_check(is_equal_approx(hqm_dealt, 30.0), "armored takes 30%% of raw blast damage")
+
+	# One C4 flattens twig, but an armored wall shrugs it off
+	var twig_wall = StructureScript.new()
+	twig_wall.setup("wall")
+	twig_wall.position = Vector3(210, 5, 210)
+	world.add_child(twig_wall)
+	world.register_structure(twig_wall)
+	var c4_data: Dictionary = game.EXPLOSIVES["c4"]
+	world.apply_explosion(twig_wall.position, float(c4_data.damage), float(c4_data.radius))
+	_check(not is_instance_valid(twig_wall) or twig_wall.is_queued_for_deletion(),
+		"one charge destroys a twig wall")
+	var armored = blast_targets["hqm"]
+	var hp_before: float = armored.health
+	world.apply_explosion(armored.position, float(c4_data.damage), float(c4_data.radius))
+	_check(is_instance_valid(armored) and not armored.is_queued_for_deletion(),
+		"an armored wall survives a single charge")
+	_check(armored.health < hp_before, "the armored wall still took damage")
+
+	# --- Explosives are live objects with a fuse
+	var live = world.spawn_explosive("grenade", Vector3(150, 10, 150), Vector3(0, 0, 0))
+	_check(live != null and live.explosive_id == "grenade", "grenade spawns as a live object")
+	_check(live._fuse > 0.0, "live grenade is counting down")
+	live.queue_free()
+
+	# --- Decay and Tool Cupboard upkeep
+	for s in world.structures.duplicate():
+		if is_instance_valid(s):
+			world.unregister_structure(s)
+			s.queue_free()
+	game.tool_cupboards.clear()
+
+	var lone = StructureScript.new()
+	lone.setup("wall")
+	lone.position = Vector3(300, 2, 300)
+	world.add_child(lone)
+	world.register_structure(lone)
+	lone.apply_tier("wood")
+	var lone_hp: float = lone.health
+	world.tick_decay()
+	_check(lone.health < lone_hp, "an unprotected wall decays")
+	_check(lone.decaying, "decaying structures are flagged for the HUD")
+
+	var tc = StructureScript.new()
+	tc.setup("tool_cupboard")
+	tc.position = Vector3(300, 2, 300)
+	world.add_child(tc)
+	world.register_structure(tc)
+	tc.apply_tier("wood")
+	_check(tc.upkeep_total() == 0, "a fresh cupboard is empty")
+	world.tick_decay()
+	_check(lone.decaying, "a cupboard with no materials does not stop decay")
+
+	game.inventory["wood"] = 400
+	tc.deposit_upkeep()
+	_check(tc.upkeep_total() >= 400, "stocking the cupboard moves materials in")
+	_check(game.get_count("wood") == 0, "the materials left the player's inventory")
+	var stocked_before: int = tc.upkeep_total()
+	var protected_hp: float = lone.health
+	world.tick_decay()
+	_check(is_equal_approx(lone.health, protected_hp),
+		"a stocked cupboard stops decay entirely")
+	_check(not lone.decaying, "protected structures clear the decaying flag")
+	_check(tc.upkeep_total() < stocked_before, "upkeep is consumed while it protects")
+
 	# --- Scene-authored environment & lighting (visible in the editor too)
 	var we = world.get_node_or_null("WorldEnvironment")
 	_check(we != null, "main.tscn contains a WorldEnvironment node")
@@ -375,7 +473,13 @@ func _run_tests() -> void:
 	var f := FileAccess.open("user://rust_save.json", FileAccess.READ)
 	var data = JSON.parse_string(f.get_as_text())
 	f.close()
-	_check(data is Dictionary and data.structures.size() == 3, "save contains 3 structures")
+	_check(data is Dictionary and data.structures.size() == world.structures.size(),
+		"save contains all %d structures" % world.structures.size())
+	var saved_tc = null
+	for entry in data.structures:
+		if entry.type == "tool_cupboard":
+			saved_tc = entry
+	_check(saved_tc != null and saved_tc.has("upkeep"), "cupboard upkeep is persisted")
 	_check(int(data.player.inventory.hammer) == 3, "save contains crafted hammers")
 	_check(data.stations.size() == world.stations.size(),
 		"save contains all %d deployed stations" % world.stations.size())

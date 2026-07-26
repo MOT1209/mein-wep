@@ -17,20 +17,38 @@ const BUILD_DISTANCE := 10.0
 ## Upgrade path: twig -> wood -> stone -> sheet metal -> concrete -> armored.
 const TIER_ORDER := ["twig", "wood", "stone", "metal", "concrete", "hqm"]
 
+## `blast_resist` scales incoming explosive damage — it is the whole reason
+## to spend resources climbing the tiers.
 const BUILDING_TIERS := {
 	"twig": {"name": "Twig", "health": 10, "color": Color8(215, 204, 200), "cost": {},
-		"metallic": 0.0, "roughness": 0.95},
+		"metallic": 0.0, "roughness": 0.95, "blast_resist": 1.0},
 	"wood": {"name": "Wood", "health": 250, "color": Color8(141, 110, 99), "cost": {"wood": 300},
-		"metallic": 0.0, "roughness": 0.85},
+		"metallic": 0.0, "roughness": 0.85, "blast_resist": 0.9},
 	"stone": {"name": "Stone", "health": 500, "color": Color8(150, 150, 145), "cost": {"stone": 300},
-		"metallic": 0.0, "roughness": 0.95},
+		"metallic": 0.0, "roughness": 0.95, "blast_resist": 0.7},
 	"metal": {"name": "Sheet Metal", "health": 1000, "color": Color8(144, 164, 174), "cost": {"frag": 200},
-		"metallic": 0.8, "roughness": 0.4},
+		"metallic": 0.8, "roughness": 0.4, "blast_resist": 0.55},
 	"concrete": {"name": "Concrete", "health": 1500, "color": Color8(178, 176, 168), "cost": {"stone": 500, "frag": 100},
-		"metallic": 0.0, "roughness": 0.9},
+		"metallic": 0.0, "roughness": 0.9, "blast_resist": 0.45},
 	"hqm": {"name": "Armored", "health": 2000, "color": Color8(226, 230, 234), "cost": {"hqm": 50},
-		"metallic": 0.9, "roughness": 0.25},
+		"metallic": 0.9, "roughness": 0.25, "blast_resist": 0.3},
 }
+
+## Raiding gear. `mode` is how it gets deployed: stuck to a wall, thrown,
+## or fired from a launcher. `impact` blows on first contact.
+const EXPLOSIVES := {
+	"c4": {"damage": 550.0, "radius": 4.5, "fuse": 6.0, "mode": "place"},
+	"grenade": {"damage": 110.0, "radius": 4.0, "fuse": 3.5, "mode": "throw",
+		"gravity": 14.0, "speed": 15.0},
+	"rocket": {"damage": 350.0, "radius": 5.0, "fuse": 8.0, "mode": "fire",
+		"gravity": 1.5, "speed": 32.0, "impact": true},
+}
+
+## Decay: unprotected structures rot away; a stocked Tool Cupboard stops it.
+const DECAY_INTERVAL := 10.0
+const DECAY_UNPROTECTED := 0.015   # fraction of max health per tick
+const DECAY_UNPAID := 0.008
+const UPKEEP_MATERIALS := ["wood", "stone", "frag"]
 
 const BUILDING_TYPES := {
 	"foundation": {"name": "Foundation", "size": Vector3(3, 0.2, 3), "y": 0.1, "requires_support": false, "is_door": false},
@@ -93,6 +111,13 @@ const ITEMS := {
 	"wooden_door": {"name": "Wooden Door", "category": "construction", "color": "5d4037", "rarity": "common", "recipe": {"wood": 300}, "desc": "Fits into doorways."},
 	"codelock": {"name": "Code Lock", "category": "items", "color": "78909c", "rarity": "rare", "recipe": {"frag": 100}, "desc": "Secure your doors with a 4-digit code."},
 	"oil": {"name": "Crude Oil", "category": "resources", "color": "37474f", "rarity": "rare", "desc": "Drilled from the ground. Refines into low grade fuel."},
+	"charcoal": {"name": "Charcoal", "category": "resources", "color": "424242", "rarity": "common", "desc": "Left behind by a burning furnace. Feeds gunpowder."},
+	"gunpowder": {"name": "Gun Powder", "category": "ammo", "color": "616161", "rarity": "common", "recipe": {"sulfur": 20, "charcoal": 30}, "workbench": 1, "desc": "Sulfur and charcoal. The base of every explosive."},
+	"explosives": {"name": "Explosives", "category": "ammo", "color": "c9a227", "rarity": "elite", "recipe": {"gunpowder": 50, "lgf": 3, "sulfur": 10, "frag": 10}, "workbench": 2, "desc": "Unstable compound used in raiding charges."},
+	"c4": {"name": "Timed Explosive Charge", "category": "weapons", "color": "c8a870", "rarity": "elite", "recipe": {"explosives": 20, "cloth": 5, "frag": 10}, "workbench": 2, "desc": "Sticks to a wall and levels it. The classic raid tool."},
+	"grenade": {"name": "F1 Grenade", "category": "weapons", "color": "47522f", "rarity": "rare", "recipe": {"gunpowder": 30, "frag": 25}, "workbench": 1, "desc": "Thrown fragmentation charge. Mind the blast radius."},
+	"rocket": {"name": "Rocket", "category": "ammo", "color": "b71c1c", "rarity": "elite", "recipe": {"explosives": 10, "pipe": 2, "frag": 100}, "workbench": 2, "desc": "Ammunition for the launcher. Detonates on impact."},
+	"rocket_launcher": {"name": "Rocket Launcher", "category": "weapons", "color": "47522f", "rarity": "elite", "recipe": {"frag": 500, "pipe": 4, "gear_comp": 2}, "workbench": 2, "desc": "Fires rockets at fortifications from a safe distance."},
 	"metal_hatchet": {"name": "Hatchet", "category": "tools", "color": "90a4ae", "rarity": "rare", "recipe": {"wood": 100, "frag": 125}, "workbench": 1, "desc": "Steel head. Fells trees far faster than stone."},
 	"metal_pickaxe": {"name": "Pickaxe", "category": "tools", "color": "90a4ae", "rarity": "rare", "recipe": {"wood": 100, "frag": 125}, "workbench": 1, "desc": "Steel head. Breaks ore nodes far faster than stone."},
 	"drill": {"name": "Mining Drill", "category": "tools", "color": "8d6e63", "rarity": "elite", "recipe": {"frag": 250, "gear_comp": 2, "hqm": 10}, "workbench": 2, "desc": "Motorised auger. Extracts crude oil and tears through ore."},

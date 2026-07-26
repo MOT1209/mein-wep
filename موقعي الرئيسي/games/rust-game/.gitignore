@@ -3,4 +3,4 @@ blender-mcp/
 godot-mcp/
 
 # Generated review artifacts from the Blender pipeline
-tools/blender/preview.png
+tools/blender/preview*.png

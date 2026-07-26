@@ -28,6 +28,7 @@ var _info_panel: PanelContainer
 var _info_tier: Label
 var _info_health: Label
 var _info_upgrade: Label
+var _info_status: Label
 var _priv_label: Label
 var _bench_label: Label
 var _cold_label: Label
@@ -241,9 +242,11 @@ func _build_info_panel() -> void:
 	_info_tier = _label("", 14)
 	_info_health = _label("", 14)
 	_info_upgrade = _label("", 13, Color(0.8, 0.8, 0.8))
+	_info_status = _label("", 13, Color(0.95, 0.5, 0.35))
 	v.add_child(_info_tier)
 	v.add_child(_info_health)
 	v.add_child(_info_upgrade)
+	v.add_child(_info_status)
 	_info_panel.add_child(v)
 	_info_panel.visible = false
 	style_panel(_info_panel)
@@ -529,6 +532,18 @@ func update_build_info(s: Node3D) -> void:
 		_info_upgrade.text = "Upgrade -> %s: %s" % [Game.BUILDING_TIERS[next].name, ", ".join(parts)]
 	else:
 		_info_upgrade.text = "MAX TIER"
+
+	# Decay / upkeep state
+	if s.build_type == "tool_cupboard":
+		var stocked: int = s.upkeep_total()
+		_info_status.text = "Upkeep stocked: %d" % stocked
+		_info_status.add_theme_color_override("font_color",
+			Color(0.4, 0.85, 0.4) if stocked > 0 else Color(0.95, 0.5, 0.35))
+	elif s.decaying:
+		_info_status.text = "DECAYING — no upkeep"
+		_info_status.add_theme_color_override("font_color", Color(0.95, 0.5, 0.35))
+	else:
+		_info_status.text = ""
 	_info_panel.visible = true
 
 

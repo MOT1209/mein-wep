@@ -52,6 +52,10 @@ PALETTE = {
     "leather":     (0.42, 0.28, 0.18, 0.0, 0.8),
     "ember":       (1.00, 0.42, 0.08, 0.0, 0.5),
     "glass":       (0.55, 0.72, 0.80, 0.0, 0.15),
+    "explosive":   (0.78, 0.66, 0.42, 0.0, 0.7),
+    "olive":       (0.28, 0.32, 0.19, 0.1, 0.65),
+    "wire_red":    (0.72, 0.14, 0.12, 0.0, 0.5),
+    "warning":     (0.92, 0.72, 0.10, 0.0, 0.5),
 }
 
 EMISSIVE = {"ember"}
@@ -445,6 +449,70 @@ def build_sulfur_node():
 
 
 # ==========================================================================
+# EXPLOSIVES  (origin at base; raiding gear)
+# ==========================================================================
+
+def build_c4():
+    """Timed explosive charge: a strapped bundle of sticks with a timer."""
+    for i in range(4):
+        cyl(0.055, 0.34, x=-0.09 + (i % 2) * 0.18, y=-0.05 + (i // 2) * 0.11,
+            z=0.17, material="explosive", verts=10)
+    # Duct-tape straps
+    for z in (0.08, 0.26):
+        box(0.34, 0.28, 0.045, z=z, material="olive")
+    # Timer box and wiring
+    box(0.15, 0.09, 0.11, y=-0.16, z=0.28, material="metal_dark")
+    box(0.09, 0.02, 0.05, y=-0.21, z=0.29, material="warning")
+    cyl(0.012, 0.22, x=0.08, y=-0.1, z=0.33, material="wire_red", verts=6,
+        rot=(0, math.pi / 2, 0.5))
+    export("c4", "explosives", origin_at_base=True)
+
+
+def build_grenade():
+    """F1-style fragmentation grenade."""
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=12, ring_count=8, radius=0.075,
+                                         location=(0, 0, 0.09))
+    obj = bpy.context.active_object
+    obj.scale = (1.0, 1.0, 1.2)
+    _finish(obj, "olive")
+    cyl(0.032, 0.05, z=0.19, material="metal_dark", verts=10)
+    box(0.022, 0.09, 0.012, y=0.035, z=0.185, material="metal")
+    cyl(0.018, 0.012, y=0.02, z=0.215, material="metal", verts=8)
+    export("grenade", "explosives", origin_at_base=True)
+
+
+def build_rocket():
+    """Warhead, body and tail fins, laid along -Y so it flies nose-first."""
+    cone(0.06, 0.0, 0.18, y=-0.3, z=0.06, material="wire_red", verts=10,
+         rot=(-math.pi / 2, 0, 0))
+    cyl(0.06, 0.26, y=-0.08, z=0.06, material="explosive", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    cyl(0.045, 0.22, y=0.16, z=0.06, material="metal_dark", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    for i in range(3):
+        box(0.012, 0.12, 0.1, y=0.22, z=0.06, material="metal",
+            rot=(0, i * 2.09, 0))
+    export("rocket", "explosives", origin_at_base=True)
+
+
+def build_rocket_launcher():
+    """Shoulder tube with grip, trigger and iron sight."""
+    cyl(0.085, 1.1, y=-0.1, z=0.5, material="olive", verts=12,
+        rot=(math.pi / 2, 0, 0))
+    cone(0.11, 0.085, 0.16, y=0.4, z=0.5, material="metal_dark", verts=12,
+         rot=(math.pi / 2, 0, 0))
+    # Grip and trigger guard
+    box(0.07, 0.1, 0.26, y=0.02, z=0.32, material="wood_dark", rot=(0.25, 0, 0))
+    box(0.05, 0.16, 0.03, y=0.06, z=0.24, material="metal_dark")
+    # Fore grip
+    box(0.06, 0.09, 0.2, y=-0.36, z=0.36, material="wood_dark")
+    # Sight
+    box(0.03, 0.06, 0.09, y=-0.2, z=0.62, material="metal")
+    box(0.03, 0.03, 0.06, y=0.18, z=0.6, material="metal")
+    export("rocket_launcher", "explosives", origin_at_base=True)
+
+
+# ==========================================================================
 # Driver
 # ==========================================================================
 
@@ -456,6 +524,7 @@ BUILDERS = [
     build_workbench_t1, build_research_table, build_furnace,
     build_storage_box, build_large_box,
     build_stone_node, build_metal_node, build_sulfur_node,
+    build_c4, build_grenade, build_rocket, build_rocket_launcher,
 ]
 
 

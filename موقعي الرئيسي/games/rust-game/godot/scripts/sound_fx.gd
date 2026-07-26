@@ -20,6 +20,7 @@ func _ready() -> void:
 	_register("step", _gen(0.07, 0.05, []))
 	_register("eat", _gen(0.2, 0.05, [[220.0, 0.08], [180.0, 0.06]]))
 	_register("drink", _gen(0.25, 0.03, [[350.0, 0.06], [250.0, 0.05]]))
+	_register("explosion", _gen(0.8, 0.5, [[55.0, 0.35], [80.0, 0.2]]))
 
 
 func _register(sfx_name: String, stream: AudioStreamWAV) -> void:

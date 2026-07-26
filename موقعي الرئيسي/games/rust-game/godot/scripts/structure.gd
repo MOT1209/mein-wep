@@ -12,6 +12,9 @@ var max_health := 10.0
 var is_door := false
 var is_open := false
 var base_rot := 0.0
+var decaying := false
+## Tool Cupboards only: materials stocked to pay this base's upkeep.
+var upkeep: Dictionary = {}
 
 var _visual: Node3D          # Blender model, when one exists for this piece
 var _fallback_mat: StandardMaterial3D  # only used by the primitive fallback
@@ -76,9 +79,70 @@ func toggle_door() -> void:
 func take_hit(amount: float) -> void:
 	health -= amount
 	if health <= 0.0:
-		var world := get_parent()
-		if world != null and world.has_method("unregister_structure"):
-			world.unregister_structure(self)
-		if build_type == "tool_cupboard":
-			Game.tool_cupboards.erase(Vector2(position.x, position.z))
-		queue_free()
+		_destroy()
+
+
+## Explosive damage, reduced by the tier's blast resistance.
+func take_blast(raw_damage: float) -> float:
+	var resist := float(Game.BUILDING_TIERS[tier].get("blast_resist", 1.0))
+	var applied := raw_damage * resist
+	health -= applied
+	if health <= 0.0:
+		_destroy()
+	return applied
+
+
+## One decay tick, as a fraction of this piece's maximum health.
+func apply_decay(fraction: float) -> void:
+	decaying = true
+	health -= max_health * fraction
+	if health <= 0.0:
+		_destroy()
+
+
+## Tool Cupboard: spend stocked materials to cover `cost` upkeep points.
+## Returns false when the cupboard has run dry.
+func pay_upkeep(cost: int) -> bool:
+	var remaining := cost
+	for res in Game.UPKEEP_MATERIALS:
+		if remaining <= 0:
+			break
+		var have := int(upkeep.get(res, 0))
+		if have <= 0:
+			continue
+		var spend: int = mini(have, remaining)
+		upkeep[res] = have - spend
+		remaining -= spend
+	return remaining <= 0
+
+
+## Interacting with a Tool Cupboard stocks it from your inventory.
+func deposit_upkeep() -> void:
+	var moved := 0
+	for res in Game.UPKEEP_MATERIALS:
+		var count := Game.get_count(res)
+		if count > 0:
+			upkeep[res] = int(upkeep.get(res, 0)) + count
+			Game.remove_item(res, count)
+			moved += count
+	if moved > 0:
+		Game.notify("Stocked %d upkeep materials" % moved)
+		Sfx.play("door")
+	else:
+		Game.notify("No upkeep materials to stock", Color(1.0, 0.63, 0.0))
+
+
+func upkeep_total() -> int:
+	var total := 0
+	for res in upkeep:
+		total += int(upkeep[res])
+	return total
+
+
+func _destroy() -> void:
+	var world := get_parent()
+	if world != null and world.has_method("unregister_structure"):
+		world.unregister_structure(self)
+	if build_type == "tool_cupboard":
+		Game.tool_cupboards.erase(Vector2(position.x, position.z))
+	queue_free()

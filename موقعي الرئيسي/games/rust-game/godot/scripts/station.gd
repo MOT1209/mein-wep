@@ -202,7 +202,9 @@ func _smelt() -> void:
 	Game.remove_item("iron", can_smelt)
 	Game.remove_item("wood", fuel)
 	Game.add_item("frag", can_smelt)
-	Game.notify("Smelted %d ore into fragments" % can_smelt)
+	# Burnt fuel leaves charcoal behind, which gunpowder needs
+	Game.add_item("charcoal", fuel)
+	Game.notify("Smelted %d ore (+%d charcoal)" % [can_smelt, fuel])
 	Sfx.play("upgrade")
 
 

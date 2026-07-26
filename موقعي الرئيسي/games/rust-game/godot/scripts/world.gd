@@ -9,6 +9,7 @@ const NpcScript := preload("res://scripts/npc.gd")
 const PlayerScript := preload("res://scripts/player.gd")
 const StructureScript := preload("res://scripts/structure.gd")
 const StationScript := preload("res://scripts/station.gd")
+const ExplosiveScript := preload("res://scripts/explosive.gd")
 const BuildingSystemScript := preload("res://scripts/building_system.gd")
 const HudScript := preload("res://scripts/hud.gd")
 
@@ -24,6 +25,10 @@ const RESPAWN_DELAY := 30.0
 const TERRAIN_SEGMENTS := 120
 const WATER_LEVEL := -2.0
 const GRASS_COUNT := 2500
+
+# How much of a blast reaches creatures and the thrower themselves
+const NPC_BLAST_SCALE := 0.35
+const PLAYER_BLAST_SCALE := 0.12
 
 # Temperature model
 const FREEZING_POINT := 20.0
@@ -67,6 +72,7 @@ var clock := 0.0
 var _sun_elevation := 1.0   # sin of the sun angle; drives night-time cold
 var _respawn_timer := 0.0
 var _autosave_timer := 0.0
+var _decay_timer := 0.0
 
 
 func _ready() -> void:
@@ -552,6 +558,12 @@ func _process(delta: float) -> void:
 				remaining.append(r)
 		respawn_queue = remaining
 
+	# Base decay / Tool Cupboard upkeep
+	_decay_timer += delta
+	if _decay_timer >= Game.DECAY_INTERVAL:
+		_decay_timer = 0.0
+		tick_decay()
+
 	# Autosave every 60s
 	_autosave_timer += delta
 	if _autosave_timer >= 60.0:
@@ -594,6 +606,91 @@ func _on_player_death() -> void:
 	Sfx.play("hit")
 
 
+# ==================== EXPLOSIVES & DECAY ====================
+
+func spawn_explosive(id: String, pos: Vector3, vel: Vector3 = Vector3.ZERO) -> Node3D:
+	var e: Node3D = ExplosiveScript.new()
+	e.setup(id, self)
+	add_child(e)
+	e.global_position = pos
+	e.velocity = vel
+	return e
+
+
+## A blast at `origin`: structures take damage through their tier's blast
+## resistance, creatures and the player take a scaled share. Everything
+## falls off with distance. Returns the total damage dealt to structures.
+func apply_explosion(origin: Vector3, damage: float, radius: float) -> float:
+	var dealt := 0.0
+	for s in structures.duplicate():
+		if not is_instance_valid(s):
+			continue
+		var d: float = s.position.distance_to(origin)
+		if d > radius:
+			continue
+		dealt += s.take_blast(damage * clampf(1.0 - d / radius, 0.15, 1.0))
+
+	for child in get_children():
+		if child.has_method("npc_take_damage"):
+			var dn: float = child.position.distance_to(origin)
+			if dn <= radius:
+				child.npc_take_damage(
+					damage * clampf(1.0 - dn / radius, 0.1, 1.0) * NPC_BLAST_SCALE)
+
+	if player != null:
+		var dp := player.position.distance_to(origin)
+		if dp <= radius:
+			Game.stats.health -= damage * clampf(1.0 - dp / radius, 0.0, 1.0) * PLAYER_BLAST_SCALE
+	return dealt
+
+
+## Structures outside every Tool Cupboard rot away. Inside one, they are
+## safe for as long as the cupboard has upkeep materials stocked.
+func tick_decay() -> void:
+	var tcs: Array = []
+	for s in structures:
+		if is_instance_valid(s) and s.build_type == "tool_cupboard":
+			tcs.append(s)
+
+	var groups: Dictionary = {}
+	var orphans: Array = []
+	for s in structures:
+		if not is_instance_valid(s) or s.build_type == "tool_cupboard":
+			continue
+		var tc := _tc_covering(s.position, tcs)
+		if tc == null:
+			orphans.append(s)
+		else:
+			var key := tc.get_instance_id()
+			if not groups.has(key):
+				groups[key] = []
+			groups[key].append(s)
+
+	for s in orphans:
+		s.apply_decay(Game.DECAY_UNPROTECTED)
+
+	for tc in tcs:
+		var group: Array = groups.get(tc.get_instance_id(), [])
+		# Bigger bases cost more to maintain
+		var cost: int = maxi(1, ceili(group.size() / 4.0))
+		if tc.pay_upkeep(cost):
+			for s in group:
+				s.decaying = false
+			tc.decaying = false
+		else:
+			for s in group:
+				s.apply_decay(Game.DECAY_UNPAID)
+			tc.apply_decay(Game.DECAY_UNPAID)
+
+
+func _tc_covering(pos: Vector3, tcs: Array) -> Node3D:
+	var flat := Vector2(pos.x, pos.z)
+	for tc in tcs:
+		if flat.distance_to(Vector2(tc.position.x, tc.position.z)) < Game.TC_RADIUS:
+			return tc
+	return null
+
+
 func register_structure(s: Node3D) -> void:
 	structures.append(s)
 
@@ -627,6 +724,7 @@ func save_game() -> void:
 			"rot": s.base_rot,
 			"tier": s.tier,
 			"health": s.health,
+			"upkeep": s.upkeep,
 		})
 	for st in stations:
 		if not is_instance_valid(st):
@@ -686,6 +784,10 @@ func load_game() -> void:
 		add_child(s)
 		s.apply_tier(str(sd.get("tier", "twig")))
 		s.health = float(sd.get("health", s.max_health))
+		var saved_upkeep = sd.get("upkeep", {})
+		if saved_upkeep is Dictionary:
+			for k in saved_upkeep:
+				s.upkeep[k] = int(saved_upkeep[k])
 		structures.append(s)
 		if type == "tool_cupboard":
 			Game.tool_cupboards.append(Vector2(s.position.x, s.position.z))
