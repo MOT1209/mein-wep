@@ -4,7 +4,10 @@
 // resize/orientationchange (belt-and-suspenders: some environments don't
 // fire the observer's first callback).
 export function fitCanvasToParent(canvas, onResize) {
+  let destroyed = false;
+
   function apply() {
+    if (destroyed) return;
     const box = canvas.parentElement.getBoundingClientRect();
     if (box.width < 1 || box.height < 1) return false;
     const dpr = window.devicePixelRatio || 1;
@@ -22,19 +25,24 @@ export function fitCanvasToParent(canvas, onResize) {
     return true;
   }
 
-  // Retries with rAF until the parent box actually has a size — needed both
-  // right after page load AND whenever a previously-hidden (display:none)
-  // panel becomes visible again, since its box reads 0 for a frame or two
-  // in both cases.
   function ensureFit(attempt = 0) {
+    if (destroyed) return;
     if (apply()) return;
     if (attempt < 40) requestAnimationFrame(() => ensureFit(attempt + 1));
   }
 
-  new ResizeObserver(apply).observe(canvas.parentElement);
-  window.addEventListener('resize', apply);
-  window.addEventListener('orientationchange', apply);
+  const ro = new ResizeObserver(apply);
+  ro.observe(canvas.parentElement);
+  const onResizeHandler = apply;
+  const onOrientHandler = apply;
+  window.addEventListener('resize', onResizeHandler);
+  window.addEventListener('orientationchange', onOrientHandler);
   ensureFit();
 
-  return ensureFit;
+  return function destroy() {
+    destroyed = true;
+    ro.disconnect();
+    window.removeEventListener('resize', onResizeHandler);
+    window.removeEventListener('orientationchange', onOrientHandler);
+  };
 }

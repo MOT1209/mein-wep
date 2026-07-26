@@ -36,6 +36,9 @@ export function initFlipbook(root) {
   const downloadWebmBtn = root.querySelector('#downloadWebmBtn');
   const clearAllBtn = root.querySelector('#clearAllFramesBtn');
   const emptyState = root.querySelector('#framesEmptyState');
+  const gridToggle = root.querySelector('#gridToggle');
+  const penOpacityInput = root.querySelector('#penOpacity');
+  const darkBgToggle = root.querySelector('#darkBgToggle');
 
   // Shape-tween generator controls
   const tweenShapeButtons = root.querySelectorAll('[data-tween-shape]');
@@ -121,13 +124,49 @@ export function initFlipbook(root) {
   function fillWhite() {
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = darkBgToggle?.checked ? '#2d2d37' : '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
   }
 
   const applyFit = fitCanvasToParent(canvas, ({ resized }) => { if (resized) fillWhite(); });
   const applyOnionFit = fitCanvasToParent(onionCanvas, () => {});
+
+  // M5: Grid overlay
+  function drawGrid() {
+    if (!gridToggle?.checked) return;
+    const dpr = window.devicePixelRatio || 1;
+    const cssW = canvas.width / dpr;
+    const cssH = canvas.height / dpr;
+    ctx.save();
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.strokeStyle = 'rgba(100,100,140,0.25)';
+    ctx.lineWidth = 0.5;
+    const step = 32;
+    for (let x = step; x < cssW; x += step) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, cssH); ctx.stroke();
+    }
+    for (let y = step; y < cssH; y += step) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cssW, y); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  gridToggle?.addEventListener('change', () => {
+    if (!gridToggle.checked) {
+      // Re-render current frame to clear grid
+      const frame = frames.find(f => f.id === activeFrameId);
+      if (frame) restoreSnapshot(frame.dataUrl);
+    } else {
+      drawGrid();
+    }
+  });
+
+  darkBgToggle?.addEventListener('change', () => {
+    fillWhite();
+    const frame = frames.find(f => f.id === activeFrameId);
+    if (frame) restoreSnapshot(frame.dataUrl);
+  });
 
   // ===================== Zoom & Pan =====================
 
@@ -213,7 +252,7 @@ export function initFlipbook(root) {
 
   function pushHistory() {
     history.push(canvas.toDataURL());
-    if (history.length > 25) history.shift();
+    if (history.length > 12) history.shift();
     redoStack = [];
   }
 
@@ -235,6 +274,7 @@ export function initFlipbook(root) {
         ctx.drawImage(img, 0, 0, cssW, cssH);
         resolve();
       };
+      img.onerror = () => resolve();
       img.src = dataUrl;
     });
   }
@@ -252,6 +292,7 @@ export function initFlipbook(root) {
     ctx.lineWidth = Number(brushSize.value);
     ctx.strokeStyle = tool === 'eraser' ? '#ffffff' : color;
     ctx.fillStyle = color;
+    ctx.globalAlpha = penOpacityInput ? Number(penOpacityInput.value) / 100 : 1;
   }
 
   function drawShapePreview(from, to) {
@@ -544,7 +585,11 @@ export function initFlipbook(root) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(frames));
     } catch (err) {
-      console.warn('تعذر حفظ الإطارات محلياً:', err);
+      if (err.name === 'QuotaExceededError') {
+        showToast('الذاكرة ممتلئة — احذف بعض الإطارات القديمة');
+      } else {
+        console.warn('تعذر حفظ الإطارات محلياً:', err);
+      }
     }
   }
 
@@ -567,6 +612,7 @@ export function initFlipbook(root) {
       onionCtx.drawImage(img, 0, 0, cssW, cssH);
       onionCtx.globalAlpha = 1;
     };
+    img.onerror = () => {};
     img.src = prevFrame.dataUrl;
   }
 
@@ -606,6 +652,20 @@ export function initFlipbook(root) {
       downBtn.disabled = i === frames.length - 1;
       downBtn.addEventListener('click', (ev) => { ev.stopPropagation(); moveFrame(i, 1); });
       actions.appendChild(downBtn);
+
+      const dupBtn = document.createElement('button');
+      dupBtn.type = 'button';
+      dupBtn.textContent = '⧉';
+      dupBtn.title = 'تكرار الإطار';
+      dupBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        const nid = nextFrameId();
+        frames.splice(i + 1, 0, { id: nid, dataUrl: frame.dataUrl, caption: frame.caption });
+        persist();
+        renderFrames();
+        showToast(`تم تكرار الإطار #${i + 1}`);
+      });
+      actions.appendChild(dupBtn);
 
       const delBtn = document.createElement('button');
       delBtn.type = 'button';
@@ -688,6 +748,7 @@ export function initFlipbook(root) {
     return Promise.all(frames.map((f) => new Promise((resolve) => {
       const img = new Image();
       img.onload = () => resolve(img);
+      img.onerror = () => resolve(null);
       img.src = f.dataUrl;
     })));
   }
@@ -714,7 +775,18 @@ export function initFlipbook(root) {
     function step() {
       if (!playing) return;
       fillWhite();
-      ctx.drawImage(imgs[i % imgs.length], 0, 0, cssW, cssH);
+      const safeIdx = i % imgs.length;
+      if (imgs[safeIdx]) ctx.drawImage(imgs[safeIdx], 0, 0, cssW, cssH);
+      // M7: Show frame number during playback
+      ctx.save();
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(cssW - 60, cssH - 28, 56, 24);
+      ctx.fillStyle = '#fff';
+      ctx.font = '13px monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${safeIdx + 1}/${imgs.length}`, cssW - 32, cssH - 10);
+      ctx.restore();
       i++;
       const fps = Math.max(1, Number(fpsInput.value) || 8);
       playTimer = setTimeout(step, 1000 / fps);
@@ -736,7 +808,7 @@ export function initFlipbook(root) {
     try {
       const imgs = await loadFrameImages();
       const fps = Math.max(1, Number(fpsInput.value) || 8);
-      const blob = await framesToWebm(imgs, { fps, width: 512, height: 512 });
+      const blob = await framesToWebm(imgs, { fps, width: EXPORT_SIZE, height: EXPORT_SIZE });
       downloadBlob(blob, 'stickman-animation.webm');
     } catch (err) {
       showToast('فشل تصدير الفيديو: ' + err.message);
@@ -912,9 +984,10 @@ export function initFlipbook(root) {
       const raw = i / (total - 1);
       const t = easingSelect.value === 'ease' ? easeInOut(raw) : raw;
       const off = document.createElement('canvas');
-      off.width = cssW;
-      off.height = cssH;
+      off.width = cssW * dpr;
+      off.height = cssH * dpr;
       const octx = off.getContext('2d');
+      octx.setTransform(dpr, 0, 0, dpr, 0, 0);
       octx.fillStyle = '#ffffff';
       octx.fillRect(0, 0, cssW, cssH);
       drawTweenShape(octx, {
@@ -991,6 +1064,16 @@ export function initFlipbook(root) {
 
   // ===================== Canvas Resize =====================
 
+  const canvasBox = canvas.parentElement;
+
+  function applyCanvasSize(w, h) {
+    canvasBox.style.width = w + 'px';
+    canvasBox.style.height = h + 'px';
+    canvasBox.style.maxWidth = 'none';
+    canvasBox.style.aspectRatio = 'auto';
+    applyFit();
+  }
+
   function loadCanvasSize() {
     try {
       const raw = localStorage.getItem(CANVAS_SIZE_KEY);
@@ -998,6 +1081,7 @@ export function initFlipbook(root) {
         const s = JSON.parse(raw);
         canvasWidthInput.value = s.w;
         canvasHeightInput.value = s.h;
+        applyCanvasSize(s.w, s.h);
       }
     } catch {}
   }
@@ -1013,7 +1097,7 @@ export function initFlipbook(root) {
       if (!(await showConfirm('تغيير الحجم قد يؤثر على الإطارات الموجودة. متأكد؟'))) return;
     }
     try { localStorage.setItem(CANVAS_SIZE_KEY, JSON.stringify({ w, h })); } catch {}
-    applyFit();
+    applyCanvasSize(w, h);
     showToast(`تم تغيير الحجم إلى ${w}×${h}`);
   });
 
@@ -1021,6 +1105,12 @@ export function initFlipbook(root) {
   loadPersisted();
   setTool('pen');
   updateZoomUI();
+
+  window.addEventListener('flipbook-frames-updated', () => {
+    loadPersisted();
+    renderFrames();
+    updateOnionSkin();
+  });
 
   return {
     refit() {
@@ -1030,5 +1120,10 @@ export function initFlipbook(root) {
       applyZoomTransform();
     },
     resetZoom,
+    reloadFrames() {
+      loadPersisted();
+      renderFrames();
+      updateOnionSkin();
+    },
   };
 }

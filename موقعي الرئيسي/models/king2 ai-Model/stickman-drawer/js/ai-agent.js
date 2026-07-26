@@ -1,4 +1,6 @@
 import { showToast, showConfirm } from './toast.js';
+import { blobToDataUrl, importSingleFrame as utilImportSingleFrame } from './utils.js';
+import { generateImage } from './ai-generator.js';
 
 const STORAGE_KEY = 'stickman-agent-state';
 
@@ -55,7 +57,7 @@ async function generateText(prompt, signal, progressEl) {
   throw new Error('provider غير معروف للنصوص');
 }
 
-async function generateTextHuggingFace(prompt, signal, progressEl) {
+async function generateTextHuggingFace(prompt, signal, progressEl, _retries = 0) {
   for (const model of AGENT_TEXT_MODELS) {
     try {
       if (progressEl) progressEl.textContent = `🧠 جاري التفكير بـ ${model.split('/').pop()}...`;
@@ -75,11 +77,11 @@ async function generateTextHuggingFace(prompt, signal, progressEl) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        if (res.status === 503) {
+        if (res.status === 503 && _retries < 3) {
           const wait = Math.min(err.estimated_time || 30, 60);
           if (progressEl) progressEl.textContent = `الموديل يتحمل... انتظر ${Math.ceil(wait)} ثانية`;
           await new Promise(r => setTimeout(r, wait * 1000));
-          return generateTextHuggingFace(prompt, signal, progressEl);
+          return generateTextHuggingFace(prompt, signal, progressEl, _retries + 1);
         }
         throw new Error(err.error || `HTTP ${res.status}`);
       }
@@ -132,10 +134,13 @@ async function generateTextGemini(prompt, signal, progressEl) {
   if (progressEl) progressEl.textContent = '🧠 جاري التفكير بـ Gemini...';
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': key,
+      },
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
@@ -193,6 +198,13 @@ async function generateTextCustom(prompt, signal, progressEl) {
   const apiUrl = document.getElementById('agentCustomApiUrl')?.value || document.getElementById('customApiUrl')?.value;
   const model = document.getElementById('agentCustomModel')?.value || document.getElementById('customModel')?.value || 'default';
   if (!apiUrl) throw new Error('ضع رابط الـ API أولاً');
+  try {
+    const u = new URL(apiUrl);
+    if (u.protocol !== 'https:') throw new Error('يجب أن يبدأ الرابط بـ https://');
+  } catch (e) {
+    if (e.message.includes('https')) throw e;
+    throw new Error('رابط غير صالح');
+  }
 
   if (progressEl) progressEl.textContent = `🧠 جاري التفكير بـ ${model}...`;
 
@@ -240,73 +252,20 @@ Example: a stickman riding a skateboard doing a kickflip, simple black line draw
 // ===================== Image Generation =====================
 
 async function generateImageBlob(prompt, size, signal, progressEl) {
-  const provider = document.getElementById('apiProvider')?.value || 'huggingface';
-  const apiKey = getApiKey();
-
-  if (provider === 'openai') {
-    const res = await fetch('https://api.openai.com/v1/images/generations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` },
-      body: JSON.stringify({ model: 'dall-e-3', prompt, n: 1, size: '1024x1024', response_format: 'b64_json' }),
-      signal,
-    });
-    if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`);
-    const data = await res.json();
-    const bin = atob(data.data[0].b64_json);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return new Blob([arr], { type: 'image/png' });
-  }
-
-  const [w, h] = size.split('x').map(Number);
-  const models = ['black-forest-labs/FLUX.1-schnell', 'stabilityai/stable-diffusion-xl-base-1.0', 'runwayml/stable-diffusion-v1-5'];
-  for (const model of models) {
-    const res = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {}) },
-      body: JSON.stringify({ inputs: prompt, parameters: { width: w, height: h } }),
-      signal,
-    });
-    if (!res.ok) {
-      if (res.status === 503) {
-        const err = await res.json().catch(() => ({}));
-        const wait = Math.min(err.estimated_time || 30, 60);
-        if (progressEl) progressEl.textContent = `⏳ انتظر ${Math.ceil(wait)} ثانية...`;
-        await new Promise(r => setTimeout(r, wait * 1000));
-        continue;
-      }
-      continue;
-    }
-    const blob = await res.blob();
-    if (blob.type.startsWith('image/')) return blob;
-  }
-  throw new Error('فشل توليد الصورة');
+  return generateImage(prompt, size, signal, progressEl);
 }
 
 // ===================== Gallery Helpers =====================
 
-function blobToDataUrl(blob) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
-}
-
 async function addToGallery(blob, prompt) {
   const dataUrl = await blobToDataUrl(blob);
-  const item = { id: Date.now() + '_' + Math.random().toString(36).slice(2, 6), dataUrl, prompt, timestamp: new Date().toISOString() };
-  return item;
+  return { id: Date.now() + '_' + Math.random().toString(36).slice(2, 6), dataUrl, prompt, timestamp: new Date().toISOString() };
 }
 
 function importSingleFrame(item) {
-  const flipbookKey = 'stickman-drawer-flipbook-v2';
-  let frames = [];
-  try { frames = JSON.parse(localStorage.getItem(flipbookKey) || '[]'); } catch {}
-  const id = frames.length ? Math.max(...frames.map(f => f.id)) + 1 : 1;
-  frames.push({ id, dataUrl: item.dataUrl, caption: item.prompt });
-  localStorage.setItem(flipbookKey, JSON.stringify(frames));
-  window.dispatchEvent(new CustomEvent('flipbook-frames-updated'));
+  try {
+    utilImportSingleFrame(item);
+  } catch (e) { showToast(e.message); }
 }
 
 // ===================== Agent Log =====================

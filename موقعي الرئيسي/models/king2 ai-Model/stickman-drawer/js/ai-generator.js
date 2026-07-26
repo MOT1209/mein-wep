@@ -1,4 +1,5 @@
 import { showToast, showConfirm } from './toast.js';
+import { blobToDataUrl, importSingleFrame as utilImportSingleFrame, importAllFrames as utilImportAllFrames } from './utils.js';
 
 const STORAGE_KEY = 'stickman-generated-gallery';
 const API_KEY_STORAGE = 'stickman-ai-api-key';
@@ -23,7 +24,7 @@ function getApiKey() {
 
 // ===================== API Providers =====================
 
-async function generateHuggingFace(prompt, size, signal, progressEl) {
+async function generateHuggingFace(prompt, size, signal, progressEl, _retries = 0) {
   const [w, h] = size.split('x').map(Number);
   const models = [
     'black-forest-labs/FLUX.1-schnell',
@@ -51,11 +52,11 @@ async function generateHuggingFace(prompt, size, signal, progressEl) {
 
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        if (res.status === 503) {
+        if (res.status === 503 && _retries < 3) {
           const wait = Math.min(err.estimated_time || 30, 60);
           if (progressEl) progressEl.textContent = `الموديل يتحمل... انتظر ${Math.ceil(wait)} ثانية`;
           await new Promise(r => setTimeout(r, wait * 1000));
-          return generateHuggingFace(prompt, size, signal, progressEl);
+          return generateHuggingFace(prompt, size, signal, progressEl, _retries + 1);
         }
         throw new Error(err.error || `HTTP ${res.status}`);
       }
@@ -146,10 +147,13 @@ async function generateGemini(prompt, size, signal, progressEl) {
   if (progressEl) progressEl.textContent = '🎨 جاري التوليد بـ Gemini...';
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
+    'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent',
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': key,
+      },
       body: JSON.stringify({
         contents: [{ parts: [{ text: `Generate an image: ${prompt}` }] }],
         generationConfig: {
@@ -218,6 +222,13 @@ async function generateCustom(prompt, size, signal, progressEl) {
   const apiUrl = document.getElementById('customApiUrl')?.value;
   const model = document.getElementById('customModel')?.value || 'default';
   if (!apiUrl) throw new Error('ضع رابط الـ API أولاً في الإعدادات');
+  try {
+    const u = new URL(apiUrl);
+    if (u.protocol !== 'https:') throw new Error('يجب أن يبدأ الرابط بـ https://');
+  } catch (e) {
+    if (e.message.includes('https')) throw e;
+    throw new Error('رابط غير صالح');
+  }
 
   if (progressEl) progressEl.textContent = `🎨 جاري التوليد بـ ${model}...`;
 
@@ -251,7 +262,7 @@ async function generateCustom(prompt, size, signal, progressEl) {
   return new Blob([arr], { type: 'image/png' });
 }
 
-async function generateImage(prompt, size, signal, progressEl) {
+export async function generateImage(prompt, size, signal, progressEl) {
   const provider = document.getElementById('apiProvider').value;
   if (provider === 'huggingface') return generateHuggingFace(prompt, size, signal, progressEl);
   if (provider === 'openai') return generateOpenAI(prompt, size, signal, progressEl);
@@ -263,14 +274,6 @@ async function generateImage(prompt, size, signal, progressEl) {
 }
 
 // ===================== Gallery =====================
-
-function blobToDataUrl(blob) {
-  return new Promise(resolve => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.readAsDataURL(blob);
-  });
-}
 
 async function addToGallery(blob, prompt) {
   const dataUrl = await blobToDataUrl(blob);
@@ -290,7 +293,13 @@ let gallery = [];
 let abortController = null;
 
 function persistGallery() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(gallery)); } catch {}
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(gallery));
+  } catch (err) {
+    if (err.name === 'QuotaExceededError') {
+      showToast('الذاكرة ممتلئة — احذف بعض الصور من المعرض');
+    }
+  }
 }
 
 function loadGallery() {
@@ -319,6 +328,7 @@ function renderGallery() {
     img.src = item.dataUrl;
     img.alt = item.prompt;
     img.title = item.prompt;
+    img.onerror = () => { img.style.display = 'none'; };
     cell.appendChild(img);
 
     const label = document.createElement('span');
@@ -335,7 +345,10 @@ function renderGallery() {
     importBtn.title = 'استيراد للفليبوك';
     importBtn.addEventListener('click', (ev) => {
       ev.stopPropagation();
-      importSingleFrame(item);
+      try {
+        utilImportSingleFrame(item);
+        showToast(`تم استيراد الإطار للفليبوك 🎉`);
+      } catch (e) { showToast(e.message); }
     });
     actions.appendChild(importBtn);
 
@@ -354,30 +367,6 @@ function renderGallery() {
     cell.appendChild(actions);
     grid.appendChild(cell);
   });
-}
-
-function importSingleFrame(item) {
-  const flipbookKey = 'stickman-drawer-flipbook-v2';
-  let frames = [];
-  try { frames = JSON.parse(localStorage.getItem(flipbookKey) || '[]'); } catch {}
-  const id = frames.length ? Math.max(...frames.map(f => f.id)) + 1 : 1;
-  frames.push({ id, dataUrl: item.dataUrl, caption: item.prompt });
-  localStorage.setItem(flipbookKey, JSON.stringify(frames));
-  showToast(`تم استيراد الإطار #${id} للفليبوك 🎉`);
-  window.dispatchEvent(new CustomEvent('flipbook-frames-updated'));
-}
-
-function importAllFrames() {
-  const flipbookKey = 'stickman-drawer-flipbook-v2';
-  let frames = [];
-  try { frames = JSON.parse(localStorage.getItem(flipbookKey) || '[]'); } catch {}
-  let nid = frames.length ? Math.max(...frames.map(f => f.id)) + 1 : 1;
-  for (const item of gallery) {
-    frames.push({ id: nid++, dataUrl: item.dataUrl, caption: item.prompt });
-  }
-  localStorage.setItem(flipbookKey, JSON.stringify(frames));
-  showToast(`تم استيراد ${gallery.length} صورة للفليبوك 🎉`);
-  window.dispatchEvent(new CustomEvent('flipbook-frames-updated'));
 }
 
 // ===================== Generation Flow =====================
@@ -453,16 +442,16 @@ export function initAIGenerator() {
 
   if (!generateBtn) return;
 
-  // Load saved API key
+  // Load saved API key (sessionStorage for security — cleared on tab close)
   try {
-    const saved = localStorage.getItem(API_KEY_STORAGE);
+    const saved = sessionStorage.getItem(API_KEY_STORAGE);
     if (saved && apiKeyInput) apiKeyInput.value = saved;
   } catch {}
 
   // Save API key on change
   apiKeyInput?.addEventListener('change', () => {
     if (saveApiKeyCheck?.checked) {
-      try { localStorage.setItem(API_KEY_STORAGE, apiKeyInput.value); } catch {}
+      try { sessionStorage.setItem(API_KEY_STORAGE, apiKeyInput.value); } catch {}
     }
   });
 
@@ -552,7 +541,10 @@ export function initAIGenerator() {
   importAllBtn?.addEventListener('click', async () => {
     if (!gallery.length) { showToast('ما فيه صور للاستيراد'); return; }
     if (!(await showConfirm(`استيراد ${gallery.length} صورة للفليبوك؟`))) return;
-    importAllFrames();
+    try {
+      utilImportAllFrames(gallery);
+      showToast(`تم استيراد ${gallery.length} صورة للفليبوك 🎉`);
+    } catch (e) { showToast(e.message); }
   });
 
   downloadAllGenBtn?.addEventListener('click', async () => {

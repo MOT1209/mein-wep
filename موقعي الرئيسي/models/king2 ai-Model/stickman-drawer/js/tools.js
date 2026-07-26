@@ -20,29 +20,48 @@ export function floodFill(ctx, canvas, x, y, hexColor, tolerance = 32) {
 
   if (Math.abs(startR - fill.r) <= tolerance && Math.abs(startG - fill.g) <= tolerance
     && Math.abs(startB - fill.b) <= tolerance) {
-    return; // already effectively this color
+    return;
   }
 
   const matches = (idx) => Math.abs(data[idx] - startR) <= tolerance
     && Math.abs(data[idx + 1] - startG) <= tolerance
     && Math.abs(data[idx + 2] - startB) <= tolerance;
 
-  const stack = [[x, y]];
   const visited = new Uint8Array(w * h);
+  const stack = [[x, y]];
 
   while (stack.length) {
-    const [cx, cy] = stack.pop();
-    if (cx < 0 || cy < 0 || cx >= w || cy >= h) continue;
-    const pixelPos = cy * w + cx;
-    if (visited[pixelPos]) continue;
-    const idx = pixelPos * 4;
-    if (!matches(idx)) continue;
-    visited[pixelPos] = 1;
-    data[idx] = fill.r;
-    data[idx + 1] = fill.g;
-    data[idx + 2] = fill.b;
-    data[idx + 3] = 255;
-    stack.push([cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]);
+    let [cx, cy] = stack.pop();
+    let idx = (cy * w + cx) * 4;
+    if (visited[cy * w + cx] || !matches(idx)) continue;
+
+    // Move to leftmost pixel of this span
+    while (cx > 0 && !visited[cy * w + cx - 1] && matches(((cy * w) + cx - 1) * 4)) cx--;
+
+    let spanLeft = false, spanRight = false;
+    while (cx < w) {
+      const pos = cy * w + cx;
+      idx = pos * 4;
+      if (visited[pos] || !matches(idx)) break;
+      visited[pos] = 1;
+      data[idx] = fill.r;
+      data[idx + 1] = fill.g;
+      data[idx + 2] = fill.b;
+      data[idx + 3] = 255;
+      if (cy > 0) {
+        const above = (cy - 1) * w + cx;
+        if (!visited[above] && matches(above * 4)) {
+          if (!spanLeft) { stack.push([cx, cy - 1]); spanLeft = true; }
+        } else { spanLeft = false; }
+      }
+      if (cy < h - 1) {
+        const below = (cy + 1) * w + cx;
+        if (!visited[below] && matches(below * 4)) {
+          if (!spanRight) { stack.push([cx, cy + 1]); spanRight = true; }
+        } else { spanRight = false; }
+      }
+      cx++;
+    }
   }
 
   ctx.putImageData(imgData, 0, 0);
