@@ -142,7 +142,7 @@ func _cook() -> void:
 	if raw <= 0:
 		Game.notify("No raw meat to cook", Color(1.0, 0.63, 0.0))
 		return
-	var can_cook := mini(raw, Game.get_count("wood") / 2)
+	var can_cook := mini(raw, floori(Game.get_count("wood") / 2.0))
 	if can_cook <= 0:
 		Game.notify("Need 2 wood per meat", Color(0.9, 0.3, 0.3))
 		return

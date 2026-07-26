@@ -1,6 +1,40 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=5 format=3]
 
-[ext_resource type="Script" path="res://scripts/world.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/world.gd" id="1_world"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.35, 0.55, 0.85, 1)
+sky_horizon_color = Color(0.7, 0.8, 0.9, 1)
+ground_bottom_color = Color(0.2, 0.25, 0.2, 1)
+ground_horizon_color = Color(0.65, 0.75, 0.85, 1)
+
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 2
+sky = SubResource("Sky_main")
+ambient_light_source = 3
+ambient_light_energy = 0.6
+tonemap_mode = 3
+tonemap_exposure = 1.1
+fog_enabled = true
+fog_light_color = Color(0.53, 0.8, 0.92, 1)
+fog_density = 0.002
 
 [node name="World" type="Node3D"]
-script = ExtResource("1")
+script = ExtResource("1_world")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0.383022, 0.642788, -0.663414, -0.321394, 0.766044, 0.55667, 0, 50, 0)
+light_energy = 1.2
+shadow_enabled = true
+directional_shadow_max_distance = 150.0
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, 0, -0.5, -0.383022, 0.642788, -0.663414, 0.321394, 0.766044, 0.55667, 0, 50, 0)
+light_color = Color(0.55, 0.65, 0.95, 1)
+light_energy = 0.0

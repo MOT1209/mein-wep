@@ -3,6 +3,8 @@ extends Control
 ## with category filter / detail panel / craft queue-less instant crafting,
 ## inventory tab with 30 slots and 6-slot belt assignment.
 
+const IconFactory := preload("res://scripts/icon_factory.gd")
+
 const RARITY_COLORS := {
 	"common": Color(0.75, 0.75, 0.75),
 	"rare": Color(0.39, 0.71, 0.96),
@@ -188,6 +190,7 @@ func _refresh_craft_grid() -> void:
 			continue
 		var b := Button.new()
 		b.text = item.name
+		b.icon = IconFactory.get_icon(id)
 		b.custom_minimum_size = Vector2(140, 44)
 		b.tooltip_text = item.desc
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
@@ -288,6 +291,7 @@ func _refresh_inventory() -> void:
 		var item: Dictionary = Game.ITEMS.get(id, {})
 		var b := Button.new()
 		b.text = "%s\nx%d" % [item.get("name", id), count]
+		b.icon = IconFactory.get_icon(id)
 		b.custom_minimum_size = Vector2(130, 52)
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
 		if id in Game.belt:
@@ -314,6 +318,7 @@ func _refresh_belt() -> void:
 		var label := "-"
 		if id is String and Game.ITEMS.has(id):
 			label = Game.ITEMS[id].name
+			b.icon = IconFactory.get_icon(id)
 		b.text = "%d\n%s" % [i + 1, label]
 		b.custom_minimum_size = Vector2(110, 52)
 		if Game.selected_belt_slot == i:

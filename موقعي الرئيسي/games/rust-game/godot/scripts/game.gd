@@ -156,8 +156,18 @@ func craft(id: String, qty: int) -> bool:
 	consume(total)
 	add_item(id, qty)
 	notify("Crafted %s x%d" % [item.name, qty])
-	Sfx.play("upgrade")
+	_sfx("upgrade")
 	return true
+
+
+## Resolved by path instead of naming the Sfx autoload directly: a direct
+## reference makes this script's compilation depend on another autoload,
+## which fails whenever scripts are compiled before every autoload has
+## registered (as happens for `godot --script` tool scripts).
+func _sfx(clip: String) -> void:
+	var s := get_node_or_null("/root/Sfx")
+	if s != null:
+		s.play(clip)
 
 
 func consume_item(id: String) -> bool:
@@ -174,7 +184,7 @@ func consume_item(id: String) -> bool:
 				belt[i] = null
 		belt_changed.emit()
 	notify("Consumed %s" % ITEMS[id].name)
-	Sfx.play("eat")
+	_sfx("eat")
 	return true
 
 

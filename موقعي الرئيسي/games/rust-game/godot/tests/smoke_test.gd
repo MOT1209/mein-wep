@@ -194,6 +194,70 @@ func _run_tests() -> void:
 		_check(world.is_in_water(water_pos), "is_in_water true inside the lake")
 	_check(not world.is_in_water(Vector3(0, 0, 0)), "is_in_water false at spawn")
 
+	# --- Scene-authored environment & lighting (visible in the editor too)
+	var we = world.get_node_or_null("WorldEnvironment")
+	_check(we != null, "main.tscn contains a WorldEnvironment node")
+	if we != null:
+		var e: Environment = we.environment
+		_check(e != null and e.background_mode == Environment.BG_SKY, "background mode is Sky")
+		_check(e != null and e.sky != null and e.sky.sky_material is ProceduralSkyMaterial,
+			"sky uses ProceduralSkyMaterial")
+		_check(e != null and e.ambient_light_source == Environment.AMBIENT_SOURCE_SKY,
+			"ambient light comes from the sky")
+		_check(e != null and e.tonemap_mode == Environment.TONE_MAPPER_ACES, "ACES tonemapping set")
+	var sun_node = world.get_node_or_null("Sun")
+	_check(sun_node is DirectionalLight3D and sun_node.shadow_enabled,
+		"Sun is a DirectionalLight3D with shadows enabled")
+	_check(world.get_node_or_null("Moon") is DirectionalLight3D, "Moon light node exists")
+	_check(world.sun == sun_node, "world.gd drives the scene's own Sun node")
+
+	# --- Item icons
+	var icon_factory = load("res://scripts/icon_factory.gd")
+	var icon = icon_factory.get_icon("hammer")
+	_check(icon is ImageTexture and icon.get_width() == 32 and icon.get_height() == 32,
+		"item icons are generated at 32x32")
+	_check(icon_factory.get_icon("hammer") == icon, "icons are cached per item")
+	var icon_img: Image = icon_factory.make_image("hammer")
+	var opaque := 0
+	for iy in 32:
+		for ix in 32:
+			if icon_img.get_pixel(ix, iy).a > 0.5:
+				opaque += 1
+	_check(opaque > 60, "generated icon actually draws a shape (%d px)" % opaque)
+
+	# --- Hotbar layout
+	var hud = world.hud
+	_check(hud._hotbar_slots.size() == 6, "hotbar has 6 slots")
+	var bar: Control = hud._hotbar_slots[0].panel.get_parent()
+	_check(bar is HBoxContainer, "hotbar slots are laid out in an HBoxContainer")
+	_check(bar.anchor_left == 0.5 and bar.anchor_right == 0.5
+		and bar.anchor_top == 1.0 and bar.anchor_bottom == 1.0, "hotbar anchored to bottom centre")
+	_check(bar.grow_horizontal == Control.GROW_DIRECTION_BOTH, "hotbar grows out symmetrically")
+	_check(bar.offset_bottom < 0.0, "hotbar lifted off the bottom edge")
+	# Measured on the laid-out screen, not just from the anchor settings
+	var vp_size: Vector2 = root.get_visible_rect().size
+	var bar_rect: Rect2 = bar.get_global_rect()
+	_check(bar_rect.size.x > 400.0, "hotbar row has real width (%d px)" % int(bar_rect.size.x))
+	_check(absf(bar_rect.get_center().x - vp_size.x * 0.5) < 2.0,
+		"hotbar is horizontally centred on screen")
+	_check(bar_rect.end.y < vp_size.y and bar_rect.end.y > vp_size.y - 60.0,
+		"hotbar sits just above the bottom edge")
+	var slot_style = hud._hotbar_slots[0].panel.get_theme_stylebox("panel")
+	_check(slot_style is StyleBoxFlat and slot_style.bg_color.a < 1.0,
+		"hotbar slots have semi-transparent backgrounds")
+	_check(hud._hotbar_slots[0].icon.texture != null, "equipped belt item shows an icon")
+
+	# --- Pause menu
+	_check(not hud._pause_menu.visible, "pause menu hidden by default")
+	_check(not paused, "scene tree not paused during play")
+	hud.handle_escape()
+	_check(hud._pause_menu.visible, "ESC opens the pause menu")
+	_check(paused, "ESC actually pauses the scene tree")
+	_check(game.ui_open == "pause", "UI state switches to 'pause'")
+	hud.handle_escape()
+	_check(not hud._pause_menu.visible, "ESC again closes the pause menu")
+	_check(not paused, "closing the pause menu resumes the tree")
+
 	# --- Save / load round trip
 	world.save_game()
 	_check(FileAccess.file_exists("user://rust_save.json"), "save file written")

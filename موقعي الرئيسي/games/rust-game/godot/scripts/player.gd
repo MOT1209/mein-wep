@@ -103,10 +103,7 @@ func _build_visual() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("pause"):
-		if hud != null:
-			hud.handle_escape()
-		return
+	# ESC/pause is handled by the HUD, which keeps running while paused.
 	if event.is_action_pressed("inventory"):
 		if hud != null and Game.ui_open in ["", "inventory"]:
 			hud.toggle_inventory()

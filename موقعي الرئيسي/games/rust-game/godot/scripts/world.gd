@@ -252,8 +252,8 @@ func _build_grass() -> void:
 		var y := terrain_height(x, z)
 		if y < 0.3 or y > 3.0:
 			continue
-		var basis := Basis(Vector3.UP, randf() * TAU).scaled(Vector3.ONE * randf_range(0.7, 1.5))
-		mm.set_instance_transform(placed, Transform3D(basis, Vector3(x, y, z)))
+		var tuft_basis := Basis(Vector3.UP, randf() * TAU).scaled(Vector3.ONE * randf_range(0.7, 1.5))
+		mm.set_instance_transform(placed, Transform3D(tuft_basis, Vector3(x, y, z)))
 		placed += 1
 	# Park any unplaced instances far underground
 	for i in range(placed, GRASS_COUNT):
@@ -303,8 +303,37 @@ func _make_grass_tuft_mesh() -> ArrayMesh:
 	return mesh
 
 
+## Sky, sun and moon are authored as real nodes in main.tscn so the editor
+## viewport shows the lit world too; they are only built here if missing.
 func _setup_environment() -> void:
-	env = Environment.new()
+	var we: WorldEnvironment = get_node_or_null("WorldEnvironment")
+	if we == null:
+		we = WorldEnvironment.new()
+		we.name = "WorldEnvironment"
+		add_child(we)
+	if we.environment == null:
+		we.environment = _default_environment()
+	env = we.environment
+
+	sun = get_node_or_null("Sun")
+	if sun == null:
+		sun = DirectionalLight3D.new()
+		sun.name = "Sun"
+		sun.shadow_enabled = true
+		sun.directional_shadow_max_distance = 150.0
+		add_child(sun)
+
+	moon = get_node_or_null("Moon")
+	if moon == null:
+		moon = DirectionalLight3D.new()
+		moon.name = "Moon"
+		moon.light_color = Color(0.55, 0.65, 0.95)
+		moon.shadow_enabled = false
+		add_child(moon)
+
+
+func _default_environment() -> Environment:
+	var e := Environment.new()
 	var sky := Sky.new()
 	var sky_mat := ProceduralSkyMaterial.new()
 	sky_mat.sky_top_color = Color(0.35, 0.55, 0.85)
@@ -312,30 +341,16 @@ func _setup_environment() -> void:
 	sky_mat.ground_bottom_color = Color(0.2, 0.25, 0.2)
 	sky_mat.ground_horizon_color = Color(0.65, 0.75, 0.85)
 	sky.sky_material = sky_mat
-	env.background_mode = Environment.BG_SKY
-	env.sky = sky
-	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	env.ambient_light_energy = 0.6
-	env.fog_enabled = true
-	env.fog_light_color = Color(0.53, 0.8, 0.92)
-	env.fog_density = 0.002
-	env.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.tonemap_exposure = 1.1
-	var we := WorldEnvironment.new()
-	we.environment = env
-	add_child(we)
-
-	sun = DirectionalLight3D.new()
-	sun.name = "Sun"
-	sun.shadow_enabled = true
-	sun.directional_shadow_max_distance = 150.0
-	add_child(sun)
-
-	moon = DirectionalLight3D.new()
-	moon.name = "Moon"
-	moon.light_color = Color(0.55, 0.65, 0.95)
-	moon.shadow_enabled = false
-	add_child(moon)
+	e.background_mode = Environment.BG_SKY
+	e.sky = sky
+	e.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
+	e.ambient_light_energy = 0.6
+	e.fog_enabled = true
+	e.fog_light_color = Color(0.53, 0.8, 0.92)
+	e.fog_density = 0.002
+	e.tonemap_mode = Environment.TONE_MAPPER_ACES
+	e.tonemap_exposure = 1.1
+	return e
 
 
 # ==================== SPAWNING ====================

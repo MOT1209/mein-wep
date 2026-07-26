@@ -4,6 +4,10 @@ extends CanvasLayer
 ## blueprint selector, start screen and pause menu. Hosts the inventory UI.
 
 const InventoryUiScript := preload("res://scripts/inventory_ui.gd")
+const IconFactory := preload("res://scripts/icon_factory.gd")
+
+const HOTBAR_SLOT_SIZE := Vector2(78, 78)
+const HOTBAR_BOTTOM_MARGIN := 28.0
 
 const BAR_DEFS := [
 	["health", Color(0.91, 0.3, 0.24)],
@@ -37,6 +41,8 @@ var inventory_ui: Control
 
 func _ready() -> void:
 	layer = 1
+	# The HUD drives the pause menu, so it must keep running while paused
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build_overlays()
 	_build_bars()
 	_build_resources()
@@ -56,7 +62,18 @@ func _ready() -> void:
 
 	Game.toast.connect(_on_toast)
 	Game.inventory_changed.connect(_refresh_resources)
+	Game.inventory_changed.connect(_refresh_hotbar)
+	Game.belt_changed.connect(_refresh_hotbar)
 	_refresh_resources()
+	_refresh_hotbar()
+
+
+## ESC is owned by the HUD (not the player) so it still works while the
+## scene tree is paused.
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
+		handle_escape()
+		get_viewport().set_input_as_handled()
 
 
 # ==================== BUILDERS ====================
@@ -118,24 +135,79 @@ func _build_crosshair() -> void:
 
 
 func _build_hotbar() -> void:
-	var box := HBoxContainer.new()
-	box.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	box.position = Vector2(-240, -76)
-	box.add_theme_constant_override("separation", 8)
-	box.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(box)
+	var bar := HBoxContainer.new()
+	# True bottom-centre: a zero-size anchor point at the bottom middle that
+	# the row grows out of symmetrically, so it stays centred at any window
+	# size and whatever the slots end up measuring.
+	bar.anchor_left = 0.5
+	bar.anchor_right = 0.5
+	bar.anchor_top = 1.0
+	bar.anchor_bottom = 1.0
+	bar.offset_left = 0.0
+	bar.offset_right = 0.0
+	bar.offset_top = -HOTBAR_BOTTOM_MARGIN
+	bar.offset_bottom = -HOTBAR_BOTTOM_MARGIN
+	bar.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	bar.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	bar.add_theme_constant_override("separation", 8)
+	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bar)
+
 	for i in 6:
-		var panel := PanelContainer.new()
-		panel.custom_minimum_size = Vector2(72, 56)
-		panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		style_panel(panel)
-		var lab := _label("%d" % (i + 1), 11)
-		lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		lab.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		lab.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		panel.add_child(lab)
-		box.add_child(panel)
-		_hotbar_slots.append([panel, lab])
+		var slot := PanelContainer.new()
+		slot.custom_minimum_size = HOTBAR_SLOT_SIZE
+		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		var v := VBoxContainer.new()
+		v.alignment = BoxContainer.ALIGNMENT_CENTER
+		v.add_theme_constant_override("separation", 2)
+		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		var num := _label(str(i + 1), 10, Color(1, 1, 1, 0.5))
+		num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+		var icon := TextureRect.new()
+		icon.custom_minimum_size = Vector2(32, 32)
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		var name_lab := _label("", 10, Color(0.86, 0.86, 0.86))
+		name_lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		name_lab.clip_text = true
+
+		v.add_child(num)
+		v.add_child(icon)
+		v.add_child(name_lab)
+		slot.add_child(v)
+		bar.add_child(slot)
+		_hotbar_slots.append({"panel": slot, "icon": icon, "name": name_lab})
+
+
+## Semi-transparent slot plate; the selected slot gets a bright rust border.
+func _style_slot(panel: PanelContainer, selected: bool) -> void:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.10, 0.09, 0.09, 0.62) if selected else Color(0.03, 0.03, 0.04, 0.45)
+	sb.border_color = Color(0.95, 0.55, 0.2, 0.95) if selected else Color(1, 1, 1, 0.16)
+	sb.set_border_width_all(3 if selected else 1)
+	sb.set_corner_radius_all(6)
+	sb.set_content_margin_all(4)
+	panel.add_theme_stylebox_override("panel", sb)
+
+
+## Redrawn only when the belt or inventory actually changes, never per frame.
+func _refresh_hotbar() -> void:
+	for i in _hotbar_slots.size():
+		var slot: Dictionary = _hotbar_slots[i]
+		_style_slot(slot.panel, Game.selected_belt_slot == i)
+		var id = Game.belt[i]
+		if id is String and Game.ITEMS.has(id):
+			slot.icon.texture = IconFactory.get_icon(id)
+			var count := Game.get_count(id)
+			slot.name.text = "%s%s" % [Game.ITEMS[id].name, (" x%d" % count) if count > 1 else ""]
+		else:
+			slot.icon.texture = null
+			slot.name.text = "—"
 
 
 func _build_toast() -> void:
@@ -348,6 +420,7 @@ func show_start_screen() -> void:
 
 func _on_start_pressed() -> void:
 	_start_screen.visible = false
+	get_tree().paused = false
 	world.started = true
 	Game.set_ui("")
 	Sfx.play("ui_click")
@@ -356,8 +429,7 @@ func _on_start_pressed() -> void:
 func handle_escape() -> void:
 	match Game.ui_open:
 		"":
-			_pause_menu.visible = true
-			Game.set_ui("pause")
+			open_pause()
 		"pause":
 			close_pause()
 		"inventory":
@@ -368,7 +440,14 @@ func handle_escape() -> void:
 			pass
 
 
+func open_pause() -> void:
+	_pause_menu.visible = true
+	Game.set_ui("pause")
+	get_tree().paused = true
+
+
 func close_pause() -> void:
+	get_tree().paused = false
 	_pause_menu.visible = false
 	Game.set_ui("")
 
@@ -455,17 +534,6 @@ func _process(delta: float) -> void:
 		_bp_label.visible = true
 	else:
 		_bp_label.visible = false
-
-	# Hotbar
-	for i in _hotbar_slots.size():
-		var panel: PanelContainer = _hotbar_slots[i][0]
-		var lab: Label = _hotbar_slots[i][1]
-		var id = Game.belt[i]
-		if id is String and Game.ITEMS.has(id):
-			lab.text = "%d\n%s" % [i + 1, Game.ITEMS[id].name]
-		else:
-			lab.text = "%d\n-" % (i + 1)
-		panel.self_modulate = Color(1.6, 1.3, 0.6) if Game.selected_belt_slot == i else Color.WHITE
 
 	# Building privilege indicator
 	if world != null and world.player != null:

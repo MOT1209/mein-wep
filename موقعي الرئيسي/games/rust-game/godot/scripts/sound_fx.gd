@@ -9,6 +9,8 @@ var _players: Dictionary = {}
 
 
 func _ready() -> void:
+	# UI sounds must still play while the tree is paused
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	_register("harvest", _gen(0.15, 0.12, [[200.0, 0.08]]))
 	_register("build", _gen(0.25, 0.18, [[80.0, 0.2], [120.0, 0.1]]))
 	_register("hit", _gen(0.1, 0.1, [[300.0, 0.06]]))
