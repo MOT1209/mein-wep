@@ -2,10 +2,22 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "farm-game-static",
+      "name": "farm-game",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-l", "8765", "."],
+      "port": 8765
+    },
+    {
+      "name": "site",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8934"],
-      "port": 8934
+      "runtimeArgs": ["-m", "http.server", "8811"],
+      "port": 8811
+    },
+    {
+      "name": "site-alt",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8812"],
+      "port": 8812
     }
   ]
 }

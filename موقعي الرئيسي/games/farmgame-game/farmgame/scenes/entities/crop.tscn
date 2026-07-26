@@ -1,6 +1,0 @@
-[gd_scene format=3 uid="uid://c1x2v3n4h5j6k"]
-
-[ext_resource type="Script" path="res://scripts/entities/crop.gd" id="1_crop"]
-
-[node name="Crop" type="Node3D"]
-script = ExtResource("1_crop")
