@@ -12,6 +12,7 @@ const StationScript := preload("res://scripts/station.gd")
 const ExplosiveScript := preload("res://scripts/explosive.gd")
 const BuildingSystemScript := preload("res://scripts/building_system.gd")
 const HudScript := preload("res://scripts/hud.gd")
+const LootBagScript := preload("res://scripts/loot_bag.gd")
 
 const SAVE_PATH := "user://rust_save.json"
 const TREE_COUNT := 70
@@ -72,6 +73,7 @@ var structures: Array = []      # placed structure nodes
 var stations: Array = []        # placed campfire/furnace nodes
 var respawn_queue: Array = []   # {type, pos, at}
 var npc_respawn_queue: Array = []  # {type, pos, at} — monument guards
+var bags: Array = []            # loot bags left where the player died
 var clock := 0.0
 var _sun_elevation := 1.0   # sin of the sun angle; drives night-time cold
 var _respawn_timer := 0.0
@@ -589,6 +591,17 @@ func _process(delta: float) -> void:
 				still_waiting.append(n)
 		npc_respawn_queue = still_waiting
 
+		# Bags rot, so a long-running world does not fill up with them
+		var live_bags := []
+		for bag in bags:
+			if not is_instance_valid(bag):
+				continue
+			if clock >= bag.expires_at or bag.is_empty():
+				bag.queue_free()
+			else:
+				live_bags.append(bag)
+		bags = live_bags
+
 	# Base decay / Tool Cupboard upkeep
 	_decay_timer += delta
 	if _decay_timer >= Game.DECAY_INTERVAL:
@@ -626,15 +639,67 @@ func _update_day_night(_delta: float) -> void:
 	env.background_energy_multiplier = clampf(elev + 0.25, 0.06, 1.0)
 
 
+## Dying costs everything you were carrying. It stays in a bag where you
+## fell, which is what makes armour, locks, a base and the whole monument
+## run worth anything — before this, nothing you owned was ever at risk.
 func _on_player_death() -> void:
+	var fell_at := player.position
+	var dropped := drop_everything(fell_at)
+
 	Game.stats.health = 100.0
 	Game.stats.hunger = 100.0
 	Game.stats.thirst = 100.0
+	Game.stats.temperature = 100.0
 	Game.stats.radiation = 0.0
-	player.position = Vector3(0, terrain_height(0, 0) + 2.0, 0)
+
+	var bed := nearest_sleeping_bag(fell_at)
+	if bed != null:
+		player.position = bed.position + Vector3(0, 1.5, 0)
+	else:
+		player.position = Vector3(0, terrain_height(0, 0) + 2.0, 0)
 	player.velocity = Vector3.ZERO
-	Game.notify("You died! Respawning...", Color(0.9, 0.3, 0.3))
+
+	if dropped > 0:
+		Game.notify("You died — %d items left in a bag where you fell" % dropped,
+			Color(0.9, 0.3, 0.3))
+	else:
+		Game.notify("You died! Respawning...", Color(0.9, 0.3, 0.3))
 	Sfx.play("hit")
+
+
+## Moves the whole loadout into a bag at `pos` and hands back the opening
+## kit, so a death never leaves the player unable to build their way back.
+## Returns how many items went into the bag.
+func drop_everything(pos: Vector3) -> int:
+	var carried: Dictionary = Game.inventory.duplicate()
+	var total := 0
+	for id in carried:
+		total += int(carried[id])
+	if total <= 0:
+		Game.reset_loadout()
+		return 0
+
+	var bag: StaticBody3D = LootBagScript.new()
+	bag.setup(carried, Game.worn, Game.belt, clock)
+	bag.position = Vector3(pos.x, terrain_height(pos.x, pos.z), pos.z)
+	add_child(bag)
+	bags.append(bag)
+
+	Game.reset_loadout()
+	return total
+
+
+func nearest_sleeping_bag(from: Vector3) -> Node3D:
+	var best: Node3D = null
+	var best_d := INF
+	for st in stations:
+		if not is_instance_valid(st) or st.station_type != "sleeping_bag":
+			continue
+		var d: float = st.position.distance_to(from)
+		if d < best_d:
+			best_d = d
+			best = st
+	return best
 
 
 # ==================== EXPLOSIVES & DECAY ====================
@@ -746,7 +811,19 @@ func save_game() -> void:
 		"time": Game.day_time,
 		"structures": [],
 		"stations": [],
+		"bags": [],
 	}
+	for bag in bags:
+		if not is_instance_valid(bag) or bag.is_empty():
+			continue
+		data.bags.append({
+			"pos": [bag.position.x, bag.position.y, bag.position.z],
+			"stored": bag.stored,
+			"worn": bag.worn,
+			"belt": bag.belt,
+			# Stored as time remaining: the clock restarts on every load
+			"left": maxf(0.0, bag.expires_at - clock),
+		})
 	for s in structures:
 		if not is_instance_valid(s):
 			continue
@@ -840,6 +917,22 @@ func load_game() -> void:
 		structures.append(s)
 		if type == "tool_cupboard":
 			Game.tool_cupboards.append(Vector2(s.position.x, s.position.z))
+
+	for bd in parsed.get("bags", []):
+		if not (bd is Dictionary):
+			continue
+		var bp: Array = bd.get("pos", [0, 0, 0])
+		var contents = bd.get("stored", {})
+		var bag_worn = bd.get("worn", {})
+		var bag_belt = bd.get("belt", [])
+		var bag: StaticBody3D = LootBagScript.new()
+		bag.setup(contents if contents is Dictionary else {},
+			bag_worn if bag_worn is Dictionary else {},
+			bag_belt if bag_belt is Array else [], clock)
+		bag.expires_at = clock + float(bd.get("left", bag.LIFETIME))
+		bag.position = Vector3(float(bp[0]), float(bp[1]), float(bp[2]))
+		add_child(bag)
+		bags.append(bag)
 
 	for st in parsed.get("stations", []):
 		if not (st is Dictionary):

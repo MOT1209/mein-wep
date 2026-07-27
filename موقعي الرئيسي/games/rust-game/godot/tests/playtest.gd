@@ -77,6 +77,7 @@ func _run() -> void:
 	_audit_survival()
 	_audit_progression_costs()
 	_audit_monument_run()
+	_audit_death_cost()
 	_audit_controls()
 
 	_section("SUMMARY")
@@ -406,6 +407,73 @@ func _audit_monument_run() -> void:
 			% float(sci.range) + "there is no way to fight one on even terms.")
 	else:
 		print("  weapons that can answer at their range: %s" % str(weapons_in_reach))
+
+
+## A survival game where dying is free has no stakes, and every threat in
+## it is decoration. This measures what a death actually takes off you.
+func _audit_death_cost() -> void:
+	_section("WHAT A DEATH COSTS")
+
+	# A mid-game loadout: what you would be carrying home from a monument
+	game.reset_loadout()
+	game.inventory["hqm"] = 40
+	game.inventory["scrap"] = 300
+	game.inventory["ak47"] = 1
+	game.inventory["ammo_rifle"] = 120
+	game.inventory["road_vest"] = 1
+	game.wear("road_vest")
+	var carried := 0
+	for id in game.inventory:
+		carried += int(game.inventory[id])
+
+	var bags_before: int = world.bags.size()
+	var dropped: int = world.drop_everything(world.player.position)
+	var bags_after: int = world.bags.size()
+	print("  carrying %d items, a rifle and a worn vest" % carried)
+	print("  => %d items dropped into %d bag" % [dropped, bags_after - bags_before])
+
+	if dropped <= 0:
+		_note("BALANCE", "Dying costs nothing at all, so armour, locks, a base "
+			+ "and the whole monument run protect something that is never at risk.")
+	elif dropped < carried:
+		_note("BALANCE", "Only %d of %d carried items are lost on death — "
+			% [dropped, carried] + "check what is being quietly kept.")
+
+	var kept := 0
+	for id in game.inventory:
+		kept += int(game.inventory[id])
+	print("  you respawn with %d items (%s)" % [kept, ", ".join(game.inventory.keys())])
+	if kept == 0:
+		_note("BLOCKER", "A respawn hands you nothing at all, so a death with no "
+			+ "wood in reach is a dead end rather than a setback.")
+	if game.get_count("hammer") <= 0 or game.get_count("building_plan") <= 0:
+		_note("BALANCE", "You respawn unable to build, which makes recovering "
+			+ "from a death mostly luck.")
+
+	# Getting back to the body
+	var bag_life := 0.0
+	for bag in world.bags:
+		if is_instance_valid(bag):
+			bag_life = maxf(bag_life, bag.LIFETIME)
+	var walk: float = game.WORLD_SIZE * 0.5 / 5.0
+	print("  a bag lasts %.0fs; crossing half the map on foot takes about %.0fs"
+		% [bag_life, walk])
+	if bag_life < walk:
+		_note("BALANCE", "A bag rots faster than the walk back, so a death far "
+			+ "from home is unrecoverable no matter how well you play.")
+
+	# Somewhere to wake up
+	if game.ITEMS.has("sleeping_bag"):
+		var cost: Dictionary = game.ITEMS["sleeping_bag"].get("recipe", {})
+		var parts := []
+		for res in cost:
+			parts.append("%d %s" % [cost[res], res])
+		print("  a respawn point costs %s" % ", ".join(parts))
+	else:
+		_note("BALANCE", "There is no way to set a respawn point, so every death "
+			+ "sends you back to the shore.")
+
+	game.reset_loadout()
 
 
 func _audit_controls() -> void:

@@ -65,6 +65,7 @@ func _add_collision_for(t: String) -> void:
 		"research_table": Vector3(1.2, 1.2, 0.8),
 		"storage_box": Vector3(0.92, 0.6, 0.64),
 		"large_box": Vector3(1.43, 1.0, 0.85),
+		"sleeping_bag": Vector3(1.9, 0.22, 0.9),
 	}
 	var size: Vector3 = sizes.get(t, Vector3(1, 1, 1))
 	var cs := CollisionShape3D.new()
@@ -181,6 +182,8 @@ func interact_station() -> void:
 			_research()
 		"storage_box", "large_box":
 			_use_storage()
+		"sleeping_bag":
+			Game.notify("You will respawn here")
 		"workbench_t1", "workbench_t2":
 			Game.notify("Workbench Level %d — craft nearby to use it" % workbench_level())
 		_:

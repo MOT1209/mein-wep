@@ -930,6 +930,61 @@ func _run_tests() -> void:
 		_check(game.get_count("sulfur_ore") > raw0, "a sulfur node yields ore")
 		_check(game.get_count("sulfur") == refined0, "and no usable sulfur on its own")
 
+	# --- Dying costs you what you were carrying
+	game.reset_loadout()
+	game.inventory["hqm"] = 40
+	game.inventory["ak47"] = 1
+	game.inventory["road_vest"] = 1
+	game.wear("road_vest")
+	game.belt[2] = "ak47"
+	var carried_before: int = game.get_count("hqm")
+	var died_at := Vector3(sx, y_player, sz + 4.0)
+	player.position = died_at
+	game.stats.health = 0.0
+	world._on_player_death()
+
+	_check(game.get_count("hqm") == 0, "the loot you were carrying is gone from your pockets")
+	_check(game.get_count("ak47") == 0, "and so is the rifle")
+	_check(game.worn.is_empty(), "the armour came off with it")
+	_check(game.get_count("hammer") == 1 and game.get_count("building_plan") == 1,
+		"but you respawn able to build your way back")
+	_check(game.stats.health == 100.0, "and at full health")
+
+	var bag: Node = null
+	for c in world.get_children():
+		if c.has_method("interact_station") and c.has_method("is_empty"):
+			bag = c
+	_check(bag != null, "a bag was left where you fell")
+	if bag != null:
+		_check(bag.position.distance_to(died_at) < 3.0,
+			"at the spot you died, not at the spawn")
+		_check(int(bag.stored.get("hqm", 0)) == carried_before,
+			"holding everything you had")
+		_check(str(bag.worn.get("chest", "")) == "road_vest", "including the armour")
+		bag.interact_station()
+		_check(game.get_count("hqm") == carried_before, "looting it gives the lot back")
+		_check(game.is_worn("road_vest"), "and puts the armour back on")
+		_check(game.belt.has("ak47"), "and restores the belt slot it was in")
+
+	# A sleeping bag is what turns a death into a walk rather than a restart
+	_check(game.DEPLOYABLES.has("sleeping_bag"), "a sleeping bag is placeable")
+	var bed_pos := Vector3(sx + 4.0, world.terrain_height(sx + 4.0, sz), sz)
+	var bed = world._spawn_station("sleeping_bag", bed_pos)
+	_check(world.nearest_sleeping_bag(died_at) == bed, "the world can find your bed")
+	player.position = died_at
+	game.stats.health = 0.0
+	world._on_player_death()
+	_check(player.position.distance_to(bed_pos) < 3.0,
+		"you wake up at your bed, not on the shore")
+	_check(player.position.distance_to(Vector3.ZERO) > 3.0, "which is not the world origin")
+
+	# Death with empty pockets leaves no litter
+	var bags_before: int = world.bags.size()
+	game.reset_loadout()
+	game.inventory = {}
+	world._on_player_death()
+	_check(world.bags.size() == bags_before, "an empty death drops no bag")
+
 	# --- Crude oil is no longer a dead end
 	var refinery = world._spawn_station("furnace", Vector3(-14, 0, -14))
 	game.inventory["oil"] = 20
@@ -1192,7 +1247,20 @@ func _run_tests() -> void:
 			saved_lock = entry
 	_check(saved_lock != null and saved_lock.has("lock_health"),
 		"a fitted lock survives the save")
-	_check(int(data.player.inventory.hammer) == 3, "save contains crafted hammers")
+	# Asserted against live state rather than a number fixed earlier in the
+	# run: dying now empties your pockets, and the save must follow that.
+	_check(int(data.player.inventory.get("hammer", 0)) == game.get_count("hammer"),
+		"save matches the inventory the player actually has")
+	_check(data.player.has("worn"), "worn armour is persisted")
+	var live_bags := 0
+	for left_behind in world.bags:
+		if is_instance_valid(left_behind) and not left_behind.is_empty():
+			live_bags += 1
+	_check(data.bags.size() == live_bags,
+		"death bags are written to the save (%d)" % live_bags)
+	if live_bags > 0:
+		_check(data.bags[0].has("stored") and data.bags[0].has("left"),
+			"with their contents and the time they have left")
 	_check(data.stations.size() == world.stations.size(),
 		"save contains all %d deployed stations" % world.stations.size())
 	var saved_box = null

@@ -114,6 +114,7 @@ const DEPLOYABLES := {
 	"research_table": {"warmth": 0.0, "workbench": 0},
 	"storage_box": {"warmth": 0.0, "workbench": 0},
 	"large_box": {"warmth": 0.0, "workbench": 0},
+	"sleeping_bag": {"warmth": 0.15, "workbench": 0},
 }
 
 const WARMTH_RADIUS := 8.0
@@ -149,6 +150,7 @@ const ITEMS := {
 	"ak47": {"name": "Assault Rifle", "category": "weapons", "color": "6d4c41", "rarity": "elite", "recipe": {"hqm": 50, "wood": 200, "scrap": 50, "pipe": 1, "spring": 2}, "workbench": 2, "desc": "The king of Rust weapons. High recoil, high reward."},
 	"furnace": {"name": "Furnace", "category": "items", "color": "ff7043", "rarity": "rare", "recipe": {"stone": 200, "wood": 100, "lgf": 10}, "desc": "Smelts ores into metal/sulfur using wood."},
 	"campfire": {"name": "Campfire", "category": "items", "color": "ffab40", "rarity": "common", "recipe": {"wood": 100}, "desc": "Useful for light and cooking meat."},
+	"sleeping_bag": {"name": "Sleeping Bag", "category": "items", "color": "6d4c41", "rarity": "common", "recipe": {"cloth": 30}, "desc": "Place one and you respawn at it instead of on the shore. The first thing to build after a shelter."},
 	"building_plan": {"name": "Building Plan", "category": "tools", "color": "64b5f6", "rarity": "common", "recipe": {"wood": 20}, "desc": "Select building pieces to place."},
 	"door": {"name": "Wood Door", "category": "construction", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 300}, "desc": "Access point with minimal security."},
 	"lock": {"name": "Key Lock", "category": "construction", "color": "546e7a", "rarity": "common", "recipe": {"iron": 100}, "desc": "Basic protection for your base."},
@@ -212,6 +214,18 @@ var ui_open: String = "start"
 
 func _ready() -> void:
 	reset_state()
+
+
+## Strips the player back to the opening kit without touching the world or
+## the clock. Death uses this after the bag has taken the real loadout.
+func reset_loadout() -> void:
+	inventory = {"building_plan": 1, "hammer": 1}
+	belt = ["building_plan", "hammer", null, null, null, null]
+	selected_belt_slot = 0
+	worn = {}
+	selected_blueprint = ""
+	inventory_changed.emit()
+	belt_changed.emit()
 
 
 func reset_state() -> void:
@@ -280,9 +294,13 @@ func hurt(amount: float) -> float:
 	return applied
 
 
-func add_item(id: String, count: int) -> void:
+## Returns how much was actually taken in. Nothing turns anything away yet;
+## the slot limit lands with the capacity work, and callers that care about
+## the overflow are already written against this contract.
+func add_item(id: String, count: int) -> int:
 	inventory[id] = get_count(id) + count
 	inventory_changed.emit()
+	return count
 
 
 func remove_item(id: String, count: int) -> void:
