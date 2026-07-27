@@ -83,6 +83,12 @@ func _ready() -> void:
 	touch_controls.name = "TouchControls"
 	add_child(touch_controls)
 
+	# The engine inherits the editor's locale, so on an Arabic install every
+	# container and anchor in the HUD mirrors itself: right-anchored panels
+	# jump to the left edge and each row reverses. The interface text is
+	# English, so pin the whole tree to left-to-right.
+	force_ltr(self)
+
 	Game.toast.connect(_on_toast)
 	Game.inventory_changed.connect(_refresh_resources)
 	Game.inventory_changed.connect(_refresh_hotbar)
@@ -112,6 +118,14 @@ func set_touch_ui(on: bool) -> void:
 
 # ==================== BUILDERS ====================
 
+## Recursively pins a UI subtree to left-to-right layout.
+static func force_ltr(node: Node) -> void:
+	if node is Control:
+		(node as Control).layout_direction = Control.LAYOUT_DIRECTION_LTR
+	for child in node.get_children():
+		force_ltr(child)
+
+
 func _label(text: String, size: int = 14, color := Color.WHITE) -> Label:
 	var l := Label.new()
 	l.text = text
@@ -128,20 +142,26 @@ func _label(text: String, size: int = 14, color := Color.WHITE) -> Label:
 ## exactly what the old fixed-width, right-anchored label did once the
 ## resource counts grew past four digits.
 func _build_stats_panel() -> void:
+	# Laid out by a full-rect MarginContainer with shrink-end size flags
+	# rather than anchor offsets plus a grow direction. Containers place
+	# their child deterministically, whereas the anchor route depends on
+	# grow direction resolving against the layout direction and quietly
+	# hung the panel off the right edge of the screen.
+	var holder := MarginContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.add_theme_constant_override("margin_right", int(HUD_MARGIN))
+	holder.add_theme_constant_override("margin_top", int(HUD_MARGIN))
+	holder.add_theme_constant_override("margin_left", int(HUD_MARGIN))
+	holder.add_theme_constant_override("margin_bottom", int(HUD_MARGIN))
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(holder)
+
 	var column := VBoxContainer.new()
-	column.anchor_left = 1.0
-	column.anchor_right = 1.0
-	column.anchor_top = 0.0
-	column.anchor_bottom = 0.0
-	column.offset_left = -HUD_MARGIN
-	column.offset_right = -HUD_MARGIN
-	column.offset_top = HUD_MARGIN
-	column.offset_bottom = HUD_MARGIN
-	column.grow_horizontal = Control.GROW_DIRECTION_BEGIN
-	column.grow_vertical = Control.GROW_DIRECTION_END
+	column.size_flags_horizontal = Control.SIZE_SHRINK_END
+	column.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
 	column.add_theme_constant_override("separation", 8)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(column)
+	holder.add_child(column)
 
 	# --- Survival stats
 	var stats_panel := PanelContainer.new()
@@ -202,7 +222,10 @@ func _build_stats_panel() -> void:
 
 		var icon := TextureRect.new()
 		icon.texture = IconFactory.get_icon(res_id)
-		icon.custom_minimum_size = Vector2(18, 18)
+		# EXPAND_IGNORE_SIZE or the 256px source art becomes this control's
+		# minimum size and blows the whole panel open.
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.custom_minimum_size = Vector2(20, 20)
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		row.add_child(icon)
@@ -342,6 +365,7 @@ func _build_hotbar() -> void:
 
 		var icon := TextureRect.new()
 		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.custom_minimum_size = HOTBAR_ICON_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE

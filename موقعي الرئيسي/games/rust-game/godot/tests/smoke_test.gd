@@ -529,13 +529,18 @@ func _run_tests() -> void:
 	# bar -> row -> rows -> stats panel -> right-hand column
 	var stats_col: Control = hud._bar_fills["health"].bar \
 		.get_parent().get_parent().get_parent().get_parent()
-	_check(is_equal_approx(stats_col.anchor_left, 1.0) and is_equal_approx(stats_col.anchor_right, 1.0),
-		"stats panel is pinned to the right edge")
-	_check(is_equal_approx(stats_col.offset_right, -HUD_MARGIN_EXPECTED)
-		and is_equal_approx(stats_col.offset_top, HUD_MARGIN_EXPECTED),
+	_check(stats_col.size_flags_horizontal == Control.SIZE_SHRINK_END,
+		"stats column hugs the right side of its container")
+	_check(stats_col.size_flags_vertical == Control.SIZE_SHRINK_BEGIN,
+		"stats column hugs the top of its container")
+	var stats_wrap: Control = stats_col.get_parent()
+	_check(stats_wrap is MarginContainer, "stats column is placed by a MarginContainer")
+	_check(stats_wrap.get_theme_constant("margin_right") == int(HUD_MARGIN_EXPECTED)
+		and stats_wrap.get_theme_constant("margin_top") == int(HUD_MARGIN_EXPECTED),
 		"stats panel keeps its margin from the top-right corner")
-	_check(stats_col.grow_horizontal == Control.GROW_DIRECTION_BEGIN,
-		"stats panel grows leftwards, so long numbers can't push it off screen")
+	_check(is_equal_approx(stats_wrap.anchor_right, 1.0)
+		and is_equal_approx(stats_wrap.anchor_bottom, 1.0),
+		"the stats wrapper covers the whole screen, so the margin is honoured")
 	_check(hud._bar_fills["temperature"].bar is ProgressBar,
 		"stats use real ProgressBar nodes")
 	_check(hud._bar_fills["health"].value.text == str(roundi(float(game.stats.health))),
@@ -547,10 +552,42 @@ func _run_tests() -> void:
 	_check(str(ProjectSettings.get_setting("display/window/stretch/aspect")) == "expand",
 		"stretch aspect is expand so wider screens gain view, not bars")
 
-	# --- Compact slot sizing
-	_check(hud.HOTBAR_SLOT_SIZE == Vector2(64, 64), "hotbar slots are 64x64")
-	_check(hud._hotbar_slots[0].panel.custom_minimum_size == Vector2(64, 64),
-		"the built hotbar slots really use that size")
+	# --- Layout direction. An Arabic Godot install mirrors every container
+	# and anchor unless the UI pins itself, which put the right-anchored
+	# stats panel on the left edge with its rows reversed.
+	var ltr_violations := []
+	var ltr_stack: Array = [hud]
+	while not ltr_stack.is_empty():
+		var n = ltr_stack.pop_back()
+		for c in n.get_children():
+			ltr_stack.append(c)
+		if n is Control and (n as Control).layout_direction != Control.LAYOUT_DIRECTION_LTR:
+			# Children added later inherit from their parent, so only the
+			# nodes built up front must be pinned.
+			ltr_violations.append(n.name)
+	_check(ltr_violations.is_empty(),
+		"the whole HUD is pinned to left-to-right %s" % str(ltr_violations.slice(0, 5)))
+
+	# --- Compact slot sizing, measured after layout rather than trusted
+	# from the setting: a 256px source icon silently became the minimum
+	# size of its TextureRect and blew the panels open.
+	_check(hud.HOTBAR_SLOT_SIZE == Vector2(64, 64), "hotbar slots are configured 64x64")
+	var slot_rect: Vector2 = hud._hotbar_slots[0].panel.size
+	_check(slot_rect.x <= 66.0 and slot_rect.y <= 66.0,
+		"a hotbar slot really renders at %.0fx%.0f" % [slot_rect.x, slot_rect.y])
+	var hb_icon: TextureRect = hud._hotbar_slots[0].icon
+	_check(hb_icon.expand_mode == TextureRect.EXPAND_IGNORE_SIZE,
+		"hotbar icons ignore their source resolution")
+	_check(hb_icon.size.x <= 66.0,
+		"the hotbar icon really renders at %.0fpx, not its 256px source" % hb_icon.size.x)
+	var res_icon: TextureRect = null
+	for c in hud._res_counts["wood"].get_parent().get_children():
+		if c is TextureRect:
+			res_icon = c
+	_check(res_icon != null and res_icon.expand_mode == TextureRect.EXPAND_IGNORE_SIZE,
+		"resource icons ignore their source resolution")
+	_check(res_icon != null and res_icon.size.x <= 24.0,
+		"a resource icon really renders at %.0fpx" % (res_icon.size.x if res_icon else -1.0))
 	_check(hud.inventory_ui.SLOT_SIZE == Vector2(80, 80), "inventory tiles are 80x80")
 	_check(hud.inventory_ui.BELT_SLOT_SIZE == Vector2(64, 64), "belt tiles match the hotbar")
 
