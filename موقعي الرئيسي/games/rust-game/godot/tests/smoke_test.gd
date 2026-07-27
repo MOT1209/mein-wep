@@ -433,16 +433,32 @@ func _run_tests() -> void:
 	# --- Item icons
 	var icon_factory = load("res://scripts/icon_factory.gd")
 	var icon = icon_factory.get_icon("hammer")
-	_check(icon is ImageTexture and icon.get_width() == 32 and icon.get_height() == 32,
-		"item icons are generated at 32x32")
+	_check(icon is Texture2D and icon.get_width() >= 32, "items resolve to a texture")
 	_check(icon_factory.get_icon("hammer") == icon, "icons are cached per item")
-	var icon_img: Image = icon_factory.make_image("hammer")
+
+	# Blender-rendered PNGs are preferred over the generated pictograms
+	_check(icon_factory.has_rendered_icon("hammer"), "hammer has a rendered icon")
+	_check(icon.get_width() == 256, "rendered icons come through at 256px")
+	var rendered_missing := []
+	for expected in ["ak47", "machete", "building_plan", "wood", "stone",
+			"sulfur", "bandage", "codelock", "rocket_launcher", "stone_pickaxe"]:
+		if not icon_factory.has_rendered_icon(expected):
+			rendered_missing.append(expected)
+	_check(rendered_missing.is_empty(),
+		"every item named in the icon batch was rendered %s" % str(rendered_missing))
+
+	# Items with no model still fall back to a drawn pictogram
+	_check(not icon_factory.has_rendered_icon("berries"), "berries has no render yet")
+	var fallback = icon_factory.get_icon("berries")
+	_check(fallback is ImageTexture and fallback.get_width() == 32,
+		"unrendered items fall back to a 32px pictogram")
+	var icon_img: Image = icon_factory.make_image("berries")
 	var opaque := 0
 	for iy in 32:
 		for ix in 32:
 			if icon_img.get_pixel(ix, iy).a > 0.5:
 				opaque += 1
-	_check(opaque > 60, "generated icon actually draws a shape (%d px)" % opaque)
+	_check(opaque > 60, "the pictogram fallback still draws a shape (%d px)" % opaque)
 
 	# --- Hotbar layout
 	var hud = world.hud

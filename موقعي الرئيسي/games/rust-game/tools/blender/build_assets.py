@@ -56,6 +56,14 @@ PALETTE = {
     "olive":       (0.28, 0.32, 0.19, 0.1, 0.65),
     "wire_red":    (0.72, 0.14, 0.12, 0.0, 0.5),
     "warning":     (0.92, 0.72, 0.10, 0.0, 0.5),
+    "paper":       (0.86, 0.83, 0.72, 0.0, 0.85),
+    "blueprint":   (0.20, 0.42, 0.62, 0.0, 0.7),
+    "gauze":       (0.94, 0.93, 0.90, 0.0, 0.9),
+    "medical":     (0.78, 0.16, 0.16, 0.0, 0.6),
+    "fabric":      (0.72, 0.68, 0.58, 0.0, 0.9),
+    "gunmetal":    (0.22, 0.23, 0.25, 0.75, 0.35),
+    "brass":       (0.72, 0.55, 0.22, 0.8, 0.3),
+    "bark":        (0.42, 0.29, 0.17, 0.0, 0.95),
 }
 
 EMISSIVE = {"ember"}
@@ -513,6 +521,143 @@ def build_rocket_launcher():
 
 
 # ==========================================================================
+# ITEMS  (inventory subjects: rendered to 2D icons and usable in-world)
+# ==========================================================================
+
+def build_machete():
+    _handle(0.32, 0.032, material="wood_dark")
+    box(0.03, 0.075, 0.1, z=0.3, material="leather")
+    box(0.016, 0.1, 0.62, y=0.012, z=0.66, material="metal")
+    box(0.018, 0.03, 0.6, y=-0.04, z=0.65, material="metal_dark")
+    cone(0.05, 0.0, 0.14, y=0.01, z=1.0, material="metal", verts=4,
+         rot=(math.pi / 2, 0, 0))
+    export("machete", "items", origin_at_base=True)
+
+
+def build_ak47():
+    # Receiver, barrel, magazine, stock and grip, laid along Y
+    box(0.06, 0.46, 0.11, y=0.02, z=0.42, material="gunmetal")
+    cyl(0.018, 0.46, y=-0.44, z=0.44, material="metal_dark", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    box(0.05, 0.1, 0.06, y=-0.3, z=0.5, material="wood_dark")
+    # Curved magazine
+    for i in range(4):
+        box(0.045, 0.09, 0.07, y=0.06 + i * 0.015, z=0.31 - i * 0.06,
+            material="gunmetal", rot=(i * 0.16, 0, 0))
+    box(0.05, 0.1, 0.16, y=0.2, z=0.31, material="wood_dark", rot=(-0.3, 0, 0))
+    box(0.05, 0.34, 0.1, y=0.4, z=0.38, material="wood", rot=(0.12, 0, 0))
+    box(0.03, 0.05, 0.06, y=-0.2, z=0.52, material="metal_dark")
+    export("ak47", "items", origin_at_base=True)
+
+
+def build_building_plan():
+    """A rolled blueprint with a band around it."""
+    cyl(0.09, 0.5, z=0.09, material="paper", verts=14, rot=(0, math.pi / 2, 0))
+    cyl(0.093, 0.06, x=-0.1, z=0.09, material="blueprint", verts=14,
+        rot=(0, math.pi / 2, 0))
+    cyl(0.093, 0.06, x=0.12, z=0.09, material="blueprint", verts=14,
+        rot=(0, math.pi / 2, 0))
+    # A sheet peeling off the roll
+    box(0.42, 0.3, 0.006, y=0.14, z=0.16, material="blueprint", rot=(0.25, 0, 0))
+    export("building_plan", "items", origin_at_base=True)
+
+
+def build_hammer():
+    _handle(0.62, 0.028, material="wood")
+    box(0.045, 0.09, 0.06, z=0.58, material="leather")
+    box(0.06, 0.1, 0.11, z=0.66, material="metal")
+    cyl(0.055, 0.1, y=-0.08, z=0.66, material="metal", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    # Claw
+    for sx in (-1, 1):
+        box(0.02, 0.14, 0.05, x=sx * 0.03, y=0.11, z=0.68,
+            material="metal_dark", rot=(-0.5, 0, 0))
+    export("hammer", "items", origin_at_base=True)
+
+
+def build_wood():
+    """Stacked logs with visible end grain."""
+    for i, (x, z) in enumerate([(-0.14, 0.13), (0.14, 0.13), (0.0, 0.35)]):
+        cyl(0.13, 0.56, x=x, z=z, material="bark", verts=12,
+            rot=(0, math.pi / 2, 0))
+        for sy in (-1, 1):
+            cyl(0.105, 0.02, x=x + sy * 0.285, z=z, material="wood_light",
+                verts=12, rot=(0, math.pi / 2, 0))
+    export("wood", "items", origin_at_base=True)
+
+
+def build_stone():
+    rock(0.26, z=0.24, material="stone", seed=101)
+    rock(0.17, x=0.28, y=0.1, z=0.15, material="stone_dark", seed=102)
+    rock(0.14, x=-0.26, y=-0.09, z=0.13, material="stone", seed=103)
+    export("stone", "items", origin_at_base=True)
+
+
+def build_sulfur():
+    rock(0.24, z=0.22, material="stone_dark", seed=201)
+    for i in range(6):
+        a = i * 1.047 + 0.4
+        box(0.11, 0.11, 0.15,
+            x=math.cos(a) * 0.19, y=math.sin(a) * 0.19, z=0.26 + (i % 3) * 0.08,
+            material="sulfur_ore", rot=(a * 0.7, a, 0))
+    export("sulfur", "items", origin_at_base=True)
+
+
+def build_bandage():
+    cyl(0.16, 0.2, z=0.16, material="gauze", verts=16, rot=(0, math.pi / 2, 0))
+    cyl(0.05, 0.21, z=0.16, material="fabric", verts=12, rot=(0, math.pi / 2, 0))
+    # Loose tail
+    box(0.2, 0.18, 0.012, x=0.02, y=0.2, z=0.05, material="gauze", rot=(0.1, 0, 0))
+    box(0.09, 0.026, 0.014, y=0.2, z=0.06, material="medical")
+    box(0.026, 0.09, 0.014, y=0.2, z=0.06, material="medical")
+    export("bandage", "items", origin_at_base=True)
+
+
+def build_codelock():
+    box(0.3, 0.12, 0.42, z=0.21, material="metal_dark")
+    box(0.24, 0.03, 0.34, y=-0.07, z=0.22, material="gunmetal")
+    # Keypad
+    for r in range(4):
+        for c in range(3):
+            box(0.05, 0.02, 0.05,
+                x=-0.07 + c * 0.07, y=-0.09, z=0.35 - r * 0.075,
+                material="warning" if (r == 0 and c == 1) else "metal")
+    box(0.1, 0.05, 0.06, x=0.0, y=0.05, z=0.44, material="brass")
+    export("codelock", "items", origin_at_base=True)
+
+
+def build_frag():
+    """A heap of torn metal fragments."""
+    for i in range(9):
+        a = i * 0.7
+        box(0.16, 0.11, 0.035,
+            x=math.cos(a) * 0.14 * (1 + i % 2), y=math.sin(a) * 0.12,
+            z=0.03 + (i % 3) * 0.05,
+            material="metal" if i % 2 == 0 else "metal_dark",
+            rot=(a * 0.5, a * 0.8, a))
+    export("frag", "items", origin_at_base=True)
+
+
+def build_scrap():
+    for i in range(6):
+        a = i * 1.05
+        cyl(0.035, 0.26, x=math.cos(a) * 0.13, y=math.sin(a) * 0.11,
+            z=0.05 + (i % 3) * 0.055, material="rust", verts=6,
+            rot=(math.pi / 2 + a * 0.4, a, a * 0.3))
+    box(0.22, 0.18, 0.03, z=0.02, material="metal_dark", rot=(0, 0, 0.5))
+    export("scrap", "items", origin_at_base=True)
+
+
+def build_cloth():
+    for i in range(3):
+        box(0.42 - i * 0.04, 0.32 - i * 0.03, 0.05,
+            z=0.03 + i * 0.055, material="fabric" if i % 2 == 0 else "wood_light",
+            rot=(0, 0, i * 0.12))
+    box(0.44, 0.06, 0.02, z=0.2, material="leather")
+    export("cloth", "items", origin_at_base=True)
+
+
+# ==========================================================================
 # Driver
 # ==========================================================================
 
@@ -525,6 +670,9 @@ BUILDERS = [
     build_storage_box, build_large_box,
     build_stone_node, build_metal_node, build_sulfur_node,
     build_c4, build_grenade, build_rocket, build_rocket_launcher,
+    build_machete, build_ak47, build_building_plan, build_hammer,
+    build_wood, build_stone, build_sulfur, build_bandage,
+    build_codelock, build_frag, build_scrap, build_cloth,
 ]
 
 

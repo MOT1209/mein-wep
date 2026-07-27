@@ -27,10 +27,11 @@ const MODELS := {
 	"storage_box": "res://assets/models/deployables/storage_box.glb",
 	"large_box": "res://assets/models/deployables/large_box.glb",
 
-	# Harvestable resource nodes — origin at the base
-	"rock": "res://assets/models/resources/stone_node.glb",
-	"iron": "res://assets/models/resources/metal_node.glb",
-	"sulfur": "res://assets/models/resources/sulfur_node.glb",
+	# Harvestable resource nodes — origin at the base. Prefixed because the
+	# mined item shares the raw id ("sulfur" the ore chunk vs the boulder).
+	"node_rock": "res://assets/models/resources/stone_node.glb",
+	"node_iron": "res://assets/models/resources/metal_node.glb",
+	"node_sulfur": "res://assets/models/resources/sulfur_node.glb",
 
 	# Held tools and weapons — origin at the grip
 	"rock_tool": "res://assets/models/tools/rock.glb",
@@ -40,6 +41,20 @@ const MODELS := {
 	"metal_pickaxe": "res://assets/models/tools/metal_pickaxe.glb",
 	"drill": "res://assets/models/tools/drill.glb",
 	"bow": "res://assets/models/tools/bow.glb",
+
+	# Inventory items — also usable in-hand and dropped in the world
+	"machete": "res://assets/models/items/machete.glb",
+	"ak47": "res://assets/models/items/ak47.glb",
+	"building_plan": "res://assets/models/items/building_plan.glb",
+	"hammer": "res://assets/models/items/hammer.glb",
+	"wood": "res://assets/models/items/wood.glb",
+	"stone": "res://assets/models/items/stone.glb",
+	"sulfur": "res://assets/models/items/sulfur.glb",
+	"bandage": "res://assets/models/items/bandage.glb",
+	"codelock": "res://assets/models/items/codelock.glb",
+	"frag": "res://assets/models/items/frag.glb",
+	"scrap": "res://assets/models/items/scrap.glb",
+	"cloth": "res://assets/models/items/cloth.glb",
 
 	# Raiding gear
 	"c4": "res://assets/models/explosives/c4.glb",

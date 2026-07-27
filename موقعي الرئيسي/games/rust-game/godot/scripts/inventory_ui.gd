@@ -25,27 +25,63 @@ var _inv_grid: GridContainer
 var _belt_row: HBoxContainer
 
 
+## Blurs and darkens whatever is behind the panel, instead of flatly
+## covering it — the world stays readable but recedes.
+const BACKDROP_SHADER := "
+shader_type canvas_item;
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+uniform float blur : hint_range(0.0, 5.0) = 2.6;
+uniform vec3 tint : source_color = vec3(0.04, 0.04, 0.05);
+uniform float darkness : hint_range(0.0, 1.0) = 0.55;
+void fragment() {
+	vec3 c = textureLod(screen_tex, SCREEN_UV, blur).rgb;
+	COLOR = vec4(mix(c, tint, darkness), 1.0);
+}
+"
+
+const SCREEN_MARGIN := 44.0
+const SLOT_SIZE := Vector2(158, 96)
+const PANEL_MIN := Vector2(980, 590)
+
+
 func _ready() -> void:
 	visible = false
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_STOP
 
-	var dim := ColorRect.new()
-	dim.color = Color(0, 0, 0, 0.8)
-	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(dim)
+	var backdrop := ColorRect.new()
+	backdrop.set_anchors_preset(Control.PRESET_FULL_RECT)
+	var shader := Shader.new()
+	shader.code = BACKDROP_SHADER
+	var mat := ShaderMaterial.new()
+	mat.shader = shader
+	backdrop.material = mat
+	add_child(backdrop)
+
+	# Keeps the panel clear of every screen edge, including the stats
+	# readout pinned to the top-right corner.
+	var margins := MarginContainer.new()
+	margins.set_anchors_preset(Control.PRESET_FULL_RECT)
+	for side in ["left", "right", "top", "bottom"]:
+		margins.add_theme_constant_override("margin_" + side, int(SCREEN_MARGIN))
+	add_child(margins)
 
 	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
-	add_child(center)
+	margins.add_child(center)
 
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(960, 600)
+	panel.custom_minimum_size = PANEL_MIN
+	_style_window(panel)
 	center.add_child(panel)
 
+	var pad := MarginContainer.new()
+	for side in ["left", "right", "top", "bottom"]:
+		pad.add_theme_constant_override("margin_" + side, 16)
+	panel.add_child(pad)
+
 	var root := VBoxContainer.new()
-	root.add_theme_constant_override("separation", 8)
-	panel.add_child(root)
+	root.add_theme_constant_override("separation", 10)
+	pad.add_child(root)
 
 	# Tabs
 	var tabs := HBoxContainer.new()
@@ -72,6 +108,30 @@ func _ready() -> void:
 	root.add_child(footer)
 
 	Game.inventory_changed.connect(_on_inventory_changed)
+
+
+func _style_window(panel: PanelContainer) -> void:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.06, 0.06, 0.07, 0.88)
+	sb.border_color = Color(0.8, 0.36, 0.17, 0.9)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(8)
+	panel.add_theme_stylebox_override("panel", sb)
+
+
+## Roomy icon-over-label slot used by the crafting grid and inventory.
+func _make_slot(id: String, label: String, tooltip: String) -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = SLOT_SIZE
+	b.icon = IconFactory.get_icon(id)
+	b.expand_icon = true
+	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+	b.text = label
+	b.tooltip_text = tooltip
+	b.clip_text = true
+	b.add_theme_font_size_override("font_size", 12)
+	return b
 
 
 func _build_craft_pane(root: VBoxContainer) -> void:
@@ -188,11 +248,7 @@ func _refresh_craft_grid() -> void:
 			continue
 		if selected_category != "common" and item.category != selected_category:
 			continue
-		var b := Button.new()
-		b.text = item.name
-		b.icon = IconFactory.get_icon(id)
-		b.custom_minimum_size = Vector2(140, 44)
-		b.tooltip_text = item.desc
+		var b := _make_slot(id, item.name, item.desc)
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
 		b.pressed.connect(_on_craft_item_selected.bind(id))
 		_craft_grid.add_child(b)
@@ -301,10 +357,8 @@ func _refresh_inventory() -> void:
 		if count <= 0:
 			continue
 		var item: Dictionary = Game.ITEMS.get(id, {})
-		var b := Button.new()
-		b.text = "%s\nx%d" % [item.get("name", id), count]
-		b.icon = IconFactory.get_icon(id)
-		b.custom_minimum_size = Vector2(130, 52)
+		var b := _make_slot(id, "%s  x%d" % [item.get("name", id), count],
+			str(item.get("desc", "")))
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
 		if id in Game.belt:
 			b.self_modulate = Color(1.3, 1.1, 0.5)
@@ -331,8 +385,13 @@ func _refresh_belt() -> void:
 		if id is String and Game.ITEMS.has(id):
 			label = Game.ITEMS[id].name
 			b.icon = IconFactory.get_icon(id)
-		b.text = "%d\n%s" % [i + 1, label]
-		b.custom_minimum_size = Vector2(110, 52)
+			b.expand_icon = true
+			b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+			b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
+		b.text = "%d  %s" % [i + 1, label]
+		b.clip_text = true
+		b.add_theme_font_size_override("font_size", 12)
+		b.custom_minimum_size = Vector2(132, 76)
 		if Game.selected_belt_slot == i:
 			b.self_modulate = Color(1.5, 1.3, 0.6)
 		b.pressed.connect(func():

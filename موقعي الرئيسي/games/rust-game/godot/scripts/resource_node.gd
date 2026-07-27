@@ -99,7 +99,7 @@ func _build_tree() -> void:
 
 ## Blender-built ore cluster when available, otherwise the old boulder.
 func _build_ore_node(color: Color, metallic: float, emission := Color.BLACK) -> void:
-	var model := ModelRegistry.spawn(res_type)
+	var model := ModelRegistry.spawn("node_" + res_type)
 	if model == null:
 		_build_boulder(color, metallic, emission)
 		return

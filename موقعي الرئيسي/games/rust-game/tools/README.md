@@ -15,9 +15,32 @@ BLENDER="C:/Program Files/Blender Foundation/Blender 5.2/blender.exe"
 # 2. Check the exported GLB files' own JSON (meshes, embedded materials)
 "$BLENDER" --background --factory-startup --python tools/blender/verify_glb.py
 
-# 3. Render a contact sheet for visual review -> tools/blender/preview.png
+# 3. Render 2D inventory icons -> godot/assets/icons/*.png (Cycles, alpha)
+"$BLENDER" --background --factory-startup --python tools/blender/render_icons.py
+
+# 4. Render a contact sheet for visual review -> tools/blender/preview.png
 "$BLENDER" --background --factory-startup --python tools/blender/preview_assets.py
+# ...or one category close up:
+"$BLENDER" --background --factory-startup --python tools/blender/preview_assets.py -- explosives
 ```
+
+### Running inside the user's live Blender (BlenderMCP)
+
+Any of the scripts above can be executed inside an already-open Blender
+instead of a fresh background one, through the BlenderMCP addon's socket:
+
+```powershell
+powershell -File tools/blender/mcp_send.ps1 -ScriptPath tools/blender/render_icons.py
+```
+
+`mcp_send.ps1` speaks the addon's protocol directly — plain JSON
+`{"type": "execute_code", "params": {"code": "..."}}` over TCP to
+`127.0.0.1:9876` — so it works even from a Claude session that started
+before the MCP server came up and therefore has no `mcp__blender__*`
+tools. Check the socket first with
+`netstat -ano | Select-String ':9876'`; the addon's own panel status is
+not reliable. A long render can outrun the socket's response wait, so
+verify the output files before treating a timeout as a failure.
 
 After adding **new** binary assets, Godot needs one editor import pass
 before `load()` can see them (close any open editor on the project first):
@@ -34,11 +57,18 @@ GODOT="C:/Users/aihmo/Godot/Godot_v4.7.1-stable_win64.exe"
    `cyl` / `cone` / `rock` helpers and a colour from `PALETTE`.
 2. Add it to the `BUILDERS` list.
 3. Register the exported path in `godot/scripts/model_registry.gd`.
-4. Re-run steps 1–3 above, then the import pass and the smoke test.
+4. Re-run the build, verify, icon render and import pass, then the
+   smoke test.
 
 Nothing else needs to change: `structure.gd`, `resource_node.gd` and
 `station.gd` all pull their visuals from `ModelRegistry`, and each falls
-back to its old primitive if a model is missing.
+back to its old primitive if a model is missing. Naming the GLB after an
+item id in `Game.ITEMS` is enough for its rendered icon to appear across
+the inventory, crafting panel and hotbar — `icon_factory.gd` prefers
+`assets/icons/<id>.png` and only draws a pictogram when none exists.
+
+Registry ids must be unique, so harvestable world nodes are prefixed
+(`node_sulfur` the boulder vs `sulfur` the mined chunk).
 
 ## Conventions
 

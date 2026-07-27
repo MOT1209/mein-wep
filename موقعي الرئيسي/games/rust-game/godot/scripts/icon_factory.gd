@@ -1,21 +1,40 @@
 extends Object
-## Generates simple pictogram icons for items at runtime, so the UI has
-## real icons without shipping any image assets. One shape per item
-## category, tinted with the item's own colour, with a dark outline so it
-## reads on any background. Textures are cached per item id.
+## Item icons for the inventory, crafting panel and hotbar.
+##
+## Preferred source is a Blender-rendered PNG under `assets/icons/`,
+## produced by `tools/blender/render_icons.py` from the item's own 3D
+## model. Items that have no model yet fall back to a generated pictogram
+## — one shape per item category, tinted with the item's colour — so the
+## UI never shows an empty slot. Both kinds are cached per item id.
 
 const SIZE := 32
 const OUTLINE := Color(0.05, 0.05, 0.06, 0.9)
+const RENDERED_DIR := "res://assets/icons/"
 
 static var _cache: Dictionary = {}
 
 
-static func get_icon(item_id: String) -> ImageTexture:
+static func get_icon(item_id: String) -> Texture2D:
 	if _cache.has(item_id):
 		return _cache[item_id]
-	var tex := ImageTexture.create_from_image(make_image(item_id))
+	var tex: Texture2D = _load_rendered(item_id)
+	if tex == null:
+		tex = ImageTexture.create_from_image(make_image(item_id))
 	_cache[item_id] = tex
 	return tex
+
+
+## True when this item has a Blender-rendered icon rather than a pictogram.
+static func has_rendered_icon(item_id: String) -> bool:
+	return ResourceLoader.exists(RENDERED_DIR + item_id + ".png")
+
+
+static func _load_rendered(item_id: String) -> Texture2D:
+	var path := RENDERED_DIR + item_id + ".png"
+	if not ResourceLoader.exists(path):
+		return null
+	var res := load(path)
+	return res if res is Texture2D else null
 
 
 ## Exposed separately from get_icon so the pixels can be inspected without
