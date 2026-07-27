@@ -723,8 +723,8 @@ func update_build_info(s: Node3D, soft_side: bool = false) -> void:
 	if s == null:
 		_info_panel.visible = false
 		return
-	var stability := maxi(20, 100 - floori((s.position.y - 0.1) * 10.0))
-	_info_tier.text = "%s (%d%%)" % [Game.BUILDING_TIERS[s.tier].name, stability]
+	_info_tier.text = "%s (%d%% stability)" % [
+		Game.BUILDING_TIERS[s.tier].name, roundi(s.stability)]
 	# Which face you are on decides what a hit is worth, so it has to be
 	# readable before you swing rather than after.
 	if soft_side:

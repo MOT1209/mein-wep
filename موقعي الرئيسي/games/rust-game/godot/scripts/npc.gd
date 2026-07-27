@@ -119,8 +119,9 @@ func _physics_process(delta: float) -> void:
 	else:
 		_passive_ai(player, dist, delta)
 
-	# Stay glued to the terrain
-	position.y = world.terrain_height(position.x, position.z)
+	# Stay glued to the ground — including a base's floor, which creatures
+	# step onto rather than wade through
+	position.y = world.ground_height_at(position.x, position.z)
 
 
 func _hostile_ai(player: Node3D, dist: float, delta: float) -> void:

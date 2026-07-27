@@ -45,6 +45,18 @@ func _check(ok: bool, test_name: String) -> void:
 	print(("PASS: " if ok else "FAIL: ") + test_name)
 
 
+## Puts a foundation under a staged piece. Stability is real now: a wall
+## registered with nothing below it falls down like any other, so fixtures
+## have to obey the same rule the building system enforces at placement.
+func _footing(w: Node3D, script_ref, x: float, z: float) -> Node3D:
+	var f = script_ref.new()
+	f.setup("foundation")
+	f.position = Vector3(x, w.terrain_height(x, z) + 0.1, z)
+	w.add_child(f)
+	w.register_structure(f)
+	return f
+
+
 ## Is `local` (in the structure's own space) inside any of its collision
 ## boxes? Lets a geometry check run without waiting on the physics server.
 func _covers(s: Node3D, local: Vector3) -> bool:
@@ -346,9 +358,11 @@ func _run_tests() -> void:
 		tree2.hit_harvest("metal_hatchet", mark)
 		_check(game.get_count("wood") == w1 + 72, "hitting the mark doubles that swing")
 		_check(tree2.sweet_spot() != mark, "and the mark moves, so it cannot be farmed")
+		# Aimed well away from wherever the mark landed this time — the new
+		# spot is random, so re-using the old one is not a reliable miss.
 		var w2: int = game.get_count("wood")
-		tree2.hit_harvest("metal_hatchet", mark)
-		_check(game.get_count("wood") == w2 + 36, "a stale aim point is worth nothing")
+		tree2.hit_harvest("metal_hatchet", tree2.sweet_spot() + Vector3(5, 0, 0))
+		_check(game.get_count("wood") == w2 + 36, "a swing away from the mark is worth nothing extra")
 	if ore2 != null:
 		var iron0: int = game.get_count("iron")
 		var oil0: int = game.get_count("oil")
@@ -426,6 +440,7 @@ func _run_tests() -> void:
 	_check(game.required_workbench("c4") == 2, "C4 is gated behind workbench 2")
 
 	# --- Blast damage scales with the tier's resistance
+	_footing(world, StructureScript, 200, 200)
 	var blast_targets := {}
 	for t in ["wood", "stone", "metal", "hqm"]:
 		var piece = StructureScript.new()
@@ -445,6 +460,7 @@ func _run_tests() -> void:
 	_check(is_equal_approx(hqm_dealt, 30.0), "armored takes 30%% of raw blast damage")
 
 	# One C4 flattens twig, but an armored wall shrugs it off
+	_footing(world, StructureScript, 210, 210)
 	var twig_wall = StructureScript.new()
 	twig_wall.setup("wall")
 	twig_wall.position = Vector3(210, 5, 210)
@@ -474,6 +490,7 @@ func _run_tests() -> void:
 			s.queue_free()
 	game.tool_cupboards.clear()
 
+	_footing(world, StructureScript, 300, 300)
 	var lone = StructureScript.new()
 	lone.setup("wall")
 	lone.position = Vector3(300, 2, 300)
@@ -575,6 +592,7 @@ func _run_tests() -> void:
 
 	# --- A wall actually stops a charging animal
 	var NpcScript = load("res://scripts/npc.gd")
+	_footing(world, StructureScript, 120, 100)
 	var blocker = StructureScript.new()
 	blocker.setup("wall")
 	blocker.position = Vector3(120, 2, 100)
@@ -635,6 +653,7 @@ func _run_tests() -> void:
 	var y_sniper: float = world.terrain_height(sx, sz + 20.0)
 	_clear_corridor(world, sx, sz, 26.0)
 
+	_footing(world, StructureScript, sx, sz + 8.0)
 	var gate = StructureScript.new()
 	gate.setup("doorway")
 	gate.position = Vector3(sx, y_gate + 1.5, sz + 8.0)
@@ -709,6 +728,7 @@ func _run_tests() -> void:
 		% [sniper.hit_chance(4.0), sniper.hit_chance(40.0)])
 	_check(sniper.hit_chance(4.0) < 1.0, "even point blank is not a certainty")
 
+	_footing(world, StructureScript, sx, sz + 16.0)
 	var cover = StructureScript.new()
 	cover.setup("wall")
 	cover.position = Vector3(sx, y_cover + 1.5, sz + 16.0)
@@ -806,6 +826,7 @@ func _run_tests() -> void:
 			"and rifle ammo, which is otherwise a tier-2 craft")
 
 	# --- Soft side: which way round you build a wall matters
+	_footing(world, StructureScript, sx, sz + 24.0)
 	var raid_wall = StructureScript.new()
 	raid_wall.setup("wall")
 	raid_wall.position = Vector3(sx, y_cover + 1.5, sz + 24.0)
@@ -929,6 +950,55 @@ func _run_tests() -> void:
 		sulfur_node.hit_harvest("stone_pickaxe")
 		_check(game.get_count("sulfur_ore") > raw0, "a sulfur node yields ore")
 		_check(game.get_count("sulfur") == refined0, "and no usable sulfur on its own")
+
+	# --- Stability: a base stands on its foundations, and falls with them
+	var tower_x := sx + 12.0
+	var tower_z := sz + 8.0
+	var footing = _footing(world, StructureScript, tower_x, tower_z)
+	var ground: float = world.terrain_height(tower_x, tower_z)
+	var tower_wall = StructureScript.new()
+	tower_wall.setup("wall")
+	tower_wall.position = Vector3(tower_x, ground + 1.5, tower_z)
+	world.add_child(tower_wall)
+	world.register_structure(tower_wall)
+	var tower_roof = StructureScript.new()
+	tower_roof.setup("ceiling")
+	tower_roof.position = Vector3(tower_x, ground + 3.0, tower_z)
+	world.add_child(tower_roof)
+	world.register_structure(tower_roof)
+
+	world.recompute_stability()
+	_check(footing.stability == 100.0, "a foundation anchors its column at 100")
+	_check(tower_wall.stability == 100.0 - game.STABILITY_DROP,
+		"the wall on it loses a step (%d)" % roundi(tower_wall.stability))
+	_check(tower_roof.stability < tower_wall.stability,
+		"and the ceiling above that loses another (%d)" % roundi(tower_roof.stability))
+	_check(tower_roof.stability > 0.0, "but a two-storey column still stands")
+
+	# The HUD has to be reading this and not a number made up from height
+	world.hud.update_build_info(tower_wall, false)
+	_check(str(roundi(tower_wall.stability)) in world.hud._info_tier.text,
+		"the build panel shows the real stability (%s)" % world.hud._info_tier.text)
+
+	# Blow the footing out and the whole column comes down with it
+	var standing_before: int = world.structures.size()
+	footing.take_hit(99999.0)
+	_check(not is_instance_valid(tower_wall) or tower_wall.is_queued_for_deletion(),
+		"destroying the foundation drops the wall on it")
+	_check(not is_instance_valid(tower_roof) or tower_roof.is_queued_for_deletion(),
+		"and everything the wall was holding up")
+	_check(world.structures.size() == standing_before - 3,
+		"three pieces left the world, not one")
+
+	# A column that never had a foundation was never standing to begin with
+	var orphan = StructureScript.new()
+	orphan.setup("wall")
+	orphan.position = Vector3(sx - 30.0, world.terrain_height(sx - 30.0, sz) + 1.5, sz)
+	world.add_child(orphan)
+	world.register_structure(orphan)
+	world.recompute_stability()
+	_check(not is_instance_valid(orphan) or orphan.is_queued_for_deletion(),
+		"a wall with nothing under it falls down")
 
 	# --- Dying costs you what you were carrying
 	game.reset_loadout()

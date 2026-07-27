@@ -84,7 +84,25 @@ const EXPLOSIVES := {
 ## landing there count double, so a raider either gets inside the base or
 ## pays twice for the same wall — the reason Rust players care which way
 ## round a wall goes up.
+## Physics layers: 1 terrain, 2 structures, 4 resources, 8 creatures,
+## 16 player, 32 floors.
+##
+## Floors sit on their own layer because creatures pin their height to the
+## ground every frame instead of falling onto things. A foundation is a
+## 20cm slab at ground level, so on the structure layer it caught every
+## creature by the shins: nothing could set foot in a base, and the guards
+## that force doors could never reach one. Floors are stepped onto, not
+## walked into.
+const LAYER_FLOOR := 32
+const FLOOR_TYPES := ["foundation", "ceiling"]
+
 const SOFT_SIDE_MULT := 2.0
+
+## Stability: a foundation anchors its column at 100 and each piece stacked
+## above it loses this much. At zero a piece has nothing holding it up and
+## falls — which is what makes blowing the foundation out from under a base
+## worth more than chewing through its walls one at a time.
+const STABILITY_DROP := 25.0
 
 ## Decay: unprotected structures rot away; a stocked Tool Cupboard stops it.
 const DECAY_INTERVAL := 10.0

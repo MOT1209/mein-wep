@@ -74,6 +74,7 @@ var stations: Array = []        # placed campfire/furnace nodes
 var respawn_queue: Array = []   # {type, pos, at}
 var npc_respawn_queue: Array = []  # {type, pos, at} — monument guards
 var bags: Array = []            # loot bags left where the player died
+var _stability_pass := false    # guards against re-entering the sweep
 var clock := 0.0
 var _sun_elevation := 1.0   # sin of the sun angle; drives night-time cold
 var _respawn_timer := 0.0
@@ -793,6 +794,108 @@ func register_structure(s: Node3D) -> void:
 
 func unregister_structure(s: Node3D) -> void:
 	structures.erase(s)
+	# Whatever that piece was holding up may have nothing under it now
+	recompute_stability()
+
+
+## Height of whatever a creature is standing on at this point: the terrain,
+## or the top of a floor piece laid over it. Creatures pin their height
+## rather than falling, so without this they wade through a base's floor
+## instead of walking on it.
+func ground_height_at(x: float, z: float) -> float:
+	var h := terrain_height(x, z)
+	for s in structures:
+		if not is_instance_valid(s) or not (s.build_type in Game.FLOOR_TYPES):
+			continue
+		if absf(s.position.x - x) > 1.5 or absf(s.position.z - z) > 1.5:
+			continue
+		var top: float = s.position.y + float(Game.BUILDING_TYPES[s.build_type].size.y) * 0.5
+		# Only what can be stepped onto — a roof two storeys up is not a floor
+		if top > h and top < h + 1.5:
+			h = top
+	return h
+
+
+# ==================== STABILITY ====================
+
+## Which 3m cell a piece stands in. Pieces "at the same point" are within
+## half a metre of each other, so rounding to the grid groups a column.
+func _cell_of(s: Node3D) -> Vector2i:
+	return Vector2i(roundi(s.position.x / 3.0), roundi(s.position.z / 3.0))
+
+
+## Scores every piece: a foundation anchors its column, and each piece
+## above the one below it loses a step. Nothing beneath it means nothing
+## holding it up.
+func _score_stability() -> void:
+	var columns: Dictionary = {}
+	for s in structures:
+		if not is_instance_valid(s):
+			continue
+		s.stability = 100.0 if s.build_type == "foundation" else 0.0
+		var cell := _cell_of(s)
+		if not columns.has(cell):
+			columns[cell] = []
+		columns[cell].append(s)
+
+	for cell in columns:
+		var column: Array = columns[cell]
+		column.sort_custom(func(a, b): return a.position.y < b.position.y)
+		# The step is per level, not per piece: a doorway and the door in it
+		# stand at the same height and must not tax each other.
+		var carried := 0.0
+		var last_y := -INF
+		for s in column:
+			if s.build_type == "foundation":
+				carried = 100.0
+				last_y = s.position.y
+				continue
+			if s.position.y > last_y + 0.5:
+				carried = maxf(0.0, carried - Game.STABILITY_DROP)
+				last_y = s.position.y
+			s.stability = carried
+
+		# A door hangs on its doorway, not on the floor below it
+		for s in column:
+			if not s.is_door:
+				continue
+			var framed := false
+			for other in column:
+				if other.build_type == "doorway" and other.stability > 0.0:
+					framed = true
+					break
+			if not framed:
+				s.stability = 0.0
+
+
+## Rescores the whole map and drops anything left with nothing under it.
+## Returns how many pieces fell. Re-entrant calls are ignored: destroying a
+## collapsed piece unregisters it, which would otherwise call straight back
+## in here in the middle of the sweep.
+func recompute_stability() -> int:
+	if _stability_pass:
+		return 0
+	_stability_pass = true
+	var collapsed := 0
+	# Each round can pull the support out from under the round above it
+	for _round in 8:
+		_score_stability()
+		var doomed := []
+		for s in structures:
+			if is_instance_valid(s) and s.stability <= 0.0:
+				doomed.append(s)
+		if doomed.is_empty():
+			break
+		for s in doomed:
+			collapsed += 1
+			s.free_collapsed()
+	_stability_pass = false
+
+	if collapsed > 0 and started:
+		Game.notify("%d pieces collapsed — nothing holding them up" % collapsed,
+			Color(0.95, 0.5, 0.35))
+		Sfx.play("hit")
+	return collapsed
 
 
 # ==================== SAVE / LOAD ====================
@@ -917,6 +1020,9 @@ func load_game() -> void:
 		structures.append(s)
 		if type == "tool_cupboard":
 			Game.tool_cupboards.append(Vector2(s.position.x, s.position.z))
+
+	# Score the rebuilt base in one pass rather than per piece as it loads
+	recompute_stability()
 
 	for bd in parsed.get("bags", []):
 		if not (bd is Dictionary):

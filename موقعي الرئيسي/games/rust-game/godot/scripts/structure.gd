@@ -27,6 +27,9 @@ var lock_health := 0.0
 ## Which way the builder was facing this piece from when they placed it.
 ## Flattened, world space; Vector3.ZERO means no weak face was recorded.
 var soft_normal := Vector3.ZERO
+## How well held up this piece is, 0-100. Foundations anchor at 100 and
+## everything above loses a step per level. At 0 the piece falls down.
+var stability := 100.0
 
 var _visual: Node3D          # Blender model, when one exists for this piece
 var _fallback_mat: StandardMaterial3D  # only used by the primitive fallback
@@ -44,7 +47,7 @@ func setup(type: String) -> void:
 	build_type = type
 	var bt: Dictionary = Game.BUILDING_TYPES[type]
 	is_door = bt.is_door
-	collision_layer = 2
+	collision_layer = Game.LAYER_FLOOR if type in Game.FLOOR_TYPES else 2
 	collision_mask = 0
 
 	_visual = ModelRegistry.spawn(type)
@@ -286,6 +289,12 @@ func upkeep_total() -> int:
 	for res in upkeep:
 		total += int(upkeep[res])
 	return total
+
+
+## Falls down because nothing is holding it up any more. Same end as being
+## destroyed; named apart so the reason is readable at the call site.
+func free_collapsed() -> void:
+	_destroy()
 
 
 func _destroy() -> void:

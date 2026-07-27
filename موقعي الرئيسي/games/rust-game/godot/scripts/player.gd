@@ -28,7 +28,7 @@ var _weapon_cd := 0.0
 
 func _ready() -> void:
 	collision_layer = 16
-	collision_mask = 7  # terrain + structures + resources
+	collision_mask = 7 | Game.LAYER_FLOOR  # terrain, structures, resources, floors
 
 	var cs := CollisionShape3D.new()
 	var cap := CapsuleShape3D.new()
@@ -210,7 +210,7 @@ func _inspect_structures() -> void:
 	looking_at_structure = null
 	if hud == null:
 		return
-	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2)
+	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | Game.LAYER_FLOOR)
 	if not hit.is_empty() and hit.collider.has_method("toggle_door"):
 		looking_at_structure = hit.collider
 	var soft: bool = (looking_at_structure != null
@@ -273,7 +273,7 @@ func _primary_action() -> void:
 		return
 
 	# 4. Interact ray: structures (2) + resources (4) + NPCs (8)
-	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | 4 | 8)
+	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | 4 | 8 | Game.LAYER_FLOOR)
 	if hit.is_empty():
 		return
 	var obj: Object = hit.collider
@@ -385,7 +385,7 @@ func _use_weapon(id: String) -> void:
 			return
 		Game.remove_item(ammo, 1)
 
-	var hit := _camera_ray(float(data.range), 2 | 4 | 8)
+	var hit := _camera_ray(float(data.range), 2 | 4 | 8 | Game.LAYER_FLOOR)
 	Sfx.play("hit" if ammo == "" else "explosion")
 	if hit.is_empty():
 		return
@@ -412,7 +412,7 @@ func _use_explosive(id: String) -> void:
 	var forward := -camera.global_transform.basis.z
 
 	if data.mode == "place":
-		var hit := _camera_ray(Game.INTERACT_DISTANCE, 1 | 2)
+		var hit := _camera_ray(Game.INTERACT_DISTANCE, 1 | 2 | Game.LAYER_FLOOR)
 		if hit.is_empty():
 			Game.notify("Aim at a wall to plant the charge", Color(1.0, 0.63, 0.0))
 			return

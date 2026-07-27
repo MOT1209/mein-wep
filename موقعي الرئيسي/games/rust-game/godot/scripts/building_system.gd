@@ -45,7 +45,7 @@ func _update_ghost() -> void:
 		_ghost_type = bp
 
 	# Ray against terrain (1) + structures (2)
-	var hit: Dictionary = player._camera_ray(Game.BUILD_DISTANCE, 1 | 2)
+	var hit: Dictionary = player._camera_ray(Game.BUILD_DISTANCE, 1 | 2 | Game.LAYER_FLOOR)
 	if hit.is_empty():
 		_ghost.visible = false
 		_ghost_valid = false
@@ -137,6 +137,7 @@ func place_structure() -> void:
 			s.soft_normal = to_builder.normalized()
 	world.add_child(s)
 	world.register_structure(s)
+	world.recompute_stability()
 
 	if bp == "tool_cupboard":
 		Game.tool_cupboards.append(Vector2(_ghost_pos.x, _ghost_pos.z))
