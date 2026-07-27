@@ -40,8 +40,11 @@ void fragment() {
 "
 
 const SCREEN_MARGIN := 44.0
-const SLOT_SIZE := Vector2(158, 96)
-const PANEL_MIN := Vector2(980, 590)
+## Compact icon tiles; the item's name lives in the tooltip and in the
+## detail panel, which keeps the grid readable at any resolution.
+const SLOT_SIZE := Vector2(80, 80)
+const BELT_SLOT_SIZE := Vector2(64, 64)
+const PANEL_MIN := Vector2(900, 540)
 
 
 func _ready() -> void:
@@ -119,18 +122,29 @@ func _style_window(panel: PanelContainer) -> void:
 	panel.add_theme_stylebox_override("panel", sb)
 
 
-## Roomy icon-over-label slot used by the crafting grid and inventory.
-func _make_slot(id: String, label: String, tooltip: String) -> Button:
+## Compact icon tile. `corner` is a short overlay (a stack count); the full
+## name goes in the tooltip so the grid stays uncluttered.
+func _make_slot(id: String, corner: String, tooltip: String) -> Button:
 	var b := Button.new()
 	b.custom_minimum_size = SLOT_SIZE
 	b.icon = IconFactory.get_icon(id)
 	b.expand_icon = true
 	b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-	b.text = label
+	b.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
 	b.tooltip_text = tooltip
-	b.clip_text = true
-	b.add_theme_font_size_override("font_size", 12)
+	if corner != "":
+		var lab := Label.new()
+		lab.text = corner
+		lab.add_theme_font_size_override("font_size", 11)
+		lab.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+		lab.add_theme_constant_override("outline_size", 4)
+		lab.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+		lab.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		lab.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		lab.offset_right = -4
+		lab.offset_bottom = -2
+		lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		b.add_child(lab)
 	return b
 
 
@@ -156,7 +170,7 @@ func _build_craft_pane(root: VBoxContainer) -> void:
 	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_craft_grid = GridContainer.new()
-	_craft_grid.columns = 3
+	_craft_grid.columns = 6
 	_craft_grid.add_theme_constant_override("h_separation", 6)
 	_craft_grid.add_theme_constant_override("v_separation", 6)
 	_craft_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -184,7 +198,7 @@ func _build_inv_pane(root: VBoxContainer) -> void:
 	_inv_pane.add_child(hint)
 
 	_inv_grid = GridContainer.new()
-	_inv_grid.columns = 6
+	_inv_grid.columns = 8
 	_inv_grid.add_theme_constant_override("h_separation", 6)
 	_inv_grid.add_theme_constant_override("v_separation", 6)
 	_inv_pane.add_child(_inv_grid)
@@ -248,7 +262,7 @@ func _refresh_craft_grid() -> void:
 			continue
 		if selected_category != "common" and item.category != selected_category:
 			continue
-		var b := _make_slot(id, item.name, item.desc)
+		var b := _make_slot(id, "", "%s\n%s" % [item.name, item.desc])
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
 		b.pressed.connect(_on_craft_item_selected.bind(id))
 		_craft_grid.add_child(b)
@@ -357,8 +371,8 @@ func _refresh_inventory() -> void:
 		if count <= 0:
 			continue
 		var item: Dictionary = Game.ITEMS.get(id, {})
-		var b := _make_slot(id, "%s  x%d" % [item.get("name", id), count],
-			str(item.get("desc", "")))
+		var b := _make_slot(id, str(count),
+			"%s\n%s" % [item.get("name", id), item.get("desc", "")])
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
 		if id in Game.belt:
 			b.self_modulate = Color(1.3, 1.1, 0.5)
@@ -381,17 +395,17 @@ func _refresh_belt() -> void:
 	for i in 6:
 		var b := Button.new()
 		var id = Game.belt[i]
-		var label := "-"
+		b.custom_minimum_size = BELT_SLOT_SIZE
+		b.tooltip_text = "Belt slot %d" % (i + 1)
 		if id is String and Game.ITEMS.has(id):
-			label = Game.ITEMS[id].name
 			b.icon = IconFactory.get_icon(id)
 			b.expand_icon = true
 			b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			b.vertical_icon_alignment = VERTICAL_ALIGNMENT_TOP
-		b.text = "%d  %s" % [i + 1, label]
-		b.clip_text = true
-		b.add_theme_font_size_override("font_size", 12)
-		b.custom_minimum_size = Vector2(132, 76)
+			b.vertical_icon_alignment = VERTICAL_ALIGNMENT_CENTER
+			b.tooltip_text = "%d — %s" % [i + 1, Game.ITEMS[id].name]
+		else:
+			b.text = str(i + 1)
+			b.add_theme_font_size_override("font_size", 12)
 		if Game.selected_belt_slot == i:
 			b.self_modulate = Color(1.5, 1.3, 0.6)
 		b.pressed.connect(func():

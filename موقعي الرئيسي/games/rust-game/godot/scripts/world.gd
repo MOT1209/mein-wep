@@ -98,6 +98,7 @@ func _ready() -> void:
 	add_child(hud)
 	hud.world = self
 	player.hud = hud
+	hud.touch_controls.player = player
 
 	load_game()
 	hud.show_start_screen()

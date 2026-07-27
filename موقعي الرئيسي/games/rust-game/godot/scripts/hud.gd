@@ -6,8 +6,11 @@ extends CanvasLayer
 const InventoryUiScript := preload("res://scripts/inventory_ui.gd")
 const IconFactory := preload("res://scripts/icon_factory.gd")
 
-const HOTBAR_SLOT_SIZE := Vector2(78, 78)
-const HOTBAR_BOTTOM_MARGIN := 28.0
+const TouchControlsScript := preload("res://scripts/touch_controls.gd")
+
+const HOTBAR_SLOT_SIZE := Vector2(64, 64)
+const HOTBAR_ICON_SIZE := Vector2(34, 34)
+const HOTBAR_BOTTOM_MARGIN := 24.0
 
 const HUD_MARGIN := 16.0
 const STAT_ROW_HEIGHT := 18.0
@@ -52,6 +55,7 @@ var _rad_overlay: ColorRect
 var _damage_flash: ColorRect
 var _last_health := 100.0
 var inventory_ui: Control
+var touch_controls: Control
 
 
 func _ready() -> void:
@@ -74,6 +78,11 @@ func _ready() -> void:
 	inventory_ui = InventoryUiScript.new()
 	add_child(inventory_ui)
 
+	Game.detect_touch_ui()
+	touch_controls = TouchControlsScript.new()
+	touch_controls.name = "TouchControls"
+	add_child(touch_controls)
+
 	Game.toast.connect(_on_toast)
 	Game.inventory_changed.connect(_refresh_resources)
 	Game.inventory_changed.connect(_refresh_hotbar)
@@ -88,6 +97,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
 		handle_escape()
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("toggle_touch_ui"):
+		# F8 previews the on-screen controls on a desktop
+		set_touch_ui(not Game.touch_ui)
+		get_viewport().set_input_as_handled()
+
+
+func set_touch_ui(on: bool) -> void:
+	Game.touch_ui = on
+	touch_controls.set_enabled(on)
+	Game.set_ui(Game.ui_open)   # re-apply mouse capture for the new mode
+	Game.notify("Touch controls %s" % ("ON" if on else "OFF"), Color(0.2, 0.6, 0.9))
 
 
 # ==================== BUILDERS ====================
@@ -315,30 +335,39 @@ func _build_hotbar() -> void:
 		slot.custom_minimum_size = HOTBAR_SLOT_SIZE
 		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-		var v := VBoxContainer.new()
-		v.alignment = BoxContainer.ALIGNMENT_CENTER
-		v.add_theme_constant_override("separation", 2)
-		v.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-		var num := _label(str(i + 1), 10, Color(1, 1, 1, 0.5))
-		num.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		# The slot number sits in the corner rather than on its own row, so
+		# the icon gets almost the whole 64px tile.
+		var stack := Control.new()
+		stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 		var icon := TextureRect.new()
-		icon.custom_minimum_size = Vector2(32, 32)
+		icon.set_anchors_preset(Control.PRESET_FULL_RECT)
+		icon.custom_minimum_size = HOTBAR_ICON_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 		icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stack.add_child(icon)
 
-		var name_lab := _label("", 10, Color(0.86, 0.86, 0.86))
-		name_lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		name_lab.clip_text = true
+		# These sit in a plain Control, not a container, so their width is
+		# pinned explicitly rather than left to a deferred re-layout when
+		# the text changes.
+		var num := _label(str(i + 1), 10, Color(1, 1, 1, 0.55))
+		num.set_anchors_preset(Control.PRESET_TOP_LEFT)
+		num.custom_minimum_size = Vector2(14, 12)
+		num.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stack.add_child(num)
 
-		v.add_child(num)
-		v.add_child(icon)
-		v.add_child(name_lab)
-		slot.add_child(v)
+		var count_lab := _label("", 10, Color(1, 1, 1, 0.9))
+		count_lab.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+		count_lab.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+		count_lab.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		count_lab.custom_minimum_size = Vector2(30, 12)
+		count_lab.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count_lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		stack.add_child(count_lab)
+
+		slot.add_child(stack)
 		bar.add_child(slot)
-		_hotbar_slots.append({"panel": slot, "icon": icon, "name": name_lab})
+		_hotbar_slots.append({"panel": slot, "icon": icon, "name": count_lab})
 
 
 ## Semi-transparent slot plate; the selected slot gets a bright rust border.
@@ -360,11 +389,13 @@ func _refresh_hotbar() -> void:
 		var id = Game.belt[i]
 		if id is String and Game.ITEMS.has(id):
 			slot.icon.texture = IconFactory.get_icon(id)
+			slot.panel.tooltip_text = Game.ITEMS[id].name
 			var count := Game.get_count(id)
-			slot.name.text = "%s%s" % [Game.ITEMS[id].name, (" x%d" % count) if count > 1 else ""]
+			slot.name.text = str(count) if count > 1 else ""
 		else:
 			slot.icon.texture = null
-			slot.name.text = "—"
+			slot.panel.tooltip_text = ""
+			slot.name.text = ""
 
 
 func _build_toast() -> void:

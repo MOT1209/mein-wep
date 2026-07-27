@@ -113,16 +113,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		rotate_y(-event.relative.x * MOUSE_SENS)
-		head.rotate_x(-event.relative.y * MOUSE_SENS)
-		head.rotation.x = clampf(head.rotation.x, -PI / 2.0, PI / 2.0)
-	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
-		if event.button_index == MOUSE_BUTTON_LEFT:
-			_primary_action()
-		elif event.button_index == MOUSE_BUTTON_RIGHT:
-			if Game.active_tool() == "building_plan":
-				hud.open_blueprint_menu()
-	elif event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F:
+		apply_look(event.relative)
+	elif event.is_action_pressed("attack"):
+		_primary_action()
+	elif event.is_action_pressed("build_menu"):
+		if Game.active_tool() == "building_plan":
+			hud.open_blueprint_menu()
+	elif event.is_action_pressed("interact"):
 		_try_drink()
 	elif event.is_action_pressed("blueprint"):
 		hud.open_blueprint_menu()
@@ -144,6 +141,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				Game.selected_belt_slot = i
 				Game.belt_changed.emit()
 				break
+
+
+## Rotate the view by a pixel delta. Shared by mouse look and the touch
+## look-drag, so both paths obey the same sensitivity and pitch clamp.
+func apply_look(rel: Vector2) -> void:
+	rotate_y(-rel.x * MOUSE_SENS)
+	head.rotate_x(-rel.y * MOUSE_SENS)
+	head.rotation.x = clampf(head.rotation.x, -PI / 2.0, PI / 2.0)
 
 
 func _toggle_view() -> void:

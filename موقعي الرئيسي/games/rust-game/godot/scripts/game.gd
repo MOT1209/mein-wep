@@ -270,9 +270,18 @@ func notify(msg: String, color: Color = Color(0.3, 0.8, 0.3)) -> void:
 	toast.emit(msg, color)
 
 
+## True on phones/tablets, or when the on-screen controls are forced on for
+## testing. Capturing the mouse makes no sense in either case.
+var touch_ui := false
+
+
+func detect_touch_ui() -> void:
+	touch_ui = DisplayServer.is_touchscreen_available() or OS.has_feature("mobile")
+
+
 func set_ui(name_: String) -> void:
 	ui_open = name_
-	if name_ == "":
+	if name_ == "" and not touch_ui:
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	else:
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE

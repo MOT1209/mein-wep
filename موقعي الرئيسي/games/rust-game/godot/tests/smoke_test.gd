@@ -541,6 +541,61 @@ func _run_tests() -> void:
 	_check(hud._bar_fills["health"].value.text == str(roundi(float(game.stats.health))),
 		"each stat shows its numeric value")
 
+	# --- Responsive display settings
+	_check(str(ProjectSettings.get_setting("display/window/stretch/mode")) == "canvas_items",
+		"stretch mode is canvas_items so the UI scales with the window")
+	_check(str(ProjectSettings.get_setting("display/window/stretch/aspect")) == "expand",
+		"stretch aspect is expand so wider screens gain view, not bars")
+
+	# --- Compact slot sizing
+	_check(hud.HOTBAR_SLOT_SIZE == Vector2(64, 64), "hotbar slots are 64x64")
+	_check(hud._hotbar_slots[0].panel.custom_minimum_size == Vector2(64, 64),
+		"the built hotbar slots really use that size")
+	_check(hud.inventory_ui.SLOT_SIZE == Vector2(80, 80), "inventory tiles are 80x80")
+	_check(hud.inventory_ui.BELT_SLOT_SIZE == Vector2(64, 64), "belt tiles match the hotbar")
+
+	# --- Touch controls
+	var touch = hud.touch_controls
+	_check(touch != null, "touch control layer exists")
+	_check(not touch.visible or game.touch_ui,
+		"touch controls stay hidden unless a touchscreen was detected")
+	var actions := []
+	for spec in touch.PAD_BUTTONS:
+		actions.append(spec.action)
+	for needed in ["attack", "jump", "interact", "inventory"]:
+		_check(needed in actions, "touch pad has a %s button" % needed)
+		_check(InputMap.has_action(needed), "'%s' is a real input action" % needed)
+
+	hud.set_touch_ui(true)
+	_check(touch.visible, "touch controls appear once enabled")
+	_check(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
+		"the mouse is never captured in touch mode")
+	touch._layout()
+	_check(touch._button_rects.size() == touch.PAD_BUTTONS.size(),
+		"every pad button got a hit rect")
+	var vp_rect := Rect2(Vector2.ZERO, touch.get_viewport_rect().size)
+	var stick_ok: bool = touch._stick_centre.x < vp_rect.size.x * 0.5
+	_check(stick_ok, "the joystick sits on the left half of the screen")
+	var pad_right := true
+	for entry in touch._button_rects:
+		if entry.rect.get_center().x < vp_rect.size.x * 0.5:
+			pad_right = false
+	_check(pad_right, "the action pad sits on the right half of the screen")
+
+	# Deflecting the stick drives the same actions the keyboard uses
+	touch._update_stick(touch._stick_centre + Vector2(touch.STICK_RADIUS, 0))
+	_check(Input.is_action_pressed("move_right") and not Input.is_action_pressed("move_left"),
+		"pushing the stick right presses move_right")
+	_check(Input.get_action_strength("move_right") > 0.9, "full deflection gives full strength")
+	touch._update_stick(touch._stick_centre + Vector2(0, -touch.STICK_RADIUS))
+	_check(Input.is_action_pressed("move_forward"), "pushing the stick up presses move_forward")
+	touch._update_stick(touch._stick_centre)
+	_check(not Input.is_action_pressed("move_right")
+		and not Input.is_action_pressed("move_forward"),
+		"centring the stick releases the movement actions")
+	hud.set_touch_ui(false)
+	_check(not touch.visible, "touch controls hide again when disabled")
+
 	# --- Pause menu
 	_check(not hud._pause_menu.visible, "pause menu hidden by default")
 	_check(not paused, "scene tree not paused during play")
