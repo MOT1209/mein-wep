@@ -1,26 +1,43 @@
 extends CharacterBody3D
-## World creatures. Hostile (wolf/bear): chase-and-melee. Passive (deer):
-## wanders and flees from the player, drops meat when hunted.
+## World creatures and monument guards. Hostile melee (wolf/bear):
+## chase-and-bite. Hostile ranged (scientist): holds its post, shoots on
+## sight and forces doors to follow you home. Passive (deer): wanders and
+## flees from the player, drops meat when hunted.
 ## Damage flash, loot drop and shrink-out death for all types.
 
+## `aggro` is how far it notices you; `range` and `ranged` turn the attack
+## into gunfire. `leash` keeps a guard near the post it spawned on, so
+## monuments stay dangerous without the whole map following you home.
 const TYPES := {
 	"wolf": {"health": 50.0, "speed": 5.0, "damage": 12.0, "hostile": true,
-		"color": Color8(93, 64, 55), "size": Vector3(0.8, 1.4, 0.4)},
+		"color": Color8(93, 64, 55), "size": Vector3(0.8, 1.4, 0.4),
+		"aggro": 18.0, "cooldown": 1.2},
 	"bear": {"health": 120.0, "speed": 3.0, "damage": 20.0, "hostile": true,
-		"color": Color8(62, 39, 35), "size": Vector3(1.1, 1.6, 0.6)},
+		"color": Color8(62, 39, 35), "size": Vector3(1.1, 1.6, 0.6),
+		"aggro": 18.0, "cooldown": 1.2},
 	"deer": {"health": 40.0, "speed": 7.0, "damage": 0.0, "hostile": false,
 		"color": Color8(193, 154, 107), "size": Vector3(0.5, 1.1, 0.9)},
+	"scientist": {"health": 90.0, "speed": 4.0, "damage": 13.0, "hostile": true,
+		"color": Color8(38, 84, 124), "size": Vector3(0.6, 1.8, 0.4),
+		"aggro": 45.0, "cooldown": 1.3, "ranged": true, "range": 45.0,
+		"standoff": 12.0, "leash": 65.0, "opens_doors": true, "accuracy": 0.8},
 }
 
 const LOOT := {
 	"wolf": {"cloth": 10, "leather": 5, "raw_meat": 2},
 	"bear": {"cloth": 15, "leather": 10, "raw_meat": 4},
 	"deer": {"raw_meat": 3, "leather": 2, "cloth": 2},
+	"scientist": {"scrap": 15, "frag": 25, "ammo_rifle": 5, "cloth": 5},
 }
+
+## How hard a guard works on a door that is in its way.
+const DOOR_DAMAGE := 8.0
 
 var npc_type := "wolf"
 var health := 50.0
 var world: Node3D
+## Where this creature was put down. Guards come back to it.
+var home := Vector3.ZERO
 var _cfg: Dictionary
 var _attack_cd := 0.0
 var _dead := false
@@ -63,12 +80,30 @@ func setup(t: String, w: Node3D) -> void:
 	head.position = Vector3(0, _cfg.size.y * 0.95, -_cfg.size.z * 0.55)
 	add_child(head)
 
+	# A guard reads as armed from a distance
+	if _cfg.get("ranged", false):
+		var rifle := MeshInstance3D.new()
+		var rifle_mesh := BoxMesh.new()
+		rifle_mesh.size = Vector3(0.08, 0.12, 0.9)
+		var rifle_mat := StandardMaterial3D.new()
+		rifle_mat.albedo_color = Color8(40, 36, 34)
+		rifle_mat.metallic = 0.6
+		rifle_mesh.material = rifle_mat
+		rifle.mesh = rifle_mesh
+		rifle.position = Vector3(_cfg.size.x * 0.6, _cfg.size.y * 0.62, -0.35)
+		add_child(rifle)
+
 	var cs := CollisionShape3D.new()
 	var shape := BoxShape3D.new()
 	shape.size = _cfg.size
 	cs.shape = shape
 	cs.position.y = _cfg.size.y * 0.5
 	add_child(cs)
+
+
+func _ready() -> void:
+	if home == Vector3.ZERO:
+		home = position
 
 
 func _physics_process(delta: float) -> void:
@@ -88,18 +123,138 @@ func _physics_process(delta: float) -> void:
 	position.y = world.terrain_height(position.x, position.z)
 
 
-func _hostile_ai(player: Node3D, dist: float, _delta: float) -> void:
-	if dist >= 18.0:
+func _hostile_ai(player: Node3D, dist: float, delta: float) -> void:
+	# A guard that has strayed too far from its post walks back instead of
+	# chasing you across the map.
+	var leash := float(_cfg.get("leash", 0.0))
+	if leash > 0.0 and position.distance_to(home) > leash:
+		var back := home - position
+		back.y = 0.0
+		if back.length() > 1.0:
+			_face(home)
+			_walk(back.normalized(), _cfg.speed)
+			return
+
+	if dist >= float(_cfg.get("aggro", 18.0)):
+		if leash > 0.0:
+			_patrol(delta)
 		return
+
 	_face(player.position)
+	if _cfg.get("ranged", false):
+		_ranged_attack(player, dist)
+	else:
+		_melee_attack(player, dist)
+
+
+func _melee_attack(player: Node3D, dist: float) -> void:
 	if dist > 1.5:
 		var dir := (player.position - position)
 		dir.y = 0.0
 		_walk(dir.normalized(), _cfg.speed)
 	if dist < 2.5 and _attack_cd <= 0.0:
 		Game.stats.health -= _cfg.damage
-		_attack_cd = 1.2
+		_attack_cd = float(_cfg.get("cooldown", 1.2))
 		Sfx.play("hit")
+
+
+## Shoots whenever it can see you. When a wall is in the way it closes in
+## instead, which is what walks it into your doorway.
+func _ranged_attack(player: Node3D, dist: float) -> void:
+	var clear := _can_see(player)
+	if clear and dist <= float(_cfg.range):
+		if dist < float(_cfg.get("standoff", 12.0)) * 0.6:
+			# Too close for a rifle: back off to a comfortable firing distance
+			var away := (position - player.position)
+			away.y = 0.0
+			_walk(away.normalized(), _cfg.speed * 0.7)
+		if _attack_cd <= 0.0:
+			_fire_at(player)
+		return
+
+	var dir := (player.position - position)
+	dir.y = 0.0
+	if dir.length() > 1.0:
+		_walk(dir.normalized(), _cfg.speed)
+
+
+## Guards miss, and they miss more the further out you are. Three of them
+## landing every shot kills a full-health player in about three seconds,
+## which would make the only source of high quality metal unapproachable.
+func hit_chance(dist: float) -> float:
+	var falloff := clampf(dist / float(_cfg.get("range", 45.0)), 0.0, 1.0)
+	return float(_cfg.get("accuracy", 0.8)) * lerpf(1.0, 0.3, falloff)
+
+
+func _fire_at(player: Node3D) -> void:
+	_attack_cd = float(_cfg.get("cooldown", 1.3))
+	var target := player.global_position + Vector3.UP * 1.0
+	Sfx.play("explosion")
+	if randf() > hit_chance(position.distance_to(player.position)):
+		# A visible miss: the round goes wide, so being shot at still reads
+		var wide := Vector3(randf_range(-1.5, 1.5), randf_range(-0.5, 1.5),
+			randf_range(-1.5, 1.5))
+		_tracer(_eye(), target + wide)
+		return
+	Game.stats.health -= _cfg.damage
+	_tracer(_eye(), target)
+
+
+## Structures and world props block a shot. Terrain deliberately does not:
+## creatures never collide with it (see setup), so a hill they are standing
+## on must not be able to eat their own bullets.
+func _can_see(player: Node3D) -> bool:
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return true
+	var query := PhysicsRayQueryParameters3D.create(
+		_eye(), player.global_position + Vector3.UP * 1.0, 2 | 4, [get_rid()])
+	return space.intersect_ray(query).is_empty()
+
+
+func _eye() -> Vector3:
+	return global_position + Vector3.UP * (float(_cfg.size.y) * 0.85)
+
+
+## A thin line that fades out where the shot went, so being shot at from
+## the treeline reads as gunfire and not as damage out of nowhere.
+func _tracer(from: Vector3, to: Vector3) -> void:
+	var span := from.distance_to(to)
+	if span < 0.1 or world == null:
+		return
+	var mi := MeshInstance3D.new()
+	var box := BoxMesh.new()
+	box.size = Vector3(0.03, 0.03, span)
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color(1.0, 0.85, 0.4)
+	mat.emission_enabled = true
+	mat.emission = Color(1.0, 0.8, 0.3)
+	mat.emission_energy_multiplier = 2.0
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	box.material = mat
+	mi.mesh = box
+	world.add_child(mi)
+	mi.global_position = (from + to) * 0.5
+	if not from.is_equal_approx(to):
+		mi.look_at(to, Vector3.UP)
+	var tw := mi.create_tween()
+	tw.tween_property(mat, "albedo_color:a", 0.0, 0.12)
+	tw.tween_callback(mi.queue_free)
+
+
+## Guards drift around their post while nothing is happening.
+func _patrol(delta: float) -> void:
+	_wander_timer -= delta
+	if _wander_timer <= 0.0:
+		_wander_timer = randf_range(3.0, 7.0)
+		if randf() < 0.4:
+			_wander_dir = Vector3.ZERO
+		else:
+			var ang := randf() * TAU
+			_wander_dir = Vector3(cos(ang), 0, sin(ang))
+	if _wander_dir != Vector3.ZERO:
+		_face(position + _wander_dir)
+		_walk(_wander_dir, 1.6)
 
 
 func _passive_ai(player: Node3D, dist: float, delta: float) -> void:
@@ -134,6 +289,25 @@ func _passive_ai(player: Node3D, dist: float, delta: float) -> void:
 func _walk(dir: Vector3, speed: float) -> void:
 	velocity = Vector3(dir.x * speed, 0.0, dir.z * speed)
 	move_and_slide()
+	if _cfg.get("opens_doors", false):
+		_force_doors()
+
+
+## A door the guard has just walked into. An unlocked one it simply opens
+## and follows you through; a locked one it has to break, which is the
+## entire reason to spend metal on a lock.
+func _force_doors() -> void:
+	for i in get_slide_collision_count():
+		var col: Object = get_slide_collision(i).get_collider()
+		if col == null or not col.has_method("npc_open_door") or not col.is_door:
+			continue
+		if col.npc_open_door():
+			return
+		if _attack_cd <= 0.0:
+			_attack_cd = float(_cfg.get("cooldown", 1.2))
+			col.attack_lock(DOOR_DAMAGE)
+			Sfx.play("hit")
+		return
 
 
 func _face(target: Vector3) -> void:
@@ -168,6 +342,9 @@ func _die() -> void:
 		Game.add_item(id, loot[id])
 		total += int(loot[id])
 	Game.notify("%s killed! +%d resources" % [npc_type.capitalize(), total], Color(0.9, 0.3, 0.3))
+	# Guards are a renewable source: the monument staffs itself again later.
+	if world != null and world.has_method("queue_npc_respawn") and _cfg.get("leash", 0.0) > 0.0:
+		world.queue_npc_respawn(npc_type, home)
 	collision_layer = 0
 	var tw := create_tween()
 	tw.set_parallel(true)

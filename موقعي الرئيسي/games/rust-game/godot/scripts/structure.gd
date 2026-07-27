@@ -5,6 +5,11 @@ extends StaticBody3D
 
 const ModelRegistry := preload("res://scripts/model_registry.gd")
 
+## The walkable hole a doorway leaves in itself. Wide and tall enough for the
+## 0.9 x 2.1 door piece that fills it.
+const DOOR_GAP_W := 1.1
+const DOOR_GAP_H := 2.2
+
 var build_type := "foundation"
 var tier := "twig"
 var health := 10.0
@@ -15,9 +20,21 @@ var base_rot := 0.0
 var decaying := false
 ## Tool Cupboards only: materials stocked to pay this base's upkeep.
 var upkeep: Dictionary = {}
+## Doors only: the installed lock ("" when the door swings freely) and the
+## punishment that lock has left in it.
+var lock_type := ""
+var lock_health := 0.0
 
 var _visual: Node3D          # Blender model, when one exists for this piece
 var _fallback_mat: StandardMaterial3D  # only used by the primitive fallback
+var _lock_visual: Node3D     # the padlock hanging on a locked door
+var _closed_pos := Vector3.ZERO  # where a door sits when shut — its hinge line
+
+
+func _ready() -> void:
+	# Placement and load both set position before adding the piece to the
+	# tree, so this is the shut position for the rest of the piece's life.
+	_closed_pos = position
 
 
 func setup(type: String) -> void:
@@ -44,13 +61,33 @@ func setup(type: String) -> void:
 
 	# Collision always comes from the declared grid size, never the mesh, so
 	# swapping a model can never shift a placed structure's hitbox.
-	var cs := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = bt.size
-	cs.shape = shape
-	add_child(cs)
+	_build_collision(bt.size)
 
 	apply_tier("twig")
+
+
+## One solid box per piece — except a doorway, which is a frame. It used to
+## get the same full 3x3 box as a wall, so the opening you can see through
+## was solid to walk into: nothing, not even the owner, could get through
+## their own door.
+func _build_collision(size: Vector3) -> void:
+	if build_type != "doorway":
+		_add_box(size, Vector3.ZERO)
+		return
+	var post := (size.x - DOOR_GAP_W) * 0.5
+	var lintel := size.y - DOOR_GAP_H
+	_add_box(Vector3(post, size.y, size.z), Vector3((size.x - post) * -0.5, 0.0, 0.0))
+	_add_box(Vector3(post, size.y, size.z), Vector3((size.x - post) * 0.5, 0.0, 0.0))
+	_add_box(Vector3(size.x, lintel, size.z), Vector3(0.0, (size.y - lintel) * 0.5, 0.0))
+
+
+func _add_box(size: Vector3, offset: Vector3) -> void:
+	var cs := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = size
+	cs.shape = shape
+	cs.position = offset
+	add_child(cs)
 
 
 func apply_tier(t: String) -> void:
@@ -70,9 +107,94 @@ func apply_tier(t: String) -> void:
 
 
 func toggle_door() -> void:
-	is_open = not is_open
-	rotation.y = base_rot + (PI / 2.0 if is_open else 0.0)
+	set_door_state(not is_open)
 	Sfx.play("door")
+
+
+## Doors hinge on their edge, not their middle. Rotating about the centre
+## left half the leaf standing in the opening, so an open door still blocked
+## the doorway it belongs to — for the owner as much as for anything else.
+func set_door_state(open: bool) -> void:
+	is_open = open
+	rotation.y = base_rot + (PI / 2.0 if open else 0.0)
+	position = _closed_pos
+	if open:
+		var w: float = Game.BUILDING_TYPES[build_type].size.x
+		position += Vector3(-w * 0.5, 0.0, w * 0.5).rotated(Vector3.UP, base_rot)
+
+
+# ==================== LOCKS ====================
+
+func is_locked() -> bool:
+	return lock_type != ""
+
+
+## Fits a lock from the player's hand. Doors only, one lock each.
+func install_lock(id: String) -> bool:
+	if not is_door or not Game.LOCKS.has(id):
+		return false
+	if is_locked():
+		return false
+	lock_type = id
+	lock_health = float(Game.LOCKS[id].strength)
+	_show_lock()
+	return true
+
+
+## What a hostile gets when it tries the handle. The owner uses toggle_door
+## and is never refused; anything else has to get through the lock first.
+func npc_open_door() -> bool:
+	if not is_door or is_locked():
+		return false
+	if not is_open:
+		toggle_door()
+	return true
+
+
+## A hostile working on the lock itself. A key lock eventually pops, which
+## leaves the door usable again; a code lock has nothing to break, so the
+## blow lands on the door instead.
+func attack_lock(amount: float) -> void:
+	if not is_locked():
+		return
+	if lock_health <= 0.0:
+		take_hit(amount)
+		return
+	lock_health -= amount
+	if lock_health <= 0.0:
+		Game.notify("%s broken open!" % Game.LOCKS[lock_type].name, Color(0.9, 0.3, 0.3))
+		_remove_lock()
+		Sfx.play("hit")
+
+
+func _remove_lock() -> void:
+	lock_type = ""
+	lock_health = 0.0
+	if is_instance_valid(_lock_visual):
+		_lock_visual.queue_free()
+	_lock_visual = null
+
+
+## Small padlock block on the door face. The code lock has a model; the key
+## lock falls back to a dull grey box, same as every other piece does.
+func _show_lock() -> void:
+	if is_instance_valid(_lock_visual):
+		_lock_visual.queue_free()
+	var node: Node3D = ModelRegistry.spawn(lock_type)
+	if node == null:
+		var mi := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.16, 0.22, 0.08)
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color8(84, 110, 122)
+		mat.metallic = 0.7
+		mat.roughness = 0.35
+		box.material = mat
+		mi.mesh = box
+		node = mi
+	node.position = Vector3(0.3, 0.1, 0.12)
+	add_child(node)
+	_lock_visual = node
 
 
 ## Bare-fist damage (punching structures, like the JS version).

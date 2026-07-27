@@ -47,6 +47,15 @@ const WEAPONS := {
 	"ak47": {"damage": 55.0, "range": 130.0, "cooldown": 0.12, "ammo": "ammo_rifle"},
 }
 
+## Door locks. Installed on a door with the lock in hand; the owner always
+## walks through, but a hostile cannot open a locked door. `strength` is how
+## much punishment the lock itself takes before it gives way — a code lock
+## has no keyhole to break, so an attacker has to bring the whole door down.
+const LOCKS := {
+	"lock": {"name": "Key Lock", "strength": 100.0},
+	"codelock": {"name": "Code Lock", "strength": 0.0},
+}
+
 ## Raiding gear. `mode` is how it gets deployed: stuck to a wall, thrown,
 ## or fired from a launcher. `impact` blows on first contact.
 const EXPLOSIVES := {

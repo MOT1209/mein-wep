@@ -22,6 +22,9 @@ const BUSH_COUNT := 25
 const WOLFBEAR_COUNT := 5
 const DEER_COUNT := 6
 const RESPAWN_DELAY := 30.0
+const GUARDS_PER_MONUMENT := 3
+const GUARD_POST_RADIUS := 9.0
+const NPC_RESPAWN_DELAY := 180.0
 const TERRAIN_SEGMENTS := 120
 const WATER_LEVEL := -2.0
 const GRASS_COUNT := 2500
@@ -68,6 +71,7 @@ var rad_zones: Array = []       # Array of Vector2 (x, z)
 var structures: Array = []      # placed structure nodes
 var stations: Array = []        # placed campfire/furnace nodes
 var respawn_queue: Array = []   # {type, pos, at}
+var npc_respawn_queue: Array = []  # {type, pos, at} — monument guards
 var clock := 0.0
 var _sun_elevation := 1.0   # sin of the sun angle; drives night-time cold
 var _respawn_timer := 0.0
@@ -438,6 +442,14 @@ func _create_monument(x: float, z: float) -> void:
 	rad_zones.append(Vector2(x, z))
 	spawn_resource("crate", Vector3(x + 2.0, terrain_height(x + 2.0, z), z))
 
+	# The crate is the only high quality metal in the world, so it is worth
+	# posting guards on it. They are the reason to bring a real weapon.
+	for i in GUARDS_PER_MONUMENT:
+		var ang := TAU * float(i) / float(GUARDS_PER_MONUMENT)
+		var gx := x + cos(ang) * GUARD_POST_RADIUS
+		var gz := z + sin(ang) * GUARD_POST_RADIUS
+		spawn_npc("scientist", Vector3(gx, terrain_height(gx, gz), gz))
+
 
 func _spawn_npcs() -> void:
 	for i in WOLFBEAR_COUNT:
@@ -454,7 +466,14 @@ func spawn_npc(type: String, pos: Vector3) -> void:
 	var npc: CharacterBody3D = NpcScript.new()
 	npc.setup(type, self)
 	npc.position = pos
+	npc.home = pos
 	add_child(npc)
+
+
+## A killed guard leaves its post empty for a while, then it is filled
+## again — otherwise clearing a monument once would clear it forever.
+func queue_npc_respawn(type: String, pos: Vector3) -> void:
+	npc_respawn_queue.append({"type": type, "pos": pos, "at": clock + NPC_RESPAWN_DELAY})
 
 
 func _create_player() -> void:
@@ -558,6 +577,14 @@ func _process(delta: float) -> void:
 			else:
 				remaining.append(r)
 		respawn_queue = remaining
+
+		var still_waiting := []
+		for n in npc_respawn_queue:
+			if clock >= n.at:
+				spawn_npc(n.type, n.pos)
+			else:
+				still_waiting.append(n)
+		npc_respawn_queue = still_waiting
 
 	# Base decay / Tool Cupboard upkeep
 	_decay_timer += delta
@@ -726,6 +753,8 @@ func save_game() -> void:
 			"tier": s.tier,
 			"health": s.health,
 			"upkeep": s.upkeep,
+			"lock": s.lock_type,
+			"lock_health": s.lock_health,
 		})
 	for st in stations:
 		if not is_instance_valid(st):
@@ -789,6 +818,10 @@ func load_game() -> void:
 		if saved_upkeep is Dictionary:
 			for k in saved_upkeep:
 				s.upkeep[k] = int(saved_upkeep[k])
+		var saved_lock := str(sd.get("lock", ""))
+		if saved_lock != "" and s.install_lock(saved_lock):
+			# A half-broken lock stays half-broken across a reload
+			s.lock_health = float(sd.get("lock_health", s.lock_health))
 		structures.append(s)
 		if type == "tool_cupboard":
 			Game.tool_cupboards.append(Vector2(s.position.x, s.position.z))

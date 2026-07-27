@@ -739,6 +739,12 @@ func update_build_info(s: Node3D) -> void:
 	elif s.decaying:
 		_info_status.text = "DECAYING — no upkeep"
 		_info_status.add_theme_color_override("font_color", Color(0.95, 0.5, 0.35))
+	elif s.is_locked():
+		_info_status.text = "%s fitted" % Game.LOCKS[s.lock_type].name
+		_info_status.add_theme_color_override("font_color", Color(0.4, 0.85, 0.4))
+	elif s.is_door:
+		_info_status.text = "No lock — anything hostile can walk in"
+		_info_status.add_theme_color_override("font_color", Color(0.95, 0.75, 0.35))
 	else:
 		_info_status.text = ""
 	_info_panel.visible = true

@@ -281,10 +281,13 @@ func _primary_action() -> void:
 		obj.interact_station()
 		return
 
-	# Doors toggle open/closed
+	# Doors toggle open/closed, or take the lock you are holding
 	if obj.has_method("toggle_door"):
 		if obj.is_door:
-			obj.toggle_door()
+			if Game.LOCKS.has(tool):
+				_install_lock(obj, tool)
+			else:
+				obj.toggle_door()
 			return
 		# Tool Cupboard: stock it with upkeep materials
 		if obj.build_type == "tool_cupboard" and tool != "hammer":
@@ -346,6 +349,23 @@ func _spawn_hit_particles(pos: Vector3, color: Color) -> void:
 	t.timeout.connect(func():
 		if is_instance_valid(parts):
 			parts.queue_free())
+
+
+## Fits the held lock onto the door you are aiming at. Locked doors still
+## open for you — the point is that nothing hostile can follow you through.
+func _install_lock(door: Node3D, id: String) -> void:
+	var label: String = Game.LOCKS[id].name
+	if door.is_locked():
+		Game.notify("That door already has a lock", Color(1.0, 0.63, 0.0))
+		return
+	if Game.get_count(id) <= 0:
+		Game.notify("Craft a %s first" % label, Color(0.9, 0.3, 0.3))
+		return
+	if not door.install_lock(id):
+		return
+	_consume_from_belt(id)
+	Game.notify("%s installed" % label)
+	Sfx.play("build")
 
 
 ## Swings a melee weapon or fires a ranged one. Ranged weapons spend a

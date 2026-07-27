@@ -75,6 +75,7 @@ func _run() -> void:
 	_audit_dead_items()
 	_audit_survival()
 	_audit_progression_costs()
+	_audit_monument_run()
 	_audit_controls()
 
 	_section("SUMMARY")
@@ -188,6 +189,9 @@ func _audit_dead_items() -> void:
 	for id in game.DEPLOYABLES:
 		used_directly[id] = true
 	for id in game.EXPLOSIVES:
+		used_directly[id] = true
+	# Spent on a door, where they decide whether a guard can follow you in
+	for id in game.LOCKS:
 		used_directly[id] = true
 	# Things whose effect lives in code rather than in a recipe: the torch
 	# lights the player, the launcher fires rockets, doors get placed.
@@ -328,6 +332,55 @@ func _audit_progression_costs() -> void:
 	if not (made_powder and made_explosives):
 		_note("BLOCKER", "The sulfur to explosives chain cannot be completed even with "
 			+ "plenty of inputs.")
+
+
+## The monument holds the only high quality metal on the map, and it is
+## guarded and irradiated. If the fight is unwinnable the tier-3 half of the
+## crafting tree is decoration; if it is free, the radiation is theatre.
+func _audit_monument_run() -> void:
+	_section("THE MONUMENT RUN")
+	var npc_script = load("res://scripts/npc.gd")
+	var sci: Dictionary = npc_script.TYPES["scientist"]
+	var guards: int = world.GUARDS_PER_MONUMENT
+
+	# Averaged over the approach: full range down to the crate
+	var probe = npc_script.new()
+	probe.setup("scientist", world)
+	var hit_avg := 0.0
+	for step in 5:
+		hit_avg += probe.hit_chance(float(sci.range) * (float(step) + 0.5) / 5.0)
+	hit_avg /= 5.0
+	probe.free()
+
+	var dps: float = guards * float(sci.damage) * hit_avg / float(sci.cooldown)
+	var ttk: float = 100.0 / dps
+	print("  %d guards, %.0f damage a shot, %.0f%% of shots land on approach"
+		% [guards, float(sci.damage), hit_avg * 100.0])
+	print("  => %.1f damage a second, %.0fs of standing in the open before you die" % [dps, ttk])
+	if ttk < 5.0:
+		_note("BALANCE", "Guards kill a full-health player in %.0fs, which is not "
+			% ttk + "enough time to shoot back or run. The monument is a wall, "
+			+ "and everything gated behind high quality metal is unreachable.")
+	elif ttk > 60.0:
+		_note("BALANCE", "Guards need %.0fs to kill you, so the monument is free "
+			% ttk + "loot and the radiation is the only real cost.")
+
+	# Radiation runs on its own clock while the shooting happens
+	var rad_fill: float = 100.0 / 2.0
+	print("  radiation fills in %.0fs inside the %.0fm zone, then costs 2 hp/s"
+		% [rad_fill, game.RAD_ZONE_RADIUS])
+	if rad_fill > ttk:
+		print("  (the guards, not the radiation, are what stop you)")
+
+	var weapons_in_reach := []
+	for id in game.WEAPONS:
+		if float(game.WEAPONS[id].range) >= float(sci.range):
+			weapons_in_reach.append(id)
+	if weapons_in_reach.is_empty():
+		_note("BALANCE", "No weapon reaches as far as a guard's rifle (%.0fm), so "
+			% float(sci.range) + "there is no way to fight one on even terms.")
+	else:
+		print("  weapons that can answer at their range: %s" % str(weapons_in_reach))
 
 
 func _audit_controls() -> void:

@@ -45,6 +45,70 @@ func _check(ok: bool, test_name: String) -> void:
 	print(("PASS: " if ok else "FAIL: ") + test_name)
 
 
+## Is `local` (in the structure's own space) inside any of its collision
+## boxes? Lets a geometry check run without waiting on the physics server.
+func _covers(s: Node3D, local: Vector3) -> bool:
+	for c in s.get_children():
+		if not (c is CollisionShape3D):
+			continue
+		var box := (c as CollisionShape3D).shape as BoxShape3D
+		if box == null:
+			continue
+		var p: Vector3 = local - (c as CollisionShape3D).position
+		if absf(p.x) <= box.size.x * 0.5 and absf(p.y) <= box.size.y * 0.5 \
+				and absf(p.z) <= box.size.z * 0.5:
+			return true
+	return false
+
+
+## The flattest north-south strip on the map, as (x, z) of its near end.
+## terrain_height is a static, unseeded function, so this picks the same
+## place on every run.
+func _flat_site(w: Node3D) -> Vector2:
+	var best := Vector2(0, 0)
+	var best_spread := INF
+	for x in range(-150, 175, 25):
+		for z in range(-150, 175, 25):
+			# Monuments bring a tower on the terrain layer and their own
+			# guards, neither of which belongs in a staged scene.
+			var too_close := false
+			for zone in w.rad_zones:
+				if Vector2(float(x), float(z)).distance_to(zone) < 45.0:
+					too_close = true
+			if too_close:
+				continue
+			var lo := INF
+			var hi := -INF
+			for step in 7:
+				var h: float = w.terrain_height(float(x), float(z) + float(step) * 4.0)
+				lo = minf(lo, h)
+				hi = maxf(hi, h)
+			if hi - lo < best_spread:
+				best_spread = hi - lo
+				best = Vector2(float(x), float(z))
+	return best
+
+
+## Takes the scenery out of the staged corridor. Trees and rocks sit on the
+## layer that blocks a line of sight, and one of them landing in the way
+## would fail a test that has nothing to do with them. The layer is cleared
+## rather than the node freed, because queue_free only lands at the end of
+## the frame and these checks all run inside one.
+func _clear_corridor(w: Node3D, x: float, z: float, length: float) -> void:
+	for c in w.get_children():
+		if not (c is CollisionObject3D) or c is CharacterBody3D:
+			continue
+		var body := c as CollisionObject3D
+		if body.collision_layer & (2 | 4) == 0:
+			continue
+		var dz: float = body.position.z - z
+		if dz < -4.0 or dz > length:
+			continue
+		if absf(body.position.x - x) > 6.0:
+			continue
+		body.collision_layer = 0
+
+
 func _run_tests() -> void:
 	var game = root.get_node("/root/Game")
 	world.started = true
@@ -128,9 +192,11 @@ func _run_tests() -> void:
 		_check(world.respawn_queue.size() == 1, "depleted tree queued for respawn")
 
 	# --- NPC damage & loot
+	# Skips the monument guards: they spawn first, and they have their own
+	# checks further down that a kill here would rob of a live subject.
 	var npc: Node = null
 	for c in world.get_children():
-		if c.has_method("npc_take_damage"):
+		if c.has_method("npc_take_damage") and c.npc_type != "scientist":
 			npc = c
 			break
 	_check(npc != null, "found an NPC")
@@ -525,6 +591,198 @@ func _run_tests() -> void:
 	hunter.queue_free()
 	blocker.queue_free()
 
+	# --- A doorway is a frame, not a slab
+	# It used to get a wall's full 3x3 collision box, so the opening you can
+	# see through was solid: nobody could walk through their own door.
+	#
+	# Everything below is staged on level ground with the scenery cleared
+	# out of the way: creatures snap to the terrain each frame, so on a
+	# slope a wall ends up above or below whatever it should be blocking,
+	# and a stray tree would block a line of sight the test is measuring.
+	# Each piece sits on its own patch of ground, the way the building
+	# system places it — a guard is only a hand's width shorter than a
+	# doorway is tall, so putting the frame on someone else's ground level
+	# is enough to catch it on the lintel.
+	var site := _flat_site(world)
+	var sx: float = site.x
+	var sz: float = site.y
+	var y_player: float = world.terrain_height(sx, sz + 4.0)
+	var y_gate: float = world.terrain_height(sx, sz + 8.0)
+	var y_walker: float = world.terrain_height(sx, sz + 12.0)
+	var y_cover: float = world.terrain_height(sx, sz + 16.0)
+	var y_sniper: float = world.terrain_height(sx, sz + 20.0)
+	_clear_corridor(world, sx, sz, 26.0)
+
+	var gate = StructureScript.new()
+	gate.setup("doorway")
+	gate.position = Vector3(sx, y_gate + 1.5, sz + 8.0)
+	world.add_child(gate)
+	world.register_structure(gate)
+	var solid_wall = StructureScript.new()
+	solid_wall.setup("wall")
+
+	# Knee height in the middle of the piece: clear on a doorway, solid on a wall
+	var knee := Vector3(0.0, -0.5, 0.0)
+	_check(not _covers(gate, knee), "the middle of a doorway is walkable")
+	_check(_covers(solid_wall, knee), "the middle of a wall is not")
+	_check(_covers(gate, Vector3(1.2, -0.5, 0.0)), "the doorway still has posts")
+	_check(_covers(gate, Vector3(0.0, 1.2, 0.0)), "and a lintel above the opening")
+	solid_wall.queue_free()
+
+	# End to end: a creature that a wall stopped walks straight through this
+	player.position = Vector3(sx, y_player, sz + 4.0)
+	var walker = NpcScript.new()
+	walker.setup("wolf", world)
+	world.add_child(walker)
+	walker.position = Vector3(sx, y_walker, sz + 12.0)
+	walker.home = walker.position
+	for i in 300:
+		walker._physics_process(0.05)
+	_check(walker.position.z < gate.position.z,
+		"a creature gets through the opening (z=%.1f, doorway z=%.1f)"
+		% [walker.position.z, gate.position.z])
+	walker.queue_free()
+
+	# --- Monument guards
+	var guards := []
+	for c in world.get_children():
+		if c.has_method("npc_take_damage") and c.npc_type == "scientist":
+			guards.append(c)
+	var expected_guards: int = world.GUARDS_PER_MONUMENT * world.rad_zones.size()
+	_check(guards.size() == expected_guards,
+		"every monument is staffed (%d guards, %d monuments)"
+		% [guards.size(), world.rad_zones.size()])
+	var posted := true
+	for g in guards:
+		var flat := Vector2(g.position.x, g.position.z)
+		var near := false
+		for zone in world.rad_zones:
+			if flat.distance_to(zone) <= world.GUARD_POST_RADIUS + 1.0:
+				near = true
+		posted = posted and near
+	_check(posted, "guards stand on the monument they protect")
+	_check(float(game.WEAPONS["bow"].range) >= 45.0,
+		"a bow outranges the guards' rifles, so they can be fought")
+
+	# --- Guards shoot on sight, and a wall stops the bullet
+	# The staged corridor runs down x = sx: player at sz+4, guard at sz+20,
+	# the doorway between them (its opening is clear at eye height).
+	for g in guards:
+		g.position = Vector3(300, 0, 300)   # keep the real ones out of this
+	var sniper = NpcScript.new()
+	sniper.setup("scientist", world)
+	world.add_child(sniper)
+	sniper.position = Vector3(sx, y_sniper, sz + 20.0)
+	sniper.home = sniper.position          # spawn_npc does this for real guards
+	player.position = Vector3(sx, y_player, sz + 4.0)
+	game.stats.health = 100.0
+	seed(20260727)   # guards miss on a dice roll; keep the run repeatable
+	for i in 120:
+		sniper._physics_process(0.1)
+	var open_ground_hp: float = game.stats.health
+	_check(open_ground_hp < 100.0,
+		"a guard shoots the player from 16m (hp=%.0f)" % open_ground_hp)
+	_check(sniper.hit_chance(4.0) > sniper.hit_chance(40.0),
+		"and hits less often the further out you are (%.2f near, %.2f far)"
+		% [sniper.hit_chance(4.0), sniper.hit_chance(40.0)])
+	_check(sniper.hit_chance(4.0) < 1.0, "even point blank is not a certainty")
+
+	var cover = StructureScript.new()
+	cover.setup("wall")
+	cover.position = Vector3(sx, y_cover + 1.5, sz + 16.0)
+	world.add_child(cover)
+	world.register_structure(cover)
+	cover.apply_tier("stone")
+	sniper.position = Vector3(sx, y_sniper, sz + 20.0)
+	sniper._attack_cd = 0.0
+	game.stats.health = 100.0
+	for i in 10:
+		sniper._physics_process(0.1)
+	_check(game.stats.health == 100.0, "a wall between them stops the shots")
+
+	# --- Doors, and what a lock is actually for
+	var front_door = StructureScript.new()
+	front_door.setup("wooden_door")
+	front_door.position = Vector3(sx, y_gate + 1.05, sz + 8.0)   # fills the doorway
+	world.add_child(front_door)
+	world.register_structure(front_door)
+	front_door.apply_tier("wood")
+	_check(not front_door.is_locked(), "a fresh door has no lock")
+	_check(front_door.npc_open_door(), "anything hostile can open an unlocked door")
+	_check(front_door.is_open, "the door swung open")
+	_check(absf(front_door.position.x - sx) > 0.4,
+		"an open door swings clear of the opening instead of standing in it")
+	front_door.toggle_door()
+	_check(front_door.position.is_equal_approx(Vector3(sx, y_gate + 1.05, sz + 8.0)),
+		"and comes back to its own hinge line when shut")
+
+	game.inventory["lock"] = 1
+	game.belt[0] = "lock"
+	game.selected_belt_slot = 0
+	player._install_lock(front_door, "lock")
+	_check(front_door.is_locked() and front_door.lock_type == "lock", "the held key lock goes on the door")
+	_check(game.get_count("lock") == 0, "installing spent the lock")
+	_check(not front_door.npc_open_door(), "a locked door refuses a hostile")
+	_check(front_door.npc_open_door() == false and not front_door.is_open, "and stays shut")
+	front_door.toggle_door()
+	_check(front_door.is_open, "the owner still walks through their own locked door")
+	front_door.toggle_door()
+
+	# A key lock is a padlock: break it and the door works again
+	var door_hp: float = front_door.health
+	front_door.attack_lock(float(game.LOCKS["lock"].strength))
+	_check(not front_door.is_locked(), "a key lock can be broken open")
+	_check(front_door.health == door_hp, "breaking the lock left the door itself intact")
+
+	# A code lock has no keyhole, so the door has to come down instead
+	game.inventory["codelock"] = 1
+	game.belt[0] = "codelock"
+	player._install_lock(front_door, "codelock")
+	_check(front_door.lock_type == "codelock", "a code lock replaces the broken one")
+	front_door.attack_lock(60.0)
+	_check(front_door.is_locked(), "a code lock cannot be picked")
+	_check(front_door.health < door_hp, "the blows land on the door instead (hp=%.0f)" % front_door.health)
+	game.belt[0] = "building_plan"
+
+	# A guard forces the unlocked door and walks in after you
+	var raider = NpcScript.new()
+	raider.setup("scientist", world)
+	world.add_child(raider)
+	raider.position = Vector3(sx, y_walker, sz + 12.0)
+	raider.home = raider.position
+	player.position = Vector3(sx, y_player, sz + 4.0)   # behind the door, out of sight
+	front_door._remove_lock()
+	front_door.set_door_state(false)
+	for i in 500:
+		raider._physics_process(0.05)
+	_check(front_door.is_open, "a guard opens an unlocked door to get at you")
+
+	# Locked, the same approach gets it nowhere
+	front_door.set_door_state(false)
+	front_door.install_lock("codelock")
+	front_door.health = front_door.max_health
+	raider.position = Vector3(sx, y_walker, sz + 12.0)
+	raider._attack_cd = 0.0
+	for i in 500:
+		raider._physics_process(0.05)
+	_check(not front_door.is_open, "a locked door keeps it out")
+	_check(front_door.health < front_door.max_health,
+		"so it works on the door instead (hp=%.0f/%.0f)" % [front_door.health, front_door.max_health])
+	raider.queue_free()
+	sniper.queue_free()
+
+	# --- Guards are renewable, and worth the ammunition
+	var queued_before: int = world.npc_respawn_queue.size()
+	var scrap_before: int = game.get_count("scrap")
+	var rifle_ammo_before: int = game.get_count("ammo_rifle")
+	if not guards.is_empty():
+		guards[0].npc_take_damage(500.0)
+		_check(world.npc_respawn_queue.size() == queued_before + 1,
+			"a dead guard is queued to be replaced")
+		_check(game.get_count("scrap") > scrap_before, "guards drop scrap")
+		_check(game.get_count("ammo_rifle") > rifle_ammo_before,
+			"and rifle ammo, which is otherwise a tier-2 craft")
+
 	# --- Crude oil is no longer a dead end
 	var refinery = world._spawn_station("furnace", Vector3(-14, 0, -14))
 	game.inventory["oil"] = 20
@@ -781,6 +1039,12 @@ func _run_tests() -> void:
 		if entry.type == "tool_cupboard":
 			saved_tc = entry
 	_check(saved_tc != null and saved_tc.has("upkeep"), "cupboard upkeep is persisted")
+	var saved_lock = null
+	for entry in data.structures:
+		if str(entry.get("lock", "")) == "codelock":
+			saved_lock = entry
+	_check(saved_lock != null and saved_lock.has("lock_health"),
+		"a fitted lock survives the save")
 	_check(int(data.player.inventory.hammer) == 3, "save contains crafted hammers")
 	_check(data.stations.size() == world.stations.size(),
 		"save contains all %d deployed stations" % world.stations.size())
