@@ -4,6 +4,7 @@ extends CanvasLayer
 ## blueprint selector, start screen and pause menu. Hosts the inventory UI.
 
 const InventoryUiScript := preload("res://scripts/inventory_ui.gd")
+const MapUiScript := preload("res://scripts/map_ui.gd")
 const IconFactory := preload("res://scripts/icon_factory.gd")
 
 const TouchControlsScript := preload("res://scripts/touch_controls.gd")
@@ -56,6 +57,8 @@ var _rad_overlay: ColorRect
 var _damage_flash: ColorRect
 var _last_health := 100.0
 var inventory_ui: Control
+var map_ui: Control
+var _compass_label: Label
 var touch_controls: Control
 
 
@@ -78,6 +81,11 @@ func _ready() -> void:
 
 	inventory_ui = InventoryUiScript.new()
 	add_child(inventory_ui)
+
+	map_ui = MapUiScript.new()
+	map_ui.name = "MapUi"
+	add_child(map_ui)
+	_build_compass()
 
 	Game.detect_touch_ui()
 	touch_controls = TouchControlsScript.new()
@@ -108,6 +116,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		# F8 previews the on-screen controls on a desktop
 		set_touch_ui(not Game.touch_ui)
 		get_viewport().set_input_as_handled()
+	elif event.is_action_pressed("map"):
+		map_ui.toggle()
+		get_viewport().set_input_as_handled()
 
 
 func set_touch_ui(on: bool) -> void:
@@ -134,6 +145,28 @@ func _label(text: String, size: int = 14, color := Color.WHITE) -> Label:
 	l.add_theme_color_override("font_color", color)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return l
+
+
+## A heading readout pinned to the top centre. Four hundred metres of
+## identical forest is unnavigable without one, and it costs a label.
+func _build_compass() -> void:
+	var holder := MarginContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.add_theme_constant_override("margin_top", int(HUD_MARGIN) - 6)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(holder)
+
+	var panel := PanelContainer.new()
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	style_panel(panel)
+	holder.add_child(panel)
+
+	_compass_label = _label("N", 16, Color(0.9, 0.92, 0.95))
+	_compass_label.custom_minimum_size = Vector2(64, 0)
+	_compass_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	panel.add_child(_compass_label)
 
 
 ## Top-right column: survival stats over the resource readout.
@@ -618,7 +651,7 @@ func _build_start_screen() -> void:
 	var controls := _label(
 		"W A S D  Move   |   SHIFT  Sprint   |   SPACE  Jump   |   V  Camera (1st/3rd)\n" +
 		"LMB  Action   |   RMB / Q  Build Menu   |   E  Inventory   |   F  Drink\n" +
-		"R  Rotate   |   G  Cancel Build   |   H  Upgrade / Repair\n" +
+		"R  Rotate   |   G  Cancel Build   |   H  Upgrade / Repair   |   M  Map\n" +
 		"1-6  Hotbar   |   ESC  Pause   |   F8  Touch Controls",
 		16, Color(0.85, 0.85, 0.85))
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -661,6 +694,8 @@ func handle_escape() -> void:
 			toggle_inventory()
 		"blueprint":
 			close_blueprint_menu()
+		"map":
+			map_ui.close()
 		"start":
 			pass
 
@@ -772,6 +807,10 @@ func _process(delta: float) -> void:
 		var entry: Dictionary = _bar_fills[key]
 		entry.bar.value = v
 		entry.value.text = str(roundi(v))
+
+	# Compass
+	if world != null and world.player != null:
+		_compass_label.text = MapUiScript.heading_of(world.player.rotation.y)
 
 	# Worn protection
 	var protect := Game.armour_protection()

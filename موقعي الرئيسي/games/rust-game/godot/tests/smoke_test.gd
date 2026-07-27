@@ -954,6 +954,42 @@ func _run_tests() -> void:
 		_check(game.get_count("sulfur_ore") > raw0, "a sulfur node yields ore")
 		_check(game.get_count("sulfur") == refined0, "and no usable sulfur on its own")
 
+	# --- Map and compass
+	var map = world.hud.map_ui
+	_check(map != null and map.world == world, "the map knows the world it is drawing")
+	_check(map._texture != null and map._texture.get_width() == map.MAP_PIXELS,
+		"the terrain is rendered once into a %dpx texture" % map.MAP_PIXELS)
+	# The terrain function is static and unseeded, so the same spot on the
+	# map must be the same colour on every run
+	var map_img: Image = map._texture.get_image()
+	var deep := map_img.get_pixel(map.MAP_PIXELS / 2, map.MAP_PIXELS / 2)
+	_check(deep.a > 0.0 and (deep.r + deep.g + deep.b) > 0.0,
+		"the map has actual terrain on it, not a blank square")
+
+	# Corners of the world land in corners of the map
+	var top_left: Vector2 = map.world_to_map(
+		Vector3(-Game.WORLD_SIZE * 0.5, 0, -Game.WORLD_SIZE * 0.5))
+	var bottom_right: Vector2 = map.world_to_map(
+		Vector3(Game.WORLD_SIZE * 0.5, 0, Game.WORLD_SIZE * 0.5))
+	var middle: Vector2 = map.world_to_map(Vector3.ZERO)
+	_check(top_left.x < middle.x and top_left.y < middle.y,
+		"the west-north corner maps above and left of the centre")
+	_check(bottom_right.x > middle.x and bottom_right.y > middle.y,
+		"and the east-south corner below and right of it")
+
+	_check(InputMap.has_action("map"), "the map has a key of its own")
+	_check(not map.visible, "it starts closed")
+	map.toggle()
+	_check(map.visible and game.ui_open == "map", "M opens it and claims the UI")
+	world.hud.handle_escape()
+	_check(not map.visible and game.ui_open == "", "and ESC puts it away")
+
+	# Compass headings, measured the way the player's yaw runs
+	_check(map.heading_of(0.0) == "N", "facing forward reads north")
+	_check(map.heading_of(deg_to_rad(-90.0)) == "E", "a quarter turn right is east")
+	_check(map.heading_of(deg_to_rad(180.0)) == "S", "half a turn is south")
+	_check(map.heading_of(deg_to_rad(90.0)) == "W", "a quarter turn left is west")
+
 	# --- Carrying capacity
 	var stashed: Dictionary = game.inventory.duplicate()
 	var stashed_worn: Dictionary = game.worn.duplicate()

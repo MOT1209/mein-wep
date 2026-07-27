@@ -556,7 +556,7 @@ func _audit_controls() -> void:
 		"blueprint": "blueprint menu", "rotate_piece": "rotate a piece",
 		"hammer_action": "upgrade / repair", "cancel_build": "cancel building",
 		"toggle_view": "first / third person", "pause": "pause",
-		"interact": "drink",
+		"interact": "drink", "map": "find your way back",
 	}
 	for action in expected:
 		if not InputMap.has_action(action):

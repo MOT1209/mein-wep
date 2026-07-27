@@ -104,6 +104,7 @@ func _ready() -> void:
 	hud.name = "HUD"
 	add_child(hud)
 	hud.world = self
+	hud.map_ui.world = self
 	player.hud = hud
 	hud.touch_controls.player = player
 
