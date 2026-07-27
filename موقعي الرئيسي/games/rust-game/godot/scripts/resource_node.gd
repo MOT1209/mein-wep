@@ -244,6 +244,19 @@ const TOOL_YIELD := {
 
 const OIL_PER_DRILL_HIT := 3
 
+## What each node type gives per swing. The types that appear in TOOL_YIELD
+## scale with the tool; the rest hand over the same amount however you hit
+## them. Monument crates are the only high quality metal in the world.
+const YIELDS := {
+	"tree": {"wood": 12},
+	"rock": {"stone": 10},
+	"iron": {"iron": 8},
+	"sulfur": {"sulfur_ore": 8},
+	"barrel": {"scrap": 3, "lgf": 2},
+	"crate": {"scrap": 5, "frag": 5, "hqm": 2},
+	"bush": {"berries": 5},
+}
+
 ## The marked spot that appears on an ore node or a tree after the first
 ## swing. Landing on it doubles that swing and moves the mark somewhere
 ## else, which turns mindless clicking into aiming. The drill is exempt,
@@ -283,31 +296,32 @@ func hit_harvest(tool_id: String = "", at: Vector3 = Vector3.INF) -> void:
 		_place_sweet_spot()
 	if bonus:
 		mult = int(round(float(mult) * SWEET_SPOT_MULT))
+
+	# What this swing would produce. Only the ore types scale with the tool;
+	# a barrel gives up the same scrap however you hit it.
+	var payload := {}
+	var per_swing: int = mult if TOOL_YIELD.has(res_type) else 1
+	for id in YIELDS.get(res_type, {}):
+		payload[id] = int(YIELDS[res_type][id]) * per_swing
+	if tool_id == "drill" and TOOL_YIELD.has(res_type):
+		payload["oil"] = int(payload.get("oil", 0)) + OIL_PER_DRILL_HIT
+
+	# A swing with nowhere to put the result leaves the node alone, rather
+	# than spending it into a full inventory.
+	var fits := false
+	for id in payload:
+		if Game.room_for(id) > 0:
+			fits = true
+			break
+	if not fits and not payload.is_empty():
+		Game.notify("Your pockets are full", Color(1.0, 0.63, 0.0))
+		return
+
+	if bonus:
 		Game.notify("Sweet spot! x%.0f" % SWEET_SPOT_MULT, Color(1.0, 0.85, 0.35))
 	health -= mult
-	match res_type:
-		"tree":
-			Game.add_item("wood", 12 * mult)
-		"rock":
-			Game.add_item("stone", 10 * mult)
-		"iron":
-			Game.add_item("iron", 8 * mult)
-		"sulfur":
-			# Raw ore: the furnace turns it into the sulfur recipes want
-			Game.add_item("sulfur_ore", 8 * mult)
-		"barrel":
-			Game.add_item("scrap", 3)
-			Game.add_item("lgf", 2)
-		"crate":
-			# Monument crates sit inside the radiation zones, and they are
-			# the only source of high quality metal in the world.
-			Game.add_item("scrap", 5)
-			Game.add_item("frag", 5)
-			Game.add_item("hqm", 2)
-		"bush":
-			Game.add_item("berries", 5)
-	if tool_id == "drill" and TOOL_YIELD.has(res_type):
-		Game.add_item("oil", OIL_PER_DRILL_HIT)
+	for id in payload:
+		Game.add_item(id, payload[id])
 	Sfx.play("harvest")
 
 	if health <= 0:

@@ -128,8 +128,11 @@ func _run_tests() -> void:
 
 	# A fresh game now starts with almost nothing, so stock the materials
 	# these mechanic checks need rather than relying on the opening loadout.
+	# Kept inside the slot limit on purpose: 30 slots is the rule under test
+	# further down, and a fixture that ignores it would break every add.
 	for res in ["wood", "stone", "frag", "iron", "cloth", "scrap"]:
-		game.inventory[res] = 2000
+		game.inventory[res] = 500
+	game.inventory["wood"] = 750   # the upgrade and repair checks below spend it
 	game.inventory_changed.emit()
 
 	# --- Crafting
@@ -376,8 +379,8 @@ func _run_tests() -> void:
 
 	# --- Workbench tier gating
 	game.workbench_level = 0
-	game.inventory["wood"] = 2000
-	game.inventory["frag"] = 2000
+	game.inventory["wood"] = 750
+	game.inventory["frag"] = 750
 	_check(game.required_workbench("metal_hatchet") == 1, "hatchet is a tier 1 recipe")
 	_check(not game.craft("metal_hatchet", 1), "tier 1 recipe blocked with no workbench")
 	var bench = world._spawn_station("workbench_t1", world.player.position + Vector3(2, 0, 0))
@@ -430,7 +433,7 @@ func _run_tests() -> void:
 	_check(game.craft("gunpowder", 2), "sulfur + charcoal makes gunpowder")
 	_check(game.get_count("sulfur") == 160 and game.get_count("charcoal") == 140,
 		"gunpowder consumed the right inputs")
-	game.inventory["gunpowder"] = 500
+	game.inventory["gunpowder"] = 200
 	game.inventory["lgf"] = 50
 	game.inventory["frag"] = 500
 	_check(game.craft("explosives", 2), "gunpowder chains up into explosives")
@@ -549,11 +552,11 @@ func _run_tests() -> void:
 		monument_crate.hit_harvest("")
 		_check(game.get_count("hqm") > hqm0, "a monument crate yields high quality metal")
 	# Earlier checks spent the stock, so top up everything the rifle needs
-	game.inventory["hqm"] = 200
+	game.inventory["hqm"] = 100
 	game.inventory["pipe"] = 10
 	game.inventory["spring"] = 10
-	game.inventory["scrap"] = 500
-	game.inventory["wood"] = 2000
+	game.inventory["scrap"] = 250
+	game.inventory["wood"] = 750
 	game.workbench_level = 2
 	_check(game.craft("ak47", 1), "the assault rifle is now craftable")
 
@@ -950,6 +953,71 @@ func _run_tests() -> void:
 		sulfur_node.hit_harvest("stone_pickaxe")
 		_check(game.get_count("sulfur_ore") > raw0, "a sulfur node yields ore")
 		_check(game.get_count("sulfur") == refined0, "and no usable sulfur on its own")
+
+	# --- Carrying capacity
+	var stashed: Dictionary = game.inventory.duplicate()
+	var stashed_worn: Dictionary = game.worn.duplicate()
+	game.inventory = {}
+	game.worn = {}
+	_check(game.slots_used() == 0, "an empty inventory uses no slots")
+	game.inventory["wood"] = game.stack_size("wood")
+	_check(game.slots_used() == 1, "a full stack of wood is one slot")
+	game.inventory["wood"] = game.stack_size("wood") + 1
+	_check(game.slots_used() == 2, "one over spills into a second")
+	_check(game.stack_size("ak47") == 1, "a rifle takes a slot to itself")
+	_check(game.stack_size("scrap") == game.stack_size("wood"),
+		"scrap hauls like a raw material, whatever tab it sits in")
+
+	# Fill it right up and the world stops handing you things
+	game.inventory = {}
+	for i in game.INVENTORY_SLOTS:
+		game.inventory["filler_%d" % i] = 1
+	_check(game.slots_used() == game.INVENTORY_SLOTS, "the inventory is full")
+	_check(game.room_for("wood") == 0, "with no room for anything new")
+	_check(game.add_item("wood", 500) == 0, "and add_item takes nothing in")
+	_check(game.get_count("wood") == 0, "so nothing appeared out of nowhere")
+
+	# A swing with nowhere to put the result leaves the node standing
+	var full_tree: Node = null
+	for c in world.get_children():
+		if c.has_method("hit_harvest") and not c.is_queued_for_deletion() \
+				and c.res_type == "tree":
+			full_tree = c
+			break
+	if full_tree != null:
+		var tree_hp: int = full_tree.health
+		full_tree.hit_harvest("stone_hatchet", Vector3.INF)
+		_check(full_tree.health == tree_hp,
+			"a full inventory does not spend the tree it cannot carry")
+
+	# Crafting must not eat the materials and hand back nothing
+	game.inventory = {}
+	for i in game.INVENTORY_SLOTS - 1:
+		game.inventory["filler_%d" % i] = 1
+	game.inventory["wood"] = game.stack_size("wood")   # exactly the last slot
+	_check(game.slots_used() == game.INVENTORY_SLOTS, "one slot of wood, none spare")
+	var wood_kept: int = game.get_count("wood")
+	_check(not game.craft("hammer", 1), "a craft with no room to land is refused")
+	_check(game.get_count("wood") == wood_kept, "and the wood is still there")
+
+	# Boxes hold a fixed amount, and what will not fit stays with you
+	game.inventory = {}
+	game.inventory["wood"] = 5000    # 20 slots
+	var box = world._spawn_station("storage_box", Vector3(-26, 0, -26))
+	_check(box.capacity() == game.BOX_SLOTS["storage_box"],
+		"a storage box holds %d slots" % box.capacity())
+	box.interact_station()
+	_check(game.slots_for(box.stored) <= box.capacity(),
+		"the box never takes more than it holds (%d/%d)"
+		% [game.slots_for(box.stored), box.capacity()])
+	_check(game.get_count("wood") > 0, "and the overflow stays in your pockets")
+	var in_box: int = int(box.stored.get("wood", 0))
+	var carried_wood: int = game.get_count("wood")
+	_check(in_box + carried_wood == 5000, "nothing went missing in between")
+
+	game.inventory = stashed
+	game.worn = stashed_worn
+	game.inventory_changed.emit()
 
 	# --- Stability: a base stands on its foundations, and falls with them
 	var tower_x := sx + 12.0

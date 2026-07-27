@@ -22,6 +22,7 @@ var _inv_pane: VBoxContainer
 var _craft_grid: GridContainer
 var _detail_box: VBoxContainer
 var _inv_grid: GridContainer
+var _slot_label: Label
 var _belt_row: HBoxContainer
 
 
@@ -193,9 +194,14 @@ func _build_inv_pane(root: VBoxContainer) -> void:
 	root.add_child(_inv_pane)
 
 	var hint := Label.new()
-	hint.text = "Click an item to equip it into the selected belt slot."
+	hint.text = "Click an item to equip it into the selected belt slot. Armour is worn."
 	hint.add_theme_font_size_override("font_size", 13)
 	_inv_pane.add_child(hint)
+
+	# Space is finite now, so how much is left has to be on screen
+	_slot_label = Label.new()
+	_slot_label.add_theme_font_size_override("font_size", 13)
+	_inv_pane.add_child(_slot_label)
 
 	_inv_grid = GridContainer.new()
 	_inv_grid.columns = 8
@@ -363,15 +369,21 @@ func _refresh_detail() -> void:
 func _refresh_inventory() -> void:
 	for c in _inv_grid.get_children():
 		c.queue_free()
+	var used := Game.slots_used()
+	_slot_label.text = "%d / %d slots used" % [used, Game.INVENTORY_SLOTS]
+	_slot_label.add_theme_color_override("font_color",
+		Color(0.95, 0.5, 0.35) if used >= Game.INVENTORY_SLOTS else Color(0.7, 0.75, 0.8))
 	var shown := 0
 	for id in Game.inventory:
-		if shown >= 30:
+		if shown >= Game.INVENTORY_SLOTS:
 			break
 		var count := Game.get_count(id)
 		if count <= 0:
 			continue
 		var item: Dictionary = Game.ITEMS.get(id, {})
 		var hint: String = item.get("desc", "")
+		hint += "\n%d per slot — using %d" % [
+			Game.stack_size(id), Game.slots_used_by(id, count)]
 		if Game.ARMOUR.has(id):
 			hint += "\n[Worn — click to take off]" if Game.is_worn(id) else "\n[Click to wear]"
 		var b := _make_slot(id, str(count), "%s\n%s" % [item.get("name", id), hint])

@@ -227,6 +227,10 @@ func _smelt() -> void:
 				short_on_wood = true
 				continue
 			batches = mini(batches, affordable)
+		# Never burn ore the player has no room to carry away
+		batches = mini(batches, Game.room_for(str(recipe.output)))
+		if batches <= 0:
+			continue
 		var used: int = batches * int(recipe.per)
 		var burnt: int = ceili(float(used) * float(recipe.wood))
 		Game.remove_item(recipe.input, used)
@@ -267,28 +271,60 @@ func _research() -> void:
 
 ## No container UI yet: interacting stashes every raw resource you carry,
 ## and interacting again with nothing to stash takes it all back out.
+func capacity() -> int:
+	return int(Game.BOX_SLOTS.get(station_type, 12))
+
+
+## Boxes hold a fixed number of slots, so a base is somewhere to put things
+## rather than an infinite pocket. Deposits stop at the lid; withdrawals
+## stop at what you can carry, and whatever does not move stays put.
 func _use_storage() -> void:
 	var moved := 0
+	var refused := 0
 	for id in STASHABLE:
 		var count := Game.get_count(id)
-		if count > 0:
-			stored[id] = int(stored.get(id, 0)) + count
-			Game.remove_item(id, count)
-			moved += count
+		if count <= 0:
+			continue
+		var room: int = Game.room_in(stored, capacity(), id)
+		var put: int = mini(count, room)
+		if put > 0:
+			stored[id] = int(stored.get(id, 0)) + put
+			Game.remove_item(id, put)
+			moved += put
+		refused += count - put
 	if moved > 0:
-		Game.notify("Stashed %d items" % moved)
+		if refused > 0:
+			Game.notify("Stashed %d items — the box is full (%d/%d slots)"
+				% [moved, Game.slots_for(stored), capacity()], Color(1.0, 0.63, 0.0))
+		else:
+			Game.notify("Stashed %d items (%d/%d slots)"
+				% [moved, Game.slots_for(stored), capacity()])
 		Sfx.play("door")
 		return
 
 	var taken := 0
+	var stuck := 0
 	for id in stored.keys():
 		var amount := int(stored[id])
-		if amount > 0:
-			Game.add_item(id, amount)
-			taken += amount
-	stored.clear()
+		if amount <= 0:
+			stored.erase(id)
+			continue
+		var accepted := Game.add_item(id, amount)
+		taken += accepted
+		if accepted < amount:
+			stored[id] = amount - accepted
+			stuck += amount - accepted
+		else:
+			stored.erase(id)
 	if taken > 0:
-		Game.notify("Took %d items back" % taken)
+		if stuck > 0:
+			Game.notify("Took %d items — %d left, no room to carry them"
+				% [taken, stuck], Color(1.0, 0.63, 0.0))
+		else:
+			Game.notify("Took %d items back" % taken)
 		Sfx.play("door")
+	elif refused > 0:
+		Game.notify("The box is full (%d/%d slots)"
+			% [Game.slots_for(stored), capacity()], Color(1.0, 0.63, 0.0))
 	else:
 		Game.notify("Box is empty", Color(1.0, 0.63, 0.0))

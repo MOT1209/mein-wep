@@ -78,6 +78,7 @@ func _run() -> void:
 	_audit_progression_costs()
 	_audit_monument_run()
 	_audit_death_cost()
+	_audit_carrying()
 	_audit_controls()
 
 	_section("SUMMARY")
@@ -474,6 +475,76 @@ func _audit_death_cost() -> void:
 			+ "sends you back to the shore.")
 
 	game.reset_loadout()
+
+
+## Carrying capacity is what makes a base worth building and a raid worth
+## running. Too much and nothing has to be stored; too little and the game
+## is a walking simulator.
+func _audit_carrying() -> void:
+	_section("WHAT YOU CAN CARRY")
+	var node_script = load("res://scripts/resource_node.gd")
+	print("  %d slots" % game.INVENTORY_SLOTS)
+
+	# How much one node yields when emptied with a decent hand tool
+	var trips := {}
+	for res_type in node_script.YIELDS:
+		var per_hit: Dictionary = node_script.YIELDS[res_type]
+		var probe = node_script.new()
+		probe.setup(res_type)
+		var hits: int = probe.health
+		probe.free()
+		var slots := 0.0
+		var summary := []
+		for id in per_hit:
+			var total: int = int(per_hit[id]) * hits
+			slots += float(total) / float(game.stack_size(id))
+			summary.append("%d %s" % [total, id])
+		if slots <= 0.0:
+			continue
+		var nodes_until_full: float = float(game.INVENTORY_SLOTS) / slots
+		trips[res_type] = nodes_until_full
+		print("  one %s gives %s — about %.0f of them fills you up"
+			% [res_type, ", ".join(summary), nodes_until_full])
+
+	var tightest := INF
+	for res_type in trips:
+		tightest = minf(tightest, float(trips[res_type]))
+	if tightest < 1.0:
+		_note("BALANCE", "A single node overflows the whole inventory, so "
+			+ "gathering anything means immediately walking home.")
+
+	# What actually decides whether the limit bites is not one resource but
+	# carrying a working kit and a spread of materials at the same time.
+	var kit := {"stone_hatchet": 1, "stone_pickaxe": 1, "hammer": 1,
+		"building_plan": 1, "bow": 1, "arrow": 100,
+		"wood_armour": 1, "metal_facemask": 1, "hazmat": 1, "cooked_meat": 5}
+	for res_type in node_script.YIELDS:
+		var probe2 = node_script.new()
+		probe2.setup(res_type)
+		var hits2: int = probe2.health
+		probe2.free()
+		for id in node_script.YIELDS[res_type]:
+			kit[id] = int(kit.get(id, 0)) + int(node_script.YIELDS[res_type][id]) * hits2
+	var kit_slots: int = game.slots_for(kit)
+	print("  a field kit plus one node of everything = %d of %d slots"
+		% [kit_slots, game.INVENTORY_SLOTS])
+	if kit_slots > game.INVENTORY_SLOTS:
+		_note("BALANCE", "A working kit and one node of each resource (%d slots) "
+			% kit_slots + "does not fit in %d, so the player is sorting their "
+			% game.INVENTORY_SLOTS + "pockets instead of playing.")
+	elif kit_slots < game.INVENTORY_SLOTS / 3:
+		_note("BALANCE", "A full kit and a node of everything uses only %d of %d "
+			% [kit_slots, game.INVENTORY_SLOTS] + "slots, so the limit never bites "
+			+ "and a storage box has nothing to be for.")
+
+	var box_slots: int = int(game.BOX_SLOTS.get("large_box", 0))
+	if box_slots < game.INVENTORY_SLOTS:
+		_note("BALANCE", "The biggest box (%d slots) holds less than you do "
+			% box_slots + "(%d), so there is no point emptying your pockets into one."
+			% game.INVENTORY_SLOTS)
+	else:
+		print("  a large box holds %d slots, a small one %d"
+			% [box_slots, int(game.BOX_SLOTS.get("storage_box", 0))])
 
 
 func _audit_controls() -> void:

@@ -138,6 +138,36 @@ const DEPLOYABLES := {
 const WARMTH_RADIUS := 8.0
 const WORKBENCH_RADIUS := 6.0
 
+## What you can carry, in slots — the same 30 the inventory screen draws.
+## Resources pile deep into one slot, but a tool or a weapon takes a slot to
+## itself, so a full kit and a mining run compete for the same space. This
+## is what gives a base, a storage box and a raid something to be about.
+const INVENTORY_SLOTS := 30
+## Sized against what the world actually gives: a tree is 48 wood and a
+## wall costs 300, so a slot holding 250 is a couple of pieces' worth. Deep
+## enough that a mining run is not interrupted every minute, shallow enough
+## that carrying a spread of materials and a working kit at the same time
+## fills you up — which is the moment a storage box starts to matter.
+const STACK_BY_CATEGORY := {
+	"resources": 250,
+	"ammo": 200,
+	"items": 100,
+	"construction": 50,
+	"medical": 20,
+	"tools": 1,
+	"weapons": 1,
+	"attire": 1,
+}
+const STACK_DEFAULT := 100
+
+## Items whose category is about where they sit in the crafting screen
+## rather than how you carry them. Scrap is filed under "items" but you
+## haul it by the thousand like any other raw material.
+const STACK_OVERRIDES := {"scrap": 250}
+
+## Slots each container holds.
+const BOX_SLOTS := {"storage_box": 12, "large_box": 30}
+
 const ITEMS := {
 	"wood": {"name": "Wood", "category": "resources", "color": "8d6e63", "rarity": "common", "desc": "Harvested from trees. Used for base building and fuel."},
 	"stone": {"name": "Stone", "category": "resources", "color": "b0bec5", "rarity": "common", "desc": "Raw stone for primitive tools and base stabilization."},
@@ -312,13 +342,62 @@ func hurt(amount: float) -> float:
 	return applied
 
 
-## Returns how much was actually taken in. Nothing turns anything away yet;
-## the slot limit lands with the capacity work, and callers that care about
-## the overflow are already written against this contract.
+# ==================== CAPACITY ====================
+
+func stack_size(id: String) -> int:
+	if STACK_OVERRIDES.has(id):
+		return int(STACK_OVERRIDES[id])
+	var cat := str(ITEMS.get(id, {}).get("category", "items"))
+	return int(STACK_BY_CATEGORY.get(cat, STACK_DEFAULT))
+
+
+func slots_used_by(id: String, count: int) -> int:
+	if count <= 0:
+		return 0
+	return ceili(float(count) / float(stack_size(id)))
+
+
+## How many slots a set of contents occupies. Shared by the inventory,
+## storage boxes and death bags so they all count space the same way.
+func slots_for(contents: Dictionary) -> int:
+	var n := 0
+	for id in contents:
+		n += slots_used_by(id, int(contents[id]))
+	return n
+
+
+## How much more of `id` will fit: the room left in the part-filled stack
+## plus whole stacks for every free slot.
+func room_in(contents: Dictionary, limit: int, id: String) -> int:
+	var stack := stack_size(id)
+	var have := int(contents.get(id, 0))
+	var open := (stack - (have % stack)) % stack
+	return open + maxi(0, limit - slots_for(contents)) * stack
+
+
+func slots_used() -> int:
+	return slots_for(inventory)
+
+
+func room_for(id: String) -> int:
+	return room_in(inventory, INVENTORY_SLOTS, id)
+
+
+## Takes in what fits and returns how much that was. Anything turned away
+## is the caller's problem to leave where it came from — never dropped
+## quietly, or a full inventory would eat a monument crate.
 func add_item(id: String, count: int) -> int:
-	inventory[id] = get_count(id) + count
-	inventory_changed.emit()
-	return count
+	if count <= 0:
+		return 0
+	var accepted := mini(count, room_for(id))
+	if accepted > 0:
+		inventory[id] = get_count(id) + accepted
+		inventory_changed.emit()
+	if accepted < count:
+		notify("Pockets full — %d %s left behind"
+			% [count - accepted, ITEMS.get(id, {}).get("name", id)],
+			Color(1.0, 0.63, 0.0))
+	return accepted
 
 
 func remove_item(id: String, count: int) -> void:
@@ -362,6 +441,11 @@ func craft(id: String, qty: int) -> bool:
 		total[res] = int(item.recipe[res]) * qty
 	if not can_afford(total):
 		notify("Not enough resources", Color(0.9, 0.3, 0.3))
+		return false
+	# Check the shelf before spending the materials, or a full inventory
+	# eats the cost and hands back nothing.
+	if room_for(id) < qty:
+		notify("No room for %s — free up a slot first" % item.name, Color(1.0, 0.63, 0.0))
 		return false
 	consume(total)
 	add_item(id, qty)
