@@ -34,6 +34,19 @@ const BUILDING_TIERS := {
 		"metallic": 0.9, "roughness": 0.25, "blast_resist": 0.3},
 }
 
+## Weapons you can actually swing or fire. Anything with `ammo` is ranged
+## and spends a round per shot; everything else is melee and reaches only
+## as far as `range`. Bare fists stay at FIST_DAMAGE.
+const FIST_DAMAGE := 15.0
+
+const WEAPONS := {
+	"spear": {"damage": 35.0, "range": 3.6, "cooldown": 0.9},
+	"machete": {"damage": 30.0, "range": 2.6, "cooldown": 0.5},
+	"bow": {"damage": 50.0, "range": 60.0, "cooldown": 1.1, "ammo": "arrow"},
+	"pistol": {"damage": 40.0, "range": 80.0, "cooldown": 0.35, "ammo": "ammo_pistol"},
+	"ak47": {"damage": 55.0, "range": 130.0, "cooldown": 0.12, "ammo": "ammo_rifle"},
+}
+
 ## Raiding gear. `mode` is how it gets deployed: stuck to a wall, thrown,
 ## or fired from a launcher. `impact` blows on first contact.
 const EXPLOSIVES := {
@@ -82,7 +95,10 @@ const ITEMS := {
 	"stone": {"name": "Stone", "category": "resources", "color": "b0bec5", "rarity": "common", "desc": "Raw stone for primitive tools and base stabilization."},
 	"iron": {"name": "Metal Ore", "category": "resources", "color": "90a4ae", "rarity": "common", "desc": "Raw iron ore. Smelt this to get metal fragments."},
 	"sulfur": {"name": "Sulfur Ore", "category": "resources", "color": "fff176", "rarity": "common", "desc": "Volatile ore used in explosives and gunpowder."},
-	"hqm": {"name": "High Quality Metal", "category": "resources", "color": "eceff1", "rarity": "elite", "desc": "Rare refined metal for modular weapons and armor."},
+	"hqm": {"name": "High Quality Metal", "category": "resources", "color": "eceff1", "rarity": "elite", "desc": "Rare refined metal. Only found in monument crates, out in the radiation."},
+	"arrow": {"name": "Arrow", "category": "ammo", "color": "a1887f", "rarity": "common", "recipe": {"wood": 25, "stone": 10}, "desc": "Cheap ammunition for the hunting bow."},
+	"ammo_pistol": {"name": "Pistol Ammo", "category": "ammo", "color": "c9a227", "rarity": "common", "recipe": {"gunpowder": 10, "frag": 5}, "workbench": 1, "desc": "Rounds for the semi-pistol."},
+	"ammo_rifle": {"name": "Rifle Ammo", "category": "ammo", "color": "e0a52a", "rarity": "rare", "recipe": {"gunpowder": 15, "frag": 10}, "workbench": 2, "desc": "Rounds for the assault rifle."},
 	"frag": {"name": "Metal Fragments", "category": "resources", "color": "ef5350", "rarity": "rare", "desc": "Refined iron used for most mid-tier items."},
 	"lgf": {"name": "Low Grade Fuel", "category": "resources", "color": "e53935", "rarity": "common", "desc": "Tallow and cloth mix. Powering your survival."},
 	"cloth": {"name": "Cloth", "category": "resources", "color": "f5f5f5", "rarity": "common", "desc": "Fibers from hemp plants. Used for clothing and meds."},
@@ -98,9 +114,9 @@ const ITEMS := {
 	"torch": {"name": "Torch", "category": "tools", "color": "fb8c00", "rarity": "common", "recipe": {"wood": 50, "lgf": 1}, "desc": "Provides light and subtle heat."},
 	"spear": {"name": "Wooden Spear", "category": "weapons", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 300}, "desc": "Cheap long-range melee option."},
 	"machete": {"name": "Machete", "category": "weapons", "color": "90a4ae", "rarity": "rare", "recipe": {"iron": 100}, "desc": "Standard industrial blade."},
-	"bow": {"name": "Hunting Bow", "category": "weapons", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 200, "cloth": 50}, "desc": "Silent and deadly ranged tool."},
-	"pistol": {"name": "Semi-Pistol", "category": "weapons", "color": "546e7a", "rarity": "rare", "recipe": {"iron": 150, "pipe": 1}, "desc": "P250 clone. Fast firing sidearm."},
-	"ak47": {"name": "Assault Rifle", "category": "weapons", "color": "6d4c41", "rarity": "elite", "recipe": {"hqm": 50, "wood": 200, "scrap": 50, "pipe": 1}, "desc": "The king of Rust weapons. High recoil, high reward."},
+	"bow": {"name": "Hunting Bow", "category": "weapons", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 200, "cloth": 50, "leather": 20, "sewing": 1}, "desc": "Silent and deadly. Fires arrows."},
+	"pistol": {"name": "Semi-Pistol", "category": "weapons", "color": "546e7a", "rarity": "rare", "recipe": {"iron": 150, "pipe": 1, "spring": 1}, "workbench": 1, "desc": "P250 clone. Fast firing sidearm."},
+	"ak47": {"name": "Assault Rifle", "category": "weapons", "color": "6d4c41", "rarity": "elite", "recipe": {"hqm": 50, "wood": 200, "scrap": 50, "pipe": 1, "spring": 2}, "workbench": 2, "desc": "The king of Rust weapons. High recoil, high reward."},
 	"furnace": {"name": "Furnace", "category": "items", "color": "ff7043", "rarity": "rare", "recipe": {"stone": 200, "wood": 100, "lgf": 10}, "desc": "Smelts ores into metal/sulfur using wood."},
 	"campfire": {"name": "Campfire", "category": "items", "color": "ffab40", "rarity": "common", "recipe": {"wood": 100}, "desc": "Useful for light and cooking meat."},
 	"building_plan": {"name": "Building Plan", "category": "tools", "color": "64b5f6", "rarity": "common", "recipe": {"wood": 20}, "desc": "Select building pieces to place."},
@@ -163,10 +179,9 @@ func _ready() -> void:
 
 
 func reset_state() -> void:
-	inventory = {
-		"wood": 2000, "stone": 1000, "frag": 500, "hqm": 100,
-		"building_plan": 1, "hammer": 1,
-	}
+	# A real survival opening: the plan and the hammer so building is
+	# always possible, and nothing else. Everything past that is earned.
+	inventory = {"building_plan": 1, "hammer": 1}
 	belt = ["building_plan", "hammer", null, null, null, null]
 	selected_belt_slot = 0
 	stats = {

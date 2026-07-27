@@ -609,10 +609,10 @@ func _build_start_screen() -> void:
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(title)
 	var controls := _label(
-		"W A S D  Move   |   SPACE  Jump   |   V  Camera (1st/3rd)\n" +
-		"LMB  Action   |   RMB / Q  Build Menu   |   E  Inventory\n" +
+		"W A S D  Move   |   SHIFT  Sprint   |   SPACE  Jump   |   V  Camera (1st/3rd)\n" +
+		"LMB  Action   |   RMB / Q  Build Menu   |   E  Inventory   |   F  Drink\n" +
 		"R  Rotate   |   G  Cancel Build   |   H  Upgrade / Repair\n" +
-		"1-6  Hotbar   |   ESC  Pause",
+		"1-6  Hotbar   |   ESC  Pause   |   F8  Touch Controls",
 		16, Color(0.85, 0.85, 0.85))
 	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(controls)
@@ -776,8 +776,9 @@ func _process(delta: float) -> void:
 	else:
 		_bench_label.visible = false
 
-	# Freezing warning
-	var cold := float(Game.stats.temperature) < 25.0
+	# Freezing warning, raised well before the damage threshold so there is
+	# time to actually go and light a fire
+	var cold := float(Game.stats.temperature) < 40.0
 	_cold_label.visible = cold
 	if cold:
 		_cold_label.modulate.a = 0.55 + 0.45 * sin(Time.get_ticks_msec() * 0.006)

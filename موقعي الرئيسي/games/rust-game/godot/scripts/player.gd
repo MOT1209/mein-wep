@@ -23,6 +23,7 @@ var in_water := false
 
 var _step_distance := 0.0
 var _drink_cd := 0.0
+var _weapon_cd := 0.0
 
 
 func _ready() -> void:
@@ -161,6 +162,7 @@ func _toggle_view() -> void:
 
 func _physics_process(delta: float) -> void:
 	_drink_cd = maxf(0.0, _drink_cd - delta)
+	_weapon_cd = maxf(0.0, _weapon_cd - delta)
 	in_water = world.is_in_water(global_position)
 
 	if not is_on_floor():
@@ -174,7 +176,7 @@ func _physics_process(delta: float) -> void:
 	var dir := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
 	var speed := SPEED
-	if Input.is_physical_key_pressed(KEY_SHIFT) and not in_water:
+	if Input.is_action_pressed("sprint") and not in_water:
 		speed = SPRINT_SPEED
 	if in_water:
 		speed *= 0.55
@@ -263,6 +265,11 @@ func _primary_action() -> void:
 		_fire_rocket()
 		return
 
+	# 5. Weapons swing or fire; bare hands fall through to the gather ray
+	if Game.WEAPONS.has(tool):
+		_use_weapon(tool)
+		return
+
 	# 4. Interact ray: structures (2) + resources (4) + NPCs (8)
 	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | 4 | 8)
 	if hit.is_empty():
@@ -295,9 +302,9 @@ func _primary_action() -> void:
 		Sfx.play("hit")
 		return
 
-	# NPC melee
+	# Bare-handed strike
 	if obj.has_method("npc_take_damage"):
-		obj.npc_take_damage(15.0)
+		obj.npc_take_damage(Game.FIST_DAMAGE)
 		Sfx.play("hit")
 		_spawn_hit_particles(hit.position, Color(0.8, 0.2, 0.2))
 		return
@@ -339,6 +346,40 @@ func _spawn_hit_particles(pos: Vector3, color: Color) -> void:
 	t.timeout.connect(func():
 		if is_instance_valid(parts):
 			parts.queue_free())
+
+
+## Swings a melee weapon or fires a ranged one. Ranged weapons spend a
+## round and reach much further; both hit creatures and structures.
+func _use_weapon(id: String) -> void:
+	var data: Dictionary = Game.WEAPONS[id]
+	if _weapon_cd > 0.0:
+		return
+	_weapon_cd = float(data.cooldown)
+
+	var ammo := str(data.get("ammo", ""))
+	if ammo != "":
+		if Game.get_count(ammo) <= 0:
+			Game.notify("Out of %s" % Game.ITEMS[ammo].name, Color(0.9, 0.3, 0.3))
+			return
+		Game.remove_item(ammo, 1)
+
+	var hit := _camera_ray(float(data.range), 2 | 4 | 8)
+	Sfx.play("hit" if ammo == "" else "explosion")
+	if hit.is_empty():
+		return
+
+	var obj: Object = hit.collider
+	var damage := float(data.damage)
+	if obj.has_method("npc_take_damage"):
+		obj.npc_take_damage(damage)
+		_spawn_hit_particles(hit.position, Color(0.8, 0.2, 0.2))
+	elif obj.has_method("take_hit"):
+		# Bullets chip structures far more slowly than explosives
+		obj.take_hit(damage * 0.25)
+		_spawn_hit_particles(hit.position, Color(0.9, 0.85, 0.6))
+	elif obj.has_method("hit_harvest"):
+		obj.hit_harvest(id)
+		_spawn_hit_particles(hit.position, Color(0.7, 0.7, 0.7))
 
 
 ## Satchel charges stick to whatever you are aiming at; grenades get lobbed.

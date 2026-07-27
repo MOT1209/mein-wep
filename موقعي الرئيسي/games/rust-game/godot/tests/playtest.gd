@@ -58,7 +58,7 @@ func _world_sources() -> Dictionary:
 		"pipe": "research bench",
 		"spring": "research bench",
 		"sewing": "research bench",
-		"hqm": "no source in the world yet",
+		"hqm": "loot a monument crate, out in the radiation",
 	}
 
 
@@ -192,6 +192,15 @@ func _audit_dead_items() -> void:
 	# Things whose effect lives in code rather than in a recipe: the torch
 	# lights the player, the launcher fires rockets, doors get placed.
 	for id in ["building_plan", "hammer", "rocket_launcher", "wooden_door", "door", "torch"]:
+		used_directly[id] = true
+	for id in game.WEAPONS:
+		used_directly[id] = true
+		var ammo := str(game.WEAPONS[id].get("ammo", ""))
+		if ammo != "":
+			used_directly[ammo] = true
+	# Consumed by a station rather than by a recipe: the furnace refines
+	# crude oil and smelts ore, the campfire cooks, the bench researches.
+	for id in ["oil", "iron", "raw_meat", "scrap"]:
 		used_directly[id] = true
 	# Tools that change gathering rates
 	var node_script = load("res://scripts/resource_node.gd")

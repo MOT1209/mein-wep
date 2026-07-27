@@ -16,6 +16,9 @@ const STASHABLE := [
 const RESEARCH_OUTPUTS := ["gear_comp", "pipe", "spring", "sewing"]
 const RESEARCH_COST := 25
 
+## Crude oil refined per unit of low grade fuel.
+const OIL_PER_FUEL := 5
+
 var station_type := "campfire"
 var stored: Dictionary = {}
 
@@ -188,8 +191,19 @@ func _cook() -> void:
 	Sfx.play("harvest")
 
 
-## Furnace: 1 wood per 2 metal ore -> metal fragments.
+## Furnace: refines crude oil into low grade fuel first (the only
+## renewable source of it), then smelts metal ore into fragments.
 func _smelt() -> void:
+	var oil := Game.get_count("oil")
+	if oil >= OIL_PER_FUEL:
+		var fuel_made := floori(float(oil) / float(OIL_PER_FUEL))
+		Game.remove_item("oil", fuel_made * OIL_PER_FUEL)
+		Game.add_item("lgf", fuel_made)
+		Game.notify("Refined %d crude oil into %d low grade fuel"
+			% [fuel_made * OIL_PER_FUEL, fuel_made])
+		Sfx.play("upgrade")
+		return
+
 	var ore := Game.get_count("iron")
 	if ore <= 0:
 		Game.notify("No metal ore to smelt", Color(1.0, 0.63, 0.0))

@@ -35,7 +35,14 @@ func setup(t: String, w: Node3D) -> void:
 	_cfg = TYPES[t]
 	health = _cfg.health
 	collision_layer = 8
-	collision_mask = 0
+	# Structures and world props only. This was 0, and every creature moved
+	# by assigning position directly, so wolves and bears walked straight
+	# through walls and a base offered no protection at all.
+	#
+	# Terrain is deliberately left out: height is snapped every frame in
+	# _physics_process, and having the body also collide with the terrain
+	# trimesh made creatures grind to a halt against their own footing.
+	collision_mask = 2 | 4
 
 	var mi := MeshInstance3D.new()
 	var box := BoxMesh.new()
@@ -81,14 +88,14 @@ func _physics_process(delta: float) -> void:
 	position.y = world.terrain_height(position.x, position.z)
 
 
-func _hostile_ai(player: Node3D, dist: float, delta: float) -> void:
+func _hostile_ai(player: Node3D, dist: float, _delta: float) -> void:
 	if dist >= 18.0:
 		return
 	_face(player.position)
 	if dist > 1.5:
 		var dir := (player.position - position)
 		dir.y = 0.0
-		position += dir.normalized() * _cfg.speed * delta
+		_walk(dir.normalized(), _cfg.speed)
 	if dist < 2.5 and _attack_cd <= 0.0:
 		Game.stats.health -= _cfg.damage
 		_attack_cd = 1.2
@@ -103,7 +110,7 @@ func _passive_ai(player: Node3D, dist: float, delta: float) -> void:
 		if away.length() > 0.01:
 			away = away.normalized()
 			_face(position + away)
-			position += away * _cfg.speed * delta
+			_walk(away, _cfg.speed)
 		return
 	# Calm wandering
 	_wander_timer -= delta
@@ -116,10 +123,17 @@ func _passive_ai(player: Node3D, dist: float, delta: float) -> void:
 			_wander_dir = Vector3(cos(ang), 0, sin(ang))
 	if _wander_dir != Vector3.ZERO:
 		_face(position + _wander_dir)
-		position += _wander_dir * 1.3 * delta
+		_walk(_wander_dir, 1.3)
 		# Keep them inside the world
 		position.x = clampf(position.x, -190.0, 190.0)
 		position.z = clampf(position.z, -190.0, 190.0)
+
+
+## Horizontal movement that respects collision, so walls actually stop a
+## creature instead of it sliding through them.
+func _walk(dir: Vector3, speed: float) -> void:
+	velocity = Vector3(dir.x * speed, 0.0, dir.z * speed)
+	move_and_slide()
 
 
 func _face(target: Vector3) -> void:

@@ -50,6 +50,12 @@ func _run_tests() -> void:
 	world.started = true
 	game.set_ui("")
 
+	# A fresh game now starts with almost nothing, so stock the materials
+	# these mechanic checks need rather than relying on the opening loadout.
+	for res in ["wood", "stone", "frag", "iron", "cloth", "scrap"]:
+		game.inventory[res] = 2000
+	game.inventory_changed.emit()
+
 	# --- Crafting
 	var wood_before: int = game.get_count("wood")
 	_check(game.craft("hammer", 2), "craft 2 hammers succeeds")
@@ -412,6 +418,124 @@ func _run_tests() -> void:
 		"a stocked cupboard stops decay entirely")
 	_check(not lone.decaying, "protected structures clear the decaying flag")
 	_check(tc.upkeep_total() < stocked_before, "upkeep is consumed while it protects")
+
+	# --- A fresh save really is a survival start
+	var fresh = load("res://scripts/game.gd").new()
+	fresh.reset_state()
+	var handout := 0
+	for id in fresh.inventory:
+		if id not in ["building_plan", "hammer"]:
+			handout += int(fresh.inventory[id])
+	_check(handout == 0, "a new game hands out no free resources (%d)" % handout)
+	_check(int(fresh.inventory.get("hammer", 0)) == 1, "you still start with a hammer")
+	fresh.free()
+
+	# --- High quality metal has a source now
+	var monument_crate: Node = null
+	for c in world.get_children():
+		if c.is_queued_for_deletion() or not c.has_method("hit_harvest"):
+			continue
+		if c.res_type == "crate":
+			monument_crate = c
+			break
+	_check(monument_crate != null, "monument crates exist in the world")
+	if monument_crate != null:
+		var hqm0: int = game.get_count("hqm")
+		monument_crate.hit_harvest("")
+		_check(game.get_count("hqm") > hqm0, "a monument crate yields high quality metal")
+	# Earlier checks spent the stock, so top up everything the rifle needs
+	game.inventory["hqm"] = 200
+	game.inventory["pipe"] = 10
+	game.inventory["spring"] = 10
+	game.inventory["scrap"] = 500
+	game.inventory["wood"] = 2000
+	game.workbench_level = 2
+	_check(game.craft("ak47", 1), "the assault rifle is now craftable")
+
+	# --- Weapons actually do something
+	_check(game.WEAPONS.has("bow") and game.WEAPONS.has("ak47"), "weapons have combat stats")
+	var player = world.player
+	var victim: Node = null
+	for c in world.get_children():
+		if c.has_method("npc_take_damage") and not c.is_queued_for_deletion():
+			victim = c
+			break
+	_check(victim != null, "found a creature to shoot")
+	if victim != null:
+		# Ranged weapons spend a round per shot
+		game.inventory["ammo_rifle"] = 3
+		game.belt[0] = "ak47"
+		game.selected_belt_slot = 0
+		player._weapon_cd = 0.0
+		player._use_weapon("ak47")
+		_check(game.get_count("ammo_rifle") == 2, "firing the rifle spends one round")
+		player._weapon_cd = 0.0
+		game.inventory["ammo_rifle"] = 0
+		player._use_weapon("ak47")
+		_check(game.get_count("ammo_rifle") == 0, "with no ammo the rifle does not fire")
+		# Melee weapons need no ammo and hit harder than fists
+		player._weapon_cd = 0.0
+		var ammo_left: int = game.get_count("ammo_rifle")
+		player._use_weapon("machete")
+		_check(game.get_count("ammo_rifle") == ammo_left,
+			"the machete swings without spending ammo")
+		_check(float(game.WEAPONS["machete"].damage) > game.FIST_DAMAGE,
+			"a weapon beats bare hands")
+	_check(float(game.WEAPONS["ak47"].range) > float(game.WEAPONS["machete"].range),
+		"ranged weapons reach further than melee")
+	game.belt[0] = "building_plan"
+
+	# --- A wall actually stops a charging animal
+	var NpcScript = load("res://scripts/npc.gd")
+	var blocker = StructureScript.new()
+	blocker.setup("wall")
+	blocker.position = Vector3(120, 2, 100)
+	world.add_child(blocker)
+	world.register_structure(blocker)
+	blocker.apply_tier("stone")
+	player.position = Vector3(120, 2, 96)     # player behind the wall
+	var hunter = NpcScript.new()
+	hunter.setup("wolf", world)
+	world.add_child(hunter)
+	hunter.position = Vector3(120, 2, 102)    # wolf just outside the wall
+	_check(hunter.collision_mask & 2 != 0, "creatures collide with structures")
+
+	# Run long enough that an unblocked wolf would be well past the wall,
+	# otherwise the check passes even when collision is broken.
+	var start_z: float = hunter.position.z
+	for i in 240:
+		hunter._physics_process(0.05)
+	var blocked_z: float = hunter.position.z
+	_check(blocked_z < start_z, "the wolf charged towards the player")
+	_check(blocked_z > blocker.position.z,
+		"the wall stopped it (wolf z=%.1f, wall z=%.1f)" % [blocked_z, blocker.position.z])
+
+	# Control run: with the wall gone it must actually get through, which
+	# proves the previous result came from the wall and not from the wolf
+	# being too slow to reach it. The layer is cleared rather than the node
+	# freed, because queue_free only takes effect at the end of the frame
+	# and the body would still be blocking during this loop.
+	blocker.collision_layer = 0
+	world.unregister_structure(blocker)
+	hunter.position = Vector3(120, 2, 102)
+	for i in 240:
+		hunter._physics_process(0.05)
+	_check(hunter.position.z < blocker.position.z,
+		"without the wall it reaches the player side (z=%.1f)" % hunter.position.z)
+	hunter.queue_free()
+	blocker.queue_free()
+
+	# --- Crude oil is no longer a dead end
+	var refinery = world._spawn_station("furnace", Vector3(-14, 0, -14))
+	game.inventory["oil"] = 20
+	game.inventory["iron"] = 0
+	var lgf0: int = game.get_count("lgf")
+	refinery.interact_station()
+	_check(game.get_count("lgf") > lgf0, "a furnace refines crude oil into low grade fuel")
+	_check(game.get_count("oil") == 0, "the oil was consumed")
+
+	# --- Sprint is a rebindable action, not a hardcoded key
+	_check(InputMap.has_action("sprint"), "sprint is a real input action")
 
 	# --- Scene-authored environment & lighting (visible in the editor too)
 	var we = world.get_node_or_null("WorldEnvironment")

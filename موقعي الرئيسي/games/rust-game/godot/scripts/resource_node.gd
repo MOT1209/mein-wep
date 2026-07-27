@@ -263,8 +263,11 @@ func hit_harvest(tool_id: String = "") -> void:
 			Game.add_item("scrap", 3)
 			Game.add_item("lgf", 2)
 		"crate":
+			# Monument crates sit inside the radiation zones, and they are
+			# the only source of high quality metal in the world.
 			Game.add_item("scrap", 5)
 			Game.add_item("frag", 5)
+			Game.add_item("hqm", 2)
 		"bush":
 			Game.add_item("berries", 5)
 	if tool_id == "drill" and TOOL_YIELD.has(res_type):
