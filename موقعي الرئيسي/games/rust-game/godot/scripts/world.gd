@@ -553,7 +553,10 @@ func _process(delta: float) -> void:
 			in_rad = true
 			break
 	if in_rad:
-		Game.stats.radiation = minf(100.0, Game.stats.radiation + 2.0 * delta)
+		# A hazmat suit is the difference between looting a monument and
+		# sprinting out of it with a timer running.
+		var shielded := 1.0 - Game.radiation_protection()
+		Game.stats.radiation = minf(100.0, Game.stats.radiation + 2.0 * delta * shielded)
 	else:
 		Game.stats.radiation = maxf(0.0, Game.stats.radiation - 1.0 * delta)
 
@@ -656,7 +659,7 @@ func apply_explosion(origin: Vector3, damage: float, radius: float) -> float:
 		var d: float = s.position.distance_to(origin)
 		if d > radius:
 			continue
-		dealt += s.take_blast(damage * clampf(1.0 - d / radius, 0.15, 1.0))
+		dealt += s.take_blast(damage * clampf(1.0 - d / radius, 0.15, 1.0), origin)
 
 	for child in get_children():
 		if child.has_method("npc_take_damage"):
@@ -668,7 +671,7 @@ func apply_explosion(origin: Vector3, damage: float, radius: float) -> float:
 	if player != null:
 		var dp := player.position.distance_to(origin)
 		if dp <= radius:
-			Game.stats.health -= damage * clampf(1.0 - dp / radius, 0.0, 1.0) * PLAYER_BLAST_SCALE
+			Game.hurt(damage * clampf(1.0 - dp / radius, 0.0, 1.0) * PLAYER_BLAST_SCALE)
 	return dealt
 
 
@@ -738,6 +741,7 @@ func save_game() -> void:
 			"stats": Game.stats,
 			"inventory": Game.inventory,
 			"belt": Game.belt,
+			"worn": Game.worn,
 		},
 		"time": Game.day_time,
 		"structures": [],
@@ -755,6 +759,7 @@ func save_game() -> void:
 			"upkeep": s.upkeep,
 			"lock": s.lock_type,
 			"lock_health": s.lock_health,
+			"soft": [s.soft_normal.x, s.soft_normal.z],
 		})
 	for st in stations:
 		if not is_instance_valid(st):
@@ -797,6 +802,13 @@ func load_game() -> void:
 		Game.inventory_changed.emit()
 	if p.has("belt") and p.belt is Array and p.belt.size() == 6:
 		Game.belt = p.belt
+	if p.has("worn") and p.worn is Dictionary:
+		Game.worn = {}
+		for slot in p.worn:
+			var piece := str(p.worn[slot])
+			# Only re-equip pieces that still exist and still fit that slot
+			if Game.ARMOUR.has(piece) and str(Game.ARMOUR[piece].slot) == str(slot):
+				Game.worn[slot] = piece
 	Game.day_time = float(parsed.get("time", Game.day_time))
 
 	for sd in parsed.get("structures", []):
@@ -818,6 +830,9 @@ func load_game() -> void:
 		if saved_upkeep is Dictionary:
 			for k in saved_upkeep:
 				s.upkeep[k] = int(saved_upkeep[k])
+		var saved_soft = sd.get("soft", [])
+		if saved_soft is Array and saved_soft.size() == 2:
+			s.soft_normal = Vector3(float(saved_soft[0]), 0.0, float(saved_soft[1]))
 		var saved_lock := str(sd.get("lock", ""))
 		if saved_lock != "" and s.install_lock(saved_lock):
 			# A half-broken lock stays half-broken across a reload

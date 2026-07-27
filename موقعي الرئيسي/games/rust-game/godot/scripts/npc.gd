@@ -153,7 +153,7 @@ func _melee_attack(player: Node3D, dist: float) -> void:
 		dir.y = 0.0
 		_walk(dir.normalized(), _cfg.speed)
 	if dist < 2.5 and _attack_cd <= 0.0:
-		Game.stats.health -= _cfg.damage
+		Game.hurt(float(_cfg.damage))
 		_attack_cd = float(_cfg.get("cooldown", 1.2))
 		Sfx.play("hit")
 
@@ -196,7 +196,7 @@ func _fire_at(player: Node3D) -> void:
 			randf_range(-1.5, 1.5))
 		_tracer(_eye(), target + wide)
 		return
-	Game.stats.health -= _cfg.damage
+	Game.hurt(float(_cfg.damage))
 	_tracer(_eye(), target)
 
 
@@ -305,7 +305,7 @@ func _force_doors() -> void:
 			return
 		if _attack_cd <= 0.0:
 			_attack_cd = float(_cfg.get("cooldown", 1.2))
-			col.attack_lock(DOOR_DAMAGE)
+			col.attack_lock(DOOR_DAMAGE, global_position)
 			Sfx.play("hit")
 		return
 

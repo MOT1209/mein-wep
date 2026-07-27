@@ -43,7 +43,8 @@ func _world_sources() -> Dictionary:
 		"wood": "chop a tree",
 		"stone": "hit a rock node",
 		"iron": "hit a metal node",
-		"sulfur": "hit a sulfur node",
+		"sulfur_ore": "hit a sulfur node",
+		"sulfur": "smelt sulfur ore in a furnace",
 		"scrap": "smash a barrel or a monument crate",
 		"lgf": "smash a barrel",
 		"frag": "loot a monument crate, or smelt ore in a furnace",
@@ -204,7 +205,13 @@ func _audit_dead_items() -> void:
 			used_directly[ammo] = true
 	# Consumed by a station rather than by a recipe: the furnace refines
 	# crude oil and smelts ore, the campfire cooks, the bench researches.
-	for id in ["oil", "iron", "raw_meat", "scrap"]:
+	var station_script = load("res://scripts/station.gd")
+	for recipe in station_script.SMELTING:
+		used_directly[str(recipe.input)] = true
+	for id in ["raw_meat", "scrap"]:
+		used_directly[id] = true
+	# Worn rather than spent
+	for id in game.ARMOUR:
 		used_directly[id] = true
 	# Tools that change gathering rates
 	var node_script = load("res://scripts/resource_node.gd")
@@ -327,7 +334,7 @@ func _audit_progression_costs() -> void:
 	var made_explosives := false
 	if made_powder:
 		made_explosives = game.craft("explosives", 1)
-	print("  raid chain from raw sulfur: gunpowder=%s explosives=%s"
+	print("  raid chain from smelted sulfur: gunpowder=%s explosives=%s"
 		% [str(made_powder), str(made_explosives)])
 	if not (made_powder and made_explosives):
 		_note("BLOCKER", "The sulfur to explosives chain cannot be completed even with "
@@ -365,10 +372,28 @@ func _audit_monument_run() -> void:
 		_note("BALANCE", "Guards need %.0fs to kill you, so the monument is free "
 			% ttk + "loot and the radiation is the only real cost.")
 
+	# The same fight in the best gear the crafting tree can produce
+	var best: Dictionary = {}
+	for id in game.ARMOUR:
+		var slot := str(game.ARMOUR[id].slot)
+		if not best.has(slot) or float(game.ARMOUR[id].protect) > float(game.ARMOUR[best[slot]].protect):
+			best[slot] = id
+	var worn_backup: Dictionary = game.worn
+	game.worn = best
+	var geared_ttk: float = ttk / maxf(0.05, 1.0 - game.armour_protection())
+	var rad_shield: float = game.radiation_protection()
+	print("  in the best armour (%d%% soaked): %.0fs instead of %.0fs"
+		% [roundi(game.armour_protection() * 100.0), geared_ttk, ttk])
+	game.worn = worn_backup
+	if geared_ttk < ttk * 1.2:
+		_note("BALANCE", "A full set of armour only buys %.0fs over going bare, "
+			% (geared_ttk - ttk) + "so there is no reason to craft any of it.")
+
 	# Radiation runs on its own clock while the shooting happens
 	var rad_fill: float = 100.0 / 2.0
-	print("  radiation fills in %.0fs inside the %.0fm zone, then costs 2 hp/s"
-		% [rad_fill, game.RAD_ZONE_RADIUS])
+	print("  radiation fills in %.0fs inside the %.0fm zone (%.0fs in a hazmat suit), "
+		% [rad_fill, game.RAD_ZONE_RADIUS, rad_fill / maxf(0.05, 1.0 - rad_shield)]
+		+ "then costs 2 hp/s")
 	if rad_fill > ttk:
 		print("  (the guards, not the radiation, are what stop you)")
 

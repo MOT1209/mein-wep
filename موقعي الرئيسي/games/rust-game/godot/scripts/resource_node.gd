@@ -244,11 +244,46 @@ const TOOL_YIELD := {
 
 const OIL_PER_DRILL_HIT := 3
 
+## The marked spot that appears on an ore node or a tree after the first
+## swing. Landing on it doubles that swing and moves the mark somewhere
+## else, which turns mindless clicking into aiming. The drill is exempt,
+## the same way Rust's tier-3 tools ignore it.
+const SWEET_SPOT_MULT := 2.0
+const SWEET_SPOT_RADIUS := 0.55
+const SWEET_SPOT_TYPES := ["tree", "rock", "iron", "sulfur"]
+
+var _sweet_pos := Vector3.INF   # world space; INF means none showing
+var _sweet_marker: MeshInstance3D
+
+
+## Where the bonus spot currently sits, or Vector3.INF when there is none.
+func sweet_spot() -> Vector3:
+	return _sweet_pos
+
+
+## Did a hit at `at` land on the mark? Always false when none is showing.
+func is_sweet_hit(at: Vector3) -> bool:
+	if _sweet_pos == Vector3.INF or at == Vector3.INF:
+		return false
+	return at.distance_to(_sweet_pos) <= SWEET_SPOT_RADIUS
+
 
 ## Called by the player on LMB hit. Grants resources scaled by the equipped
-## tool, plays feedback, and destroys the node when depleted.
-func hit_harvest(tool_id: String = "") -> void:
+## tool and by whether the swing found the marked spot, plays feedback, and
+## destroys the node when depleted.
+func hit_harvest(tool_id: String = "", at: Vector3 = Vector3.INF) -> void:
 	var mult: int = int(TOOL_YIELD.get(res_type, {}).get(tool_id, 1))
+	var bonus := false
+	if SWEET_SPOT_TYPES.has(res_type):
+		if tool_id == "drill":
+			# A drill chews the whole node; there is nothing to aim at
+			bonus = true
+		elif is_sweet_hit(at):
+			bonus = true
+		_place_sweet_spot()
+	if bonus:
+		mult = int(round(float(mult) * SWEET_SPOT_MULT))
+		Game.notify("Sweet spot! x%.0f" % SWEET_SPOT_MULT, Color(1.0, 0.85, 0.35))
 	health -= mult
 	match res_type:
 		"tree":
@@ -258,7 +293,8 @@ func hit_harvest(tool_id: String = "") -> void:
 		"iron":
 			Game.add_item("iron", 8 * mult)
 		"sulfur":
-			Game.add_item("sulfur", 8 * mult)
+			# Raw ore: the furnace turns it into the sulfur recipes want
+			Game.add_item("sulfur_ore", 8 * mult)
 		"barrel":
 			Game.add_item("scrap", 3)
 			Game.add_item("lgf", 2)
@@ -274,6 +310,9 @@ func hit_harvest(tool_id: String = "") -> void:
 		Game.add_item("oil", OIL_PER_DRILL_HIT)
 	Sfx.play("harvest")
 
+	if health <= 0:
+		_hide_marker()
+
 	# Small bounce feedback
 	var tw := create_tween()
 	tw.tween_property(self, "position:y", position.y + 0.05, 0.05)
@@ -282,3 +321,52 @@ func hit_harvest(tool_id: String = "") -> void:
 	if health <= 0:
 		depleted.emit(res_type, position)
 		queue_free()
+
+
+## Moves the mark to a new point on the node's own collision surface, so it
+## lands on the rock rather than in the air beside it whatever size the
+## scatter rolled this one.
+func _place_sweet_spot() -> void:
+	var local := Vector3(0.0, 1.0, 0.0)
+	for c in get_children():
+		if not (c is CollisionShape3D):
+			continue
+		var cs := c as CollisionShape3D
+		if cs.shape is SphereShape3D:
+			var r: float = (cs.shape as SphereShape3D).radius
+			var dir := Vector3(randf_range(-1.0, 1.0), randf_range(-0.2, 0.8),
+				randf_range(-1.0, 1.0)).normalized()
+			local = cs.position + dir * r
+		elif cs.shape is CylinderShape3D:
+			var cyl := cs.shape as CylinderShape3D
+			var ang := randf() * TAU
+			local = cs.position + Vector3(cos(ang) * cyl.radius,
+				randf_range(-cyl.height * 0.3, cyl.height * 0.3), sin(ang) * cyl.radius)
+		break
+	_sweet_pos = to_global(local)
+	_show_marker(local)
+
+
+func _show_marker(local: Vector3) -> void:
+	if _sweet_marker == null:
+		_sweet_marker = MeshInstance3D.new()
+		var m := SphereMesh.new()
+		m.radius = 0.13
+		m.height = 0.26
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(1.0, 0.85, 0.3)
+		mat.emission_enabled = true
+		mat.emission = Color(1.0, 0.8, 0.2)
+		mat.emission_energy_multiplier = 3.0
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		m.material = mat
+		_sweet_marker.mesh = m
+		add_child(_sweet_marker)
+	_sweet_marker.position = local
+	_sweet_marker.visible = true
+
+
+func _hide_marker() -> void:
+	_sweet_pos = Vector3.INF
+	if is_instance_valid(_sweet_marker):
+		_sweet_marker.visible = false

@@ -128,6 +128,13 @@ func place_structure() -> void:
 	s.position = _ghost_pos
 	s.base_rot = Game.blueprint_rotation
 	s.rotation.y = s.base_rot
+	# The face you are standing on becomes the weak one, so which way round
+	# you raise a wall decides whether a raider has to get inside first.
+	if world.player != null:
+		var to_builder: Vector3 = world.player.global_position - s.position
+		to_builder.y = 0.0
+		if to_builder.length() > 0.01:
+			s.soft_normal = to_builder.normalized()
 	world.add_child(s)
 	world.register_structure(s)
 

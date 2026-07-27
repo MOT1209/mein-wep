@@ -329,13 +329,35 @@ func _run_tests() -> void:
 			ore2 = c
 	if tree2 != null:
 		var w0: int = game.get_count("wood")
+		# First swing on an untouched node: no mark is showing yet
 		tree2.hit_harvest("metal_hatchet")
 		_check(game.get_count("wood") == w0 + 36, "metal hatchet yields 3x wood per swing")
+
+		# --- Sweet spot
+		# Kept alive on purpose: a doubled swing would otherwise fell the
+		# tree before the sequence below finishes.
+		tree2.health = 99
+		_check(tree2.sweet_spot() != Vector3.INF, "the first swing puts a mark on the node")
+		var mark: Vector3 = tree2.sweet_spot()
+		_check(tree2.is_sweet_hit(mark), "a swing landing on the mark counts")
+		_check(not tree2.is_sweet_hit(mark + Vector3(3, 0, 0)),
+			"a swing well away from it does not")
+		var w1: int = game.get_count("wood")
+		tree2.hit_harvest("metal_hatchet", mark)
+		_check(game.get_count("wood") == w1 + 72, "hitting the mark doubles that swing")
+		_check(tree2.sweet_spot() != mark, "and the mark moves, so it cannot be farmed")
+		var w2: int = game.get_count("wood")
+		tree2.hit_harvest("metal_hatchet", mark)
+		_check(game.get_count("wood") == w2 + 36, "a stale aim point is worth nothing")
 	if ore2 != null:
 		var iron0: int = game.get_count("iron")
 		var oil0: int = game.get_count("oil")
 		ore2.hit_harvest("drill")
-		_check(game.get_count("iron") == iron0 + 32, "drill yields 4x metal ore per swing")
+		# The drill chews the whole node, so it never has to find the mark —
+		# it always swings as if it had. The node's total is unchanged either
+		# way: the bonus takes health off just as fast as it gives ore.
+		_check(game.get_count("iron") == iron0 + 64,
+			"the drill never has to aim (4x tool, doubled)")
 		_check(game.get_count("oil") == oil0 + 3, "drill is the source of crude oil")
 
 	# --- Workbench tier gating
@@ -782,6 +804,131 @@ func _run_tests() -> void:
 		_check(game.get_count("scrap") > scrap_before, "guards drop scrap")
 		_check(game.get_count("ammo_rifle") > rifle_ammo_before,
 			"and rifle ammo, which is otherwise a tier-2 craft")
+
+	# --- Soft side: which way round you build a wall matters
+	var raid_wall = StructureScript.new()
+	raid_wall.setup("wall")
+	raid_wall.position = Vector3(sx, y_cover + 1.5, sz + 24.0)
+	world.add_child(raid_wall)
+	world.register_structure(raid_wall)
+	raid_wall.apply_tier("stone")
+	var inside := Vector3(sx, y_cover, sz + 25.0)    # the builder's side
+	var outside := Vector3(sx, y_cover, sz + 23.0)
+	raid_wall.soft_normal = (inside - raid_wall.position).normalized()
+	raid_wall.soft_normal.y = 0.0
+	raid_wall.soft_normal = raid_wall.soft_normal.normalized()
+
+	_check(raid_wall.is_soft_side(inside), "the side the builder stood on is the weak one")
+	_check(not raid_wall.is_soft_side(outside), "the far side is not")
+	raid_wall.health = raid_wall.max_health
+	var hard_dealt: float = raid_wall.take_hit(50.0, outside)
+	var soft_dealt: float = raid_wall.take_hit(50.0, inside)
+	_check(hard_dealt == 50.0, "a hit from outside lands for face value")
+	_check(soft_dealt == 50.0 * game.SOFT_SIDE_MULT,
+		"the same hit from inside lands for %.0fx (%.0f vs %.0f)"
+		% [game.SOFT_SIDE_MULT, soft_dealt, hard_dealt])
+
+	raid_wall.health = raid_wall.max_health
+	var hard_blast: float = raid_wall.take_blast(200.0, outside)
+	raid_wall.health = raid_wall.max_health
+	var soft_blast: float = raid_wall.take_blast(200.0, inside)
+	_check(soft_blast > hard_blast, "a charge on the weak face is worth more explosive")
+	_check(hard_blast < 200.0, "and the tier's blast resistance still applies")
+
+	var no_builder = StructureScript.new()
+	no_builder.setup("wall")
+	world.add_child(no_builder)
+	_check(not no_builder.is_soft_side(inside),
+		"a piece with no recorded builder has no weak face at all")
+	_check(no_builder.take_hit(10.0, inside) == 10.0, "so it takes hits at face value")
+	no_builder.queue_free()
+	raid_wall.health = raid_wall.max_health
+
+	# --- Armour
+	game.worn = {}
+	_check(game.armour_protection() == 0.0, "a bare player soaks nothing")
+	game.stats.health = 100.0
+	game.hurt(20.0)
+	_check(game.stats.health == 80.0, "unarmoured damage lands in full")
+
+	game.inventory["road_vest"] = 1
+	_check(game.wear("road_vest"), "a crafted vest can be worn")
+	_check(game.is_worn("road_vest"), "and reads as worn")
+	_check(game.get_count("road_vest") == 1, "wearing it does not consume it")
+	_check(absf(game.armour_protection() - 0.25) < 0.001, "the vest soaks 25%")
+	game.stats.health = 100.0
+	game.hurt(20.0)
+	_check(absf(game.stats.health - 85.0) < 0.001, "so 20 damage arrives as 15")
+
+	game.inventory["metal_facemask"] = 1
+	game.wear("metal_facemask")
+	_check(absf(game.armour_protection() - 0.45) < 0.001,
+		"a second piece in a different slot stacks (%.2f)" % game.armour_protection())
+	game.inventory["wood_armour"] = 1
+	game.wear("wood_armour")
+	_check(game.worn.get("chest", "") == "wood_armour",
+		"a second chest piece replaces the first rather than stacking")
+	_check(not game.is_worn("road_vest"), "the vest came off")
+	game.wear("wood_armour")
+	_check(not game.is_worn("wood_armour"), "clicking it again takes it off")
+
+	# The cap: nothing makes you immune
+	game.worn = {"chest": "road_vest", "head": "metal_facemask", "suit": "hazmat"}
+	_check(game.armour_protection() <= game.ARMOUR_CAP, "stacked armour is capped")
+
+	# Radiation is the monument's other weapon, and the hazmat is its answer
+	_check(game.radiation_protection() > 0.5, "a hazmat suit keeps most radiation out")
+	# Measured standing in an actual monument zone — the staged corridor is
+	# deliberately far from one, so this has to go to the radiation.
+	var zone: Vector2 = world.rad_zones[0]
+	var parked: Vector3 = player.position
+	player.position = Vector3(zone.x, world.terrain_height(zone.x, zone.y), zone.y)
+	game.worn = {}
+	game.stats.radiation = 0.0
+	world._process(1.0)
+	var bare_rads: float = game.stats.radiation
+	_check(bare_rads > 0.0, "standing in a monument's radiation builds it up")
+	game.worn = {"suit": "hazmat"}
+	game.stats.radiation = 0.0
+	world._process(1.0)
+	_check(game.stats.radiation < bare_rads,
+		"and the suit slows it right down (%.2f suited vs %.2f bare)"
+		% [game.stats.radiation, bare_rads])
+	game.worn = {}
+	game.stats.radiation = 0.0
+	player.position = parked
+
+	# --- Furnace: one interaction, everything it can process
+	var big_furnace = world._spawn_station("furnace", Vector3(-20, 0, -20))
+	game.inventory["oil"] = 10
+	game.inventory["iron"] = 40
+	game.inventory["sulfur_ore"] = 30
+	game.inventory["wood"] = 500
+	game.inventory["lgf"] = 0
+	game.inventory["frag"] = 0
+	game.inventory["sulfur"] = 0
+	game.inventory["charcoal"] = 0
+	big_furnace.interact_station()
+	_check(game.get_count("lgf") == 2, "it refined the oil")
+	_check(game.get_count("frag") == 40, "and smelted the metal ore in the same pass")
+	_check(game.get_count("sulfur") == 30, "and the sulfur ore, which used to have no step")
+	_check(game.get_count("charcoal") == 35, "burnt wood left charcoal behind")
+	_check(game.get_count("oil") == 0 and game.get_count("sulfur_ore") == 0,
+		"every input was consumed")
+
+	# Sulfur is a smelted product now, not something a node hands you
+	var sulfur_node: Node = null
+	for c in world.get_children():
+		if c.has_method("hit_harvest") and not c.is_queued_for_deletion() \
+				and c.res_type == "sulfur":
+			sulfur_node = c
+			break
+	if sulfur_node != null:
+		var raw0: int = game.get_count("sulfur_ore")
+		var refined0: int = game.get_count("sulfur")
+		sulfur_node.hit_harvest("stone_pickaxe")
+		_check(game.get_count("sulfur_ore") > raw0, "a sulfur node yields ore")
+		_check(game.get_count("sulfur") == refined0, "and no usable sulfur on its own")
 
 	# --- Crude oil is no longer a dead end
 	var refinery = world._spawn_station("furnace", Vector3(-14, 0, -14))

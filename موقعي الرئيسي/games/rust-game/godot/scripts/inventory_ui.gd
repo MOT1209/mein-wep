@@ -371,11 +371,15 @@ func _refresh_inventory() -> void:
 		if count <= 0:
 			continue
 		var item: Dictionary = Game.ITEMS.get(id, {})
-		var b := _make_slot(id, str(count),
-			"%s\n%s" % [item.get("name", id), item.get("desc", "")])
+		var hint: String = item.get("desc", "")
+		if Game.ARMOUR.has(id):
+			hint += "\n[Worn — click to take off]" if Game.is_worn(id) else "\n[Click to wear]"
+		var b := _make_slot(id, str(count), "%s\n%s" % [item.get("name", id), hint])
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
 		if id in Game.belt:
 			b.self_modulate = Color(1.3, 1.1, 0.5)
+		if Game.is_worn(id):
+			b.self_modulate = Color(0.6, 1.4, 0.7)
 		b.pressed.connect(_on_inventory_item.bind(id))
 		_inv_grid.add_child(b)
 		shown += 1
@@ -383,6 +387,13 @@ func _refresh_inventory() -> void:
 
 
 func _on_inventory_item(id: String) -> void:
+	# Armour is worn, not held: clicking a piece puts it on or takes it off,
+	# and it never touches the belt.
+	if Game.ARMOUR.has(id):
+		Game.wear(id)
+		Sfx.play("ui_click")
+		_refresh_inventory()
+		return
 	Game.belt[Game.selected_belt_slot] = id
 	Game.belt_changed.emit()
 	Sfx.play("ui_click")

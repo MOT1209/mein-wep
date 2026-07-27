@@ -24,6 +24,9 @@ var upkeep: Dictionary = {}
 ## punishment that lock has left in it.
 var lock_type := ""
 var lock_health := 0.0
+## Which way the builder was facing this piece from when they placed it.
+## Flattened, world space; Vector3.ZERO means no weak face was recorded.
+var soft_normal := Vector3.ZERO
 
 var _visual: Node3D          # Blender model, when one exists for this piece
 var _fallback_mat: StandardMaterial3D  # only used by the primitive fallback
@@ -154,11 +157,11 @@ func npc_open_door() -> bool:
 ## A hostile working on the lock itself. A key lock eventually pops, which
 ## leaves the door usable again; a code lock has nothing to break, so the
 ## blow lands on the door instead.
-func attack_lock(amount: float) -> void:
+func attack_lock(amount: float, from: Vector3 = Vector3.INF) -> void:
 	if not is_locked():
 		return
 	if lock_health <= 0.0:
-		take_hit(amount)
+		take_hit(amount, from)
 		return
 	lock_health -= amount
 	if lock_health <= 0.0:
@@ -197,17 +200,41 @@ func _show_lock() -> void:
 	_lock_visual = node
 
 
-## Bare-fist damage (punching structures, like the JS version).
-func take_hit(amount: float) -> void:
-	health -= amount
+## Is `from` standing on this piece's weak face? Pieces with no recorded
+## builder — old saves, test fixtures — have no weak side at all.
+func is_soft_side(from: Vector3) -> bool:
+	if soft_normal == Vector3.ZERO:
+		return false
+	var dir := from - global_position
+	dir.y = 0.0
+	if dir.length() < 0.01:
+		return false
+	return dir.normalized().dot(soft_normal) > 0.0
+
+
+func damage_multiplier(from: Vector3) -> float:
+	return Game.SOFT_SIDE_MULT if is_soft_side(from) else 1.0
+
+
+## Melee and bullet damage. `from` is where the blow came from, so the soft
+## side can double it; leave it out and the piece takes the raw amount.
+func take_hit(amount: float, from: Vector3 = Vector3.INF) -> float:
+	var applied := amount
+	if from != Vector3.INF:
+		applied *= damage_multiplier(from)
+	health -= applied
 	if health <= 0.0:
 		_destroy()
+	return applied
 
 
-## Explosive damage, reduced by the tier's blast resistance.
-func take_blast(raw_damage: float) -> float:
+## Explosive damage, reduced by the tier's blast resistance and doubled
+## when the charge was planted against the weak face.
+func take_blast(raw_damage: float, origin: Vector3 = Vector3.INF) -> float:
 	var resist := float(Game.BUILDING_TIERS[tier].get("blast_resist", 1.0))
 	var applied := raw_damage * resist
+	if origin != Vector3.INF:
+		applied *= damage_multiplier(origin)
 	health -= applied
 	if health <= 0.0:
 		_destroy()

@@ -213,7 +213,9 @@ func _inspect_structures() -> void:
 	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2)
 	if not hit.is_empty() and hit.collider.has_method("toggle_door"):
 		looking_at_structure = hit.collider
-	hud.update_build_info(looking_at_structure)
+	var soft: bool = (looking_at_structure != null
+		and looking_at_structure.is_soft_side(global_position))
+	hud.update_build_info(looking_at_structure, soft)
 
 
 func _camera_ray(dist: float, mask: int) -> Dictionary:
@@ -301,7 +303,7 @@ func _primary_action() -> void:
 				world.building.upgrade_structure(obj)
 			return
 		# Bare fist on a structure chips it
-		obj.take_hit(1.0)
+		obj.take_hit(1.0, global_position)
 		Sfx.play("hit")
 		return
 
@@ -321,7 +323,7 @@ func _primary_action() -> void:
 			"bush": Color(0.8, 0.2, 0.3),
 		}
 		_spawn_hit_particles(hit.position, colors.get(obj.res_type, Color.WHITE))
-		obj.hit_harvest(tool)
+		obj.hit_harvest(tool, hit.position)
 
 
 ## One-shot burst of tiny cubes at the impact point.
@@ -395,10 +397,10 @@ func _use_weapon(id: String) -> void:
 		_spawn_hit_particles(hit.position, Color(0.8, 0.2, 0.2))
 	elif obj.has_method("take_hit"):
 		# Bullets chip structures far more slowly than explosives
-		obj.take_hit(damage * 0.25)
+		obj.take_hit(damage * 0.25, global_position)
 		_spawn_hit_particles(hit.position, Color(0.9, 0.85, 0.6))
 	elif obj.has_method("hit_harvest"):
-		obj.hit_harvest(id)
+		obj.hit_harvest(id, hit.position)
 		_spawn_hit_particles(hit.position, Color(0.7, 0.7, 0.7))
 
 

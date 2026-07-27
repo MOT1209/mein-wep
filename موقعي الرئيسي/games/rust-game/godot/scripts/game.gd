@@ -47,6 +47,20 @@ const WEAPONS := {
 	"ak47": {"damage": 55.0, "range": 130.0, "cooldown": 0.12, "ammo": "ammo_rifle"},
 }
 
+## Wearable protection, one item per `slot`. `protect` is the fraction of
+## incoming damage it soaks; `rads` is the fraction of radiation it keeps
+## out. Guards hit for 13 a shot and the monument is irradiated, so this is
+## the gear answer to both.
+const ARMOUR := {
+	"wood_armour": {"slot": "chest", "protect": 0.12, "rads": 0.0},
+	"road_vest": {"slot": "chest", "protect": 0.25, "rads": 0.05},
+	"metal_facemask": {"slot": "head", "protect": 0.20, "rads": 0.0},
+	"hazmat": {"slot": "suit", "protect": 0.08, "rads": 0.75},
+}
+
+## The most damage armour may ever soak, however much you stack.
+const ARMOUR_CAP := 0.6
+
 ## Door locks. Installed on a door with the lock in hand; the owner always
 ## walks through, but a hostile cannot open a locked door. `strength` is how
 ## much punishment the lock itself takes before it gives way — a code lock
@@ -65,6 +79,12 @@ const EXPLOSIVES := {
 	"rocket": {"damage": 350.0, "radius": 5.0, "fuse": 8.0, "mode": "fire",
 		"gravity": 1.5, "speed": 32.0, "impact": true},
 }
+
+## Every piece has a weak face: the one the builder was standing on. Hits
+## landing there count double, so a raider either gets inside the base or
+## pays twice for the same wall — the reason Rust players care which way
+## round a wall goes up.
+const SOFT_SIDE_MULT := 2.0
 
 ## Decay: unprotected structures rot away; a stocked Tool Cupboard stops it.
 const DECAY_INTERVAL := 10.0
@@ -103,7 +123,8 @@ const ITEMS := {
 	"wood": {"name": "Wood", "category": "resources", "color": "8d6e63", "rarity": "common", "desc": "Harvested from trees. Used for base building and fuel."},
 	"stone": {"name": "Stone", "category": "resources", "color": "b0bec5", "rarity": "common", "desc": "Raw stone for primitive tools and base stabilization."},
 	"iron": {"name": "Metal Ore", "category": "resources", "color": "90a4ae", "rarity": "common", "desc": "Raw iron ore. Smelt this to get metal fragments."},
-	"sulfur": {"name": "Sulfur Ore", "category": "resources", "color": "fff176", "rarity": "common", "desc": "Volatile ore used in explosives and gunpowder."},
+	"sulfur_ore": {"name": "Sulfur Ore", "category": "resources", "color": "fdd835", "rarity": "common", "desc": "Raw ore. Smelt it in a furnace to get usable sulfur."},
+	"sulfur": {"name": "Sulfur", "category": "resources", "color": "fff176", "rarity": "common", "desc": "Refined from ore in a furnace. The base of gunpowder and every explosive."},
 	"hqm": {"name": "High Quality Metal", "category": "resources", "color": "eceff1", "rarity": "elite", "desc": "Rare refined metal. Only found in monument crates, out in the radiation."},
 	"arrow": {"name": "Arrow", "category": "ammo", "color": "a1887f", "rarity": "common", "recipe": {"wood": 25, "stone": 10}, "desc": "Cheap ammunition for the hunting bow."},
 	"ammo_pistol": {"name": "Pistol Ammo", "category": "ammo", "color": "c9a227", "rarity": "common", "recipe": {"gunpowder": 10, "frag": 5}, "workbench": 1, "desc": "Rounds for the semi-pistol."},
@@ -133,6 +154,10 @@ const ITEMS := {
 	"lock": {"name": "Key Lock", "category": "construction", "color": "546e7a", "rarity": "common", "recipe": {"iron": 100}, "desc": "Basic protection for your base."},
 	"bandage": {"name": "Bandage", "category": "medical", "color": "e57373", "rarity": "common", "recipe": {"cloth": 2}, "desc": "Stops bleeding immediately."},
 	"syringe": {"name": "Medical Syringe", "category": "medical", "color": "ef5350", "rarity": "rare", "recipe": {"iron": 20, "scrap": 5, "cloth": 10}, "desc": "Instant adrenaline-boosted recovery."},
+	"wood_armour": {"name": "Wooden Chestplate", "category": "attire", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 250, "leather": 15}, "desc": "Planks and straps. Soaks 12% of what hits you."},
+	"road_vest": {"name": "Road Sign Vest", "category": "attire", "color": "b0bec5", "rarity": "rare", "recipe": {"frag": 150, "leather": 20, "sewing": 1}, "workbench": 1, "desc": "Bolted road signs. Soaks 25% and takes the edge off radiation."},
+	"metal_facemask": {"name": "Metal Facemask", "category": "attire", "color": "90a4ae", "rarity": "rare", "recipe": {"frag": 200, "cloth": 20}, "workbench": 1, "desc": "Soaks 20% of incoming damage. Ugly, effective."},
+	"hazmat": {"name": "Hazmat Suit", "category": "attire", "color": "fff176", "rarity": "elite", "recipe": {"cloth": 100, "leather": 30, "sewing": 2, "frag": 50}, "workbench": 1, "desc": "Keeps 75% of the radiation out. The only sane way to loot a monument."},
 	"wooden_door": {"name": "Wooden Door", "category": "construction", "color": "5d4037", "rarity": "common", "recipe": {"wood": 300}, "desc": "Fits into doorways."},
 	"codelock": {"name": "Code Lock", "category": "items", "color": "78909c", "rarity": "rare", "recipe": {"frag": 100}, "desc": "Secure your doors with a 4-digit code."},
 	"oil": {"name": "Crude Oil", "category": "resources", "color": "37474f", "rarity": "rare", "desc": "Drilled from the ground. Refines into low grade fuel."},
@@ -165,11 +190,13 @@ const CONSUMABLES := {
 	"syringe": {"health": 50.0},
 }
 
-const CATEGORIES := ["common", "construction", "items", "resources", "tools", "medical", "weapons"]
+const CATEGORIES := ["common", "construction", "items", "resources", "tools", "medical", "weapons", "attire"]
 
 var inventory: Dictionary = {}
 var belt: Array = ["building_plan", "hammer", null, null, null, null]
 var selected_belt_slot: int = 0
+## What is being worn, keyed by ARMOUR slot ("head" / "chest" / "suit").
+var worn: Dictionary = {}
 var stats: Dictionary = {
 	"health": 100.0, "hunger": 100.0, "thirst": 100.0,
 	"temperature": 100.0, "radiation": 0.0,
@@ -193,6 +220,7 @@ func reset_state() -> void:
 	inventory = {"building_plan": 1, "hammer": 1}
 	belt = ["building_plan", "hammer", null, null, null, null]
 	selected_belt_slot = 0
+	worn = {}
 	stats = {
 		"health": 100.0, "hunger": 100.0, "thirst": 100.0,
 		"temperature": 100.0, "radiation": 0.0,
@@ -206,6 +234,50 @@ func reset_state() -> void:
 
 func get_count(id: String) -> int:
 	return int(inventory.get(id, 0))
+
+
+# ==================== ARMOUR ====================
+
+## Puts an armour piece on, swapping out whatever held that slot. The piece
+## stays in the inventory while worn — it is equipment, not a consumable.
+func wear(id: String) -> bool:
+	if not ARMOUR.has(id) or get_count(id) <= 0:
+		return false
+	var slot := str(ARMOUR[id].slot)
+	if worn.get(slot, "") == id:
+		worn.erase(slot)          # clicking what you are wearing takes it off
+	else:
+		worn[slot] = id
+	inventory_changed.emit()
+	return true
+
+
+func is_worn(id: String) -> bool:
+	return worn.values().has(id)
+
+
+## Damage soaked by everything worn, capped so no stack makes you immune.
+func armour_protection() -> float:
+	var total := 0.0
+	for slot in worn:
+		total += float(ARMOUR[worn[slot]].protect)
+	return minf(total, ARMOUR_CAP)
+
+
+func radiation_protection() -> float:
+	var total := 0.0
+	for slot in worn:
+		total += float(ARMOUR[worn[slot]].rads)
+	return minf(total, 0.95)
+
+
+## The one way anything hostile takes health off the player: a guard's
+## rifle, a wolf's teeth, a blast. Starvation, thirst, cold and radiation
+## bypass it deliberately — armour is not a diet.
+func hurt(amount: float) -> float:
+	var applied := amount * (1.0 - armour_protection())
+	stats.health -= applied
+	return applied
 
 
 func add_item(id: String, count: int) -> void:

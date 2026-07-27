@@ -41,6 +41,7 @@ var _bp_label: Label
 var _info_panel: PanelContainer
 var _info_tier: Label
 var _info_health: Label
+var _armour_label: Label
 var _info_upgrade: Label
 var _info_status: Label
 var _priv_label: Label
@@ -204,6 +205,12 @@ func _build_stats_panel() -> void:
 
 		rows.add_child(row)
 		_bar_fills[stat_name] = {"bar": bar, "value": value_lab}
+
+	# What you are wearing, right under the bars it protects. Hidden while
+	# you have nothing on, so a bare-handed start stays uncluttered.
+	_armour_label = _label("", 13, Color(0.55, 0.85, 0.95))
+	_armour_label.visible = false
+	rows.add_child(_armour_label)
 
 	# --- Resource readout, one line per resource so nothing is ever clipped
 	var res_panel := PanelContainer.new()
@@ -712,13 +719,21 @@ func _refresh_resources() -> void:
 		_res_counts[res_id].text = str(Game.get_count(res_id))
 
 
-func update_build_info(s: Node3D) -> void:
+func update_build_info(s: Node3D, soft_side: bool = false) -> void:
 	if s == null:
 		_info_panel.visible = false
 		return
 	var stability := maxi(20, 100 - floori((s.position.y - 0.1) * 10.0))
 	_info_tier.text = "%s (%d%%)" % [Game.BUILDING_TIERS[s.tier].name, stability]
-	_info_health.text = "HP: %d / %d" % [roundi(s.health), roundi(s.max_health)]
+	# Which face you are on decides what a hit is worth, so it has to be
+	# readable before you swing rather than after.
+	if soft_side:
+		_info_health.text = "HP: %d / %d   ·   SOFT SIDE x%.0f" % [
+			roundi(s.health), roundi(s.max_health), Game.SOFT_SIDE_MULT]
+		_info_health.add_theme_color_override("font_color", Color(0.95, 0.5, 0.35))
+	else:
+		_info_health.text = "HP: %d / %d" % [roundi(s.health), roundi(s.max_health)]
+		_info_health.add_theme_color_override("font_color", Color.WHITE)
 	var idx := Game.TIER_ORDER.find(s.tier)
 	if idx >= 0 and idx < Game.TIER_ORDER.size() - 1:
 		var next: String = Game.TIER_ORDER[idx + 1]
@@ -757,6 +772,16 @@ func _process(delta: float) -> void:
 		var entry: Dictionary = _bar_fills[key]
 		entry.bar.value = v
 		entry.value.text = str(roundi(v))
+
+	# Worn protection
+	var protect := Game.armour_protection()
+	var rads := Game.radiation_protection()
+	_armour_label.visible = protect > 0.0 or rads > 0.0
+	if _armour_label.visible:
+		var parts := ["Armour %d%%" % roundi(protect * 100.0)]
+		if rads > 0.0:
+			parts.append("rads -%d%%" % roundi(rads * 100.0))
+		_armour_label.text = "  ".join(parts)
 
 	# Toast fade
 	if _toast_left > 0.0:

@@ -8,7 +8,7 @@ const ModelRegistry := preload("res://scripts/model_registry.gd")
 
 ## Everything a storage box will accept.
 const STASHABLE := [
-	"wood", "stone", "iron", "sulfur", "hqm", "frag", "lgf", "cloth",
+	"wood", "stone", "iron", "sulfur_ore", "sulfur", "hqm", "frag", "lgf", "cloth",
 	"leather", "scrap", "oil", "berries", "raw_meat", "cooked_meat",
 ]
 
@@ -18,6 +18,19 @@ const RESEARCH_COST := 25
 
 ## Crude oil refined per unit of low grade fuel.
 const OIL_PER_FUEL := 5
+
+## Everything a furnace knows how to turn into something else, in the order
+## it works through them. `per` is how many units of input make one unit of
+## output; `wood` is the wood burnt per unit of input, and burnt wood leaves
+## charcoal behind. Refining oil needs no fire, so it costs no wood.
+const SMELTING := [
+	{"input": "oil", "output": "lgf", "per": OIL_PER_FUEL, "wood": 0.0,
+		"verb": "Refined %d crude oil into %d low grade fuel"},
+	{"input": "iron", "output": "frag", "per": 1, "wood": 0.5,
+		"verb": "Smelted %d metal ore into %d fragments"},
+	{"input": "sulfur_ore", "output": "sulfur", "per": 1, "wood": 0.5,
+		"verb": "Smelted %d sulfur ore into %d sulfur"},
+]
 
 var station_type := "campfire"
 var stored: Dictionary = {}
@@ -191,34 +204,49 @@ func _cook() -> void:
 	Sfx.play("harvest")
 
 
-## Furnace: refines crude oil into low grade fuel first (the only
-## renewable source of it), then smelts metal ore into fragments.
+## Furnace: works through every recipe it can afford in one go. It used to
+## stop at the first match, so a stack of crude oil in your pockets meant
+## the furnace would never touch your ore.
 func _smelt() -> void:
-	var oil := Game.get_count("oil")
-	if oil >= OIL_PER_FUEL:
-		var fuel_made := floori(float(oil) / float(OIL_PER_FUEL))
-		Game.remove_item("oil", fuel_made * OIL_PER_FUEL)
-		Game.add_item("lgf", fuel_made)
-		Game.notify("Refined %d crude oil into %d low grade fuel"
-			% [fuel_made * OIL_PER_FUEL, fuel_made])
-		Sfx.play("upgrade")
+	var done := []
+	var charcoal := 0
+	var short_on_wood := false
+
+	for recipe in SMELTING:
+		var have: int = Game.get_count(recipe.input)
+		var batches: int = floori(float(have) / float(recipe.per))
+		if batches <= 0:
+			continue
+		var wood_each: float = float(recipe.wood) * float(recipe.per)
+		if wood_each > 0.0:
+			var affordable: int = floori(float(Game.get_count("wood")) / wood_each)
+			if affordable <= 0:
+				short_on_wood = true
+				continue
+			batches = mini(batches, affordable)
+		var used: int = batches * int(recipe.per)
+		var burnt: int = ceili(float(used) * float(recipe.wood))
+		Game.remove_item(recipe.input, used)
+		if burnt > 0:
+			Game.remove_item("wood", burnt)
+			# Burnt fuel leaves charcoal behind, which gunpowder needs
+			charcoal += burnt
+		Game.add_item(recipe.output, batches)
+		done.append(str(recipe.verb) % [used, batches])
+
+	if charcoal > 0:
+		Game.add_item("charcoal", charcoal)
+
+	if done.is_empty():
+		if short_on_wood:
+			Game.notify("Need wood as fuel", Color(0.9, 0.3, 0.3))
+		else:
+			Game.notify("Nothing here the furnace can process", Color(1.0, 0.63, 0.0))
 		return
 
-	var ore := Game.get_count("iron")
-	if ore <= 0:
-		Game.notify("No metal ore to smelt", Color(1.0, 0.63, 0.0))
-		return
-	var can_smelt := mini(ore, Game.get_count("wood") * 2)
-	if can_smelt <= 0:
-		Game.notify("Need wood as fuel", Color(0.9, 0.3, 0.3))
-		return
-	var fuel := ceili(float(can_smelt) / 2.0)
-	Game.remove_item("iron", can_smelt)
-	Game.remove_item("wood", fuel)
-	Game.add_item("frag", can_smelt)
-	# Burnt fuel leaves charcoal behind, which gunpowder needs
-	Game.add_item("charcoal", fuel)
-	Game.notify("Smelted %d ore (+%d charcoal)" % [can_smelt, fuel])
+	if charcoal > 0:
+		done.append("+%d charcoal" % charcoal)
+	Game.notify(" · ".join(done))
 	Sfx.play("upgrade")
 
 
