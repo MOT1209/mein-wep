@@ -155,6 +155,39 @@ func _run_tests() -> void:
 	world.register_structure(foundation)
 	_check(b.can_build_here(Vector3(3, 1.5, 3), "wall"), "wall allowed on foundation")
 
+	# --- Ghost placement actually stands the wall on top of the foundation,
+	# not sunk to the foundation's own height, and snaps to one of the
+	# tile's four EDGES like real Rust — not through its centre, which used
+	# to split the tile in half. can_build_here alone can't catch either:
+	# it only validates a hand-picked position, never the ray that
+	# _update_ghost casts from the player's camera.
+	_clear_corridor(world, 3.0, -1.0, 5.0)
+	game.selected_blueprint = "wall"
+	game.ui_open = ""
+	world.player.global_position = Vector3(3.0, foundation.position.y + 1.7, -1.0)
+	world.player.camera.look_at(foundation.global_position, Vector3.UP)
+	b._update_ghost()
+	_check(b._ghost_base == foundation, "ghost ray actually hit the foundation")
+	_check(absf(b._ghost_pos.y - game.BUILDING_TYPES.wall.y) < 0.05,
+		"wall ghost stands at wall height, not sunk into the foundation")
+	_check(absf(b._ghost_pos.x - 3.0) > 1.0 or absf(b._ghost_pos.z - 3.0) > 1.0,
+		"wall ghost sits on one of the tile's edges, not through its centre")
+	_check(b._ghost_valid, "the edge-snapped wall is still counted as supported")
+
+	var edge_wall = StructureScript.new()
+	edge_wall.setup("wall")
+	edge_wall.position = b._ghost_pos
+	edge_wall.base_rot = b._ghost_rot
+	edge_wall.rotation.y = edge_wall.base_rot
+	world.add_child(edge_wall)
+	world.register_structure(edge_wall)
+	world.recompute_stability()
+	_check(is_instance_valid(edge_wall) and edge_wall.stability > 0.0,
+		"an edge-snapped wall still resolves to its foundation's column and stays up")
+	world.unregister_structure(edge_wall)
+	edge_wall.queue_free()
+	game.selected_blueprint = ""
+
 	# --- Upgrade & repair
 	b.upgrade_structure(foundation)
 	_check(foundation.tier == "wood" and foundation.max_health == 250.0, "upgrade twig -> wood")
@@ -219,6 +252,26 @@ func _run_tests() -> void:
 		var cloth0: int = game.get_count("cloth")
 		npc.npc_take_damage(500.0)
 		_check(game.get_count("cloth") > cloth0, "dead NPC dropped loot")
+
+	# --- Wild boar: hostile, but only once you are close enough to matter
+	var NpcDefs = load("res://scripts/npc.gd")
+	_check(NpcDefs.TYPES.has("boar") and NpcDefs.LOOT.has("boar"),
+		"boar registered as a creature with its own loot")
+	_check(float(NpcDefs.TYPES.boar.aggro) < float(NpcDefs.TYPES.wolf.aggro),
+		"a boar notices you later than a wolf does")
+	_check(int(NpcDefs.LOOT.boar.raw_meat) > int(NpcDefs.LOOT.deer.raw_meat),
+		"a boar is worth more meat than a deer")
+	var boar: Node = null
+	for c in world.get_children():
+		if c.has_method("npc_take_damage") and c.npc_type == "boar" \
+				and not c.is_queued_for_deletion():
+			boar = c
+			break
+	_check(boar != null, "boars spawned into the world")
+	if boar != null:
+		var meat0: int = game.get_count("raw_meat")
+		boar.npc_take_damage(500.0)
+		_check(game.get_count("raw_meat") > meat0, "a killed boar dropped meat")
 
 	# --- Terrain determinism
 	_check(absf(world.terrain_height(50.0, 50.0) - world.terrain_height(50.0, 50.0)) < 0.0001,
@@ -331,6 +384,40 @@ func _run_tests() -> void:
 		"stairs and window wall added as buildable pieces")
 	_check(game.TIER_ORDER == ["twig", "wood", "stone", "metal", "concrete", "hqm"],
 		"concrete sits between sheet metal and armored")
+
+	# --- Upgrading far enough earns a piece its own model, not a grey wash
+	var missing_tier := []
+	for piece in registry.TIER_MODELS:
+		for tier_id in registry.TIER_MODELS[piece]:
+			if not ResourceLoader.exists(registry.TIER_MODELS[piece][tier_id]):
+				missing_tier.append(piece + ":" + tier_id)
+	_check(missing_tier.is_empty(), "all tier-specific models exist on disk %s"
+		% str(missing_tier))
+	_check(registry.model_for("wall", "stone") != registry.MODELS["wall"],
+		"a stone wall resolves to the coursed-stone model")
+	_check(registry.model_for("wall", "wood") == registry.MODELS["wall"],
+		"a wood wall still resolves to the plank model")
+	_check(registry.keeps_own_materials("wall", "stone")
+		and not registry.keeps_own_materials("wall", "concrete"),
+		"stone keeps its own rubble, concrete is poured flat over the same shape")
+	_check(modelled_wall._visual_path == registry.model_for("wall", "stone"),
+		"the placed wall swapped its mesh when it was upgraded to stone")
+	var upgraded_shape: CollisionShape3D = null
+	for ch in modelled_wall.get_children():
+		if ch is CollisionShape3D:
+			upgraded_shape = ch
+	_check(upgraded_shape != null
+		and upgraded_shape.shape.size == game.BUILDING_TYPES.wall.size,
+		"swapping the mesh left the wall's hitbox exactly where it was")
+	var steel_door = StructureScript.new()
+	steel_door.setup("wooden_door")
+	world.add_child(steel_door)
+	_check(steel_door._visual_path.ends_with("wooden_door.glb"),
+		"a fresh door is still the wooden one")
+	steel_door.apply_tier("metal")
+	_check(steel_door._visual_path.ends_with("metal_door.glb"),
+		"upgrading a door to sheet metal makes it the steel door")
+	steel_door.queue_free()
 
 	# --- Tool-specific gathering rates
 	var tree2: Node = null
@@ -591,6 +678,33 @@ func _run_tests() -> void:
 			"a weapon beats bare hands")
 	_check(float(game.WEAPONS["ak47"].range) > float(game.WEAPONS["machete"].range),
 		"ranged weapons reach further than melee")
+
+	# --- Pipe shotgun: one shell buys a cone of pellets
+	_check(game.ITEMS.has("pipe_shotgun") and game.ITEMS.has("ammo_shotgun"),
+		"the pipe shotgun and its shells are craftable items")
+	_check(int(game.WEAPONS.pipe_shotgun.pellets) > 1
+		and float(game.WEAPONS.pipe_shotgun.spread) > 0.0,
+		"the shotgun fires a spread of pellets")
+	_check(int(game.WEAPONS.ak47.get("pellets", 1)) == 1
+		and float(game.WEAPONS.ak47.get("spread", 0.0)) == 0.0,
+		"every other weapon still fires one straight shot")
+	_check(float(game.WEAPONS.pipe_shotgun.range) < float(game.WEAPONS.pistol.range),
+		"the shotgun trades the pistol's reach for that spread")
+	# Aim at the sky first: eight pellets would otherwise pick off a creature
+	# a later check still needs alive.
+	player.camera.global_rotation = Vector3(1.3, 0.0, 0.0)
+	game.inventory["ammo_shotgun"] = 4
+	game.inventory_changed.emit()
+	player._weapon_cd = 0.0
+	player._use_weapon("pipe_shotgun")
+	_check(game.get_count("ammo_shotgun") == 3,
+		"a whole cone of pellets still costs exactly one shell")
+	game.inventory["ammo_shotgun"] = 0
+	game.inventory_changed.emit()
+	player._weapon_cd = 0.0
+	player._use_weapon("pipe_shotgun")
+	_check(game.get_count("ammo_shotgun") == 0,
+		"with no shells left the shotgun does not fire")
 	game.belt[0] = "building_plan"
 
 	# --- A wall actually stops a charging animal

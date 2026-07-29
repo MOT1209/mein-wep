@@ -27,8 +27,8 @@ OUT_DIR = os.path.join(PROJECT_ROOT, "godot", "assets", "icons")
 RESOLUTION = 256
 SAMPLES = 40
 
-# Only these get icons; big world pieces would just read as grey blobs.
-SKIP_CATEGORIES = {"building"}
+# Only these get icons; big world pieces and NPCs never show in a slot.
+SKIP_CATEGORIES = {"building", "creatures"}
 
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 ONLY = set(ARGS) if ARGS else set()

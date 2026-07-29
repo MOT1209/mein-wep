@@ -39,10 +39,16 @@ const BUILDING_TIERS := {
 ## as far as `range`. Bare fists stay at FIST_DAMAGE.
 const FIST_DAMAGE := 15.0
 
+## `pellets` and `spread` turn one trigger pull into a cone of shots: a
+## shotgun that lands everything at contact range and almost nothing past
+## it. Both default to a single straight shot, so every other weapon here
+## behaves exactly as it always has.
 const WEAPONS := {
 	"spear": {"damage": 35.0, "range": 3.6, "cooldown": 0.9},
 	"machete": {"damage": 30.0, "range": 2.6, "cooldown": 0.5},
 	"bow": {"damage": 50.0, "range": 60.0, "cooldown": 1.1, "ammo": "arrow"},
+	"pipe_shotgun": {"damage": 14.0, "range": 22.0, "cooldown": 1.1,
+		"ammo": "ammo_shotgun", "pellets": 8, "spread": 0.06},
 	"pistol": {"damage": 40.0, "range": 80.0, "cooldown": 0.35, "ammo": "ammo_pistol"},
 	"ak47": {"damage": 55.0, "range": 130.0, "cooldown": 0.12, "ammo": "ammo_rifle"},
 }
@@ -178,6 +184,7 @@ const ITEMS := {
 	"arrow": {"name": "Arrow", "category": "ammo", "color": "a1887f", "rarity": "common", "recipe": {"wood": 25, "stone": 10}, "desc": "Cheap ammunition for the hunting bow."},
 	"ammo_pistol": {"name": "Pistol Ammo", "category": "ammo", "color": "c9a227", "rarity": "common", "recipe": {"gunpowder": 10, "frag": 5}, "workbench": 1, "desc": "Rounds for the semi-pistol."},
 	"ammo_rifle": {"name": "Rifle Ammo", "category": "ammo", "color": "e0a52a", "rarity": "rare", "recipe": {"gunpowder": 15, "frag": 10}, "workbench": 2, "desc": "Rounds for the assault rifle."},
+	"ammo_shotgun": {"name": "Handmade Shell", "category": "ammo", "color": "b5651d", "rarity": "common", "recipe": {"gunpowder": 12, "frag": 8}, "workbench": 1, "desc": "A pipe-full of scrap and powder. Devastating up close, useless at range."},
 	"frag": {"name": "Metal Fragments", "category": "resources", "color": "ef5350", "rarity": "rare", "desc": "Refined iron used for most mid-tier items."},
 	"lgf": {"name": "Low Grade Fuel", "category": "resources", "color": "e53935", "rarity": "common", "desc": "Tallow and cloth mix. Powering your survival."},
 	"cloth": {"name": "Cloth", "category": "resources", "color": "f5f5f5", "rarity": "common", "desc": "Fibers from hemp plants. Used for clothing and meds."},
@@ -194,6 +201,7 @@ const ITEMS := {
 	"spear": {"name": "Wooden Spear", "category": "weapons", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 300}, "desc": "Cheap long-range melee option."},
 	"machete": {"name": "Machete", "category": "weapons", "color": "90a4ae", "rarity": "rare", "recipe": {"iron": 100}, "desc": "Standard industrial blade."},
 	"bow": {"name": "Hunting Bow", "category": "weapons", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 200, "cloth": 50, "leather": 20, "sewing": 1}, "desc": "Silent and deadly. Fires arrows."},
+	"pipe_shotgun": {"name": "Pipe Shotgun", "category": "weapons", "color": "8d6e63", "rarity": "common", "recipe": {"pipe": 2, "wood": 100, "frag": 75}, "workbench": 1, "desc": "A pipe, a stock and a lot of nerve. Eight pellets at once — get close."},
 	"pistol": {"name": "Semi-Pistol", "category": "weapons", "color": "546e7a", "rarity": "rare", "recipe": {"iron": 150, "pipe": 1, "spring": 1}, "workbench": 1, "desc": "P250 clone. Fast firing sidearm."},
 	"ak47": {"name": "Assault Rifle", "category": "weapons", "color": "6d4c41", "rarity": "elite", "recipe": {"hqm": 50, "wood": 200, "scrap": 50, "pipe": 1, "spring": 2}, "workbench": 2, "desc": "The king of Rust weapons. High recoil, high reward."},
 	"furnace": {"name": "Furnace", "category": "items", "color": "ff7043", "rarity": "rare", "recipe": {"stone": 200, "wood": 100, "lgf": 10}, "desc": "Smelts ores into metal/sulfur using wood."},

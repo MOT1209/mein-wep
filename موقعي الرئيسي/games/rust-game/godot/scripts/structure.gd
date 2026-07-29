@@ -32,15 +32,16 @@ var soft_normal := Vector3.ZERO
 var stability := 100.0
 
 var _visual: Node3D          # Blender model, when one exists for this piece
+var _visual_path := ""       # which model `_visual` was instanced from
 var _fallback_mat: StandardMaterial3D  # only used by the primitive fallback
 var _lock_visual: Node3D     # the padlock hanging on a locked door
-var _closed_pos := Vector3.ZERO  # where a door sits when shut — its hinge line
+var closed_pos := Vector3.ZERO  # where a door sits when shut — its hinge line
 
 
 func _ready() -> void:
 	# Placement and load both set position before adding the piece to the
 	# tree, so this is the shut position for the rest of the piece's life.
-	_closed_pos = position
+	closed_pos = position
 
 
 func setup(type: String) -> void:
@@ -50,10 +51,12 @@ func setup(type: String) -> void:
 	collision_layer = Game.LAYER_FLOOR if type in Game.FLOOR_TYPES else 2
 	collision_mask = 0
 
-	_visual = ModelRegistry.spawn(type)
+	_visual_path = ModelRegistry.model_for(type, "twig")
+	_visual = ModelRegistry.spawn_path(_visual_path)
 	if _visual != null:
 		add_child(_visual)
 	else:
+		_visual_path = ""
 		# No model for this piece yet: fall back to the primitive block
 		var mi := MeshInstance3D.new()
 		var box := BoxMesh.new()
@@ -103,13 +106,38 @@ func apply_tier(t: String) -> void:
 	var td: Dictionary = Game.BUILDING_TIERS[t]
 	max_health = float(td.health)
 	health = max_health
+
 	if _fallback_mat != null:
 		_fallback_mat.albedo_color = td.color
-	elif t == "wood":
-		# Wood keeps the model's own painted materials (planks, trim, hinges)
+		return
+
+	# Some pieces earn a model of their own once upgraded — coursed stone,
+	# a riveted steel door — instead of the wooden one under a grey wash.
+	_swap_visual(ModelRegistry.model_for(build_type, t))
+
+	if t == "wood" or ModelRegistry.keeps_own_materials(build_type, t):
+		# The model on screen is already painted for this tier: planks and
+		# hinges for wood, rubble and rivets for stone and metal.
 		ModelRegistry.clear_tint(_visual)
 	else:
 		ModelRegistry.tint(_visual, td.color, float(td.metallic), float(td.roughness))
+
+
+## Replaces the piece's mesh in place. Collision is never rebuilt — it comes
+## from `Game.BUILDING_TYPES`, so a taller or wider model can't move a placed
+## structure's hitbox out from under the base it is holding up.
+func _swap_visual(path: String) -> void:
+	if path == "" or path == _visual_path:
+		return
+	var next := ModelRegistry.spawn_path(path)
+	if next == null:
+		return
+	if is_instance_valid(_visual):
+		remove_child(_visual)
+		_visual.queue_free()
+	_visual = next
+	_visual_path = path
+	add_child(_visual)
 
 
 func toggle_door() -> void:
@@ -123,7 +151,7 @@ func toggle_door() -> void:
 func set_door_state(open: bool) -> void:
 	is_open = open
 	rotation.y = base_rot + (PI / 2.0 if open else 0.0)
-	position = _closed_pos
+	position = closed_pos
 	if open:
 		var w: float = Game.BUILDING_TYPES[build_type].size.x
 		position += Vector3(-w * 0.5, 0.0, w * 0.5).rotated(Vector3.UP, base_rot)

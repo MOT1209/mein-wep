@@ -1,4 +1,5 @@
 extends CharacterBody3D
+const ModelRegistry := preload("res://scripts/model_registry.gd")
 ## World creatures and monument guards. Hostile melee (wolf/bear):
 ## chase-and-bite. Hostile ranged (scientist): holds its post, shoots on
 ## sight and forces doors to follow you home. Passive (deer): wanders and
@@ -17,6 +18,12 @@ const TYPES := {
 		"aggro": 18.0, "cooldown": 1.2},
 	"deer": {"health": 40.0, "speed": 7.0, "damage": 0.0, "hostile": false,
 		"color": Color8(193, 154, 107), "size": Vector3(0.5, 1.1, 0.9)},
+	# Short-sighted and short-tempered: a boar will not cross the map for
+	# you the way a wolf does, but walk into one and it commits. That gap
+	# between the deer you hunt and the wolf that hunts you is the point.
+	"boar": {"health": 80.0, "speed": 4.5, "damage": 15.0, "hostile": true,
+		"color": Color8(96, 74, 58), "size": Vector3(0.6, 1.0, 1.1),
+		"aggro": 11.0, "cooldown": 1.4},
 	"scientist": {"health": 90.0, "speed": 4.0, "damage": 13.0, "hostile": true,
 		"color": Color8(38, 84, 124), "size": Vector3(0.6, 1.8, 0.4),
 		"aggro": 45.0, "cooldown": 1.3, "ranged": true, "range": 45.0,
@@ -27,6 +34,8 @@ const LOOT := {
 	"wolf": {"cloth": 10, "leather": 5, "raw_meat": 2},
 	"bear": {"cloth": 15, "leather": 10, "raw_meat": 4},
 	"deer": {"raw_meat": 3, "leather": 2, "cloth": 2},
+	# The best meat in the game, and it fights back for it.
+	"boar": {"raw_meat": 6, "leather": 4, "cloth": 3},
 	"scientist": {"scrap": 15, "frag": 25, "ammo_rifle": 5, "cloth": 5},
 }
 
@@ -41,7 +50,8 @@ var home := Vector3.ZERO
 var _cfg: Dictionary
 var _attack_cd := 0.0
 var _dead := false
-var _mat: StandardMaterial3D
+var _visual: Node3D  # Blender model, when one exists for this species
+var _mat: StandardMaterial3D  # only set by the primitive fallback
 var _wander_dir := Vector3.ZERO
 var _wander_timer := 0.0
 
@@ -61,6 +71,24 @@ func setup(t: String, w: Node3D) -> void:
 	# trimesh made creatures grind to a halt against their own footing.
 	collision_mask = 2 | 4
 
+	_visual = ModelRegistry.spawn("npc_" + t)
+	if _visual != null:
+		add_child(_visual)
+	else:
+		_build_fallback_visual()
+
+	var cs := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = _cfg.size
+	cs.shape = shape
+	cs.position.y = _cfg.size.y * 0.5
+	add_child(cs)
+
+
+## Flat-coloured body + head block (+ rifle for a guard), used only when
+## this species' Blender model is missing. Kept as a safety net rather than
+## a hard dependency, same as every other system in ModelRegistry.
+func _build_fallback_visual() -> void:
 	var mi := MeshInstance3D.new()
 	var box := BoxMesh.new()
 	box.size = _cfg.size
@@ -71,7 +99,6 @@ func setup(t: String, w: Node3D) -> void:
 	mi.position.y = _cfg.size.y * 0.5
 	add_child(mi)
 
-	# Small head block so creatures read as animals, not crates
 	var head := MeshInstance3D.new()
 	var head_mesh := BoxMesh.new()
 	head_mesh.size = Vector3(_cfg.size.x * 0.5, _cfg.size.x * 0.5, _cfg.size.x * 0.5)
@@ -80,7 +107,6 @@ func setup(t: String, w: Node3D) -> void:
 	head.position = Vector3(0, _cfg.size.y * 0.95, -_cfg.size.z * 0.55)
 	add_child(head)
 
-	# A guard reads as armed from a distance
 	if _cfg.get("ranged", false):
 		var rifle := MeshInstance3D.new()
 		var rifle_mesh := BoxMesh.new()
@@ -92,13 +118,6 @@ func setup(t: String, w: Node3D) -> void:
 		rifle.mesh = rifle_mesh
 		rifle.position = Vector3(_cfg.size.x * 0.6, _cfg.size.y * 0.62, -0.35)
 		add_child(rifle)
-
-	var cs := CollisionShape3D.new()
-	var shape := BoxShape3D.new()
-	shape.size = _cfg.size
-	cs.shape = shape
-	cs.position.y = _cfg.size.y * 0.5
-	add_child(cs)
 
 
 func _ready() -> void:
@@ -317,17 +336,31 @@ func _face(target: Vector3) -> void:
 		look_at(flat, Vector3.UP)
 
 
+## A brief red flash on taking damage. The fallback box shares one material
+## it can flip emission on directly; a modelled creature has several meshes
+## with their own baked colours, so it gets a temporary tint override instead.
+func _flash_hit() -> void:
+	if _mat != null:
+		_mat.emission_enabled = true
+		_mat.emission = Color(1, 0, 0)
+		_mat.emission_energy_multiplier = 0.5
+		var t := get_tree().create_timer(0.1)
+		t.timeout.connect(func():
+			if is_instance_valid(self):
+				_mat.emission_enabled = false)
+	elif _visual != null:
+		ModelRegistry.tint(_visual, Color(1, 0, 0), 0.0, 0.6)
+		var t := get_tree().create_timer(0.1)
+		t.timeout.connect(func():
+			if is_instance_valid(self):
+				ModelRegistry.clear_tint(_visual))
+
+
 func npc_take_damage(amount: float) -> void:
 	if _dead:
 		return
 	health -= amount
-	_mat.emission_enabled = true
-	_mat.emission = Color(1, 0, 0)
-	_mat.emission_energy_multiplier = 0.5
-	var t := get_tree().create_timer(0.1)
-	t.timeout.connect(func():
-		if is_instance_valid(self):
-			_mat.emission_enabled = false)
+	_flash_hit()
 	if health <= 0.0:
 		_die()
 	elif not _cfg.hostile:

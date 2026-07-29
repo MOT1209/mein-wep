@@ -22,6 +22,7 @@ const BARREL_COUNT := 30
 const BUSH_COUNT := 25
 const WOLFBEAR_COUNT := 5
 const DEER_COUNT := 6
+const BOAR_COUNT := 4
 const RESPAWN_DELAY := 30.0
 const GUARDS_PER_MONUMENT := 3
 const GUARD_POST_RADIUS := 9.0
@@ -464,6 +465,10 @@ func _spawn_npcs() -> void:
 		spawn_npc("wolf" if randf() > 0.3 else "bear", pos)
 	for i in DEER_COUNT:
 		spawn_npc("deer", _rand_pos_land(40.0))
+	# Boars sit between the two: worth hunting for the meat, dangerous to
+	# hunt badly, and only aggressive once you are close enough to matter.
+	for i in BOAR_COUNT:
+		spawn_npc("boar", _rand_pos_land(35.0))
 
 
 func spawn_npc(type: String, pos: Vector3) -> void:
@@ -819,22 +824,56 @@ func ground_height_at(x: float, z: float) -> float:
 
 # ==================== STABILITY ====================
 
+## A wall/doorway/window/door sits 1.5m off its tile's centre, on whichever
+## edge was nearest a foundation when it was placed (see building_system.gd).
+## Plain rounding would land it in the empty gap between two tiles, so it
+## has to resolve to whichever neighbouring tile actually carries it.
+const _EDGE_TYPES := ["wall", "doorway", "window_wall", "wooden_door"]
+
+
 ## Which 3m cell a piece stands in. Pieces "at the same point" are within
 ## half a metre of each other, so rounding to the grid groups a column.
-func _cell_of(s: Node3D) -> Vector2i:
-	return Vector2i(roundi(s.position.x / 3.0), roundi(s.position.z / 3.0))
+## `founded_cells` are the cells that hold a foundation or ceiling — an edge
+## piece resolves to whichever of its two neighbouring cells is one of
+## those, defaulting to the first if neither (or both) qualify.
+func _cell_of(s: Node3D, founded_cells: Dictionary) -> Vector2i:
+	if not (s.build_type in _EDGE_TYPES):
+		return Vector2i(roundi(s.position.x / 3.0), roundi(s.position.z / 3.0))
+
+	# base_rot and closed_pos (not rotation.y / position) because an open
+	# door's swing changes both, and it must still resolve to the same
+	# tile its doorway does.
+	var p: Vector3 = s.closed_pos if s.build_type == "wooden_door" else s.position
+	var candidates: Array[Vector2i] = []
+	if absf(s.base_rot - PI / 2.0) < 0.1:
+		var cz := roundi(p.z / 3.0)
+		candidates = [Vector2i(roundi((p.x - 1.5) / 3.0), cz),
+			Vector2i(roundi((p.x + 1.5) / 3.0), cz)]
+	else:
+		var cx := roundi(p.x / 3.0)
+		candidates = [Vector2i(cx, roundi((p.z - 1.5) / 3.0)),
+			Vector2i(cx, roundi((p.z + 1.5) / 3.0))]
+	for c in candidates:
+		if founded_cells.has(c):
+			return c
+	return candidates[0]
 
 
 ## Scores every piece: a foundation anchors its column, and each piece
 ## above the one below it loses a step. Nothing beneath it means nothing
 ## holding it up.
 func _score_stability() -> void:
+	var founded_cells := {}
+	for s in structures:
+		if is_instance_valid(s) and (s.build_type == "foundation" or s.build_type == "ceiling"):
+			founded_cells[Vector2i(roundi(s.position.x / 3.0), roundi(s.position.z / 3.0))] = true
+
 	var columns: Dictionary = {}
 	for s in structures:
 		if not is_instance_valid(s):
 			continue
 		s.stability = 100.0 if s.build_type == "foundation" else 0.0
-		var cell := _cell_of(s)
+		var cell := _cell_of(s, founded_cells)
 		if not columns.has(cell):
 			columns[cell] = []
 		columns[cell].append(s)

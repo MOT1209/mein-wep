@@ -219,9 +219,14 @@ func _inspect_structures() -> void:
 
 
 func _camera_ray(dist: float, mask: int) -> Dictionary:
+	return _ray_along(-camera.global_transform.basis.z, dist, mask)
+
+
+## The same cast with the direction spelled out, so a shotgun can throw a
+## handful of them into a cone instead of one down the crosshair.
+func _ray_along(dir: Vector3, dist: float, mask: int) -> Dictionary:
 	var from := camera.global_position
-	var to := from + (-camera.global_transform.basis.z) * dist
-	var query := PhysicsRayQueryParameters3D.create(from, to, mask, [get_rid()])
+	var query := PhysicsRayQueryParameters3D.create(from, from + dir * dist, mask, [get_rid()])
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 
@@ -385,11 +390,26 @@ func _use_weapon(id: String) -> void:
 			return
 		Game.remove_item(ammo, 1)
 
-	var hit := _camera_ray(float(data.range), 2 | 4 | 8 | Game.LAYER_FLOOR)
 	Sfx.play("hit" if ammo == "" else "explosion")
+
+	# One shot down the crosshair for everything but a shotgun, which throws
+	# its pellets into a cone: all of them land at contact range, almost none
+	# of them past it.
+	var pellets := int(data.get("pellets", 1))
+	var spread := float(data.get("spread", 0.0))
+	var aim := -camera.global_transform.basis.z
+	for i in pellets:
+		var dir := aim
+		if spread > 0.0 and i > 0:
+			dir = (aim + camera.global_transform.basis.x * randf_range(-spread, spread)
+				+ camera.global_transform.basis.y * randf_range(-spread, spread)).normalized()
+		_hit_with(id, data, _ray_along(dir, float(data.range), 2 | 4 | 8 | Game.LAYER_FLOOR))
+
+
+## Applies one shot's worth of damage to whatever it landed on.
+func _hit_with(id: String, data: Dictionary, hit: Dictionary) -> void:
 	if hit.is_empty():
 		return
-
 	var obj: Object = hit.collider
 	var damage := float(data.damage)
 	if obj.has_method("npc_take_damage"):
