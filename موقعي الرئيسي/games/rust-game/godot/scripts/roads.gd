@@ -14,10 +14,20 @@ extends Node3D
 
 const ROAD_WIDTH := 7.0
 ## How often the strip is sampled along its length. Short enough to follow a
-## hill, long enough not to build a mesh the size of the terrain.
-const ROAD_STEP := 4.0
-## Lifted this far off the ground so it does not fight the terrain for depth.
-const ROAD_LIFT := 0.07
+## hill, long enough not to build a mesh the size of the terrain. Half a
+## terrain quad, so the strip tracks the ground the player actually walks on
+## rather than cutting the corner off every rise.
+const ROAD_STEP := 1.6
+## Lifted this far off the ground.
+##
+## Seven centimetres was not enough for two reasons, and both showed. The
+## terrain is drawn as flat quads 3.3m across while the road samples the smooth
+## height function it was built from, so on a rise the ground rendered *above*
+## the road and tore jagged holes through it. And 7cm is inside the shadow
+## bias, so the terrain cast its own shadow onto the road lying on it and the
+## whole surface came out near-black. Clearing both costs a float small enough
+## that nobody standing on it can tell.
+const ROAD_LIFT := 0.3
 ## Dashes down the middle.
 const LINE_WIDTH := 0.32
 const DASH_LENGTH := 2.6
@@ -156,7 +166,7 @@ func _add_surface(node_name: String, verts: PackedVector3Array,
 
 	var mat := StandardMaterial3D.new()
 	if kind == "asphalt":
-		mat.albedo_color = Color8(33, 33, 36)
+		mat.albedo_color = Color8(68, 69, 74)
 		mat.roughness = 0.92
 		mat.vertex_color_use_as_albedo = colors != null
 	else:

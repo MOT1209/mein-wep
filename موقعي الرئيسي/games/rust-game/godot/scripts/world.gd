@@ -4,6 +4,7 @@ extends Node3D
 ## spawning, day/night cycle with sun+moon, respawn queue, autosave and
 ## save/load. Port + expansion of the Three.js engine body.
 
+const ScreenshotScript := preload("res://tools/screenshot.gd")
 const ResourceNodeScript := preload("res://scripts/resource_node.gd")
 const NpcScript := preload("res://scripts/npc.gd")
 const PlayerScript := preload("res://scripts/player.gd")
@@ -124,7 +125,11 @@ var _decay_timer := 0.0
 
 
 func _ready() -> void:
-	randomize()
+	var shot_seed: int = int(ScreenshotScript.wanted().seed)
+	if shot_seed > 0:
+		seed(shot_seed)
+	else:
+		randomize()
 	_setup_environment()
 	_build_terrain()
 	_build_water()
@@ -183,6 +188,18 @@ func _ready() -> void:
 
 	load_game()
 	hud.show_start_screen()
+
+	# Only when asked for on the command line. A headless run cannot capture
+	# anything — the dummy renderer draws nothing — so looking at the interface
+	# has to happen from inside a real window.
+	var shot: Dictionary = ScreenshotScript.wanted()
+	if str(shot.path) != "":
+		var shooter = ScreenshotScript.new()
+		shooter.name = "Screenshot"
+		shooter.path = str(shot.path)
+		shooter.frames = int(shot.frames)
+		shooter.dump = bool(shot.dump)
+		add_child(shooter)
 
 
 # ==================== TERRAIN ====================
@@ -420,9 +437,27 @@ func _setup_environment() -> void:
 	if sun == null:
 		sun = DirectionalLight3D.new()
 		sun.name = "Sun"
-		sun.shadow_enabled = true
-		sun.directional_shadow_max_distance = 150.0
 		add_child(sun)
+
+	# Applied to whichever sun we ended up with, not just to one built here.
+	# The scene file already carries a Sun, so anything set inside the branch
+	# above is set on a node that is never created.
+	#
+	# The terrain is one mesh of very large triangles, and at a low sun angle
+	# the default bias is nowhere near enough: whole hillsides shadow
+	# themselves in hard black polygons with lit slivers through them.
+	# Normal-offset bias is what fixes acne on geometry this coarse, and
+	# blending the splits hides the seam where the cascades meet, which across
+	# open ground is otherwise a line drawn through the middle distance.
+	sun.shadow_enabled = true
+	sun.directional_shadow_max_distance = 150.0
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_blend_splits = true
+	sun.shadow_bias = 0.04
+	sun.shadow_normal_bias = 4.0
+	# Shaded ground in a stylised world reads better as darker ground than
+	# as an absence of it.
+	sun.shadow_opacity = 0.72
 
 	moon = get_node_or_null("Moon")
 	if moon == null:
@@ -860,7 +895,10 @@ func _update_day_night(_delta: float) -> void:
 
 	var night := clampf(0.5 - elev, 0.0, 1.0)
 	env.fog_light_color = Color(0.53, 0.8, 0.92).lerp(Color(0.03, 0.04, 0.08), night)
-	env.ambient_light_energy = maxf(0.12, elev * 0.8)
+	# Shadows are lit by the sky and nothing else, so this figure decides how
+	# dark a shadow gets. At 0.8 of a low morning sun it left hillside shadows
+	# at about 8% grey — a hole in the world rather than shaded ground.
+	env.ambient_light_energy = maxf(0.28, elev * 1.15)
 	env.background_energy_multiplier = clampf(elev + 0.25, 0.06, 1.0)
 
 

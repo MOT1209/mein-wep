@@ -125,11 +125,6 @@ func _ready() -> void:
 	# jump to the left edge and each row reverses. The interface text is
 	# English, so pin the whole tree to left-to-right.
 	force_ltr(self)
-	# The main menu is the one screen written in Arabic, so it asks for the
-	# mirroring back afterwards rather than being exempted from the pass —
-	# anything added to it later is pinned by the pass and re-flipped here, in
-	# that order, instead of quietly keeping whatever the locale happened to be.
-	main_menu.apply_rtl()
 
 	Game.toast.connect(_on_toast)
 	Game.inventory_changed.connect(_refresh_resources)

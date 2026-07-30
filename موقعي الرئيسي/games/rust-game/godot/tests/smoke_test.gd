@@ -1473,15 +1473,10 @@ func _run_tests() -> void:
 	# --- Layout direction. An Arabic Godot install mirrors every container
 	# and anchor unless the UI pins itself, which put the right-anchored
 	# stats panel on the left edge with its rows reversed.
-	# The main menu is the one deliberate exception: it is written in Arabic
-	# and asks for the mirroring back after the pass. Everything else, being
-	# English, must still be pinned.
 	var ltr_violations := []
 	var ltr_stack: Array = [hud]
 	while not ltr_stack.is_empty():
 		var n = ltr_stack.pop_back()
-		if n == hud.main_menu:
-			continue
 		for c in n.get_children():
 			ltr_stack.append(c)
 		if n is Control and (n as Control).layout_direction != Control.LAYOUT_DIRECTION_LTR:
@@ -1489,27 +1484,15 @@ func _run_tests() -> void:
 			# nodes built up front must be pinned.
 			ltr_violations.append(n.name)
 	_check(ltr_violations.is_empty(),
-		"the rest of the HUD is pinned to left-to-right %s"
+		"the whole HUD is pinned to left-to-right %s"
 			% str(ltr_violations.slice(0, 5)))
 
-	# And the menu is mirrored all the way down, not just at its root — a
-	# child left at the default would face the wrong way on an English install.
-	var rtl_misses := []
-	var rtl_stack: Array = [hud.main_menu]
-	while not rtl_stack.is_empty():
-		var n2 = rtl_stack.pop_back()
-		# One deliberate island: the compass ribbon is bearings and Latin
-		# initials, and mirrored it would draw 330 to the right of 345.
-		if n2 == hud.main_menu._compass_box:
-			continue
-		for c in n2.get_children():
-			rtl_stack.append(c)
-		if n2 is Control and (n2 as Control).layout_direction \
-				!= Control.LAYOUT_DIRECTION_RTL:
-			rtl_misses.append(n2.name)
-	_check(rtl_misses.is_empty(),
-		"the Arabic menu is mirrored right-to-left throughout %s"
-			% str(rtl_misses.slice(0, 5)))
+	# Including the Arabic menu. Arabic text in a left-to-right layout is what
+	# the reference art is, and the two are easy to conflate: mirroring the
+	# containers to match the language puts the navigation on the wrong side
+	# and reverses every label-bar-figure row.
+	_check(hud.main_menu.layout_direction == Control.LAYOUT_DIRECTION_LTR,
+		"the Arabic menu is laid out left-to-right, like the art it is built to")
 
 	# --- Compact slot sizing, measured after layout rather than trusted
 	# from the setting: a 256px source icon silently became the minimum
@@ -2916,8 +2899,19 @@ func _test_main_menu(game, world) -> void:
 		"the version is shown (%s)" % menu._version_label.text)
 	_check(menu._clock_label.text.contains(":"),
 		"the clock reads a time (%s)" % menu._clock_label.text)
-	_check(menu._weather_label.text.contains(world.weather.state_name()),
-		"and the real weather (%s)" % menu._weather_label.text)
+	# The label carries the Arabic for whatever the weather actually is, so the
+	# check goes through the same map rather than asserting the English word is
+	# on a screen written in Arabic.
+	_check(menu._weather_label.text == menu._weather_name()
+			and menu._weather_name() != "",
+		"and the real weather, in Arabic (%s = %s)"
+			% [world.weather.state_name(), menu._weather_label.text])
+	for state in world.weather.STATES:
+		var english: String = str(world.weather.STATES[state].name)
+		_check(menu.WEATHER_NAMES.has(english),
+			"every weather state has an Arabic name (%s)" % english)
+	_check(menu._wind_label.text.ends_with("%"),
+		"the wind reads as a percentage on its own (%s)" % menu._wind_label.text)
 	for invented in ["Ping", "ms", "EU-West", "Region"]:
 		_check(not menu._version_label.text.contains(invented)
 			and not menu._weather_label.text.contains(invented),

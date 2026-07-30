@@ -32,7 +32,7 @@ const LOGO_PULSE_PERIOD := 5.0
 const NEWS_PERIOD := 10.0
 
 const PANEL_WIDTH := 296.0
-const BUTTON_HEIGHT := 56.0
+const BUTTON_HEIGHT := 42.0
 const HOVER_SCALE := 1.04
 const HOVER_FADE := 0.22
 const EDGE := 24.0
@@ -77,12 +77,18 @@ const BAR_NAMES := {
 	"stamina": "الطاقة", "oxygen": "الأكسجين",
 }
 
+## The weather, in the language this screen is written in. Keyed off the same
+## `state_name()` the rest of the game uses, so a state with no translation
+## here falls back to its own name rather than vanishing.
+const WEATHER_NAMES := {
+	"Clear": "صافٍ", "Overcast": "غائم", "Rain": "ممطر",
+	"Thunderstorm": "عاصفة رعدية",
+}
+
 const RESOURCES := [
 	{"id": "wood", "label": "الخشب"},
 	{"id": "stone", "label": "الحجر"},
 	{"id": "iron", "label": "خام المعدن"},
-	{"id": "scrap", "label": "سكراب"},
-	{"id": "cloth", "label": "قماش"},
 ]
 
 var hud: CanvasLayer
@@ -98,6 +104,7 @@ var _logo: Label
 var _buttons: Array = []
 var _clock_label: Label
 var _weather_label: Label
+var _wind_label: Label
 var _compass_box: HBoxContainer
 var _compass_signature := ""
 var _level_label: Label
@@ -115,7 +122,14 @@ var _version_label: Label
 
 
 func _ready() -> void:
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Sized to the window explicitly, and kept that way. `set_anchors_preset`
+	# alone leaves the offsets untouched, so this Control was 0x0 — and every
+	# region holder inside it, anchored to a rect of nothing, collapsed to its
+	# own minimum size at the top-left corner. That is why six panels ended up
+	# stacked in one corner with the navigation cut in half: nothing was being
+	# placed anywhere, because there was no screen to place it on.
+	_fit()
+	get_viewport().size_changed.connect(_fit)
 	visible = false
 	# Godot's bundled font carries no Arabic glyphs, so this whole interface
 	# would render as empty boxes. A system font is asked for by name instead,
@@ -128,18 +142,25 @@ func _ready() -> void:
 	_build()
 
 
-## The HUD pins its whole tree left-to-right at startup, because the rest of
-## the interface is English and would mirror itself on an Arabic install. This
-## menu is Arabic and wants exactly the opposite, so it asks for it back.
-func apply_rtl() -> void:
-	_set_direction(self, Control.LAYOUT_DIRECTION_RTL)
+## Fills the window. Called again whenever it changes size, so the menu is
+## still laid out across the whole screen after a resize rather than across
+## whatever the screen was when it was built.
+func _fit() -> void:
+	# Offsets as well as anchors. Setting the anchors alone leaves the offsets
+	# where they were, which is what left this Control at nothing by nothing;
+	# assigning `size` on top would be overridden by the anchors anyway.
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 
-func _set_direction(node: Node, dir: int) -> void:
-	if node is Control:
-		(node as Control).layout_direction = dir
-	for c in node.get_children():
-		_set_direction(c, dir)
+## Arabic text, left-to-right layout — which is what the reference art is, and
+## worth being explicit about because the two are easy to conflate. The
+## navigation sits on the left, the profile on the right, and every row reads
+## icon, then name, then bar, then figure. Mirroring the containers to match
+## the language turns all of that inside out.
+##
+## The Arabic itself needs no help: a Label detects the direction of its own
+## text, so a right-to-left string is shaped and ordered correctly inside a
+## box that is laid out left-to-right.
 
 
 # ==================== THE VIEW ====================
@@ -188,9 +209,16 @@ func _aim_rig() -> void:
 		var at2: Vector2 = pick.pos
 		focus = Vector3(at2.x, world.terrain_height(at2.x, at2.y), at2.y)
 
-	# Stand back down the road from that point and look along it
+	# Stand back down the road from that point and look along it — and stand on
+	# the ground that is actually there. Measuring the height at the point being
+	# looked at and adding to that put the camera inside a hill whenever the
+	# road ran downhill towards it, which is what filled the lower half of the
+	# frame with the black insides of the terrain.
 	var behind := Vector3(-along.x, 0.0, -along.y) * RIG_BACK
-	_rig.global_position = focus + behind + Vector3(0, RIG_HEIGHT, 0)
+	var eye := focus + behind
+	var ground: float = world.terrain_height(eye.x, eye.z)
+	eye.y = maxf(ground, focus.y) + RIG_HEIGHT
+	_rig.global_position = eye
 	_rig.look_at(focus + Vector3(0, 1.0, 0), Vector3.UP)
 	_rig.rotation.z = 0.0
 
@@ -234,9 +262,17 @@ func _animate_logo() -> void:
 # ==================== BUILDING BLOCKS ====================
 
 func _label(text: String, size: int, colour: Color,
-		align := HORIZONTAL_ALIGNMENT_RIGHT) -> Label:
+		align := HORIZONTAL_ALIGNMENT_LEFT) -> Label:
 	var l := Label.new()
 	l.text = text
+	var arabic := false
+	for ch in text:
+		var c := ch.unicode_at(0)
+		if c >= 0x0600 and c <= 0x06FF:
+			arabic = true
+			break
+	l.text_direction = Control.TEXT_DIRECTION_AUTO if arabic \
+		else Control.TEXT_DIRECTION_LTR
 	l.add_theme_font_override("font", _font)
 	l.add_theme_font_size_override("font_size", size)
 	l.add_theme_color_override("font_color", colour)
@@ -267,7 +303,7 @@ func _plate() -> PanelContainer:
 ## they would if they shared one container.
 func _anchor(node: Control, h: int, v: int) -> void:
 	var holder := MarginContainer.new()
-	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	for side in ["left", "right", "top", "bottom"]:
 		holder.add_theme_constant_override("margin_" + side, int(EDGE))
 	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -342,9 +378,9 @@ func _build_logo_and_clock() -> void:
 	logo_col.add_theme_constant_override("separation", 0)
 	logo_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	logo_plate.add_child(logo_col)
-	_logo = _label("RUST", 50, Color(0.94, 0.95, 0.97), HORIZONTAL_ALIGNMENT_CENTER)
+	_logo = _label("RUST", 34, Color(0.94, 0.95, 0.97), HORIZONTAL_ALIGNMENT_CENTER)
 	logo_col.add_child(_logo)
-	logo_col.add_child(_label("SURVIVAL 3D", 18, Game.ACCENT,
+	logo_col.add_child(_label("SURVIVAL 3D", 13, Game.ACCENT,
 		HORIZONTAL_ALIGNMENT_CENTER))
 	row.add_child(logo_plate)
 
@@ -355,8 +391,18 @@ func _build_logo_and_clock() -> void:
 	clock_plate.add_child(clock_col)
 	_clock_label = _label("00:00", 22, Game.ACCENT, HORIZONTAL_ALIGNMENT_CENTER)
 	clock_col.add_child(_clock_label)
+
+	var conditions := HBoxContainer.new()
+	conditions.alignment = BoxContainer.ALIGNMENT_CENTER
+	conditions.add_theme_constant_override("separation", 8)
+	conditions.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_weather_label = _label("", 13, Game.TEXT_DIM, HORIZONTAL_ALIGNMENT_CENTER)
-	clock_col.add_child(_weather_label)
+	conditions.add_child(_weather_label)
+	conditions.add_child(_label("·", 13, Game.TEXT_DIM))
+	conditions.add_child(_label("رياح", 13, Game.TEXT_DIM))
+	_wind_label = _label("0%", 13, Game.TEXT_DIM, HORIZONTAL_ALIGNMENT_CENTER)
+	conditions.add_child(_wind_label)
+	clock_col.add_child(conditions)
 	row.add_child(clock_plate)
 
 
@@ -442,7 +488,7 @@ func _build_vitals(into: VBoxContainer) -> void:
 		row.add_child(bar)
 
 		var value := _label("", 14, Color(0.94, 0.95, 0.97),
-			HORIZONTAL_ALIGNMENT_LEFT)
+			HORIZONTAL_ALIGNMENT_RIGHT)
 		value.custom_minimum_size = Vector2(40, 0)
 		row.add_child(value)
 
@@ -470,7 +516,7 @@ func _build_resources(into: VBoxContainer) -> void:
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(name_label)
 		var count := _label("0", 16, Color(0.94, 0.95, 0.97),
-			HORIZONTAL_ALIGNMENT_LEFT)
+			HORIZONTAL_ALIGNMENT_RIGHT)
 		count.custom_minimum_size = Vector2(62, 0)
 		row.add_child(count)
 		column.add_child(row)
@@ -485,7 +531,7 @@ func _build_nav() -> void:
 	_anchor(plate, Control.SIZE_SHRINK_BEGIN, Control.SIZE_SHRINK_CENTER)
 
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 4)
+	column.add_theme_constant_override("separation", 3)
 	plate.add_child(column)
 
 	for entry in ENTRIES:
@@ -510,8 +556,8 @@ func _build_nav() -> void:
 		text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		text.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		text.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		text.add_child(_label(str(entry.title), 17, Color(0.94, 0.95, 0.97)))
-		text.add_child(_label(str(entry.desc), 11, Game.TEXT_DIM))
+		text.add_child(_label(str(entry.title), 15, Color(0.94, 0.95, 0.97)))
+		text.add_child(_label(str(entry.desc), 10, Game.TEXT_DIM))
 		row.add_child(text)
 
 		b.add_child(row)
@@ -577,7 +623,7 @@ func _on_entry(id: String, b: Button) -> void:
 			hud.start_game()
 			hud.toggle_inventory()
 		"events":
-			var lines := "الطقس: %s\n\n" % world.weather.state_name()
+			var lines := "الطقس: %s\n\n" % _weather_name()
 			for m in world.missions.active:
 				lines += "%s — %d / %d\n" % [m.name, int(m.progress), int(m.target)]
 			Game.notify(lines.strip_edges(), Game.ACCENT)
@@ -619,12 +665,18 @@ func _build_news() -> void:
 	column.add_theme_constant_override("separation", 4)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	plate.add_child(column)
-	column.add_child(_label("أخبار اللعبة", 15, Game.ACCENT))
-	_version_label = _label("", 12, Game.TEXT_DIM)
-	column.add_child(_version_label)
-	_news = _label("", 13, Game.TEXT)
+	var head := HBoxContainer.new()
+	head.add_theme_constant_override("separation", 8)
+	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var title := _label("أخبار اللعبة", 14, Game.ACCENT)
+	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	head.add_child(title)
+	_version_label = _label("", 11, Game.TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+	head.add_child(_version_label)
+	column.add_child(head)
+	_news = _label("", 12, Game.TEXT)
 	_news.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_news.custom_minimum_size = Vector2(320, 44)
+	_news.custom_minimum_size = Vector2(320, 34)
 	column.add_child(_news)
 
 
@@ -710,8 +762,6 @@ func _refresh_compass() -> void:
 			Game.ACCENT if w.lit else Game.TEXT_DIM, HORIZONTAL_ALIGNMENT_CENTER)
 		l.custom_minimum_size = Vector2(38, 24)
 		_compass_box.add_child(l)
-	# Headings are numbers and Latin letters: this one strip reads left to right
-	# even on an Arabic screen, or 330 would be drawn to the right of 345.
 	hud.force_ltr(_compass_box)
 
 
@@ -722,12 +772,18 @@ func _refresh_clock() -> void:
 	var minute := int(fmod(Game.day_time / Game.DAY_LENGTH * 1440.0, 60.0))
 	_clock_label.text = "%02d:%02d" % [hour, minute]
 	if _weather_label != null and world.weather != null:
-		_weather_label.text = "%s · رياح %d%%" % [
-			world.weather.state_name(), roundi(world.wind_strength() * 100.0)]
+		_weather_label.text = _weather_name()
+		_wind_label.text = "%d%%" % roundi(world.wind_strength() * 100.0)
 		# Colour-coded against something real: how survivable it is out there.
 		var harsh: float = clampf(world.weather.chill() / 26.0, 0.0, 1.0)
-		_weather_label.add_theme_color_override("font_color",
-			Color(0.45, 0.85, 0.5).lerp(Color(0.95, 0.45, 0.35), harsh))
+		var tone := Color(0.45, 0.85, 0.5).lerp(Color(0.95, 0.45, 0.35), harsh)
+		_weather_label.add_theme_color_override("font_color", tone)
+		_wind_label.add_theme_color_override("font_color", tone)
+
+
+func _weather_name() -> String:
+	var raw := str(world.weather.state_name())
+	return str(WEATHER_NAMES.get(raw, raw))
 
 
 func _refresh_profile() -> void:
@@ -774,7 +830,7 @@ func _refresh_missions() -> void:
 		name_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(name_label)
 		var frac := _label("%d / %d" % [int(m.progress), int(m.target)], 13,
-			Game.TEXT_DIM, HORIZONTAL_ALIGNMENT_LEFT)
+			Game.TEXT_DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 		frac.custom_minimum_size = Vector2(66, 0)
 		row.add_child(frac)
 		_mission_box.add_child(row)
@@ -784,9 +840,9 @@ func _refresh_missions() -> void:
 		bar.value = float(m.progress)
 		_mission_box.add_child(bar)
 
-	# Pointed the right way again after every rebuild: the HUD only pins its
-	# tree once, at startup, so rows created later would face the wrong way.
-	_set_direction(_mission_box, Control.LAYOUT_DIRECTION_RTL)
+	# Pinned again after every rebuild: the HUD pins its tree once, at startup,
+	# so rows created later would mirror themselves on an Arabic install.
+	hud.force_ltr(_mission_box)
 
 
 ## Read from the project settings rather than a file beside the project: res://

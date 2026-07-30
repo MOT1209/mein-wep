@@ -14,23 +14,23 @@ extends Node
 ## the range a roll picks from, and `reward` what it pays. Every one of these
 ## is something the game already tracks the moment it happens.
 const POOL := [
-	{"id": "gather_wood", "kind": "harvest_wood", "name": "Fell timber",
+	{"id": "gather_wood", "kind": "harvest_wood", "name": "اجمع الخشب",
 		"target": [200, 500], "reward": {"scrap": 15}},
-	{"id": "gather_stone", "kind": "harvest_stone", "name": "Quarry stone",
+	{"id": "gather_stone", "kind": "harvest_stone", "name": "اجمع الحجر",
 		"target": [150, 400], "reward": {"scrap": 15}},
-	{"id": "build", "kind": "build", "name": "Raise structures",
+	{"id": "build", "kind": "build", "name": "ابنِ قطعًا",
 		"target": [4, 10], "reward": {"wood": 300}},
-	{"id": "craft", "kind": "craft", "name": "Craft items",
+	{"id": "craft", "kind": "craft", "name": "اصنع أدوات",
 		"target": [3, 8], "reward": {"scrap": 20}},
-	{"id": "hunt", "kind": "hunt", "name": "Hunt animals",
+	{"id": "hunt", "kind": "hunt", "name": "اصطد حيوانات",
 		"target": [2, 5], "reward": {"cloth": 60}},
-	{"id": "strip", "kind": "wreck", "name": "Strip car wrecks",
+	{"id": "strip", "kind": "wreck", "name": "فكّك سيارات محطمة",
 		"target": [1, 3], "reward": {"frag": 80}},
-	{"id": "monument", "kind": "monument", "name": "Visit a monument",
+	{"id": "monument", "kind": "monument", "name": "زُر نصبًا",
 		"target": [1, 1], "reward": {"scrap": 40}},
-	{"id": "smelt", "kind": "smelt", "name": "Smelt ore",
+	{"id": "smelt", "kind": "smelt", "name": "اصهر الخام",
 		"target": [20, 60], "reward": {"lgf": 25}},
-	{"id": "survive", "kind": "survive_day", "name": "Survive a full day",
+	{"id": "survive", "kind": "survive_day", "name": "انجُ يومًا كاملًا",
 		"target": [1, 1], "reward": {"scrap": 50}},
 ]
 
