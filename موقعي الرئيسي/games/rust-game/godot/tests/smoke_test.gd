@@ -673,13 +673,18 @@ func _run_tests() -> void:
 			break
 	_check(victim != null, "found a creature to shoot")
 	if victim != null:
-		# Ranged weapons spend a round per shot
+		# Ranged weapons spend a round per shot — out of the magazine now, not
+		# straight out of your pockets.
 		game.inventory["ammo_rifle"] = 3
 		game.belt[0] = "ak47"
 		game.selected_belt_slot = 0
+		game.loaded["ak47"] = 3
 		player._weapon_cd = 0.0
+		player._reload_left = 0.0
 		player._use_weapon("ak47")
-		_check(game.get_count("ammo_rifle") == 2, "firing the rifle spends one round")
+		_check(game.rounds_loaded("ak47") == 2, "firing the rifle spends one round")
+		_check(game.get_count("ammo_rifle") == 3,
+			"and takes it from the magazine, leaving your pockets alone")
 		player._weapon_cd = 0.0
 		game.inventory["ammo_rifle"] = 0
 		player._use_weapon("ak47")
@@ -710,10 +715,12 @@ func _run_tests() -> void:
 	# a later check still needs alive.
 	player.camera.global_rotation = Vector3(1.3, 0.0, 0.0)
 	game.inventory["ammo_shotgun"] = 4
+	game.loaded["pipe_shotgun"] = 1
 	game.inventory_changed.emit()
 	player._weapon_cd = 0.0
+	player._reload_left = 0.0
 	player._use_weapon("pipe_shotgun")
-	_check(game.get_count("ammo_shotgun") == 3,
+	_check(game.rounds_loaded("pipe_shotgun") == 0,
 		"a whole cone of pellets still costs exactly one shell")
 	game.inventory["ammo_shotgun"] = 0
 	game.inventory_changed.emit()
@@ -1589,6 +1596,7 @@ func _run_tests() -> void:
 	_test_settings(game, world)
 	_test_camera(game, world)
 	_test_stances(game, world)
+	_test_combat(game, world)
 	_test_models(game, world)
 	_test_durability(game, world)
 	_test_new_pieces(game, world, StructureScript)
@@ -1926,6 +1934,214 @@ func _test_stances(game, world) -> void:
 		player._update_lean(1.0 / 60.0)
 	_check(absf(player.head.rotation.z) < 0.01 and absf(player.head.position.x) < 0.01,
 		"and letting go brings it back upright")
+
+
+# ==================== COMBAT ====================
+
+func _test_combat(game, world) -> void:
+	var player = world.player
+	game.reset_settings()
+	_clear_pockets(game)
+	player.stance = game.STANCE_STAND
+	player.aiming = false
+	player.holding_breath = false
+	player._reload_left = 0.0
+	player._burst_left = 0
+	player._weapon_cd = 0.0
+
+	# Magazines exist for the guns and not for the spear
+	_check(game.is_ranged("ak47") and game.is_ranged("bow"),
+		"the rifle and the bow have magazines")
+	_check(not game.is_ranged("spear") and not game.is_ranged("machete"),
+		"melee weapons do not")
+	_check(game.magazine_size("ak47") == 30, "the rifle holds thirty rounds")
+
+	# A fresh weapon comes loaded rather than needing a reload before shot one
+	game.loaded.clear()
+	_check(game.rounds_loaded("ak47") == 30, "an untouched magazine counts as full")
+
+	# Firing spends the magazine, not the pocket
+	game.inventory["ak47"] = 1
+	game.inventory["ammo_rifle"] = 100
+	var pocket_before: int = game.get_count("ammo_rifle")
+	_check(game.spend_round("ak47"), "firing takes a round from the magazine")
+	_check(game.rounds_loaded("ak47") == 29, "and the magazine is one lighter")
+	_check(game.get_count("ammo_rifle") == pocket_before,
+		"while the rounds in your pockets are untouched")
+
+	# Empty means empty
+	game.loaded["ak47"] = 0
+	_check(not game.spend_round("ak47"), "an empty magazine will not fire")
+
+	# Reloading moves rounds out of your pockets and reports what it moved
+	var moved: int = game.reload_weapon("ak47")
+	_check(moved == 30, "reloading fills the magazine (%d rounds)" % moved)
+	_check(game.get_count("ammo_rifle") == pocket_before - 30,
+		"and those rounds came out of your pockets")
+	_check(game.reload_weapon("ak47") == 0, "reloading a full magazine does nothing")
+
+	# With nothing to load, reloading fails rather than half-filling
+	game.loaded["ak47"] = 0
+	game.inventory["ammo_rifle"] = 0
+	_check(game.reload_weapon("ak47") == 0, "no ammunition means no reload")
+	game.inventory["ammo_rifle"] = 7
+	_check(game.reload_weapon("ak47") == 7, "and a partial load takes what there is")
+
+	# Fire modes cycle only where the weapon has more than one
+	game.fire_modes.clear()
+	_check(game.fire_mode("ak47") == "semi", "the rifle starts on semi-automatic")
+	_check(game.cycle_fire_mode("ak47") == "burst", "and cycles to burst")
+	_check(game.cycle_fire_mode("ak47") == "auto", "and then to automatic")
+	_check(game.cycle_fire_mode("ak47") == "semi", "and wraps back round")
+	_check(game.cycle_fire_mode("pistol") == "",
+		"a weapon with one fire mode has nothing to cycle")
+	_check(game.fire_mode("pistol") == "semi", "and stays on it")
+
+	# Sights
+	_check(game.scope_list("ak47").size() > 1, "the rifle has an adjustable sight")
+	game.scope_levels.clear()
+	_check(is_equal_approx(game.scope_zoom("ak47"), 1.0), "which starts at 1x")
+	_check(game.cycle_scope("ak47") > 1.0, "and can be zoomed in")
+	_check(is_equal_approx(game.scope_zoom("pistol"), 1.0),
+		"a weapon with no sight is always 1x")
+
+	# Spread: every steadying measure tightens it, and they stack
+	var loose: float = game.weapon_spread("ak47", game.STANCE_STAND, false, false)
+	var aimed: float = game.weapon_spread("ak47", game.STANCE_STAND, true, false)
+	var braced: float = game.weapon_spread("ak47", game.STANCE_PRONE, true, false)
+	var held: float = game.weapon_spread("ak47", game.STANCE_PRONE, true, true)
+	_check(loose > 0.0, "a rifle has sway to begin with")
+	_check(aimed < loose, "aiming tightens it")
+	_check(braced < aimed, "lying down tightens it further")
+	_check(held < braced, "and holding your breath tightest of all")
+	_check(is_equal_approx(game.weapon_spread("spear", game.STANCE_STAND, false, false), 0.0),
+		"a spear has no spread to speak of")
+
+	# Aiming
+	player.aiming = false
+	player.stance = game.STANCE_STAND
+	player.set_aiming(true)
+	_check(player.aiming, "you can aim down the sights")
+	player.set_aiming(false)
+	_check(not player.aiming, "and come back off them")
+	player.stance = game.STANCE_SWIM
+	player.set_aiming(true)
+	_check(not player.aiming, "but not while swimming")
+	player.stance = game.STANCE_STAND
+
+	# Holding a breath needs breath to hold
+	game.stats.oxygen = 100.0
+	player.set_holding_breath(true)
+	_check(player.holding_breath, "you can hold your breath")
+	player.set_holding_breath(false)
+	game.stats.oxygen = 2.0
+	player.set_holding_breath(true)
+	_check(not player.holding_breath, "but not on an empty chest")
+	game.stats.oxygen = 100.0
+
+	# Reload takes time, and the weapon is out of action for it
+	game.loaded["ak47"] = 0
+	game.inventory["ammo_rifle"] = 60
+	game.belt[0] = "ak47"
+	game.selected_belt_slot = 0
+	player._reload_left = 0.0
+	_check(player.start_reload(), "starting a reload works")
+	_check(player._reload_left > 0.0, "and it takes time")
+	_check(not player.start_reload(), "a second reload while one is running is refused")
+	# Run it to completion
+	for i in 300:
+		player._update_weapon(1.0 / 60.0)
+		if player._reload_left <= 0.0:
+			break
+	_check(game.rounds_loaded("ak47") == 30, "and when it finishes the magazine is full")
+
+	# Burst queues its rounds rather than firing them all in one frame
+	game.fire_modes["ak47"] = game.fire_mode_list("ak47").find("burst")
+	player._weapon_cd = 0.0
+	player._burst_left = 0
+	var before_burst: int = game.rounds_loaded("ak47")
+	player._use_weapon("ak47")
+	_check(player._burst_left == game.BURST_ROUNDS,
+		"a burst queues %d rounds" % game.BURST_ROUNDS)
+	_check(game.rounds_loaded("ak47") == before_burst,
+		"and has not spent any of them yet")
+	for i in 200:
+		player._weapon_cd = 0.0
+		player._update_weapon(1.0 / 60.0)
+		if player._burst_left <= 0:
+			break
+	_check(game.rounds_loaded("ak47") == before_burst - game.BURST_ROUNDS,
+		"and over the following frames it sends exactly that many")
+	game.fire_modes.clear()
+
+	# Recoil pushes the muzzle up
+	player._pitch_target = 0.0
+	player._apply_recoil("ak47", 0.02)
+	_check(player._pitch_target > 0.0, "firing kicks the aim upwards")
+	player._pitch_target = 0.0
+
+	# Melee bashes with whatever is in your hands, and the chain escalates
+	player._weapon_cd = 0.0
+	player._combo_step = 0
+	player._combo_at = -99.0
+	_check(player.melee_strike(), "the melee button always swings")
+	var first_step: int = player._combo_step
+	player._weapon_cd = 0.0
+	player.melee_strike()
+	_check(player._combo_step != first_step, "and a second swing continues the combo")
+	# Left alone, the chain resets
+	player._combo_at = -99.0
+	player._weapon_cd = 0.0
+	player.melee_strike()
+	_check(player._combo_step == 0, "but a pause starts it again from the first swing")
+
+	# Inspect reads out the things that are otherwise invisible
+	var summary: String = game.weapon_summary("ak47")
+	_check(summary.contains("30") and summary.to_upper().contains("SEMI"),
+		"inspecting a rifle shows its magazine and fire mode (%s)" % summary)
+
+	# Quick throw finds a grenade without it being in your hand
+	_clear_pockets(game)
+	game.inventory["grenade"] = 2
+	player._last_grenade = ""
+	var thrown: bool = player._throw_last_grenade()
+	_check(thrown and game.get_count("grenade") == 1,
+		"quick throw finds a grenade you are not holding")
+	_check(player._last_grenade == "grenade", "and remembers it for next time")
+	_clear_pockets(game)
+	_check(not player._throw_last_grenade(), "with nothing to throw it refuses")
+
+	# The predicted arc is a real trajectory that stops where it lands
+	var arc: PackedVector3Array = player.grenade_arc("grenade")
+	_check(arc.size() > 2, "a thrown grenade has a predicted arc (%d points)" % arc.size())
+	var rises := false
+	var falls := false
+	for i in range(1, arc.size()):
+		if arc[i].y > arc[i - 1].y:
+			rises = true
+		elif arc[i].y < arc[i - 1].y:
+			falls = true
+	_check(rises and falls, "and the arc goes up before it comes down")
+	_check(player.grenade_arc("c4").is_empty(),
+		"a charge that is placed rather than thrown has no arc")
+
+	# Weapon state survives a save
+	game.loaded["ak47"] = 11
+	game.fire_modes["ak47"] = 2
+	game.scope_levels["ak47"] = 1
+	world.save_game()
+	var f := FileAccess.open("user://rust_save.json", FileAccess.READ)
+	var data = JSON.parse_string(f.get_as_text())
+	f.close()
+	_check(data is Dictionary and int(data.player.loaded.get("ak47", 0)) == 11,
+		"what is in the magazine is written to the save")
+	_check(int(data.player.fire_modes.get("ak47", 0)) == 2
+		and int(data.player.scopes.get("ak47", 0)) == 1,
+		"and so are the fire mode and the sight")
+
+	game.belt[0] = "building_plan"
+	game.selected_belt_slot = 0
+	_clear_pockets(game)
 
 
 # ==================== MODELS ====================

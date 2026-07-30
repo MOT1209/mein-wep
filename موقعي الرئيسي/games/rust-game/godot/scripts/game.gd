@@ -43,15 +43,47 @@ const FIST_DAMAGE := 15.0
 ## shotgun that lands everything at contact range and almost nothing past
 ## it. Both default to a single straight shot, so every other weapon here
 ## behaves exactly as it always has.
+## `mag` is how many rounds the weapon holds before it has to be reloaded out
+## of your pockets; `modes` are the fire modes it can be cycled through;
+## `sway` is how wide it shoots before stance, aiming and a held breath have
+## their say. A weapon with no `ammo` is melee and has none of these.
+##
+## `scope` lists the magnifications the sight can be switched between, so a
+## rifle can be aimed at a doorway or at a ridgeline with the same weapon.
 const WEAPONS := {
 	"spear": {"damage": 35.0, "range": 3.6, "cooldown": 0.9},
 	"machete": {"damage": 30.0, "range": 2.6, "cooldown": 0.5},
-	"bow": {"damage": 50.0, "range": 60.0, "cooldown": 1.1, "ammo": "arrow"},
+	"bow": {"damage": 50.0, "range": 60.0, "cooldown": 1.1, "ammo": "arrow",
+		"mag": 1, "modes": ["semi"], "reload_time": 1.0, "sway": 0.006},
 	"pipe_shotgun": {"damage": 14.0, "range": 22.0, "cooldown": 1.1,
-		"ammo": "ammo_shotgun", "pellets": 8, "spread": 0.06},
-	"pistol": {"damage": 40.0, "range": 80.0, "cooldown": 0.35, "ammo": "ammo_pistol"},
-	"ak47": {"damage": 55.0, "range": 130.0, "cooldown": 0.12, "ammo": "ammo_rifle"},
+		"ammo": "ammo_shotgun", "pellets": 8, "spread": 0.06,
+		"mag": 1, "modes": ["semi"], "reload_time": 1.5, "sway": 0.02},
+	"pistol": {"damage": 40.0, "range": 80.0, "cooldown": 0.35, "ammo": "ammo_pistol",
+		"mag": 12, "modes": ["semi"], "reload_time": 1.9, "sway": 0.011},
+	"ak47": {"damage": 55.0, "range": 130.0, "cooldown": 0.12, "ammo": "ammo_rifle",
+		"mag": 30, "modes": ["semi", "burst", "auto"], "reload_time": 2.7,
+		"sway": 0.017, "scope": [1.0, 2.5]},
 }
+
+## Rounds a burst sends per trigger pull.
+const BURST_ROUNDS := 3
+
+## What a bare-handed bash with a rifle in your hands is worth. The melee
+## button always does something, whatever you are holding — but it is never
+## the equal of the actual melee weapon.
+const MELEE_BASH_DAMAGE := 18.0
+const MELEE_BASH_RANGE := 2.2
+const MELEE_BASH_COOLDOWN := 0.7
+## A held melee button swings a combo: each hit in the chain lands harder than
+## the last, which is the reward for committing to standing still and swinging.
+const MELEE_COMBO_STEPS := 3
+const MELEE_COMBO_GAIN := 0.35
+## How long after a swing the chain still counts as continuing.
+const MELEE_COMBO_WINDOW := 1.1
+
+## How much aiming and a held breath tighten the shot.
+const ADS_SPREAD_SCALE := 0.45
+const BREATH_SPREAD_SCALE := 0.5
 
 ## How many uses a tool or weapon has in it before it breaks. Nothing you
 ## carry lasts forever, which is what keeps a mining run tied to the cost of
@@ -944,6 +976,154 @@ func consume(cost: Dictionary) -> void:
 	for res in cost:
 		inventory[res] = get_count(res) - int(cost[res])
 	inventory_changed.emit()
+
+
+# ==================== WEAPONS: MAGAZINES & FIRE MODES ====================
+
+## Rounds sitting in the weapon itself, keyed by weapon id. Absent means the
+## magazine has never been touched, which counts as full — a weapon you just
+## crafted comes loaded, because making the player reload it before the first
+## shot teaches them nothing.
+var loaded: Dictionary = {}
+## Which entry of the weapon's `modes` list is selected, keyed by weapon id.
+var fire_modes: Dictionary = {}
+## Which magnification of its `scope` list a weapon is set to.
+var scope_levels: Dictionary = {}
+
+
+func magazine_size(id: String) -> int:
+	return int(WEAPONS.get(id, {}).get("mag", 0))
+
+
+## True for anything that has a magazine at all — the guns and the bow, not
+## the spear.
+func is_ranged(id: String) -> bool:
+	return WEAPONS.has(id) and str(WEAPONS[id].get("ammo", "")) != ""
+
+
+func rounds_loaded(id: String) -> int:
+	if not is_ranged(id):
+		return 0
+	return int(loaded.get(id, magazine_size(id)))
+
+
+## Spends one round. Returns false when the magazine is empty, which is the
+## caller's cue to tell the player to reload rather than to fire.
+func spend_round(id: String) -> bool:
+	var left := rounds_loaded(id)
+	if left <= 0:
+		return false
+	loaded[id] = left - 1
+	inventory_changed.emit()
+	return true
+
+
+## Tops the magazine up from your pockets. Returns how many rounds went in, so
+## zero means there was either nothing to load or nowhere to put it.
+func reload_weapon(id: String) -> int:
+	if not is_ranged(id):
+		return 0
+	var ammo := str(WEAPONS[id].ammo)
+	var room := magazine_size(id) - rounds_loaded(id)
+	if room <= 0:
+		notify("%s is already loaded" % ITEMS.get(id, {}).get("name", id),
+			Color(1.0, 0.63, 0.0))
+		return 0
+	var have := get_count(ammo)
+	if have <= 0:
+		notify("Out of %s" % ITEMS.get(ammo, {}).get("name", ammo), Color(0.9, 0.3, 0.3))
+		return 0
+	var moved: int = mini(room, have)
+	remove_item(ammo, moved)
+	loaded[id] = rounds_loaded(id) + moved
+	notify("Reloaded — %d/%d" % [rounds_loaded(id), magazine_size(id)])
+	_sfx("door")
+	return moved
+
+
+func fire_mode_list(id: String) -> Array:
+	var modes = WEAPONS.get(id, {}).get("modes", [])
+	return modes if modes is Array and not modes.is_empty() else ["semi"]
+
+
+func fire_mode(id: String) -> String:
+	var modes := fire_mode_list(id)
+	var idx: int = int(fire_modes.get(id, 0)) % modes.size()
+	return str(modes[idx])
+
+
+## Steps to the next fire mode this weapon supports. Returns the new one, or
+## an empty string when the weapon has only one and there is nothing to cycle.
+func cycle_fire_mode(id: String) -> String:
+	var modes := fire_mode_list(id)
+	if modes.size() < 2:
+		notify("%s has one fire mode" % ITEMS.get(id, {}).get("name", id),
+			Color(1.0, 0.63, 0.0))
+		return ""
+	fire_modes[id] = (int(fire_modes.get(id, 0)) + 1) % modes.size()
+	var now := fire_mode(id)
+	notify("Fire mode: %s" % now.to_upper(), Color(0.85, 0.85, 0.4))
+	_sfx("upgrade")
+	return now
+
+
+func scope_list(id: String) -> Array:
+	var levels = WEAPONS.get(id, {}).get("scope", [])
+	return levels if levels is Array else []
+
+
+func scope_zoom(id: String) -> float:
+	var levels := scope_list(id)
+	if levels.is_empty():
+		return 1.0
+	var idx: int = int(scope_levels.get(id, 0)) % levels.size()
+	return float(levels[idx])
+
+
+## Steps the sight to its next magnification. Swiping the scope button runs
+## this; a weapon with no scope says so rather than silently doing nothing.
+func cycle_scope(id: String) -> float:
+	var levels := scope_list(id)
+	if levels.size() < 2:
+		notify("No adjustable sight on that", Color(1.0, 0.63, 0.0))
+		return 1.0
+	scope_levels[id] = (int(scope_levels.get(id, 0)) + 1) % levels.size()
+	var zoom := scope_zoom(id)
+	notify("Sight: %.1fx" % zoom, Color(0.7, 0.85, 1.0))
+	return zoom
+
+
+## How wide this weapon shoots right now: its own sway, tightened by the
+## stance, by aiming and by a held breath. This is the number that makes lying
+## down and holding still worth the vulnerability.
+func weapon_spread(id: String, stance: String, aiming: bool, breath: bool) -> float:
+	var sway := float(WEAPONS.get(id, {}).get("sway", 0.0))
+	if sway <= 0.0:
+		return 0.0
+	sway *= float(stance_data(stance).spread)
+	if aiming:
+		sway *= ADS_SPREAD_SCALE
+	if breath:
+		sway *= BREATH_SPREAD_SCALE
+	return sway
+
+
+## A readable line about what you are holding, for the inspect button.
+func weapon_summary(id: String) -> String:
+	var item: Dictionary = ITEMS.get(id, {})
+	var parts := [str(item.get("name", id))]
+	if WEAPONS.has(id):
+		var w: Dictionary = WEAPONS[id]
+		parts.append("%.0f dmg" % float(w.damage))
+		parts.append("%.0fm" % float(w.range))
+		if is_ranged(id):
+			parts.append("%d/%d" % [rounds_loaded(id), magazine_size(id)])
+			parts.append(fire_mode(id).to_upper())
+			if scope_list(id).size() > 1:
+				parts.append("%.1fx" % scope_zoom(id))
+	if has_durability(id):
+		parts.append("cond %d%%" % roundi(durability_fraction(id) * 100.0))
+	return " · ".join(parts)
 
 
 # ==================== RECYCLING ====================

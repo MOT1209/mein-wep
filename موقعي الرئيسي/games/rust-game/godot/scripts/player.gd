@@ -117,6 +117,17 @@ var _jumps_used := 0
 var _lean := 0.0
 var _lean_target := 0.0
 
+## Weapon state: rounds still to send in a queued burst, and the reload timer.
+var _burst_left := 0
+var _burst_weapon := ""
+var _reload_left := 0.0
+var _reload_weapon := ""
+## Where in a melee combo the last swing was, and when it landed.
+var _combo_step := 0
+var _combo_at := -99.0
+## The last charge thrown, for the quick-throw gesture.
+var _last_grenade := ""
+
 
 func _ready() -> void:
 	collision_layer = 16
@@ -232,6 +243,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_stance(Game.STANCE_STAND)
 		return
 
+	# Held actions that end when the key comes up
+	if event.is_action_released("hold_breath"):
+		set_holding_breath(false)
+		return
+	if event.is_action_released("lean_left") or event.is_action_released("lean_right"):
+		set_lean(0.0)
+		return
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		apply_look(event.relative)
 	elif event.is_action_pressed("attack"):
@@ -244,9 +263,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif event.is_action_pressed("blueprint"):
 		hud.open_blueprint_menu()
 	elif event.is_action_pressed("rotate_piece"):
+		# One key, two jobs, decided by whether you are building: rotate the
+		# piece if there is one on the crosshair, otherwise reload. Both are
+		# what a player pressing R means in the moment they press it.
 		if Game.selected_blueprint != "":
 			Game.blueprint_rotation = fmod(Game.blueprint_rotation + PI / 2.0, TAU)
 			Game.notify("Rotated %d°" % roundi(rad_to_deg(Game.blueprint_rotation)), Color(1.0, 0.63, 0.0))
+		else:
+			start_reload()
 	elif event.is_action_pressed("cancel_build"):
 		if Game.selected_blueprint != "":
 			Game.selected_blueprint = ""
@@ -263,6 +287,22 @@ func _unhandled_input(event: InputEvent) -> void:
 		toggle_stance(Game.STANCE_CROUCH)
 	elif event.is_action_pressed("prone"):
 		toggle_stance(Game.STANCE_PRONE)
+	elif event.is_action_pressed("aim"):
+		toggle_aiming()
+	elif event.is_action_pressed("melee"):
+		melee_strike()
+	elif event.is_action_pressed("fire_mode"):
+		Game.cycle_fire_mode(Game.active_tool())
+	elif event.is_action_pressed("hold_breath"):
+		set_holding_breath(true)
+	elif event.is_action_pressed("inspect"):
+		inspect_held()
+	elif event.is_action_pressed("throw_grenade"):
+		_throw_last_grenade()
+	elif event.is_action_pressed("lean_left"):
+		set_lean(-1.0)
+	elif event.is_action_pressed("lean_right"):
+		set_lean(1.0)
 	else:
 		for i in Game.BELT_SLOTS:
 			if event.is_action_pressed("slot_%d" % (i + 1)):
@@ -622,6 +662,11 @@ func target_fov() -> float:
 	base += float(Game.stance_data(stance).fov)
 	if aiming:
 		base *= ADS_FOV_SCALE
+		# A scope divides on top of that, so a 2.5x sight really is two and a
+		# half times the reach of the naked sights.
+		var zoom: float = Game.scope_zoom(Game.active_tool())
+		if zoom > 1.0:
+			base /= zoom
 	return base
 
 
@@ -780,6 +825,7 @@ func _physics_process(delta: float) -> void:
 			Sfx.play("step")
 
 	_update_camera(delta)
+	_update_weapon(delta)
 	_update_lights(delta)
 	_inspect_structures()
 
@@ -1107,38 +1153,225 @@ func _install_lock(door: Node3D, id: String) -> void:
 
 ## Swings a melee weapon or fires a ranged one. Ranged weapons spend a
 ## round and reach much further; both hit creatures and structures.
+## A trigger pull. What it does depends on the fire mode: one shot, a burst
+## queued up to be sent over the next few frames, or the start of automatic
+## fire that keeps going while the button is held.
 func _use_weapon(id: String) -> void:
+	if _reload_left > 0.0:
+		return
+	if not Game.is_ranged(id):
+		_fire_shot(id)
+		return
+	if Game.rounds_loaded(id) <= 0:
+		if _weapon_cd <= 0.0:
+			Game.notify("Empty — reload", Color(0.9, 0.3, 0.3))
+			Sfx.play("hit")
+			_weapon_cd = 0.35
+		return
+	match Game.fire_mode(id):
+		"burst":
+			_burst_left = Game.BURST_ROUNDS
+			_burst_weapon = id
+		_:
+			_fire_shot(id)
+
+
+## One round leaving the weapon. Everything about where it goes is decided
+## here: the weapon's own sway, tightened by the stance you are in, by aiming
+## and by a held breath — which is what makes lying still worth being unable
+## to move.
+func _fire_shot(id: String) -> void:
 	var data: Dictionary = Game.WEAPONS[id]
 	if _weapon_cd > 0.0:
 		return
 	_weapon_cd = float(data.cooldown)
 
-	var ammo := str(data.get("ammo", ""))
-	if ammo != "":
-		if Game.get_count(ammo) <= 0:
-			Game.notify("Out of %s" % Game.ITEMS[ammo].name, Color(0.9, 0.3, 0.3))
-			return
-		Game.remove_item(ammo, 1)
+	var ranged := Game.is_ranged(id)
+	if ranged and not Game.spend_round(id):
+		return
 
-	Sfx.play("hit" if ammo == "" else "explosion")
+	Sfx.play("hit" if not ranged else "explosion")
 
 	# One shot down the crosshair for everything but a shotgun, which throws
 	# its pellets into a cone: all of them land at contact range, almost none
 	# of them past it.
 	var pellets := int(data.get("pellets", 1))
-	var spread := float(data.get("spread", 0.0))
+	var pellet_spread := float(data.get("spread", 0.0))
 	# A blunt machete and a rifle with a shot-out barrel both still work —
 	# they just stop being worth what they cost to keep.
 	var condition := Game.condition_multiplier(id)
+
+	var right := camera.global_transform.basis.x
+	var up := camera.global_transform.basis.y
+	# Where the weapon is actually pointing this shot, as against where the
+	# crosshair is
+	var sway := Game.weapon_spread(id, stance, aiming, holding_breath)
 	var aim := -camera.global_transform.basis.z
+	if sway > 0.0:
+		aim = (aim + right * randf_range(-sway, sway)
+			+ up * randf_range(-sway, sway)).normalized()
+
 	for i in pellets:
 		var dir := aim
-		if spread > 0.0 and i > 0:
-			dir = (aim + camera.global_transform.basis.x * randf_range(-spread, spread)
-				+ camera.global_transform.basis.y * randf_range(-spread, spread)).normalized()
+		if pellet_spread > 0.0 and i > 0:
+			dir = (aim + right * randf_range(-pellet_spread, pellet_spread)
+				+ up * randf_range(-pellet_spread, pellet_spread)).normalized()
 		_hit_with(id, data, _ray_along(dir, float(data.range), 2 | 4 | 8 | Game.LAYER_FLOOR),
 			condition)
+
+	if ranged:
+		_apply_recoil(id, sway)
 	Game.wear_tool(id)
+
+
+## Kicks the muzzle up and shakes the view. Aiming and a steady stance cut it
+## the same way they cut the spread, so a braced shot is followed by a second
+## one you can actually place.
+func _apply_recoil(id: String, sway: float) -> void:
+	var kick: float = sway * 1.6 + 0.004
+	_pitch_target = clampf(_pitch_target + kick, -PI / 2.0, PI / 2.0)
+	_yaw_target += randf_range(-kick, kick) * 0.6
+	shake_camera(kick * 1.2, 0.16, 34.0)
+	Game.haptic(0.35 if aiming else 0.55)
+
+
+## Automatic fire, queued bursts and the reload timer. Held-down fire lives
+## here rather than in the input handler because "still holding" is a state,
+## not an event.
+func _update_weapon(delta: float) -> void:
+	if _reload_left > 0.0:
+		_reload_left = maxf(0.0, _reload_left - delta)
+		if _reload_left <= 0.0:
+			Game.reload_weapon(_reload_weapon)
+			_reload_weapon = ""
+		return
+
+	if _burst_left > 0 and _weapon_cd <= 0.0:
+		if Game.rounds_loaded(_burst_weapon) > 0:
+			_fire_shot(_burst_weapon)
+			_burst_left -= 1
+		else:
+			_burst_left = 0
+		return
+
+	if Game.ui_open != "" or not Input.is_action_pressed("attack"):
+		return
+	var held := Game.active_tool()
+	if not Game.is_ranged(held) or Game.fire_mode(held) != "auto":
+		return
+	if Game.rounds_loaded(held) > 0:
+		_fire_shot(held)
+
+
+## Starts a reload. The weapon is out of action for its own reload time, which
+## is what makes running dry in the open a mistake rather than an inconvenience.
+func start_reload() -> bool:
+	var id := Game.active_tool()
+	if not Game.is_ranged(id):
+		Game.notify("Nothing to reload", Color(1.0, 0.63, 0.0))
+		return false
+	if _reload_left > 0.0:
+		return false
+	if Game.rounds_loaded(id) >= Game.magazine_size(id):
+		Game.notify("%s is already loaded" % Game.ITEMS[id].name, Color(1.0, 0.63, 0.0))
+		return false
+	if Game.get_count(str(Game.WEAPONS[id].ammo)) <= 0:
+		Game.notify("Out of %s" % Game.ITEMS[str(Game.WEAPONS[id].ammo)].name,
+			Color(0.9, 0.3, 0.3))
+		return false
+	_reload_weapon = id
+	_reload_left = float(Game.WEAPONS[id].get("reload_time", 2.0))
+	_burst_left = 0
+	Game.notify("Reloading…", Color(0.8, 0.8, 0.85))
+	Game.haptic(0.4)
+	return true
+
+
+## Aiming down the sights. Narrows the view, tightens the shot, halves your
+## speed and — if the sight is a scope — magnifies by whatever level it is set
+## to. Cannot be done while sprinting, because bracing and running are
+## opposites.
+func set_aiming(on: bool) -> void:
+	if on == aiming:
+		return
+	if on and stance == Game.STANCE_SWIM:
+		return
+	aiming = on
+	Game.haptic(0.25)
+
+
+func toggle_aiming() -> void:
+	set_aiming(not aiming)
+
+
+## Holding your breath. Steadies the weapon and quietens you, and spends the
+## same oxygen a dive does — so it is a few seconds of steadiness, not a
+## permanent upgrade.
+func set_holding_breath(on: bool) -> void:
+	if on and float(Game.stats.oxygen) <= 5.0:
+		Game.notify("No breath left to hold", Color(1.0, 0.63, 0.0))
+		return
+	if holding_breath == on:
+		return
+	holding_breath = on
+	if on:
+		Game.notify("Holding breath", Color(0.7, 0.85, 1.0))
+
+
+## The melee button: a bash with whatever is in your hands. Held down it
+## chains into a combo, each swing landing harder than the last.
+func melee_strike() -> bool:
+	if _weapon_cd > 0.0 or _reload_left > 0.0:
+		return false
+	var held := Game.active_tool()
+	# A real melee weapon swings as itself; anything else is a bash
+	if Game.WEAPONS.has(held) and not Game.is_ranged(held):
+		_fire_shot(held)
+		_advance_combo()
+		return true
+
+	_weapon_cd = Game.MELEE_BASH_COOLDOWN
+	var step := _advance_combo()
+	var damage: float = Game.MELEE_BASH_DAMAGE * (1.0 + Game.MELEE_COMBO_GAIN * float(step))
+	var hit := _camera_ray(Game.MELEE_BASH_RANGE, 2 | 4 | 8 | Game.LAYER_FLOOR)
+	Sfx.play("hit")
+	Game.haptic(0.5 + 0.15 * float(step))
+	shake_camera(0.012 * (1.0 + float(step)), 0.14, 30.0)
+	if hit.is_empty():
+		return true
+	var obj: Object = hit.collider
+	if obj.has_method("npc_take_damage"):
+		obj.npc_take_damage(damage)
+		_spawn_hit_particles(hit.position, Color(0.8, 0.2, 0.2))
+	elif obj.has_method("take_hit"):
+		obj.take_hit(damage * 0.3, global_position)
+		_spawn_hit_particles(hit.position, Color(0.85, 0.8, 0.6))
+	elif obj.has_method("hit_harvest"):
+		obj.hit_harvest("", hit.position)
+	return true
+
+
+## Moves the combo along, or restarts it if the chain was left too long.
+## Returns which step of the chain this swing is, counting from zero.
+func _advance_combo() -> int:
+	var now: float = world.clock if world != null else 0.0
+	if now - _combo_at > Game.MELEE_COMBO_WINDOW:
+		_combo_step = 0
+	else:
+		_combo_step = (_combo_step + 1) % Game.MELEE_COMBO_STEPS
+	_combo_at = now
+	return _combo_step
+
+
+## Reads out what you are holding. Long-pressed on the inspect button, and it
+## is the only place the magazine, the fire mode and the condition are all
+## visible at once.
+func inspect_held() -> void:
+	var id := Game.active_tool()
+	if id == "":
+		Game.notify("Empty hands", Color(1.0, 0.63, 0.0))
+		return
+	Game.notify(Game.weapon_summary(id), Color(0.8, 0.88, 1.0))
 
 
 ## Applies one shot's worth of damage to whatever it landed on.
@@ -1179,8 +1412,66 @@ func _use_explosive(id: String) -> void:
 		world.spawn_explosive(id, start, forward * float(data.speed) + Vector3.UP * 2.0)
 		Game.notify("%s thrown" % Game.ITEMS[id].name, Color(1.0, 0.63, 0.0))
 
+	_last_grenade = id
 	_consume_from_belt(id)
 	Sfx.play("build")
+
+
+## Quick throw: sends the last thing you threw, wherever it is in your pockets,
+## without having to find it on the belt first. Double-tapping the screen runs
+## this — the whole point is that it costs no time.
+func _throw_last_grenade() -> bool:
+	var id := _last_grenade
+	# Nothing thrown yet this life: fall back to whatever you are holding, and
+	# failing that the cheapest thing you have.
+	if id == "" or Game.get_count(id) <= 0:
+		id = ""
+		var held := Game.active_tool()
+		if Game.EXPLOSIVES.has(held) and Game.get_count(held) > 0:
+			id = held
+		else:
+			for candidate in Game.EXPLOSIVES:
+				if str(Game.EXPLOSIVES[candidate].mode) == "throw" \
+						and Game.get_count(candidate) > 0:
+					id = candidate
+					break
+	if id == "":
+		Game.notify("Nothing to throw", Color(1.0, 0.63, 0.0))
+		return false
+	_use_explosive(id)
+	return true
+
+
+## The arc a thrown charge would follow from where you are aiming now, as a
+## list of world points. Stepped with the same gravity and speed the explosive
+## itself uses, so the line is a prediction and not a decoration.
+func grenade_arc(id: String, steps: int = 26, step: float = 0.09) -> PackedVector3Array:
+	var out := PackedVector3Array()
+	if not Game.EXPLOSIVES.has(id):
+		return out
+	var data: Dictionary = Game.EXPLOSIVES[id]
+	if str(data.mode) != "throw":
+		return out
+	var forward := -camera.global_transform.basis.z
+	var pos := camera.global_position + forward * 0.8
+	var vel := forward * float(data.speed) + Vector3.UP * 2.0
+	var gravity := float(data.get("gravity", 14.0))
+	var space := get_world_3d().direct_space_state
+
+	out.append(pos)
+	for i in steps:
+		var next := pos + vel * step
+		vel.y -= gravity * step
+		# Stop the line where the throw would actually land
+		if space != null:
+			var hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+				pos, next, 1 | 2 | Game.LAYER_FLOOR, [get_rid()]))
+			if not hit.is_empty():
+				out.append(hit.position)
+				break
+		out.append(next)
+		pos = next
+	return out
 
 
 func _fire_rocket() -> void:

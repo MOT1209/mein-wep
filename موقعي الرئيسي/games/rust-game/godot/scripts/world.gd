@@ -1163,6 +1163,9 @@ func save_game() -> void:
 			"belt": Game.belt,
 			"worn": Game.worn,
 			"wear": Game.tool_wear,
+			"loaded": Game.loaded,
+			"fire_modes": Game.fire_modes,
+			"scopes": Game.scope_levels,
 		},
 		"time": Game.day_time,
 		"settings": Game.settings,
@@ -1266,6 +1269,31 @@ func load_game() -> void:
 			# Only re-equip pieces that still exist and still fit that slot
 			if Game.ARMOUR.has(piece) and str(Game.ARMOUR[piece].slot) == str(slot):
 				Game.worn[slot] = piece
+	# A weapon keeps what was in its magazine, the mode it was set to and the
+	# magnification its sight was on. Each is clamped to what the weapon can
+	# actually hold, so a rebalance never leaves a rifle with 40 rounds in a
+	# 30-round magazine.
+	if p.has("loaded") and p.loaded is Dictionary:
+		Game.loaded = {}
+		for id in p.loaded:
+			if Game.is_ranged(str(id)):
+				Game.loaded[str(id)] = clampi(
+					int(p.loaded[id]), 0, Game.magazine_size(str(id)))
+	if p.has("fire_modes") and p.fire_modes is Dictionary:
+		Game.fire_modes = {}
+		for id in p.fire_modes:
+			var modes := Game.fire_mode_list(str(id))
+			if Game.WEAPONS.has(str(id)):
+				Game.fire_modes[str(id)] = clampi(
+					int(p.fire_modes[id]), 0, modes.size() - 1)
+	if p.has("scopes") and p.scopes is Dictionary:
+		Game.scope_levels = {}
+		for id in p.scopes:
+			var levels := Game.scope_list(str(id))
+			if levels.size() > 1:
+				Game.scope_levels[str(id)] = clampi(
+					int(p.scopes[id]), 0, levels.size() - 1)
+
 	if p.has("wear") and p.wear is Dictionary:
 		Game.tool_wear = {}
 		for id in p.wear:
