@@ -150,10 +150,11 @@ static func _hull_points(shape: String, size: Vector3) -> PackedVector3Array:
 		Vector3(-hx, hy, hz), Vector3(hx, hy, hz)])
 
 
-## The same solids as triangle lists, so the drawn mesh and the collision
-## hull are generated from one set of corners and cannot drift apart.
-static func _hull_faces(shape: String, size: Vector3) -> Array:
-	var p := _hull_points(shape, size)
+## Which corners of `_hull_points` form each triangle of the surface. Indices
+## only — the corners themselves depend on the piece's size, the faces joining
+## them do not. Winding is not trusted here: `_solid_mesh` turns any face it
+## finds pointing inwards, so these only have to name the right three corners.
+static func _hull_faces(shape: String) -> Array:
 	if shape == "triangle":
 		# 0,1,2 = bottom face; 3,4,5 = the same corners on top
 		return [[0, 2, 1], [3, 4, 5],
@@ -182,7 +183,7 @@ static func _solid_mesh(shape: String, size: Vector3, mat: StandardMaterial3D) -
 
 	var verts := PackedVector3Array()
 	var normals := PackedVector3Array()
-	for face in _hull_faces(shape, size):
+	for face in _hull_faces(shape):
 		var a: Vector3 = points[face[0]]
 		var b: Vector3 = points[face[1]]
 		var c: Vector3 = points[face[2]]
