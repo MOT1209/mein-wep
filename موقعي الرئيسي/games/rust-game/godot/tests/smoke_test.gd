@@ -1502,28 +1502,138 @@ func _run_tests() -> void:
 	_check(touch != null, "touch control layer exists")
 	_check(not touch.visible or game.touch_ui,
 		"touch controls stay hidden unless a touchscreen was detected")
-	var actions := []
-	for spec in touch.PAD_BUTTONS:
-		actions.append(spec.action)
-	for needed in ["attack", "jump", "interact", "inventory"]:
-		_check(needed in actions, "touch pad has a %s button" % needed)
-		_check(InputMap.has_action(needed), "'%s' is a real input action" % needed)
+	# Every button declares a label and a cluster, and every input action it
+	# drives is a real one — a typo here is a control that silently does
+	# nothing on a device with no keyboard to fall back on.
+	var ids := {}
+	for spec in touch.BUTTONS:
+		_check(not ids.has(str(spec.id)), "button id '%s' is unique" % str(spec.id))
+		ids[str(spec.id)] = true
+		_check(str(spec.get("label", "")) != "", "'%s' has a caption" % str(spec.id))
+		if spec.has("press"):
+			_check(InputMap.has_action(str(spec.press)),
+				"'%s' drives the real action '%s'" % [str(spec.id), str(spec.press)])
+	for needed in ["fire", "jump", "interact", "inventory", "reload", "aim",
+			"crouch", "prone", "melee", "build"]:
+		_check(ids.has(needed), "the touch layer has a %s button" % needed)
 
 	hud.set_touch_ui(true)
 	_check(touch.visible, "touch controls appear once enabled")
 	_check(Input.mouse_mode == Input.MOUSE_MODE_VISIBLE,
 		"the mouse is never captured in touch mode")
 	touch._layout()
-	_check(touch._button_rects.size() == touch.PAD_BUTTONS.size(),
-		"every pad button got a hit rect")
 	var vp_rect := Rect2(Vector2.ZERO, touch.get_viewport_rect().size)
-	var stick_ok: bool = touch._stick_centre.x < vp_rect.size.x * 0.5
-	_check(stick_ok, "the joystick sits on the left half of the screen")
-	var pad_right := true
+	_check(touch._button_rects.size() > 0, "the layout produced hit rects")
+	_check(touch._stick_centre.x < vp_rect.size.x * 0.5,
+		"the joystick sits on the left half of the screen")
+
+	# No button is ever below the size a thumb can find, whatever the scale
+	game.set_setting("button_scale", 0.7)
+	touch._layout()
+	var smallest := 9999.0
 	for entry in touch._button_rects:
-		if entry.rect.get_center().x < vp_rect.size.x * 0.5:
-			pad_right = false
-	_check(pad_right, "the action pad sits on the right half of the screen")
+		smallest = minf(smallest, float(entry.size))
+	_check(smallest >= touch.MIN_BUTTON,
+		"at the smallest scale no button is under %.0fpx (%.0f)"
+			% [touch.MIN_BUTTON, smallest])
+	game.set_setting("button_scale", 1.6)
+	touch._layout()
+	var biggest := 0.0
+	for entry in touch._button_rects:
+		biggest = maxf(biggest, float(entry.size))
+	_check(biggest > smallest, "and the scale setting really resizes them")
+	game.reset_settings()
+	touch._layout()
+
+	# No two buttons may overlap and none may hang off the screen — checked at
+	# every scale, because the grid step and the button size are separate
+	# numbers and the case where they disagree is the largest one.
+	var span: Array = game.SETTINGS_RANGE["button_scale"]
+	for probe in [float(span[0]), 1.0, float(span[1])]:
+		game.set_setting("button_scale", probe)
+		touch._layout()
+		var clashes := []
+		for i in touch._button_rects.size():
+			for j in range(i + 1, touch._button_rects.size()):
+				var rect_a: Rect2 = touch._button_rects[i].rect
+				var rect_b: Rect2 = touch._button_rects[j].rect
+				if rect_a.intersects(rect_b):
+					clashes.append("%s/%s" % [str(touch._button_rects[i].spec.id),
+						str(touch._button_rects[j].spec.id)])
+		_check(clashes.is_empty(),
+			"at %.1fx scale no two buttons overlap %s" % [probe, str(clashes)])
+		var off_screen := []
+		for entry in touch._button_rects:
+			if not vp_rect.encloses(entry.rect):
+				off_screen.append(str(entry.spec.id))
+		_check(off_screen.is_empty(),
+			"at %.1fx scale every button is on screen %s" % [probe, str(off_screen)])
+	game.reset_settings()
+	touch._layout()
+
+	# The camera zone is on the opposite side to the stick, and buttons are
+	# punched out of it
+	_check(touch.in_camera_zone(Vector2(vp_rect.size.x * 0.8, vp_rect.size.y * 0.3)),
+		"the right of the screen is the camera zone")
+	_check(not touch.in_camera_zone(Vector2(vp_rect.size.x * 0.1, vp_rect.size.y * 0.5)),
+		"the left of it is not")
+	var fire_rect: Rect2 = Rect2()
+	for entry in touch._button_rects:
+		if str(entry.spec.id) == "fire":
+			fire_rect = entry.rect
+	_check(not touch.in_camera_zone(fire_rect.get_center()),
+		"and a button sitting inside it is not part of it")
+
+	# Left-handed mirrors the stick as well as the buttons
+	game.set_setting("left_handed", true)
+	touch._layout()
+	_check(touch._stick_centre.x > vp_rect.size.x * 0.5,
+		"left-handed puts the stick on the right")
+	_check(touch.in_camera_zone(Vector2(vp_rect.size.x * 0.15, vp_rect.size.y * 0.3)),
+		"and the camera zone on the left")
+	game.reset_settings()
+	touch._layout()
+
+	# A per-button override moves and resizes just that button
+	var before_rect: Rect2 = Rect2()
+	for entry in touch._button_rects:
+		if str(entry.spec.id) == "jump":
+			before_rect = entry.rect
+	game.set_button_override("jump", 1.5, Vector2(0.0, -40.0))
+	touch._layout()
+	for entry in touch._button_rects:
+		if str(entry.spec.id) == "jump":
+			_check(entry.rect.size.x > before_rect.size.x,
+				"an override makes one button bigger")
+			_check(entry.rect.get_center().y < before_rect.get_center().y,
+				"and moves it where it was asked to go")
+	game.reset_touch_layout()
+	touch._layout()
+
+	# Context sensitivity: the reload button only exists with a gun in hand
+	_clear_pockets(game)
+	game.belt[0] = "hammer"
+	game.selected_belt_slot = 0
+	touch._layout()
+	var visible_ids := {}
+	for entry in touch._button_rects:
+		visible_ids[str(entry.spec.id)] = true
+	_check(not visible_ids.has("reload"),
+		"holding a hammer, there is no reload button")
+	game.inventory["ak47"] = 1
+	game.belt[0] = "ak47"
+	touch._layout()
+	visible_ids.clear()
+	for entry in touch._button_rects:
+		visible_ids[str(entry.spec.id)] = true
+	_check(visible_ids.has("reload") and visible_ids.has("aim"),
+		"holding a rifle, reload and ADS appear")
+	_check(visible_ids.has("fire_mode"), "and so does the fire-mode switch")
+	_check(visible_ids.has("scope"), "and the sight, because the rifle has one")
+	game.belt[0] = "building_plan"
+	game.selected_belt_slot = 0
+	_clear_pockets(game)
+	touch._layout()
 
 	# Deflecting the stick drives the same actions the keyboard uses
 	touch._update_stick(touch._stick_centre + Vector2(touch.STICK_RADIUS, 0))

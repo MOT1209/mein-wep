@@ -1169,6 +1169,7 @@ func save_game() -> void:
 		},
 		"time": Game.day_time,
 		"settings": Game.settings,
+		"touch_layout": Game.touch_layout,
 		"structures": [],
 		"stations": [],
 		"bags": [],
@@ -1306,6 +1307,9 @@ func load_game() -> void:
 	var saved_settings = parsed.get("settings", {})
 	if saved_settings is Dictionary:
 		Game.load_settings(saved_settings)
+	var saved_layout = parsed.get("touch_layout", {})
+	if saved_layout is Dictionary:
+		Game.load_touch_layout(saved_layout)
 
 	for sd in parsed.get("structures", []):
 		if not (sd is Dictionary):

@@ -608,7 +608,59 @@ const SETTINGS_DEFAULTS := {
 	# is exactly what some hands cannot do.
 	"toggle_stance": false,
 	"button_scale": 1.0,
+	# Long-pressing a button names it. Off by default because it is a
+	# teaching aid, not part of the interface.
+	"button_tooltips": false,
+	# Which side of the screen the camera zone and the movement stick are on,
+	# so a left-handed player is not fighting the layout.
+	"left_handed": false,
 }
+
+## Per-button layout overrides, keyed by button id: `{"scale": 1.2,
+## "offset": Vector2}`. Empty means every button sits where the default
+## layout puts it. Saved alongside the settings.
+var touch_layout: Dictionary = {}
+
+
+func button_override(id: String) -> Dictionary:
+	var entry = touch_layout.get(id, {})
+	return entry if entry is Dictionary else {}
+
+
+## Moves or resizes one button. `scale` is on top of the global button scale,
+## so a player can make the one button they keep missing bigger without
+## inflating the rest.
+func set_button_override(id: String, scale: float, offset: Vector2) -> void:
+	touch_layout[id] = {
+		"scale": clampf(scale, 0.6, 2.0),
+		"offset": [offset.x, offset.y],
+	}
+	settings_changed.emit()
+
+
+func reset_touch_layout() -> void:
+	touch_layout.clear()
+	settings_changed.emit()
+
+
+## Restores a saved layout, dropping anything malformed rather than trusting
+## it — a corrupt entry here would put a button off-screen.
+func load_touch_layout(saved: Dictionary) -> void:
+	touch_layout.clear()
+	for id in saved:
+		var entry = saved[id]
+		if not (entry is Dictionary):
+			continue
+		var off = entry.get("offset", [0.0, 0.0])
+		var ox := 0.0
+		var oy := 0.0
+		if off is Array and off.size() == 2:
+			ox = clampf(float(off[0]), -2000.0, 2000.0)
+			oy = clampf(float(off[1]), -2000.0, 2000.0)
+		touch_layout[str(id)] = {
+			"scale": clampf(float(entry.get("scale", 1.0)), 0.6, 2.0),
+			"offset": [ox, oy],
+		}
 
 ## Seconds the field of view takes to reach a new value. Long enough to read
 ## as a movement rather than a jump cut, short enough not to fight the player.
