@@ -53,6 +53,8 @@ var _priv_label: Label
 var _bench_label: Label
 var _cold_label: Label
 var _hotbar_slots: Array = []
+## Every root of the playing interface, hidden while a menu owns the screen.
+var _play_ui: Array = []
 var main_menu: Control
 var _guide_screen: Control
 var _credits_screen: Control
@@ -73,15 +75,28 @@ func _ready() -> void:
 	layer = 1
 	# The HUD drives the pause menu, so it must keep running while paused
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	# Everything that belongs to playing is built first, then snapshotted as
+	# one group. The main menu is a window onto the world rather than a sheet
+	# over it, so unless this group is hidden while a menu owns the screen the
+	# stat bars, the hotbar, the crosshair and the compass all sit on top of
+	# it — fighting the menu's own panels for the same four corners.
 	_build_overlays()
 	_build_stats_panel()
 	_build_crosshair()
 	_build_hotbar()
-	_build_toast()
 	_build_blueprint_indicator()
 	_build_info_panel()
 	_build_privilege_label()
 	_build_hint_label()
+	_build_compass()
+	for c in get_children():
+		_play_ui.append(c)
+
+	# The toast is built after the snapshot on purpose: notifications have to
+	# keep working in the menu, where they are how it answers a press.
+	_build_toast()
+
+	# Menus from here down. None of these belong to the play group.
 	_build_blueprint_menu()
 	_build_pause_menu()
 	_build_start_screen()
@@ -92,7 +107,6 @@ func _ready() -> void:
 	map_ui = MapUiScript.new()
 	map_ui.name = "MapUi"
 	add_child(map_ui)
-	_build_compass()
 
 	Game.detect_touch_ui()
 	touch_controls = TouchControlsScript.new()
@@ -111,6 +125,11 @@ func _ready() -> void:
 	# jump to the left edge and each row reverses. The interface text is
 	# English, so pin the whole tree to left-to-right.
 	force_ltr(self)
+	# The main menu is the one screen written in Arabic, so it asks for the
+	# mirroring back afterwards rather than being exempted from the pass —
+	# anything added to it later is pinned by the pass and re-flipped here, in
+	# that order, instead of quietly keeping whatever the locale happened to be.
+	main_menu.apply_rtl()
 
 	Game.toast.connect(_on_toast)
 	Game.inventory_changed.connect(_refresh_resources)
@@ -789,12 +808,21 @@ func show_credits() -> void:
 # ==================== STATE / FLOW ====================
 
 func show_start_screen() -> void:
+	set_play_ui_visible(false)
 	main_menu.world = world
 	main_menu.open()
 
 
+## Shows or hides the whole playing interface at once.
+func set_play_ui_visible(on: bool) -> void:
+	for c in _play_ui:
+		if is_instance_valid(c):
+			c.visible = on
+
+
 ## Leaves the menu and hands the view back to the player.
 func start_game() -> void:
+	set_play_ui_visible(true)
 	main_menu.close()
 	get_tree().paused = false
 	world.started = true

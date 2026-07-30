@@ -71,6 +71,9 @@ var _dead := false
 var _visual: Node3D  # Blender model, when one exists for this species
 var _mat: StandardMaterial3D  # only set by the primitive fallback
 var _wander_dir := Vector3.ZERO
+## How far a posted guard may drift from where it stands, in metres.
+const PATROL_RADIUS := 6.0
+
 var _wander_timer := 0.0
 ## Seconds left held in a bear trap. Nothing moves while this is running.
 var _snared := 0.0
@@ -395,10 +398,18 @@ func _tracer(from: Vector3, to: Vector3) -> void:
 	tw.tween_callback(mi.queue_free)
 
 
-## Guards drift around their post while nothing is happening.
+## Guards drift around their post while nothing is happening — and only
+## around it. The leash is sized for a chase and is far too loose to describe
+## standing somewhere, so patrolling gets a tether of its own.
 func _patrol(delta: float) -> void:
 	_wander_timer -= delta
-	if _wander_timer <= 0.0:
+	var out := position - home
+	out.y = 0.0
+	if out.length() > PATROL_RADIUS:
+		# Already too far: turn round now rather than at the end of the burst
+		_wander_dir = -out.normalized()
+		_wander_timer = maxf(_wander_timer, 1.0)
+	elif _wander_timer <= 0.0:
 		_wander_timer = randf_range(3.0, 7.0)
 		if randf() < 0.4:
 			_wander_dir = Vector3.ZERO

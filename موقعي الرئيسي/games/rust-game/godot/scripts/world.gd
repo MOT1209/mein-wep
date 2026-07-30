@@ -1254,6 +1254,8 @@ func save_game() -> void:
 			"belt": Game.belt,
 			"worn": Game.worn,
 			"wear": Game.tool_wear,
+			"xp": Game.xp,
+			"level": Game.level,
 			"favourites": Game.favourites,
 			"sort_mode": Game.sort_mode,
 			"loaded": Game.loaded,
@@ -1364,6 +1366,8 @@ func load_game() -> void:
 			# Only re-equip pieces that still exist and still fit that slot
 			if Game.ARMOUR.has(piece) and str(Game.ARMOUR[piece].slot) == str(slot):
 				Game.worn[slot] = piece
+	Game.level = maxi(1, int(p.get("level", 1)))
+	Game.xp = maxi(0, int(p.get("xp", 0)))
 	if p.has("favourites") and p.favourites is Array:
 		Game.favourites = []
 		for id in p.favourites:

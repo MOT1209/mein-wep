@@ -563,6 +563,52 @@ func glass_box(lit: bool = false, corner: int = CORNER) -> StyleBoxFlat:
 	return sb
 
 
+# ==================== PROGRESSION ====================
+
+## Experience, so the profile card has a real level on it rather than a number
+## typed into the interface. Fed by the same `activity` signal the missions
+## read, so everything that already reports what the player did feeds this too
+## without another call site anywhere.
+const XP_FOR := {
+	"harvest_wood": 1, "harvest_stone": 1, "craft": 25, "build": 15,
+	"hunt": 60, "wreck": 120, "smelt": 2, "monument": 150,
+}
+## Experience needed for level N, growing so later levels are real work.
+const XP_BASE := 500
+const XP_GROWTH := 1.18
+
+var xp := 0
+var level := 1
+
+signal levelled_up(to: int)
+
+
+## Experience needed to go from `lvl` to the next one.
+func xp_to_next(lvl: int) -> int:
+	return int(XP_BASE * pow(XP_GROWTH, maxi(0, lvl - 1)))
+
+
+## How far through the current level, 0..1 — the fill of the bar on the card.
+func level_progress() -> float:
+	var need := xp_to_next(level)
+	return clampf(float(xp) / float(maxi(1, need)), 0.0, 1.0)
+
+
+## Awards experience for something the player did, and levels them up as many
+## times as the award earns.
+func award_xp(kind: String, amount: int) -> void:
+	var per := int(XP_FOR.get(kind, 0))
+	if per <= 0 or amount <= 0:
+		return
+	xp += per * amount
+	while xp >= xp_to_next(level):
+		xp -= xp_to_next(level)
+		level += 1
+		levelled_up.emit(level)
+		notify("Level %d" % level, ACCENT)
+		_sfx("upgrade")
+
+
 # ==================== STAMINA ====================
 
 ## Sprinting costs something now. Without it, running is free and the whole
@@ -808,6 +854,9 @@ var ui_open: String = "start"
 
 
 func _ready() -> void:
+	# Experience rides the same reports the missions do, so nothing has to
+	# know that either system exists in order to feed both.
+	activity.connect(award_xp)
 	reset_state()
 
 

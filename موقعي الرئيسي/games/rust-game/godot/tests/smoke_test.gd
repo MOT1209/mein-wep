@@ -837,15 +837,23 @@ func _run_tests() -> void:
 	_check(guards.size() == expected_guards,
 		"every monument is staffed (%d guards, %d monuments)"
 		% [guards.size(), world.rad_zones.size()])
+	# A guard stands on the guard ring and may patrol its own radius around
+	# that spot — no further. Stated from the two constants so tightening
+	# either one cannot leave this asserting something nobody meant.
+	var reach: float = world.GUARD_POST_RADIUS + NpcScript.PATROL_RADIUS + 1.0
 	var posted := true
+	var worst := 0.0
 	for g in guards:
 		var flat := Vector2(g.position.x, g.position.z)
 		var near := false
 		for zone in world.rad_zones:
-			if flat.distance_to(zone) <= world.GUARD_POST_RADIUS + 1.0:
+			var d: float = flat.distance_to(zone)
+			if d <= reach:
 				near = true
+				worst = maxf(worst, d)
 		posted = posted and near
-	_check(posted, "guards stand on the monument they protect")
+	_check(posted, "guards stand on the monument they protect"
+		+ " (furthest %.1fm of %.1fm allowed)" % [worst, reach])
 	_check(float(game.WEAPONS["bow"].range) >= 45.0,
 		"a bow outranges the guards' rifles, so they can be fought")
 
@@ -1078,7 +1086,7 @@ func _run_tests() -> void:
 	game.inventory["sulfur"] = 0
 	game.inventory["charcoal"] = 0
 	big_furnace.interact_station()
-	_check(game.get_count("lgf") == 2, "it refined the oil")
+	_check(game.get_count("lgf") == 2, "it refined the oil (lgf %d, oil left %d, room %d)" % [game.get_count("lgf"), game.get_count("oil"), game.room_for("lgf")])
 	_check(game.get_count("frag") == 40, "and smelted the metal ore in the same pass")
 	_check(game.get_count("sulfur") == 30, "and the sulfur ore, which used to have no step")
 	_check(game.get_count("charcoal") == 35, "burnt wood left charcoal behind")
@@ -1465,10 +1473,15 @@ func _run_tests() -> void:
 	# --- Layout direction. An Arabic Godot install mirrors every container
 	# and anchor unless the UI pins itself, which put the right-anchored
 	# stats panel on the left edge with its rows reversed.
+	# The main menu is the one deliberate exception: it is written in Arabic
+	# and asks for the mirroring back after the pass. Everything else, being
+	# English, must still be pinned.
 	var ltr_violations := []
 	var ltr_stack: Array = [hud]
 	while not ltr_stack.is_empty():
 		var n = ltr_stack.pop_back()
+		if n == hud.main_menu:
+			continue
 		for c in n.get_children():
 			ltr_stack.append(c)
 		if n is Control and (n as Control).layout_direction != Control.LAYOUT_DIRECTION_LTR:
@@ -1476,7 +1489,27 @@ func _run_tests() -> void:
 			# nodes built up front must be pinned.
 			ltr_violations.append(n.name)
 	_check(ltr_violations.is_empty(),
-		"the whole HUD is pinned to left-to-right %s" % str(ltr_violations.slice(0, 5)))
+		"the rest of the HUD is pinned to left-to-right %s"
+			% str(ltr_violations.slice(0, 5)))
+
+	# And the menu is mirrored all the way down, not just at its root — a
+	# child left at the default would face the wrong way on an English install.
+	var rtl_misses := []
+	var rtl_stack: Array = [hud.main_menu]
+	while not rtl_stack.is_empty():
+		var n2 = rtl_stack.pop_back()
+		# One deliberate island: the compass ribbon is bearings and Latin
+		# initials, and mirrored it would draw 330 to the right of 345.
+		if n2 == hud.main_menu._compass_box:
+			continue
+		for c in n2.get_children():
+			rtl_stack.append(c)
+		if n2 is Control and (n2 as Control).layout_direction \
+				!= Control.LAYOUT_DIRECTION_RTL:
+			rtl_misses.append(n2.name)
+	_check(rtl_misses.is_empty(),
+		"the Arabic menu is mirrored right-to-left throughout %s"
+			% str(rtl_misses.slice(0, 5)))
 
 	# --- Compact slot sizing, measured after layout rather than trusted
 	# from the setting: a 256px source icon silently became the minimum
@@ -2798,14 +2831,20 @@ func _test_main_menu(game, world) -> void:
 	_check(menu._buttons.size() == menu.ENTRIES.size(),
 		"every declared entry got a button")
 	for entry in menu.ENTRIES:
-		_check(str(entry.label) != "" and str(entry.glyph) != "",
-			"'%s' has a label and a glyph" % str(entry.id))
+		_check(str(entry.title) != "" and str(entry.glyph) != "",
+			"'%s' has a title and a glyph" % str(entry.id))
+		# Written in Arabic, like the rest of this screen. Checked by codepoint
+		# rather than by eye so an English string cannot creep back in.
+		var arabic := false
+		for ch in str(entry.title):
+			if ch.unicode_at(0) >= 0x0600 and ch.unicode_at(0) <= 0x06FF:
+				arabic = true
+		_check(arabic, "'%s' is titled in Arabic" % str(entry.id))
 	var ids := []
 	for entry in menu.ENTRIES:
 		ids.append(str(entry.id))
-	for offered in ["continue", "play", "servers", "character", "inventory",
-			"guide", "battle_pass", "events", "store", "controls", "credits",
-			"exit"]:
+	for offered in ["play", "servers", "character", "inventory",
+			"guide", "events", "store", "controls", "credits", "exit"]:
 		_check(ids.has(offered), "the menu offers %s" % offered)
 
 	# Every entry declares whether it is built. The ones that are not are the
@@ -2817,13 +2856,29 @@ func _test_main_menu(game, world) -> void:
 			"'%s' explains itself" % str(entry.id))
 		if not bool(entry.get("real", true)):
 			unbuilt.append(str(entry.id))
-	_check(unbuilt.has("store") and unbuilt.has("battle_pass")
-		and unbuilt.has("servers"),
-		"the storefront, the season and the server list are marked unbuilt %s"
-			% str(unbuilt))
-	for built in ["continue", "play", "character", "inventory", "guide",
+	_check(unbuilt.has("store") and unbuilt.has("servers"),
+		"the storefront and the server list are marked unbuilt %s" % str(unbuilt))
+	for built in ["play", "character", "inventory", "guide",
 			"events", "controls", "credits", "exit"]:
 		_check(not unbuilt.has(built), "%s is a real screen" % built)
+
+	# The playing interface has to be out of the way while the menu is up. The
+	# old start screen was an opaque black sheet that hid it by accident; this
+	# menu is see-through, so the stat bars, hotbar, crosshair and compass
+	# would otherwise sit on top of the menu's own panels in the same corners.
+	world.hud.show_start_screen()
+	var showing := []
+	for c in world.hud._play_ui:
+		if is_instance_valid(c) and c.visible:
+			showing.append(c.name)
+	_check(world.hud._play_ui.size() >= 8,
+		"the playing interface is grouped (%d roots)" % world.hud._play_ui.size())
+	_check(showing.is_empty(),
+		"and none of it is drawn over the menu %s" % str(showing))
+	# Except the toast, which is how the menu answers a press
+	_check(world.hud._toast_label != null
+		and not world.hud._play_ui.has(world.hud._toast_label.get_parent()),
+		"the toast is deliberately left out of that group")
 
 	# The rig pans and breathes rather than sitting still
 	menu.world = world
@@ -2854,13 +2909,17 @@ func _test_main_menu(game, world) -> void:
 	_check(attrs != null and attrs.dof_blur_far_enabled,
 		"the far distance is softened")
 
-	# The status line reports what is true and nothing that is not
-	menu._refresh_status()
-	_check(menu._status.text.contains("v"), "the version is shown")
+	# The menu reports what is true and nothing that is not
+	menu._refresh_clock()
+	menu._refresh_live()
+	_check(menu._version_label.text.contains(menu._version()),
+		"the version is shown (%s)" % menu._version_label.text)
+	_check(menu._clock_label.text.contains(":"),
+		"the clock reads a time (%s)" % menu._clock_label.text)
 	_check(menu._weather_label.text.contains(world.weather.state_name()),
 		"and the real weather (%s)" % menu._weather_label.text)
 	for invented in ["Ping", "ms", "EU-West", "Region"]:
-		_check(not menu._status.text.contains(invented)
+		_check(not menu._version_label.text.contains(invented)
 			and not menu._weather_label.text.contains(invented),
 			"and nothing about a server, because there is no server (%s)" % invented)
 
@@ -2900,6 +2959,12 @@ func _test_main_menu(game, world) -> void:
 	_check(not menu.visible, "starting the game closes the menu")
 	_check(game.ui_open == "" and world.started, "and hands control over")
 	_check(world.player.camera.current, "and the view goes back to the player")
+	var hidden := []
+	for c in world.hud._play_ui:
+		if is_instance_valid(c) and not c.visible:
+			hidden.append(c.name)
+	_check(hidden.is_empty(),
+		"and the playing interface comes back %s" % str(hidden))
 
 
 # ==================== ROADS AND ROADSIDE ====================
