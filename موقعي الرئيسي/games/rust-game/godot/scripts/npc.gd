@@ -153,7 +153,13 @@ func _physics_process(delta: float) -> void:
 	# nothing hunts a player who has not started playing: everything falls
 	# back to wandering.
 	if not world.started:
-		_passive_ai(world.player, 999.0, delta)
+		# A posted guard keeps its post: patrolling drifts around home, where
+		# free wandering walked them off the monument they are there to
+		# protect while the player sat in the menu.
+		if float(_cfg.get("leash", 0.0)) > 0.0:
+			_patrol(delta)
+		else:
+			_passive_ai(world.player, 999.0, delta)
 		position.y = world.ground_height_at(position.x, position.z)
 		return
 	_attack_cd = maxf(0.0, _attack_cd - delta)
@@ -509,6 +515,7 @@ func _die(credit_player: bool = true) -> void:
 			total += int(loot[id])
 		Game.notify("%s killed! +%d resources" % [npc_type.capitalize(), total],
 			Color(0.9, 0.3, 0.3))
+		Game.activity.emit("hunt", 1)
 
 	# Everything that dies out here leaves a gap in the population, and the
 	# world fills it again in its own time — slower the harder that species

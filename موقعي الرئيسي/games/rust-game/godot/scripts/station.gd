@@ -284,6 +284,7 @@ func _smelt() -> void:
 			# Burnt fuel leaves charcoal behind, which gunpowder needs
 			charcoal += burnt
 		Game.add_item(recipe.output, batches)
+		Game.activity.emit("smelt", used)
 		done.append(str(recipe.verb) % [used, batches])
 
 	if charcoal > 0:

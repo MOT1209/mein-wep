@@ -274,6 +274,7 @@ func place_structure() -> void:
 		"kind": "place", "type": bp, "pos": _ghost_pos, "rot": _ghost_rot,
 		"tier": s.tier, "soft": s.soft_normal,
 	})
+	Game.activity.emit("build", 1)
 
 	# Grow-in placement animation
 	s.scale = Vector3(0.1, 0.1, 0.1)

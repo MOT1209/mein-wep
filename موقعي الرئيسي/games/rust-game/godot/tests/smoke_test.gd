@@ -1391,7 +1391,11 @@ func _run_tests() -> void:
 	# --- Stats panel: every label must fit its slot and stay on screen.
 	# The six-digit resource counts were primed several frames ago so the
 	# containers have already re-laid out at their widest.
-	_check(hud._bar_fills.size() == 5, "all five survival stats have a row")
+	_check(hud._bar_fills.size() == hud.BAR_DEFS.size(),
+		"every survival stat has a row (%d)" % hud._bar_fills.size())
+	for needed in ["health", "hunger", "thirst", "temperature", "radiation",
+			"stamina", "oxygen"]:
+		_check(hud._bar_fills.has(needed), "including %s" % needed)
 	hud._process(0.016)
 
 	var clipped := []
@@ -2799,11 +2803,27 @@ func _test_main_menu(game, world) -> void:
 	var ids := []
 	for entry in menu.ENTRIES:
 		ids.append(str(entry.id))
-	for real in ["play", "controls", "guide", "credits", "exit"]:
-		_check(ids.has(real), "the menu offers %s" % real)
-	for fake in ["store", "battle_pass", "events", "servers", "inventory"]:
-		_check(not ids.has(fake),
-			"and does not offer '%s', which this game has no such thing as" % fake)
+	for offered in ["continue", "play", "servers", "character", "inventory",
+			"guide", "battle_pass", "events", "store", "controls", "credits",
+			"exit"]:
+		_check(ids.has(offered), "the menu offers %s" % offered)
+
+	# Every entry declares whether it is built. The ones that are not are the
+	# ones with no system behind them, and pressing one has to say so rather
+	# than open an empty screen dressed as a feature.
+	var unbuilt := []
+	for entry in menu.ENTRIES:
+		_check(str(entry.get("desc", "")) != "",
+			"'%s' explains itself" % str(entry.id))
+		if not bool(entry.get("real", true)):
+			unbuilt.append(str(entry.id))
+	_check(unbuilt.has("store") and unbuilt.has("battle_pass")
+		and unbuilt.has("servers"),
+		"the storefront, the season and the server list are marked unbuilt %s"
+			% str(unbuilt))
+	for built in ["continue", "play", "character", "inventory", "guide",
+			"events", "controls", "credits", "exit"]:
+		_check(not unbuilt.has(built), "%s is a real screen" % built)
 
 	# The rig pans and breathes rather than sitting still
 	menu.world = world

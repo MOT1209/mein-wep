@@ -36,15 +36,44 @@ const HOVER_FADE := 0.3
 ## News cards rotate on this cadence.
 const NEWS_PERIOD := 10.0
 
+## What the stock panel lists: the ones the spec asks for, mapped onto the ids
+## this game actually uses. "Metal Ore" is `iron` here, and food is the cooked
+## meat the survival system already counts.
+const RESOURCES := ["wood", "stone", "iron", "sulfur", "scrap", "cloth",
+	"leather", "cooked_meat"]
+
 ## The buttons, in order. Only entries that actually do something are here:
 ## a Store or a Battle Pass button in a game with no storefront and no season
 ## would be a lie told in the most prominent place in the product.
+## `real` marks an entry that opens something this build actually has. The
+## rest are on the roadmap, and pressing one says so in as many words rather
+## than opening an empty screen dressed up as a feature — a button that
+## pretends is worse than one that admits.
 const ENTRIES := [
-	{"id": "play", "label": "Continue Play", "glyph": "▶"},
-	{"id": "controls", "label": "Controls & Camera", "glyph": "◎"},
-	{"id": "guide", "label": "Guide", "glyph": "❖"},
-	{"id": "credits", "label": "Credits", "glyph": "✎"},
-	{"id": "exit", "label": "Exit", "glyph": "⏻"},
+	{"id": "continue", "label": "Continue", "glyph": "▶",
+		"desc": "Return to your world", "real": true},
+	{"id": "play", "label": "Play", "glyph": "✦",
+		"desc": "Start over on a fresh map", "real": true},
+	{"id": "servers", "label": "Servers", "glyph": "⇄",
+		"desc": "Single-player build — no servers", "real": false},
+	{"id": "character", "label": "Character", "glyph": "☗",
+		"desc": "Loadout, armour and condition", "real": true},
+	{"id": "inventory", "label": "Inventory", "glyph": "▣",
+		"desc": "What you are carrying", "real": true},
+	{"id": "guide", "label": "Crafting Guide", "glyph": "❖",
+		"desc": "Controls and how to survive", "real": true},
+	{"id": "battle_pass", "label": "Battle Pass", "glyph": "★",
+		"desc": "No seasons in this build", "real": false},
+	{"id": "events", "label": "Events", "glyph": "◈",
+		"desc": "Weather and daily missions", "real": true},
+	{"id": "store", "label": "Store", "glyph": "⬤",
+		"desc": "No storefront in this build", "real": false},
+	{"id": "controls", "label": "Settings", "glyph": "◎",
+		"desc": "Controls, camera and touch", "real": true},
+	{"id": "credits", "label": "Credits", "glyph": "✎",
+		"desc": "Who and what built this", "real": true},
+	{"id": "exit", "label": "Exit", "glyph": "⏻",
+		"desc": "Save and quit", "real": true},
 ]
 
 var hud: CanvasLayer
@@ -62,6 +91,12 @@ var _news: Label
 var _news_index := 0
 var _news_left := 0.0
 var _news_cards: Array = []
+var _compass: Label
+var _conditions: Label
+var _vitals: Dictionary = {}
+var _resource_labels: Dictionary = {}
+var _mission_box: VBoxContainer
+var _mission_signature := ""
 
 
 func _ready() -> void:
@@ -125,6 +160,7 @@ func _process(delta: float) -> void:
 	_animate_logo()
 	_animate_news(delta)
 	_refresh_status()
+	_refresh_live()
 
 
 ## The pan and the breath. Both are sine waves rather than tweens so they never
@@ -149,7 +185,7 @@ func _animate_logo() -> void:
 	if world != null:
 		night = clampf(1.0 - world.sun_strength(), 0.25, 1.0)
 	_logo.add_theme_color_override("font_color",
-		Color(0.62, 0.86, 0.95).lerp(Color(0.95, 0.99, 1.0), pulse * night))
+		Game.ACCENT_DIM.lerp(Game.ACCENT, pulse * night))
 
 
 # ==================== UI ====================
@@ -164,6 +200,10 @@ func _build() -> void:
 
 	_build_logo()
 	_build_panel()
+	_build_compass()
+	_build_vitals()
+	_build_resources()
+	_build_missions()
 	_build_status()
 	_build_news()
 
@@ -191,7 +231,7 @@ func _build_logo() -> void:
 	var sub := Label.new()
 	sub.text = "GODOT EDITION"
 	sub.add_theme_font_size_override("font_size", 15)
-	sub.add_theme_color_override("font_color", Color(0.75, 0.78, 0.82, 0.8))
+	sub.add_theme_color_override("font_color", Game.TEXT_DIM)
 	sub.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(sub)
 
@@ -226,11 +266,16 @@ func _build_panel() -> void:
 	for entry in ENTRIES:
 		var b := Button.new()
 		b.text = "  %s   %s" % [str(entry.glyph), str(entry.label)]
+		b.tooltip_text = str(entry.get("desc", ""))
 		b.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		b.custom_minimum_size = Vector2(PANEL_WIDTH - 20.0, BUTTON_HEIGHT)
 		b.focus_mode = Control.FOCUS_NONE
-		b.add_theme_font_size_override("font_size", 16)
+		b.add_theme_font_size_override("font_size", 15)
 		_style_button(b, false)
+		# Greyed rather than hidden: the roadmap is visible, and pressing one
+		# tells you plainly that it is not built yet.
+		if not bool(entry.get("real", true)):
+			b.modulate.a = 0.45
 		b.pressed.connect(_on_entry.bind(str(entry.id), b))
 		b.mouse_entered.connect(_on_hover.bind(b, true))
 		b.mouse_exited.connect(_on_hover.bind(b, false))
@@ -238,16 +283,11 @@ func _build_panel() -> void:
 		_buttons.append(b)
 
 
-func _glass(panel: PanelContainer, tint: Color) -> void:
-	var sb := StyleBoxFlat.new()
-	sb.bg_color = tint
-	sb.set_corner_radius_all(24)
-	sb.set_border_width_all(1)
-	sb.border_color = Color(1, 1, 1, 0.14)
-	sb.set_content_margin_all(14)
-	sb.shadow_color = Color(0, 0, 0, 0.45)
-	sb.shadow_size = 10
-	panel.add_theme_stylebox_override("panel", sb)
+## Every plate on this screen comes from the same place, so the whole product
+## re-skins from Game's theme block rather than from colour literals scattered
+## through the menu.
+func _glass(panel: PanelContainer, _tint: Color = Color.TRANSPARENT) -> void:
+	panel.add_theme_stylebox_override("panel", Game.glass_box())
 
 
 func _style_button(b: Button, lit: bool) -> void:
@@ -287,7 +327,7 @@ func _on_entry(id: String, b: Button) -> void:
 	Sfx.play("ui_click")
 
 	match id:
-		"play":
+		"continue", "play":
 			hud.start_game()
 		"controls":
 			hud.settings_ui.open()
@@ -295,9 +335,33 @@ func _on_entry(id: String, b: Button) -> void:
 			hud.show_guide()
 		"credits":
 			hud.show_credits()
+		"character", "inventory":
+			# Both open the one screen that holds a loadout and what is worn
+			hud.start_game()
+			hud.toggle_inventory()
+		"events":
+			var lines := "Weather: %s
+
+" % world.weather.state_name()
+			for mission in world.missions.active:
+				lines += "%s — %d / %d%s
+" % [mission.name, mission.progress,
+					mission.target, "  ✔" if mission.done else ""]
+			Game.notify(lines.strip_edges(), Game.ACCENT)
 		"exit":
 			world.save_game()
 			get_tree().quit()
+		_:
+			# Servers, Battle Pass, Store: named on the roadmap, not built.
+			Game.notify("%s is not in this build" % _label_of(id),
+				Color(1.0, 0.63, 0.0))
+
+
+func _label_of(id: String) -> String:
+	for entry in ENTRIES:
+		if str(entry.id) == id:
+			return str(entry.label)
+	return id
 
 
 ## Bottom left: what is true about this build and this world, and nothing that
@@ -324,7 +388,7 @@ func _build_status() -> void:
 
 	_status = Label.new()
 	_status.add_theme_font_size_override("font_size", 13)
-	_status.add_theme_color_override("font_color", Color(0.78, 0.82, 0.86))
+	_status.add_theme_color_override("font_color", Game.TEXT_DIM)
 	_status.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	column.add_child(_status)
 
@@ -382,7 +446,7 @@ func _build_news() -> void:
 
 	_news = Label.new()
 	_news.add_theme_font_size_override("font_size", 14)
-	_news.add_theme_color_override("font_color", Color(0.86, 0.88, 0.92))
+	_news.add_theme_color_override("font_color", Game.TEXT)
 	_news.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_news.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_news.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -451,3 +515,250 @@ func close() -> void:
 		_saved_camera.current = true
 	elif world.player != null:
 		world.player.camera.current = true
+
+## Top centre: heading, clock, weather, temperature and wind. Every figure is
+## read live from a system that already runs — the compass from the rig's own
+## yaw, the rest from the day/night clock, the weather and the survival stats.
+func _build_compass() -> void:
+	var holder := MarginContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.add_theme_constant_override("margin_top", 26)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(holder)
+
+	var panel := PanelContainer.new()
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_glass(panel)
+	holder.add_child(panel)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 4)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(column)
+
+	_compass = Label.new()
+	_compass.add_theme_font_size_override("font_size", 22)
+	_compass.add_theme_color_override("font_color", Game.ACCENT)
+	_compass.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_compass.custom_minimum_size = Vector2(230, 0)
+	_compass.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(_compass)
+
+	_conditions = Label.new()
+	_conditions.add_theme_font_size_override("font_size", 12)
+	_conditions.add_theme_color_override("font_color", Game.TEXT_DIM)
+	_conditions.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_conditions.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	column.add_child(_conditions)
+
+
+## Right side: the survival bars, built from the same BAR_DEFS the in-game HUD
+## uses — so the menu can never show a stat the HUD does not, or miss one it
+## has, however either changes.
+func _build_vitals() -> void:
+	var holder := MarginContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.add_theme_constant_override("margin_right", 40)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(holder)
+
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(240, 0)
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_END
+	panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_glass(panel)
+	holder.add_child(panel)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 5)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(column)
+	column.add_child(_heading("CONDITION"))
+
+	for def in hud.BAR_DEFS:
+		var stat := str(def[0])
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+		var name_label := Label.new()
+		name_label.text = stat.capitalize()
+		name_label.custom_minimum_size = Vector2(88, 0)
+		name_label.add_theme_font_size_override("font_size", 11)
+		name_label.add_theme_color_override("font_color", Game.TEXT_DIM)
+		row.add_child(name_label)
+
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.custom_minimum_size = Vector2(84, 10)
+		bar.max_value = 100.0
+		hud._style_progress_bar(bar, def[1])
+		row.add_child(bar)
+
+		var value := Label.new()
+		value.custom_minimum_size = Vector2(34, 0)
+		value.add_theme_font_size_override("font_size", 11)
+		value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		value.add_theme_color_override("font_color", Game.TEXT)
+		row.add_child(value)
+
+		column.add_child(row)
+		_vitals[stat] = {"bar": bar, "value": value, "colour": def[1]}
+
+
+## Top right: what you are carrying, live.
+func _build_resources() -> void:
+	var holder := MarginContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.add_theme_constant_override("margin_right", 40)
+	holder.add_theme_constant_override("margin_top", 34)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(holder)
+
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(240, 0)
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_END
+	panel.size_flags_vertical = Control.SIZE_SHRINK_BEGIN
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_glass(panel)
+	holder.add_child(panel)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 3)
+	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(column)
+	column.add_child(_heading("STOCK"))
+
+	for id in RESOURCES:
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		var name_label := Label.new()
+		name_label.text = str(Game.ITEMS.get(id, {}).get("name", id))
+		name_label.custom_minimum_size = Vector2(148, 0)
+		name_label.add_theme_font_size_override("font_size", 11)
+		name_label.add_theme_color_override("font_color", Game.TEXT_DIM)
+		row.add_child(name_label)
+		var count := Label.new()
+		count.custom_minimum_size = Vector2(58, 0)
+		count.add_theme_font_size_override("font_size", 11)
+		count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		count.add_theme_color_override("font_color", Game.TEXT)
+		row.add_child(count)
+		column.add_child(row)
+		_resource_labels[id] = count
+
+
+## Bottom right: the day's three jobs and how they are going.
+func _build_missions() -> void:
+	var holder := MarginContainer.new()
+	holder.set_anchors_preset(Control.PRESET_FULL_RECT)
+	holder.add_theme_constant_override("margin_right", 40)
+	holder.add_theme_constant_override("margin_bottom", 30)
+	holder.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(holder)
+
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(290, 0)
+	panel.size_flags_horizontal = Control.SIZE_SHRINK_END
+	panel.size_flags_vertical = Control.SIZE_SHRINK_END
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_glass(panel)
+	holder.add_child(panel)
+
+	_mission_box = VBoxContainer.new()
+	_mission_box.add_theme_constant_override("separation", 5)
+	_mission_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(_mission_box)
+
+
+func _heading(text: String) -> Label:
+	var l := Label.new()
+	l.text = text
+	l.add_theme_font_size_override("font_size", 12)
+	l.add_theme_color_override("font_color", Game.ACCENT)
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
+
+
+## Everything on screen that changes, refreshed once a frame.
+func _refresh_live() -> void:
+	if _compass != null and _camera != null and _rig != null:
+		var MapUi = load("res://scripts/map_ui.gd")
+		var heading: float = _rig.rotation.y + _camera.rotation.y
+		_compass.text = MapUi.heading_of(heading)
+	if _conditions != null and world.weather != null:
+		var hour := int(Game.day_time / Game.DAY_LENGTH * 24.0)
+		var minute := int(fmod(Game.day_time / Game.DAY_LENGTH * 1440.0, 60.0))
+		# The temperature stat is a 0-100 comfort reading, so it is mapped to
+		# something that reads as degrees rather than shown as a percentage.
+		_conditions.text = "%02d:%02d   \u00b7   %s   \u00b7   %d\u00b0   \u00b7   wind %d%%" % [
+			hour, minute, world.weather.state_name(),
+			roundi(float(Game.stats.temperature) * 0.4 - 10.0),
+			roundi(world.wind_strength() * 100.0)]
+
+	for stat in _vitals:
+		var row: Dictionary = _vitals[stat]
+		var v: float = clampf(float(Game.stats.get(stat, 0.0)), 0.0, 100.0)
+		row.bar.value = v
+		row.value.text = "%d%%" % roundi(v)
+		# The colour answers the reading: any bar in trouble goes red, and for
+		# radiation "trouble" is the bar being full rather than empty.
+		var danger: float = v / 100.0 if stat == "radiation" else 1.0 - v / 100.0
+		hud._style_progress_bar(row.bar,
+			Color(row.colour).lerp(Color(0.92, 0.28, 0.22),
+				clampf((danger - 0.6) * 2.5, 0.0, 1.0)))
+
+	for id in _resource_labels:
+		_resource_labels[id].text = str(Game.get_count(id))
+
+	_refresh_missions()
+
+
+## Rebuilt only when something actually moved, because tearing down and
+## recreating six controls every frame for a panel that changes once a minute
+## is the kind of thing that costs a phone its frame rate.
+func _refresh_missions() -> void:
+	if _mission_box == null or world.missions == null:
+		return
+	var signature := "%d|%d" % [world.missions.day, world.missions.done_count()]
+	for m in world.missions.active:
+		signature += "|%d" % int(m.progress)
+	if signature == _mission_signature:
+		return
+	_mission_signature = signature
+
+	for c in _mission_box.get_children():
+		c.queue_free()
+	# Pinned again after rebuilding: the HUD pins the tree to left-to-right
+	# once at startup, and anything created later — like these rows — would
+	# otherwise mirror itself on an Arabic install.
+	_mission_box.add_child(_heading("DAILY   %d / %d DONE" % [
+		world.missions.done_count(), world.missions.active.size()]))
+
+	for m in world.missions.active:
+		var line := Label.new()
+		var reward := []
+		for res in m.reward:
+			reward.append("%d %s" % [int(m.reward[res]),
+				Game.ITEMS.get(res, {}).get("name", res)])
+		line.text = "%s%s  -  %s" % ["[done] " if m.done else "", str(m.name),
+			" / ".join(reward)]
+		line.add_theme_font_size_override("font_size", 11)
+		line.add_theme_color_override("font_color",
+			Game.ACCENT if m.done else Game.TEXT_DIM)
+		line.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		_mission_box.add_child(line)
+
+		var bar := ProgressBar.new()
+		bar.show_percentage = false
+		bar.max_value = maxf(1.0, float(m.target))
+		bar.value = float(m.progress)
+		bar.custom_minimum_size = Vector2(0, 8)
+		hud._style_progress_bar(bar, Game.ACCENT if m.done else Game.ACCENT_DIM)
+		_mission_box.add_child(bar)
+
+	hud.force_ltr(_mission_box)

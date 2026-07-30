@@ -18,6 +18,7 @@ const PowerGridScript := preload("res://scripts/power_grid.gd")
 const InteractionScript := preload("res://scripts/interaction.gd")
 const RoadsScript := preload("res://scripts/roads.gd")
 const WeatherScript := preload("res://scripts/weather.gd")
+const MissionsScript := preload("res://scripts/missions.gd")
 
 const SAVE_PATH := "user://rust_save.json"
 const TREE_COUNT := 70
@@ -108,6 +109,7 @@ var power: Node                 # the electrical grid solver
 var interaction: Node           # works out what the interact button means
 var roads: Node3D               # the road network and everything left on it
 var weather: Node                # clear / overcast / rain / storm
+var missions: Node               # three jobs a day, and what they pay
 var respawn_queue: Array = []   # {type, pos, at}
 ## type -> how hard it has been harvested lately. See PRESSURE_PER_TAKE.
 var pressure: Dictionary = {}
@@ -158,6 +160,11 @@ func _ready() -> void:
 	weather.name = "Weather"
 	add_child(weather)
 	weather.setup(self)
+
+	missions = MissionsScript.new()
+	missions.name = "Missions"
+	add_child(missions)
+	missions.setup(self)
 
 	interaction = InteractionScript.new()
 	interaction.name = "Interaction"
@@ -870,6 +877,7 @@ func _on_player_death() -> void:
 	Game.stats.temperature = 100.0
 	Game.stats.radiation = 0.0
 	Game.stats.oxygen = 100.0
+	Game.stats.stamina = 100.0
 
 	var bed := nearest_sleeping_bag(fell_at)
 	if bed != null:
@@ -1255,6 +1263,7 @@ func save_game() -> void:
 		"time": Game.day_time,
 		"settings": Game.settings,
 		"touch_layout": Game.touch_layout,
+		"missions": missions.to_save() if missions != null else {},
 		"structures": [],
 		"stations": [],
 		"bags": [],
@@ -1403,6 +1412,9 @@ func load_game() -> void:
 	var saved_layout = parsed.get("touch_layout", {})
 	if saved_layout is Dictionary:
 		Game.load_touch_layout(saved_layout)
+	var saved_missions = parsed.get("missions", {})
+	if saved_missions is Dictionary and missions != null:
+		missions.from_save(saved_missions)
 
 	for sd in parsed.get("structures", []):
 		if not (sd is Dictionary):

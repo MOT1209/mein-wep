@@ -6,6 +6,10 @@ extends Node
 signal inventory_changed
 signal belt_changed
 signal toast(msg: String, color: Color)
+## Something the player did that another system may care about: harvesting,
+## building, crafting, hunting. Emitted by whoever did it, listened to by the
+## mission tracker — so no gameplay system has to know missions exist.
+signal activity(kind: String, amount: int)
 
 const WORLD_SIZE := 400.0
 const DAY_LENGTH := 800.0
@@ -524,6 +528,57 @@ const POISON_HUNGER := 15.0
 
 const CATEGORIES := ["common", "construction", "items", "resources", "tools", "medical", "weapons", "attire"]
 
+# ==================== VISUAL IDENTITY ====================
+
+## One place the interface gets its look from. Every panel, border and hover
+## reads these, so the whole product can be re-skinned by editing this block
+## rather than by hunting colour literals through six UI scripts.
+const ACCENT := Color("ff8c32")
+const ACCENT_DIM := Color("b35f18")
+const GLASS := Color(0.055, 0.06, 0.07, 0.62)
+const GLASS_LIGHT := Color(0.10, 0.11, 0.125, 0.72)
+const BORDER := Color(1, 1, 1, 0.10)
+const BORDER_LIT := Color("ff8c32")
+const TEXT := Color(0.88, 0.90, 0.93)
+const TEXT_DIM := Color(0.62, 0.66, 0.72)
+const CORNER := 12
+const CORNER_SMALL := 10
+
+
+## The standard glass plate: dark, slightly transparent, thin border, soft
+## shadow. `lit` is the hover state, which brings the accent to the edge.
+##
+## Not static: everything reaches it through the `Game` autoload, which is an
+## instance, and calling a static through an instance is a warning in every
+## script that does it.
+func glass_box(lit: bool = false, corner: int = CORNER) -> StyleBoxFlat:
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = GLASS_LIGHT if lit else GLASS
+	sb.set_corner_radius_all(corner)
+	sb.set_border_width_all(1)
+	sb.border_color = BORDER_LIT if lit else BORDER
+	sb.set_content_margin_all(12)
+	sb.shadow_color = Color(0, 0, 0, 0.5)
+	sb.shadow_size = 8
+	return sb
+
+
+# ==================== STAMINA ====================
+
+## Sprinting costs something now. Without it, running is free and the whole
+## stance system — where crouching is slow and prone is slower — has no top
+## end to trade against.
+const STAMINA_SPRINT_DRAIN := 14.0
+const STAMINA_JUMP_COST := 8.0
+const STAMINA_REGEN := 11.0
+## No regeneration for this long after spending any, so sprinting in bursts
+## is not the same as sprinting continuously.
+const STAMINA_REGEN_DELAY := 1.1
+## Below this you cannot start sprinting again — which stops a stutter of
+## one-step sprints at the bottom of the bar.
+const STAMINA_SPRINT_FLOOR := 12.0
+
+
 # ==================== STANCE ====================
 
 ## How the player is carrying themselves. One of these at a time and never
@@ -738,6 +793,7 @@ var tool_wear: Dictionary = {}
 var stats: Dictionary = {
 	"health": 100.0, "hunger": 100.0, "thirst": 100.0,
 	"temperature": 100.0, "radiation": 0.0, "oxygen": 100.0,
+	"stamina": 100.0,
 }
 ## Earned, not bought: off until the game says otherwise, which is what the
 ## spec's "if unlocked" means in practice.
@@ -779,6 +835,7 @@ func reset_state() -> void:
 	stats = {
 		"health": 100.0, "hunger": 100.0, "thirst": 100.0,
 		"temperature": 100.0, "radiation": 0.0, "oxygen": 100.0,
+		"stamina": 100.0,
 	}
 	workbench_level = 0
 	day_time = 300.0
@@ -1318,6 +1375,7 @@ func craft(id: String, qty: int) -> bool:
 		return false
 	consume(total)
 	add_item(id, qty)
+	activity.emit("craft", qty)
 	notify("Crafted %s x%d" % [item.name, qty])
 	_sfx("upgrade")
 	return true

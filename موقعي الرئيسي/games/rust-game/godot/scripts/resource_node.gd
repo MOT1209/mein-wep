@@ -600,7 +600,13 @@ func hit_harvest(tool_id: String = "", at: Vector3 = Vector3.INF) -> void:
 		Game.notify("Sweet spot! x%.0f" % SWEET_SPOT_MULT, Color(1.0, 0.85, 0.35))
 	health -= mult
 	for id in payload:
-		Game.add_item(id, payload[id])
+		var taken := Game.add_item(id, payload[id])
+		# Reported by material, so a mission for timber counts wood from a tree
+		# and from anything else that ever gives wood.
+		if taken > 0 and id in ["wood", "stone"]:
+			Game.activity.emit("harvest_" + id, taken)
+	if res_type == "car_wreck" and health <= 0:
+		Game.activity.emit("wreck", 1)
 	# What it sounds like depends on what it is made of, not on the fact that
 	# it is a resource node.
 	Sfx.play(HARVEST_SOUND.get(res_type, "harvest"))

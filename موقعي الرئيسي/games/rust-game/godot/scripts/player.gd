@@ -83,6 +83,10 @@ var _step_distance := 0.0
 var _drink_cd := 0.0
 var _weapon_cd := 0.0
 var _flashlight_timer := 0.0
+## Stamina bookkeeping: how long since any was spent, and whether sprinting is
+## locked out until the bar has recovered a usable amount.
+var _stamina_idle := 0.0
+var _sprint_locked := false
 
 ## Movement tuning
 const SLIDE_SPEED := 13.5
@@ -345,13 +349,58 @@ func movement_speed() -> float:
 	var base := SPEED
 	if stance == Game.STANCE_SWIM:
 		base = SWIM_SPEED
-	elif stance == Game.STANCE_STAND and Input.is_action_pressed("sprint"):
+	elif stance == Game.STANCE_STAND and is_sprinting():
 		base = SPRINT_SPEED
 	var factor := float(Game.stance_data(stance).speed)
 	# Aiming plants your feet. Half speed is what stops ADS being free.
 	if aiming:
 		factor *= 0.5
 	return base * factor
+
+
+## Sprinting, and whether there is anything left to sprint on. Held down at
+## zero it simply stops working rather than stuttering, and it will not start
+## again until there is a real amount back in the bar.
+func is_sprinting() -> bool:
+	if not Input.is_action_pressed("sprint") or stance != Game.STANCE_STAND:
+		return false
+	if aiming or in_water:
+		return false
+	if Vector2(velocity.x, velocity.z).length() < 0.5:
+		return false
+	if _sprint_locked:
+		return float(Game.stats.stamina) >= Game.STAMINA_SPRINT_FLOOR
+	return float(Game.stats.stamina) > 0.0
+
+
+## Spends stamina on running and gives it back once you stop. The delay before
+## it starts coming back is what makes a sprint a decision rather than a
+## rhythm you hold down.
+func _update_stamina(delta: float) -> void:
+	var spending := is_sprinting()
+	if spending:
+		Game.stats.stamina = maxf(0.0,
+			float(Game.stats.stamina) - Game.STAMINA_SPRINT_DRAIN * delta)
+		_stamina_idle = 0.0
+		if Game.stats.stamina <= 0.0:
+			_sprint_locked = true
+	else:
+		_stamina_idle += delta
+		if _stamina_idle >= Game.STAMINA_REGEN_DELAY:
+			Game.stats.stamina = minf(100.0,
+				float(Game.stats.stamina) + Game.STAMINA_REGEN * delta)
+	if _sprint_locked and float(Game.stats.stamina) >= Game.STAMINA_SPRINT_FLOOR:
+		_sprint_locked = false
+
+
+## Takes a one-off cost, if there is enough. Returns false when there is not,
+## which is the caller's cue not to do the thing.
+func spend_stamina(amount: float) -> bool:
+	if float(Game.stats.stamina) < amount:
+		return false
+	Game.stats.stamina = maxf(0.0, float(Game.stats.stamina) - amount)
+	_stamina_idle = 0.0
+	return true
 
 
 ## Is there room to grow back up to `height` where we are standing? Checked
@@ -556,6 +605,8 @@ func try_jump() -> bool:
 		# Crouched or prone, jump stands you up instead of leaving the ground
 		if stance != Game.STANCE_STAND:
 			return set_stance(Game.STANCE_STAND)
+		if not spend_stamina(Game.STAMINA_JUMP_COST):
+			return false
 		velocity.y = JUMP_VELOCITY
 		_jumps_used = 1
 		Game.haptic(0.35)
@@ -755,6 +806,7 @@ func _physics_process(delta: float) -> void:
 
 	_update_swimming()
 	_update_stance_shape(delta)
+	_update_stamina(delta)
 	_update_oxygen(delta)
 	_update_lean(delta)
 

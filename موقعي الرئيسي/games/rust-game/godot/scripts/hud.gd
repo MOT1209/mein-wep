@@ -32,6 +32,8 @@ const BAR_DEFS := [
 	["thirst", Color(0.2, 0.6, 0.86)],
 	["temperature", Color(0.55, 0.82, 0.95)],
 	["radiation", Color(0.18, 0.8, 0.44)],
+	["stamina", Color(0.95, 0.78, 0.25)],
+	["oxygen", Color(0.45, 0.75, 0.95)],
 ]
 
 var world: Node3D
