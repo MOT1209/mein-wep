@@ -146,7 +146,15 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if _dead or world == null or world.player == null or not world.started:
+	if _dead or world == null or world.player == null:
+		return
+	# Before the game starts the world still moves — the main menu looks out
+	# over it, and a settlement where nothing walks is a photograph. But
+	# nothing hunts a player who has not started playing: everything falls
+	# back to wandering.
+	if not world.started:
+		_passive_ai(world.player, 999.0, delta)
+		position.y = world.ground_height_at(position.x, position.z)
 		return
 	_attack_cd = maxf(0.0, _attack_cd - delta)
 

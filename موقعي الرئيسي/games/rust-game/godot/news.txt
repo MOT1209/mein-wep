@@ -1,0 +1,9 @@
+# One news card per line. Blank lines and lines starting with # are ignored.
+# Read by the main menu at startup — this is the real changelog, not filler.
+New: roads across the map, with wrecked cars worth stripping for components.
+New: weather — clear, overcast, rain and thunderstorms. Rain makes you cold.
+New: crouch, prone, slide and vault. Lie down before shooting at range.
+New: magazines and reloading. Fire modes on the rifle: semi, burst, auto.
+New: electricity — generators, solar, wind, batteries, turrets and traps.
+New: recyclers in three grades. Break anything you built back down.
+New: 89 models and every sound, all generated procedurally at build time.

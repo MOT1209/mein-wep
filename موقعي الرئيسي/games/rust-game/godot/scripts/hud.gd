@@ -9,6 +9,7 @@ const IconFactory := preload("res://scripts/icon_factory.gd")
 
 const TouchControlsScript := preload("res://scripts/touch_controls.gd")
 const SettingsUiScript := preload("res://scripts/settings_ui.gd")
+const MainMenuScript := preload("res://scripts/main_menu.gd")
 
 const HOTBAR_SLOT_SIZE := Vector2(64, 64)
 const HOTBAR_ICON_SIZE := Vector2(34, 34)
@@ -50,7 +51,9 @@ var _priv_label: Label
 var _bench_label: Label
 var _cold_label: Label
 var _hotbar_slots: Array = []
-var _start_screen: Control
+var main_menu: Control
+var _guide_screen: Control
+var _credits_screen: Control
 var _pause_menu: Control
 var _bp_menu: Control
 var _hint_label: Label
@@ -679,50 +682,118 @@ func _build_pause_menu() -> void:
 	add_child(_pause_menu)
 
 
+## The cinematic menu replaces the old black sheet: it needs the world to be
+## visible behind it, so it is built as its own node rather than as a dim.
 func _build_start_screen() -> void:
-	_start_screen = Control.new()
-	_start_screen.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_start_screen.visible = false
-	var dim := _dim_screen()
-	dim.color = Color(0.04, 0.04, 0.05, 0.92)
-	_start_screen.add_child(dim)
-	var center := CenterContainer.new()
-	center.set_anchors_preset(Control.PRESET_FULL_RECT)
+	main_menu = MainMenuScript.new()
+	main_menu.name = "MainMenu"
+	main_menu.hud = self
+	add_child(main_menu)
+	_build_guide()
+	_build_credits()
+
+
+## Two read-only screens the menu links to. Kept here with the other menus
+## rather than in the menu itself, because escape has to be able to close them.
+func _build_guide() -> void:
+	_guide_screen = _reader("HOW TO SURVIVE",
+		"MOVE  W A S D   ·   SPRINT  Shift   ·   JUMP / VAULT  Space
+"
+		+ "CROUCH  Ctrl   ·   PRONE  Z   ·   SLIDE  run then Ctrl
+"
+		+ "AIM  Right mouse   ·   RELOAD  R   ·   FIRE MODE  N   ·   MELEE  B
+"
+		+ "HOLD BREATH  T   ·   LEAN  , and .   ·   INSPECT  I   ·   THROW  Y
+"
+		+ "USE  F   ·   INVENTORY  E   ·   BUILD MENU  Q   ·   MAP  M
+"
+		+ "UPGRADE / REPAIR  H   ·   DEMOLISH  X   ·   WIRE  C
+"
+		+ "HOTBAR  1-0   ·   CAMERA  V   ·   TOUCH CONTROLS  F8   ·   PAUSE  Esc
+
+"
+		+ "Chop a tree, mine a rock, put a foundation down and a Tool Cupboard
+"
+		+ "on it — an unprotected base rots. Roads carry wrecks worth stripping
+"
+		+ "and the monuments carry the only high quality metal, under guard.
+"
+		+ "Lie down before you shoot at anything far away. Watch the sky.")
+
+
+func _build_credits() -> void:
+	_credits_screen = _reader("CREDITS",
+		"Rust Survival 3D — Godot Edition
+
+"
+		+ "Design and code: Rashid
+"
+		+ "Built with Godot 4 and Blender.
+
+"
+		+ "Every model in this game is generated procedurally by
+"
+		+ "tools/blender/build_assets.py — 89 of them, no downloaded assets.
+"
+		+ "Every sound is synthesised at startup in scripts/sound_fx.gd —
+"
+		+ "there is not one audio file in the project.
+
+"
+		+ "Terrain, roads, weather and the creatures in it are all generated
+"
+		+ "at run time from the same handful of scripts.")
+
+
+## A dimmed page of text with a way back. Used by the guide and the credits.
+func _reader(title: String, body: String) -> Control:
+	var screen := Control.new()
+	screen.set_anchors_preset(Control.PRESET_FULL_RECT)
+	screen.visible = false
+	screen.add_child(_dim_screen())
+	var centre := CenterContainer.new()
+	centre.set_anchors_preset(Control.PRESET_FULL_RECT)
 	var v := VBoxContainer.new()
-	v.add_theme_constant_override("separation", 14)
-	var title := _label("RUST SURVIVAL 3D", 40, Color(0.8, 0.36, 0.17))
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(title)
-	var controls := _label(
-		"W A S D  Move   |   SHIFT  Sprint   |   SPACE  Jump   |   V  Camera (1st/3rd)\n" +
-		"LMB  Action   |   RMB / Q  Build Menu   |   E  Inventory   |   F  Drink\n" +
-		"R  Rotate   |   G  Cancel Build   |   H  Upgrade / Repair   |   M  Map\n" +
-		"1-6  Hotbar   |   ESC  Pause   |   F8  Touch Controls",
-		16, Color(0.85, 0.85, 0.85))
-	controls.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(controls)
-	var start := Button.new()
-	start.text = "START SURVIVAL"
-	start.custom_minimum_size = Vector2(260, 52)
-	start.pressed.connect(_on_start_pressed)
-	v.add_child(start)
-	var ver := _label("Godot Edition 1.0 — ported from the web version", 12, Color(0.5, 0.5, 0.5))
-	ver.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	v.add_child(ver)
-	center.add_child(v)
-	_start_screen.add_child(center)
-	add_child(_start_screen)
+	v.add_theme_constant_override("separation", 16)
+	var heading := _label(title, 26, Color(1, 0.84, 0))
+	heading.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(heading)
+	var text := _label(body, 15, Color(0.86, 0.88, 0.9))
+	text.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	v.add_child(text)
+	var back := Button.new()
+	back.text = "BACK"
+	back.custom_minimum_size = Vector2(200, 42)
+	back.pressed.connect(func():
+		screen.visible = false
+		Game.set_ui("start"))
+	v.add_child(back)
+	centre.add_child(v)
+	screen.add_child(centre)
+	add_child(screen)
+	return screen
+
+
+func show_guide() -> void:
+	_guide_screen.visible = true
+	Game.set_ui("guide")
+
+
+func show_credits() -> void:
+	_credits_screen.visible = true
+	Game.set_ui("credits")
 
 
 # ==================== STATE / FLOW ====================
 
 func show_start_screen() -> void:
-	_start_screen.visible = true
-	Game.set_ui("start")
+	main_menu.world = world
+	main_menu.open()
 
 
-func _on_start_pressed() -> void:
-	_start_screen.visible = false
+## Leaves the menu and hands the view back to the player.
+func start_game() -> void:
+	main_menu.close()
 	get_tree().paused = false
 	world.started = true
 	Game.set_ui("")
@@ -739,6 +810,12 @@ func handle_escape() -> void:
 			toggle_inventory()
 		"settings":
 			settings_ui.close()
+		"guide":
+			_guide_screen.visible = false
+			Game.set_ui("start")
+		"credits":
+			_credits_screen.visible = false
+			Game.set_ui("start")
 		"blueprint":
 			close_blueprint_menu()
 		"map":

@@ -17,6 +17,7 @@ const DeviceScript := preload("res://scripts/device.gd")
 const PowerGridScript := preload("res://scripts/power_grid.gd")
 const InteractionScript := preload("res://scripts/interaction.gd")
 const RoadsScript := preload("res://scripts/roads.gd")
+const WeatherScript := preload("res://scripts/weather.gd")
 
 const SAVE_PATH := "user://rust_save.json"
 const TREE_COUNT := 70
@@ -106,6 +107,7 @@ var devices: Array = []         # placed generators, turrets, traps, sensors
 var power: Node                 # the electrical grid solver
 var interaction: Node           # works out what the interact button means
 var roads: Node3D               # the road network and everything left on it
+var weather: Node                # clear / overcast / rain / storm
 var respawn_queue: Array = []   # {type, pos, at}
 ## type -> how hard it has been harvested lately. See PRESSURE_PER_TAKE.
 var pressure: Dictionary = {}
@@ -151,6 +153,11 @@ func _ready() -> void:
 	power.name = "PowerGrid"
 	add_child(power)
 	power.world = self
+
+	weather = WeatherScript.new()
+	weather.name = "Weather"
+	add_child(weather)
+	weather.setup(self)
 
 	interaction = InteractionScript.new()
 	interaction.name = "Interaction"
@@ -678,6 +685,9 @@ func _update_stations(delta: float) -> void:
 	var target := 100.0 - clampf(0.55 - _sun_elevation, 0.0, 1.0) * NIGHT_CHILL
 	if player.in_water:
 		target -= WATER_CHILL
+	# Standing out in the rain costs you the same way night does
+	if weather != null:
+		target -= weather.chill()
 	if best_warmth > 0.0:
 		target = maxf(target, 55.0 + best_warmth * 45.0)
 	Game.stats.temperature = move_toward(
@@ -695,8 +705,13 @@ func sun_strength() -> float:
 ## Wind comes in slow swells rather than blowing at one speed forever, so a
 ## turbine-only base has quiet spells that a battery has to cover.
 func wind_strength() -> float:
+	# A slow swell, scaled by what the weather is doing: a turbine in a storm
+	# earns its components back and one on a clear day does not.
 	var swell := 0.5 + 0.5 * sin(clock * TAU / Game.WIND_PERIOD)
-	return clampf(Game.WIND_FLOOR + (1.0 - Game.WIND_FLOOR) * swell, 0.0, 1.0)
+	var base := Game.WIND_FLOOR + (1.0 - Game.WIND_FLOOR) * swell
+	if weather != null:
+		base *= lerpf(0.55, 1.45, weather.wind())
+	return clampf(base, 0.0, 1.0)
 
 
 func place_device(type: String, pos: Vector3) -> void:

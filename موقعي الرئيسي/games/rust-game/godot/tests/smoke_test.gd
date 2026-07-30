@@ -1711,6 +1711,8 @@ func _run_tests() -> void:
 	_test_inventory_order(game, world)
 	_test_interaction(game, world, StructureScript)
 	_test_build_undo(game, world)
+	_test_weather(game, world)
+	_test_main_menu(game, world)
 	_test_roads(game, world)
 	_test_models(game, world)
 	_test_durability(game, world)
@@ -2320,6 +2322,12 @@ func _test_settings_screen(game, world) -> void:
 	_check(ui.visible and game.ui_open == "settings", "the screen opens")
 	world.hud.handle_escape()
 	_check(not ui.visible, "and escape closes it")
+	# Closing it returns to whatever was underneath, which during a test run is
+	# the main menu the world opened at startup. Put the UI state back to
+	# playing, or every later check that only runs in play would be skipped.
+	_check(game.ui_open == "start",
+		"and lands back on the menu it was opened from")
+	game.set_ui("")
 	game.reset_settings()
 
 
@@ -2665,6 +2673,213 @@ func _test_build_undo(game, world) -> void:
 	build._undo_stack.clear()
 	build._redo_stack.clear()
 	_clear_pockets(game)
+
+
+# ==================== WEATHER ====================
+
+func _test_weather(game, world) -> void:
+	var wx = world.weather
+	_check(wx != null, "the world has weather")
+	if wx == null:
+		return
+
+	for name_ in ["clear", "overcast", "rain", "storm"]:
+		_check(wx.STATES.has(name_), "%s is a weather state" % name_)
+		_check(wx.NEXT.has(name_), "and something can follow it")
+
+	# Weather builds rather than jumping: clear never becomes a storm outright
+	_check(not wx.NEXT["clear"].has("storm"),
+		"a clear sky never turns straight into a thunderstorm")
+	_check(wx.NEXT["rain"].has("storm"), "but rain can become one")
+	_check(wx.NEXT["storm"].has("rain"), "and a storm eases back to rain")
+
+	# Worse weather is darker, colder, wetter and windier, in that order
+	var clear: Dictionary = wx.STATES["clear"]
+	var storm: Dictionary = wx.STATES["storm"]
+	_check(float(storm.light) < float(clear.light), "a storm is darker than clear")
+	_check(float(storm.chill) > float(clear.chill), "and colder")
+	_check(float(storm.rain) > float(clear.rain), "and wetter")
+	_check(float(storm.wind) > float(clear.wind), "and windier")
+	_check(float(storm.fog) > float(clear.fog), "and you can see less through it")
+
+	# A transition is a blend, not a cut
+	wx.previous = "clear"
+	wx.state = "storm"
+	wx.blend = 0.0
+	_check(is_equal_approx(wx.value("chill"), float(clear.chill)),
+		"at the start of a blend the old weather still holds")
+	wx.blend = 0.5
+	var midway: float = wx.value("chill")
+	_check(midway > float(clear.chill) and midway < float(storm.chill),
+		"half way through it is half way between (%.1f)" % midway)
+	wx.blend = 1.0
+	_check(is_equal_approx(wx.value("chill"), float(storm.chill)),
+		"and at the end the new weather has arrived")
+
+	# Only a storm has lightning in it
+	_check(wx.is_storming(), "a storm is storming")
+	wx.state = "rain"
+	wx.previous = "rain"
+	_check(not wx.is_storming(), "rain on its own is not")
+	_check(wx.is_wet(), "but it is wet")
+	wx.state = "clear"
+	wx.previous = "clear"
+	_check(not wx.is_wet(), "and a clear sky is not")
+
+	# The wind the turbines read really does answer the weather
+	wx.state = "clear"
+	wx.previous = "clear"
+	wx.blend = 1.0
+	var calm: float = world.wind_strength()
+	wx.state = "storm"
+	wx.previous = "storm"
+	var blowing: float = world.wind_strength()
+	_check(blowing > calm,
+		"a turbine makes more in a storm than in still air (%.2f vs %.2f)"
+			% [blowing, calm])
+
+	# And the cold the survival stats read
+	_check(wx.chill() > 0.0, "a storm is actively making it colder")
+	wx.state = "clear"
+	wx.previous = "clear"
+	_check(is_equal_approx(wx.chill(), 0.0), "and a clear day is not")
+
+	# Rain and lightning have real nodes behind them
+	_check(wx._rain != null, "there is a rain emitter")
+	_check(wx._flash != null, "and a lightning flash")
+	wx.state = "storm"
+	wx.previous = "storm"
+	wx._update_rain()
+	_check(wx._rain.emitting, "it rains during a storm")
+	wx.state = "clear"
+	wx.previous = "clear"
+	wx._update_rain()
+	_check(not wx._rain.emitting, "and stops when it clears")
+
+	# A strike lights up and the thunder follows it rather than arriving with it
+	wx._thunder_left = -1.0
+	wx.strike()
+	_check(wx._flash_left > 0.0, "a strike flashes")
+	_check(wx._thunder_left > 0.0, "and the thunder is still on its way")
+	for i in 60:
+		wx._update_lightning(1.0 / 60.0)
+	_check(wx._flash_left <= 0.0, "the flash is over within a second")
+
+	wx.state = "clear"
+	wx.previous = "clear"
+	wx.blend = 1.0
+
+
+# ==================== MAIN MENU ====================
+
+func _test_main_menu(game, world) -> void:
+	var menu = world.hud.main_menu
+	_check(menu != null, "there is a main menu")
+	if menu == null:
+		return
+
+	# It is a window onto the world, not a sheet in front of it: the veil has
+	# to be mostly transparent or none of the rest matters.
+	var veil: ColorRect = null
+	for c in menu.get_children():
+		if c is ColorRect:
+			veil = c
+			break
+	_check(veil != null and veil.color.a < 0.45,
+		"the menu backdrop is see-through (alpha %.2f)"
+			% (veil.color.a if veil else -1.0))
+
+	# Every button does something. A Store button in a game with no store is a
+	# lie in the most prominent place in the product.
+	_check(menu._buttons.size() == menu.ENTRIES.size(),
+		"every declared entry got a button")
+	for entry in menu.ENTRIES:
+		_check(str(entry.label) != "" and str(entry.glyph) != "",
+			"'%s' has a label and a glyph" % str(entry.id))
+	var ids := []
+	for entry in menu.ENTRIES:
+		ids.append(str(entry.id))
+	for real in ["play", "controls", "guide", "credits", "exit"]:
+		_check(ids.has(real), "the menu offers %s" % real)
+	for fake in ["store", "battle_pass", "events", "servers", "inventory"]:
+		_check(not ids.has(fake),
+			"and does not offer '%s', which this game has no such thing as" % fake)
+
+	# The rig pans and breathes rather than sitting still
+	menu.world = world
+	menu.open()
+	_check(menu.visible and game.ui_open == "start", "the menu opens")
+	_check(menu._rig != null and menu._camera != null, "with a camera rig")
+	_check(menu._camera.current, "and that camera has the view")
+
+	menu._clock = 0.0
+	menu._animate_view()
+	var start_yaw: float = menu._camera.rotation.y
+	var start_y: float = menu._camera.position.y
+	menu._clock = menu.PAN_PERIOD * 0.25
+	menu._animate_view()
+	_check(absf(menu._camera.rotation.y - start_yaw) > 0.01,
+		"the camera pans as time passes")
+	_check(absf(menu._camera.rotation.y) <= deg_to_rad(menu.PAN_DEGREES) + 0.001,
+		"and never past the ten degrees it is allowed")
+	menu._clock = menu.BREATH_PERIOD * 0.25
+	menu._animate_view()
+	_check(absf(menu._camera.position.y - start_y) > 0.001,
+		"and the rig drifts up and down")
+	_check(absf(menu._camera.position.y) <= menu.BREATH + 0.001,
+		"by no more than ten centimetres")
+
+	# Depth of field keeps the near ground sharp and the hills soft
+	var attrs: CameraAttributesPractical = menu._camera.attributes
+	_check(attrs != null and attrs.dof_blur_far_enabled,
+		"the far distance is softened")
+
+	# The status line reports what is true and nothing that is not
+	menu._refresh_status()
+	_check(menu._status.text.contains("v"), "the version is shown")
+	_check(menu._weather_label.text.contains(world.weather.state_name()),
+		"and the real weather (%s)" % menu._weather_label.text)
+	for invented in ["Ping", "ms", "EU-West", "Region"]:
+		_check(not menu._status.text.contains(invented)
+			and not menu._weather_label.text.contains(invented),
+			"and nothing about a server, because there is no server (%s)" % invented)
+
+	# News comes from a file rather than being typed into the menu
+	_check(menu._news_cards.size() > 0,
+		"the news panel read %d cards from disk" % menu._news_cards.size())
+	menu._news_left = 0.0
+	menu._animate_news(0.1)
+	var first: String = menu._news.text
+	_check(first != "", "and shows one")
+	menu._news_left = 0.0
+	menu._animate_news(0.1)
+	_check(menu._news.text != first or menu._news_cards.size() == 1,
+		"and rotates to the next")
+
+	# Wildlife keeps moving while the menu is up, or it is a photograph
+	var NpcScript = load("res://scripts/npc.gd")
+	var doe = NpcScript.new()
+	doe.setup("deer", world)
+	doe.position = Vector3(120.0, world.terrain_height(120.0, -120.0), -120.0)
+	world.add_child(doe)
+	doe.home = doe.position
+	var was_started: bool = world.started
+	world.started = false
+	var before: Vector3 = doe.position
+	doe._wander_timer = 0.0
+	for i in 400:
+		doe._physics_process(1.0 / 60.0)
+	_check(doe.position.distance_to(before) > 0.05,
+		"a deer still wanders with the game not yet started (%.2f m)"
+			% doe.position.distance_to(before))
+	world.started = was_started
+	doe.queue_free()
+
+	# Starting the game hands the view back and clears the menu
+	world.hud.start_game()
+	_check(not menu.visible, "starting the game closes the menu")
+	_check(game.ui_open == "" and world.started, "and hands control over")
+	_check(world.player.camera.current, "and the view goes back to the player")
 
 
 # ==================== ROADS AND ROADSIDE ====================

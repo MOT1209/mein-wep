@@ -280,4 +280,12 @@ func open() -> void:
 
 func close() -> void:
 	visible = false
-	Game.set_ui("pause" if hud != null and hud._pause_menu.visible else "")
+	# Back to whatever was underneath: the pause menu, the main menu, or play
+	if hud == null:
+		Game.set_ui("")
+	elif hud._pause_menu.visible:
+		Game.set_ui("pause")
+	elif hud.main_menu != null and hud.main_menu.visible:
+		Game.set_ui("start")
+	else:
+		Game.set_ui("")

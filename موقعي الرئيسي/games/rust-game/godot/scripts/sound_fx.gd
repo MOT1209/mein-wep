@@ -26,6 +26,9 @@ func _ready() -> void:
 	_register("metal_scrape", _gen(0.32, 0.22, [[520.0, 0.1], [780.0, 0.06]]))
 	# Glass out of a window frame: a bright top with nothing underneath it.
 	_register("glass_break", _gen(0.28, 0.16, [[1400.0, 0.09], [2100.0, 0.05]]))
+	# Thunder is a roll, not a crack: long, low, and mostly noise.
+	_register("thunder", _gen(1.6, 0.42, [[38.0, 0.3], [26.0, 0.22]]))
+	_register("rain_start", _gen(0.9, 0.3, [[900.0, 0.05]]))
 
 
 func _register(sfx_name: String, stream: AudioStreamWAV) -> void:
