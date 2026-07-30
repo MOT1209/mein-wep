@@ -45,6 +45,16 @@ func _check(ok: bool, test_name: String) -> void:
 	print(("PASS: " if ok else "FAIL: ") + test_name)
 
 
+## Empties the pockets back to the opening kit. A check about a recipe or a
+## loot table is not about the slot limit, and a run that has been
+## harvesting for a thousand lines is carrying a stack of most things in the
+## game — which is enough on its own to fail a craft for want of a slot.
+func _clear_pockets(game) -> void:
+	game.inventory = {"building_plan": 1, "hammer": 1}
+	game.tool_wear.clear()
+	game.inventory_changed.emit()
+
+
 ## Puts a foundation under a staged piece. Stability is real now: a wall
 ## registered with nothing below it falls down like any other, so fixtures
 ## have to obey the same rule the building system enforces at placement.
@@ -116,7 +126,11 @@ func _clear_corridor(w: Node3D, x: float, z: float, length: float) -> void:
 		var dz: float = body.position.z - z
 		if dz < -4.0 or dz > length:
 			continue
-		if absf(body.position.x - x) > 6.0:
+		# Wide enough that a creature sliding along a wall still has clear
+		# ground beside it. The map now scatters plants, deposits and fish on
+		# top of the trees and rocks, so a narrower band leaves something in
+		# the way often enough to fail a movement check at random.
+		if absf(body.position.x - x) > 10.0:
 			continue
 		body.collision_layer = 0
 
@@ -514,6 +528,7 @@ func _run_tests() -> void:
 	_check(comps_after == comps_before + 1, "research yields one component")
 
 	# --- Explosive crafting chain gives sulfur a purpose
+	_clear_pockets(game)
 	game.workbench_level = 2
 	game.inventory["sulfur"] = 200
 	game.inventory["charcoal"] = 200
@@ -639,6 +654,7 @@ func _run_tests() -> void:
 		monument_crate.hit_harvest("")
 		_check(game.get_count("hqm") > hqm0, "a monument crate yields high quality metal")
 	# Earlier checks spent the stock, so top up everything the rifle needs
+	_clear_pockets(game)
 	game.inventory["hqm"] = 100
 	game.inventory["pipe"] = 10
 	game.inventory["spring"] = 10
@@ -709,6 +725,10 @@ func _run_tests() -> void:
 
 	# --- A wall actually stops a charging animal
 	var NpcScript = load("res://scripts/npc.gd")
+	# This block stages at a fixed spot rather than the flat site, so it has
+	# to clear its own ground: a boulder or a hemp stand landing between the
+	# wolf and the wall fails the control run for reasons of its own.
+	_clear_corridor(world, 120.0, 94.0, 14.0)
 	_footing(world, StructureScript, 120, 100)
 	var blocker = StructureScript.new()
 	blocker.setup("wall")
@@ -931,6 +951,7 @@ func _run_tests() -> void:
 	sniper.queue_free()
 
 	# --- Guards are renewable, and worth the ammunition
+	_clear_pockets(game)
 	var queued_before: int = world.npc_respawn_queue.size()
 	var scrap_before: int = game.get_count("scrap")
 	var rifle_ammo_before: int = game.get_count("ammo_rifle")
@@ -1038,6 +1059,9 @@ func _run_tests() -> void:
 
 	# --- Furnace: one interaction, everything it can process
 	var big_furnace = world._spawn_station("furnace", Vector3(-20, 0, -20))
+	# A furnace works through everything it can in one pass, so anything
+	# smeltable still in your pockets would land in these totals too.
+	_clear_pockets(game)
 	game.inventory["oil"] = 10
 	game.inventory["iron"] = 40
 	game.inventory["sulfur_ore"] = 30
@@ -1556,6 +1580,14 @@ func _run_tests() -> void:
 		if entry.type == "storage_box":
 			saved_box = entry
 	_check(saved_box != null and saved_box.has("stored"), "storage box contents are persisted")
+	_check(data.has("devices") and data.has("wires"),
+		"the electrical grid is written to the save")
+
+	_test_durability(game, world)
+	_test_new_pieces(game, world, StructureScript)
+	_test_ecosystem(game, world)
+	_test_recycling(game, world)
+	_test_power(game, world)
 
 	# Restore the player's real save (or leave none, as before the test)
 	DirAccess.remove_absolute("user://rust_save.json")
@@ -1564,3 +1596,457 @@ func _run_tests() -> void:
 		rf.store_string(_save_backup)
 		rf.close()
 	print("SMOKE TEST DONE")
+
+
+# ==================== TOOL DURABILITY ====================
+
+func _test_durability(game, world) -> void:
+	_clear_pockets(game)
+	_check(game.has_durability("stone_pickaxe") and not game.has_durability("hammer"),
+		"tools wear out, the building hammer does not")
+
+	game.inventory["stone_pickaxe"] = 1
+	game.tool_wear.erase("stone_pickaxe")
+	_check(game.durability("stone_pickaxe") == game.max_durability("stone_pickaxe"),
+		"a fresh tool starts at full condition")
+
+	game.wear_tool("stone_pickaxe", 5)
+	_check(game.durability("stone_pickaxe") == game.max_durability("stone_pickaxe") - 5,
+		"swinging it spends condition")
+
+	# Past the worn threshold it still works, just not as well
+	game.tool_wear["stone_pickaxe"] = int(game.max_durability("stone_pickaxe") * 0.1)
+	_check(game.condition_multiplier("stone_pickaxe") < 1.0,
+		"a blunt tool gathers less per swing")
+	_check(game.condition_multiplier("hammer") == 1.0,
+		"something with no durability is never penalised")
+
+	# The blow that empties the bar is the one that breaks it
+	game.tool_wear["stone_pickaxe"] = 1
+	var broke: bool = not game.wear_tool("stone_pickaxe")
+	_check(broke and game.get_count("stone_pickaxe") == 0,
+		"the last swing breaks the tool and takes it with it")
+
+	# A spare in the pack becomes the one in your hand, at full condition
+	game.inventory["metal_hatchet"] = 2
+	game.tool_wear["metal_hatchet"] = 1
+	game.wear_tool("metal_hatchet")
+	_check(game.get_count("metal_hatchet") == 1
+		and game.durability("metal_hatchet") == game.max_durability("metal_hatchet"),
+		"a spare takes over at full condition")
+
+	# Repair costs a share of the item's own recipe
+	game.tool_wear["metal_hatchet"] = 10
+	game.inventory["wood"] = 500
+	game.inventory["frag"] = 500
+	var wood_before: int = game.get_count("wood")
+	var repaired: bool = game.repair_tool_item("metal_hatchet", 0.25)
+	_check(repaired and game.durability("metal_hatchet") > 10, "repairing puts condition back")
+	_check(game.get_count("wood") < wood_before, "and it costs materials to do it")
+
+	# Fuelled tools burn low grade fuel rather than running for free
+	_check(game.TOOL_FUEL.has("chainsaw") and game.TOOL_FUEL.has("jackhammer"),
+		"the powered tools run on fuel")
+	game.inventory["lgf"] = 0
+	game.inventory["chainsaw"] = 1
+	var starved := false
+	for i in 60:
+		if not game.spend_tool_fuel("chainsaw"):
+			starved = true
+			break
+	_check(starved, "with no fuel in your pack a chainsaw eventually refuses to run")
+
+	# A chainsaw is worth its fuel: it out-cuts every hand tool
+	var ResNode = load("res://scripts/resource_node.gd")
+	_check(int(ResNode.TOOL_YIELD["tree"]["chainsaw"]) > int(ResNode.TOOL_YIELD["tree"]["metal_hatchet"]),
+		"a chainsaw fells a tree faster than a steel axe")
+	_check(int(ResNode.TOOL_YIELD["rock"]["jackhammer"]) > int(ResNode.TOOL_YIELD["rock"]["metal_pickaxe"]),
+		"and a jackhammer out-mines a steel pick")
+
+	# Condition survives a save
+	game.tool_wear["metal_hatchet"] = 42
+	world.save_game()
+	var f := FileAccess.open("user://rust_save.json", FileAccess.READ)
+	var data = JSON.parse_string(f.get_as_text())
+	f.close()
+	_check(data is Dictionary and data.player.has("wear")
+		and int(data.player.wear.get("metal_hatchet", 0)) == 42,
+		"a half-worn tool stays half-worn across a save")
+
+
+# ==================== NEW BUILDING PIECES ====================
+
+func _test_new_pieces(game, world, StructureScript) -> void:
+	for piece in ["triangle_foundation", "half_wall", "low_wall", "pillar",
+			"roof", "ladder", "barricade", "garage_door"]:
+		_check(game.BUILDING_TYPES.has(piece), "%s is a placeable piece" % piece)
+
+	# The triangle is a foundation in every sense that matters
+	_check("triangle_foundation" in game.ANCHOR_TYPES
+		and "triangle_foundation" in game.SUPPORT_TYPES
+		and "triangle_foundation" in game.FLOOR_TYPES,
+		"a triangle foundation anchors, supports and can be walked on")
+
+	# Non-box pieces get a real solid, not a box pretending to be one
+	var tri = StructureScript.new()
+	tri.setup("triangle_foundation")
+	var hulls := 0
+	for c in tri.get_children():
+		if c is CollisionShape3D and (c as CollisionShape3D).shape is ConvexPolygonShape3D:
+			hulls += 1
+	_check(hulls == 1, "the triangle's collision is a convex hull, not a box")
+	var tri_points: PackedVector3Array = StructureScript._hull_points("triangle", Vector3(3, 0.2, 3))
+	_check(tri_points.size() == 6, "a triangular prism has six corners")
+	var wedge_points: PackedVector3Array = StructureScript._hull_points("wedge", Vector3(3, 1.5, 3))
+	_check(wedge_points.size() == 6, "and so does a roof wedge")
+	# The drawn mesh comes off the same corners as the hull
+	var mesh: ArrayMesh = StructureScript._solid_mesh("wedge", Vector3(3, 1.5, 3),
+		StandardMaterial3D.new())
+	_check(mesh.get_surface_count() == 1 and mesh.surface_get_array_len(0) > 0,
+		"the roof's mesh is built from those same corners")
+	tri.free()
+
+	# A garage door lifts rather than swinging
+	_check("garage_door" in game.LIFTING_DOORS and "garage_door" in game.DOOR_FILLS_DOORWAY,
+		"a garage door fills a doorway and lifts to open")
+	var garage = StructureScript.new()
+	garage.setup("garage_door")
+	garage.position = Vector3(0, 5, 0)
+	world.add_child(garage)
+	var shut: Vector3 = garage.position
+	garage.set_door_state(true)
+	_check(garage.position.y > shut.y and is_equal_approx(garage.position.x, shut.x),
+		"opening it runs it straight up, not sideways")
+	garage.set_door_state(false)
+	_check(garage.position.is_equal_approx(shut), "and closing it drops it back")
+	garage.queue_free()
+
+	# A barricade stands on its own and bleeds whatever leans on it
+	_check("barricade" in game.FREESTANDING_TYPES,
+		"a barricade needs no foundation under it")
+	_check(game.BARRICADE_DPS > 0.0, "and it costs something to walk into")
+
+	# Demolition returns half of what was spent climbing the tiers
+	var wall = StructureScript.new()
+	wall.setup("wall")
+	wall.placed_at = world.clock
+	wall.apply_tier("stone")
+	var spent: Dictionary = wall.invested_materials()
+	var back: Dictionary = wall.salvage_value()
+	_check(int(spent.get("wood", 0)) == 300 and int(spent.get("stone", 0)) == 300,
+		"a stone wall records the wood and the stone that went into it")
+	_check(int(back.get("stone", 0)) == int(float(spent.stone) * game.SALVAGE_FRACTION),
+		"and demolishing it hands half of that back")
+	_check(wall.can_demolish(world.clock), "a piece just put up can be taken down")
+	_check(not wall.can_demolish(world.clock + game.DEMOLISH_WINDOW + 1.0),
+		"an old one has to be knocked down instead")
+	wall.free()
+
+	# A pillar carries the level above it instead of losing a step
+	var sx: float = _flat_site(world).x + 60.0
+	var sz: float = _flat_site(world).y
+	_footing(world, StructureScript, sx, sz)
+	var pillar = StructureScript.new()
+	pillar.setup("pillar")
+	pillar.position = Vector3(sx + 1.5, world.terrain_height(sx, sz) + 1.5, sz + 1.5)
+	world.add_child(pillar)
+	world.register_structure(pillar)
+	world.recompute_stability()
+	_check(is_instance_valid(pillar) and pillar.stability > 0.0,
+		"a pillar on a foundation stands up")
+
+
+# ==================== RESOURCES, PLANTS, ANIMALS ====================
+
+func _test_ecosystem(game, world) -> void:
+	for id in ["resin", "clay", "sand", "dirt", "salt", "glass", "brick",
+			"hemp", "rope", "bone", "feather", "egg", "scales", "corn",
+			"pumpkin", "mushroom", "herbs", "antlers", "tusks"]:
+		_check(game.ITEMS.has(id), "%s exists as an item" % id)
+
+	var ResNode = load("res://scripts/resource_node.gd")
+	_check(int(ResNode.YIELDS["tree"].get("resin", 0)) > 0, "felling a tree bleeds resin")
+	for node_type in ["hemp", "corn", "pumpkin", "mushroom", "herbs",
+			"clay_deposit", "sand_deposit", "salt_deposit", "fish"]:
+		_check(ResNode.YIELDS.has(node_type), "%s is a harvestable node" % node_type)
+	_check(int(ResNode.YIELDS["clay_deposit"].get("dirt", 0)) > 0,
+		"digging clay turns up fill alongside it")
+
+	# The new nodes really are in the world, not just in a table
+	var found := {}
+	for c in world.get_children():
+		if c.has_method("hit_harvest") and not c.is_queued_for_deletion():
+			found[c.res_type] = true
+	for node_type in ["hemp", "clay_deposit", "sand_deposit", "fish"]:
+		_check(found.has(node_type), "the map was seeded with %s" % node_type)
+
+	# Small game, and predators that eat it
+	var NpcScript = load("res://scripts/npc.gd")
+	_check(NpcScript.TYPES.has("rabbit") and NpcScript.TYPES.has("chicken"),
+		"rabbits and chickens exist")
+	_check(NpcScript.LOOT["chicken"].has("egg") and NpcScript.LOOT["chicken"].has("feather"),
+		"a chicken is worth an egg and its feathers")
+	_check(NpcScript.LOOT["deer"].has("antlers") and NpcScript.LOOT["boar"].has("tusks"),
+		"a buck drops antlers and a boar its tusks")
+	_check(bool(NpcScript.TYPES["wolf"].get("hunts", false))
+		and bool(NpcScript.TYPES["deer"].get("prey", false)),
+		"wolves hunt and deer are hunted")
+	_check(bool(NpcScript.TYPES["wolf"].get("packs", false)),
+		"and wolves work in packs")
+
+	# A wolf with company hits harder than a wolf on its own
+	var lone = NpcScript.new()
+	lone.setup("wolf", world)
+	lone.position = Vector3(150, 0, 150)
+	world.add_child(lone)
+	var alone: float = lone.attack_damage()
+	var mate = NpcScript.new()
+	mate.setup("wolf", world)
+	mate.position = lone.position + Vector3(3, 0, 0)
+	world.add_child(mate)
+	_check(lone.attack_damage() > alone,
+		"a wolf with a packmate beside it bites harder (%.1f vs %.1f)"
+			% [lone.attack_damage(), alone])
+
+	# A predator's kill fills nobody's pockets
+	var quarry = NpcScript.new()
+	quarry.setup("rabbit", world)
+	quarry.position = Vector3(150, 0, 156)
+	world.add_child(quarry)
+	_clear_pockets(game)
+	var meat_before: int = game.get_count("raw_meat")
+	quarry.npc_take_damage(999.0, false)
+	_check(game.get_count("raw_meat") == meat_before,
+		"a rabbit taken by a wolf does not end up in your pockets")
+	lone.queue_free()
+	mate.queue_free()
+
+	# Over-harvesting stretches how long a species takes to come back.
+	# Measured from a clean slate: earlier checks in this run have already
+	# felled trees, and the reading is capped.
+	world.pressure.clear()
+	var base_delay: float = world.respawn_delay_for("tree")
+	world.note_take("tree")
+	world.note_take("tree")
+	_check(world.respawn_delay_for("tree") > base_delay,
+		"a worked-over patch comes back slower")
+	_check(world.npc_respawn_delay_for("deer") >= world.NPC_RESPAWN_DELAY,
+		"and so does a hunted-out population")
+	world.pressure.clear()
+
+	# Foraged food is the cheapest in the game and it is not free
+	_check(float(game.CONSUMABLES["mushroom"].get("poison", 0.0)) > 0.0,
+		"some mushrooms are poisonous")
+	_check(game.CONSUMABLES.has("cooked_fish") and game.CONSUMABLES.has("preserved_meat"),
+		"fish and salted meat are both proper meals")
+
+	# The furnace learned the new firings
+	var StationScript = load("res://scripts/station.gd")
+	var inputs := {}
+	for recipe in StationScript.SMELTING:
+		inputs[str(recipe.input)] = str(recipe.output)
+	_check(inputs.get("sand", "") == "glass", "sand fires into glass")
+	_check(inputs.get("clay", "") == "brick", "clay fires into brick")
+	_check(inputs.get("resin", "") == "lgf", "resin renders into fuel")
+
+	# Brick needs fill as well as clay, so dirt is worth carrying
+	var brick_recipe := {}
+	for recipe in StationScript.SMELTING:
+		if str(recipe.input) == "clay":
+			brick_recipe = recipe.get("extra", {})
+	_check(brick_recipe.has("dirt"), "and firing brick wants fill mixed into it")
+
+	_clear_pockets(game)
+	game.inventory["clay"] = 30
+	game.inventory["dirt"] = 20
+	game.inventory["wood"] = 200
+	var kiln = world._spawn_station("furnace", Vector3(40, 0, 40))
+	kiln.interact_station()
+	_check(game.get_count("brick") > 0 and game.get_count("dirt") < 20,
+		"a furnace really does turn clay and fill into brick")
+
+	# A campfire cooks fish as readily as meat
+	_clear_pockets(game)
+	game.inventory["raw_fish"] = 4
+	game.inventory["wood"] = 100
+	var fire = world._spawn_station("campfire", Vector3(44, 0, 44))
+	fire.interact_station()
+	_check(game.get_count("cooked_fish") == 4 and game.get_count("raw_fish") == 0,
+		"and a campfire cooks what you pulled out of the lake")
+
+
+# ==================== RECYCLING ====================
+
+func _test_recycling(game, world) -> void:
+	for tier in ["recycler", "advanced_recycler", "hitech_recycler"]:
+		_check(game.DEPLOYABLES.has(tier), "%s is deployable" % tier)
+	var basic: float = float(game.DEPLOYABLES["recycler"].efficiency)
+	var adv: float = float(game.DEPLOYABLES["advanced_recycler"].efficiency)
+	var high: float = float(game.DEPLOYABLES["hitech_recycler"].efficiency)
+	_check(basic < adv and adv < high, "each tier hands back more than the last")
+	_check(float(game.DEPLOYABLES["recycler"].get("power", 0.0)) == 0.0
+		and float(game.DEPLOYABLES["advanced_recycler"].power) > 0.0,
+		"the hand-cranked one needs no power and the motorised ones do")
+
+	_check(game.is_recyclable("pistol"), "anything you built can be broken down")
+	_check(game.is_recyclable("gear_comp"), "and so can the components the world hands out")
+	_check(not game.is_recyclable("wood"), "but raw material has nothing left to take apart")
+
+	# A crafted item refunds a share of its own recipe
+	var pistol_back: Dictionary = game.recycle_yield("pistol", 0.5)
+	var pistol_recipe: Dictionary = game.ITEMS["pistol"].recipe
+	_check(int(pistol_back.get("iron", 0)) == floori(float(pistol_recipe.iron) * 0.5),
+		"a recycled pistol gives back half its iron at half efficiency")
+	_check(game.recycle_yield("pistol", high).iron > pistol_back.iron,
+		"and more of it at a better machine")
+
+	# Actually run one
+	_clear_pockets(game)
+	game.inventory["pistol"] = 2
+	game.belt[0] = "pistol"
+	game.selected_belt_slot = 0
+	var mill = world._spawn_station("recycler", Vector3(48, 0, 48))
+	_check(mill.is_powered(), "a hand-cranked recycler runs without a circuit")
+	mill.interact_station()
+	_check(game.get_count("pistol") == 0 and game.get_count("iron") > 0,
+		"it broke the pistols down into their parts")
+
+	# The motorised one sits idle until the wires say otherwise
+	var adv_mill = world._spawn_station("advanced_recycler", Vector3(52, 0, 48))
+	adv_mill.powered = false
+	_check(not adv_mill.is_powered(), "an advanced recycler with no power does nothing")
+	adv_mill.set_powered(true)
+	_check(adv_mill.is_powered(), "and comes to life once the circuit reaches it")
+	game.belt[0] = "building_plan"
+	game.selected_belt_slot = 0
+
+
+# ==================== ELECTRICITY AND DEFENCE ====================
+
+func _test_power(game, world) -> void:
+	for id in ["generator", "solar_panel", "wind_turbine", "battery",
+			"auto_turret", "shotgun_trap", "flame_trap", "tesla_coil",
+			"alarm", "motion_sensor", "smart_switch", "camera",
+			"land_mine", "bear_trap"]:
+		_check(game.DEVICES.has(id) and game.ITEMS.has(id),
+			"%s is a craftable, deployable device" % id)
+
+	_check(world.power != null, "the world has a power grid")
+	var grid = world.power
+	var wires_before: int = grid.wires.size()
+
+	# A generator feeding a turret through a wire
+	var gen = world._spawn_device("generator", Vector3(100, 0, 100))
+	var turret = world._spawn_device("auto_turret", Vector3(104, 0, 100))
+	_check(float(turret.power_draw()) > 0.0 and float(gen.power_draw()) == 0.0,
+		"a turret draws power and a generator does not")
+	_check(gen.rated_output() > turret.power_draw(),
+		"one generator can carry a turret")
+
+	grid.solve(1.0)
+	_check(not turret.is_live(), "an unwired turret is dead")
+
+	_check(grid.connect_devices(gen, turret), "a wire runs between them")
+	_check(grid.wires.size() == wires_before + 1, "and the grid records it")
+	_check(not grid.connect_devices(gen, turret), "the same wire cannot be run twice")
+
+	game.inventory["lgf"] = 100
+	grid.solve(1.0)
+	_check(turret.is_live(), "now the circuit feeds it")
+
+	# Too far apart is too far apart
+	var far = world._spawn_device("alarm", Vector3(100 + game.WIRE_RANGE + 5.0, 0, 100))
+	_check(not grid.connect_devices(gen, far), "a wire will not reach across the map")
+	world.remove_device(far)
+
+	# A switch downstream of the generator arms and disarms what is behind it
+	var switch = world._spawn_device("smart_switch", Vector3(102, 0, 103))
+	var lamp = world._spawn_device("alarm", Vector3(102, 0, 106))
+	grid.connect_devices(gen, switch)
+	grid.connect_devices(switch, lamp)
+	switch.switch_on = true
+	grid.solve(1.0)
+	_check(lamp.is_live(), "with the switch armed the alarm behind it has power")
+	switch.switch_on = false
+	grid.solve(1.0)
+	_check(not lamp.is_live(), "flipping the switch cuts everything downstream")
+	switch.switch_on = true
+
+	# Solar makes nothing at night; a battery covers the gap
+	var panel = world._spawn_device("solar_panel", Vector3(108, 0, 100))
+	world._sun_elevation = -0.8
+	_check(is_equal_approx(panel.power_output(1.0), 0.0),
+		"a solar panel makes nothing after dark")
+	world._sun_elevation = 1.0
+	_check(panel.power_output(1.0) > 0.0, "and its full rating at noon")
+
+	var cell = world._spawn_device("battery", Vector3(110, 0, 100))
+	_check(cell.is_battery(), "a battery is a battery")
+	var banked: float = cell.charge(1000.0, 1.0)
+	_check(banked > 0.0 and cell.stored_charge == banked, "it banks a surplus")
+	var given: float = cell.discharge(1000.0, 1.0)
+	_check(given > 0.0 and cell.stored_charge < banked, "and pays it back on demand")
+
+	# A shortfall costs you the big loads first
+	var hungry = world._spawn_device("tesla_coil", Vector3(106, 0, 100))
+	var quiet = world._spawn_device("alarm", Vector3(106, 0, 103))
+	grid.connect_devices(gen, hungry)
+	grid.connect_devices(gen, quiet)
+	game.inventory["lgf"] = 0
+	# Drain the generator by running enough ticks to burn its fuel through
+	for i in 6:
+		grid.solve(float(game.DEVICES["generator"].fuel_interval))
+	_check(not hungry.is_live(),
+		"a circuit with no fuel behind it stops feeding the coil")
+
+	# Turrets only shoot at things that shoot back
+	var NpcScript = load("res://scripts/npc.gd")
+	var doe = NpcScript.new()
+	doe.setup("deer", world)
+	world.add_child(doe)
+	var wolf = NpcScript.new()
+	wolf.setup("wolf", world)
+	world.add_child(wolf)
+	_check(not doe.is_hostile() and wolf.is_hostile(),
+		"a deer is not a threat and a wolf is")
+	doe.queue_free()
+	wolf.queue_free()
+
+	# Mechanical traps need no circuit at all
+	var mine = world._spawn_device("land_mine", Vector3(120, 0, 120))
+	_check(mine.is_live(), "a land mine is live the moment it is buried")
+	_check(float(game.DEVICES["land_mine"].get("blast", 0.0)) > 0.0
+		and bool(game.DEVICES["bear_trap"].get("single_use", false)),
+		"a mine goes off with a blast and a bear trap is spent once it fires")
+	world.remove_device(mine)
+
+	# A bear trap pins what steps in it
+	var caught = NpcScript.new()
+	caught.setup("boar", world)
+	caught.position = Vector3(130, 0, 130)
+	world.add_child(caught)
+	caught.snare(3.0)
+	var held_at: Vector3 = caught.position
+	caught._physics_process(0.1)
+	_check(caught.position.is_equal_approx(held_at), "a snared animal cannot walk away")
+	caught.queue_free()
+
+	# A keycard lock is the one lock that can shut you out of your own base
+	_check(game.LOCKS.has("keycard_lock")
+		and str(game.LOCKS["keycard_lock"].get("needs", "")) == "keycard",
+		"a keycard lock wants the card in hand")
+	var StructureScript = load("res://scripts/structure.gd")
+	var vault = StructureScript.new()
+	vault.setup("wooden_door")
+	world.add_child(vault)
+	vault.install_lock("keycard_lock")
+	_clear_pockets(game)
+	_check(not vault.player_may_open(), "without the card the door stays shut")
+	game.inventory["keycard"] = 1
+	_check(vault.player_may_open(), "with it the door opens")
+	vault.queue_free()
+
+	# Tear the test rig back down so the save check above is not disturbed
+	for d in [gen, turret, switch, lamp, panel, cell, hungry, quiet]:
+		if is_instance_valid(d):
+			world.remove_device(d)

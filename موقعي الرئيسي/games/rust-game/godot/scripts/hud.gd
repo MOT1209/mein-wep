@@ -429,9 +429,23 @@ func _build_hotbar() -> void:
 		count_lab.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		stack.add_child(count_lab)
 
+		# Condition bar along the bottom of the tile. Only ever shown for
+		# things that wear out, so the hotbar stays quiet for materials.
+		var wear := ProgressBar.new()
+		wear.show_percentage = false
+		wear.min_value = 0.0
+		wear.max_value = 1.0
+		wear.custom_minimum_size = Vector2(0, 4)
+		wear.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+		wear.grow_vertical = Control.GROW_DIRECTION_BEGIN
+		wear.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		wear.visible = false
+		_style_progress_bar(wear, Color(0.45, 0.8, 0.45))
+		stack.add_child(wear)
+
 		slot.add_child(stack)
 		bar.add_child(slot)
-		_hotbar_slots.append({"panel": slot, "icon": icon, "name": count_lab})
+		_hotbar_slots.append({"panel": slot, "icon": icon, "name": count_lab, "wear": wear})
 
 
 ## Semi-transparent slot plate; the selected slot gets a bright rust border.
@@ -456,10 +470,27 @@ func _refresh_hotbar() -> void:
 			slot.panel.tooltip_text = Game.ITEMS[id].name
 			var count := Game.get_count(id)
 			slot.name.text = str(count) if count > 1 else ""
+			# Condition, and the colour it is going: green while it has life
+			# in it, amber once it is past the point where it still works
+			# properly, red when the next few swings are the last ones.
+			var wears: bool = Game.has_durability(id) and count > 0
+			slot.wear.visible = wears
+			if wears:
+				var frac := Game.durability_fraction(id)
+				slot.wear.value = frac
+				slot.panel.tooltip_text = "%s — %d/%d" % [Game.ITEMS[id].name,
+					Game.durability(id), Game.max_durability(id)]
+				var col := Color(0.45, 0.8, 0.45)
+				if frac < 0.12:
+					col = Color(0.9, 0.3, 0.3)
+				elif frac < Game.WORN_THRESHOLD:
+					col = Color(0.95, 0.7, 0.3)
+				_style_progress_bar(slot.wear, col)
 		else:
 			slot.icon.texture = null
 			slot.panel.tooltip_text = ""
 			slot.name.text = ""
+			slot.wear.visible = false
 
 
 func _build_toast() -> void:
@@ -873,7 +904,19 @@ func _process(delta: float) -> void:
 			hint = "Press F to drink"
 		elif Game.CONSUMABLES.has(tool) and Game.get_count(tool) > 0:
 			hint = "Click to consume %s" % Game.ITEMS[tool].name
-		elif (tool == "campfire" or tool == "furnace") and Game.get_count(tool) > 0:
-			hint = "Click on the ground to place the %s" % tool
+		elif Game.DEVICES.has(tool) and Game.get_count(tool) > 0:
+			hint = "Click on the ground to place the %s" % Game.ITEMS[tool].name
+		elif tool == "wire_tool":
+			hint = ("Aim at the other device and press C"
+				if world.player.wiring_from != null
+				else "Aim at a device and press C to start a wire")
+		elif tool == "repair_tool" and Game.get_count(tool) > 0:
+			hint = "Click a wall to repair it, or click at a workbench to service your gear"
+		elif tool == "binoculars" and Game.get_count(tool) > 0:
+			hint = "Click to put them down" if world.player.glassing else "Click to glass the treeline"
+		elif tool == "hammer" or tool == "jackhammer":
+			hint = "H to repair or upgrade   ·   X to demolish"
+		elif Game.DEPLOYABLES.has(tool) and Game.get_count(tool) > 0:
+			hint = "Click on the ground to place the %s" % Game.ITEMS[tool].name
 	_hint_label.text = hint
 	_hint_label.visible = hint != ""

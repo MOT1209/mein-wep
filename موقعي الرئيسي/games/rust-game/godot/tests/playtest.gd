@@ -38,29 +38,35 @@ func _section(title: String) -> void:
 
 
 # What the world hands you without crafting anything.
+## Everything the world hands you without a recipe behind it, read off the
+## tables that actually produce it rather than listed by hand. A hand-written
+## list goes stale the moment a node learns a new drop, and then this audit
+## reports a shelf of blockers that only exist in the list.
 func _world_sources() -> Dictionary:
-	return {
-		"wood": "chop a tree",
-		"stone": "hit a rock node",
-		"iron": "hit a metal node",
-		"sulfur_ore": "hit a sulfur node",
-		"sulfur": "smelt sulfur ore in a furnace",
-		"scrap": "smash a barrel or a monument crate",
-		"lgf": "smash a barrel",
-		"frag": "loot a monument crate, or smelt ore in a furnace",
-		"charcoal": "burn wood in a furnace",
-		"berries": "harvest a bush",
-		"cloth": "kill an animal",
-		"leather": "kill an animal",
-		"raw_meat": "hunt a deer, wolf or bear",
-		"cooked_meat": "cook raw meat on a campfire",
-		"oil": "drill an ore node",
-		"gear_comp": "research bench",
-		"pipe": "research bench",
-		"spring": "research bench",
-		"sewing": "research bench",
-		"hqm": "loot a monument crate, out in the radiation",
-	}
+	var out := {}
+	var node_script = load("res://scripts/resource_node.gd")
+	for node_type in node_script.YIELDS:
+		for id in node_script.YIELDS[node_type]:
+			out[str(id)] = "harvest a %s" % node_type
+
+	var npc_script = load("res://scripts/npc.gd")
+	for species in npc_script.LOOT:
+		for id in npc_script.LOOT[species]:
+			out[str(id)] = "hunt a %s" % species
+
+	var station_script = load("res://scripts/station.gd")
+	for recipe in station_script.SMELTING:
+		out[str(recipe.output)] = "fire %s in a furnace" % recipe.input
+	for raw_id in station_script.COOKING:
+		out[str(station_script.COOKING[raw_id])] = "cook %s on a campfire" % raw_id
+	for id in station_script.RESEARCH_OUTPUTS:
+		out[str(id)] = "research bench"
+
+	# Charcoal is what burning fuel leaves behind, and crude oil only comes
+	# up under a drill — neither is a yield table entry.
+	out["charcoal"] = "burn wood in a furnace"
+	out["oil"] = "drill an ore node"
+	return out
 
 
 func _run() -> void:
@@ -193,12 +199,30 @@ func _audit_dead_items() -> void:
 		used_directly[id] = true
 	for id in game.EXPLOSIVES:
 		used_directly[id] = true
+	# Deployed devices, and whatever they burn to do their job: a turret
+	# spends rifle ammunition, a generator drinks fuel.
+	for id in game.DEVICES:
+		used_directly[id] = true
+		for key in ["ammo", "fuel"]:
+			var burnt := str(game.DEVICES[id].get(key, ""))
+			if burnt != "":
+				used_directly[burnt] = true
+	# Fed into a recycler rather than into a recipe
+	for id in game.RECYCLE_RAW:
+		used_directly[id] = true
+	# Burnt by the tools that run on fuel
+	for id in game.TOOL_FUEL:
+		used_directly[id] = true
 	# Spent on a door, where they decide whether a guard can follow you in
 	for id in game.LOCKS:
 		used_directly[id] = true
 	# Things whose effect lives in code rather than in a recipe: the torch
 	# lights the player, the launcher fires rockets, doors get placed.
-	for id in ["building_plan", "hammer", "rocket_launcher", "wooden_door", "door", "torch"]:
+	for id in ["building_plan", "hammer", "rocket_launcher", "wooden_door", "door", "torch",
+			# Held tools whose whole effect is in code: the wire tool runs
+			# wiring, the binoculars zoom, the flashlight lights, the repair
+			# tool services gear, the keycard opens a lock that wants one.
+			"wire_tool", "binoculars", "flashlight", "repair_tool", "keycard", "garage_door"]:
 		used_directly[id] = true
 	for id in game.WEAPONS:
 		used_directly[id] = true
@@ -210,6 +234,12 @@ func _audit_dead_items() -> void:
 	var station_script = load("res://scripts/station.gd")
 	for recipe in station_script.SMELTING:
 		used_directly[str(recipe.input)] = true
+		# A firing can want a second ingredient — brick is clay held together
+		# with fill, so dirt is spent here and nowhere else.
+		for extra in recipe.get("extra", {}):
+			used_directly[str(extra)] = true
+	for raw_id in station_script.COOKING:
+		used_directly[str(raw_id)] = true
 	for id in ["raw_meat", "scrap"]:
 		used_directly[id] = true
 	# Worn rather than spent

@@ -8,7 +8,14 @@ extends Node3D
 ## splitting the tile in half. These three share that edge-snap behaviour;
 ## a door is edge-snapped too but inherits its position from the doorway
 ## it fills rather than computing an offset of its own.
-const EDGE_TYPES := ["wall", "doorway", "window_wall"]
+const EDGE_TYPES := ["wall", "half_wall", "low_wall", "doorway", "window_wall", "ladder"]
+
+## Pieces that stand on the ground wherever you aim rather than on a tile:
+## they carry nothing and nothing is carried on them, so pinning them to a
+## fixed height would only float them off a slope.
+const GROUND_TYPES := ["barricade"]
+
+const StructureScript := preload("res://scripts/structure.gd")
 
 var world: Node3D
 var player: CharacterBody3D
@@ -40,14 +47,21 @@ func _update_ghost() -> void:
 		if _ghost != null:
 			_ghost.queue_free()
 		_ghost = MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = bt.size
 		_ghost_mat = StandardMaterial3D.new()
 		_ghost_mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 		_ghost_mat.albedo_color = Color(0, 1, 0, 0.4)
 		_ghost_mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		box.material = _ghost_mat
-		_ghost.mesh = box
+		# The preview is built from the same solid the piece will be, so a
+		# triangle previews as a triangle and a roof as a slope — you can
+		# tell which way round it is going before you commit to it.
+		var shape := str(bt.get("shape", "box"))
+		if shape == "box":
+			var box := BoxMesh.new()
+			box.size = bt.size
+			box.material = _ghost_mat
+			_ghost.mesh = box
+		else:
+			_ghost.mesh = StructureScript._solid_mesh(shape, bt.size, _ghost_mat)
 		_ghost.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 		add_child(_ghost)
 		_ghost_type = bp
@@ -65,7 +79,7 @@ func _update_ghost() -> void:
 
 	var support_points: Array[Vector2] = []
 
-	if bp == "wooden_door":
+	if bp in Game.DOOR_FILLS_DOORWAY:
 		# A door has no tile of its own: it fills whatever doorway it is
 		# aimed at, at that doorway's exact position and orientation.
 		if _ghost_base == null or _ghost_base.build_type != "doorway":
@@ -74,6 +88,24 @@ func _update_ghost() -> void:
 			return
 		_ghost_pos = _ghost_base.position
 		_ghost_rot = _ghost_base.base_rot
+	elif bp in GROUND_TYPES:
+		# Free-standing: it goes where you are aiming, standing on whatever
+		# the ground is doing there rather than on a tile.
+		_ghost_pos = Vector3(point.x, point.y + bt.size.y * 0.5, point.z)
+		_ghost_rot = Game.blueprint_rotation
+	elif bp == "pillar":
+		# Pillars go on tile corners, not tile centres — one pillar braces
+		# the up-to-four tiles that meet there.
+		var cx := roundf((point.x - 1.5) / 3.0) * 3.0 + 1.5
+		var cz := roundf((point.z - 1.5) / 3.0) * 3.0 + 1.5
+		var pillar_y: float = bt.y
+		if _ghost_base != null and _ghost_base.build_type == "ceiling":
+			pillar_y = _ghost_base.position.y + bt.y
+		_ghost_pos = Vector3(cx, pillar_y, cz)
+		_ghost_rot = 0.0
+		for ox in [-1.5, 1.5]:
+			for oz in [-1.5, 1.5]:
+				support_points.append(Vector2(cx + ox, cz + oz))
 	elif bp in EDGE_TYPES:
 		var tile_x := roundf(point.x / 3.0) * 3.0
 		var tile_z := roundf(point.z / 3.0) * 3.0
@@ -99,6 +131,10 @@ func _update_ghost() -> void:
 		var target_y: float = bt.y
 		if _ghost_base != null and bp == "ceiling":
 			target_y = _ghost_base.position.y + 3.0
+		elif _ghost_base != null and bp == "roof" and _ghost_base.build_type == "ceiling":
+			# A pitched roof caps the storey: it sits straight on the ceiling
+			# slab rather than a wall's height above it.
+			target_y = _ghost_base.position.y + 0.1 + bt.size.y * 0.5
 		_ghost_pos = Vector3(snap_x, target_y, snap_z)
 		_ghost_rot = Game.blueprint_rotation
 
@@ -132,7 +168,7 @@ func can_build_here(pos: Vector3, type: String, support_points: Array[Vector2] =
 		for s in world.structures:
 			if not is_instance_valid(s):
 				continue
-			if s.build_type != "foundation" and s.build_type != "ceiling":
+			if not (s.build_type in Game.SUPPORT_TYPES):
 				continue
 			var spos := Vector2(s.position.x, s.position.z)
 			for sp in support_points:
@@ -141,19 +177,22 @@ func can_build_here(pos: Vector3, type: String, support_points: Array[Vector2] =
 					break
 			if has_foundation:
 				break
-		if not has_foundation and type != "foundation":
+		if not has_foundation and not (type in Game.ANCHOR_TYPES):
 			return false
 
-	# 3. Doors need a doorway at the same snap point
-	if type == "wooden_door":
+	# 3. Doors need an empty doorway at the same snap point — one leaf each,
+	# or a second door could be hung through the first and both would swing.
+	if type in Game.DOOR_FILLS_DOORWAY:
 		var on_doorway := false
 		for s in world.structures:
 			if not is_instance_valid(s):
 				continue
-			var d2 := pos2.distance_to(Vector2(s.position.x, s.position.z))
-			if d2 < 0.5 and s.build_type == "doorway":
+			if pos2.distance_to(Vector2(s.closed_pos.x, s.closed_pos.z)) >= 0.5:
+				continue
+			if s.build_type == "doorway":
 				on_doorway = true
-				break
+			elif s.is_door:
+				return false
 		if not on_doorway:
 			return false
 
@@ -170,11 +209,12 @@ func place_structure() -> void:
 		return
 
 	var bp := Game.selected_blueprint
-	var s: StaticBody3D = preload("res://scripts/structure.gd").new()
+	var s: StaticBody3D = StructureScript.new()
 	s.setup(bp)
 	s.position = _ghost_pos
 	s.base_rot = _ghost_rot
 	s.rotation.y = s.base_rot
+	s.placed_at = world.clock
 	# The face you are standing on becomes the weak one, so which way round
 	# you raise a wall decides whether a raider has to get inside first.
 	if world.player != null:
@@ -210,6 +250,39 @@ func upgrade_structure(s: Node3D) -> void:
 	s.apply_tier(next_tier)
 	Game.notify("Upgraded to %s" % Game.BUILDING_TIERS[next_tier].name)
 	Sfx.play("upgrade")
+
+
+## Takes a piece down on purpose and hands back half of what was spent
+## upgrading it. Only works inside the demolition window and only where you
+## have building privilege, so this is a builder's undo and never a way into
+## somebody else's base.
+func demolish_structure(s: Node3D) -> void:
+	if not Game.has_building_privilege(s.position) and not Game.tool_cupboards.is_empty():
+		Game.notify("You lack building privilege here", Color(0.9, 0.3, 0.3))
+		return
+	if not s.can_demolish(world.clock):
+		Game.notify("Too old to demolish — knock it down instead", Color(1.0, 0.63, 0.0))
+		return
+
+	var refund: Dictionary = s.salvage_value()
+	var label: String = Game.BUILDING_TYPES[s.build_type].name
+	var recovered := 0
+	for res in refund:
+		recovered += Game.add_item(res, int(refund[res]))
+
+	# A Tool Cupboard hands its stock back too, or demolishing one would
+	# quietly eat everything stored in it.
+	if s.build_type == "tool_cupboard":
+		for res in s.upkeep:
+			recovered += Game.add_item(res, int(s.upkeep[res]))
+		s.upkeep.clear()
+
+	s.free_collapsed()
+	if recovered > 0:
+		Game.notify("Demolished %s — recovered %d materials" % [label, recovered])
+	else:
+		Game.notify("Demolished %s" % label)
+	Sfx.play("hit")
 
 
 func repair_structure(s: Node3D) -> void:

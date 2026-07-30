@@ -13,6 +13,8 @@ const ExplosiveScript := preload("res://scripts/explosive.gd")
 const BuildingSystemScript := preload("res://scripts/building_system.gd")
 const HudScript := preload("res://scripts/hud.gd")
 const LootBagScript := preload("res://scripts/loot_bag.gd")
+const DeviceScript := preload("res://scripts/device.gd")
+const PowerGridScript := preload("res://scripts/power_grid.gd")
 
 const SAVE_PATH := "user://rust_save.json"
 const TREE_COUNT := 70
@@ -23,7 +25,30 @@ const BUSH_COUNT := 25
 const WOLFBEAR_COUNT := 5
 const DEER_COUNT := 6
 const BOAR_COUNT := 4
+const RABBIT_COUNT := 8
+const CHICKEN_COUNT := 6
+const HEMP_COUNT := 30
+const CORN_COUNT := 12
+const PUMPKIN_COUNT := 8
+const MUSHROOM_COUNT := 18
+const HERB_COUNT := 16
+const CLAY_COUNT := 14
+const SAND_COUNT := 14
+const SALT_COUNT := 8
+const FISH_COUNT := 18
 const RESPAWN_DELAY := 30.0
+
+## Over-harvesting. Every tree felled and every animal shot adds a point of
+## pressure against that type; the point bleeds off on its own. While the
+## reading is high, everything of that type comes back slower — so stripping
+## one valley bare pushes you into the next one rather than letting you farm
+## the same clearing forever.
+const PRESSURE_PER_TAKE := 1.0
+const PRESSURE_DECAY := 0.03      # points per second
+const PRESSURE_CAP := 8.0
+## Extra seconds of respawn delay per point of pressure.
+const RESPAWN_PER_PRESSURE := 14.0
+const NPC_RESPAWN_PER_PRESSURE := 45.0
 const GUARDS_PER_MONUMENT := 3
 const GUARD_POST_RADIUS := 9.0
 const NPC_RESPAWN_DELAY := 180.0
@@ -71,8 +96,15 @@ var started := false
 
 var rad_zones: Array = []       # Array of Vector2 (x, z)
 var structures: Array = []      # placed structure nodes
+## Barricades, kept apart from the rest so every creature does not have to
+## walk the whole structure list every frame looking for one.
+var barricades: Array = []
 var stations: Array = []        # placed campfire/furnace nodes
+var devices: Array = []         # placed generators, turrets, traps, sensors
+var power: Node                 # the electrical grid solver
 var respawn_queue: Array = []   # {type, pos, at}
+## type -> how hard it has been harvested lately. See PRESSURE_PER_TAKE.
+var pressure: Dictionary = {}
 var npc_respawn_queue: Array = []  # {type, pos, at} — monument guards
 var bags: Array = []            # loot bags left where the player died
 var _stability_pass := false    # guards against re-entering the sweep
@@ -100,6 +132,11 @@ func _ready() -> void:
 	add_child(building)
 	building.world = self
 	building.player = player
+
+	power = PowerGridScript.new()
+	power.name = "PowerGrid"
+	add_child(power)
+	power.world = self
 
 	hud = HudScript.new()
 	hud.name = "HUD"
@@ -257,6 +294,12 @@ func _build_water() -> void:
 	add_child(mi)
 
 
+## True once the sun is low enough that predators start working. Read off
+## the same elevation the lighting uses, so "night" means what it looks like.
+func is_night() -> bool:
+	return _sun_elevation < 0.05
+
+
 func is_in_water(pos: Vector3) -> bool:
 	return terrain_height(pos.x, pos.z) < WATER_LEVEL - 0.15 and pos.y < WATER_LEVEL + 1.2
 
@@ -393,6 +436,19 @@ func _rand_pos_land(margin: float) -> Vector3:
 	return Vector3(10.0, terrain_height(10.0, 10.0), 10.0)
 
 
+## Somewhere in the shallows: standing water a fish could hold in, or the
+## wet ground beside it where clay and sand collect. Falls back to dry land
+## when a map rolls with almost no water on it.
+func _rand_pos_wet(margin: float, below_water: bool) -> Vector3:
+	for i in 60:
+		var p := _rand_pos(margin)
+		if below_water and p.y < WATER_LEVEL - 0.4 and p.y > WATER_LEVEL - 3.0:
+			return Vector3(p.x, WATER_LEVEL - 0.35, p.z)
+		if not below_water and p.y > WATER_LEVEL and p.y < WATER_LEVEL + 1.6:
+			return p
+	return _rand_pos_land(margin)
+
+
 func _scatter_resources() -> void:
 	for i in TREE_COUNT:
 		spawn_resource("tree", _rand_pos_land(40.0))
@@ -405,6 +461,30 @@ func _scatter_resources() -> void:
 	for i in BUSH_COUNT:
 		spawn_resource("bush", _rand_pos_land(40.0))
 
+	# Plants: the cheap end of the economy, and the only cloth you get
+	# without killing something for it.
+	for i in HEMP_COUNT:
+		spawn_resource("hemp", _rand_pos_land(30.0))
+	for i in CORN_COUNT:
+		spawn_resource("corn", _rand_pos_land(30.0))
+	for i in PUMPKIN_COUNT:
+		spawn_resource("pumpkin", _rand_pos_land(30.0))
+	for i in MUSHROOM_COUNT:
+		spawn_resource("mushroom", _rand_pos_land(20.0))
+	for i in HERB_COUNT:
+		spawn_resource("herbs", _rand_pos_land(20.0))
+
+	# Ground materials collect where the water has worked the soil, so a
+	# lakeshore is worth walking rather than just worth drinking from.
+	for i in CLAY_COUNT:
+		spawn_resource("clay_deposit", _rand_pos_wet(40.0, false))
+	for i in SAND_COUNT:
+		spawn_resource("sand_deposit", _rand_pos_wet(40.0, false))
+	for i in SALT_COUNT:
+		spawn_resource("salt_deposit", _rand_pos_land(60.0))
+	for i in FISH_COUNT:
+		spawn_resource("fish", _rand_pos_wet(40.0, true))
+
 
 func spawn_resource(type: String, pos: Vector3) -> void:
 	var node: StaticBody3D = ResourceNodeScript.new()
@@ -415,7 +495,40 @@ func spawn_resource(type: String, pos: Vector3) -> void:
 
 
 func _on_resource_depleted(type: String, pos: Vector3) -> void:
-	respawn_queue.append({"type": type, "pos": pos, "at": clock + RESPAWN_DELAY})
+	note_take(type)
+	respawn_queue.append({"type": type, "pos": pos, "at": clock + respawn_delay_for(type)})
+
+
+# ==================== POPULATION PRESSURE ====================
+
+## Records that one more of `type` has been taken out of the world.
+func note_take(type: String) -> void:
+	pressure[type] = minf(PRESSURE_CAP, float(pressure.get(type, 0.0)) + PRESSURE_PER_TAKE)
+
+
+func pressure_on(type: String) -> float:
+	return float(pressure.get(type, 0.0))
+
+
+## How long this type takes to come back right now. A patch nobody has
+## touched refills at the base rate; one that has been stripped takes its
+## time about it.
+func respawn_delay_for(type: String) -> float:
+	return RESPAWN_DELAY + pressure_on(type) * RESPAWN_PER_PRESSURE
+
+
+func npc_respawn_delay_for(type: String) -> float:
+	return NPC_RESPAWN_DELAY + pressure_on(type) * NPC_RESPAWN_PER_PRESSURE
+
+
+## Everything recovers if it is left alone.
+func _relieve_pressure(delta: float) -> void:
+	for type in pressure.keys():
+		var left := float(pressure[type]) - PRESSURE_DECAY * delta
+		if left <= 0.0:
+			pressure.erase(type)
+		else:
+			pressure[type] = left
 
 
 func _create_monument(x: float, z: float) -> void:
@@ -469,6 +582,12 @@ func _spawn_npcs() -> void:
 	# hunt badly, and only aggressive once you are close enough to matter.
 	for i in BOAR_COUNT:
 		spawn_npc("boar", _rand_pos_land(35.0))
+	# Small game: the food you can take on day one with nothing but a rock,
+	# and what a wolf eats when you are not the closest thing worth chasing.
+	for i in RABBIT_COUNT:
+		spawn_npc("rabbit", _rand_pos_land(20.0))
+	for i in CHICKEN_COUNT:
+		spawn_npc("chicken", _rand_pos_land(20.0))
 
 
 func spawn_npc(type: String, pos: Vector3) -> void:
@@ -482,7 +601,8 @@ func spawn_npc(type: String, pos: Vector3) -> void:
 ## A killed guard leaves its post empty for a while, then it is filled
 ## again — otherwise clearing a monument once would clear it forever.
 func queue_npc_respawn(type: String, pos: Vector3) -> void:
-	npc_respawn_queue.append({"type": type, "pos": pos, "at": clock + NPC_RESPAWN_DELAY})
+	npc_respawn_queue.append({"type": type, "pos": pos,
+		"at": clock + npc_respawn_delay_for(type)})
 
 
 func _create_player() -> void:
@@ -533,6 +653,50 @@ func _update_stations(delta: float) -> void:
 		Game.stats.temperature, clampf(target, 0.0, 100.0), WARMTH_RATE * delta)
 
 
+# ==================== DEVICES & POWER ====================
+
+## How much of its rating a solar panel makes right now: nothing before dawn,
+## everything at noon.
+func sun_strength() -> float:
+	return clampf(_sun_elevation, 0.0, 1.0)
+
+
+## Wind comes in slow swells rather than blowing at one speed forever, so a
+## turbine-only base has quiet spells that a battery has to cover.
+func wind_strength() -> float:
+	var swell := 0.5 + 0.5 * sin(clock * TAU / Game.WIND_PERIOD)
+	return clampf(Game.WIND_FLOOR + (1.0 - Game.WIND_FLOOR) * swell, 0.0, 1.0)
+
+
+func place_device(type: String, pos: Vector3) -> void:
+	var label: String = Game.ITEMS.get(type, {}).get("name", type)
+	if Game.get_count(type) <= 0:
+		Game.notify("Craft a %s first" % label, Color(0.9, 0.3, 0.3))
+		return
+	Game.remove_item(type, 1)
+	_spawn_device(type, pos)
+	Game.notify("Placed %s" % label)
+	Sfx.play("build")
+
+
+func _spawn_device(type: String, pos: Vector3) -> Node3D:
+	var d: StaticBody3D = DeviceScript.new()
+	d.setup(type, self)
+	d.position = pos
+	add_child(d)
+	devices.append(d)
+	return d
+
+
+## Takes a device off the grid and out of the world — a spent mine, a turret
+## somebody blew off its mount.
+func remove_device(d: Node3D) -> void:
+	devices.erase(d)
+	if power != null:
+		power.disconnect_device(d)
+	d.queue_free()
+
+
 func _spawn_station(type: String, pos: Vector3) -> Node3D:
 	var s: StaticBody3D = StationScript.new()
 	s.setup(type)
@@ -555,6 +719,7 @@ func _process(delta: float) -> void:
 	Game.stats.hunger = maxf(0.0, Game.stats.hunger - 0.05 * delta)
 	Game.stats.thirst = maxf(0.0, Game.stats.thirst - 0.08 * delta)
 	_update_stations(delta)
+	_relieve_pressure(delta)
 
 	var in_rad := false
 	for z in rad_zones:
@@ -733,6 +898,14 @@ func apply_explosion(origin: Vector3, damage: float, radius: float) -> float:
 			continue
 		dealt += s.take_blast(damage * clampf(1.0 - d / radius, 0.15, 1.0), origin)
 
+	# Turrets and traps go up with the wall they were bolted to
+	for d in devices.duplicate():
+		if not is_instance_valid(d):
+			continue
+		var dd: float = d.position.distance_to(origin)
+		if dd <= radius:
+			dealt += d.take_blast(damage * clampf(1.0 - dd / radius, 0.15, 1.0), origin)
+
 	for child in get_children():
 		if child.has_method("npc_take_damage"):
 			var dn: float = child.position.distance_to(origin)
@@ -796,10 +969,13 @@ func _tc_covering(pos: Vector3, tcs: Array) -> Node3D:
 
 func register_structure(s: Node3D) -> void:
 	structures.append(s)
+	if s.build_type == "barricade":
+		barricades.append(s)
 
 
 func unregister_structure(s: Node3D) -> void:
 	structures.erase(s)
+	barricades.erase(s)
 	# Whatever that piece was holding up may have nothing under it now
 	recompute_stability()
 
@@ -828,7 +1004,8 @@ func ground_height_at(x: float, z: float) -> float:
 ## edge was nearest a foundation when it was placed (see building_system.gd).
 ## Plain rounding would land it in the empty gap between two tiles, so it
 ## has to resolve to whichever neighbouring tile actually carries it.
-const _EDGE_TYPES := ["wall", "doorway", "window_wall", "wooden_door"]
+const _EDGE_TYPES := ["wall", "half_wall", "low_wall", "doorway", "window_wall",
+	"ladder", "wooden_door", "garage_door"]
 
 
 ## Which 3m cell a piece stands in. Pieces "at the same point" are within
@@ -837,13 +1014,28 @@ const _EDGE_TYPES := ["wall", "doorway", "window_wall", "wooden_door"]
 ## piece resolves to whichever of its two neighbouring cells is one of
 ## those, defaulting to the first if neither (or both) qualify.
 func _cell_of(s: Node3D, founded_cells: Dictionary) -> Vector2i:
+	# A pillar stands on the corner where up to four tiles meet, so plain
+	# rounding drops it into whichever one happens to be nearest — often an
+	# empty one, and the pillar then falls down on a base it is holding up.
+	# It belongs to whichever of the four is actually carrying it.
+	if s.build_type == "pillar":
+		var corners: Array[Vector2i] = []
+		for ox in [-1.5, 1.5]:
+			for oz in [-1.5, 1.5]:
+				corners.append(Vector2i(roundi((s.position.x + ox) / 3.0),
+					roundi((s.position.z + oz) / 3.0)))
+		for c in corners:
+			if founded_cells.has(c):
+				return c
+		return corners[0]
+
 	if not (s.build_type in _EDGE_TYPES):
 		return Vector2i(roundi(s.position.x / 3.0), roundi(s.position.z / 3.0))
 
 	# base_rot and closed_pos (not rotation.y / position) because an open
 	# door's swing changes both, and it must still resolve to the same
 	# tile its doorway does.
-	var p: Vector3 = s.closed_pos if s.build_type == "wooden_door" else s.position
+	var p: Vector3 = s.closed_pos if s.is_door else s.position
 	var candidates: Array[Vector2i] = []
 	if absf(s.base_rot - PI / 2.0) < 0.1:
 		var cz := roundi(p.z / 3.0)
@@ -865,14 +1057,17 @@ func _cell_of(s: Node3D, founded_cells: Dictionary) -> Vector2i:
 func _score_stability() -> void:
 	var founded_cells := {}
 	for s in structures:
-		if is_instance_valid(s) and (s.build_type == "foundation" or s.build_type == "ceiling"):
+		if is_instance_valid(s) and (s.build_type in Game.SUPPORT_TYPES):
 			founded_cells[Vector2i(roundi(s.position.x / 3.0), roundi(s.position.z / 3.0))] = true
 
 	var columns: Dictionary = {}
 	for s in structures:
 		if not is_instance_valid(s):
 			continue
-		s.stability = 100.0 if s.build_type == "foundation" else 0.0
+		# Free-standing pieces carry nothing and are carried by nothing, so
+		# they are simply always up.
+		s.stability = 100.0 if (s.build_type in Game.ANCHOR_TYPES
+			or s.build_type in Game.FREESTANDING_TYPES) else 0.0
 		var cell := _cell_of(s, founded_cells)
 		if not columns.has(cell):
 			columns[cell] = []
@@ -885,15 +1080,25 @@ func _score_stability() -> void:
 		# stand at the same height and must not tax each other.
 		var carried := 0.0
 		var last_y := -INF
+		# A pillar on the level below is a load path straight down to the
+		# footing, so the level above it starts again at full instead of
+		# losing its step. That is the whole reason to spend on pillars when
+		# a base goes up rather than out.
+		var braced_below := false
 		for s in column:
-			if s.build_type == "foundation":
+			if s.build_type in Game.ANCHOR_TYPES:
 				carried = 100.0
 				last_y = s.position.y
+				braced_below = false
 				continue
 			if s.position.y > last_y + 0.5:
-				carried = maxf(0.0, carried - Game.STABILITY_DROP)
+				carried = 100.0 if braced_below else maxf(0.0, carried - Game.STABILITY_DROP)
 				last_y = s.position.y
-			s.stability = carried
+				braced_below = false
+			if s.build_type == "pillar":
+				braced_below = true
+			if not (s.build_type in Game.FREESTANDING_TYPES):
+				s.stability = carried
 
 		# A door hangs on its doorway, not on the floor below it
 		for s in column:
@@ -950,12 +1155,34 @@ func save_game() -> void:
 			"inventory": Game.inventory,
 			"belt": Game.belt,
 			"worn": Game.worn,
+			"wear": Game.tool_wear,
 		},
 		"time": Game.day_time,
 		"structures": [],
 		"stations": [],
 		"bags": [],
+		"devices": [],
+		"wires": [],
 	}
+
+	# Devices first, because the wires are stored as indices into this list
+	var live_devices := []
+	for d in devices:
+		if is_instance_valid(d):
+			live_devices.append(d)
+	for d in live_devices:
+		data.devices.append({
+			"type": d.device_type,
+			"pos": [d.position.x, d.position.y, d.position.z],
+			"on": d.switch_on,
+			"charge": d.stored_charge,
+		})
+	if power != null:
+		for w in power.wires:
+			var ia := live_devices.find(w[0])
+			var ib := live_devices.find(w[1])
+			if ia >= 0 and ib >= 0:
+				data.wires.append([ia, ib])
 	for bag in bags:
 		if not is_instance_valid(bag) or bag.is_empty():
 			continue
@@ -980,6 +1207,8 @@ func save_game() -> void:
 			"lock": s.lock_type,
 			"lock_health": s.lock_health,
 			"soft": [s.soft_normal.x, s.soft_normal.z],
+			# Stored as age, because the world clock restarts on every load
+			"age": maxf(0.0, clock - s.placed_at),
 		})
 	for st in stations:
 		if not is_instance_valid(st):
@@ -1029,6 +1258,14 @@ func load_game() -> void:
 			# Only re-equip pieces that still exist and still fit that slot
 			if Game.ARMOUR.has(piece) and str(Game.ARMOUR[piece].slot) == str(slot):
 				Game.worn[slot] = piece
+	if p.has("wear") and p.wear is Dictionary:
+		Game.tool_wear = {}
+		for id in p.wear:
+			# Only for things that still wear out, and never above the
+			# maximum a rebalance may since have lowered.
+			if Game.has_durability(str(id)):
+				Game.tool_wear[str(id)] = clampi(
+					int(p.wear[id]), 0, Game.max_durability(str(id)))
 	Game.day_time = float(parsed.get("time", Game.day_time))
 
 	for sd in parsed.get("structures", []):
@@ -1043,6 +1280,7 @@ func load_game() -> void:
 		s.position = Vector3(float(sp[0]), float(sp[1]), float(sp[2]))
 		s.base_rot = float(sd.get("rot", 0.0))
 		s.rotation.y = s.base_rot
+		s.placed_at = clock - float(sd.get("age", Game.DEMOLISH_WINDOW))
 		add_child(s)
 		s.apply_tier(str(sd.get("tier", "twig")))
 		s.health = float(sd.get("health", s.max_health))
@@ -1057,7 +1295,7 @@ func load_game() -> void:
 		if saved_lock != "" and s.install_lock(saved_lock):
 			# A half-broken lock stays half-broken across a reload
 			s.lock_health = float(sd.get("lock_health", s.lock_health))
-		structures.append(s)
+		register_structure(s)
 		if type == "tool_cupboard":
 			Game.tool_cupboards.append(Vector2(s.position.x, s.position.z))
 
@@ -1091,6 +1329,34 @@ func load_game() -> void:
 		if contents is Dictionary:
 			for k in contents:
 				node.stored[k] = int(contents[k])
+
+	# Devices, then the wires between them by the index they were saved at
+	var restored := []
+	for dd in parsed.get("devices", []):
+		if not (dd is Dictionary):
+			continue
+		var dtype := str(dd.get("type", ""))
+		if not Game.DEVICES.has(dtype):
+			continue
+		var dp: Array = dd.get("pos", [0, 0, 0])
+		var node := _spawn_device(dtype,
+			Vector3(float(dp[0]), float(dp[1]), float(dp[2])))
+		node.switch_on = bool(dd.get("on", true))
+		node.stored_charge = float(dd.get("charge", 0.0))
+		restored.append(node)
+
+	if power != null:
+		for pair in parsed.get("wires", []):
+			if not (pair is Array) or pair.size() != 2:
+				continue
+			var ia := int(pair[0])
+			var ib := int(pair[1])
+			if ia < 0 or ib < 0 or ia >= restored.size() or ib >= restored.size():
+				continue
+			# Straight into the list: the range check was already passed when
+			# the wire was first run, and the two ends have not moved.
+			power.wires.append([restored[ia], restored[ib]])
+			power._draw_wire(restored[ia], restored[ib])
 
 
 func _notification(what: int) -> void:

@@ -6,11 +6,15 @@ extends StaticBody3D
 
 const ModelRegistry := preload("res://scripts/model_registry.gd")
 
-## Everything a storage box will accept.
-const STASHABLE := [
-	"wood", "stone", "iron", "sulfur_ore", "sulfur", "hqm", "frag", "lgf", "cloth",
-	"leather", "scrap", "oil", "berries", "raw_meat", "cooked_meat",
-]
+## Everything a storage box will accept: raw materials, not gear. Read off
+## the item table rather than listed by hand, so a new resource is stashable
+## the moment it exists instead of silently refusing to go in a box.
+static func stashable() -> Array:
+	var out := []
+	for id in Game.ITEMS:
+		if str(Game.ITEMS[id].get("category", "")) == "resources" or id == "scrap":
+			out.append(id)
+	return out
 
 ## Research table output pool: components with no other source in the world.
 const RESEARCH_OUTPUTS := ["gear_comp", "pipe", "spring", "sewing"]
@@ -23,17 +27,29 @@ const OIL_PER_FUEL := 5
 ## it works through them. `per` is how many units of input make one unit of
 ## output; `wood` is the wood burnt per unit of input, and burnt wood leaves
 ## charcoal behind. Refining oil needs no fire, so it costs no wood.
+##
+## `extra` is a second ingredient consumed alongside the main one, per batch
+## — a brick is fired clay held together with fill, not clay alone.
 const SMELTING := [
 	{"input": "oil", "output": "lgf", "per": OIL_PER_FUEL, "wood": 0.0,
 		"verb": "Refined %d crude oil into %d low grade fuel"},
+	{"input": "resin", "output": "lgf", "per": 3, "wood": 0.0,
+		"verb": "Rendered %d resin into %d low grade fuel"},
 	{"input": "iron", "output": "frag", "per": 1, "wood": 0.5,
 		"verb": "Smelted %d metal ore into %d fragments"},
 	{"input": "sulfur_ore", "output": "sulfur", "per": 1, "wood": 0.5,
 		"verb": "Smelted %d sulfur ore into %d sulfur"},
+	{"input": "sand", "output": "glass", "per": 4, "wood": 1.0,
+		"verb": "Fired %d sand into %d glass"},
+	{"input": "clay", "output": "brick", "per": 3, "wood": 0.6, "extra": {"dirt": 2},
+		"verb": "Fired %d clay into %d brick"},
 ]
 
 var station_type := "campfire"
 var stored: Dictionary = {}
+## Set by the power grid each time it solves. Only meaningful for stations
+## that draw power at all.
+var powered := false
 
 
 func setup(t: String) -> void:
@@ -66,6 +82,9 @@ func _add_collision_for(t: String) -> void:
 		"storage_box": Vector3(0.92, 0.6, 0.64),
 		"large_box": Vector3(1.43, 1.0, 0.85),
 		"sleeping_bag": Vector3(1.9, 0.22, 0.9),
+		"recycler": Vector3(1.1, 1.6, 1.0),
+		"advanced_recycler": Vector3(1.3, 1.7, 1.1),
+		"hitech_recycler": Vector3(1.5, 1.8, 1.2),
 	}
 	var size: Vector3 = sizes.get(t, Vector3(1, 1, 1))
 	var cs := CollisionShape3D.new()
@@ -182,6 +201,8 @@ func interact_station() -> void:
 			_research()
 		"storage_box", "large_box":
 			_use_storage()
+		"recycler", "advanced_recycler", "hitech_recycler":
+			_recycle()
 		"sleeping_bag":
 			Game.notify("You will respawn here")
 		"workbench_t1", "workbench_t2":
@@ -190,21 +211,39 @@ func interact_station() -> void:
 			pass
 
 
-## Campfire: 2 wood per raw meat -> cooked meat.
+## Campfire: 2 wood per raw item -> its cooked form. Meat and fish both go
+## on the same fire, so a lakeside camp feeds you as well as a hunt does.
+const COOKING := {"raw_meat": "cooked_meat", "raw_fish": "cooked_fish"}
+const WOOD_PER_COOK := 2
+
+
 func _cook() -> void:
-	var raw := Game.get_count("raw_meat")
-	if raw <= 0:
-		Game.notify("No raw meat to cook", Color(1.0, 0.63, 0.0))
-		return
-	var can_cook := mini(raw, floori(Game.get_count("wood") / 2.0))
-	if can_cook <= 0:
-		Game.notify("Need 2 wood per meat", Color(0.9, 0.3, 0.3))
-		return
-	Game.remove_item("raw_meat", can_cook)
-	Game.remove_item("wood", can_cook * 2)
-	Game.add_item("cooked_meat", can_cook)
-	Game.notify("Cooked %d meat" % can_cook)
-	Sfx.play("harvest")
+	var done := []
+	var total := 0
+	var had_raw := false
+	for raw_id in COOKING:
+		var raw := Game.get_count(raw_id)
+		if raw <= 0:
+			continue
+		had_raw = true
+		var cooked_id := str(COOKING[raw_id])
+		var can_cook := mini(raw, floori(float(Game.get_count("wood")) / float(WOOD_PER_COOK)))
+		can_cook = mini(can_cook, Game.room_for(cooked_id))
+		if can_cook <= 0:
+			continue
+		Game.remove_item(raw_id, can_cook)
+		Game.remove_item("wood", can_cook * WOOD_PER_COOK)
+		Game.add_item(cooked_id, can_cook)
+		done.append("%d %s" % [can_cook, Game.ITEMS[cooked_id].name])
+		total += can_cook
+
+	if total > 0:
+		Game.notify("Cooked " + " · ".join(done))
+		Sfx.play("harvest")
+	elif had_raw:
+		Game.notify("Need %d wood per item" % WOOD_PER_COOK, Color(0.9, 0.3, 0.3))
+	else:
+		Game.notify("Nothing raw to cook", Color(1.0, 0.63, 0.0))
 
 
 ## Furnace: works through every recipe it can afford in one go. It used to
@@ -229,11 +268,17 @@ func _smelt() -> void:
 			batches = mini(batches, affordable)
 		# Never burn ore the player has no room to carry away
 		batches = mini(batches, Game.room_for(str(recipe.output)))
+		# A second ingredient caps the run as hard as the first one does
+		var extra: Dictionary = recipe.get("extra", {})
+		for res in extra:
+			batches = mini(batches, floori(float(Game.get_count(res)) / float(extra[res])))
 		if batches <= 0:
 			continue
 		var used: int = batches * int(recipe.per)
 		var burnt: int = ceili(float(used) * float(recipe.wood))
 		Game.remove_item(recipe.input, used)
+		for res in extra:
+			Game.remove_item(res, batches * int(extra[res]))
 		if burnt > 0:
 			Game.remove_item("wood", burnt)
 			# Burnt fuel leaves charcoal behind, which gunpowder needs
@@ -254,6 +299,86 @@ func _smelt() -> void:
 	if charcoal > 0:
 		done.append("+%d charcoal" % charcoal)
 	Game.notify(" · ".join(done))
+	Sfx.play("upgrade")
+
+
+# ==================== RECYCLING ====================
+
+## Units of electricity this station needs to run, 0 when it needs none.
+func power_draw() -> float:
+	return float(Game.DEPLOYABLES.get(station_type, {}).get("power", 0.0))
+
+
+## Share of an item's build cost this machine hands back.
+func efficiency() -> float:
+	return float(Game.DEPLOYABLES.get(station_type, {}).get("efficiency", 0.0))
+
+
+## Whether the grid is currently feeding this station. A machine that needs
+## no power is always on; one that does is only on while the wires say so.
+func is_powered() -> bool:
+	if power_draw() <= 0.0:
+		return true
+	return powered
+
+
+## Called by the power grid each time it solves.
+func set_powered(on: bool) -> void:
+	powered = on
+
+
+func label() -> String:
+	return str(Game.ITEMS.get(station_type, {}).get("name", station_type))
+
+
+## Breaks down whatever is in the selected belt slot — one stack at a time,
+## on purpose. A recycler that ate everything in your pockets the moment you
+## touched it would be a trap rather than a machine.
+func _recycle() -> void:
+	if not is_powered():
+		Game.notify("%s has no power" % Game.ITEMS[station_type].name, Color(0.9, 0.3, 0.3))
+		return
+
+	var id := Game.active_tool()
+	if id == "":
+		Game.notify("Hold what you want recycled in your belt", Color(1.0, 0.63, 0.0))
+		return
+	if not Game.is_recyclable(id):
+		Game.notify("%s cannot be broken down" % Game.ITEMS.get(id, {}).get("name", id),
+			Color(1.0, 0.63, 0.0))
+		return
+
+	var per_unit := Game.recycle_yield(id, efficiency())
+	if per_unit.is_empty():
+		Game.notify("Nothing worth recovering from that", Color(1.0, 0.63, 0.0))
+		return
+
+	# Only process as many as the pockets can hold the output of, so a run
+	# never destroys a stack and hands back nothing.
+	var have := Game.get_count(id)
+	var batch := have
+	for res in per_unit:
+		batch = mini(batch, floori(float(Game.room_for(res)) / float(per_unit[res])))
+	if batch <= 0:
+		Game.notify("No room for what that would give back", Color(1.0, 0.63, 0.0))
+		return
+
+	Game.remove_item(id, batch)
+	var parts := []
+	for res in per_unit:
+		var units: int = int(per_unit[res]) * batch
+		Game.add_item(res, units)
+		parts.append("%d %s" % [units, Game.ITEMS[res].name])
+
+	# The belt slot is empty now if that was the last one
+	if Game.get_count(id) <= 0:
+		for i in Game.belt.size():
+			if Game.belt[i] == id:
+				Game.belt[i] = null
+		Game.belt_changed.emit()
+
+	Game.notify("Recycled %d %s → %s"
+		% [batch, Game.ITEMS[id].name, " · ".join(parts)])
 	Sfx.play("upgrade")
 
 
@@ -281,7 +406,7 @@ func capacity() -> int:
 func _use_storage() -> void:
 	var moved := 0
 	var refused := 0
-	for id in STASHABLE:
+	for id in stashable():
 		var count := Game.get_count(id)
 		if count <= 0:
 			continue

@@ -30,6 +30,9 @@ var soft_normal := Vector3.ZERO
 ## How well held up this piece is, 0-100. Foundations anchor at 100 and
 ## everything above loses a step per level. At 0 the piece falls down.
 var stability := 100.0
+## World clock reading when it went up. Demolition is only offered for a
+## while after that — see Game.DEMOLISH_WINDOW.
+var placed_at := 0.0
 
 var _visual: Node3D          # Blender model, when one exists for this piece
 var _visual_path := ""       # which model `_visual` was instanced from
@@ -57,29 +60,44 @@ func setup(type: String) -> void:
 		add_child(_visual)
 	else:
 		_visual_path = ""
-		# No model for this piece yet: fall back to the primitive block
-		var mi := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = bt.size
-		_fallback_mat = StandardMaterial3D.new()
-		_fallback_mat.roughness = 0.8
-		box.material = _fallback_mat
-		mi.mesh = box
-		add_child(mi)
-		_visual = mi
+		_build_fallback_visual(bt)
 
 	# Collision always comes from the declared grid size, never the mesh, so
 	# swapping a model can never shift a placed structure's hitbox.
-	_build_collision(bt.size)
+	_build_collision(bt)
 
 	apply_tier("twig")
 
 
-## One solid box per piece — except a doorway, which is a frame. It used to
-## get the same full 3x3 box as a wall, so the opening you can see through
-## was solid to walk into: nothing, not even the owner, could get through
-## their own door.
-func _build_collision(size: Vector3) -> void:
+## The primitive stand-in used by every piece with no Blender model yet. A
+## box for almost everything; the triangle and the roof get the same solid
+## the collision is built from, so what you see is what you walk into.
+func _build_fallback_visual(bt: Dictionary) -> void:
+	_fallback_mat = StandardMaterial3D.new()
+	_fallback_mat.roughness = 0.8
+	var mi := MeshInstance3D.new()
+	var shape := str(bt.get("shape", "box"))
+	if shape == "box":
+		var box := BoxMesh.new()
+		box.size = bt.size
+		box.material = _fallback_mat
+		mi.mesh = box
+	else:
+		mi.mesh = _solid_mesh(shape, bt.size, _fallback_mat)
+	add_child(mi)
+	_visual = mi
+
+
+## One solid box per piece — except a doorway, which is a frame, and the
+## triangle and roof, which are convex solids. The doorway used to get the
+## same full 3x3 box as a wall, so the opening you can see through was solid
+## to walk into: nothing, not even the owner, could get through their own door.
+func _build_collision(bt: Dictionary) -> void:
+	var size: Vector3 = bt.size
+	var shape := str(bt.get("shape", "box"))
+	if shape != "box":
+		_add_convex(_hull_points(shape, size))
+		return
 	if build_type != "doorway":
 		_add_box(size, Vector3.ZERO)
 		return
@@ -97,6 +115,97 @@ func _add_box(size: Vector3, offset: Vector3) -> void:
 	cs.shape = shape
 	cs.position = offset
 	add_child(cs)
+
+
+func _add_convex(points: PackedVector3Array) -> void:
+	var cs := CollisionShape3D.new()
+	var shape := ConvexPolygonShape3D.new()
+	shape.points = points
+	cs.shape = shape
+	add_child(cs)
+
+
+## Corner points of a non-box piece, centred on the origin like every other
+## collision solid here.
+##
+## "triangle" is a 3x3 tile cut along the diagonal that runs from its -x/-z
+## corner to its +x/+z one, leaving the half on the +x side; four of them
+## rotated in 90° steps tile a full square, which is what makes hexagonal
+## and angled bases possible on a square grid.
+##
+## "wedge" is a roof: flat underneath, rising from the -z edge to a ridge
+## along +z, so rain-shedding pitched roofs sit on top of 3m walls.
+static func _hull_points(shape: String, size: Vector3) -> PackedVector3Array:
+	var hx := size.x * 0.5
+	var hy := size.y * 0.5
+	var hz := size.z * 0.5
+	if shape == "triangle":
+		return PackedVector3Array([
+			Vector3(-hx, -hy, -hz), Vector3(hx, -hy, -hz), Vector3(hx, -hy, hz),
+			Vector3(-hx, hy, -hz), Vector3(hx, hy, -hz), Vector3(hx, hy, hz)])
+	# wedge
+	return PackedVector3Array([
+		Vector3(-hx, -hy, -hz), Vector3(hx, -hy, -hz),
+		Vector3(hx, -hy, hz), Vector3(-hx, -hy, hz),
+		Vector3(-hx, hy, hz), Vector3(hx, hy, hz)])
+
+
+## The same solids as triangle lists, so the drawn mesh and the collision
+## hull are generated from one set of corners and cannot drift apart.
+static func _hull_faces(shape: String, size: Vector3) -> Array:
+	var p := _hull_points(shape, size)
+	if shape == "triangle":
+		# 0,1,2 = bottom face; 3,4,5 = the same corners on top
+		return [[0, 2, 1], [3, 4, 5],
+			[0, 1, 4], [0, 4, 3],
+			[1, 2, 5], [1, 5, 4],
+			[2, 0, 3], [2, 3, 5]]
+	# wedge: 0-3 base quad (-z,-z,+z,+z), 4-5 the ridge above the +z edge
+	return [[0, 2, 1], [0, 3, 2],
+		[3, 5, 4], [3, 2, 5],
+		[0, 1, 5], [0, 5, 4],
+		[0, 4, 3], [1, 2, 5]]
+
+
+## Flat-shaded mesh built from the same corners the collision hull uses.
+##
+## Winding is fixed here rather than trusted from the face table: a solid is
+## convex and its faces all point away from its centre, so any triangle
+## found facing inwards is simply turned round. Getting one wrong by hand
+## would leave a hole in the piece that is only visible from one side.
+static func _solid_mesh(shape: String, size: Vector3, mat: StandardMaterial3D) -> ArrayMesh:
+	var points := _hull_points(shape, size)
+	var middle := Vector3.ZERO
+	for p in points:
+		middle += p
+	middle /= float(points.size())
+
+	var verts := PackedVector3Array()
+	var normals := PackedVector3Array()
+	for face in _hull_faces(shape, size):
+		var a: Vector3 = points[face[0]]
+		var b: Vector3 = points[face[1]]
+		var c: Vector3 = points[face[2]]
+		var n := (b - a).cross(c - a)
+		if n.length() < 0.0001:
+			continue
+		n = n.normalized()
+		if n.dot((a + b + c) / 3.0 - middle) < 0.0:
+			var swap := b
+			b = c
+			c = swap
+			n = -n
+		verts.append_array(PackedVector3Array([a, b, c]))
+		for i in 3:
+			normals.append(n)
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = verts
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	mesh.surface_set_material(0, mat)
+	return mesh
 
 
 func apply_tier(t: String) -> void:
@@ -140,7 +249,21 @@ func _swap_visual(path: String) -> void:
 	add_child(_visual)
 
 
+## Whether the player may work this door right now. A key or code lock
+## always opens for the owner; a keycard lock wants the card in hand, so it
+## is the one lock that can shut you out of your own base.
+func player_may_open() -> bool:
+	if not is_locked():
+		return true
+	var needs := str(Game.LOCKS[lock_type].get("needs", ""))
+	return needs == "" or Game.get_count(needs) > 0
+
+
 func toggle_door() -> void:
+	if not player_may_open():
+		Game.notify("%s — you need a %s"
+			% [Game.LOCKS[lock_type].name, Game.ITEMS["keycard"].name], Color(0.9, 0.3, 0.3))
+		return
 	set_door_state(not is_open)
 	Sfx.play("door")
 
@@ -150,8 +273,18 @@ func toggle_door() -> void:
 ## the doorway it belongs to — for the owner as much as for anything else.
 func set_door_state(open: bool) -> void:
 	is_open = open
-	rotation.y = base_rot + (PI / 2.0 if open else 0.0)
 	position = closed_pos
+	rotation.y = base_rot
+
+	# A garage door has no hinge: it runs up into its own lintel. Nothing can
+	# body-block it from the far side the way a swinging leaf can be, which
+	# is most of what the metal buys you.
+	if build_type in Game.LIFTING_DOORS:
+		if open:
+			position.y += float(Game.BUILDING_TYPES[build_type].size.y)
+		return
+
+	rotation.y = base_rot + (PI / 2.0 if open else 0.0)
 	if open:
 		var w: float = Game.BUILDING_TYPES[build_type].size.x
 		position += Vector3(-w * 0.5, 0.0, w * 0.5).rotated(Vector3.UP, base_rot)
@@ -317,6 +450,38 @@ func upkeep_total() -> int:
 	for res in upkeep:
 		total += int(upkeep[res])
 	return total
+
+
+# ==================== DEMOLITION ====================
+
+## Everything that was spent climbing to this piece's current tier. Upgrades
+## only ever go one step at a time, so the total is the sum of every tier's
+## cost up to this one — no need to record the history as it happens.
+func invested_materials() -> Dictionary:
+	var total := {}
+	var idx := Game.TIER_ORDER.find(tier)
+	for i in range(1, idx + 1):
+		var cost: Dictionary = Game.BUILDING_TIERS[Game.TIER_ORDER[i]].cost
+		for res in cost:
+			total[res] = int(total.get(res, 0)) + int(cost[res])
+	return total
+
+
+## What tearing this piece down hands back: half of what went into it.
+func salvage_value() -> Dictionary:
+	var spent := invested_materials()
+	var refund := {}
+	for res in spent:
+		var units := floori(float(spent[res]) * Game.SALVAGE_FRACTION)
+		if units > 0:
+			refund[res] = units
+	return refund
+
+
+## A piece is only cleanly removable for a while after it goes up. Past that
+## it has to be knocked down, so nobody salvages their way into a base.
+func can_demolish(now: float) -> bool:
+	return now - placed_at <= Game.DEMOLISH_WINDOW
 
 
 ## Falls down because nothing is holding it up any more. Same end as being

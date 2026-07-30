@@ -12,18 +12,25 @@ const ModelRegistry := preload("res://scripts/model_registry.gd")
 const TYPES := {
 	"wolf": {"health": 50.0, "speed": 5.0, "damage": 12.0, "hostile": true,
 		"color": Color8(93, 64, 55), "size": Vector3(0.8, 1.4, 0.4),
-		"aggro": 18.0, "cooldown": 1.2},
+		"aggro": 18.0, "cooldown": 1.2, "hunts": true, "packs": true},
 	"bear": {"health": 120.0, "speed": 3.0, "damage": 20.0, "hostile": true,
 		"color": Color8(62, 39, 35), "size": Vector3(1.1, 1.6, 0.6),
-		"aggro": 18.0, "cooldown": 1.2},
+		"aggro": 18.0, "cooldown": 1.2, "hunts": true},
 	"deer": {"health": 40.0, "speed": 7.0, "damage": 0.0, "hostile": false,
-		"color": Color8(193, 154, 107), "size": Vector3(0.5, 1.1, 0.9)},
+		"color": Color8(193, 154, 107), "size": Vector3(0.5, 1.1, 0.9), "prey": true},
 	# Short-sighted and short-tempered: a boar will not cross the map for
 	# you the way a wolf does, but walk into one and it commits. That gap
 	# between the deer you hunt and the wolf that hunts you is the point.
 	"boar": {"health": 80.0, "speed": 4.5, "damage": 15.0, "hostile": true,
 		"color": Color8(96, 74, 58), "size": Vector3(0.6, 1.0, 1.1),
 		"aggro": 11.0, "cooldown": 1.4},
+	# Small game. A rabbit is fast and worth almost nothing; a chicken is
+	# slow and lays as it wanders. Both are day-one food, and both are what
+	# a wolf goes for when you are not the nearest warm thing.
+	"rabbit": {"health": 18.0, "speed": 8.5, "damage": 0.0, "hostile": false,
+		"color": Color8(198, 180, 160), "size": Vector3(0.3, 0.35, 0.5), "prey": true},
+	"chicken": {"health": 15.0, "speed": 3.2, "damage": 0.0, "hostile": false,
+		"color": Color8(245, 240, 230), "size": Vector3(0.28, 0.45, 0.4), "prey": true},
 	"scientist": {"health": 90.0, "speed": 4.0, "damage": 13.0, "hostile": true,
 		"color": Color8(38, 84, 124), "size": Vector3(0.6, 1.8, 0.4),
 		"aggro": 45.0, "cooldown": 1.3, "ranged": true, "range": 45.0,
@@ -31,16 +38,27 @@ const TYPES := {
 }
 
 const LOOT := {
-	"wolf": {"cloth": 10, "leather": 5, "raw_meat": 2},
-	"bear": {"cloth": 15, "leather": 10, "raw_meat": 4},
-	"deer": {"raw_meat": 3, "leather": 2, "cloth": 2},
+	"wolf": {"cloth": 10, "leather": 5, "raw_meat": 2, "bone": 2},
+	"bear": {"cloth": 15, "leather": 10, "raw_meat": 4, "bone": 6},
+	"deer": {"raw_meat": 3, "leather": 2, "cloth": 2, "bone": 2, "antlers": 1},
 	# The best meat in the game, and it fights back for it.
-	"boar": {"raw_meat": 6, "leather": 4, "cloth": 3},
+	"boar": {"raw_meat": 6, "leather": 4, "cloth": 3, "bone": 3, "tusks": 1},
+	"rabbit": {"raw_meat": 1, "leather": 1, "bone": 1},
+	"chicken": {"raw_meat": 1, "feather": 4, "egg": 1, "bone": 1},
 	"scientist": {"scrap": 15, "frag": 25, "ammo_rifle": 5, "cloth": 5},
 }
 
 ## How hard a guard works on a door that is in its way.
 const DOOR_DAMAGE := 8.0
+
+## How far a predator will look for something smaller once the sun is down.
+const PREDATION_RANGE := 40.0
+## How close another of its own kind has to be to count as pack, and what
+## having one alongside is worth. A lone wolf is a nuisance; three of them
+## working the same clearing is the reason to be indoors after dark.
+const PACK_RADIUS := 14.0
+const PACK_BONUS := 0.35
+const PACK_MAX := 2
 
 var npc_type := "wolf"
 var health := 50.0
@@ -54,6 +72,8 @@ var _visual: Node3D  # Blender model, when one exists for this species
 var _mat: StandardMaterial3D  # only set by the primitive fallback
 var _wander_dir := Vector3.ZERO
 var _wander_timer := 0.0
+## Seconds left held in a bear trap. Nothing moves while this is running.
+var _snared := 0.0
 
 
 func setup(t: String, w: Node3D) -> void:
@@ -130,6 +150,13 @@ func _physics_process(delta: float) -> void:
 		return
 	_attack_cd = maxf(0.0, _attack_cd - delta)
 
+	# Held in a trap: it can still be shot, it just cannot go anywhere, and
+	# the jaws keep working on it the whole time.
+	if _snared > 0.0:
+		_snared -= delta
+		npc_take_damage(Game.BARRICADE_DPS * 0.4 * delta, false)
+		return
+
 	var player: Node3D = world.player
 	var dist := position.distance_to(player.position)
 
@@ -141,6 +168,20 @@ func _physics_process(delta: float) -> void:
 	# Stay glued to the ground — including a base's floor, which creatures
 	# step onto rather than wade through
 	position.y = world.ground_height_at(position.x, position.z)
+	_bleed_on_barricades(delta)
+
+
+## Barbed wire and steel plate. Anything that pushes into a barricade pays
+## for it every second it stays there, which is what turns a ring of them
+## into a perimeter rather than a fence.
+func _bleed_on_barricades(delta: float) -> void:
+	for b in world.barricades:
+		if not is_instance_valid(b):
+			continue
+		if position.distance_to(b.position) > Game.BARRICADE_RADIUS:
+			continue
+		npc_take_damage(Game.BARRICADE_DPS * delta)
+		return
 
 
 func _hostile_ai(player: Node3D, dist: float, delta: float) -> void:
@@ -156,6 +197,13 @@ func _hostile_ai(player: Node3D, dist: float, delta: float) -> void:
 			return
 
 	if dist >= float(_cfg.get("aggro", 18.0)):
+		# Out of reach of the player. After dark a predator goes looking for
+		# whatever else is out there instead of standing around.
+		if _cfg.get("hunts", false) and world.is_night():
+			var quarry := _nearest_prey()
+			if quarry != null:
+				_hunt(quarry)
+				return
 		if leash > 0.0:
 			_patrol(delta)
 		return
@@ -167,15 +215,86 @@ func _hostile_ai(player: Node3D, dist: float, delta: float) -> void:
 		_melee_attack(player, dist)
 
 
+## Damage this creature deals right now. A pack animal with its own kind
+## alongside hits harder for each of them, up to a cap — being surrounded is
+## the danger, not any one bite.
+func attack_damage() -> float:
+	var base := float(_cfg.damage)
+	if not _cfg.get("packs", false) or world == null:
+		return base
+	var mates := 0
+	for c in world.get_children():
+		if c == self or not c.has_method("is_prey"):
+			continue
+		if c.npc_type == npc_type and c.is_alive() \
+				and position.distance_to(c.position) < PACK_RADIUS:
+			mates += 1
+			if mates >= PACK_MAX:
+				break
+	return base * (1.0 + PACK_BONUS * float(mates))
+
+
 func _melee_attack(player: Node3D, dist: float) -> void:
 	if dist > 1.5:
 		var dir := (player.position - position)
 		dir.y = 0.0
 		_walk(dir.normalized(), _cfg.speed)
 	if dist < 2.5 and _attack_cd <= 0.0:
-		Game.hurt(float(_cfg.damage))
+		Game.hurt(attack_damage())
 		_attack_cd = float(_cfg.get("cooldown", 1.2))
 		Sfx.play("hit")
+
+
+func is_prey() -> bool:
+	return bool(_cfg.get("prey", false))
+
+
+func is_alive() -> bool:
+	return not _dead
+
+
+## What turrets and traps shoot at. A defence that could not tell a wolf
+## from a chicken would be out of ammunition by the second night.
+func is_hostile() -> bool:
+	return bool(_cfg.get("hostile", false))
+
+
+## Caught in a bear trap: pinned in place until the jaws are worked open,
+## and bleeding the whole time.
+func snare(seconds: float) -> void:
+	_snared = maxf(_snared, seconds)
+
+
+## The nearest smaller thing worth running down. Only ever called at night,
+## and only by something that hunts.
+func _nearest_prey() -> Node3D:
+	var best: Node3D = null
+	var best_d := PREDATION_RANGE
+	for c in world.get_children():
+		if c == self or not c.has_method("is_prey"):
+			continue
+		if not c.is_prey() or not c.is_alive():
+			continue
+		var d: float = position.distance_to(c.position)
+		if d < best_d:
+			best_d = d
+			best = c
+	return best
+
+
+## Run down and kill something that is not the player. This is what keeps
+## the deer population honest without the player ever touching it.
+func _hunt(quarry: Node3D) -> void:
+	var dist := position.distance_to(quarry.position)
+	_face(quarry.position)
+	if dist > 1.5:
+		var dir := (quarry.position - position)
+		dir.y = 0.0
+		if dir.length() > 0.01:
+			_walk(dir.normalized(), _cfg.speed)
+	if dist < 2.5 and _attack_cd <= 0.0:
+		quarry.npc_take_damage(attack_damage(), false)
+		_attack_cd = float(_cfg.get("cooldown", 1.2))
 
 
 ## Shoots whenever it can see you. When a wall is in the way it closes in
@@ -356,28 +475,39 @@ func _flash_hit() -> void:
 				ModelRegistry.clear_tint(_visual))
 
 
-func npc_take_damage(amount: float) -> void:
+## `credit_player` is false when something other than the player landed the
+## blow — a wolf running down a deer, a turret covering a doorway. The kill
+## still counts against the population, but nobody's pockets fill up with a
+## carcass they were nowhere near.
+func npc_take_damage(amount: float, credit_player: bool = true) -> void:
 	if _dead:
 		return
 	health -= amount
 	_flash_hit()
 	if health <= 0.0:
-		_die()
+		_die(credit_player)
 	elif not _cfg.hostile:
 		# A wounded deer panics: sprint away immediately
 		_wander_timer = 0.0
 
 
-func _die() -> void:
+func _die(credit_player: bool = true) -> void:
 	_dead = true
-	var loot: Dictionary = LOOT[npc_type]
-	var total := 0
-	for id in loot:
-		Game.add_item(id, loot[id])
-		total += int(loot[id])
-	Game.notify("%s killed! +%d resources" % [npc_type.capitalize(), total], Color(0.9, 0.3, 0.3))
-	# Guards are a renewable source: the monument staffs itself again later.
-	if world != null and world.has_method("queue_npc_respawn") and _cfg.get("leash", 0.0) > 0.0:
+	if credit_player:
+		var loot: Dictionary = LOOT[npc_type]
+		var total := 0
+		for id in loot:
+			Game.add_item(id, loot[id])
+			total += int(loot[id])
+		Game.notify("%s killed! +%d resources" % [npc_type.capitalize(), total],
+			Color(0.9, 0.3, 0.3))
+
+	# Everything that dies out here leaves a gap in the population, and the
+	# world fills it again in its own time — slower the harder that species
+	# has been worked lately. Guards come back to their post; wild animals
+	# come back somewhere near where the last one lived.
+	if world != null and world.has_method("queue_npc_respawn"):
+		world.note_take(npc_type)
 		world.queue_npc_respawn(npc_type, home)
 	collision_layer = 0
 	var tw := create_tween()

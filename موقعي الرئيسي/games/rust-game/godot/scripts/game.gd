@@ -53,6 +53,39 @@ const WEAPONS := {
 	"ak47": {"damage": 55.0, "range": 130.0, "cooldown": 0.12, "ammo": "ammo_rifle"},
 }
 
+## How many uses a tool or weapon has in it before it breaks. Nothing you
+## carry lasts forever, which is what keeps a mining run tied to the cost of
+## the pick that made it and stops one good hatchet from being the last one
+## you ever need. Anything absent from this table never wears out — the
+## building plan, the hammer, thrown gear.
+##
+## Swinging at a resource node, hitting something with a weapon, or firing a
+## round each spend one point; a chainsaw and a jackhammer spend one per
+## swing too but do several swings' worth of work for it.
+const TOOL_DURABILITY := {
+	"stone_hatchet": 120, "stone_pickaxe": 120,
+	"metal_hatchet": 400, "metal_pickaxe": 400,
+	"chainsaw": 350, "jackhammer": 350, "drill": 300,
+	"repair_tool": 250, "flashlight": 600, "binoculars": 900,
+	"torch": 400,
+	"spear": 90, "machete": 220, "bow": 300,
+	"pipe_shotgun": 120, "pistol": 400, "ak47": 600, "rocket_launcher": 120,
+}
+
+## A worn tool still works, but not as well: below this fraction of its
+## durability it gathers and hits at reduced effect, so a blunt pick is felt
+## before it snaps rather than only at the moment it does.
+const WORN_THRESHOLD := 0.25
+const WORN_PENALTY := 0.5
+
+## Repairing at a workbench costs this fraction of the item's own recipe per
+## full bar restored, so keeping a rifle alive is cheaper than building the
+## next one but never free.
+const REPAIR_COST_FRACTION := 0.2
+
+## Tools that burn fuel while they run. Low grade fuel per use.
+const TOOL_FUEL := {"chainsaw": 0.2, "jackhammer": 0.2, "drill": 0.15}
+
 ## Wearable protection, one item per `slot`. `protect` is the fraction of
 ## incoming damage it soaks; `rads` is the fraction of radiation it keeps
 ## out. Guards hit for 13 a shot and the monument is irradiated, so this is
@@ -71,9 +104,13 @@ const ARMOUR_CAP := 0.6
 ## walks through, but a hostile cannot open a locked door. `strength` is how
 ## much punishment the lock itself takes before it gives way — a code lock
 ## has no keyhole to break, so an attacker has to bring the whole door down.
+## `needs` is an item that has to be on you before the door will open at
+## all. A keycard lock has no keyhole to break and no code to be watched
+## being typed in — but lose the card and you are outside your own base.
 const LOCKS := {
 	"lock": {"name": "Key Lock", "strength": 100.0},
 	"codelock": {"name": "Code Lock", "strength": 0.0},
+	"keycard_lock": {"name": "Keycard Lock", "strength": 0.0, "needs": "keycard"},
 }
 
 ## Raiding gear. `mode` is how it gets deployed: stuck to a wall, thrown,
@@ -100,7 +137,22 @@ const EXPLOSIVES := {
 ## that force doors could never reach one. Floors are stepped onto, not
 ## walked into.
 const LAYER_FLOOR := 32
-const FLOOR_TYPES := ["foundation", "ceiling"]
+const FLOOR_TYPES := ["foundation", "triangle_foundation", "ceiling"]
+
+## Pieces something else can be built on top of. A foundation or a triangle
+## carries the storey above it from the ground; a ceiling carries the one
+## above that.
+const SUPPORT_TYPES := ["foundation", "triangle_foundation", "ceiling"]
+
+## Pieces that anchor a column at full stability because they sit on the
+## earth themselves. Everything else is only as well held up as what it
+## stands on.
+const ANCHOR_TYPES := ["foundation", "triangle_foundation"]
+
+## Pieces that belong to no column at all: they stand on the ground on their
+## own and nothing is ever stacked on them, so the stability sweep leaves
+## them alone rather than collapsing them for having no footing.
+const FREESTANDING_TYPES := ["barricade"]
 
 const SOFT_SIDE_MULT := 2.0
 
@@ -116,16 +168,52 @@ const DECAY_UNPROTECTED := 0.015   # fraction of max health per tick
 const DECAY_UNPAID := 0.008
 const UPKEEP_MATERIALS := ["wood", "stone", "frag"]
 
+## `shape` names the collision solid when a plain box will not do:
+## "triangle" is half a tile split along its diagonal, "wedge" is a roof
+## slope. Absent means a box of `size`, which is what almost everything is.
 const BUILDING_TYPES := {
 	"foundation": {"name": "Foundation", "size": Vector3(3, 0.2, 3), "y": 0.1, "requires_support": false, "is_door": false},
+	"triangle_foundation": {"name": "Triangle Foundation", "size": Vector3(3, 0.2, 3), "y": 0.1, "requires_support": false, "is_door": false, "shape": "triangle"},
 	"wall": {"name": "Wall", "size": Vector3(3, 3, 0.2), "y": 1.5, "requires_support": true, "is_door": false},
+	"half_wall": {"name": "Half Wall", "size": Vector3(3, 1.5, 0.2), "y": 0.75, "requires_support": true, "is_door": false},
+	"low_wall": {"name": "Low Wall", "size": Vector3(3, 0.9, 0.2), "y": 0.45, "requires_support": true, "is_door": false},
 	"doorway": {"name": "Doorway", "size": Vector3(3, 3, 0.2), "y": 1.5, "requires_support": true, "is_door": false},
 	"window_wall": {"name": "Window Wall", "size": Vector3(3, 3, 0.2), "y": 1.5, "requires_support": true, "is_door": false},
 	"ceiling": {"name": "Ceiling", "size": Vector3(3, 0.2, 3), "y": 3.0, "requires_support": true, "is_door": false},
+	"roof": {"name": "Sloped Roof", "size": Vector3(3, 1.5, 3), "y": 3.75, "requires_support": true, "is_door": false, "shape": "wedge"},
 	"stairs": {"name": "Stairs", "size": Vector3(3, 3, 3), "y": 1.5, "requires_support": true, "is_door": false},
+	"pillar": {"name": "Pillar", "size": Vector3(0.5, 3, 0.5), "y": 1.5, "requires_support": true, "is_door": false},
+	"ladder": {"name": "Ladder", "size": Vector3(1.0, 3, 0.16), "y": 1.5, "requires_support": true, "is_door": false},
+	"barricade": {"name": "Barricade", "size": Vector3(3, 1.4, 0.5), "y": 0.7, "requires_support": false, "is_door": false},
 	"tool_cupboard": {"name": "Tool Cupboard", "size": Vector3(1, 1.8, 0.8), "y": 0.9, "requires_support": true, "is_door": false},
 	"wooden_door": {"name": "Door", "size": Vector3(0.9, 2.1, 0.1), "y": 1.05, "requires_support": false, "is_door": true},
+	"garage_door": {"name": "Garage Door", "size": Vector3(2.6, 2.6, 0.16), "y": 1.3, "requires_support": false, "is_door": true},
 }
+
+## Doors, and what fills each doorway. A garage door lifts into its own
+## lintel instead of swinging, so it cannot be blocked from the far side and
+## it seals the whole opening — which is what makes it worth the metal.
+const DOOR_FILLS_DOORWAY := ["wooden_door", "garage_door"]
+const LIFTING_DOORS := ["garage_door"]
+
+## Barricades are the one piece that hurts whatever walks into it. Anything
+## that shares the barricade's space takes this much per second.
+const BARRICADE_DPS := 14.0
+const BARRICADE_RADIUS := 2.0
+
+## Ladders are climbed rather than collided with: standing this close to one
+## and pushing forward carries you up it.
+const LADDER_REACH := 1.6
+const LADDER_CLIMB_SPEED := 4.0
+
+## What demolishing a piece hands back, as a fraction of everything that was
+## spent upgrading it. Half, so tearing down and rebuilding elsewhere is a
+## real option and never a free one.
+const SALVAGE_FRACTION := 0.5
+## A piece can only be taken down cleanly while it is still fresh — after
+## this many seconds it has to be knocked down like anything else, so a
+## raider can never salvage their way into someone's base.
+const DEMOLISH_WINDOW := 600.0
 
 ## Items that are placed into the world instead of being held. `warmth`
 ## marks a heat source for the temperature system; `workbench` is the
@@ -139,16 +227,104 @@ const DEPLOYABLES := {
 	"storage_box": {"warmth": 0.0, "workbench": 0},
 	"large_box": {"warmth": 0.0, "workbench": 0},
 	"sleeping_bag": {"warmth": 0.15, "workbench": 0},
+	# Recyclers. `efficiency` is the share of an item's build cost that comes
+	# back out of it; the better machines want electricity for the privilege.
+	"recycler": {"warmth": 0.0, "workbench": 0, "efficiency": 0.4},
+	"advanced_recycler": {"warmth": 0.0, "workbench": 0, "efficiency": 0.6, "power": 6.0},
+	"hitech_recycler": {"warmth": 0.0, "workbench": 1, "efficiency": 0.8, "power": 14.0},
+}
+
+## What a recycler gets back out of things the world hands you rather than
+## things you built: components, trophies and offcuts have no recipe to read
+## a refund off, so their breakdown is written down here. Per unit.
+const RECYCLE_RAW := {
+	"gear_comp": {"frag": 20, "scrap": 5},
+	"pipe": {"frag": 15, "scrap": 3},
+	"spring": {"frag": 18, "scrap": 4},
+	"sewing": {"cloth": 8, "scrap": 2},
+	"antlers": {"bone": 4, "scrap": 2},
+	"tusks": {"bone": 3, "scrap": 2},
+	"scales": {"resin": 1},
+	"bone": {"scrap": 1},
 }
 
 const WARMTH_RADIUS := 8.0
 const WORKBENCH_RADIUS := 6.0
 
+# ==================== ELECTRICITY & DEFENCE ====================
+
+## Everything that is deployed and then acts on its own.
+##
+## `output` is power produced, `power` is power drawn to run. A device with
+## neither is mechanical: a bear trap does not care whether the base has
+## electricity, which is exactly why it is the first defence anyone builds.
+##
+## `gate` marks a device that passes power on rather than consuming it — a
+## switch or a sensor. Everything downstream of a closed gate is dark, which
+## is what turns a pile of turrets into a system you can arm and disarm.
+##
+## `hold` is how long a trap pins whatever it catches; `chain` is how many
+## targets an arc jumps between; `blast` is an explosion radius.
+const DEVICES := {
+	# --- Generation ---
+	"generator": {"name": "Fuel Generator", "output": 40.0, "fuel": "lgf",
+		"fuel_interval": 12.0, "size": Vector3(1.3, 1.0, 0.9)},
+	"solar_panel": {"name": "Solar Panel", "output": 14.0, "solar": true,
+		"size": Vector3(1.6, 0.2, 1.0)},
+	"wind_turbine": {"name": "Wind Turbine", "output": 12.0, "wind": true,
+		"size": Vector3(0.5, 4.0, 0.5)},
+	"battery": {"name": "Battery", "capacity": 400.0, "rate": 24.0,
+		"size": Vector3(0.9, 0.8, 0.7)},
+
+	# --- Active defence ---
+	"auto_turret": {"name": "Auto Turret", "power": 12.0, "damage": 16.0,
+		"range": 30.0, "cooldown": 0.5, "ammo": "ammo_rifle",
+		"size": Vector3(0.7, 1.3, 0.7)},
+	"shotgun_trap": {"name": "Shotgun Trap", "power": 2.0, "damage": 55.0,
+		"range": 4.5, "cooldown": 2.5, "ammo": "ammo_shotgun",
+		"size": Vector3(0.4, 0.5, 0.5)},
+	"flame_trap": {"name": "Flame Turret", "power": 3.0, "damage": 22.0,
+		"range": 5.0, "cooldown": 0.4, "ammo": "lgf", "ammo_chance": 0.15,
+		"size": Vector3(0.5, 0.7, 0.5)},
+	"tesla_coil": {"name": "Tesla Coil", "power": 10.0, "damage": 18.0,
+		"range": 6.5, "cooldown": 1.0, "chain": 3, "size": Vector3(0.5, 1.8, 0.5)},
+
+	# --- Detection and control ---
+	"alarm": {"name": "Alarm", "power": 1.0, "range": 20.0, "cooldown": 10.0,
+		"size": Vector3(0.4, 0.4, 0.3)},
+	"motion_sensor": {"name": "Motion Sensor", "power": 1.0, "range": 15.0,
+		"gate": true, "size": Vector3(0.3, 0.3, 0.25)},
+	"smart_switch": {"name": "Smart Switch", "gate": true, "manual": true,
+		"size": Vector3(0.35, 0.45, 0.2)},
+	"camera": {"name": "CCTV Camera", "power": 2.0, "range": 45.0,
+		"size": Vector3(0.3, 0.3, 0.5)},
+
+	# --- Mechanical traps, no wiring needed ---
+	"land_mine": {"name": "Land Mine", "damage": 130.0, "range": 2.0,
+		"blast": 4.5, "single_use": true, "size": Vector3(0.4, 0.12, 0.4)},
+	"bear_trap": {"name": "Bear Trap", "damage": 45.0, "range": 1.7,
+		"hold": 5.0, "single_use": true, "size": Vector3(0.7, 0.2, 0.7)},
+}
+
+## How often the grid re-solves. Power is a state of the base, not something
+## that has to be exact frame to frame.
+const POWER_TICK := 1.0
+## How far a wire will reach between two devices.
+const WIRE_RANGE := 18.0
+## Wind is a slow swell rather than a constant, so a turbine-only base has
+## quiet spells a battery has to cover.
+const WIND_PERIOD := 90.0
+const WIND_FLOOR := 0.25
+
 ## What you can carry, in slots — the same 30 the inventory screen draws.
 ## Resources pile deep into one slot, but a tool or a weapon takes a slot to
 ## itself, so a full kit and a mining run compete for the same space. This
 ## is what gives a base, a storage box and a raid something to be about.
-const INVENTORY_SLOTS := 30
+## Raised from 30 when the world learned to hand out resin, clay, sand,
+## salt, hemp, four crops and a handful of animal parts: a working kit plus
+## one node of everything came to 31 slots, so a normal gathering run ended
+## with the player sorting their pockets instead of playing.
+const INVENTORY_SLOTS := 36
 ## Sized against what the world actually gives: a tree is 48 wood and a
 ## wall costs 300, so a slot holding 250 is a couple of pieces' worth. Deep
 ## enough that a mining run is not interrupted every minute, shallow enough
@@ -171,8 +347,10 @@ const STACK_DEFAULT := 100
 ## haul it by the thousand like any other raw material.
 const STACK_OVERRIDES := {"scrap": 250}
 
-## Slots each container holds.
-const BOX_SLOTS := {"storage_box": 12, "large_box": 30}
+## Slots each container holds. The large box has to hold more than a player
+## does or there is no point emptying your pockets into one — which is the
+## entire reason a base is somewhere you come back to.
+const BOX_SLOTS := {"storage_box": 12, "large_box": 48}
 
 const ITEMS := {
 	"wood": {"name": "Wood", "category": "resources", "color": "8d6e63", "rarity": "common", "desc": "Harvested from trees. Used for base building and fuel."},
@@ -181,7 +359,7 @@ const ITEMS := {
 	"sulfur_ore": {"name": "Sulfur Ore", "category": "resources", "color": "fdd835", "rarity": "common", "desc": "Raw ore. Smelt it in a furnace to get usable sulfur."},
 	"sulfur": {"name": "Sulfur", "category": "resources", "color": "fff176", "rarity": "common", "desc": "Refined from ore in a furnace. The base of gunpowder and every explosive."},
 	"hqm": {"name": "High Quality Metal", "category": "resources", "color": "eceff1", "rarity": "elite", "desc": "Rare refined metal. Only found in monument crates, out in the radiation."},
-	"arrow": {"name": "Arrow", "category": "ammo", "color": "a1887f", "rarity": "common", "recipe": {"wood": 25, "stone": 10}, "desc": "Cheap ammunition for the hunting bow."},
+	"arrow": {"name": "Arrow", "category": "ammo", "color": "a1887f", "rarity": "common", "recipe": {"wood": 25, "stone": 10, "feather": 2}, "desc": "Cheap ammunition for the hunting bow. Fletched, or it goes where it likes."},
 	"ammo_pistol": {"name": "Pistol Ammo", "category": "ammo", "color": "c9a227", "rarity": "common", "recipe": {"gunpowder": 10, "frag": 5}, "workbench": 1, "desc": "Rounds for the semi-pistol."},
 	"ammo_rifle": {"name": "Rifle Ammo", "category": "ammo", "color": "e0a52a", "rarity": "rare", "recipe": {"gunpowder": 15, "frag": 10}, "workbench": 2, "desc": "Rounds for the assault rifle."},
 	"ammo_shotgun": {"name": "Handmade Shell", "category": "ammo", "color": "b5651d", "rarity": "common", "recipe": {"gunpowder": 12, "frag": 8}, "workbench": 1, "desc": "A pipe-full of scrap and powder. Devastating up close, useless at range."},
@@ -218,6 +396,23 @@ const ITEMS := {
 	"hazmat": {"name": "Hazmat Suit", "category": "attire", "color": "fff176", "rarity": "elite", "recipe": {"cloth": 100, "leather": 30, "sewing": 2, "frag": 50}, "workbench": 1, "desc": "Keeps 75% of the radiation out. The only sane way to loot a monument."},
 	"wooden_door": {"name": "Wooden Door", "category": "construction", "color": "5d4037", "rarity": "common", "recipe": {"wood": 300}, "desc": "Fits into doorways."},
 	"codelock": {"name": "Code Lock", "category": "items", "color": "78909c", "rarity": "rare", "recipe": {"frag": 100}, "desc": "Secure your doors with a 4-digit code."},
+	"keycard_lock": {"name": "Keycard Lock", "category": "items", "color": "4dd0e1", "rarity": "elite", "recipe": {"frag": 150, "gear_comp": 1, "glass": 5}, "workbench": 2, "desc": "Opens for a card and nothing else. No code to watch someone type in."},
+	"keycard": {"name": "Keycard", "category": "items", "color": "26c6da", "rarity": "rare", "recipe": {"frag": 25, "glass": 2}, "workbench": 1, "desc": "Hand one to somebody you trust with the whole base. There is no half measure."},
+	"wire_tool": {"name": "Wire Tool", "category": "tools", "color": "ef5350", "rarity": "common", "recipe": {"frag": 40, "rope": 2}, "workbench": 1, "desc": "Run a wire between two devices. Aim, press C, aim at the other, press C again."},
+	"generator": {"name": "Fuel Generator", "category": "items", "color": "455a64", "rarity": "rare", "recipe": {"frag": 350, "gear_comp": 2, "pipe": 2}, "workbench": 1, "desc": "Forty units of power for a steady drink of low grade fuel. Loud, and it never stops being loud."},
+	"solar_panel": {"name": "Solar Panel", "category": "items", "color": "1e88e5", "rarity": "rare", "recipe": {"frag": 200, "glass": 30, "gear_comp": 1}, "workbench": 1, "desc": "Free power while the sun is up, and nothing at all once it is down."},
+	"wind_turbine": {"name": "Wind Turbine", "category": "items", "color": "cfd8dc", "rarity": "rare", "recipe": {"frag": 300, "gear_comp": 2, "spring": 1}, "workbench": 1, "desc": "Turns day and night, when the wind is in. Audible from a long way off."},
+	"battery": {"name": "Battery", "category": "items", "color": "8d6e63", "rarity": "rare", "recipe": {"frag": 150, "scrap": 40, "glass": 10}, "workbench": 1, "desc": "Banks a surplus and pays it back through the night. What makes solar worth building."},
+	"auto_turret": {"name": "Auto Turret", "category": "items", "color": "37474f", "rarity": "elite", "recipe": {"frag": 500, "gear_comp": 3, "spring": 2, "hqm": 20}, "workbench": 2, "desc": "Tracks and fires on its own, on rifle ammo and twelve units of power. The only thing that guards a base while you sleep."},
+	"shotgun_trap": {"name": "Shotgun Trap", "category": "items", "color": "6d4c41", "rarity": "rare", "recipe": {"frag": 250, "pipe": 2, "spring": 1}, "workbench": 1, "desc": "One barrel covering one doorway. Whatever comes through takes all of it."},
+	"flame_trap": {"name": "Flame Turret", "category": "items", "color": "e64a19", "rarity": "rare", "recipe": {"frag": 200, "pipe": 2, "lgf": 25}, "workbench": 1, "desc": "Fills a corridor with fire for as long as there is fuel in it."},
+	"tesla_coil": {"name": "Tesla Coil", "category": "items", "color": "b3e5fc", "rarity": "elite", "recipe": {"hqm": 25, "frag": 300, "gear_comp": 2, "glass": 15}, "workbench": 2, "desc": "Arcs to everything in the room at once. Hungry, and worth it in a stairwell."},
+	"alarm": {"name": "Alarm", "category": "items", "color": "e53935", "rarity": "common", "recipe": {"frag": 80, "gear_comp": 1}, "workbench": 1, "desc": "Tells you something is in the base. Knowing early is most of surviving it."},
+	"motion_sensor": {"name": "Motion Sensor", "category": "items", "color": "9575cd", "rarity": "rare", "recipe": {"frag": 120, "gear_comp": 1, "glass": 5}, "workbench": 1, "desc": "Passes power on only while something is moving in front of it. Wire your turrets behind one."},
+	"smart_switch": {"name": "Smart Switch", "category": "items", "color": "66bb6a", "rarity": "common", "recipe": {"frag": 60, "scrap": 10}, "workbench": 1, "desc": "Arms and disarms everything downstream of it. Interact to flip."},
+	"camera": {"name": "CCTV Camera", "category": "items", "color": "263238", "rarity": "rare", "recipe": {"frag": 100, "glass": 10, "gear_comp": 1}, "workbench": 1, "desc": "Interact to see what it sees, at night as well as by day."},
+	"land_mine": {"name": "Land Mine", "category": "items", "color": "5d4037", "rarity": "rare", "recipe": {"explosives": 4, "frag": 60, "spring": 1}, "workbench": 2, "desc": "Buried and forgotten until it is not. Goes off once."},
+	"bear_trap": {"name": "Bear Trap", "category": "items", "color": "78909c", "rarity": "common", "recipe": {"frag": 150, "spring": 1}, "workbench": 1, "desc": "Jaws and a spring. Holds whatever steps in it long enough for you to arrive."},
 	"oil": {"name": "Crude Oil", "category": "resources", "color": "37474f", "rarity": "rare", "desc": "Drilled from the ground. Refines into low grade fuel."},
 	"charcoal": {"name": "Charcoal", "category": "resources", "color": "424242", "rarity": "common", "desc": "Left behind by a burning furnace. Feeds gunpowder."},
 	"gunpowder": {"name": "Gun Powder", "category": "ammo", "color": "616161", "rarity": "common", "recipe": {"sulfur": 20, "charcoal": 30}, "workbench": 1, "desc": "Sulfur and charcoal. The base of every explosive."},
@@ -229,24 +424,69 @@ const ITEMS := {
 	"metal_hatchet": {"name": "Hatchet", "category": "tools", "color": "90a4ae", "rarity": "rare", "recipe": {"wood": 100, "frag": 125}, "workbench": 1, "desc": "Steel head. Fells trees far faster than stone."},
 	"metal_pickaxe": {"name": "Pickaxe", "category": "tools", "color": "90a4ae", "rarity": "rare", "recipe": {"wood": 100, "frag": 125}, "workbench": 1, "desc": "Steel head. Breaks ore nodes far faster than stone."},
 	"drill": {"name": "Mining Drill", "category": "tools", "color": "8d6e63", "rarity": "elite", "recipe": {"frag": 250, "gear_comp": 2, "hqm": 10}, "workbench": 2, "desc": "Motorised auger. Extracts crude oil and tears through ore."},
+	"chainsaw": {"name": "Chainsaw", "category": "tools", "color": "ff7043", "rarity": "elite", "recipe": {"frag": 300, "gear_comp": 2, "spring": 1, "lgf": 20}, "workbench": 2, "desc": "Fells a tree in a handful of pulls. Burns fuel and can be heard across the valley."},
+	"jackhammer": {"name": "Jackhammer", "category": "tools", "color": "90a4ae", "rarity": "elite", "recipe": {"frag": 350, "gear_comp": 3, "hqm": 5, "pipe": 2}, "workbench": 2, "desc": "Breaks stone and tears down structures far faster than a hammer."},
+	"repair_tool": {"name": "Repair Tool", "category": "tools", "color": "4db6ac", "rarity": "rare", "recipe": {"frag": 100, "gear_comp": 1, "scrap": 20}, "workbench": 1, "desc": "Restores condition to a worn tool or a damaged wall, for a share of what it cost to make."},
+	"binoculars": {"name": "Binoculars", "category": "tools", "color": "37474f", "rarity": "rare", "recipe": {"frag": 50, "scrap": 20, "sewing": 1}, "workbench": 1, "desc": "Hold to glass the treeline. Spots what is out there before it spots you."},
+	"flashlight": {"name": "Flashlight", "category": "tools", "color": "fdd835", "rarity": "common", "recipe": {"frag": 40, "scrap": 10}, "workbench": 1, "desc": "A tight beam that does not give you away the way a torch does. Drains its cell as it burns."},
 	"workbench_t1": {"name": "Workbench Level 1", "category": "items", "color": "a1887f", "rarity": "common", "recipe": {"wood": 500, "stone": 100, "frag": 50}, "desc": "Unlocks tier 1 crafting while you stand near it."},
 	"workbench_t2": {"name": "Workbench Level 2", "category": "items", "color": "78909c", "rarity": "rare", "recipe": {"frag": 500, "scrap": 250, "wood": 500}, "workbench": 1, "desc": "Unlocks tier 2 crafting while you stand near it."},
 	"research_table": {"name": "Research Table", "category": "items", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 200, "frag": 75, "scrap": 50}, "desc": "Study components to progress your tech tree."},
+	"recycler": {"name": "Recycler", "category": "items", "color": "78909c", "rarity": "common", "recipe": {"frag": 200, "brick": 20, "gear_comp": 1}, "desc": "Hand-cranked. Breaks anything you built back down into two fifths of what it cost."},
+	"advanced_recycler": {"name": "Advanced Recycler", "category": "items", "color": "546e7a", "rarity": "rare", "recipe": {"frag": 400, "brick": 40, "gear_comp": 3, "spring": 1}, "workbench": 1, "desc": "Motorised, and it wants feeding — six units of power for three fifths back."},
+	"hitech_recycler": {"name": "High-Tech Recycler", "category": "items", "color": "b0bec5", "rarity": "elite", "recipe": {"hqm": 30, "frag": 500, "gear_comp": 5, "glass": 20, "spring": 2}, "workbench": 2, "desc": "Four fifths back, and a workbench with it. Fourteen units of power is the price."},
 	"storage_box": {"name": "Wood Storage Box", "category": "construction", "color": "8d6e63", "rarity": "common", "recipe": {"wood": 100}, "desc": "Small container. Interact to stash your resources."},
 	"large_box": {"name": "Large Wood Box", "category": "construction", "color": "5d4037", "rarity": "common", "recipe": {"wood": 250, "frag": 20}, "workbench": 1, "desc": "Large container with more capacity."},
+	"resin": {"name": "Tree Resin", "category": "resources", "color": "d98d2b", "rarity": "common", "desc": "Sap bled from a felled trunk. Burns hot and glues what nails will not hold."},
+	"clay": {"name": "Clay", "category": "resources", "color": "a1725a", "rarity": "common", "desc": "Dug from a riverbank. Fires into brick."},
+	"sand": {"name": "Sand", "category": "resources", "color": "e3d9a8", "rarity": "common", "desc": "Fires into glass. The reason a lakeshore is worth walking."},
+	"dirt": {"name": "Dirt", "category": "resources", "color": "6d5844", "rarity": "common", "desc": "Fill. Mixed with clay it makes a brick that holds its shape."},
+	"salt": {"name": "Salt", "category": "resources", "color": "eceff1", "rarity": "common", "desc": "Scraped from a dry flat. Keeps meat edible far longer than a fire does."},
+	"glass": {"name": "Glass", "category": "resources", "color": "b3e5fc", "rarity": "rare", "desc": "Fired from sand. Lenses, panels and anything that has to see."},
+	"brick": {"name": "Brick", "category": "resources", "color": "8d4a3a", "rarity": "common", "desc": "Fired clay and fill. Cheap mass for furnaces and machinery."},
+	"hemp": {"name": "Hemp Fiber", "category": "resources", "color": "9ccc65", "rarity": "common", "desc": "Stripped from a hemp plant. Spun into cloth or laid into rope."},
+	"rope": {"name": "Rope", "category": "items", "color": "c8a165", "rarity": "common", "recipe": {"hemp": 20}, "desc": "Laid hemp. Holds a bow, a trap and half the machinery in a base together."},
+	"bone": {"name": "Bone", "category": "resources", "color": "e8e0d0", "rarity": "common", "desc": "Stripped from a big carcass. Blades, arrowheads and glue."},
+	"feather": {"name": "Feather", "category": "resources", "color": "f5f5f5", "rarity": "common", "desc": "Fletching. An arrow without one goes where it likes."},
+	"egg": {"name": "Egg", "category": "resources", "color": "fff8e1", "rarity": "common", "desc": "Laid by a chicken you did not have to kill. Eat it raw if you must."},
+	"scales": {"name": "Fish Scales", "category": "resources", "color": "b0bec5", "rarity": "common", "desc": "Boils down into a glue the old bows were made with."},
+	"antlers": {"name": "Antlers", "category": "resources", "color": "c8b28a", "rarity": "common", "desc": "Off a big buck. Grinds down into bone, and a recycler pays for the rest."},
+	"tusks": {"name": "Boar Tusks", "category": "resources", "color": "efe4c9", "rarity": "common", "desc": "What the boar was trying to put through you. Worth taking off it."},
+	"corn": {"name": "Corn", "category": "resources", "color": "fdd835", "rarity": "common", "desc": "Field corn. Filling, and it keeps."},
+	"pumpkin": {"name": "Pumpkin", "category": "resources", "color": "fb8c00", "rarity": "common", "desc": "A meal on its own. Heavy to carry for what it gives."},
+	"mushroom": {"name": "Mushroom", "category": "resources", "color": "bcaaa4", "rarity": "common", "desc": "Some of these are food. You find out which by eating one."},
+	"herbs": {"name": "Herbs", "category": "resources", "color": "66bb6a", "rarity": "common", "desc": "Bitter leaves that close a wound faster than cloth alone."},
+	"preserved_meat": {"name": "Salted Meat", "category": "resources", "color": "c49a6c", "rarity": "common", "recipe": {"cooked_meat": 1, "salt": 5}, "desc": "Salted down. Feeds you properly and does not turn."},
+	"herbal_salve": {"name": "Herbal Salve", "category": "medical", "color": "81c784", "rarity": "common", "recipe": {"herbs": 8, "cloth": 4, "resin": 2}, "desc": "Crushed herbs bound in resin. Slower than a syringe, cheaper than everything."},
 	"berries": {"name": "Berries", "category": "resources", "color": "e57399", "rarity": "common", "desc": "Wild berries. Eat to restore hunger."},
 	"raw_meat": {"name": "Raw Meat", "category": "resources", "color": "ef9a9a", "rarity": "common", "desc": "Hunted meat. Cook it at a campfire before eating."},
 	"cooked_meat": {"name": "Cooked Meat", "category": "resources", "color": "a1887f", "rarity": "common", "desc": "A proper meal. Restores a lot of hunger."},
+	"raw_fish": {"name": "Raw Fish", "category": "resources", "color": "90a4ae", "rarity": "common", "desc": "Pulled from the shallows. Cook it unless you enjoy being ill."},
+	"cooked_fish": {"name": "Cooked Fish", "category": "resources", "color": "d7a86e", "rarity": "common", "desc": "The lake's answer to hunting. Quieter, and nothing bites back."},
 }
 
 ## Items that can be consumed with LMB while equipped in the belt.
+## `poison` is the chance a bite turns on you. Only the mushroom carries it:
+## foraging is the cheapest food in the game and this is what it costs.
 const CONSUMABLES := {
 	"berries": {"hunger": 25.0},
 	"raw_meat": {"hunger": 5.0, "health": -5.0},
 	"cooked_meat": {"hunger": 40.0, "health": 5.0},
+	"preserved_meat": {"hunger": 55.0, "health": 8.0},
+	"corn": {"hunger": 30.0},
+	"pumpkin": {"hunger": 45.0},
+	"mushroom": {"hunger": 15.0, "health": 5.0, "poison": 0.35},
+	"egg": {"hunger": 12.0},
+	"raw_fish": {"hunger": 8.0, "health": -3.0},
+	"cooked_fish": {"hunger": 35.0, "health": 4.0},
 	"bandage": {"health": 15.0},
+	"herbal_salve": {"health": 28.0},
 	"syringe": {"health": 50.0},
 }
+
+## What a bad mushroom does: hunger back out and a real bite of health.
+const POISON_DAMAGE := 22.0
+const POISON_HUNGER := 15.0
 
 const CATEGORIES := ["common", "construction", "items", "resources", "tools", "medical", "weapons", "attire"]
 
@@ -255,6 +495,10 @@ var belt: Array = ["building_plan", "hammer", null, null, null, null]
 var selected_belt_slot: int = 0
 ## What is being worn, keyed by ARMOUR slot ("head" / "chest" / "suit").
 var worn: Dictionary = {}
+## Uses left on the tool of each id you are currently holding. Absent means
+## "untouched", which counts as full — so a freshly crafted tool needs no
+## bookkeeping until the first time it is swung.
+var tool_wear: Dictionary = {}
 var stats: Dictionary = {
 	"health": 100.0, "hunger": 100.0, "thirst": 100.0,
 	"temperature": 100.0, "radiation": 0.0,
@@ -279,6 +523,7 @@ func reset_loadout() -> void:
 	belt = ["building_plan", "hammer", null, null, null, null]
 	selected_belt_slot = 0
 	worn = {}
+	tool_wear = {}
 	selected_blueprint = ""
 	inventory_changed.emit()
 	belt_changed.emit()
@@ -291,6 +536,7 @@ func reset_state() -> void:
 	belt = ["building_plan", "hammer", null, null, null, null]
 	selected_belt_slot = 0
 	worn = {}
+	tool_wear = {}
 	stats = {
 		"health": 100.0, "hunger": 100.0, "thirst": 100.0,
 		"temperature": 100.0, "radiation": 0.0,
@@ -350,6 +596,116 @@ func hurt(amount: float) -> float:
 	return applied
 
 
+# ==================== DURABILITY ====================
+
+func has_durability(id: String) -> bool:
+	return TOOL_DURABILITY.has(id)
+
+
+func max_durability(id: String) -> int:
+	return int(TOOL_DURABILITY.get(id, 0))
+
+
+## Uses left on the one you are holding. Anything with no durability at all
+## reports 0 — callers should ask `has_durability` first.
+func durability(id: String) -> int:
+	if not has_durability(id):
+		return 0
+	return int(tool_wear.get(id, max_durability(id)))
+
+
+## 0..1, for the HUD bar and for the worn-tool penalty.
+func durability_fraction(id: String) -> float:
+	if not has_durability(id):
+		return 1.0
+	return clampf(float(durability(id)) / float(max_durability(id)), 0.0, 1.0)
+
+
+## How effective this tool is right now. A tool near the end of its life
+## still swings, it just stops being worth swinging.
+func condition_multiplier(id: String) -> float:
+	if not has_durability(id):
+		return 1.0
+	return WORN_PENALTY if durability_fraction(id) < WORN_THRESHOLD else 1.0
+
+
+## Spends one use (or `amount`). Returns false when the tool broke on this
+## use — the caller has already had its effect, the next swing is the one
+## that finds an empty hand.
+##
+## Fuelled tools also burn low grade fuel; running dry stops them dead
+## without costing durability, so a chainsaw with no fuel is idle, not lost.
+func wear_tool(id: String, amount: int = 1) -> bool:
+	if not has_durability(id) or get_count(id) <= 0:
+		return true
+	var left := durability(id) - amount
+	if left > 0:
+		tool_wear[id] = left
+		inventory_changed.emit()
+		return true
+
+	# It gave out. One of them is gone; if you carry a spare, that spare is
+	# now the one in your hand, at full condition.
+	remove_item(id, 1)
+	tool_wear.erase(id)
+	var label := str(ITEMS.get(id, {}).get("name", id))
+	if get_count(id) > 0:
+		notify("%s broke — switching to your spare" % label, Color(1.0, 0.63, 0.0))
+	else:
+		notify("%s broke" % label, Color(0.9, 0.3, 0.3))
+		for i in belt.size():
+			if belt[i] == id:
+				belt[i] = null
+		belt_changed.emit()
+	_sfx("hit")
+	return false
+
+
+## True when the tool has the fuel this use needs, spending it if so.
+func spend_tool_fuel(id: String) -> bool:
+	if not TOOL_FUEL.has(id):
+		return true
+	var per := float(TOOL_FUEL[id])
+	# Fuel is whole units, so the cost is paid probabilistically: a 0.2/use
+	# tool burns one low grade fuel every five swings on average rather than
+	# needing fractional stacks the inventory cannot represent.
+	if randf() >= per:
+		return true
+	if get_count("lgf") <= 0:
+		notify("%s is out of fuel" % ITEMS.get(id, {}).get("name", id), Color(1.0, 0.63, 0.0))
+		return false
+	remove_item("lgf", 1)
+	return true
+
+
+## Puts condition back into a tool. `fraction` is how much of the full bar
+## one repair restores; the materials come out of the item's own recipe.
+## Returns false when there is nothing to repair or nothing to repair it with.
+func repair_tool_item(id: String, fraction: float = 0.25) -> bool:
+	if not has_durability(id) or get_count(id) <= 0:
+		return false
+	if durability(id) >= max_durability(id):
+		notify("%s is in perfect condition" % ITEMS.get(id, {}).get("name", id),
+			Color(1.0, 0.63, 0.0))
+		return false
+	var recipe: Dictionary = ITEMS.get(id, {}).get("recipe", {})
+	var cost := {}
+	for res in recipe:
+		var units := ceili(float(recipe[res]) * REPAIR_COST_FRACTION * (fraction / 0.25))
+		if units > 0:
+			cost[res] = units
+	if not can_afford(cost):
+		notify("Not enough materials to repair", Color(0.9, 0.3, 0.3))
+		return false
+	consume(cost)
+	tool_wear[id] = mini(max_durability(id),
+		durability(id) + ceili(float(max_durability(id)) * fraction))
+	notify("Repaired %s" % ITEMS.get(id, {}).get("name", id))
+	_sfx("upgrade")
+	inventory_changed.emit()
+	return true
+
+
 # ==================== CAPACITY ====================
 
 func stack_size(id: String) -> int:
@@ -399,6 +755,10 @@ func add_item(id: String, count: int) -> int:
 		return 0
 	var accepted := mini(count, room_for(id))
 	if accepted > 0:
+		# Picking one up with none in hand means the next swing is with a
+		# fresh one, so whatever the last one had left dies with it.
+		if get_count(id) <= 0 and has_durability(id):
+			tool_wear.erase(id)
 		inventory[id] = get_count(id) + accepted
 		inventory_changed.emit()
 	if accepted < count:
@@ -429,6 +789,28 @@ func consume(cost: Dictionary) -> void:
 	for res in cost:
 		inventory[res] = get_count(res) - int(cost[res])
 	inventory_changed.emit()
+
+
+# ==================== RECYCLING ====================
+
+## Can this be broken back down at all? Anything you built can be, plus the
+## odds and ends the world hands out with no recipe behind them. Raw
+## materials cannot — there is nothing left to take apart.
+func is_recyclable(id: String) -> bool:
+	return ITEMS.get(id, {}).has("recipe") or RECYCLE_RAW.has(id)
+
+
+## What one unit of `id` gives back at this machine's efficiency. A crafted
+## item refunds a share of its own recipe, so the table never has to be kept
+## in step with the crafting one by hand.
+func recycle_yield(id: String, efficiency: float) -> Dictionary:
+	var source: Dictionary = ITEMS.get(id, {}).get("recipe", RECYCLE_RAW.get(id, {}))
+	var out := {}
+	for res in source:
+		var units := floori(float(source[res]) * efficiency)
+		if units > 0:
+			out[res] = units
+	return out
 
 
 ## Workbench tier an item needs before it can be crafted (0 = anywhere).
@@ -477,6 +859,20 @@ func consume_item(id: String) -> bool:
 		return false
 	var c: Dictionary = CONSUMABLES[id]
 	remove_item(id, 1)
+
+	# Foraged food is free and sometimes it is free for a reason.
+	if randf() < float(c.get("poison", 0.0)):
+		stats.health = maxf(1.0, stats.health - POISON_DAMAGE)
+		stats.hunger = maxf(0.0, stats.hunger - POISON_HUNGER)
+		notify("That one was poisonous", Color(0.6, 0.85, 0.3))
+		_sfx("hit")
+		if get_count(id) <= 0:
+			for i in belt.size():
+				if belt[i] == id:
+					belt[i] = null
+			belt_changed.emit()
+		return true
+
 	stats.health = clampf(stats.health + float(c.get("health", 0.0)), 1.0, 100.0)
 	stats.hunger = clampf(stats.hunger + float(c.get("hunger", 0.0)), 0.0, 100.0)
 	stats.thirst = clampf(stats.thirst + float(c.get("thirst", 0.0)), 0.0, 100.0)

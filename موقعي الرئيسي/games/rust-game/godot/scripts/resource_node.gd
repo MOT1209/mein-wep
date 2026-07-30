@@ -37,6 +37,33 @@ func setup(t: String) -> void:
 		"bush":
 			health = 3
 			_build_bush()
+		"hemp":
+			health = 2
+			_build_plant(Color8(124, 179, 66), 1.1, 5, Color8(90, 140, 50))
+		"corn":
+			health = 2
+			_build_plant(Color8(139, 195, 74), 1.6, 4, Color8(253, 216, 53))
+		"pumpkin":
+			health = 2
+			_build_gourd(Color8(251, 140, 0))
+		"mushroom":
+			health = 1
+			_build_mushroom()
+		"herbs":
+			health = 2
+			_build_plant(Color8(102, 187, 106), 0.55, 7, Color8(129, 199, 132))
+		"clay_deposit":
+			health = 5
+			_build_deposit(Color8(161, 114, 90))
+		"sand_deposit":
+			health = 5
+			_build_deposit(Color8(227, 217, 168))
+		"salt_deposit":
+			health = 4
+			_build_deposit(Color8(236, 239, 241), 0.35)
+		"fish":
+			health = 2
+			_build_fish()
 
 
 func _build_tree() -> void:
@@ -232,14 +259,205 @@ func _build_bush() -> void:
 	add_child(cs)
 
 
+## A stand of stalks: a few blades fanned out of one root, topped with
+## whatever the plant is worth picking for. Shared by hemp, corn and herbs
+## because the difference between them is colour and height, not shape.
+func _build_plant(stalk_col: Color, height: float, blades: int, crop_col: Color) -> void:
+	var stalk_mat := StandardMaterial3D.new()
+	stalk_mat.albedo_color = stalk_col
+	stalk_mat.roughness = 0.95
+	stalk_mat.cull_mode = BaseMaterial3D.CULL_DISABLED
+	var crop_mat := StandardMaterial3D.new()
+	crop_mat.albedo_color = crop_col
+	crop_mat.roughness = 0.85
+
+	for i in blades:
+		var blade := MeshInstance3D.new()
+		var quad := BoxMesh.new()
+		quad.size = Vector3(0.07, height, 0.02)
+		quad.material = stalk_mat
+		blade.mesh = quad
+		var ang := TAU * float(i) / float(blades) + randf() * 0.4
+		blade.position = Vector3(cos(ang) * 0.12, height * 0.5, sin(ang) * 0.12)
+		blade.rotation = Vector3(randf_range(-0.25, 0.25), ang, randf_range(-0.25, 0.25))
+		add_child(blade)
+
+	# The pickable part, sat at the top where it reads from a distance
+	var crop := MeshInstance3D.new()
+	var head := SphereMesh.new()
+	head.radius = 0.11
+	head.height = 0.3
+	head.radial_segments = 6
+	head.rings = 3
+	head.material = crop_mat
+	crop.mesh = head
+	crop.position.y = height * 0.92
+	add_child(crop)
+
+	_add_cylinder_collision(0.35, height)
+	scale = Vector3.ONE * randf_range(0.85, 1.2)
+
+
+## A pumpkin sitting on the dirt: one squashed sphere and a stub of stalk.
+func _build_gourd(color: Color) -> void:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.roughness = 0.8
+	var body := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.42
+	sphere.height = 0.62
+	sphere.radial_segments = 8
+	sphere.rings = 5
+	sphere.material = mat
+	body.mesh = sphere
+	body.position.y = 0.3
+	add_child(body)
+
+	var stalk_mat := StandardMaterial3D.new()
+	stalk_mat.albedo_color = Color8(85, 107, 47)
+	var stalk := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.05
+	cyl.bottom_radius = 0.07
+	cyl.height = 0.18
+	cyl.material = stalk_mat
+	stalk.mesh = cyl
+	stalk.position.y = 0.62
+	add_child(stalk)
+
+	_add_sphere_collision(0.45, 0.3)
+
+
+func _build_mushroom() -> void:
+	var stem_mat := StandardMaterial3D.new()
+	stem_mat.albedo_color = Color8(239, 235, 222)
+	var cap_mat := StandardMaterial3D.new()
+	cap_mat.albedo_color = Color8(141, 110, 99).lerp(Color8(198, 64, 56), randf())
+	cap_mat.roughness = 0.85
+
+	var stem := MeshInstance3D.new()
+	var cyl := CylinderMesh.new()
+	cyl.top_radius = 0.05
+	cyl.bottom_radius = 0.07
+	cyl.height = 0.26
+	cyl.material = stem_mat
+	stem.mesh = cyl
+	stem.position.y = 0.13
+	add_child(stem)
+
+	var cap := MeshInstance3D.new()
+	var dome := SphereMesh.new()
+	dome.radius = 0.18
+	dome.height = 0.2
+	dome.radial_segments = 8
+	dome.rings = 3
+	dome.is_hemisphere = true
+	dome.material = cap_mat
+	cap.mesh = dome
+	cap.position.y = 0.26
+	add_child(cap)
+
+	_add_sphere_collision(0.25, 0.18)
+	scale = Vector3.ONE * randf_range(0.8, 1.3)
+
+
+## A worked patch of ground: a low mound you dig rather than swing at.
+func _build_deposit(color: Color, height := 0.5) -> void:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = color
+	mat.roughness = 1.0
+	var mound := MeshInstance3D.new()
+	var dome := SphereMesh.new()
+	dome.radius = 1.0
+	dome.height = height * 2.0
+	dome.radial_segments = 7
+	dome.rings = 3
+	dome.is_hemisphere = true
+	dome.material = mat
+	mound.mesh = dome
+	add_child(mound)
+
+	# A few loose lumps around the edge so it reads as dug, not moulded
+	for i in 4:
+		var lump := MeshInstance3D.new()
+		var chunk := BoxMesh.new()
+		var s := randf_range(0.12, 0.24)
+		chunk.size = Vector3(s, s * 0.7, s)
+		chunk.material = mat
+		lump.mesh = chunk
+		var ang := randf() * TAU
+		lump.position = Vector3(cos(ang) * randf_range(0.7, 1.1), s * 0.35,
+			sin(ang) * randf_range(0.7, 1.1))
+		lump.rotation.y = randf() * TAU
+		add_child(lump)
+
+	_add_sphere_collision(1.0, height * 0.5)
+
+
+## A fish holding station in the shallows: a flattened body and a tail.
+func _build_fish() -> void:
+	var mat := StandardMaterial3D.new()
+	mat.albedo_color = Color8(120, 144, 156)
+	mat.metallic = 0.3
+	mat.roughness = 0.35
+
+	var body := MeshInstance3D.new()
+	var sphere := SphereMesh.new()
+	sphere.radius = 0.22
+	sphere.height = 0.3
+	sphere.radial_segments = 7
+	sphere.rings = 4
+	sphere.material = mat
+	body.mesh = sphere
+	body.scale = Vector3(0.55, 1.0, 1.9)
+	body.position.y = 0.2
+	add_child(body)
+
+	var tail := MeshInstance3D.new()
+	var fin := BoxMesh.new()
+	fin.size = Vector3(0.03, 0.26, 0.22)
+	fin.material = mat
+	tail.mesh = fin
+	tail.position = Vector3(0, 0.2, 0.5)
+	add_child(tail)
+
+	_add_sphere_collision(0.4, 0.2)
+	rotation.y = randf() * TAU
+
+
+func _add_sphere_collision(radius: float, y: float) -> void:
+	var cs := CollisionShape3D.new()
+	var shape := SphereShape3D.new()
+	shape.radius = radius
+	cs.shape = shape
+	cs.position.y = y
+	add_child(cs)
+
+
+func _add_cylinder_collision(radius: float, height: float) -> void:
+	var cs := CollisionShape3D.new()
+	var shape := CylinderShape3D.new()
+	shape.radius = radius
+	shape.height = height
+	cs.shape = shape
+	cs.position.y = height * 0.5
+	add_child(cs)
+
+
 ## Yield and damage multiplier per (node type, equipped tool). The right
 ## tool gathers more per swing and breaks the node sooner; the drill is the
 ## only thing that brings up crude oil.
 const TOOL_YIELD := {
-	"tree": {"stone_hatchet": 2, "metal_hatchet": 3, "machete": 2},
-	"rock": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4},
-	"iron": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4},
-	"sulfur": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4},
+	"tree": {"stone_hatchet": 2, "metal_hatchet": 3, "machete": 2, "chainsaw": 6},
+	"rock": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4, "jackhammer": 6},
+	"iron": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4, "jackhammer": 5},
+	"sulfur": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4, "jackhammer": 5},
+	"clay_deposit": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4, "jackhammer": 4},
+	"sand_deposit": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4, "jackhammer": 4},
+	"salt_deposit": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 3},
+	# A blade takes a hemp stand down in one pass; bare hands strip it slowly
+	"hemp": {"machete": 3, "stone_hatchet": 2, "metal_hatchet": 3},
 }
 
 const OIL_PER_DRILL_HIT := 3
@@ -248,13 +466,23 @@ const OIL_PER_DRILL_HIT := 3
 ## scale with the tool; the rest hand over the same amount however you hit
 ## them. Monument crates are the only high quality metal in the world.
 const YIELDS := {
-	"tree": {"wood": 12},
+	"tree": {"wood": 12, "resin": 1},
 	"rock": {"stone": 10},
 	"iron": {"iron": 8},
 	"sulfur": {"sulfur_ore": 8},
 	"barrel": {"scrap": 3, "lgf": 2},
 	"crate": {"scrap": 5, "frag": 5, "hqm": 2},
 	"bush": {"berries": 5},
+	"hemp": {"hemp": 8},
+	"corn": {"corn": 3},
+	"pumpkin": {"pumpkin": 2},
+	"mushroom": {"mushroom": 2},
+	"herbs": {"herbs": 4},
+	# Digging turns up fill alongside whatever you came for
+	"clay_deposit": {"clay": 6, "dirt": 4},
+	"sand_deposit": {"sand": 8, "dirt": 3},
+	"salt_deposit": {"salt": 6},
+	"fish": {"raw_fish": 2, "scales": 3},
 }
 
 ## The marked spot that appears on an ore node or a tree after the first
@@ -263,7 +491,8 @@ const YIELDS := {
 ## the same way Rust's tier-3 tools ignore it.
 const SWEET_SPOT_MULT := 2.0
 const SWEET_SPOT_RADIUS := 0.55
-const SWEET_SPOT_TYPES := ["tree", "rock", "iron", "sulfur"]
+const SWEET_SPOT_TYPES := ["tree", "rock", "iron", "sulfur",
+	"clay_deposit", "sand_deposit", "salt_deposit"]
 
 var _sweet_pos := Vector3.INF   # world space; INF means none showing
 var _sweet_marker: MeshInstance3D
@@ -286,6 +515,11 @@ func is_sweet_hit(at: Vector3) -> bool:
 ## destroys the node when depleted.
 func hit_harvest(tool_id: String = "", at: Vector3 = Vector3.INF) -> void:
 	var mult: int = int(TOOL_YIELD.get(res_type, {}).get(tool_id, 1))
+	# A worn-out head bites less deeply. Never below one, so a nearly dead
+	# pick is slow rather than useless.
+	var condition := Game.condition_multiplier(tool_id)
+	if condition < 1.0:
+		mult = maxi(1, int(round(float(mult) * condition)))
 	var bonus := false
 	if SWEET_SPOT_TYPES.has(res_type):
 		if tool_id == "drill":

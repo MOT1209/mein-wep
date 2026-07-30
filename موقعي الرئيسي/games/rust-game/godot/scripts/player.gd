@@ -17,13 +17,27 @@ var spring: SpringArm3D
 var camera: Camera3D
 var body_visual: Node3D
 var torch_light: OmniLight3D
+var flashlight: SpotLight3D
 var third_person := false
 var looking_at_structure: Node3D = null
 var in_water := false
 
+## Field of view the camera sits at normally, and the one binoculars pull it
+## down to. A narrower cone is a longer look.
+const FOV_NORMAL := 75.0
+const FOV_GLASSED := 22.0
+## Seconds of flashlight burn that cost one point of its cell.
+const FLASHLIGHT_DRAIN_INTERVAL := 2.0
+
+var glassing := false
+var on_ladder := false
+## The device the wire tool is holding one end of, if any.
+var wiring_from: Object = null
+
 var _step_distance := 0.0
 var _drink_cd := 0.0
 var _weapon_cd := 0.0
+var _flashlight_timer := 0.0
 
 
 func _ready() -> void:
@@ -60,6 +74,18 @@ func _ready() -> void:
 	torch_light.position = Vector3(0, 1.5, 0)
 	torch_light.visible = false
 	add_child(torch_light)
+
+	# A torch throws light in every direction and announces you for it. The
+	# flashlight is a cone pointed where you look: further, tighter, and only
+	# visible to whatever is in front of you.
+	flashlight = SpotLight3D.new()
+	flashlight.light_color = Color(0.92, 0.95, 1.0)
+	flashlight.spot_range = 34.0
+	flashlight.spot_angle = 22.0
+	flashlight.spot_angle_attenuation = 0.6
+	flashlight.light_energy = 4.0
+	flashlight.visible = false
+	head.add_child(flashlight)
 
 	_build_visual()
 
@@ -134,6 +160,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			Game.notify("Build mode cancelled", Color(1.0, 0.63, 0.0))
 	elif event.is_action_pressed("hammer_action"):
 		_hammer_action()
+	elif event.is_action_pressed("demolish"):
+		_demolish_action()
+	elif event.is_action_pressed("wire_connect"):
+		_wire_action()
 	elif event.is_action_pressed("toggle_view"):
 		_toggle_view()
 	else:
@@ -165,7 +195,16 @@ func _physics_process(delta: float) -> void:
 	_weapon_cd = maxf(0.0, _weapon_cd - delta)
 	in_water = world.is_in_water(global_position)
 
-	if not is_on_floor():
+	# A ladder suspends gravity while you are against it: hold forward to go
+	# up, back to come down, jump to push off. It is the only way to reach a
+	# second storey without giving raiders a staircase to walk up.
+	on_ladder = Game.ui_open == "" and _ladder_in_reach()
+	if on_ladder and Input.is_action_just_pressed("jump"):
+		velocity.y = JUMP_VELOCITY
+		on_ladder = false
+	elif on_ladder:
+		velocity.y = Input.get_axis("move_back", "move_forward") * Game.LADDER_CLIMB_SPEED
+	elif not is_on_floor():
 		velocity.y -= GRAVITY * delta
 	elif Game.ui_open == "" and Input.is_action_just_pressed("jump"):
 		velocity.y = JUMP_VELOCITY
@@ -197,12 +236,55 @@ func _physics_process(delta: float) -> void:
 			_step_distance = 0.0
 			Sfx.play("step")
 
-	# Torch: hold it in the belt to light your way at night
-	torch_light.visible = Game.active_tool() == "torch" and Game.get_count("torch") > 0
+	_update_lights(delta)
+	_inspect_structures()
+
+
+## Torch and flashlight both live in the belt: whichever is selected is the
+## one that is lit. The flashlight runs its cell down while it burns, so it
+## is a resource rather than a free floodlight.
+func _update_lights(delta: float) -> void:
+	var tool := Game.active_tool()
+
+	torch_light.visible = tool == "torch" and Game.get_count("torch") > 0
 	if torch_light.visible:
 		torch_light.light_energy = 1.7 + sin(world.clock * 9.0) * 0.25
 
-	_inspect_structures()
+	var lit := tool == "flashlight" and Game.get_count("flashlight") > 0
+	flashlight.visible = lit
+	if lit:
+		_flashlight_timer += delta
+		if _flashlight_timer >= FLASHLIGHT_DRAIN_INTERVAL:
+			_flashlight_timer = 0.0
+			Game.wear_tool("flashlight")
+		# The beam browns out as the cell goes, so running dry is visible
+		# before the light dies rather than only after.
+		flashlight.light_energy = 1.2 + 2.8 * Game.durability_fraction("flashlight")
+	else:
+		_flashlight_timer = 0.0
+
+	# Glassing only holds while the binoculars are the thing in your hands
+	if glassing and tool != "binoculars":
+		glassing = false
+	camera.fov = FOV_GLASSED if glassing else FOV_NORMAL
+
+
+## Is there a ladder close enough to be hanging off? Checked against the
+## ladder's own span so stepping off the top lets go of it.
+func _ladder_in_reach() -> bool:
+	if world == null:
+		return false
+	var size: Vector3 = Game.BUILDING_TYPES["ladder"].size
+	for s in world.structures:
+		if not is_instance_valid(s) or s.build_type != "ladder":
+			continue
+		var flat := Vector2(s.position.x - global_position.x, s.position.z - global_position.z)
+		if flat.length() > Game.LADDER_REACH:
+			continue
+		var foot: float = s.position.y - size.y * 0.5
+		if global_position.y >= foot - 0.5 and global_position.y <= foot + size.y:
+			return true
+	return false
 
 
 ## Keeps the HUD build-info panel in sync with whatever structure is in view.
@@ -259,6 +341,15 @@ func _primary_action() -> void:
 			Game.notify("Aim at the ground to place", Color(1.0, 0.63, 0.0))
 		return
 
+	# 2b. Devices (generators, turrets, traps, sensors): also placed on ground
+	if Game.DEVICES.has(tool):
+		var spot := _camera_ray(Game.BUILD_DISTANCE, 1 | Game.LAYER_FLOOR)
+		if not spot.is_empty():
+			world.place_device(tool, spot.position)
+		else:
+			Game.notify("Aim at the ground to place", Color(1.0, 0.63, 0.0))
+		return
+
 	# 3. Consumables: eat / use
 	if Game.CONSUMABLES.has(tool):
 		Game.consume_item(tool)
@@ -272,7 +363,18 @@ func _primary_action() -> void:
 		_fire_rocket()
 		return
 
-	# 5. Weapons swing or fire; bare hands fall through to the gather ray
+	# 5. Binoculars: hold the view down the glass until you put them away
+	if tool == "binoculars":
+		_toggle_glassing()
+		return
+
+	# 6. Repair tool: a wall if you are aiming at one, otherwise the most
+	# worn thing you are carrying — which needs a workbench to work on.
+	if tool == "repair_tool":
+		_use_repair_tool()
+		return
+
+	# 7. Weapons swing or fire; bare hands fall through to the gather ray
 	if Game.WEAPONS.has(tool):
 		_use_weapon(tool)
 		return
@@ -321,6 +423,8 @@ func _primary_action() -> void:
 
 	# Resource harvest
 	if obj.has_method("hit_harvest"):
+		if not Game.spend_tool_fuel(tool):
+			return
 		var colors := {
 			"tree": Color(0.45, 0.3, 0.15), "rock": Color(0.6, 0.6, 0.6),
 			"iron": Color(0.65, 0.7, 0.75), "sulfur": Color(0.95, 0.85, 0.3),
@@ -329,6 +433,90 @@ func _primary_action() -> void:
 		}
 		_spawn_hit_particles(hit.position, colors.get(obj.res_type, Color.WHITE))
 		obj.hit_harvest(tool, hit.position)
+		# Charged after the swing, so the blow that breaks the tool still lands
+		Game.wear_tool(tool)
+
+
+## Binoculars pull the view in rather than firing anything, so they get
+## their own toggle instead of an entry in WEAPONS.
+func _toggle_glassing() -> void:
+	if Game.get_count("binoculars") <= 0:
+		return
+	glassing = not glassing
+	if glassing:
+		if not Game.wear_tool("binoculars"):
+			glassing = false
+			return
+		Game.notify("Glassing the treeline", Color(0.6, 0.8, 1.0))
+	camera.fov = FOV_GLASSED if glassing else FOV_NORMAL
+
+
+## Aim it at a wall and it puts health back; aim it at nothing and it works
+## on whatever you are carrying that is closest to breaking. The second use
+## needs a workbench nearby, so a rifle is repaired at home and not mid-raid.
+func _use_repair_tool() -> void:
+	if Game.get_count("repair_tool") <= 0:
+		return
+	var hit := _camera_ray(Game.INTERACT_DISTANCE, 2 | Game.LAYER_FLOOR)
+	if not hit.is_empty() and hit.collider.has_method("take_hit"):
+		var s: Object = hit.collider
+		if s.health >= s.max_health:
+			Game.notify("Nothing to repair there", Color(1.0, 0.63, 0.0))
+			return
+		# A building piece is repaired against its tier's cost; a device has
+		# no tier, so it is patched up for a share of its own build recipe.
+		if s.has_method("toggle_door"):
+			world.building.repair_structure(s)
+		else:
+			_repair_device(s)
+		Game.wear_tool("repair_tool")
+		return
+
+	if Game.workbench_level < 1:
+		Game.notify("Stand at a workbench to service your gear", Color(1.0, 0.63, 0.0))
+		return
+	var worst := _most_worn_item()
+	if worst == "":
+		Game.notify("Everything you carry is in good condition", Color(1.0, 0.63, 0.0))
+		return
+	if Game.repair_tool_item(worst):
+		Game.wear_tool("repair_tool")
+
+
+## Patches a shot-up turret or generator back together, for a tenth of what
+## it took to build. Half the point of a defence is that it survives the
+## first raid it turns away.
+func _repair_device(d: Object) -> void:
+	var recipe: Dictionary = Game.ITEMS.get(d.device_type, {}).get("recipe", {})
+	var cost := {}
+	for res in recipe:
+		var units := ceili(float(recipe[res]) * 0.1)
+		if units > 0:
+			cost[res] = units
+	if not Game.can_afford(cost):
+		Game.notify("Not enough materials to repair that", Color(0.9, 0.3, 0.3))
+		return
+	Game.consume(cost)
+	d.health = minf(d.max_health, d.health + d.max_health * 0.25)
+	Game.notify("Repaired %s" % d.label())
+	Sfx.play("build")
+
+
+## The carried tool or weapon with the least life left in it, ignoring the
+## repair tool itself so it never spends its last use on itself.
+func _most_worn_item() -> String:
+	var worst := ""
+	var worst_frac := 1.0
+	for id in Game.inventory:
+		if id == "repair_tool" or not Game.has_durability(id):
+			continue
+		if Game.get_count(id) <= 0:
+			continue
+		var frac := Game.durability_fraction(id)
+		if frac < worst_frac:
+			worst_frac = frac
+			worst = id
+	return worst
 
 
 ## One-shot burst of tiny cubes at the impact point.
@@ -397,21 +585,26 @@ func _use_weapon(id: String) -> void:
 	# of them past it.
 	var pellets := int(data.get("pellets", 1))
 	var spread := float(data.get("spread", 0.0))
+	# A blunt machete and a rifle with a shot-out barrel both still work —
+	# they just stop being worth what they cost to keep.
+	var condition := Game.condition_multiplier(id)
 	var aim := -camera.global_transform.basis.z
 	for i in pellets:
 		var dir := aim
 		if spread > 0.0 and i > 0:
 			dir = (aim + camera.global_transform.basis.x * randf_range(-spread, spread)
 				+ camera.global_transform.basis.y * randf_range(-spread, spread)).normalized()
-		_hit_with(id, data, _ray_along(dir, float(data.range), 2 | 4 | 8 | Game.LAYER_FLOOR))
+		_hit_with(id, data, _ray_along(dir, float(data.range), 2 | 4 | 8 | Game.LAYER_FLOOR),
+			condition)
+	Game.wear_tool(id)
 
 
 ## Applies one shot's worth of damage to whatever it landed on.
-func _hit_with(id: String, data: Dictionary, hit: Dictionary) -> void:
+func _hit_with(id: String, data: Dictionary, hit: Dictionary, condition: float = 1.0) -> void:
 	if hit.is_empty():
 		return
 	var obj: Object = hit.collider
-	var damage := float(data.damage)
+	var damage := float(data.damage) * condition
 	if obj.has_method("npc_take_damage"):
 		obj.npc_take_damage(damage)
 		_spawn_hit_particles(hit.position, Color(0.8, 0.2, 0.2))
@@ -482,3 +675,55 @@ func _hammer_action() -> void:
 		world.building.repair_structure(s)
 	else:
 		world.building.upgrade_structure(s)
+
+
+## Runs a wire between two devices. The first press picks up the end you are
+## aiming at, the second drops it on another — the same two-step every real
+## wiring job is, and it is why the wire tool is the cheapest thing in the
+## electricity tree.
+func _wire_action() -> void:
+	if Game.active_tool() != "wire_tool":
+		Game.notify("Hold the Wire Tool to run wiring", Color(1.0, 0.63, 0.0))
+		return
+	var hit := _camera_ray(Game.INTERACT_DISTANCE * 2.0, 2)
+	var target: Object = hit.collider if not hit.is_empty() else null
+	if target == null or not target.has_method("power_draw"):
+		Game.notify("Aim at a device", Color(1.0, 0.63, 0.0))
+		return
+
+	if wiring_from == null or not is_instance_valid(wiring_from):
+		wiring_from = target
+		Game.notify("Wire from %s — aim at the other end" % target.label(),
+			Color(0.6, 0.8, 1.0))
+		return
+	if target == wiring_from:
+		wiring_from = null
+		Game.notify("Wiring cancelled", Color(1.0, 0.63, 0.0))
+		return
+	world.power.connect_devices(wiring_from, target)
+	wiring_from = null
+
+
+## Takes a piece back down deliberately, returning half of what went into
+## it. The hammer does it to anything you put up recently; a jackhammer will
+## chew through the old ones too, which is what makes it worth its metal.
+func _demolish_action() -> void:
+	var tool := Game.active_tool()
+	if tool != "hammer" and tool != "jackhammer":
+		Game.notify("Requires Hammer or Jackhammer", Color(0.9, 0.3, 0.3))
+		return
+	if looking_at_structure == null:
+		Game.notify("Aim at a piece to demolish it", Color(1.0, 0.63, 0.0))
+		return
+	var s := looking_at_structure
+	if tool == "jackhammer":
+		if not Game.spend_tool_fuel(tool):
+			return
+		# A jackhammer does not ask how old the wall is, only how much of it
+		# is left. It gets no salvage for the trouble.
+		s.take_hit(180.0, global_position)
+		Game.wear_tool(tool)
+		Sfx.play("hit")
+		_spawn_hit_particles(s.global_position, Color(0.75, 0.72, 0.68))
+		return
+	world.building.demolish_structure(s)
