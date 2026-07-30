@@ -896,11 +896,18 @@ func _process(delta: float) -> void:
 	if _damage_flash.color.a > 0.0:
 		_damage_flash.color.a = maxf(0.0, _damage_flash.color.a - 1.2 * delta)
 
-	# Contextual hint (drinking / eating / placing stations)
+	# Contextual hint. What the interact button would do comes first: it is
+	# about a thing in front of you right now, which beats any advice about
+	# what you are holding.
 	var hint := ""
 	if world != null and world.player != null and Game.ui_open == "":
 		var tool: String = Game.active_tool()
-		if world.player.in_water:
+		var reach: String = ""
+		if world.interaction != null:
+			reach = world.interaction.prompt()
+		if reach != "":
+			hint = reach
+		elif world.player.in_water:
 			hint = "Press F to drink"
 		elif Game.CONSUMABLES.has(tool) and Game.get_count(tool) > 0:
 			hint = "Click to consume %s" % Game.ITEMS[tool].name

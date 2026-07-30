@@ -15,6 +15,7 @@ const HudScript := preload("res://scripts/hud.gd")
 const LootBagScript := preload("res://scripts/loot_bag.gd")
 const DeviceScript := preload("res://scripts/device.gd")
 const PowerGridScript := preload("res://scripts/power_grid.gd")
+const InteractionScript := preload("res://scripts/interaction.gd")
 
 const SAVE_PATH := "user://rust_save.json"
 const TREE_COUNT := 70
@@ -102,6 +103,7 @@ var barricades: Array = []
 var stations: Array = []        # placed campfire/furnace nodes
 var devices: Array = []         # placed generators, turrets, traps, sensors
 var power: Node                 # the electrical grid solver
+var interaction: Node           # works out what the interact button means
 var respawn_queue: Array = []   # {type, pos, at}
 ## type -> how hard it has been harvested lately. See PRESSURE_PER_TAKE.
 var pressure: Dictionary = {}
@@ -137,6 +139,12 @@ func _ready() -> void:
 	power.name = "PowerGrid"
 	add_child(power)
 	power.world = self
+
+	interaction = InteractionScript.new()
+	interaction.name = "Interaction"
+	add_child(interaction)
+	interaction.world = self
+	interaction.player = player
 
 	hud = HudScript.new()
 	hud.name = "HUD"

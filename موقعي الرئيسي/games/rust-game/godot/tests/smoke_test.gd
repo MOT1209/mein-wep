@@ -1707,6 +1707,8 @@ func _run_tests() -> void:
 	_test_camera(game, world)
 	_test_stances(game, world)
 	_test_combat(game, world)
+	_test_interaction(game, world, StructureScript)
+	_test_build_undo(game, world)
 	_test_models(game, world)
 	_test_durability(game, world)
 	_test_new_pieces(game, world, StructureScript)
@@ -2251,6 +2253,211 @@ func _test_combat(game, world) -> void:
 
 	game.belt[0] = "building_plan"
 	game.selected_belt_slot = 0
+	_clear_pockets(game)
+
+
+# ==================== UNIVERSAL INTERACTION ====================
+
+func _test_interaction(game, world, StructureScript) -> void:
+	var player = world.player
+	var inter = world.interaction
+	_check(inter != null, "the world has an interaction brain")
+	if inter == null:
+		return
+	game.reset_settings()
+	_clear_pockets(game)
+
+	# Stage a door and a storage box side by side, well away from everything
+	var site: Vector2 = _flat_site(world)
+	var bx: float = site.x + 45.0
+	var bz: float = site.y + 45.0
+	var ground: float = world.terrain_height(bx, bz)
+	var parked: Vector3 = player.position
+
+	var door = StructureScript.new()
+	door.setup("wooden_door")
+	door.position = Vector3(bx, ground + 1.05, bz)
+	world.add_child(door)
+	world.register_structure(door)
+	var box = world._spawn_station("storage_box", Vector3(bx + 1.2, ground, bz))
+
+	# Standing between them with nothing in hand, the nearer wins
+	player.position = Vector3(bx + 1.0, ground + 0.1, bz)
+	inter._process(0.1)
+	_check(inter.target != null, "something in reach is targeted")
+	_check(inter.prompt() != "", "and there is a prompt for it (%s)" % inter.prompt())
+
+	# The prompt names what it will do, not just what the thing is
+	player.position = Vector3(bx, ground + 0.1, bz)
+	inter._set_target(door)
+	_check(inter.verb == "Open" and inter.label.contains("Door"),
+		"a shut door reads as Open Door (%s)" % inter.prompt())
+	door.set_door_state(true)
+	inter._set_target(null)
+	inter._set_target(door)
+	_check(inter.verb == "Close", "and an open one reads as Close")
+	door.set_door_state(false)
+
+	# A lock in hand makes the door the intended target over the box
+	game.inventory["lock"] = 1
+	game.belt[0] = "lock"
+	game.selected_belt_slot = 0
+	_check(inter._matches_intent(door), "holding a lock, a door is what you mean")
+	_check(not inter._matches_intent(box), "and the box beside it is not")
+
+	# A hammer means the structure, not the door
+	_clear_pockets(game)
+	game.inventory["hammer"] = 1
+	game.belt[0] = "hammer"
+	var wall = StructureScript.new()
+	wall.setup("wall")
+	wall.position = Vector3(bx - 1.5, ground + 1.5, bz)
+	world.add_child(wall)
+	world.register_structure(wall)
+	_check(inter._matches_intent(wall), "holding a hammer, a wall is what you mean")
+
+	# Tapping a door opens it, and the cooldown stops a held finger flapping it
+	_clear_pockets(game)
+	game.belt[0] = "building_plan"
+	inter._cd = 0.0
+	inter._set_target(door)
+	_check(inter.interact_tap(), "tapping a door works")
+	_check(door.is_open, "and it opened")
+	_check(not inter.interact_tap(), "a second tap inside the cooldown is refused")
+	_check(door.is_open, "so the door is still open rather than flapping shut")
+	inter._cd = 0.0
+	_check(inter.interact_tap() and not door.is_open, "and once it clears, it closes")
+
+	# Double tap forces a door open and leaves it open
+	door.set_door_state(false)
+	inter._cd = 0.0
+	_check(inter.interact_double(), "double tapping a door works")
+	_check(door.is_open, "and it is open")
+	inter._cd = 0.0
+	_check(inter.interact_double() and door.is_open,
+		"and doing it again leaves it open rather than toggling")
+	door.set_door_state(false)
+
+	# A locked door you cannot open reads as locked
+	door.install_lock("keycard_lock")
+	inter._set_target(null)
+	inter._set_target(door)
+	_check(inter.verb == "Locked", "a door you have no card for reads as Locked")
+	game.inventory["keycard"] = 1
+	inter._set_target(null)
+	inter._set_target(door)
+	_check(inter.verb == "Open", "and with the card it reads as Open again")
+	door._remove_lock()
+	_clear_pockets(game)
+
+	# The highlight follows the target and goes away with it
+	inter._set_target(door)
+	_check(inter._outline != null and inter._outline.visible,
+		"the target is outlined")
+	inter._set_target(null)
+	_check(not inter._outline.visible, "and the outline goes when nothing is targeted")
+
+	# Nothing in reach means no prompt at all
+	player.position = Vector3(bx + 200.0, ground + 20.0, bz + 200.0)
+	inter._process(0.1)
+	_check(inter.prompt() == "", "out of reach of everything, there is no prompt")
+
+	world.unregister_structure(door)
+	door.queue_free()
+	world.unregister_structure(wall)
+	wall.queue_free()
+	world.stations.erase(box)
+	box.queue_free()
+	player.position = parked
+
+
+# ==================== BUILD UNDO / GESTURES ====================
+
+func _test_build_undo(game, world) -> void:
+	var build = world.building
+	_check(build != null, "the building system exists")
+	game.reset_settings()
+
+	# The tile grid stays 3m on purpose; only free-standing pieces snap finer
+	_check(build.FREE_SNAP_STEPS.has(0.5) and build.FREE_SNAP_STEPS.has(2.0),
+		"free-standing pieces offer half-metre and two-metre snapping")
+	var first: float = build.free_snap()
+	_check(build.cycle_free_snap() != first, "and the snap step cycles")
+
+	# Height offset is clamped to a storey either way
+	build.reset_height()
+	_check(is_equal_approx(build.adjust_height(1.0), 1.0), "a piece can be raised")
+	_check(is_equal_approx(build.adjust_height(-2.0), -1.0), "and lowered")
+	build.adjust_height(999.0)
+	_check(is_equal_approx(build.height_offset, build.HEIGHT_LIMIT),
+		"but never past a storey")
+	build.reset_height()
+
+	# A twist rotates freely, and can be squared back up
+	game.blueprint_rotation = 0.0
+	build.rotate_ghost(0.3)
+	_check(absf(game.blueprint_rotation - 0.3) < 0.001, "a twist rotates the piece")
+	build.square_up_rotation()
+	_check(is_equal_approx(fmod(game.blueprint_rotation, PI / 2.0), 0.0),
+		"and squaring up snaps it to a quarter turn")
+	game.blueprint_rotation = 0.0
+
+	# Undo a placement
+	var site: Vector2 = _flat_site(world)
+	var ux: float = site.x + 66.0
+	var uz: float = site.y + 66.0
+	var uy: float = world.terrain_height(ux, uz)
+	build._undo_stack.clear()
+	build._redo_stack.clear()
+
+	var slab = load("res://scripts/structure.gd").new()
+	slab.setup("foundation")
+	slab.position = Vector3(ux, uy + 0.1, uz)
+	slab.placed_at = world.clock
+	world.add_child(slab)
+	world.register_structure(slab)
+	build._record({"kind": "place", "type": "foundation",
+		"pos": slab.position, "rot": 0.0, "tier": "twig",
+		"soft": Vector3.ZERO})
+	_check(build.undo_depth() == 1, "placing a piece records an undo step")
+	var count_before: int = world.structures.size()
+	_check(build.undo(), "undo takes it back")
+	_check(world.structures.size() == count_before - 1, "and the piece is gone")
+	_check(build.redo_depth() == 1, "and it can be redone")
+	_check(build.redo(), "redo puts it back")
+	_check(world.structures.size() == count_before, "and it is there again")
+
+	# Undo an upgrade puts the tier and the materials back
+	var target = build._find_structure(Vector3(ux, uy + 0.1, uz), "foundation")
+	_check(target != null, "the rebuilt piece can be found again")
+	if target != null:
+		_clear_pockets(game)
+		game.inventory["wood"] = 1000
+		var wood_before: int = game.get_count("wood")
+		build.upgrade_structure(target)
+		_check(target.tier == "wood", "upgrading raises the tier")
+		_check(game.get_count("wood") < wood_before, "and costs materials")
+		_check(build.undo(), "undoing the upgrade works")
+		_check(target.tier == "twig", "the tier drops back")
+		_check(game.get_count("wood") == wood_before, "and the materials come back")
+		world.unregister_structure(target)
+		target.queue_free()
+
+	# The stack never grows past its declared depth
+	build._undo_stack.clear()
+	for i in build.UNDO_DEPTH + 6:
+		build._record({"kind": "place", "type": "foundation",
+			"pos": Vector3(float(i), 0.0, 0.0), "rot": 0.0, "tier": "twig",
+			"soft": Vector3.ZERO})
+	_check(build.undo_depth() == build.UNDO_DEPTH,
+		"the undo history holds exactly %d actions" % build.UNDO_DEPTH)
+	# Recording drops any redo future, because the timeline just branched
+	build._redo_stack.append({"kind": "place"})
+	build._record({"kind": "place", "type": "foundation", "pos": Vector3.ZERO,
+		"rot": 0.0, "tier": "twig", "soft": Vector3.ZERO})
+	_check(build.redo_depth() == 0, "and a new action clears the redo history")
+	build._undo_stack.clear()
+	build._redo_stack.clear()
 	_clear_pockets(game)
 
 

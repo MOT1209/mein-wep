@@ -17,8 +17,44 @@ const GROUND_TYPES := ["barricade"]
 
 const StructureScript := preload("res://scripts/structure.gd")
 
+## How many building actions can be taken back. Ten, which is about one
+## room's worth of mistakes.
+const UNDO_DEPTH := 10
+
+## Free-standing pieces are the only ones that snap finer than the tile grid.
+##
+## The tile grid is 3m because the pieces are 3m: the support checks, the
+## stability columns and the edge sockets are all addressed by 3m cell, so
+## offering a 0.5m snap for a wall would let two of them share a cell and put
+## the whole structural model out of step with what is on screen. A barricade
+## carries nothing and is carried by nothing, so it is free to sit anywhere.
+const FREE_SNAP_STEPS := [0.5, 1.0, 2.0]
+
 var world: Node3D
 var player: CharacterBody3D
+
+## Actions that can be undone, oldest first: {"kind", "type", "pos", "rot",
+## "tier", "soft"}. Only placements and demolitions go in — an upgrade is
+## recorded as the tier it was raised from.
+var _undo_stack: Array = []
+var _redo_stack: Array = []
+## Which of FREE_SNAP_STEPS a free-standing piece snaps to.
+var free_snap_index := 1
+## Manual height offset on the ghost, in metres. Pinching raises and lowers a
+## piece for the cases the automatic height gets wrong — a wall on a slope, a
+## barricade on a step.
+var height_offset := 0.0
+const HEIGHT_LIMIT := 3.0
+
+
+## Raises or lowers the piece being placed, within a storey either way.
+func adjust_height(delta_metres: float) -> float:
+	height_offset = clampf(height_offset + delta_metres, -HEIGHT_LIMIT, HEIGHT_LIMIT)
+	return height_offset
+
+
+func reset_height() -> void:
+	height_offset = 0.0
 
 var _ghost: MeshInstance3D
 var _ghost_type := ""
@@ -90,8 +126,11 @@ func _update_ghost() -> void:
 		_ghost_rot = _ghost_base.base_rot
 	elif bp in GROUND_TYPES:
 		# Free-standing: it goes where you are aiming, standing on whatever
-		# the ground is doing there rather than on a tile.
-		_ghost_pos = Vector3(point.x, point.y + bt.size.y * 0.5, point.z)
+		# the ground is doing there rather than on a tile — snapped to a step
+		# the player chooses, since nothing structural depends on where it is.
+		var step: float = free_snap()
+		_ghost_pos = Vector3(
+			snappedf(point.x, step), point.y + bt.size.y * 0.5, snappedf(point.z, step))
 		_ghost_rot = Game.blueprint_rotation
 	elif bp == "pillar":
 		# Pillars go on tile corners, not tile centres — one pillar braces
@@ -138,6 +177,8 @@ func _update_ghost() -> void:
 		_ghost_pos = Vector3(snap_x, target_y, snap_z)
 		_ghost_rot = Game.blueprint_rotation
 
+	# Whatever the automatic height worked out, the player can override it
+	_ghost_pos.y += height_offset
 	_ghost.position = _ghost_pos
 	_ghost.rotation.y = _ghost_rot
 	_ghost.visible = true
@@ -229,12 +270,141 @@ func place_structure() -> void:
 	if bp == "tool_cupboard":
 		Game.tool_cupboards.append(Vector2(_ghost_pos.x, _ghost_pos.z))
 
+	_record({
+		"kind": "place", "type": bp, "pos": _ghost_pos, "rot": _ghost_rot,
+		"tier": s.tier, "soft": s.soft_normal,
+	})
+
 	# Grow-in placement animation
 	s.scale = Vector3(0.1, 0.1, 0.1)
 	var tw := s.create_tween()
 	tw.tween_property(s, "scale", Vector3.ONE, 0.15)
 
 	Sfx.play("build")
+
+
+# ==================== SNAPPING, ROTATION, UNDO ====================
+
+func free_snap() -> float:
+	return float(FREE_SNAP_STEPS[free_snap_index % FREE_SNAP_STEPS.size()])
+
+
+## Steps to the next snap spacing for free-standing pieces.
+func cycle_free_snap() -> float:
+	free_snap_index = (free_snap_index + 1) % FREE_SNAP_STEPS.size()
+	Game.notify("Snap: %.1fm" % free_snap(), Color(0.7, 0.85, 1.0))
+	return free_snap()
+
+
+## Turns the piece by an arbitrary angle — what a two-finger twist produces,
+## as against the 90-degree steps the R key gives. Edge-snapped pieces ignore
+## it, because their rotation comes from which edge of the tile they are on.
+func rotate_ghost(radians: float) -> void:
+	Game.blueprint_rotation = fmod(Game.blueprint_rotation + radians + TAU, TAU)
+
+
+## Snaps the current rotation to the nearest quarter turn, so a twist can be
+## tidied up rather than left slightly off square.
+func square_up_rotation() -> void:
+	Game.blueprint_rotation = snappedf(Game.blueprint_rotation, PI / 2.0)
+
+
+## Records something that can be taken back. Kept to UNDO_DEPTH, and any redo
+## history is dropped because the timeline has just branched.
+func _record(action: Dictionary) -> void:
+	_undo_stack.append(action)
+	while _undo_stack.size() > UNDO_DEPTH:
+		_undo_stack.pop_front()
+	_redo_stack.clear()
+
+
+func undo_depth() -> int:
+	return _undo_stack.size()
+
+
+func redo_depth() -> int:
+	return _redo_stack.size()
+
+
+## Takes back the last building action: a placement is removed, a demolition
+## is rebuilt, an upgrade is dropped back a tier. Materials are returned or
+## charged so undoing is free of profit either way.
+func undo() -> bool:
+	if _undo_stack.is_empty():
+		Game.notify("Nothing to undo", Color(1.0, 0.63, 0.0))
+		return false
+	var action: Dictionary = _undo_stack.pop_back()
+	match str(action.kind):
+		"place":
+			var s := _find_structure(action.pos, str(action.type))
+			if s == null:
+				Game.notify("That piece is already gone", Color(1.0, 0.63, 0.0))
+				return false
+			var back: Dictionary = s.salvage_value()
+			for res in back:
+				Game.add_item(res, int(back[res]))
+			s.free_collapsed()
+			_redo_stack.append(action)
+		"upgrade":
+			var up := _find_structure(action.pos, str(action.type))
+			if up == null:
+				return false
+			var cost: Dictionary = Game.BUILDING_TIERS[str(action.to)].cost
+			for res in cost:
+				Game.add_item(res, int(cost[res]))
+			up.apply_tier(str(action.from))
+			_redo_stack.append(action)
+	Game.notify("Undone", Color(0.8, 0.85, 0.9))
+	Game.haptic(0.5)
+	world.recompute_stability()
+	return true
+
+
+## Puts back what undo took away.
+func redo() -> bool:
+	if _redo_stack.is_empty():
+		Game.notify("Nothing to redo", Color(1.0, 0.63, 0.0))
+		return false
+	var action: Dictionary = _redo_stack.pop_back()
+	match str(action.kind):
+		"place":
+			var s: StaticBody3D = StructureScript.new()
+			s.setup(str(action.type))
+			s.position = action.pos
+			s.base_rot = float(action.rot)
+			s.rotation.y = s.base_rot
+			s.placed_at = world.clock
+			world.add_child(s)
+			world.register_structure(s)
+			s.apply_tier(str(action.get("tier", "twig")))
+			var soft = action.get("soft", Vector3.ZERO)
+			if soft is Vector3:
+				s.soft_normal = soft
+			_undo_stack.append(action)
+		"upgrade":
+			var up := _find_structure(action.pos, str(action.type))
+			if up == null:
+				return false
+			var cost: Dictionary = Game.BUILDING_TIERS[str(action.to)].cost
+			if not Game.can_afford(cost):
+				Game.notify("Not enough resources to redo that", Color(0.9, 0.3, 0.3))
+				return false
+			Game.consume(cost)
+			up.apply_tier(str(action.to))
+			_undo_stack.append(action)
+	Game.notify("Redone", Color(0.8, 0.85, 0.9))
+	world.recompute_stability()
+	return true
+
+
+## The structure of this type standing at this point, if one still is.
+func _find_structure(pos: Vector3, type: String) -> Node3D:
+	for s in world.structures:
+		if not is_instance_valid(s) or s.build_type != type:
+			continue
+		if s.closed_pos.distance_to(pos) < 0.4:
+			return s
+	return null
 
 
 func upgrade_structure(s: Node3D) -> void:
@@ -246,8 +416,13 @@ func upgrade_structure(s: Node3D) -> void:
 	if not Game.can_afford(cost):
 		Game.notify("Not enough resources to upgrade", Color(0.9, 0.3, 0.3))
 		return
+	var was: String = s.tier
 	Game.consume(cost)
 	s.apply_tier(next_tier)
+	_record({
+		"kind": "upgrade", "type": s.build_type, "pos": s.closed_pos,
+		"from": was, "to": next_tier,
+	})
 	Game.notify("Upgraded to %s" % Game.BUILDING_TIERS[next_tier].name)
 	Sfx.play("upgrade")
 

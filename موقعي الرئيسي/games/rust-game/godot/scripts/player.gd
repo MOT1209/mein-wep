@@ -259,7 +259,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		if Game.active_tool() == "building_plan":
 			hud.open_blueprint_menu()
 	elif event.is_action_pressed("interact"):
-		_try_drink()
+		# Drinking wins while you are standing in water — it is the one
+		# interaction with no object to target.
+		if not _try_drink():
+			interact()
 	elif event.is_action_pressed("blueprint"):
 		hud.open_blueprint_menu()
 	elif event.is_action_pressed("rotate_piece"):
@@ -901,13 +904,35 @@ func _ray_along(dir: Vector3, dist: float, mask: int) -> Dictionary:
 	return get_world_3d().direct_space_state.intersect_ray(query)
 
 
-func _try_drink() -> void:
+func _try_drink() -> bool:
 	if not in_water or _drink_cd > 0.0:
-		return
+		return false
 	_drink_cd = 0.8
 	Game.stats.thirst = clampf(Game.stats.thirst + 35.0, 0.0, 100.0)
 	Game.notify("You drank from the lake")
 	Sfx.play("drink")
+	return true
+
+
+## The universal interact button, in its three flavours. The work of deciding
+## what is being interacted with lives in world.interaction, so the keyboard
+## and the touch button both come through here and get the same answer.
+func interact() -> bool:
+	if world == null or world.interaction == null:
+		return false
+	return world.interaction.interact_tap()
+
+
+func interact_hold() -> bool:
+	if world == null or world.interaction == null:
+		return false
+	return world.interaction.interact_hold()
+
+
+func interact_double() -> bool:
+	if world == null or world.interaction == null:
+		return false
+	return world.interaction.interact_double()
 
 
 func _primary_action() -> void:

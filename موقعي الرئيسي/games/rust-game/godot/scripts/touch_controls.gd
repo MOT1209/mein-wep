@@ -335,6 +335,12 @@ func _on_drag(index: int, pos: Vector2, relative: Vector2) -> void:
 			Game.haptic(0.4)
 		return
 
+	# Two free fingers while a piece is on the crosshair: twist to turn it,
+	# pinch to raise and lower it. Checked before the camera drag, or the same
+	# two fingers would also be panning the view.
+	if _update_pinch():
+		return
+
 	# Camera drag. Gyro-only mode turns this off entirely.
 	if in_camera_zone(record.start) and player != null and player.touch_look_enabled():
 		player.apply_look(relative / LOOK_DIVISOR)
@@ -474,6 +480,69 @@ func _release_all() -> void:
 	_apply_move_actions()
 
 
+# ==================== TWO-FINGER BUILD GESTURES ====================
+
+## Pixels of pinch that move a piece one metre, and radians of twist that
+## count as a deliberate turn rather than two thumbs drifting.
+const PINCH_PER_METRE := 220.0
+const TWIST_DEAD_ZONE := 0.04
+
+var _pinch_dist := -1.0
+var _pinch_angle := 0.0
+
+
+## The two fingers that are not on a button or the stick, if there are exactly
+## two of them.
+func _free_fingers() -> Array:
+	var out := []
+	for index in _touches:
+		var record: Dictionary = _touches[index]
+		if record.button == null and index != _stick_finger:
+			out.append(record)
+	return out
+
+
+## Twist and pinch, applied to the piece being placed. Returns true when the
+## gesture was handled, so the caller knows not to also pan the camera.
+func _update_pinch() -> bool:
+	if world_building() == null or Game.selected_blueprint == "":
+		_pinch_dist = -1.0
+		return false
+	var fingers := _free_fingers()
+	if fingers.size() != 2:
+		_pinch_dist = -1.0
+		return false
+
+	var a: Vector2 = fingers[0].pos
+	var b: Vector2 = fingers[1].pos
+	var dist := a.distance_to(b)
+	var angle := (b - a).angle()
+
+	if _pinch_dist < 0.0:
+		_pinch_dist = dist
+		_pinch_angle = angle
+		return true
+
+	var building := world_building()
+	# Spreading raises, closing lowers
+	var moved := (dist - _pinch_dist) / PINCH_PER_METRE
+	if absf(moved) > 0.001:
+		building.adjust_height(moved)
+	# Twisting turns, past a dead zone so a wobble is not a rotation
+	var turned := angle_difference(_pinch_angle, angle)
+	if absf(turned) > TWIST_DEAD_ZONE:
+		building.rotate_ghost(turned)
+	_pinch_dist = dist
+	_pinch_angle = angle
+	return true
+
+
+func world_building() -> Node:
+	if player == null or player.world == null:
+		return null
+	return player.world.building
+
+
 # ==================== TOUCH-ONLY ACTIONS ====================
 
 ## The stance buttons always toggle, whatever the keyboard is set to do: there
@@ -500,19 +569,22 @@ func touch_build_mode() -> void:
 		hud.open_blueprint_menu()
 
 
+## The three flavours of interact go straight to the player rather than
+## through a synthesised key press, so a hold and a double tap can mean
+## different things instead of all arriving as one indistinguishable press.
 func touch_interact() -> void:
-	Input.action_press("interact")
-	# Released next frame: the interact path reads a press, not a hold
-	get_tree().create_timer(0.05).timeout.connect(func():
-		Input.action_release("interact"))
+	if player != null:
+		player.interact()
 
 
 func touch_interact_hold() -> void:
-	touch_interact()
+	if player != null:
+		player.interact_hold()
 
 
 func touch_interact_fast() -> void:
-	touch_interact()
+	if player != null:
+		player.interact_double()
 
 
 func cycle_fire_mode_held() -> void:
