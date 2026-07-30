@@ -1358,7 +1358,10 @@ func _run_tests() -> void:
 
 	# --- Hotbar layout
 	var hud = world.hud
-	_check(hud._hotbar_slots.size() == 6, "hotbar has 6 slots")
+	_check(hud._hotbar_slots.size() == game.BELT_SLOTS,
+		"hotbar draws all %d belt slots" % game.BELT_SLOTS)
+	_check(game.belt.size() == game.BELT_SLOTS,
+		"and the belt itself is that long")
 	var bar: Control = hud._hotbar_slots[0].panel.get_parent()
 	_check(bar is HBoxContainer, "hotbar slots are laid out in an HBoxContainer")
 	_check(bar.anchor_left == 0.5 and bar.anchor_right == 0.5
@@ -1583,6 +1586,9 @@ func _run_tests() -> void:
 	_check(data.has("devices") and data.has("wires"),
 		"the electrical grid is written to the save")
 
+	_test_settings(game, world)
+	_test_camera(game, world)
+	_test_stances(game, world)
 	_test_models(game, world)
 	_test_durability(game, world)
 	_test_new_pieces(game, world, StructureScript)
@@ -1597,6 +1603,329 @@ func _run_tests() -> void:
 		rf.store_string(_save_backup)
 		rf.close()
 	print("SMOKE TEST DONE")
+
+
+# ==================== CONTROL SETTINGS ====================
+
+func _test_settings(game, world) -> void:
+	# Every tunable has a default, and the ones with a range are held inside
+	# it — a hand-edited save must not be able to produce a broken camera.
+	for key in game.SETTINGS_RANGE:
+		_check(game.SETTINGS_DEFAULTS.has(key),
+			"%s has a default as well as a range" % key)
+		var span: Array = game.SETTINGS_RANGE[key]
+		game.set_setting(key, float(span[1]) + 100.0)
+		_check(is_equal_approx(float(game.setting(key)), float(span[1])),
+			"%s clamps to its maximum of %.2f" % [key, float(span[1])])
+		game.set_setting(key, float(span[0]) - 100.0)
+		_check(is_equal_approx(float(game.setting(key)), float(span[0])),
+			"%s clamps to its minimum of %.2f" % [key, float(span[0])])
+
+	# The ranges the spec asked for, spelled out so a rebalance is deliberate
+	_check(game.SETTINGS_RANGE["look_sensitivity"] == [0.1, 2.0],
+		"look sensitivity spans 0.1x to 2.0x")
+	_check(game.SETTINGS_RANGE["camera_damping"] == [0.1, 1.0],
+		"camera damping spans 0.1 to 1.0")
+	_check(game.SETTINGS_RANGE["fov"] == [70.0, 110.0], "field of view spans 70 to 110")
+	_check(game.SETTINGS_RANGE["tap_tolerance"] == [0.05, 0.2],
+		"tap tolerance spans 50ms to 200ms")
+
+	game.reset_settings()
+	_check(is_equal_approx(float(game.setting("look_sensitivity")), 1.0),
+		"resetting puts every setting back to its default")
+	_check(not bool(game.setting("gyro_enabled")),
+		"the gyroscope is off until asked for")
+
+	# An unknown key is refused rather than stored, so a stale save cannot
+	# grow the settings dictionary with keys nothing reads.
+	game.set_setting("not_a_setting", 5)
+	_check(not game.settings.has("not_a_setting"), "an unknown setting is ignored")
+
+	# Settings survive a save
+	game.set_setting("fov", 96.0)
+	game.set_setting("invert_look_y", true)
+	world.save_game()
+	var f := FileAccess.open("user://rust_save.json", FileAccess.READ)
+	var data = JSON.parse_string(f.get_as_text())
+	f.close()
+	_check(data is Dictionary and data.has("settings")
+		and is_equal_approx(float(data.settings.get("fov", 0.0)), 96.0),
+		"settings are written to the save")
+	game.reset_settings()
+	game.load_settings({"fov": 999.0, "gyro_only": true, "junk": 1})
+	_check(is_equal_approx(float(game.setting("fov")), 110.0),
+		"loading a nonsense value clamps rather than accepting it")
+	_check(bool(game.setting("gyro_only")) and not game.settings.has("junk"),
+		"and loading keeps the real keys while dropping the unknown ones")
+	game.reset_settings()
+
+
+# ==================== CAMERA ====================
+
+func _test_camera(game, world) -> void:
+	var player = world.player
+	game.reset_settings()
+
+	# Look input lands on a target, not on the transform — that is what lets
+	# the camera be smoothed at all.
+	player._yaw_target = 0.0
+	player._pitch_target = 0.0
+	player.rotation.y = 0.0
+	player.apply_look(Vector2(100.0, 0.0))
+	_check(player._yaw_target < 0.0, "dragging right turns the view target right")
+	_check(is_equal_approx(player.rotation.y, 0.0),
+		"and does not move the body until the camera is stepped")
+
+	# Sensitivity really scales it
+	player._yaw_target = 0.0
+	game.set_setting("look_sensitivity", 2.0)
+	player.apply_look(Vector2(100.0, 0.0))
+	var fast: float = absf(player._yaw_target)
+	player._yaw_target = 0.0
+	game.set_setting("look_sensitivity", 0.5)
+	player.apply_look(Vector2(100.0, 0.0))
+	var slow: float = absf(player._yaw_target)
+	_check(fast > slow * 3.0, "2.0x sensitivity turns much further than 0.5x")
+	game.reset_settings()
+
+	# Inversion flips pitch and nothing else
+	player._pitch_target = 0.0
+	player.apply_look(Vector2(0.0, 50.0))
+	var normal_pitch: float = player._pitch_target
+	player._pitch_target = 0.0
+	game.set_setting("invert_look_y", true)
+	player.apply_look(Vector2(0.0, 50.0))
+	_check(signf(player._pitch_target) == -signf(normal_pitch),
+		"inverting the Y axis flips the pitch")
+	game.reset_settings()
+
+	# Pitch cannot pass straight up or down however hard you drag
+	player._pitch_target = 0.0
+	for i in 40:
+		player.apply_look(Vector2(0.0, -400.0))
+	_check(player._pitch_target <= PI / 2.0 + 0.001,
+		"pitch is clamped looking up")
+	player._pitch_target = 0.0
+	for i in 40:
+		player.apply_look(Vector2(0.0, 400.0))
+	_check(player._pitch_target >= -PI / 2.0 - 0.001,
+		"and looking down")
+	player._pitch_target = 0.0
+
+	# Smoothing closes the gap without overshooting it
+	player._yaw_target = 1.0
+	player.rotation.y = 0.0
+	player._yaw_vel = 0.0
+	var last := 0.0
+	var overshot := false
+	for i in 120:
+		player._update_camera(1.0 / 60.0)
+		if player.rotation.y > 1.0001:
+			overshot = true
+		last = player.rotation.y
+	_check(not overshot, "the camera spring never overshoots its target")
+	_check(absf(last - 1.0) < 0.05,
+		"and it arrives (%.3f of 1.0 after two seconds)" % last)
+
+	# Field of view: the player's setting, narrowed by stance and by aiming
+	game.set_setting("fov", 90.0)
+	player.stance = game.STANCE_STAND
+	player.aiming = false
+	player.glassing = false
+	_check(is_equal_approx(player.target_fov(), 90.0),
+		"standing, the view is exactly what the player asked for")
+	player.stance = game.STANCE_CROUCH
+	var crouched: float = player.target_fov()
+	player.stance = game.STANCE_PRONE
+	var prone_fov: float = player.target_fov()
+	_check(crouched < 90.0 and prone_fov < crouched,
+		"crouching narrows it and prone narrows it further (%.1f > %.1f > %.1f)"
+			% [90.0, crouched, prone_fov])
+	player.stance = game.STANCE_STAND
+	player.aiming = true
+	_check(player.target_fov() < 90.0, "aiming narrows it too")
+	player.aiming = false
+
+	# And it blends over the declared time rather than snapping
+	player.camera.fov = 90.0
+	player._fov_to = 90.0
+	player._fov_elapsed = game.FOV_BLEND_TIME
+	game.set_setting("fov", 70.0)
+	player._update_fov(0.05)
+	_check(player.camera.fov > 71.0 and player.camera.fov < 90.0,
+		"a field of view change is part-way through after 50ms (%.1f)" % player.camera.fov)
+	for i in 40:
+		player._update_fov(1.0 / 60.0)
+	_check(is_equal_approx(player.camera.fov, 70.0), "and has arrived by the end")
+	game.reset_settings()
+
+	# Shake decays to nothing and leaves the camera level
+	player.shake_camera(0.1, 0.2, 20.0)
+	player._update_shake(0.05)
+	_check(player.camera.rotation != Vector3.ZERO, "an impact shakes the camera")
+	for i in 30:
+		player._update_shake(1.0 / 60.0)
+	_check(player.camera.rotation == Vector3.ZERO, "and it settles back level")
+
+	# Turned off, it does nothing at all
+	game.set_setting("shake_intensity", 0.0)
+	player.shake_camera(0.5, 0.5, 20.0)
+	player._update_shake(0.05)
+	_check(player.camera.rotation == Vector3.ZERO,
+		"with shake turned off an impact does not move the camera")
+	game.reset_settings()
+
+	# Gyro-only mode is the one case where a thumb must not turn the view
+	_check(player.touch_look_enabled(), "touch look is on by default")
+	game.set_setting("gyro_enabled", true)
+	game.set_setting("gyro_only", true)
+	_check(not player.touch_look_enabled(), "gyro-only mode disables touch look")
+	game.reset_settings()
+	_check(player.touch_look_enabled(), "and turning it off gives touch look back")
+
+
+# ==================== STANCES ====================
+
+func _test_stances(game, world) -> void:
+	var player = world.player
+	game.reset_settings()
+	player.stance = game.STANCE_STAND
+	player.aiming = false
+	player._slide_left = 0.0
+
+	for name_ in [game.STANCE_STAND, game.STANCE_CROUCH, game.STANCE_PRONE,
+			game.STANCE_SWIM]:
+		_check(game.STANCES.has(name_), "%s is a stance" % name_)
+
+	# Lower is slower, smaller and harder to hit — the trade the whole system
+	# rests on
+	var stand: Dictionary = game.stance_data(game.STANCE_STAND)
+	var crouch: Dictionary = game.stance_data(game.STANCE_CROUCH)
+	var prone: Dictionary = game.stance_data(game.STANCE_PRONE)
+	_check(float(crouch.speed) < float(stand.speed)
+		and float(prone.speed) < float(crouch.speed),
+		"each stance down is slower than the last")
+	_check(float(crouch.height) < float(stand.height)
+		and float(prone.height) < float(crouch.height),
+		"and shorter")
+	_check(float(crouch.spread) < float(stand.spread)
+		and float(prone.spread) < float(crouch.spread),
+		"and steadier to shoot from")
+	_check(float(crouch.noise) < float(stand.noise),
+		"and quieter")
+
+	# One stance at a time
+	_check(player.set_stance(game.STANCE_CROUCH), "you can crouch")
+	_check(player.stance == game.STANCE_CROUCH, "and only that stance is set")
+	_check(player.set_stance(game.STANCE_PRONE), "you can drop from crouch to prone")
+	_check(player.stance == game.STANCE_PRONE, "and are no longer crouched")
+
+	# The capsule follows, so a crouched player really is a smaller target
+	player.stance = game.STANCE_STAND
+	player._height_now = float(stand.height)
+	player._update_stance_shape(0.001)
+	var tall: float = player._capsule.height
+	player.stance = game.STANCE_PRONE
+	for i in 60:
+		player._update_stance_shape(1.0 / 60.0)
+	_check(player._capsule.height < tall,
+		"going prone shrinks the collision capsule (%.2f from %.2f)"
+			% [player._capsule.height, tall])
+	_check(is_equal_approx(player._body_cs.position.y, player._capsule.height * 0.5),
+		"and the capsule stays centred on its own height")
+	_check(absf(player.head.position.y - float(prone.eye)) < 0.05,
+		"and the eye has dropped to prone height")
+
+	# Sprint is standing-only
+	player.stance = game.STANCE_STAND
+	var stand_speed: float = player.movement_speed()
+	player.stance = game.STANCE_CROUCH
+	_check(player.movement_speed() < stand_speed, "crouched movement is slower")
+	player.stance = game.STANCE_STAND
+	player.aiming = true
+	_check(player.movement_speed() < stand_speed, "aiming plants your feet")
+	player.aiming = false
+
+	# Standing up under something solid is refused rather than clipping through
+	# it. Staged with a real ceiling rather than asserted against open sky,
+	# where any amount of headroom is genuinely available.
+	var parked: Vector3 = player.position
+	var lid_x: float = _flat_site(world).x + 90.0
+	var lid_z: float = _flat_site(world).y + 90.0
+	var ground: float = world.terrain_height(lid_x, lid_z)
+	player.position = Vector3(lid_x, ground + 0.1, lid_z)
+	_check(player.has_headroom(1.8), "under open sky there is room to stand")
+
+	var StructureScript2 = load("res://scripts/structure.gd")
+	var lid = StructureScript2.new()
+	lid.setup("ceiling")
+	# A slab at chest height: enough room to crouch under, not to stand
+	lid.position = Vector3(lid_x, ground + 1.25, lid_z)
+	world.add_child(lid)
+	world.register_structure(lid)
+	_check(not player.has_headroom(1.8), "under a low ceiling there is not")
+	player.stance = game.STANCE_CROUCH
+	_check(not player.set_stance(game.STANCE_STAND, false),
+		"so standing up is refused rather than clipping through it")
+	_check(player.stance == game.STANCE_CROUCH, "and the stance is left alone")
+	world.unregister_structure(lid)
+	lid.queue_free()
+	player.position = parked
+	player.stance = game.STANCE_STAND
+
+	# A slide needs speed behind it
+	player.velocity = Vector3.ZERO
+	player._slide_left = 0.0
+	_check(not player.try_slide(), "you cannot slide from standing still")
+	player.velocity = Vector3(player.SPEED, 0.0, 0.0)
+	var slid: bool = player.try_slide()
+	if slid:
+		_check(player._slide_left > 0.0, "sliding from a run starts a slide")
+		_check(player.stance == game.STANCE_CROUCH, "and puts you on your knees")
+	player._slide_left = 0.0
+	player.stance = game.STANCE_STAND
+
+	# Swimming is imposed, not chosen
+	_check(not player.set_stance(game.STANCE_SWIM)
+		or player.stance == game.STANCE_SWIM,
+		"the swim stance is only ever set by the water")
+	player.stance = game.STANCE_SWIM
+	_check(not player.set_stance(game.STANCE_PRONE),
+		"and you cannot go prone in a lake")
+	_check(player.try_dive(), "you can dive while swimming")
+	_check(player.velocity.y < 0.0, "and it takes you down")
+	player.stance = game.STANCE_STAND
+	_check(not player.try_dive(), "but not while standing on dry land")
+
+	# Oxygen
+	_check(game.stats.has("oxygen"), "the player has a breath to hold")
+	game.stats.oxygen = 100.0
+	player.holding_breath = true
+	player._update_oxygen(1.0)
+	_check(game.stats.oxygen < 100.0, "holding your breath spends it")
+	player.holding_breath = false
+	player._update_oxygen(1.0)
+	_check(game.stats.oxygen > 0.0, "and letting go gets it back")
+	game.stats.oxygen = 0.0
+	player.holding_breath = true
+	player._update_oxygen(0.1)
+	_check(not player.holding_breath, "you cannot hold a breath you do not have")
+	game.stats.oxygen = 100.0
+
+	# Double jump is off until unlocked
+	_check(not game.double_jump_unlocked, "the double jump starts locked")
+
+	# Leaning rolls the view and shifts it off the shoulder
+	player.set_lean(1.0)
+	for i in 30:
+		player._update_lean(1.0 / 60.0)
+	_check(player.head.rotation.z < 0.0 and player.head.position.x > 0.0,
+		"leaning right rolls the camera and moves it right")
+	player.set_lean(0.0)
+	for i in 30:
+		player._update_lean(1.0 / 60.0)
+	_check(absf(player.head.rotation.z) < 0.01 and absf(player.head.position.x) < 0.01,
+		"and letting go brings it back upright")
 
 
 # ==================== MODELS ====================

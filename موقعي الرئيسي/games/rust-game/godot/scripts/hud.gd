@@ -393,7 +393,7 @@ func _build_hotbar() -> void:
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bar)
 
-	for i in 6:
+	for i in Game.BELT_SLOTS:
 		var slot := PanelContainer.new()
 		slot.custom_minimum_size = HOTBAR_SLOT_SIZE
 		slot.mouse_filter = Control.MOUSE_FILTER_IGNORE

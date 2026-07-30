@@ -22,9 +22,9 @@ var third_person := false
 var looking_at_structure: Node3D = null
 var in_water := false
 
-## Field of view the camera sits at normally, and the one binoculars pull it
-## down to. A narrower cone is a longer look.
-const FOV_NORMAL := 75.0
+## What binoculars pull the field of view down to. A narrower cone is a longer
+## look. The everyday value is no longer a constant — it is the player's own
+## `fov` setting, narrowed further by stance and by aiming.
 const FOV_GLASSED := 22.0
 ## Seconds of flashlight burn that cost one point of its cell.
 const FLASHLIGHT_DRAIN_INTERVAL := 2.0
@@ -34,23 +34,104 @@ var on_ladder := false
 ## The device the wire tool is holding one end of, if any.
 var wiring_from: Object = null
 
+## How much narrower the view goes when aiming down the sights.
+const ADS_FOV_SCALE := 0.62
+## Downward speed a landing has to beat before it is felt. Ordinary jumping
+## lands well under this, so hopping about does not rattle the camera.
+const LAND_SHAKE_SPEED := -12.0
+## Radians per second of phone rotation, per unit of gyro sensitivity.
+const GYRO_SCALE := 1.0
+## Below this much sensor motion the phone counts as being held still, and
+## the drift bias is re-learned.
+const GYRO_STILL_THRESHOLD := 0.02
+const GYRO_SETTLE_TIME := 0.4
+
+## Which way the player has asked the view to point. The transform eases
+## towards these rather than being set from the input directly.
+var _yaw_target := 0.0
+var _pitch_target := 0.0
+var _yaw_vel := 0.0
+var _pitch_vel := 0.0
+
+## Impact shake
+var _shake_amount := 0.0
+var _shake_duration := 0.0
+var _shake_left := 0.0
+var _shake_frequency := 22.0
+
+## Field of view blend
+var _fov_from := 75.0
+var _fov_to := 75.0
+var _fov_elapsed := 0.0
+
+## Gyroscope drift compensation
+var _gyro_bias := Vector3.ZERO
+var _gyro_settled := 0.0
+
+## Current stance, one of Game.STANCE_*. Movement, the collision capsule, the
+## camera height and weapon spread all read this. Spelled as a literal rather
+## than through the autoload, because a member initialiser runs before there
+## is any guarantee the autoload has registered.
+var stance := "stand"
+## True while aiming down the sights.
+var aiming := false
+## True while the breath is being held: steadier aim, quieter, and it burns
+## the same oxygen that diving does.
+var holding_breath := false
+
 var _step_distance := 0.0
 var _drink_cd := 0.0
 var _weapon_cd := 0.0
 var _flashlight_timer := 0.0
+
+## Movement tuning
+const SLIDE_SPEED := 13.5
+const SLIDE_TIME := 0.65
+## A slide has to be started from a run, or it is just a crouch with extra
+## steps. This is the fraction of walking speed you must already be doing.
+const SLIDE_MIN_SPEED := 0.9
+const VAULT_MAX_HEIGHT := 1.35
+const VAULT_REACH := 1.2
+const SWIM_SPEED := 5.0
+const DIVE_SPEED := 4.0
+## Oxygen, in seconds of held breath before it starts costing health.
+const OXYGEN_DRAIN := 8.0
+const OXYGEN_REFILL := 26.0
+const DROWN_DAMAGE := 6.0
+## Leaning: how far the view rolls and shifts, and how long it takes.
+const LEAN_ANGLE := 0.28
+const LEAN_OFFSET := 0.42
+const LEAN_TIME := 0.16
+
+var _body_cs: CollisionShape3D
+var _capsule: CapsuleShape3D
+## Capsule height and eye height, eased so a stance change reads as the body
+## dropping rather than the camera teleporting.
+var _height_now := 1.8
+var _eye_now := 1.6
+var _slide_left := 0.0
+var _slide_dir := Vector3.ZERO
+## Jumps used since last touching the ground, for the double jump.
+var _jumps_used := 0
+## Sideways lean, -1 left to +1 right, and where it is easing to.
+var _lean := 0.0
+var _lean_target := 0.0
 
 
 func _ready() -> void:
 	collision_layer = 16
 	collision_mask = 7 | Game.LAYER_FLOOR  # terrain, structures, resources, floors
 
-	var cs := CollisionShape3D.new()
-	var cap := CapsuleShape3D.new()
-	cap.radius = 0.4
-	cap.height = 1.8
-	cs.shape = cap
-	cs.position.y = 0.9
-	add_child(cs)
+	# Kept as members: the capsule shrinks and grows with the stance, so
+	# crouching really does make a smaller target rather than only looking
+	# like one.
+	_body_cs = CollisionShape3D.new()
+	_capsule = CapsuleShape3D.new()
+	_capsule.radius = 0.4
+	_capsule.height = 1.8
+	_body_cs.shape = _capsule
+	_body_cs.position.y = 0.9
+	add_child(_body_cs)
 
 	head = Node3D.new()
 	head.position = Vector3(0, 1.6, 0)
@@ -65,7 +146,11 @@ func _ready() -> void:
 	camera = Camera3D.new()
 	camera.current = true
 	camera.far = 2000.0
+	camera.fov = float(Game.setting("fov"))
 	spring.add_child(camera)
+	_fov_from = camera.fov
+	_fov_to = camera.fov
+	recalibrate_gyro()
 
 	torch_light = OmniLight3D.new()
 	torch_light.light_color = Color(1.0, 0.62, 0.28)
@@ -139,6 +224,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if Game.ui_open != "":
 		return
 
+	# Hold-to-crouch: letting go stands you back up. Skipped when the player
+	# has asked for the stance controls to toggle instead, which is the
+	# accessibility option for hands that cannot hold a key down.
+	if event.is_action_released("crouch") and not bool(Game.setting("toggle_stance")):
+		if stance == Game.STANCE_CROUCH:
+			set_stance(Game.STANCE_STAND)
+		return
+
 	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		apply_look(event.relative)
 	elif event.is_action_pressed("attack"):
@@ -166,8 +259,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		_wire_action()
 	elif event.is_action_pressed("toggle_view"):
 		_toggle_view()
+	elif event.is_action_pressed("crouch"):
+		toggle_stance(Game.STANCE_CROUCH)
+	elif event.is_action_pressed("prone"):
+		toggle_stance(Game.STANCE_PRONE)
 	else:
-		for i in 6:
+		for i in Game.BELT_SLOTS:
 			if event.is_action_pressed("slot_%d" % (i + 1)):
 				Game.selected_belt_slot = i
 				Game.belt_changed.emit()
@@ -175,11 +272,424 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 ## Rotate the view by a pixel delta. Shared by mouse look and the touch
-## look-drag, so both paths obey the same sensitivity and pitch clamp.
+## look-drag, so both paths obey the same sensitivity, inversion and clamp.
+##
+## The delta lands on a *target* rather than on the transform: the camera then
+## eases towards it, which is what turns a finger dragged across glass in
+## jerky steps into a pan. Nothing here moves the head directly.
 func apply_look(rel: Vector2) -> void:
-	rotate_y(-rel.x * MOUSE_SENS)
-	head.rotate_x(-rel.y * MOUSE_SENS)
-	head.rotation.x = clampf(head.rotation.x, -PI / 2.0, PI / 2.0)
+	var sens: float = MOUSE_SENS * float(Game.setting("look_sensitivity"))
+	_yaw_target -= rel.x * sens
+	var pitch_delta: float = rel.y * sens
+	if bool(Game.setting("invert_look_y")):
+		pitch_delta = -pitch_delta
+	_pitch_target = clampf(_pitch_target - pitch_delta, -PI / 2.0, PI / 2.0)
+
+
+## Whether a finger on the camera zone should turn the view at all. In
+## gyro-only mode it must not: the point of that mode is that the phone is
+## the aim, and a stray thumb would fight it.
+func touch_look_enabled() -> bool:
+	return not (bool(Game.setting("gyro_enabled")) and bool(Game.setting("gyro_only")))
+
+
+# ==================== STANCE & MOVEMENT ====================
+
+## How fast this stance moves, before the water and the slide have their say.
+## Sprinting is standing-only: you cannot run while crouched or prone, which
+## is the whole trade the stances are built on.
+func movement_speed() -> float:
+	var base := SPEED
+	if stance == Game.STANCE_SWIM:
+		base = SWIM_SPEED
+	elif stance == Game.STANCE_STAND and Input.is_action_pressed("sprint"):
+		base = SPRINT_SPEED
+	var factor := float(Game.stance_data(stance).speed)
+	# Aiming plants your feet. Half speed is what stops ADS being free.
+	if aiming:
+		factor *= 0.5
+	return base * factor
+
+
+## Is there room to grow back up to `height` where we are standing? Checked
+## before any stance change that makes the capsule taller, so standing up
+## under a low ceiling simply does not happen rather than launching the
+## player through it.
+func has_headroom(height: float) -> bool:
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return true
+	var from := global_position + Vector3.UP * 0.15
+	var to := global_position + Vector3.UP * (height + 0.05)
+	var query := PhysicsRayQueryParameters3D.create(
+		from, to, 1 | 2 | Game.LAYER_FLOOR, [get_rid()])
+	return space.intersect_ray(query).is_empty()
+
+
+## Moves to a stance, or refuses. Swimming is not chosen — it is imposed by
+## being in water — so it cannot be entered or left by hand.
+func set_stance(next: String, announce: bool = true) -> bool:
+	if next == stance:
+		return true
+	if not Game.STANCES.has(next):
+		return false
+	if stance == Game.STANCE_SWIM and next != Game.STANCE_STAND:
+		return false
+
+	var target_height := float(Game.stance_data(next).height)
+	if target_height > float(Game.stance_data(stance).height) \
+			and not has_headroom(target_height):
+		if announce:
+			Game.notify("No room to stand up here", Color(1.0, 0.63, 0.0))
+		return false
+
+	stance = next
+	if announce:
+		Game.notify(str(Game.stance_data(next).name), Color(0.7, 0.8, 0.9))
+	Game.haptic(0.5)
+	return true
+
+
+## What a stance button does: into the stance if you are not in it, back to
+## standing if you are. This is the tap-to-action path, used by the touch
+## buttons always and by the keys when the accessibility toggle is on.
+func toggle_stance(which: String) -> bool:
+	if stance == which:
+		return set_stance(Game.STANCE_STAND)
+	# Running into a crouch is a slide, not a crouch
+	if which == Game.STANCE_CROUCH and try_slide():
+		return true
+	return set_stance(which)
+
+
+## Eases the collision capsule and the eye height towards the current stance.
+## A full stand-to-prone takes STANCE_BLEND_TIME; a smaller change is quicker.
+func _update_stance_shape(delta: float) -> void:
+	var data := Game.stance_data(stance)
+	var span := float(Game.stance_data(Game.STANCE_STAND).height) \
+		- float(Game.stance_data(Game.STANCE_PRONE).height)
+	var step := span / Game.STANCE_BLEND_TIME * delta
+
+	_height_now = move_toward(_height_now, float(data.height), step)
+	_eye_now = move_toward(_eye_now, float(data.eye), step)
+
+	# Centred on the height the capsule actually took, not the height we asked
+	# for: a capsule refuses to be shorter than twice its radius, and using
+	# the requested value left the shape hanging below its own centre.
+	_capsule.height = maxf(_capsule.radius * 2.0, _height_now)
+	_body_cs.position.y = _capsule.height * 0.5
+	head.position.y = _eye_now
+
+
+## Water decides for itself. Wading in puts you in the swim stance and wading
+## out takes you back to standing, so there is no way to be prone in a lake.
+func _update_swimming() -> void:
+	if in_water and stance != Game.STANCE_SWIM:
+		stance = Game.STANCE_SWIM
+		_slide_left = 0.0
+		Game.notify("Swimming", Color(0.4, 0.7, 0.95))
+	elif not in_water and stance == Game.STANCE_SWIM:
+		stance = Game.STANCE_STAND
+
+
+## True when the head is actually under the surface — which is what costs
+## oxygen, rather than merely standing in the shallows.
+func is_submerged() -> bool:
+	return in_water and head.global_position.y < world.WATER_LEVEL
+
+
+## Breath. Runs down while the head is under and refills fast above it; at
+## zero the player starts drowning. Held breath while aiming spends it too,
+## which is what stops "hold breath" being a free steadying.
+func _update_oxygen(delta: float) -> void:
+	var spending := is_submerged() or holding_breath
+	if spending:
+		Game.stats.oxygen = maxf(0.0, float(Game.stats.oxygen) - OXYGEN_DRAIN * delta)
+		if Game.stats.oxygen <= 0.0:
+			Game.stats.health -= DROWN_DAMAGE * delta
+			if is_submerged():
+				shake_camera(0.02, 0.4, 12.0)
+	else:
+		Game.stats.oxygen = minf(100.0, float(Game.stats.oxygen) + OXYGEN_REFILL * delta)
+	if holding_breath and Game.stats.oxygen <= 0.0:
+		holding_breath = false
+
+
+## Dives from the surface. Only means anything while swimming, and it is the
+## only way down: swimming alone floats you.
+func try_dive() -> bool:
+	if stance != Game.STANCE_SWIM:
+		return false
+	velocity.y = -DIVE_SPEED
+	Game.haptic(0.4)
+	return true
+
+
+## Slides, if there is enough speed behind it. Returns false when the
+## conditions are not there, so the caller can fall back to a plain crouch.
+func try_slide() -> bool:
+	if _slide_left > 0.0 or not is_on_floor() or stance != Game.STANCE_STAND:
+		return false
+	var flat := Vector2(velocity.x, velocity.z)
+	if flat.length() < SPEED * SLIDE_MIN_SPEED:
+		return false
+	if not set_stance(Game.STANCE_CROUCH, false):
+		return false
+	_slide_left = SLIDE_TIME
+	_slide_dir = Vector3(flat.x, 0.0, flat.y).normalized()
+	Game.notify("Slide", Color(0.8, 0.85, 0.95))
+	Game.haptic(0.7)
+	Sfx.play("step")
+	return true
+
+
+## Hops a waist-high obstacle. Looks for something solid within reach at shin
+## height with clear air above it, then throws the player up and over with an
+## impulse sized to clear whatever it found — physics does the arc, so there
+## is no animation to desynchronise from the collision.
+func try_vault() -> bool:
+	if stance == Game.STANCE_SWIM or not is_on_floor():
+		return false
+	var space := get_world_3d().direct_space_state
+	if space == null:
+		return false
+
+	var forward := -global_transform.basis.z
+	forward.y = 0.0
+	if forward.length() < 0.01:
+		return false
+	forward = forward.normalized()
+
+	# Something at shin height, within reach
+	var low_from := global_position + Vector3.UP * 0.35
+	var low := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		low_from, low_from + forward * VAULT_REACH, 1 | 2 | Game.LAYER_FLOOR, [get_rid()]))
+	if low.is_empty():
+		return false
+
+	# ...and nothing at chest height, or it is a wall and not a ledge
+	var high_from := global_position + Vector3.UP * (VAULT_MAX_HEIGHT + 0.25)
+	var high := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		high_from, high_from + forward * (VAULT_REACH + 0.2),
+		1 | 2 | Game.LAYER_FLOOR, [get_rid()]))
+	if not high.is_empty():
+		return false
+
+	# Find the top of what we are climbing, by looking down onto it
+	var over: Vector3 = low.position + forward * 0.35 + Vector3.UP * (VAULT_MAX_HEIGHT + 0.5)
+	var top := space.intersect_ray(PhysicsRayQueryParameters3D.create(
+		over, over - Vector3.UP * (VAULT_MAX_HEIGHT + 1.0),
+		1 | 2 | Game.LAYER_FLOOR, [get_rid()]))
+	var ledge: float = float(top.position.y) if not top.is_empty() else \
+		global_position.y + VAULT_MAX_HEIGHT
+	var rise: float = ledge - global_position.y
+	if rise > VAULT_MAX_HEIGHT or rise < 0.15:
+		return false
+
+	# Just enough upward speed to clear the ledge, plus a shove forwards
+	velocity.y = sqrt(2.0 * GRAVITY * (rise + 0.35))
+	velocity.x = forward.x * SPEED * 0.9
+	velocity.z = forward.z * SPEED * 0.9
+	_jumps_used = 1
+	Game.notify("Vault", Color(0.8, 0.9, 0.8))
+	Game.haptic(0.6)
+	Sfx.play("step")
+	return true
+
+
+## Jump, vault, or double jump — in that order of preference, because a
+## player pressing jump at a waist-high wall means "get over it".
+func try_jump() -> bool:
+	if stance == Game.STANCE_SWIM:
+		velocity.y = SWIM_SPEED * 0.6
+		return true
+	if on_ladder:
+		velocity.y = JUMP_VELOCITY
+		on_ladder = false
+		return true
+	if is_on_floor():
+		if try_vault():
+			return true
+		# Crouched or prone, jump stands you up instead of leaving the ground
+		if stance != Game.STANCE_STAND:
+			return set_stance(Game.STANCE_STAND)
+		velocity.y = JUMP_VELOCITY
+		_jumps_used = 1
+		Game.haptic(0.35)
+		return true
+	if Game.double_jump_unlocked and _jumps_used < 2:
+		velocity.y = JUMP_VELOCITY * 0.85
+		_jumps_used += 1
+		Game.haptic(0.45)
+		Sfx.play("step")
+		return true
+	return false
+
+
+## Sideways peek. Rolls the camera and shifts it off the shoulder, which is
+## enough to see round a doorway without stepping into it.
+func set_lean(amount: float) -> void:
+	_lean_target = clampf(amount, -1.0, 1.0)
+
+
+func _update_lean(delta: float) -> void:
+	_lean = move_toward(_lean, _lean_target, delta / LEAN_TIME)
+	head.rotation.z = -_lean * LEAN_ANGLE
+	head.position.x = _lean * LEAN_OFFSET
+
+
+# ==================== CAMERA ====================
+
+## Eases the view towards where the player has asked it to point, blends the
+## field of view, and lays any impact shake on top.
+func _update_camera(delta: float) -> void:
+	_apply_gyro(delta)
+
+	var damping: float = float(Game.setting("camera_damping"))
+	if bool(Game.setting("camera_acceleration")):
+		# A critically damped spring: it starts and stops smoothly and never
+		# overshoots, which is what "acceleration" has to mean for a camera.
+		# Anything that overshoots a crosshair is unusable.
+		var stiffness: float = lerpf(90.0, 900.0, damping)
+		var yaw := _spring(rotation.y, _yaw_target, _yaw_vel, delta, stiffness)
+		rotation.y = yaw[0]
+		_yaw_vel = yaw[1]
+		var pitch := _spring(head.rotation.x, _pitch_target, _pitch_vel, delta, stiffness)
+		head.rotation.x = clampf(pitch[0], -PI / 2.0, PI / 2.0)
+		_pitch_vel = pitch[1]
+	else:
+		# Plain exponential ease. Frame-rate independent, so a phone dropping
+		# to 30 fps feels the same as one holding 60.
+		var rate: float = lerpf(6.0, 40.0, damping)
+		var t: float = 1.0 - exp(-rate * delta)
+		rotation.y = lerpf(rotation.y, _yaw_target, t)
+		head.rotation.x = clampf(lerpf(head.rotation.x, _pitch_target, t),
+			-PI / 2.0, PI / 2.0)
+		_yaw_vel = 0.0
+		_pitch_vel = 0.0
+
+	_update_shake(delta)
+	_update_fov(delta)
+
+
+## One step of a critically damped spring. Returns [position, velocity].
+func _spring(current: float, target: float, vel: float, delta: float,
+		stiffness: float) -> Array:
+	var accel: float = (target - current) * stiffness - vel * 2.0 * sqrt(stiffness)
+	vel += accel * delta
+	return [current + vel * delta, vel]
+
+
+## Kicks the camera. `intensity` is in radians of swing at full strength,
+## scaled by the player's own preference so someone who cannot tolerate it
+## can turn it off entirely without losing the hit feedback elsewhere.
+func shake_camera(intensity: float, duration: float = 0.35,
+		frequency: float = 22.0) -> void:
+	var scaled: float = intensity * float(Game.setting("shake_intensity"))
+	if scaled <= 0.0 or duration <= 0.0:
+		return
+	# A bigger shake is never cut short by a smaller one already running
+	if scaled * duration < _shake_amount * _shake_left:
+		return
+	_shake_amount = scaled
+	_shake_duration = duration
+	_shake_left = duration
+	_shake_frequency = frequency
+
+
+func _update_shake(delta: float) -> void:
+	if _shake_left <= 0.0:
+		if camera.rotation != Vector3.ZERO:
+			camera.rotation = Vector3.ZERO
+		return
+	_shake_left = maxf(0.0, _shake_left - delta)
+	# Fades out over its life so it settles instead of stopping dead
+	var fade: float = _shake_left / maxf(0.0001, _shake_duration)
+	var amp: float = _shake_amount * fade * fade
+	var t: float = (_shake_duration - _shake_left) * _shake_frequency
+	camera.rotation = Vector3(
+		sin(t * 1.7) * amp,
+		sin(t * 1.1 + 1.3) * amp,
+		sin(t * 2.3 + 2.7) * amp * 0.6)
+
+
+## Where the field of view wants to be: the player's own setting, narrowed by
+## the stance they are in and again by aiming or glassing.
+func target_fov() -> float:
+	if glassing:
+		return FOV_GLASSED
+	var base: float = float(Game.setting("fov"))
+	base += float(Game.stance_data(stance).fov)
+	if aiming:
+		base *= ADS_FOV_SCALE
+	return base
+
+
+## Blends over a fixed time rather than at a fixed rate, so a 4-degree crouch
+## dip and a 40-degree scope zoom both take the same third of a second.
+func _update_fov(delta: float) -> void:
+	var want := target_fov()
+	if not is_equal_approx(want, _fov_to):
+		_fov_from = camera.fov
+		_fov_to = want
+		_fov_elapsed = 0.0
+	if _fov_elapsed >= Game.FOV_BLEND_TIME:
+		camera.fov = _fov_to
+		return
+	_fov_elapsed = minf(Game.FOV_BLEND_TIME, _fov_elapsed + delta)
+	var t: float = _fov_elapsed / Game.FOV_BLEND_TIME
+	# Ease in and out, so the zoom does not start or stop with a jerk
+	camera.fov = lerpf(_fov_from, _fov_to, t * t * (3.0 - 2.0 * t))
+
+
+# ==================== GYROSCOPE ====================
+
+## Records what the sensor reads while the phone is being held still, and
+## subtracts it from then on. Every gyroscope drifts; without this the view
+## creeps sideways on its own with nobody touching it.
+func recalibrate_gyro() -> void:
+	_gyro_bias = Input.get_gyroscope()
+	_gyro_settled = 0.0
+
+
+## Turns phone rotation into view rotation, when the player has asked for it.
+## Off by default, and by default only while aiming — a gyroscope is a
+## precision tool for the moment you are already holding still, not a way to
+## walk around.
+func _apply_gyro(delta: float) -> void:
+	if not bool(Game.setting("gyro_enabled")):
+		return
+	if not (aiming or bool(Game.setting("gyro_only"))):
+		return
+
+	var raw := Input.get_gyroscope()
+	if raw == Vector3.ZERO:
+		return  # no sensor on this device
+
+	# Re-learn the bias whenever the phone has been still for a moment, which
+	# is the auto-recentring the player never has to think about.
+	var motion := (raw - _gyro_bias).length()
+	if motion < GYRO_STILL_THRESHOLD:
+		_gyro_settled += delta
+		if _gyro_settled > GYRO_SETTLE_TIME:
+			_gyro_bias = _gyro_bias.lerp(raw, 0.05)
+	else:
+		_gyro_settled = 0.0
+
+	var rate := raw - _gyro_bias
+	var dead: float = float(Game.setting("gyro_dead_zone"))
+	var sens: float = float(Game.setting("gyro_sensitivity")) * GYRO_SCALE
+
+	# Landscape phone: rotating about the device's Y axis turns the view, and
+	# about its X axis raises and lowers it.
+	var yaw_rate: float = 0.0 if absf(rate.y) < dead else rate.y
+	var pitch_rate: float = 0.0 if absf(rate.x) < dead else rate.x
+	if bool(Game.setting("invert_look_y")):
+		pitch_rate = -pitch_rate
+
+	_yaw_target += yaw_rate * sens * delta
+	_pitch_target = clampf(_pitch_target + pitch_rate * sens * delta,
+		-PI / 2.0, PI / 2.0)
 
 
 func _toggle_view() -> void:
@@ -195,39 +705,72 @@ func _physics_process(delta: float) -> void:
 	_weapon_cd = maxf(0.0, _weapon_cd - delta)
 	in_water = world.is_in_water(global_position)
 
+	_update_swimming()
+	_update_stance_shape(delta)
+	_update_oxygen(delta)
+	_update_lean(delta)
+
 	# A ladder suspends gravity while you are against it: hold forward to go
 	# up, back to come down, jump to push off. It is the only way to reach a
 	# second storey without giving raiders a staircase to walk up.
 	on_ladder = Game.ui_open == "" and _ladder_in_reach()
-	if on_ladder and Input.is_action_just_pressed("jump"):
-		velocity.y = JUMP_VELOCITY
-		on_ladder = false
+	var wants_jump := Game.ui_open == "" and Input.is_action_just_pressed("jump")
+
+	if stance == Game.STANCE_SWIM:
+		# Swimming holds you at the surface unless you deliberately go down
+		if wants_jump:
+			try_jump()
+		elif velocity.y < 0.0:
+			velocity.y = move_toward(velocity.y, 0.0, GRAVITY * 0.5 * delta)
+		else:
+			velocity.y -= GRAVITY * 0.12 * delta
+	elif wants_jump:
+		try_jump()
 	elif on_ladder:
 		velocity.y = Input.get_axis("move_back", "move_forward") * Game.LADDER_CLIMB_SPEED
 	elif not is_on_floor():
 		velocity.y -= GRAVITY * delta
-	elif Game.ui_open == "" and Input.is_action_just_pressed("jump"):
-		velocity.y = JUMP_VELOCITY
 
 	var input_dir := Vector2.ZERO
 	if Game.ui_open == "":
 		input_dir = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var dir := (transform.basis * Vector3(input_dir.x, 0, input_dir.y)).normalized()
 
-	var speed := SPEED
-	if Input.is_action_pressed("sprint") and not in_water:
-		speed = SPRINT_SPEED
-	if in_water:
-		speed *= 0.55
+	var speed := movement_speed()
 
-	if dir != Vector3.ZERO:
+	if _slide_left > 0.0:
+		# A slide carries you: the input is ignored and the momentum bleeds
+		# away, which is what makes it a commitment rather than a fast crouch.
+		_slide_left = maxf(0.0, _slide_left - delta)
+		var t: float = _slide_left / SLIDE_TIME
+		var carry: float = lerpf(speed, SLIDE_SPEED, t * t)
+		velocity.x = _slide_dir.x * carry
+		velocity.z = _slide_dir.z * carry
+		if _slide_left <= 0.0 and not Input.is_action_pressed("crouch") \
+				and not bool(Game.setting("toggle_stance")):
+			set_stance(Game.STANCE_STAND)
+	elif dir != Vector3.ZERO:
 		velocity.x = dir.x * speed
 		velocity.z = dir.z * speed
 	else:
 		velocity.x = move_toward(velocity.x, 0.0, SPEED * 10.0 * delta)
 		velocity.z = move_toward(velocity.z, 0.0, SPEED * 10.0 * delta)
 
+	# How hard the ground was coming up at us, read before the collision
+	# resolves it away
+	var falling := velocity.y
+	var was_airborne := not is_on_floor()
+
 	move_and_slide()
+
+	# Landing: a hard drop shakes the view in proportion to the fall. Below
+	# the threshold nothing happens, so ordinary hopping about is quiet.
+	if was_airborne and is_on_floor() and falling < LAND_SHAKE_SPEED:
+		var force: float = clampf((-falling - -LAND_SHAKE_SPEED) / 20.0, 0.0, 1.0)
+		shake_camera(0.035 * force, 0.28, 30.0)
+		Game.haptic(force)
+	if is_on_floor():
+		_jumps_used = 0
 
 	# Footsteps
 	if is_on_floor():
@@ -236,6 +779,7 @@ func _physics_process(delta: float) -> void:
 			_step_distance = 0.0
 			Sfx.play("step")
 
+	_update_camera(delta)
 	_update_lights(delta)
 	_inspect_structures()
 
@@ -266,7 +810,6 @@ func _update_lights(delta: float) -> void:
 	# Glassing only holds while the binoculars are the thing in your hands
 	if glassing and tool != "binoculars":
 		glassing = false
-	camera.fov = FOV_GLASSED if glassing else FOV_NORMAL
 
 
 ## Is there a ladder close enough to be hanging off? Checked against the
@@ -448,7 +991,6 @@ func _toggle_glassing() -> void:
 			glassing = false
 			return
 		Game.notify("Glassing the treeline", Color(0.6, 0.8, 1.0))
-	camera.fov = FOV_GLASSED if glassing else FOV_NORMAL
 
 
 ## Aim it at a wall and it puts health back; aim it at nothing and it works

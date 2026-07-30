@@ -823,6 +823,7 @@ func _on_player_death() -> void:
 	Game.stats.thirst = 100.0
 	Game.stats.temperature = 100.0
 	Game.stats.radiation = 0.0
+	Game.stats.oxygen = 100.0
 
 	var bed := nearest_sleeping_bag(fell_at)
 	if bed != null:
@@ -917,6 +918,12 @@ func apply_explosion(origin: Vector3, damage: float, radius: float) -> float:
 		var dp := player.position.distance_to(origin)
 		if dp <= radius:
 			Game.hurt(damage * clampf(1.0 - dp / radius, 0.0, 1.0) * PLAYER_BLAST_SCALE)
+		# A blast is felt further than it is survived: the camera kicks well
+		# outside the damage radius, which is what tells you a raid has
+		# started somewhere behind you.
+		var felt: float = radius * 4.0
+		if dp <= felt and player.has_method("shake_camera"):
+			player.shake_camera(0.05 * clampf(1.0 - dp / felt, 0.0, 1.0), 0.5, 26.0)
 	return dealt
 
 
@@ -1158,6 +1165,7 @@ func save_game() -> void:
 			"wear": Game.tool_wear,
 		},
 		"time": Game.day_time,
+		"settings": Game.settings,
 		"structures": [],
 		"stations": [],
 		"bags": [],
@@ -1249,7 +1257,7 @@ func load_game() -> void:
 		for k in p.inventory:
 			Game.inventory[k] = int(p.inventory[k])
 		Game.inventory_changed.emit()
-	if p.has("belt") and p.belt is Array and p.belt.size() == 6:
+	if p.has("belt") and p.belt is Array and p.belt.size() == Game.BELT_SLOTS:
 		Game.belt = p.belt
 	if p.has("worn") and p.worn is Dictionary:
 		Game.worn = {}
@@ -1267,6 +1275,9 @@ func load_game() -> void:
 				Game.tool_wear[str(id)] = clampi(
 					int(p.wear[id]), 0, Game.max_durability(str(id)))
 	Game.day_time = float(parsed.get("time", Game.day_time))
+	var saved_settings = parsed.get("settings", {})
+	if saved_settings is Dictionary:
+		Game.load_settings(saved_settings)
 
 	for sd in parsed.get("structures", []):
 		if not (sd is Dictionary):

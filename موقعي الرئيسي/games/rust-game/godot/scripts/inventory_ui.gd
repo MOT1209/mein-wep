@@ -415,7 +415,7 @@ func _on_inventory_item(id: String) -> void:
 func _refresh_belt() -> void:
 	for c in _belt_row.get_children():
 		c.queue_free()
-	for i in 6:
+	for i in Game.BELT_SLOTS:
 		var b := Button.new()
 		var id = Game.belt[i]
 		b.custom_minimum_size = BELT_SLOT_SIZE

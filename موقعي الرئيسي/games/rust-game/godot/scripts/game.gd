@@ -492,8 +492,158 @@ const POISON_HUNGER := 15.0
 
 const CATEGORIES := ["common", "construction", "items", "resources", "tools", "medical", "weapons", "attire"]
 
+# ==================== STANCE ====================
+
+## How the player is carrying themselves. One of these at a time and never
+## two, which is what keeps crouch, prone and swimming from fighting each
+## other over the collision shape.
+##
+## `speed` scales movement, `height` is the collision capsule, `eye` is where
+## the camera sits inside it, and `fov` shifts the field of view: hunkering
+## down narrows what you can see, which is the cost of the smaller target.
+## `spread` scales weapon inaccuracy — lying down is how you hit anything at
+## range, and it is the reason to accept being unable to move.
+const STANCE_STAND := "stand"
+const STANCE_CROUCH := "crouch"
+const STANCE_PRONE := "prone"
+const STANCE_SWIM := "swim"
+
+const STANCES := {
+	"stand":  {"name": "Standing", "speed": 1.0, "height": 1.8, "eye": 1.6,
+		"fov": 0.0, "spread": 1.0, "noise": 1.0},
+	"crouch": {"name": "Crouched", "speed": 0.45, "height": 1.1, "eye": 0.95,
+		"fov": -4.0, "spread": 0.6, "noise": 0.35},
+	# 0.9 rather than lower because the body is a capsule and a capsule can
+	# never be shorter than twice its radius — asking for 0.5 got silently
+	# clamped to 0.8 while the rest of the maths still believed 0.5, which put
+	# the collision shape and its own centre out of step.
+	"prone":  {"name": "Prone", "speed": 0.18, "height": 0.9, "eye": 0.45,
+		"fov": -7.0, "spread": 0.3, "noise": 0.1},
+	"swim":   {"name": "Swimming", "speed": 0.55, "height": 1.2, "eye": 1.0,
+		"fov": 0.0, "spread": 1.6, "noise": 1.2},
+}
+
+## Seconds a stance change takes, so the camera rises and drops rather than
+## teleporting between eye heights.
+const STANCE_BLEND_TIME := 0.18
+
+
+func stance_data(stance: String) -> Dictionary:
+	return STANCES.get(stance, STANCES[STANCE_STAND])
+
+
+# ==================== CONTROL & CAMERA SETTINGS ====================
+
+## Everything a player can tune about how the game reads their input, with
+## the range each value is held inside. A phone is held differently by every
+## pair of hands, so none of these are constants — they are saved with the
+## game and clamped on the way in, because a settings file that has been
+## edited by hand must not be able to produce an unplayable camera.
+##
+## `damping` is how much of the gap to the target the camera closes each
+## frame: low is heavy and smooth, high is immediate. `tap_tolerance` is how
+## long a touch may last and still count as a tap rather than a hold.
+const SETTINGS_RANGE := {
+	"look_sensitivity": [0.1, 2.0],
+	"camera_damping": [0.1, 1.0],
+	"shake_intensity": [0.0, 2.0],
+	"gyro_sensitivity": [0.1, 2.0],
+	"gyro_dead_zone": [0.0, 0.2],
+	"fov": [70.0, 110.0],
+	"tap_tolerance": [0.05, 0.2],
+	"haptic_strength": [0.0, 1.0],
+	"button_scale": [0.7, 1.6],
+}
+
+const SETTINGS_DEFAULTS := {
+	"look_sensitivity": 1.0,
+	"camera_damping": 0.45,
+	"camera_acceleration": true,
+	"shake_intensity": 1.0,
+	"invert_look_y": false,
+	# Gyroscope is off by default: most players never want it, and the ones
+	# who do want it only while aiming.
+	"gyro_enabled": false,
+	"gyro_only": false,
+	"gyro_sensitivity": 1.0,
+	"gyro_dead_zone": 0.02,
+	"fov": 75.0,
+	"tap_tolerance": 0.12,
+	"haptics": true,
+	"haptic_strength": 0.6,
+	# Accessibility: hold-to-crouch is the default because it is what a
+	# shooter player expects, but holding a thumb down for a whole firefight
+	# is exactly what some hands cannot do.
+	"toggle_stance": false,
+	"button_scale": 1.0,
+}
+
+## Seconds the field of view takes to reach a new value. Long enough to read
+## as a movement rather than a jump cut, short enough not to fight the player.
+const FOV_BLEND_TIME := 0.3
+
+var settings: Dictionary = SETTINGS_DEFAULTS.duplicate(true)
+
+signal settings_changed
+
+
+func setting(key: String) -> Variant:
+	return settings.get(key, SETTINGS_DEFAULTS.get(key))
+
+
+## Writes a setting, holding numbers inside their declared range. Anything
+## with no range is stored as given — the booleans.
+func set_setting(key: String, value: Variant) -> void:
+	if not SETTINGS_DEFAULTS.has(key):
+		return
+	if SETTINGS_RANGE.has(key):
+		var span: Array = SETTINGS_RANGE[key]
+		value = clampf(float(value), float(span[0]), float(span[1]))
+	settings[key] = value
+	settings_changed.emit()
+
+
+func reset_settings() -> void:
+	settings = SETTINGS_DEFAULTS.duplicate(true)
+	settings_changed.emit()
+
+
+## Loads a saved settings block, dropping keys that no longer exist and
+## clamping the ones that do.
+func load_settings(saved: Dictionary) -> void:
+	settings = SETTINGS_DEFAULTS.duplicate(true)
+	for key in saved:
+		if SETTINGS_DEFAULTS.has(key):
+			set_setting(str(key), saved[key])
+
+
+## One short buzz, at the strength the player asked for. Silent on desktop,
+## and silent when they have turned it off.
+func haptic(scale: float = 1.0) -> void:
+	if not bool(setting("haptics")) or not touch_ui:
+		return
+	var strength := float(setting("haptic_strength")) * scale
+	if strength <= 0.0:
+		return
+	Input.vibrate_handheld(int(clampf(strength, 0.0, 1.0) * 40.0) + 10)
+
+
+## Quick-slot count. Ten, because a survival kit is a weapon, a tool for wood,
+## one for stone, a building plan, a hammer, food, meds, a torch and two spare
+## — six was always one row short of what the game asks you to carry.
+const BELT_SLOTS := 10
+
+
+## A fresh belt: the opening kit in the first two slots, the rest empty.
+static func empty_belt() -> Array:
+	var out: Array = ["building_plan", "hammer"]
+	while out.size() < BELT_SLOTS:
+		out.append(null)
+	return out
+
+
 var inventory: Dictionary = {}
-var belt: Array = ["building_plan", "hammer", null, null, null, null]
+var belt: Array = empty_belt()
 var selected_belt_slot: int = 0
 ## What is being worn, keyed by ARMOUR slot ("head" / "chest" / "suit").
 var worn: Dictionary = {}
@@ -503,8 +653,11 @@ var worn: Dictionary = {}
 var tool_wear: Dictionary = {}
 var stats: Dictionary = {
 	"health": 100.0, "hunger": 100.0, "thirst": 100.0,
-	"temperature": 100.0, "radiation": 0.0,
+	"temperature": 100.0, "radiation": 0.0, "oxygen": 100.0,
 }
+## Earned, not bought: off until the game says otherwise, which is what the
+## spec's "if unlocked" means in practice.
+var double_jump_unlocked := false
 ## Highest workbench tier the player is currently standing next to.
 var workbench_level: int = 0
 var day_time: float = 300.0
@@ -522,7 +675,7 @@ func _ready() -> void:
 ## the clock. Death uses this after the bag has taken the real loadout.
 func reset_loadout() -> void:
 	inventory = {"building_plan": 1, "hammer": 1}
-	belt = ["building_plan", "hammer", null, null, null, null]
+	belt = empty_belt()
 	selected_belt_slot = 0
 	worn = {}
 	tool_wear = {}
@@ -535,13 +688,13 @@ func reset_state() -> void:
 	# A real survival opening: the plan and the hammer so building is
 	# always possible, and nothing else. Everything past that is earned.
 	inventory = {"building_plan": 1, "hammer": 1}
-	belt = ["building_plan", "hammer", null, null, null, null]
+	belt = empty_belt()
 	selected_belt_slot = 0
 	worn = {}
 	tool_wear = {}
 	stats = {
 		"health": 100.0, "hunger": 100.0, "thirst": 100.0,
-		"temperature": 100.0, "radiation": 0.0,
+		"temperature": 100.0, "radiation": 0.0, "oxygen": 100.0,
 	}
 	workbench_level = 0
 	day_time = 300.0
