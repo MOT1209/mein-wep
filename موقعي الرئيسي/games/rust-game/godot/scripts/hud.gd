@@ -8,6 +8,7 @@ const MapUiScript := preload("res://scripts/map_ui.gd")
 const IconFactory := preload("res://scripts/icon_factory.gd")
 
 const TouchControlsScript := preload("res://scripts/touch_controls.gd")
+const SettingsUiScript := preload("res://scripts/settings_ui.gd")
 
 const HOTBAR_SLOT_SIZE := Vector2(64, 64)
 const HOTBAR_ICON_SIZE := Vector2(34, 34)
@@ -60,6 +61,7 @@ var inventory_ui: Control
 var map_ui: Control
 var _compass_label: Label
 var touch_controls: Control
+var settings_ui: Control
 
 
 func _ready() -> void:
@@ -91,6 +93,13 @@ func _ready() -> void:
 	touch_controls = TouchControlsScript.new()
 	touch_controls.name = "TouchControls"
 	add_child(touch_controls)
+
+	# Built after the pause menu, because it reads it to know where BACK
+	# should return to
+	settings_ui = SettingsUiScript.new()
+	settings_ui.name = "SettingsUi"
+	settings_ui.hud = self
+	add_child(settings_ui)
 
 	# The engine inherits the editor's locale, so on an Arabic install every
 	# container and anchor in the HUD mirrors itself: right-anchored panels
@@ -648,6 +657,11 @@ func _build_pause_menu() -> void:
 	resume.custom_minimum_size = Vector2(220, 44)
 	resume.pressed.connect(func(): close_pause())
 	v.add_child(resume)
+	var controls := Button.new()
+	controls.text = "CONTROLS & CAMERA"
+	controls.custom_minimum_size = Vector2(220, 44)
+	controls.pressed.connect(func(): settings_ui.open())
+	v.add_child(controls)
 	var save := Button.new()
 	save.text = "SAVE GAME"
 	save.custom_minimum_size = Vector2(220, 44)
@@ -723,6 +737,8 @@ func handle_escape() -> void:
 			close_pause()
 		"inventory":
 			toggle_inventory()
+		"settings":
+			settings_ui.close()
 		"blueprint":
 			close_blueprint_menu()
 		"map":

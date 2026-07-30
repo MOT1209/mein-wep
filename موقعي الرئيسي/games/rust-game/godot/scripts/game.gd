@@ -945,6 +945,98 @@ func repair_tool_item(id: String, fraction: float = 0.25) -> bool:
 	return true
 
 
+# ==================== INVENTORY ORDER ====================
+
+## The inventory is a bag, not a grid of numbered slots: it maps an item to how
+## many you have, and the slot count is derived from that. So there is nothing
+## to swap two positions of and nothing to split a pile into two piles — what
+## there is instead is control over the order things are listed in, which is
+## what the sorting, filtering and pinning below give.
+const SORT_MODES := ["type", "rarity", "name", "count"]
+
+const RARITY_ORDER := {"common": 0, "rare": 1, "elite": 2}
+
+## Items pinned to the front of the list, in the order they were pinned.
+var favourites: Array = []
+var sort_mode := "type"
+var filter_category := ""
+
+
+func toggle_favourite(id: String) -> bool:
+	if favourites.has(id):
+		favourites.erase(id)
+		notify("%s unpinned" % ITEMS.get(id, {}).get("name", id), Color(0.7, 0.75, 0.8))
+	else:
+		favourites.append(id)
+		notify("%s pinned" % ITEMS.get(id, {}).get("name", id), Color(1.0, 0.85, 0.35))
+	inventory_changed.emit()
+	return favourites.has(id)
+
+
+func is_favourite(id: String) -> bool:
+	return favourites.has(id)
+
+
+func set_sort_mode(mode: String) -> void:
+	if mode in SORT_MODES:
+		sort_mode = mode
+		inventory_changed.emit()
+
+
+func cycle_sort_mode() -> String:
+	var idx := SORT_MODES.find(sort_mode)
+	sort_mode = str(SORT_MODES[(idx + 1) % SORT_MODES.size()])
+	inventory_changed.emit()
+	return sort_mode
+
+
+func set_filter(category: String) -> void:
+	filter_category = category
+	inventory_changed.emit()
+
+
+## Every held item id, filtered and ordered. Pinned items come first whatever
+## the sort says — the point of pinning a bandage is that it does not move.
+func ordered_inventory() -> Array:
+	var ids := []
+	for id in inventory:
+		if get_count(id) <= 0:
+			continue
+		if filter_category != "" \
+				and str(ITEMS.get(id, {}).get("category", "")) != filter_category:
+			continue
+		ids.append(id)
+
+	var mode := sort_mode
+	ids.sort_custom(func(a: String, b: String) -> bool:
+		var fa := favourites.find(a)
+		var fb := favourites.find(b)
+		if (fa >= 0) != (fb >= 0):
+			return fa >= 0
+		if fa >= 0 and fb >= 0:
+			return fa < fb
+		var ia: Dictionary = ITEMS.get(a, {})
+		var ib: Dictionary = ITEMS.get(b, {})
+		match mode:
+			"rarity":
+				var ra: int = int(RARITY_ORDER.get(ia.get("rarity", "common"), 0))
+				var rb: int = int(RARITY_ORDER.get(ib.get("rarity", "common"), 0))
+				if ra != rb:
+					return ra > rb
+			"count":
+				var ca := get_count(a)
+				var cb := get_count(b)
+				if ca != cb:
+					return ca > cb
+			"type":
+				var ca2 := str(ia.get("category", ""))
+				var cb2 := str(ib.get("category", ""))
+				if ca2 != cb2:
+					return ca2 < cb2
+		return str(ia.get("name", a)).naturalnocasecmp_to(str(ib.get("name", b))) < 0)
+	return ids
+
+
 # ==================== CAPACITY ====================
 
 func stack_size(id: String) -> int:

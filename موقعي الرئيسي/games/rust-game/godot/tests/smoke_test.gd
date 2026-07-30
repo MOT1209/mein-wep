@@ -1707,6 +1707,8 @@ func _run_tests() -> void:
 	_test_camera(game, world)
 	_test_stances(game, world)
 	_test_combat(game, world)
+	_test_settings_screen(game, world)
+	_test_inventory_order(game, world)
 	_test_interaction(game, world, StructureScript)
 	_test_build_undo(game, world)
 	_test_models(game, world)
@@ -2253,6 +2255,209 @@ func _test_combat(game, world) -> void:
 
 	game.belt[0] = "building_plan"
 	game.selected_belt_slot = 0
+	_clear_pockets(game)
+
+
+# ==================== SETTINGS SCREEN ====================
+
+func _test_settings_screen(game, world) -> void:
+	var ui = world.hud.settings_ui
+	_check(ui != null, "the settings screen exists")
+	if ui == null:
+		return
+	game.reset_settings()
+
+	# Every setting has a control. A setting with no row is a setting the
+	# player cannot reach, which is the same as not having it.
+	var missing := []
+	for key in game.SETTINGS_DEFAULTS:
+		if not ui._rows.has(str(key)):
+			missing.append(str(key))
+	_check(missing.is_empty(), "every setting has a control on screen %s" % str(missing))
+
+	# Numbers get sliders, flags get checkboxes, and each slider's range is
+	# read from the same table that does the clamping
+	for key in ui._rows:
+		var row: Dictionary = ui._rows[key]
+		if game.SETTINGS_RANGE.has(key):
+			_check(row.has("slider"), "%s is a slider" % key)
+			var span: Array = game.SETTINGS_RANGE[key]
+			_check(is_equal_approx(row.slider.min_value, float(span[0]))
+				and is_equal_approx(row.slider.max_value, float(span[1])),
+				"%s's slider spans exactly its allowed range" % key)
+		else:
+			_check(row.has("check"), "%s is a checkbox" % key)
+
+	# Moving a slider writes the setting
+	var fov_row: Dictionary = ui._rows["fov"]
+	fov_row.slider.value = 101.0
+	_check(is_equal_approx(float(game.setting("fov")), 101.0),
+		"dragging the field-of-view slider changes the setting")
+	_check(fov_row.value.text.contains("101"),
+		"and the readout follows it (%s)" % fov_row.value.text)
+
+	# Ticking a box writes the setting
+	var invert_row: Dictionary = ui._rows["invert_look_y"]
+	invert_row.check.button_pressed = true
+	_check(bool(game.setting("invert_look_y")), "ticking a box changes the setting")
+
+	# A reset from elsewhere pulls the controls back into line
+	game.reset_settings()
+	_check(is_equal_approx(fov_row.slider.value, float(game.SETTINGS_DEFAULTS["fov"])),
+		"resetting the settings moves the slider back too")
+	_check(not invert_row.check.button_pressed, "and unticks the box")
+
+	# The units are the ones a player thinks in, not raw floats
+	_check(ui._format("fov", 90.0) == "90°", "field of view reads in degrees")
+	_check(ui._format("tap_tolerance", 0.15) == "150ms",
+		"tap tolerance reads in milliseconds")
+	_check(ui._format("look_sensitivity", 1.5) == "1.50x",
+		"sensitivity reads as a multiplier")
+
+	# Opening and closing behaves like the other screens
+	ui.open()
+	_check(ui.visible and game.ui_open == "settings", "the screen opens")
+	world.hud.handle_escape()
+	_check(not ui.visible, "and escape closes it")
+	game.reset_settings()
+
+
+# ==================== INVENTORY ORDER, PINNING, DROPPING ====================
+
+func _test_inventory_order(game, world) -> void:
+	# Emptied outright rather than reset to the opening kit: this is a test
+	# about ordering, and the plan and hammer would be two more rows to
+	# account for in every count below.
+	game.inventory.clear()
+	game.favourites.clear()
+	game.set_filter("")
+	game.set_sort_mode("name")
+
+	game.inventory["wood"] = 100        # resources, common
+	game.inventory["ak47"] = 1          # weapons, elite
+	game.inventory["bandage"] = 5       # medical, common
+	game.inventory["hqm"] = 20          # resources, elite
+	game.inventory["machete"] = 1       # weapons, rare
+
+	var listed: Array = game.ordered_inventory()
+	_check(listed.size() == 5, "every held item is listed (%d)" % listed.size())
+
+	# Sorting by name is alphabetical by display name
+	var names := []
+	for id in listed:
+		names.append(str(game.ITEMS[id].name))
+	var sorted_names := names.duplicate()
+	sorted_names.sort()
+	_check(names == sorted_names, "sorting by name really is alphabetical %s" % str(names))
+
+	# Sorting by rarity puts the good things first
+	game.set_sort_mode("rarity")
+	listed = game.ordered_inventory()
+	_check(listed[0] == "ak47" or listed[0] == "hqm",
+		"sorting by rarity leads with an elite item (%s)" % str(listed[0]))
+
+	# Sorting by count leads with the biggest pile
+	game.set_sort_mode("count")
+	listed = game.ordered_inventory()
+	_check(listed[0] == "wood", "sorting by count leads with the deepest stack")
+
+	# Sorting by type groups categories together
+	game.set_sort_mode("type")
+	listed = game.ordered_inventory()
+	var seen_categories := []
+	for id in listed:
+		var cat := str(game.ITEMS[id].get("category", ""))
+		if seen_categories.is_empty() or seen_categories[-1] != cat:
+			seen_categories.append(cat)
+	var unique_categories := {}
+	for cat in seen_categories:
+		unique_categories[cat] = true
+	_check(seen_categories.size() == unique_categories.size(),
+		"sorting by type never revisits a category %s" % str(seen_categories))
+
+	# Cycling the sort mode walks every mode and comes back round
+	var start: String = game.sort_mode
+	var walked := {}
+	for i in game.SORT_MODES.size():
+		walked[game.cycle_sort_mode()] = true
+	_check(walked.size() == game.SORT_MODES.size(),
+		"cycling the sort visits every mode")
+	_check(game.sort_mode == start, "and returns to where it started")
+
+	# A pinned item leads whatever the sort says
+	game.set_sort_mode("name")
+	game.toggle_favourite("bandage")
+	_check(game.is_favourite("bandage"), "an item can be pinned")
+	listed = game.ordered_inventory()
+	_check(listed[0] == "bandage", "and a pinned item comes first")
+	game.set_sort_mode("count")
+	listed = game.ordered_inventory()
+	_check(listed[0] == "bandage",
+		"even under a sort that would otherwise bury it")
+	# Pins keep the order they were made in
+	game.toggle_favourite("hqm")
+	listed = game.ordered_inventory()
+	_check(listed[0] == "bandage" and listed[1] == "hqm",
+		"two pins keep the order they were pinned in")
+	game.toggle_favourite("bandage")
+	_check(not game.is_favourite("bandage"), "and a pin can be taken off again")
+	listed = game.ordered_inventory()
+	_check(listed[0] == "hqm", "leaving the other one leading")
+	game.favourites.clear()
+
+	# Filtering narrows the list to one category and back
+	game.set_filter("weapons")
+	listed = game.ordered_inventory()
+	_check(listed.size() == 2, "filtering to weapons shows two (%d)" % listed.size())
+	for id in listed:
+		_check(str(game.ITEMS[id].category) == "weapons",
+			"and everything shown is a weapon (%s)" % id)
+	game.set_filter("medical")
+	_check(game.ordered_inventory() == ["bandage"], "filtering to medical shows one")
+	game.set_filter("")
+	_check(game.ordered_inventory().size() == 5, "clearing the filter shows them all")
+
+	# An empty stack never appears, whatever the dictionary still holds
+	game.inventory["wood"] = 0
+	_check(not game.ordered_inventory().has("wood"),
+		"an emptied stack drops out of the list")
+
+	# Dropping puts the item on the ground in a bag rather than deleting it
+	var bags_before: int = world.bags.size()
+	game.inventory["stone"] = 40
+	var dropped: int = world.drop_item("stone", 15)
+	_check(dropped == 15, "dropping moves the requested amount")
+	_check(game.get_count("stone") == 25, "and takes it out of your pockets")
+	_check(world.bags.size() == bags_before + 1, "leaving a bag on the ground")
+	var bag = world.bags[world.bags.size() - 1]
+	_check(int(bag.stored.get("stone", 0)) == 15, "with the items in it")
+
+	# A second drop in the same place lands in the same bag
+	world.drop_item("stone", 5)
+	_check(world.bags.size() == bags_before + 1,
+		"dropping again does not stack bags up")
+	_check(int(bag.stored.get("stone", 0)) == 20, "it goes in the one already there")
+
+	# Dropping more than you have drops what you have
+	_check(world.drop_item("stone", 9999) == 20, "dropping more than you hold caps")
+	_check(game.get_count("stone") == 0, "and empties the stack")
+	_check(world.drop_item("stone", 5) == 0, "dropping nothing does nothing")
+
+	# Pins and the sort mode survive a save
+	game.toggle_favourite("ak47")
+	game.set_sort_mode("rarity")
+	world.save_game()
+	var f := FileAccess.open("user://rust_save.json", FileAccess.READ)
+	var data = JSON.parse_string(f.get_as_text())
+	f.close()
+	_check(data is Dictionary and data.player.favourites.has("ak47"),
+		"pinned items are written to the save")
+	_check(str(data.player.get("sort_mode", "")) == "rarity",
+		"and so is the sort mode")
+
+	game.favourites.clear()
+	game.set_sort_mode("type")
+	game.set_filter("")
 	_clear_pockets(game)
 
 

@@ -23,6 +23,7 @@ var _craft_grid: GridContainer
 var _detail_box: VBoxContainer
 var _inv_grid: GridContainer
 var _slot_label: Label
+var _sort_btn: Button
 var _belt_row: HBoxContainer
 
 
@@ -194,9 +195,44 @@ func _build_inv_pane(root: VBoxContainer) -> void:
 	root.add_child(_inv_pane)
 
 	var hint := Label.new()
-	hint.text = "Click an item to equip it into the selected belt slot. Armour is worn."
+	hint.text = ("Click to equip into the selected belt slot. Armour is worn. "
+		+ "Right-click to pin, middle-click to drop one.")
 	hint.add_theme_font_size_override("font_size", 13)
 	_inv_pane.add_child(hint)
+
+	# Sorting and filtering. A bag with sixty item types in it is unusable
+	# without them, and the game now hands out that many.
+	var tools_row := HBoxContainer.new()
+	tools_row.add_theme_constant_override("separation", 6)
+	_inv_pane.add_child(tools_row)
+
+	var sort_label := Label.new()
+	sort_label.text = "Sort"
+	sort_label.add_theme_font_size_override("font_size", 12)
+	tools_row.add_child(sort_label)
+	_sort_btn = Button.new()
+	_sort_btn.custom_minimum_size = Vector2(110, 28)
+	_sort_btn.pressed.connect(func():
+		Game.cycle_sort_mode()
+		Sfx.play("ui_click"))
+	tools_row.add_child(_sort_btn)
+
+	var all_btn := Button.new()
+	all_btn.text = "ALL"
+	all_btn.custom_minimum_size = Vector2(56, 28)
+	all_btn.pressed.connect(func():
+		Game.set_filter("")
+		Sfx.play("ui_click"))
+	tools_row.add_child(all_btn)
+	for cat in ["weapons", "tools", "resources", "medical", "attire"]:
+		var f := Button.new()
+		f.text = cat.substr(0, 3).to_upper()
+		f.tooltip_text = cat.capitalize()
+		f.custom_minimum_size = Vector2(52, 28)
+		f.pressed.connect(func():
+			Game.set_filter("" if Game.filter_category == cat else cat)
+			Sfx.play("ui_click"))
+		tools_row.add_child(f)
 
 	# Space is finite now, so how much is left has to be on screen
 	_slot_label = Label.new()
@@ -373,29 +409,63 @@ func _refresh_inventory() -> void:
 	_slot_label.text = "%d / %d slots used" % [used, Game.INVENTORY_SLOTS]
 	_slot_label.add_theme_color_override("font_color",
 		Color(0.95, 0.5, 0.35) if used >= Game.INVENTORY_SLOTS else Color(0.7, 0.75, 0.8))
+	if _sort_btn != null:
+		_sort_btn.text = Game.sort_mode.to_upper()
+		_sort_btn.tooltip_text = "Sorting by %s — click to change" % Game.sort_mode
+
 	var shown := 0
-	for id in Game.inventory:
+	# Ordered rather than in dictionary order: pinned first, then whichever
+	# sort the player picked, filtered to the category they chose.
+	for id in Game.ordered_inventory():
 		if shown >= Game.INVENTORY_SLOTS:
 			break
 		var count := Game.get_count(id)
-		if count <= 0:
-			continue
 		var item: Dictionary = Game.ITEMS.get(id, {})
 		var hint: String = item.get("desc", "")
 		hint += "\n%d per slot — using %d" % [
 			Game.stack_size(id), Game.slots_used_by(id, count)]
 		if Game.ARMOUR.has(id):
 			hint += "\n[Worn — click to take off]" if Game.is_worn(id) else "\n[Click to wear]"
-		var b := _make_slot(id, str(count), "%s\n%s" % [item.get("name", id), hint])
+		hint += "\n[Right-click to %s]" % ("unpin" if Game.is_favourite(id) else "pin")
+		hint += "\n[Middle-click to drop one]"
+		var corner: String = ("★ " if Game.is_favourite(id) else "") + str(count)
+		var b := _make_slot(id, corner, "%s\n%s" % [item.get("name", id), hint])
 		b.self_modulate = RARITY_COLORS.get(item.get("rarity", "common"), Color.WHITE)
 		if id in Game.belt:
 			b.self_modulate = Color(1.3, 1.1, 0.5)
 		if Game.is_worn(id):
 			b.self_modulate = Color(0.6, 1.4, 0.7)
+		if Game.is_favourite(id):
+			b.self_modulate = Color(1.5, 1.3, 0.6)
 		b.pressed.connect(_on_inventory_item.bind(id))
+		b.gui_input.connect(_on_inventory_slot_input.bind(id))
 		_inv_grid.add_child(b)
 		shown += 1
 	_refresh_belt()
+
+
+## Right-click pins an item to the front of the list; middle-click drops one on
+## the ground. Both are here rather than behind a context menu because a menu
+## is two taps for something that wants to be one.
+func _on_inventory_slot_input(event: InputEvent, id: String) -> void:
+	if not (event is InputEventMouseButton) or not event.pressed:
+		return
+	if event.button_index == MOUSE_BUTTON_RIGHT:
+		Game.toggle_favourite(id)
+		Sfx.play("ui_click")
+	elif event.button_index == MOUSE_BUTTON_MIDDLE:
+		var world := _world()
+		if world != null:
+			world.drop_item(id, 1)
+
+
+## The world, reached through the HUD that owns this screen. Looked up rather
+## than stored so this pane never has to be wired up separately.
+func _world() -> Node3D:
+	var hud := get_parent()
+	if hud != null and "world" in hud:
+		return hud.world
+	return null
 
 
 func _on_inventory_item(id: String) -> void:

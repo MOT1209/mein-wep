@@ -152,6 +152,7 @@ func _ready() -> void:
 	hud.world = self
 	hud.map_ui.world = self
 	player.hud = hud
+	hud.settings_ui.player = player
 	hud.touch_controls.player = player
 
 	load_game()
@@ -870,6 +871,43 @@ func drop_everything(pos: Vector3) -> int:
 	return total
 
 
+## Drops part of a stack on the ground at the player's feet, in a bag anyone
+## can pick up. The only way to get rid of something on purpose — before this
+## the only way to lose an item was to die holding it.
+func drop_item(id: String, count: int) -> int:
+	var moved: int = mini(count, Game.get_count(id))
+	if moved <= 0:
+		return 0
+	Game.remove_item(id, moved)
+	if Game.get_count(id) <= 0:
+		for i in Game.belt.size():
+			if Game.belt[i] == id:
+				Game.belt[i] = null
+		Game.belt_changed.emit()
+
+	# Where it will land, worked out once. Comparing bags against the player's
+	# own position instead would miss a bag lying at their feet whenever they
+	# are standing above the ground — on a floor, mid-jump, up a ladder.
+	var at: Vector3 = player.global_position
+	var spot := Vector3(at.x, terrain_height(at.x, at.z), at.z)
+
+	# Land it in a bag already lying here rather than stacking bags up
+	for bag in bags:
+		if is_instance_valid(bag) and bag.position.distance_to(spot) < 1.5:
+			bag.stored[id] = int(bag.stored.get(id, 0)) + moved
+			Game.notify("Dropped %d %s" % [moved, Game.ITEMS.get(id, {}).get("name", id)])
+			return moved
+
+	var bag: StaticBody3D = LootBagScript.new()
+	bag.setup({id: moved}, {}, [], clock)
+	bag.position = spot
+	add_child(bag)
+	bags.append(bag)
+	Game.notify("Dropped %d %s" % [moved, Game.ITEMS.get(id, {}).get("name", id)])
+	Sfx.play("door")
+	return moved
+
+
 func nearest_sleeping_bag(from: Vector3) -> Node3D:
 	var best: Node3D = null
 	var best_d := INF
@@ -1171,6 +1209,8 @@ func save_game() -> void:
 			"belt": Game.belt,
 			"worn": Game.worn,
 			"wear": Game.tool_wear,
+			"favourites": Game.favourites,
+			"sort_mode": Game.sort_mode,
 			"loaded": Game.loaded,
 			"fire_modes": Game.fire_modes,
 			"scopes": Game.scope_levels,
@@ -1278,6 +1318,14 @@ func load_game() -> void:
 			# Only re-equip pieces that still exist and still fit that slot
 			if Game.ARMOUR.has(piece) and str(Game.ARMOUR[piece].slot) == str(slot):
 				Game.worn[slot] = piece
+	if p.has("favourites") and p.favourites is Array:
+		Game.favourites = []
+		for id in p.favourites:
+			# Only ids that still exist, or a rename would pin a ghost
+			if Game.ITEMS.has(str(id)):
+				Game.favourites.append(str(id))
+	Game.set_sort_mode(str(p.get("sort_mode", Game.sort_mode)))
+
 	# A weapon keeps what was in its magazine, the mode it was set to and the
 	# magnification its sight was on. Each is clamped to what the weapon can
 	# actually hold, so a rebalance never leaves a rifle with 40 rounds in a
