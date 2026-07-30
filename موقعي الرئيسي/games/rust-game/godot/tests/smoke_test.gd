@@ -1711,6 +1711,7 @@ func _run_tests() -> void:
 	_test_inventory_order(game, world)
 	_test_interaction(game, world, StructureScript)
 	_test_build_undo(game, world)
+	_test_roads(game, world)
 	_test_models(game, world)
 	_test_durability(game, world)
 	_test_new_pieces(game, world, StructureScript)
@@ -2664,6 +2665,122 @@ func _test_build_undo(game, world) -> void:
 	build._undo_stack.clear()
 	build._redo_stack.clear()
 	_clear_pockets(game)
+
+
+# ==================== ROADS AND ROADSIDE ====================
+
+func _test_roads(game, world) -> void:
+	var roads = world.roads
+	_check(roads != null, "the world has a road network")
+	if roads == null:
+		return
+
+	_check(roads.waypoints.size() >= 4,
+		"the route has several legs (%d waypoints)" % roads.waypoints.size())
+	# It is a loop, so it can be walked without dead ends
+	_check(roads.waypoints[0].distance_to(roads.waypoints[roads.waypoints.size() - 1]) < 0.01,
+		"and it closes back on itself")
+
+	# The road is drawn, as two surfaces: tarmac and the dashes on it
+	var surface: MeshInstance3D = roads.get_node_or_null("RoadSurface")
+	var lines: MeshInstance3D = roads.get_node_or_null("RoadLines")
+	_check(surface != null and surface.mesh != null, "the tarmac has a mesh")
+	_check(lines != null and lines.mesh != null, "and the centre line does too")
+	if surface != null:
+		_check(surface.mesh.surface_get_array_len(0) > 300,
+			"the road mesh is a real strip (%d vertices)"
+				% surface.mesh.surface_get_array_len(0))
+
+	# The road follows the ground rather than floating over or sinking into it
+	var mid: Vector2 = roads.waypoints[1]
+	var probes := 0
+	var hovering := 0
+	for i in roads.waypoints.size() - 1:
+		var a: Vector2 = roads.waypoints[i]
+		var b: Vector2 = roads.waypoints[i + 1]
+		for step in 5:
+			var at: Vector2 = a.lerp(b, float(step) / 5.0)
+			probes += 1
+			# Every point of the centre line is on the road by definition
+			if not roads.on_road(at):
+				hovering += 1
+	_check(hovering == 0, "every point of the centre line counts as road (%d/%d)"
+		% [probes - hovering, probes])
+
+	# Off to the side of it is not road
+	var away := mid + Vector2(60.0, 60.0)
+	_check(not roads.on_road(away), "and a point well away from it is not")
+	_check(roads.distance_to_road(away) > roads.ROAD_WIDTH,
+		"with a distance to match")
+
+	# Wrecks exist, are harvestable, and are worth the walk
+	var ResNode = load("res://scripts/resource_node.gd")
+	_check(ResNode.YIELDS.has("car_wreck"), "a car wreck is a harvestable")
+	var wreck_yield: Dictionary = ResNode.YIELDS["car_wreck"]
+	_check(wreck_yield.has("frag") and wreck_yield.has("scrap"),
+		"it gives metal and scrap")
+	_check(wreck_yield.has("gear_comp") or wreck_yield.has("pipe"),
+		"and the components a bench otherwise charges scrap for")
+	var barrel_total := 0
+	for id in ResNode.YIELDS["barrel"]:
+		barrel_total += int(ResNode.YIELDS["barrel"][id])
+	var wreck_total := 0
+	for id in wreck_yield:
+		wreck_total += int(wreck_yield[id])
+	_check(wreck_total > barrel_total,
+		"a wreck is worth more than a barrel (%d vs %d)" % [wreck_total, barrel_total])
+	_check(ResNode.TOOL_YIELD["car_wreck"].has("jackhammer"),
+		"and a jackhammer is the right tool for it")
+
+	# They are actually in the world, and on the road
+	var wrecks := []
+	var on_tarmac := 0
+	for c in world.get_children():
+		if c.has_method("hit_harvest") and not c.is_queued_for_deletion() \
+				and c.res_type == "car_wreck":
+			wrecks.append(c)
+			if roads.distance_to_road(Vector2(c.position.x, c.position.z)) \
+					<= roads.ROAD_WIDTH:
+				on_tarmac += 1
+	_check(wrecks.size() > 0, "the map was seeded with wrecks (%d)" % wrecks.size())
+	_check(on_tarmac == wrecks.size(),
+		"and every one of them is on the road (%d/%d)" % [on_tarmac, wrecks.size()])
+
+	# Buildings went up beside it, with collision so you cannot walk through
+	var buildings := 0
+	var solid := 0
+	for c in roads.get_children():
+		if not (c is StaticBody3D):
+			continue
+		buildings += 1
+		for gc in c.get_children():
+			if gc is CollisionShape3D:
+				solid += 1
+				break
+	_check(buildings > 0, "there are roadside buildings (%d)" % buildings)
+	_check(solid == buildings, "and every one is solid (%d/%d)" % [solid, buildings])
+	_check(roads.landmarks.size() > 0,
+		"the landmarks are recorded for the map (%d)" % roads.landmarks.size())
+
+	# Nothing scattered by the world grows through the tarmac
+	var through_road := []
+	for c in world.get_children():
+		if not c.has_method("hit_harvest") or c.is_queued_for_deletion():
+			continue
+		if c.res_type == "car_wreck" or c.res_type == "barrel":
+			continue   # these are placed on and beside the road on purpose
+		if roads.distance_to_road(Vector2(c.position.x, c.position.z)) < 3.0:
+			through_road.append(c.res_type)
+	_check(through_road.is_empty(),
+		"nothing scattered grows through the road %s" % str(through_road))
+
+	# Metal things sound like metal
+	_check(ResNode.HARVEST_SOUND.get("car_wreck", "") == "metal_scrape",
+		"stripping a wreck sounds like sheet metal")
+	var sfx = world.get_node_or_null("/root/Sfx")
+	if sfx != null:
+		_check(sfx._players.has("metal_scrape") and sfx._players.has("glass_break"),
+			"and those sounds were synthesised at startup")
 
 
 # ==================== MODELS ====================

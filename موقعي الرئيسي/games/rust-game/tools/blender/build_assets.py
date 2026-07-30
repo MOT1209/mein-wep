@@ -106,6 +106,17 @@ PALETTE = {
     "led_green":     (0.25, 0.95, 0.35, 0.0, 0.3),
     "led_red":       (0.95, 0.20, 0.15, 0.0, 0.3),
     "arc":           (0.62, 0.86, 1.00, 0.0, 0.2),
+    # Roadside: the tarmac, the houses beside it and the cars left on it
+    "asphalt":       (0.13, 0.13, 0.14, 0.0, 0.85),
+    "asphalt_worn":  (0.19, 0.19, 0.20, 0.0, 0.9),
+    "road_line":     (0.82, 0.78, 0.62, 0.0, 0.7),
+    "plaster":       (0.72, 0.69, 0.62, 0.0, 0.9),
+    "plaster_dirty": (0.54, 0.51, 0.45, 0.0, 0.95),
+    "roof_tile":     (0.40, 0.24, 0.20, 0.0, 0.85),
+    "glass_broken":  (0.42, 0.55, 0.58, 0.1, 0.3),
+    "car_red":       (0.44, 0.15, 0.13, 0.35, 0.6),
+    "car_blue":      (0.16, 0.26, 0.38, 0.35, 0.6),
+    "tyre":          (0.09, 0.09, 0.10, 0.0, 0.95),
 }
 
 ## Anything here glows: fire, and the status lights that tell you at a glance
@@ -1405,6 +1416,171 @@ def build_bear_trap():
 
 
 # ==========================================================================
+# ROADSIDE  (origin at base — these sit on the ground beside a road)
+#
+# The world had nothing built by anyone else in it: two towers and otherwise
+# forest. These are the leftovers of whoever was here first, which is what
+# gives a road a reason to be walked down.
+# ==========================================================================
+
+def build_car_wreck():
+    """A stripped saloon on its rims: panels rusted through, glass gone, bonnet
+    up and one door hanging. Everything worth taking has already been taken
+    once, which is why it gives scrap and not a working engine."""
+    body_col = "car_red"
+    # Floor pan and sills
+    box(1.7, 4.0, 0.22, z=0.42, material="rust")
+    for sx in (-1, 1):
+        box(0.12, 3.6, 0.3, x=sx * 0.85, z=0.5, material=body_col)
+    # Lower body
+    box(1.66, 3.8, 0.55, z=0.72, material=body_col)
+    wear(1.6, 0.5, y=-1.9, z=0.72, count=6, seed=2, material="rust")
+    # Cabin: a roof on pillars, with the glass gone from between them
+    box(1.5, 1.9, 0.06, y=0.1, z=1.42, material=body_col)
+    for sx in (-1, 1):
+        for sy in (-0.75, 0.95):
+            box(0.1, 0.1, 0.62, x=sx * 0.7, y=sy, z=1.1, material=body_col)
+    # A few shards left in the frames
+    rng = random.Random(31)
+    for sx in (-1, 1):
+        for i in range(3):
+            box(0.03, 0.22, rng.uniform(0.08, 0.2), x=sx * 0.74,
+                y=-0.5 + i * 0.5, z=1.3, material="glass_broken")
+    # Bonnet, propped open
+    box(1.5, 1.1, 0.07, y=1.6, z=1.15, rot=(-0.55, 0, 0), material=body_col)
+    # Engine bay, emptied
+    box(1.1, 0.9, 0.34, y=1.5, z=0.95, material="metal_dark")
+    for i in range(3):
+        cyl(0.09, 0.3, x=-0.3 + i * 0.3, y=1.5, z=1.1, material="steel_worn", verts=8)
+    # Boot lid sprung
+    box(1.4, 0.9, 0.07, y=-1.75, z=1.12, rot=(0.35, 0, 0), material="rust")
+    # One door on the ground beside it
+    box(0.08, 1.1, 0.75, x=-1.25, y=0.2, z=0.06, rot=(0, 1.45, 0), material=body_col)
+    # Wheels: two flat, two gone to the rims
+    for sx in (-1, 1):
+        for sy in (-1.3, 1.3):
+            if sx * sy > 0:
+                cyl(0.32, 0.24, x=sx * 0.82, y=sy, z=0.3,
+                    material="tyre", verts=12, rot=(0, math.pi / 2, 0))
+            else:
+                cyl(0.2, 0.1, x=sx * 0.82, y=sy, z=0.2,
+                    material="steel_worn", verts=10, rot=(0, math.pi / 2, 0))
+    # Bumpers and a dead headlight each side
+    for sy, mat_name in ((2.0, "steel_worn"), (-1.98, "rust")):
+        box(1.6, 0.14, 0.2, y=sy, z=0.66, material=mat_name)
+    for sx in (-1, 1):
+        box(0.34, 0.06, 0.2, x=sx * 0.55, y=2.02, z=0.92, material="glass_broken")
+    export("car_wreck", "roadside", origin_at_base=True)
+
+
+def _shell(w, d, h, wall, roof, door_side=1):
+    """A four-walled shell with a doorway and window openings — the shared
+    carcass of every roadside building. Walls are built as posts and lintels
+    so the openings are real holes rather than dark rectangles."""
+    t = 0.16
+    # Floor slab
+    box(w, d, 0.12, z=0.06, material="concrete")
+    # Long walls with two window openings each
+    for sy in (-1, 1):
+        y = sy * (d / 2.0 - t / 2.0)
+        segs = 5
+        for i in range(segs):
+            seg_w = w / segs
+            x = -w / 2.0 + seg_w * (i + 0.5)
+            if i in (1, 3):
+                # Under and over a window
+                box(seg_w, t, 0.9, x=x, y=y, z=0.55, material=wall)
+                box(seg_w, t, h - 2.0, x=x, y=y, z=h - (h - 2.0) / 2.0, material=wall)
+            else:
+                box(seg_w, t, h, x=x, y=y, z=h / 2.0 + 0.1, material=wall)
+    # End walls, one of them with the doorway
+    for sx in (-1, 1):
+        x = sx * (w / 2.0 - t / 2.0)
+        if sx == door_side:
+            side = (d - 1.1) / 2.0
+            for sy in (-1, 1):
+                box(t, side, h, x=x, y=sy * (d / 2.0 - side / 2.0),
+                    z=h / 2.0 + 0.1, material=wall)
+            box(t, 1.1, h - 2.1, x=x, z=h - (h - 2.1) / 2.0, material=wall)
+        else:
+            box(t, d, h, x=x, z=h / 2.0 + 0.1, material=wall)
+    # Roof, overhanging
+    box(w + 0.5, d + 0.5, 0.16, z=h + 0.18, material=roof)
+    return t
+
+
+def build_house_small():
+    """Still standing, still emptiable. A door you can walk through and windows
+    you can shoot through, which is what makes it worth clearing."""
+    _shell(6.0, 5.0, 2.8, "plaster", "roof_tile")
+    # A lean-to porch over the door
+    box(1.6, 1.4, 0.1, x=3.4, z=2.5, rot=(0, -0.2, 0), material="wood_dark")
+    for sy in (-1, 1):
+        box(0.12, 0.12, 2.3, x=3.9, y=sy * 0.55, z=1.15, material="wood_dark")
+    # A chimney, because a silhouette needs one thing that is not a box
+    box(0.6, 0.6, 1.2, x=-1.6, y=1.2, z=3.4, material="stone_dark")
+    export("house_small", "roadside", origin_at_base=True)
+
+
+def build_house_ruin():
+    """The same house after something went through it: two walls left, the roof
+    on the floor, and rubble to climb over."""
+    box(6.0, 5.0, 0.12, z=0.06, material="concrete")
+    # Two standing walls, one of them broken off half way along
+    box(0.16, 5.0, 2.6, x=-2.92, z=1.4, material="plaster_dirty")
+    box(3.4, 0.16, 2.4, x=-1.3, y=-2.42, z=1.3, material="plaster_dirty")
+    # A jagged stump of the third
+    rng = random.Random(17)
+    for i in range(5):
+        h = rng.uniform(0.5, 1.9)
+        box(0.16, 0.9, h, x=2.92, y=-2.0 + i * 1.0, z=h / 2.0 + 0.1,
+            material="plaster_dirty")
+    # The roof, collapsed inwards
+    box(4.6, 3.6, 0.14, x=0.3, y=0.4, z=0.9, rot=(0.28, 0.12, 0),
+        material="roof_tile")
+    # Rubble
+    for i in range(14):
+        rock(rng.uniform(0.16, 0.4), x=rng.uniform(-2.6, 2.6),
+             y=rng.uniform(-2.2, 2.2), z=0.18,
+             material="plaster_dirty" if i % 2 else "concrete", seed=i)
+    # A bent length of rebar sticking out of it
+    for i in range(3):
+        box(0.04, 0.04, 1.4, x=rng.uniform(-1.5, 1.5), y=rng.uniform(-1.5, 1.5),
+            z=0.8, rot=(rng.uniform(-0.5, 0.5), rng.uniform(-0.5, 0.5), 0),
+            material="rust")
+    export("house_ruin", "roadside", origin_at_base=True)
+
+
+def build_shed():
+    """A one-room outbuilding. Small enough to be worth checking, big enough to
+    hide behind."""
+    _shell(3.2, 2.8, 2.2, "wood_dark", "metal_dark")
+    # Corrugation across the roof
+    for i in range(7):
+        box(3.6, 0.12, 0.06, y=-1.2 + i * 0.4, z=2.44, material="steel_worn")
+    export("shed", "roadside", origin_at_base=True)
+
+
+def build_road_sign():
+    """A speed-limit disc shot to pieces on a leaning post — the source of the
+    road signs the vest is made from."""
+    cyl(0.06, 2.6, z=1.3, material="steel_worn", verts=8, rot=(0.06, 0, 0))
+    cyl(0.55, 0.05, z=2.3, material="plaster", verts=16, rot=(math.pi / 2, 0, 0))
+    cyl(0.44, 0.06, y=-0.02, z=2.3, material="medical", verts=16,
+        rot=(math.pi / 2, 0, 0))
+    # Bullet holes punched through it
+    rng = random.Random(5)
+    for i in range(4):
+        a = rng.uniform(0, math.tau)
+        r = rng.uniform(0.05, 0.36)
+        cyl(rng.uniform(0.03, 0.06), 0.1, x=math.cos(a) * r, y=-0.03,
+            z=2.3 + math.sin(a) * r, material="char", verts=6,
+            rot=(math.pi / 2, 0, 0))
+    box(0.3, 0.3, 0.12, z=0.06, material="concrete")
+    export("road_sign", "roadside", origin_at_base=True)
+
+
+# ==========================================================================
 # CREATURES  (origin at base — feet on the ground, like the deployables)
 # ==========================================================================
 
@@ -2002,6 +2178,8 @@ BUILDERS = [
     build_auto_turret, build_shotgun_trap, build_flame_trap,
     build_tesla_coil, build_alarm, build_motion_sensor,
     build_smart_switch, build_camera, build_land_mine, build_bear_trap,
+    build_car_wreck, build_house_small, build_house_ruin, build_shed,
+    build_road_sign,
     build_wolf, build_bear, build_deer, build_boar, build_scientist,
     build_rabbit, build_chicken,
     build_stone_node, build_metal_node, build_sulfur_node,

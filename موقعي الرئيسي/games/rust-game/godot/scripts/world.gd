@@ -16,6 +16,7 @@ const LootBagScript := preload("res://scripts/loot_bag.gd")
 const DeviceScript := preload("res://scripts/device.gd")
 const PowerGridScript := preload("res://scripts/power_grid.gd")
 const InteractionScript := preload("res://scripts/interaction.gd")
+const RoadsScript := preload("res://scripts/roads.gd")
 
 const SAVE_PATH := "user://rust_save.json"
 const TREE_COUNT := 70
@@ -104,6 +105,7 @@ var stations: Array = []        # placed campfire/furnace nodes
 var devices: Array = []         # placed generators, turrets, traps, sensors
 var power: Node                 # the electrical grid solver
 var interaction: Node           # works out what the interact button means
+var roads: Node3D               # the road network and everything left on it
 var respawn_queue: Array = []   # {type, pos, at}
 ## type -> how hard it has been harvested lately. See PRESSURE_PER_TAKE.
 var pressure: Dictionary = {}
@@ -123,6 +125,16 @@ func _ready() -> void:
 	_build_terrain()
 	_build_water()
 	_build_grass()
+
+	# Roads first: they decide where the monuments are worth walking to, and
+	# the scatter below has to know where the tarmac is so it does not drop a
+	# tree in the middle of it.
+	roads = RoadsScript.new()
+	roads.name = "Roads"
+	add_child(roads)
+	roads.world = self
+	roads.generate([Vector2(40.0, -40.0), Vector2(-60.0, 50.0)])
+
 	_scatter_resources()
 	_create_monument(40.0, -40.0)
 	_create_monument(-60.0, 50.0)
@@ -436,12 +448,17 @@ func _rand_pos(margin: float) -> Vector3:
 	return Vector3(x, terrain_height(x, z), z)
 
 
-## Random position guaranteed to be on dry land (not in a lake).
+## Random position guaranteed to be on dry land (not in a lake) and off the
+## road — a tree growing through the tarmac reads as a bug, and the roadside
+## content puts its own things there deliberately.
 func _rand_pos_land(margin: float) -> Vector3:
 	for i in 30:
 		var p := _rand_pos(margin)
-		if p.y > WATER_LEVEL + 0.5:
-			return p
+		if p.y <= WATER_LEVEL + 0.5:
+			continue
+		if roads != null and roads.distance_to_road(Vector2(p.x, p.z)) < 6.0:
+			continue
+		return p
 	return Vector3(10.0, terrain_height(10.0, 10.0), 10.0)
 
 
@@ -451,6 +468,10 @@ func _rand_pos_land(margin: float) -> Vector3:
 func _rand_pos_wet(margin: float, below_water: bool) -> Vector3:
 	for i in 60:
 		var p := _rand_pos(margin)
+		# Off the road here too: where the route crosses water it rides over it
+		# as a causeway, and a fish swimming through the tarmac is still wrong.
+		if roads != null and roads.distance_to_road(Vector2(p.x, p.z)) < 5.0:
+			continue
 		if below_water and p.y < WATER_LEVEL - 0.4 and p.y > WATER_LEVEL - 3.0:
 			return Vector3(p.x, WATER_LEVEL - 0.35, p.z)
 		if not below_water and p.y > WATER_LEVEL and p.y < WATER_LEVEL + 1.6:
@@ -495,12 +516,13 @@ func _scatter_resources() -> void:
 		spawn_resource("fish", _rand_pos_wet(40.0, true))
 
 
-func spawn_resource(type: String, pos: Vector3) -> void:
+func spawn_resource(type: String, pos: Vector3) -> StaticBody3D:
 	var node: StaticBody3D = ResourceNodeScript.new()
 	node.setup(type)
 	node.position = pos
 	node.depleted.connect(_on_resource_depleted)
 	add_child(node)
+	return node
 
 
 func _on_resource_depleted(type: String, pos: Vector3) -> void:

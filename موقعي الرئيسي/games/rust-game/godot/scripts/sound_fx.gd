@@ -21,6 +21,11 @@ func _ready() -> void:
 	_register("eat", _gen(0.2, 0.05, [[220.0, 0.08], [180.0, 0.06]]))
 	_register("drink", _gen(0.25, 0.03, [[350.0, 0.06], [250.0, 0.05]]))
 	_register("explosion", _gen(0.8, 0.5, [[55.0, 0.35], [80.0, 0.2]]))
+	# Stripping a car sounds like neither chopping wood nor mining stone: a
+	# scrape of sheet metal with a ring left in it afterwards.
+	_register("metal_scrape", _gen(0.32, 0.22, [[520.0, 0.1], [780.0, 0.06]]))
+	# Glass out of a window frame: a bright top with nothing underneath it.
+	_register("glass_break", _gen(0.28, 0.16, [[1400.0, 0.09], [2100.0, 0.05]]))
 
 
 func _register(sfx_name: String, stream: AudioStreamWAV) -> void:

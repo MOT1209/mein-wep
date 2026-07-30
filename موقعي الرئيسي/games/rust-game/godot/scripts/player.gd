@@ -1252,7 +1252,9 @@ func _fire_shot(id: String) -> void:
 ## Kicks the muzzle up and shakes the view. Aiming and a steady stance cut it
 ## the same way they cut the spread, so a braced shot is followed by a second
 ## one you can actually place.
-func _apply_recoil(id: String, sway: float) -> void:
+## `_id` is unused: everything that differs between weapons is already in
+## their sway, which is what the kick is computed from.
+func _apply_recoil(_id: String, sway: float) -> void:
 	var kick: float = sway * 1.6 + 0.004
 	_pitch_target = clampf(_pitch_target + kick, -PI / 2.0, PI / 2.0)
 	_yaw_target += randf_range(-kick, kick) * 0.6

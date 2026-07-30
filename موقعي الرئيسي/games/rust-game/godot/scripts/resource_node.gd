@@ -64,6 +64,11 @@ func setup(t: String) -> void:
 		"fish":
 			health = 2
 			_build_fish()
+		"car_wreck":
+			# Tougher than a barrel and worth far more: the reason a road is
+			# worth walking down rather than a forest worth cutting.
+			health = 9
+			_build_car_wreck()
 
 
 func _build_tree() -> void:
@@ -426,6 +431,33 @@ func _build_fish() -> void:
 	rotation.y = randf() * TAU
 
 
+## The modelled wreck, with a box the size of a car around it. Falls back to a
+## rusted crate shape when the model is missing, like every other node here.
+func _build_car_wreck() -> void:
+	var model := ModelRegistry.spawn("car_wreck")
+	if model == null:
+		var mi := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(1.8, 1.3, 4.0)
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color8(115, 66, 41)
+		mat.metallic = 0.4
+		mat.roughness = 0.8
+		box.material = mat
+		mi.mesh = box
+		mi.position.y = 0.65
+		add_child(mi)
+	else:
+		add_child(model)
+
+	var cs := CollisionShape3D.new()
+	var shape := BoxShape3D.new()
+	shape.size = Vector3(2.0, 1.5, 4.2)
+	cs.shape = shape
+	cs.position.y = 0.75
+	add_child(cs)
+
+
 func _add_sphere_collision(radius: float, y: float) -> void:
 	var cs := CollisionShape3D.new()
 	var shape := SphereShape3D.new()
@@ -456,11 +488,21 @@ const TOOL_YIELD := {
 	"clay_deposit": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4, "jackhammer": 4},
 	"sand_deposit": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 4, "jackhammer": 4},
 	"salt_deposit": {"stone_pickaxe": 2, "metal_pickaxe": 3, "drill": 3},
+	# Stripping a car is metal work: a pick is the wrong tool, a jackhammer is
+	# the right one, and bare hands take all day.
+	"car_wreck": {"metal_hatchet": 2, "jackhammer": 4, "machete": 2, "drill": 3},
 	# A blade takes a hemp stand down in one pass; bare hands strip it slowly
 	"hemp": {"machete": 3, "stone_hatchet": 2, "metal_hatchet": 3},
 }
 
 const OIL_PER_DRILL_HIT := 3
+
+## Nodes that sound like something other than a generic harvest.
+const HARVEST_SOUND := {
+	"car_wreck": "metal_scrape",
+	"barrel": "metal_scrape",
+	"iron": "metal_scrape",
+}
 
 ## What each node type gives per swing. The types that appear in TOOL_YIELD
 ## scale with the tool; the rest hand over the same amount however you hit
@@ -483,6 +525,9 @@ const YIELDS := {
 	"sand_deposit": {"sand": 8, "dirt": 3},
 	"salt_deposit": {"salt": 6},
 	"fish": {"raw_fish": 2, "scales": 3},
+	# The components a research bench otherwise charges 25 scrap apiece for,
+	# out here for the cost of walking to them and the noise of taking them.
+	"car_wreck": {"frag": 12, "scrap": 6, "gear_comp": 1, "pipe": 1, "lgf": 2},
 }
 
 ## The marked spot that appears on an ore node or a tree after the first
@@ -556,7 +601,9 @@ func hit_harvest(tool_id: String = "", at: Vector3 = Vector3.INF) -> void:
 	health -= mult
 	for id in payload:
 		Game.add_item(id, payload[id])
-	Sfx.play("harvest")
+	# What it sounds like depends on what it is made of, not on the fact that
+	# it is a resource node.
+	Sfx.play(HARVEST_SOUND.get(res_type, "harvest"))
 
 	if health <= 0:
 		_hide_marker()

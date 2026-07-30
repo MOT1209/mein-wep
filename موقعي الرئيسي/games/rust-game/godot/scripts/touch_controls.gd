@@ -202,7 +202,9 @@ func _layout() -> void:
 	var stick_x: float = vp.x - STICK_MARGIN.x if _mirrored() else STICK_MARGIN.x
 	_stick_centre = Vector2(stick_x, vp.y - STICK_MARGIN.y)
 
-	var scale: float = float(Game.setting("button_scale"))
+	# Named btn_scale, not scale: this is a Control, and Control already has a
+	# scale property that a local of that name would shadow.
+	var btn_scale: float = float(Game.setting("button_scale"))
 	_button_rects.clear()
 	for spec in BUTTONS:
 		if not _context_ok(spec):
@@ -210,9 +212,9 @@ func _layout() -> void:
 		var over := Game.button_override(str(spec.id))
 		var base: float = BTN_BIG_SIZE if str(spec.get("size", "")) == "big" else BTN_SIZE
 		var diameter: float = maxf(MIN_BUTTON,
-			base * scale * float(over.get("scale", 1.0)))
+			base * btn_scale * float(over.get("scale", 1.0)))
 		var centre := _cluster_slot(str(spec.cluster), int(spec.col), int(spec.row),
-			vp, scale)
+			vp, btn_scale)
 		var off = over.get("offset", [0.0, 0.0])
 		if off is Array and off.size() == 2:
 			centre += Vector2(float(off[0]), float(off[1]))
@@ -233,11 +235,11 @@ func _layout() -> void:
 ## a thumb cannot reliably pick out. And it scales with the button scale, or
 ## making the buttons bigger would pile them on top of each other.
 func _cluster_slot(cluster: String, col: int, row: int, vp: Vector2,
-		scale: float) -> Vector2:
-	var unit: float = maxf(MIN_BUTTON, BTN_BIG_SIZE * scale)
-	var step: float = unit + BTN_GAP * scale
+		btn_scale: float) -> Vector2:
+	var unit: float = maxf(MIN_BUTTON, BTN_BIG_SIZE * btn_scale)
+	var step: float = unit + BTN_GAP * btn_scale
 	# Enough room between the screen edge and the first slot for half a button
-	var edge: float = unit * 0.5 + 22.0 * scale
+	var edge: float = unit * 0.5 + 22.0 * btn_scale
 	var mirror: float = -1.0 if _mirrored() else 1.0
 	match cluster:
 		"combat":

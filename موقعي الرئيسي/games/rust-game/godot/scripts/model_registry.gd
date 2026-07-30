@@ -68,6 +68,13 @@ const MODELS := {
 	"advanced_recycler": "res://assets/models/deployables/advanced_recycler.glb",
 	"hitech_recycler": "res://assets/models/deployables/hitech_recycler.glb",
 
+	# Roadside: the leftovers of whoever built the road. Origin at the base.
+	"car_wreck": "res://assets/models/roadside/car_wreck.glb",
+	"house_small": "res://assets/models/roadside/house_small.glb",
+	"house_ruin": "res://assets/models/roadside/house_ruin.glb",
+	"shed": "res://assets/models/roadside/shed.glb",
+	"road_sign": "res://assets/models/roadside/road_sign.glb",
+
 	# Harvestable resource nodes — origin at the base. Prefixed because the
 	# mined item shares the raw id ("sulfur" the ore chunk vs the boulder).
 	"node_rock": "res://assets/models/resources/stone_node.glb",

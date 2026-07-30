@@ -28,7 +28,7 @@ RESOLUTION = 256
 SAMPLES = 40
 
 # Only these get icons; big world pieces and NPCs never show in a slot.
-SKIP_CATEGORIES = {"building", "creatures"}
+SKIP_CATEGORIES = {"building", "creatures", "roadside"}
 
 ARGS = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else []
 ONLY = set(ARGS) if ARGS else set()
