@@ -47,7 +47,11 @@ def main():
                 if name.endswith(".glb"):
                     paths.append(os.path.join(cat, name))
 
-    placed = 0
+    # Import everything first, so the grid can be sized from what is actually
+    # in the batch. A fixed spacing was fine when a category held a handful of
+    # hand tools; it buries a sheet of 3 m walls and a 4 m turbine mast in one
+    # overlapping pile, which is exactly when you most need to look at them.
+    batches = []
     for path in paths:
         before = set(bpy.context.scene.objects)
         bpy.ops.import_scene.gltf(filepath=path)
@@ -55,11 +59,21 @@ def main():
         if not new:
             print("  [warn] nothing imported from %s" % path)
             continue
+        batches.append(new)
+
+    widest = 0.0
+    for objs in batches:
+        for obj in objs:
+            widest = max(widest, obj.dimensions.x, obj.dimensions.y)
+    spacing = max(SPACING, widest * 1.3)
+
+    placed = 0
+    for objs in batches:
         col = placed % COLS
         row = placed // COLS
-        for obj in new:
-            obj.location.x += col * SPACING - (COLS - 1) * SPACING / 2.0
-            obj.location.y += -row * SPACING
+        for obj in objs:
+            obj.location.x += col * spacing - (COLS - 1) * spacing / 2.0
+            obj.location.y += -row * spacing
             # Drop each model onto a common floor line so they read as a row
             low = min((obj.matrix_world @ v.co).z for v in obj.data.vertices)
             obj.location.z -= low
@@ -71,7 +85,7 @@ def main():
     # view direction so the framing holds for any batch size.
     tilt = math.radians(64)
     view_dir = (0.0, math.sin(tilt), -math.cos(tilt))
-    target = (0.0, -(rows - 1) * SPACING / 2.0, SPACING * 0.15)
+    target = (0.0, -(rows - 1) * spacing / 2.0, spacing * 0.15)
     distance = 30.0
     bpy.ops.object.camera_add(location=(
         target[0] - view_dir[0] * distance,
@@ -81,7 +95,7 @@ def main():
     cam = bpy.context.active_object
     cam.rotation_euler = (tilt, 0, 0)
     cam.data.type = "ORTHO"
-    cam.data.ortho_scale = max(COLS, rows) * SPACING * 1.25 + SPACING
+    cam.data.ortho_scale = max(COLS, rows) * spacing * 1.25 + spacing
     bpy.context.scene.camera = cam
 
     scene = bpy.context.scene
