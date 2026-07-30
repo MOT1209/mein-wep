@@ -18,13 +18,44 @@ const MODELS := {
 	"stairs": "res://assets/models/building/stairs.glb",
 	"wooden_door": "res://assets/models/building/wooden_door.glb",
 	"tool_cupboard": "res://assets/models/building/tool_cupboard.glb",
+	"triangle_foundation": "res://assets/models/building/triangle_foundation.glb",
+	"half_wall": "res://assets/models/building/half_wall.glb",
+	"low_wall": "res://assets/models/building/low_wall.glb",
+	"pillar": "res://assets/models/building/pillar.glb",
+	"roof": "res://assets/models/building/roof.glb",
+	"ladder": "res://assets/models/building/ladder.glb",
+	"barricade": "res://assets/models/building/barricade.glb",
+	"garage_door": "res://assets/models/building/garage_door.glb",
 
 	# Creatures — origin at the base
 	"npc_wolf": "res://assets/models/creatures/wolf.glb",
 	"npc_bear": "res://assets/models/creatures/bear.glb",
 	"npc_deer": "res://assets/models/creatures/deer.glb",
 	"npc_boar": "res://assets/models/creatures/boar.glb",
+	"npc_rabbit": "res://assets/models/creatures/rabbit.glb",
+	"npc_chicken": "res://assets/models/creatures/chicken.glb",
 	"npc_scientist": "res://assets/models/creatures/scientist.glb",
+
+	# Electrical devices and traps — origin at the base. Keyed by the same id
+	# the item and the deployed device share, so one entry serves both.
+	#
+	# The turbine and every device that aims are modelled without their
+	# moving part: device.gd spins the blades and swings the mount at
+	# runtime, so the model stops where the motion starts.
+	"generator": "res://assets/models/devices/generator.glb",
+	"solar_panel": "res://assets/models/devices/solar_panel.glb",
+	"wind_turbine": "res://assets/models/devices/wind_turbine.glb",
+	"battery": "res://assets/models/devices/battery.glb",
+	"auto_turret": "res://assets/models/devices/auto_turret.glb",
+	"shotgun_trap": "res://assets/models/devices/shotgun_trap.glb",
+	"flame_trap": "res://assets/models/devices/flame_trap.glb",
+	"tesla_coil": "res://assets/models/devices/tesla_coil.glb",
+	"alarm": "res://assets/models/devices/alarm.glb",
+	"motion_sensor": "res://assets/models/devices/motion_sensor.glb",
+	"smart_switch": "res://assets/models/devices/smart_switch.glb",
+	"camera": "res://assets/models/devices/camera.glb",
+	"land_mine": "res://assets/models/devices/land_mine.glb",
+	"bear_trap": "res://assets/models/devices/bear_trap.glb",
 
 	# Deployables — origin at the base
 	"furnace": "res://assets/models/deployables/furnace.glb",
@@ -33,6 +64,9 @@ const MODELS := {
 	"research_table": "res://assets/models/deployables/research_table.glb",
 	"storage_box": "res://assets/models/deployables/storage_box.glb",
 	"large_box": "res://assets/models/deployables/large_box.glb",
+	"recycler": "res://assets/models/deployables/recycler.glb",
+	"advanced_recycler": "res://assets/models/deployables/advanced_recycler.glb",
+	"hitech_recycler": "res://assets/models/deployables/hitech_recycler.glb",
 
 	# Harvestable resource nodes — origin at the base. Prefixed because the
 	# mined item shares the raw id ("sulfur" the ore chunk vs the boulder).
@@ -50,6 +84,12 @@ const MODELS := {
 	"bow": "res://assets/models/tools/bow.glb",
 	"torch": "res://assets/models/tools/torch.glb",
 	"spear": "res://assets/models/tools/spear.glb",
+	"chainsaw": "res://assets/models/tools/chainsaw.glb",
+	"jackhammer": "res://assets/models/tools/jackhammer.glb",
+	"repair_tool": "res://assets/models/tools/repair_tool.glb",
+	"binoculars": "res://assets/models/tools/binoculars.glb",
+	"flashlight": "res://assets/models/tools/flashlight.glb",
+	"wire_tool": "res://assets/models/tools/wire_tool.glb",
 
 	# Inventory items — also usable in-hand and dropped in the world
 	"machete": "res://assets/models/items/machete.glb",

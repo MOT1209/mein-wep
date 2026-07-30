@@ -418,29 +418,51 @@ func _build_visual() -> void:
 	mat.metallic = 0.55
 	mat.roughness = 0.45
 
-	var body := MeshInstance3D.new()
-	var box := BoxMesh.new()
-	box.size = Vector3(size.x, size.y * 0.55, size.z)
-	box.material = mat
-	body.mesh = box
-	body.position.y = size.y * 0.275
-	add_child(body)
+	# A Blender model when there is one, the primitive block when there is
+	# not. Either way the collision below comes from Game.DEVICES, so the
+	# model can never move a deployed device's hitbox.
+	var model := ModelRegistry.spawn(device_type)
 
-	# The part that moves, so what a device is doing is readable at a glance
+	# The part that moves, so what a device is doing is readable at a glance.
+	# A modelled turret goes under the mount and swings bodily, which is what
+	# the model is built for: it stops at the mount and has no barrel of its
+	# own. The block fallback gets a barrel drawn for it.
 	if _cfg.has("damage") and not _cfg.get("single_use", false):
 		_head = Node3D.new()
-		_head.position.y = size.y * 0.7
 		add_child(_head)
-		var barrel := MeshInstance3D.new()
-		var tube := BoxMesh.new()
-		tube.size = Vector3(size.x * 0.3, size.x * 0.3, size.z * 1.3)
-		tube.material = mat
-		barrel.mesh = tube
-		barrel.position.z = -size.z * 0.5
-		_head.add_child(barrel)
-	elif _cfg.get("wind", false):
+		if model != null:
+			_head.add_child(model)
+		else:
+			_head.position.y = size.y * 0.7
+			var barrel := MeshInstance3D.new()
+			var tube := BoxMesh.new()
+			tube.size = Vector3(size.x * 0.3, size.x * 0.3, size.z * 1.3)
+			tube.material = mat
+			barrel.mesh = tube
+			barrel.position.z = -size.z * 0.5
+			_head.add_child(barrel)
+	elif model != null:
+		add_child(model)
+
+	if model == null:
+		var body := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(size.x, size.y * 0.55, size.z)
+		box.material = mat
+		body.mesh = box
+		body.position.y = size.y * 0.275
+		add_child(body)
+
+	# Blades always stay procedural: the model ends at the hub because this
+	# is the part that has to keep turning.
+	if _cfg.get("wind", false):
 		_spinner = Node3D.new()
-		_spinner.position.y = size.y * 0.9
+		# On the modelled mast the hub is a specific place; on the fallback
+		# block it is just near the top.
+		if model != null:
+			_spinner.position = Vector3(0.0, 3.5, 0.34)
+		else:
+			_spinner.position.y = size.y * 0.9
 		add_child(_spinner)
 		var blade_mat := StandardMaterial3D.new()
 		blade_mat.albedo_color = Color8(236, 239, 241)

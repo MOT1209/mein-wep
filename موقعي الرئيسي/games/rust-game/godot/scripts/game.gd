@@ -296,8 +296,10 @@ const DEVICES := {
 		"gate": true, "size": Vector3(0.3, 0.3, 0.25)},
 	"smart_switch": {"name": "Smart Switch", "gate": true, "manual": true,
 		"size": Vector3(0.35, 0.45, 0.2)},
+	# Tall enough to cover the arm as well as the body: a camera mounted on a
+	# 30 cm box would hang above its own hitbox and could not be shot off.
 	"camera": {"name": "CCTV Camera", "power": 2.0, "range": 45.0,
-		"size": Vector3(0.3, 0.3, 0.5)},
+		"size": Vector3(0.3, 0.5, 0.5)},
 
 	# --- Mechanical traps, no wiring needed ---
 	"land_mine": {"name": "Land Mine", "damage": 130.0, "range": 2.0,

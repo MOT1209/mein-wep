@@ -89,9 +89,28 @@ PALETTE = {
     "eye":            (0.05, 0.04, 0.04, 0.0, 0.25),
     "suit":           (0.149, 0.329, 0.486, 0.0, 0.55),
     "suit_dark":      (0.09, 0.20, 0.30, 0.0, 0.6),
+    # Small game, matched to npc.gd's TYPES colours like the rest
+    "rabbit_fur":       (0.776, 0.706, 0.627, 0.0, 0.9),
+    "rabbit_fur_dark":  (0.55, 0.48, 0.41, 0.0, 0.9),
+    "hen_feather":      (0.961, 0.941, 0.902, 0.0, 0.85),
+    "hen_feather_dark": (0.78, 0.75, 0.70, 0.0, 0.85),
+    "comb":             (0.80, 0.18, 0.16, 0.0, 0.6),
+    "beak":             (0.90, 0.72, 0.25, 0.0, 0.6),
+    # Machinery: the salvaged-electrical look of a wired base
+    "solar":         (0.07, 0.11, 0.26, 0.35, 0.18),
+    "solar_cell":    (0.11, 0.17, 0.36, 0.35, 0.22),
+    "plastic_black": (0.10, 0.10, 0.11, 0.0, 0.45),
+    "plastic_white": (0.86, 0.86, 0.84, 0.0, 0.5),
+    "copper":        (0.72, 0.42, 0.20, 0.85, 0.3),
+    "orange_paint":  (0.86, 0.36, 0.06, 0.0, 0.5),
+    "led_green":     (0.25, 0.95, 0.35, 0.0, 0.3),
+    "led_red":       (0.95, 0.20, 0.15, 0.0, 0.3),
+    "arc":           (0.62, 0.86, 1.00, 0.0, 0.2),
 }
 
-EMISSIVE = {"ember", "flame"}
+## Anything here glows: fire, and the status lights that tell you at a glance
+## whether a circuit is feeding the thing in front of you.
+EMISSIVE = {"ember", "flame", "led_green", "led_red", "arc"}
 
 _materials = {}
 
@@ -460,6 +479,200 @@ def build_tool_cupboard():
     export("tool_cupboard", "building", origin_at_base=True)
 
 
+def build_triangle_foundation():
+    """Half a tile, cut on the diagonal. The deck boards run the short way
+    and each one is shorter than the last, which is how a real triangular
+    deck is laid and makes the cut read from above without a texture.
+
+    Godot fills the half on its +X side of the diagonal. Blender -Y is
+    Godot +Z, so that same half is `y >= -x` here: a board at x spans from
+    y = -x up to the +Y edge.
+    """
+    half = GRID / 2.0
+    # Joists following the hypotenuse, under the deck
+    for i in range(4):
+        x = -half + 0.45 + i * 0.72
+        length = half + x
+        if length <= 0.1:
+            continue
+        box(0.13, length * 0.96, 0.09, x=x, y=(half - x) / 2.0, z=0.03,
+            material="wood_dark")
+    # Deck boards, each cut to the diagonal
+    for i in range(7):
+        x = -half + 0.28 + i * 0.42
+        length = half + x
+        if length <= 0.1:
+            continue
+        box(0.36, length, 0.07, x=x, y=(half - x) / 2.0, z=0.095,
+            material="wood" if i % 2 == 0 else "wood_light")
+    # Rim beam along the cut face, so the hypotenuse is a built edge
+    box(0.16, GRID * 1.36, 0.16, z=0.04, rot=(0, 0, -math.pi / 4),
+        material="wood_dark")
+    # Footings on the three corners that exist
+    for cx, cy in ((half - 0.2, half - 0.2), (half - 0.2, -half + 0.2),
+                   (-half + 0.2, half - 0.2)):
+        box(0.24, 0.24, 0.22, x=cx, y=cy, z=-0.04, material="stone_dark")
+    export("triangle_foundation", "building")
+
+
+def _board_wall(height, name, rails=True):
+    """A wall of salvaged boards at an arbitrary height — the full wall's
+    construction, scaled down for the half and low variants."""
+    box(GRID, WALL_T, height, material="wood_dark")
+    face = -WALL_T / 2 - 0.02
+    rng = random.Random(int(height * 100))
+    for i in range(6):
+        x = -1.25 + i * 0.5
+        h = height * rng.uniform(0.88, 0.97)
+        box(0.44, 0.06, h, x=x, y=face, z=(height - h) * 0.5 * rng.choice((-1, 1)),
+            material="wood" if i % 2 == 0 else "wood_light")
+        box(0.035, 0.02, 0.035, x=x, y=face - 0.04,
+            z=height * 0.32, material="metal_dark")
+    if rails:
+        box(GRID * 0.98, 0.08, 0.14, z=height / 2.0 - 0.1, y=face - 0.02,
+            material="wood_dark")
+    # Capping rail across the top: a wall you can see over wants a finished
+    # edge to lean on rather than a sawn-off stack of planks. Kept to the
+    # same 8 cm proud of the declared thickness that every other piece sits
+    # at, so a half wall is no fatter than a full one.
+    box(GRID * 0.99, WALL_T + 0.06, 0.12, z=height / 2.0 + 0.02,
+        material="wood_dark")
+    export(name, "building")
+
+
+def build_half_wall():
+    _board_wall(1.5, "half_wall")
+
+
+def build_low_wall():
+    _board_wall(0.9, "low_wall", rails=False)
+
+
+def build_pillar():
+    """Squared post on a stone pad with a bracket cap — it has to look like
+    it is carrying something, because that is exactly what it does."""
+    box(0.34, 0.34, GRID * 0.9, z=0.02, material="wood")
+    # Grain: two darker faces so the post is not one flat colour
+    for sy in (-1, 1):
+        box(0.3, 0.03, GRID * 0.86, y=sy * 0.175, material="wood_dark")
+    # Iron straps at three heights
+    for z in (-1.1, 0.0, 1.1):
+        box(0.38, 0.38, 0.07, z=z, material="metal_dark")
+    # Stone pad at the foot and a bracket cap at the head
+    box(0.5, 0.5, 0.16, z=-GRID / 2.0 + 0.08, material="stone")
+    box(0.46, 0.46, 0.12, z=GRID / 2.0 - 0.06, material="wood_dark")
+    for sx in (-1, 1):
+        box(0.08, 0.3, 0.34, x=sx * 0.2, z=GRID / 2.0 - 0.3, material="metal_dark")
+    export("pillar", "building")
+
+
+def build_roof():
+    """Pitched roof: rafters under overlapping shingle courses, climbing to a
+    capped ridge. Godot slopes it up towards +Z, and Blender -Y is Godot +Z,
+    so the ridge sits at -Y here and the eaves at +Y."""
+    half = GRID / 2.0
+    rise = 1.5
+    # Everything on a pitched roof is laid along the slope, not along the
+    # floor, so it is measured that way: a board of the slope's own length,
+    # centred on the slope's midpoint and tilted to its angle, spans exactly
+    # the wedge's rise and no more. Laying them out by floor position instead
+    # made the model half again as tall as the 1.5 m piece it stands for.
+    slope = math.hypot(GRID, rise)
+    angle = math.atan2(rise, GRID)
+    cos_t = GRID / slope
+    sin_t = rise / slope
+
+    # Rafters running up the slope
+    for i in range(5):
+        box(0.1, slope * 0.94, 0.1, x=-1.2 + i * 0.6, rot=(angle, 0, 0),
+            material="wood_dark")
+    # Shingle courses, each overlapping the one below. The outermost courses
+    # stop half their own length short of the ends, so the run of them
+    # finishes flush with the wedge instead of overhanging it.
+    courses = 7
+    clen = slope / courses * 1.15
+    smax = slope / 2.0 - clen / 2.0
+    for i in range(courses):
+        s = (-1.0 + 2.0 * i / (courses - 1)) * smax
+        box(GRID * 0.99, clen, 0.06, y=-s * cos_t, z=s * sin_t,
+            rot=(angle, 0, 0),
+            material="wood" if i % 2 == 0 else "wood_light")
+    # Ridge cap and a gutter board at the eaves
+    box(GRID * 0.99, 0.18, 0.11, y=-half + 0.07, z=rise / 2.0 - 0.06,
+        material="wood_dark")
+    box(GRID * 0.99, 0.12, 0.14, y=half - 0.05, z=-rise / 2.0 + 0.07,
+        material="wood_dark")
+    export("roof", "building")
+
+
+def build_ladder():
+    """Two rails and round rungs, braced off the wall it is pinned to."""
+    for sx in (-1, 1):
+        box(0.1, 0.1, GRID, x=sx * 0.4, material="wood")
+    for i in range(9):
+        cyl(0.035, 0.78, z=-GRID / 2.0 + 0.24 + i * 0.32,
+            material="wood_light", verts=8, rot=(0, math.pi / 2, 0))
+    # Stand-off brackets that hold it clear of the wall face
+    for z in (-1.2, 0.0, 1.2):
+        for sx in (-1, 1):
+            box(0.06, 0.12, 0.06, x=sx * 0.4, y=0.05, z=z, material="metal_dark")
+    export("ladder", "building")
+
+
+def build_barricade():
+    """Timber frame, crossed planks and coiled barbed wire. The wire is what
+    it is for, so it has to be the thing you notice."""
+    # Frame: two uprights and a top rail
+    for sx in (-1, 1):
+        box(0.14, 0.4, 1.3, x=sx * 1.4, material="wood_dark")
+    box(GRID * 0.99, 0.16, 0.14, z=0.58, material="wood_dark")
+    # Crossed planks
+    for sign in (-1, 1):
+        box(GRID * 1.02, 0.09, 0.28, z=-0.1,
+            rot=(0, sign * 0.42, 0), material="wood")
+    # Angled props at the back so it stands into a charge
+    for sx in (-1, 1):
+        box(0.1, 0.7, 0.1, x=sx * 1.1, y=0.18, z=-0.4,
+            rot=(0.7, 0, 0), material="wood_dark")
+    # Barbed wire: coils along the top with barbs struck through them
+    rng = random.Random(9)
+    for i in range(11):
+        x = -1.35 + i * 0.27
+        cyl(0.11, 0.05, x=x, z=0.66, material="metal_dark", verts=8,
+            rot=(0, math.pi / 2, 0))
+        for j in range(2):
+            a = rng.uniform(0, math.pi)
+            box(0.015, 0.11, 0.015, x=x, z=0.66,
+                rot=(a, 0, rng.uniform(-0.5, 0.5)), material="steel_worn")
+    export("barricade", "building", origin_at_base=False)
+
+
+def build_garage_door():
+    """Rolling slat door on a lift track: the slats and the chain drive are
+    the whole reason it reads as something that goes up, not sideways."""
+    span = 2.6
+    slats = 7
+    for i in range(slats):
+        z = -span / 2.0 + span / slats * (i + 0.5)
+        box(span * 0.98, 0.1, span / slats * 0.86, z=z,
+            material="metal" if i % 2 == 0 else "steel_worn")
+        # Ribbed pressing across each slat
+        box(span * 0.9, 0.04, span / slats * 0.3, y=-0.06, z=z,
+            material="metal_dark")
+    # Vertical tracks the slats run in
+    for sx in (-1, 1):
+        box(0.1, 0.22, span, x=sx * (span / 2.0 - 0.02), material="metal_dark")
+    # Chain drive and sprocket up one side
+    cyl(0.11, 0.06, x=-span / 2.0 + 0.06, z=span / 2.0 - 0.12,
+        material="steel_worn", verts=10, rot=(0, math.pi / 2, 0))
+    for i in range(8):
+        box(0.03, 0.03, 0.07, x=-span / 2.0 + 0.06, y=-0.1,
+            z=span / 2.0 - 0.2 - i * 0.16, material="metal_dark")
+    # Handle across the bottom slat
+    box(0.5, 0.07, 0.07, y=-0.1, z=-span / 2.0 + 0.14, material="metal_dark")
+    export("garage_door", "building")
+
+
 # ==========================================================================
 # TOOLS & WEAPONS  (origin at the grip, held ~1 m long)
 # ==========================================================================
@@ -580,6 +793,158 @@ def build_drill():
     export("drill", "tools", origin_at_base=True)
 
 
+def build_chainsaw():
+    """Two-stroke body, wrap handle and a toothed bar. The chain is what you
+    are buying, so the bar runs long and the teeth are individually cut."""
+    # Engine body and pull-start cover
+    box(0.2, 0.34, 0.24, z=0.62, material="orange_paint")
+    cyl(0.1, 0.1, x=0.11, z=0.62, material="plastic_black", verts=12,
+        rot=(0, math.pi / 2, 0))
+    cyl(0.03, 0.03, x=0.17, z=0.62, material="metal_dark", verts=8,
+        rot=(0, math.pi / 2, 0))
+    # Fuel cap and air filter
+    cyl(0.04, 0.04, y=0.14, z=0.76, material="plastic_black", verts=8)
+    box(0.14, 0.1, 0.1, y=0.16, z=0.66, material="plastic_black")
+    # Wrap handle over the top, and the rear grip with its trigger
+    box(0.24, 0.04, 0.04, z=0.82, material="plastic_black")
+    for sx in (-1, 1):
+        box(0.04, 0.04, 0.18, x=sx * 0.1, z=0.73, material="plastic_black")
+    box(0.09, 0.2, 0.07, y=0.24, z=0.56, material="plastic_black")
+    box(0.05, 0.06, 0.02, y=0.19, z=0.52, material="metal_dark")
+    # Hand guard
+    box(0.22, 0.03, 0.03, y=-0.13, z=0.8, rot=(0.4, 0, 0),
+        material="plastic_black")
+    # Cutting bar, with a rounded nose
+    box(0.04, 0.62, 0.1, y=-0.5, z=0.62, material="steel_worn")
+    cyl(0.05, 0.038, y=-0.8, z=0.62, material="steel_worn", verts=10,
+        rot=(0, math.pi / 2, 0))
+    # Chain teeth along both edges of the bar
+    for i in range(11):
+        y = -0.24 - i * 0.052
+        for sz in (-1, 1):
+            box(0.05, 0.028, 0.026, y=y, z=0.62 + sz * 0.06,
+                rot=(0, 0, 0.3 * sz), material="gunmetal")
+    # Sprocket cover where the chain drives
+    box(0.06, 0.12, 0.14, y=-0.2, z=0.6, material="orange_paint")
+    export("chainsaw", "tools", origin_at_base=True)
+
+
+def build_jackhammer():
+    """Pneumatic breaker: twin grips, a body under pressure and a chisel bit
+    that has been driven into a lot of concrete."""
+    # Body and its cooling ribs
+    cyl(0.09, 0.5, z=0.72, material="warning", verts=12)
+    for i in range(4):
+        cyl(0.1, 0.03, z=0.56 + i * 0.11, material="metal_dark", verts=12)
+    # Air line coupling and hose stub
+    cyl(0.035, 0.12, x=0.1, z=0.92, material="metal_dark", verts=8,
+        rot=(0, math.pi / 2, 0))
+    cyl(0.028, 0.18, x=0.2, z=0.88, material="char", verts=8,
+        rot=(0, 0.7, 0))
+    # T-bar grips with a throttle lever between them
+    box(0.44, 0.05, 0.05, z=1.0, material="metal_dark")
+    for sx in (-1, 1):
+        cyl(0.035, 0.14, x=sx * 0.2, z=1.0, material="plastic_black", verts=10,
+            rot=(0, math.pi / 2, 0))
+    box(0.1, 0.04, 0.03, y=-0.06, z=0.96, material="steel_worn")
+    # Chuck and the chisel bit
+    cyl(0.07, 0.1, z=0.44, material="metal_dark", verts=10)
+    cyl(0.045, 0.34, z=0.26, material="steel_worn", verts=8)
+    box(0.09, 0.03, 0.14, z=0.06, material="gunmetal")
+    wear(0.08, 0.12, z=0.1, count=5, seed=6, normal="y", material="metal_dark")
+    export("jackhammer", "tools", origin_at_base=True)
+
+
+def build_repair_tool():
+    """Part gun, part soldering iron: a nozzle, a spool of filler and a gauge
+    that tells you what condition you are putting back."""
+    # Grip and body
+    box(0.09, 0.14, 0.22, y=0.1, z=0.5, material="plastic_black")
+    box(0.13, 0.3, 0.16, z=0.7, material="metal")
+    # Filler spool on the side
+    cyl(0.09, 0.05, x=0.1, z=0.72, material="copper", verts=14,
+        rot=(0, math.pi / 2, 0))
+    cyl(0.03, 0.06, x=0.12, z=0.72, material="metal_dark", verts=8,
+        rot=(0, math.pi / 2, 0))
+    # Gauge on top
+    cyl(0.045, 0.03, z=0.8, material="glass", verts=12)
+    box(0.03, 0.01, 0.01, z=0.82, rot=(0, 0, 0.6), material="medical")
+    # Nozzle out the front with a hot tip
+    cyl(0.035, 0.18, y=-0.22, z=0.7, material="steel_worn", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    cone(0.035, 0.012, 0.1, y=-0.35, z=0.7, material="ember", verts=8,
+         rot=(-math.pi / 2, 0, 0))
+    # Trigger
+    box(0.04, 0.05, 0.02, y=0.03, z=0.56, material="metal_dark")
+    export("repair_tool", "tools", origin_at_base=True)
+
+
+def build_binoculars():
+    """Twin barrels bridged by a focus wheel, with a neck strap."""
+    for sx in (-1, 1):
+        cyl(0.055, 0.24, x=sx * 0.065, z=0.6, material="plastic_black",
+            verts=12, rot=(math.pi / 2, 0, 0))
+        # Objective and eyepiece glass
+        cyl(0.05, 0.02, x=sx * 0.065, y=-0.13, z=0.6, material="glass",
+            verts=12, rot=(math.pi / 2, 0, 0))
+        cyl(0.035, 0.05, x=sx * 0.065, y=0.14, z=0.6, material="leather",
+            verts=10, rot=(math.pi / 2, 0, 0))
+        # Rubber armour ring
+        cyl(0.06, 0.05, x=sx * 0.065, y=-0.04, z=0.6, material="char", verts=12,
+            rot=(math.pi / 2, 0, 0))
+    # Bridge and the focus wheel between the barrels
+    box(0.08, 0.1, 0.05, z=0.6, material="plastic_black")
+    cyl(0.03, 0.07, z=0.6, material="metal_dark", verts=10,
+        rot=(0, math.pi / 2, 0))
+    # Strap lugs and a length of strap looping down
+    for sx in (-1, 1):
+        box(0.02, 0.03, 0.03, x=sx * 0.12, y=0.06, z=0.64,
+            material="metal_dark")
+    for i in range(5):
+        box(0.02, 0.02, 0.09, x=-0.12 + i * 0.06, y=0.08,
+            z=0.5 - abs(i - 2) * 0.03, rot=(0, 0.4 * (i - 2), 0),
+            material="fabric")
+    export("binoculars", "tools", origin_at_base=True)
+
+
+def build_flashlight():
+    """Barrel, reflector head and a thumb switch. A tight beam, not a torch."""
+    cyl(0.035, 0.34, z=0.55, material="metal_dark", verts=12)
+    # Knurled grip rings
+    for i in range(5):
+        cyl(0.038, 0.025, z=0.44 + i * 0.05, material="steel_worn", verts=12)
+    # Reflector head and lens
+    cone(0.07, 0.04, 0.12, z=0.78, material="metal", verts=14)
+    cyl(0.066, 0.02, z=0.84, material="glass", verts=14)
+    cone(0.055, 0.015, 0.07, z=0.79, material="led_green", verts=12)
+    # Tail cap and thumb switch
+    cyl(0.036, 0.05, z=0.36, material="plastic_black", verts=12)
+    box(0.03, 0.02, 0.04, y=-0.035, z=0.5, material="orange_paint")
+    export("flashlight", "tools", origin_at_base=True)
+
+
+def build_wire_tool():
+    """A spool of insulated wire on a pistol frame, with strippers in the jaw."""
+    box(0.07, 0.1, 0.2, y=0.06, z=0.5, material="plastic_black")
+    box(0.1, 0.22, 0.1, z=0.66, material="wire_red")
+    # The spool, wound in visible turns
+    cyl(0.1, 0.06, x=0.09, z=0.66, material="plastic_black", verts=14,
+        rot=(0, math.pi / 2, 0))
+    for i in range(4):
+        cyl(0.09 - i * 0.018, 0.04, x=0.1, z=0.66, material="copper", verts=14,
+            rot=(0, math.pi / 2, 0))
+    # Jaw out the front: two stripper blades
+    for sz in (-1, 1):
+        box(0.03, 0.16, 0.02, y=-0.2, z=0.66 + sz * 0.03,
+            rot=(sz * 0.12, 0, 0), material="steel_worn")
+    # A run of wire trailing out of the jaw
+    for i in range(4):
+        box(0.015, 0.09, 0.015, y=-0.3 - i * 0.06,
+            z=0.66 - i * 0.04, rot=(0.4, 0, 0), material="wire_red")
+    box(0.04, 0.05, 0.02, y=0.0, z=0.56, material="metal_dark")
+    export("wire_tool", "tools", origin_at_base=True)
+
+
 def build_bow():
     """Recurve limbs built from three shortening segments each, a bound
     riser and a nocked arrow, so the silhouette reads as a hunting bow
@@ -663,6 +1028,380 @@ def build_storage_box():
 def build_large_box():
     _crate(1.4, 0.8, 1.0, "wood_dark", "metal_dark")
     export("large_box", "deployables", origin_at_base=True)
+
+
+def _recycler(w, d, h, body, trim, hopper_material, tier):
+    """Shared recycler shell: a hopper you drop things into, a drum that turns
+    them over, and an output chute. The tier shows in what it is built from
+    and in how much machinery is bolted to the outside of it."""
+    box(w, d, h * 0.82, z=h * 0.41, material=body)
+    # Angled hopper mouth on top
+    box(w * 0.9, d * 0.82, h * 0.16, z=h * 0.9, material=hopper_material)
+    box(w * 0.74, d * 0.66, h * 0.1, z=h * 0.97, material="metal_dark")
+    # Output chute at the front, where the fragments come out
+    box(w * 0.5, d * 0.16, h * 0.2, y=-d / 2.0 - 0.04, z=h * 0.22,
+        material="metal_dark")
+    box(w * 0.44, d * 0.1, h * 0.04, y=-d / 2.0 - 0.09, z=h * 0.14,
+        material=trim)
+    # Corner ribs
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            box(0.07, 0.07, h * 0.8, x=sx * (w / 2.0 - 0.04),
+                y=sy * (d / 2.0 - 0.04), z=h * 0.4, material=trim)
+    if tier >= 1:
+        # A motor and a belt drive: the reason it wants electricity
+        cyl(h * 0.13, w * 0.16, x=w / 2.0 - 0.02, z=h * 0.5,
+            material="metal_dark", verts=10, rot=(0, math.pi / 2, 0))
+        box(0.03, d * 0.5, h * 0.3, x=w / 2.0 - 0.02, z=h * 0.5,
+            material="char")
+        box(0.14, 0.1, 0.1, x=-w / 2.0 + 0.06, y=-d / 2.0 + 0.02, z=h * 0.66,
+            material="led_green")
+    if tier >= 2:
+        # Sorting bank and a glass inspection port
+        for i in range(3):
+            box(w * 0.2, 0.05, h * 0.22, x=-w * 0.28 + i * w * 0.28,
+                y=-d / 2.0 - 0.03, z=h * 0.56, material="glass")
+        box(w * 0.86, d * 0.2, h * 0.1, z=h * 1.03, material="metal")
+        cyl(0.05, h * 0.34, x=-w / 2.0 + 0.1, y=d / 2.0 - 0.1, z=h * 1.12,
+            material="copper", verts=8)
+
+
+def build_recycler():
+    """Hand-cranked: a barrel drum, a wooden hopper and a handle you turn."""
+    _recycler(1.0, 0.9, 1.5, "rust", "metal_dark", "wood", tier=0)
+    # The crank, which is the whole story of the tier-0 machine
+    cyl(0.04, 0.4, x=0.56, z=0.85, material="metal_dark", verts=8,
+        rot=(0, math.pi / 2, 0))
+    box(0.06, 0.06, 0.26, x=0.74, z=0.72, material="wood")
+    export("recycler", "deployables", origin_at_base=True)
+
+
+def build_advanced_recycler():
+    _recycler(1.2, 1.0, 1.6, "metal_dark", "metal", "steel_worn", tier=1)
+    export("advanced_recycler", "deployables", origin_at_base=True)
+
+
+def build_hitech_recycler():
+    _recycler(1.4, 1.1, 1.7, "metal", "concrete", "steel_worn", tier=2)
+    export("hitech_recycler", "deployables", origin_at_base=True)
+
+
+# ==========================================================================
+# ELECTRICAL DEVICES & TRAPS  (origin at base)
+#
+# Sizes match Game.DEVICES, remembering that a Godot size (X, Y, Z) is a
+# Blender box(X, Z, Y) — Blender's Z is height and its -Y is Godot's +Z.
+#
+# Two devices deliberately model only their static half: the wind turbine's
+# blades and every turret's barrel are spun and aimed at runtime by
+# device.gd, so the model stops where the moving part starts.
+# ==========================================================================
+
+def _status_lamp(x, y, z, size=0.05):
+    """The little light that says whether the circuit is feeding this thing.
+    Modelled green; device.gd recolours the real light beside it."""
+    box(size, size * 0.5, size, x=x, y=y, z=z, material="led_green")
+
+
+def build_generator():
+    """Engine block, fuel tank and an exhaust that has been running hot."""
+    box(1.24, 0.84, 0.5, z=0.3, material="metal_dark")
+    # Engine block and its cooling fins
+    box(0.7, 0.6, 0.34, x=-0.2, z=0.68, material="steel_worn")
+    for i in range(5):
+        box(0.62, 0.04, 0.28, x=-0.2, y=-0.24 + i * 0.12, z=0.7,
+            material="metal_dark")
+    # Fuel tank
+    cyl(0.19, 0.6, x=0.42, z=0.7, material="rust", verts=12,
+        rot=(0, math.pi / 2, 0))
+    cyl(0.06, 0.08, x=0.42, z=0.92, material="metal_dark", verts=8)
+    # Exhaust, charred at the tip
+    cyl(0.05, 0.4, x=-0.5, y=0.3, z=0.96, material="metal_dark", verts=8)
+    cyl(0.06, 0.1, x=-0.5, y=0.3, z=1.18, material="char", verts=8)
+    # Pull-start and terminals
+    cyl(0.11, 0.06, x=0.02, y=-0.44, z=0.68, material="metal", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    for sx in (-1, 1):
+        box(0.06, 0.06, 0.08, x=sx * 0.2, y=-0.44, z=0.4, material="copper")
+    # Skid feet
+    for sx in (-1, 1):
+        box(0.12, 0.8, 0.1, x=sx * 0.54, z=0.05, material="metal_dark")
+    _status_lamp(0.0, -0.44, 0.52)
+    export("generator", "devices", origin_at_base=True)
+
+
+def build_solar_panel():
+    """A cell array on a shallow tilted frame. Flat, because it has to fit
+    inside a 20 cm tall box and still read as a panel from standing height."""
+    tilt = 0.2
+    box(1.5, 0.9, 0.05, z=0.13, rot=(tilt, 0, 0), material="solar")
+    # Cell grid, slightly proud of the backing
+    for i in range(4):
+        for j in range(2):
+            box(0.33, 0.38, 0.02, x=-0.55 + i * 0.37, y=-0.21 + j * 0.42,
+                z=0.16 + (-0.21 + j * 0.42) * -tilt, rot=(tilt, 0, 0),
+                material="solar_cell")
+    # Aluminium edge frame
+    for sx in (-1, 1):
+        box(0.05, 0.92, 0.07, x=sx * 0.75, z=0.13, rot=(tilt, 0, 0),
+            material="metal")
+    # Mounting rails and a junction box underneath
+    for sy in (-1, 1):
+        box(1.2, 0.07, 0.07, y=sy * 0.34, z=0.04, material="metal_dark")
+    box(0.2, 0.14, 0.08, x=0.5, y=0.3, z=0.05, material="plastic_black")
+    export("solar_panel", "devices", origin_at_base=True)
+
+
+def build_wind_turbine():
+    """Mast, guy wires and nacelle only — device.gd spins the blades, so the
+    model stops at the hub the blades bolt onto."""
+    cyl(0.11, 3.4, z=1.7, material="metal", verts=10)
+    # Taper: a wider collar at the foot
+    cyl(0.17, 0.3, z=0.15, material="metal_dark", verts=10)
+    box(0.6, 0.6, 0.08, z=0.04, material="concrete")
+    # Weld bands up the mast
+    for i in range(4):
+        cyl(0.125, 0.05, z=0.6 + i * 0.7, material="steel_worn", verts=10)
+    # Guy wires out to three ground anchors
+    for i in range(3):
+        a = i * math.tau / 3.0
+        box(0.02, 0.02, 1.5, x=math.cos(a) * 0.35, y=math.sin(a) * 0.35,
+            z=0.85, rot=(math.sin(a) * -0.42, math.cos(a) * 0.42, 0),
+            material="steel_worn")
+        box(0.1, 0.1, 0.1, x=math.cos(a) * 0.62, y=math.sin(a) * 0.62,
+            z=0.05, material="metal_dark")
+    # Nacelle and the hub the blades turn on
+    box(0.24, 0.5, 0.24, z=3.5, material="plastic_white")
+    cone(0.13, 0.05, 0.2, y=-0.32, z=3.5, material="metal_dark", verts=10,
+         rot=(math.pi / 2, 0, 0))
+    # Tail vane, so it reads as something that faces into the wind
+    box(0.02, 0.3, 0.26, y=0.36, z=3.56, material="plastic_white")
+    _status_lamp(0.0, -0.2, 3.66)
+    export("wind_turbine", "devices", origin_at_base=True)
+
+
+def build_battery():
+    """Salvaged cell bank in a crate, with the terminals you clip onto."""
+    box(0.84, 0.64, 0.5, z=0.3, material="plastic_black")
+    box(0.86, 0.66, 0.07, z=0.58, material="metal_dark")
+    # Cells visible through the open top
+    for i in range(3):
+        cyl(0.11, 0.42, x=-0.26 + i * 0.26, z=0.33, material="rust", verts=10)
+    # Terminals, one copper and one worn
+    for sx, m in ((-1, "copper"), (1, "steel_worn")):
+        cyl(0.05, 0.1, x=sx * 0.24, y=-0.2, z=0.66, material=m, verts=8)
+    # Charge gauge on the front
+    box(0.34, 0.04, 0.1, y=-0.33, z=0.36, material="metal_dark")
+    box(0.2, 0.03, 0.05, x=-0.05, y=-0.36, z=0.36, material="led_green")
+    # Carry handles
+    for sx in (-1, 1):
+        box(0.05, 0.16, 0.05, x=sx * 0.43, z=0.44, material="metal_dark")
+    export("battery", "devices", origin_at_base=True)
+
+
+def build_auto_turret():
+    """Tripod and armoured housing. No barrel: device.gd aims that, so the
+    model ends at the mount it swings on."""
+    # Tripod legs splayed off a hub
+    for i in range(3):
+        a = i * math.tau / 3.0
+        box(0.07, 0.07, 0.62, x=math.cos(a) * 0.17, y=math.sin(a) * 0.17,
+            z=0.3, rot=(math.sin(a) * 0.32, math.cos(a) * -0.32, 0),
+            material="metal_dark")
+        box(0.11, 0.11, 0.04, x=math.cos(a) * 0.28, y=math.sin(a) * 0.28,
+            z=0.02, material="steel_worn")
+    cyl(0.13, 0.12, z=0.64, material="metal_dark", verts=10)
+    # Armoured housing
+    box(0.4, 0.34, 0.34, z=0.88, material="gunmetal")
+    box(0.44, 0.06, 0.3, y=-0.18, z=0.88, material="steel_worn")
+    # Optics behind a glass port, and the ammunition drum on the side
+    box(0.12, 0.04, 0.09, y=-0.22, z=0.95, material="glass")
+    cyl(0.1, 0.14, x=0.24, z=0.9, material="metal_dark", verts=10,
+        rot=(0, math.pi / 2, 0))
+    # Wear on the housing: it has been shot at before
+    wear(0.34, 0.28, y=-0.19, z=0.88, count=5, seed=3, normal="y",
+         material="steel_worn")
+    _status_lamp(-0.16, -0.19, 1.02)
+    export("auto_turret", "devices", origin_at_base=True)
+
+
+def build_shotgun_trap():
+    """A sawn-off barrel in a wall bracket over a tripwire plate."""
+    box(0.34, 0.34, 0.14, z=0.07, material="metal_dark")
+    # Bracket and the breech it clamps
+    box(0.16, 0.3, 0.26, z=0.27, material="wood_dark")
+    cyl(0.055, 0.42, y=-0.12, z=0.34, material="gunmetal", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    cyl(0.075, 0.12, y=0.1, z=0.34, material="steel_worn", verts=10,
+        rot=(math.pi / 2, 0, 0))
+    # Shells in a clip on the side
+    for i in range(3):
+        cyl(0.026, 0.11, x=0.12, y=0.02 + i * 0.06, z=0.2,
+            material="brass", verts=8, rot=(math.pi / 2, 0, 0))
+    # Trigger linkage down to the pressure plate
+    box(0.02, 0.02, 0.2, x=-0.09, y=0.06, z=0.2, material="steel_worn")
+    box(0.26, 0.26, 0.03, z=0.15, material="steel_worn")
+    _status_lamp(0.1, -0.14, 0.44, size=0.04)
+    export("shotgun_trap", "devices", origin_at_base=True)
+
+
+def build_flame_trap():
+    """Fuel bottle, valve and a nozzle with a pilot flame at the tip."""
+    box(0.36, 0.36, 0.1, z=0.05, material="metal_dark")
+    # Fuel bottle
+    cyl(0.13, 0.4, y=0.06, z=0.3, material="rust", verts=12)
+    cyl(0.05, 0.07, y=0.06, z=0.53, material="metal_dark", verts=8)
+    # Valve wheel
+    cyl(0.07, 0.03, y=0.06, z=0.42, material="brass", verts=10,
+        rot=(0, math.pi / 2, 0))
+    # Nozzle out the front, angled slightly down a corridor
+    cyl(0.035, 0.26, y=-0.16, z=0.44, material="gunmetal", verts=8,
+        rot=(math.pi / 2 - 0.16, 0, 0))
+    cone(0.055, 0.03, 0.08, y=-0.28, z=0.42, material="char", verts=8,
+         rot=(math.pi / 2 - 0.16, 0, 0))
+    # Pilot flame
+    cone(0.03, 0.0, 0.09, y=-0.33, z=0.43, material="flame", verts=6,
+         rot=(math.pi / 2 - 0.16, 0, 0))
+    # Feed line from bottle to nozzle
+    box(0.02, 0.16, 0.02, y=-0.06, z=0.46, material="copper")
+    _status_lamp(0.13, -0.1, 0.2, size=0.04)
+    export("flame_trap", "devices", origin_at_base=True)
+
+
+def build_tesla_coil():
+    """Wound secondary on a crate base, topped with a toroid and an arc gap."""
+    box(0.42, 0.42, 0.16, z=0.08, material="wood_dark")
+    box(0.34, 0.34, 0.05, z=0.18, material="plastic_black")
+    # Secondary winding: stacked copper rings up a former
+    cyl(0.09, 1.0, z=0.72, material="plastic_white", verts=12)
+    for i in range(13):
+        cyl(0.105, 0.05, z=0.28 + i * 0.075, material="copper", verts=12)
+    # Toroid and the electrode above it
+    cyl(0.19, 0.09, z=1.28, material="metal", verts=14)
+    cyl(0.02, 0.16, z=1.4, material="steel_worn", verts=6)
+    box(0.05, 0.05, 0.05, z=1.5, material="arc")
+    # Primary coil turns around the base of the former
+    for i in range(3):
+        cyl(0.16 - i * 0.015, 0.03, z=0.26 + i * 0.05, material="copper", verts=14)
+    # Earth strap
+    box(0.03, 0.14, 0.03, y=0.2, z=0.2, material="copper")
+    _status_lamp(0.16, -0.16, 0.24, size=0.045)
+    export("tesla_coil", "devices", origin_at_base=True)
+
+
+def build_alarm():
+    """A bell housing and a strobe on a wall plate."""
+    box(0.3, 0.1, 0.3, z=0.15, material="plastic_black")
+    # Bell dome
+    cyl(0.12, 0.09, y=-0.11, z=0.19, material="medical", verts=14,
+        rot=(math.pi / 2, 0, 0))
+    cyl(0.03, 0.05, y=-0.17, z=0.19, material="metal_dark", verts=8,
+        rot=(math.pi / 2, 0, 0))
+    # Strobe lens under it
+    box(0.1, 0.06, 0.05, y=-0.09, z=0.05, material="led_red")
+    # Mounting screws
+    for sx in (-1, 1):
+        for sz in (0.04, 0.26):
+            box(0.02, 0.03, 0.02, x=sx * 0.12, y=-0.06, z=sz,
+                material="metal_dark")
+    export("alarm", "devices", origin_at_base=True)
+
+
+def build_motion_sensor():
+    """Fresnel lens in a small white housing, aimed slightly down."""
+    box(0.22, 0.14, 0.16, z=0.14, material="plastic_white")
+    # Lens
+    box(0.16, 0.04, 0.1, y=-0.09, z=0.13, rot=(0.2, 0, 0),
+        material="plastic_black")
+    for i in range(3):
+        box(0.15, 0.01, 0.02, y=-0.11, z=0.1 + i * 0.03, rot=(0.2, 0, 0),
+            material="plastic_white")
+    # Wall bracket
+    box(0.06, 0.06, 0.1, z=0.05, material="plastic_white")
+    box(0.14, 0.1, 0.03, z=0.01, material="plastic_black")
+    _status_lamp(0.06, -0.08, 0.2, size=0.03)
+    export("motion_sensor", "devices", origin_at_base=True)
+
+
+def build_smart_switch():
+    """A toggle in a weatherproof box — the thing you flip on your way out."""
+    box(0.26, 0.14, 0.3, z=0.17, material="plastic_white")
+    box(0.2, 0.03, 0.22, y=-0.08, z=0.18, material="plastic_black")
+    # The lever itself, thrown up
+    box(0.05, 0.05, 0.11, y=-0.11, z=0.22, rot=(-0.4, 0, 0),
+        material="orange_paint")
+    # Cable glands top and bottom
+    for sz in (0.03, 0.33):
+        cyl(0.03, 0.05, z=sz, material="metal_dark", verts=8)
+    _status_lamp(0.07, -0.09, 0.09, size=0.035)
+    export("smart_switch", "devices", origin_at_base=True)
+
+
+def build_camera():
+    """Boxy body, lens hood and a wall arm."""
+    box(0.16, 0.34, 0.16, z=0.38, material="plastic_black")
+    # Lens hood and glass
+    cyl(0.07, 0.1, y=-0.21, z=0.38, material="metal_dark", verts=12,
+        rot=(math.pi / 2, 0, 0))
+    cyl(0.055, 0.02, y=-0.26, z=0.38, material="glass", verts=12,
+        rot=(math.pi / 2, 0, 0))
+    # Infrared ring, so it reads as something that sees in the dark
+    for i in range(6):
+        a = i * math.tau / 6.0
+        box(0.02, 0.01, 0.02, x=math.cos(a) * 0.055, y=-0.265,
+            z=0.38 + math.sin(a) * 0.055, material="led_red")
+    # Arm and wall plate
+    box(0.05, 0.05, 0.24, y=0.1, z=0.22, rot=(0.5, 0, 0),
+        material="metal_dark")
+    box(0.14, 0.14, 0.03, y=0.18, z=0.02, material="metal_dark")
+    _status_lamp(0.07, -0.14, 0.47, size=0.03)
+    export("camera", "devices", origin_at_base=True)
+
+
+def build_land_mine():
+    """A pressure plate over a shallow charge, half buried in loose dirt."""
+    cyl(0.18, 0.07, z=0.035, material="olive", verts=12)
+    # Pressure plate with its spider legs
+    cyl(0.11, 0.03, z=0.08, material="metal_dark", verts=10)
+    for i in range(4):
+        a = i * math.tau / 4.0 + 0.4
+        box(0.02, 0.11, 0.015, x=math.cos(a) * 0.11, y=math.sin(a) * 0.11,
+            z=0.075, rot=(0, 0, a), material="steel_worn")
+    # Arming ring, pulled
+    cyl(0.025, 0.012, x=0.14, z=0.08, material="brass", verts=8)
+    # Dirt kicked up around the rim so it reads as buried, not dropped
+    rng = random.Random(21)
+    for i in range(7):
+        a = rng.uniform(0, math.tau)
+        r = rng.uniform(0.16, 0.22)
+        rock(rng.uniform(0.025, 0.05), x=math.cos(a) * r, y=math.sin(a) * r,
+             z=0.02, material="mud", seed=i)
+    export("land_mine", "devices", origin_at_base=True)
+
+
+def build_bear_trap():
+    """Sprung jaws open around a pressure pan, on a staked base plate."""
+    box(0.3, 0.3, 0.03, z=0.015, material="steel_worn")
+    # The two jaws, thrown open and toothed
+    for sy in (-1, 1):
+        box(0.34, 0.05, 0.05, y=sy * 0.15, z=0.11, rot=(sy * -0.9, 0, 0),
+            material="metal_dark")
+        for i in range(5):
+            box(0.025, 0.03, 0.08, x=-0.13 + i * 0.065, y=sy * 0.2, z=0.15,
+                rot=(sy * -0.9, 0, 0), material="steel_worn")
+    # Coil springs either side
+    for sx in (-1, 1):
+        cyl(0.055, 0.05, x=sx * 0.19, z=0.05, material="rust", verts=10,
+            rot=(0, math.pi / 2, 0))
+        box(0.09, 0.03, 0.03, x=sx * 0.24, z=0.05, material="steel_worn")
+    # Pressure pan in the middle
+    box(0.13, 0.13, 0.02, z=0.04, material="metal_dark")
+    # Anchor chain running off one corner
+    for i in range(4):
+        cyl(0.022, 0.012, x=-0.14 + i * -0.05, y=0.16, z=0.02,
+            material="metal_dark", verts=6, rot=(0, math.pi / 2, 0))
+    box(0.05, 0.05, 0.1, x=-0.32, y=0.16, z=0.03, material="metal_dark")
+    export("bear_trap", "devices", origin_at_base=True)
 
 
 # ==========================================================================
@@ -884,6 +1623,71 @@ def build_scientist():
     box(0.05, 0.16, 0.07, x=0.22, y=-0.1, z=shoulder - 0.05, material="metal_dark")
     box(0.03, 0.05, 0.14, x=0.22, y=0.05, z=shoulder - 0.16, material="metal_dark")
     export("scientist", "creatures", origin_at_base=True)
+
+
+def build_rabbit():
+    """Small, crouched, and all ears — the ears are the only part of a rabbit
+    that reads at the distance you first spot one from."""
+    def scut(body_z, head_y, head_z):
+        # The white tail flash you actually see when it bolts
+        rock(0.055, y=-0.19, z=body_z + 0.02, material="hen_feather", seed=3)
+        # Haunches bunched for a spring
+        for sx in (-1, 1):
+            rock(0.075, x=sx * 0.085, y=-0.09, z=body_z - 0.02,
+                 material="rabbit_fur", seed=10 + sx)
+
+    _quadruped("rabbit", body_dims=(0.19, 0.3, 0.16), leg_h=0.1,
+               head_dims=(0.12, 0.13, 0.12), snout_dims=(0.075, 0.08, 0.07),
+               ear_size=0.19, tail=(0.06, 0.045), tail_tilt=0.9,
+               fur="rabbit_fur", fur_dark="rabbit_fur_dark", bands=2,
+               neck=0.3, extra=scut)
+    export("rabbit", "creatures", origin_at_base=True)
+
+
+def build_chicken():
+    """A bird, so it gets its own build rather than the quadruped skeleton:
+    two legs, a plump body, folded wings and a combed head."""
+    body_z = 0.2
+    # Body and the fold of the wings against it
+    box(0.2, 0.3, 0.2, z=body_z, material="hen_feather")
+    box(0.19, 0.2, 0.12, y=-0.02, z=body_z - 0.06, material="hen_feather_dark")
+    for sx in (-1, 1):
+        box(0.04, 0.22, 0.13, x=sx * 0.105, y=-0.01, z=body_z,
+            material="hen_feather")
+        box(0.035, 0.1, 0.06, x=sx * 0.11, y=-0.1, z=body_z - 0.04,
+            material="hen_feather_dark")
+    # Breast
+    rock(0.1, y=0.13, z=body_z - 0.01, material="hen_feather", seed=5)
+
+    # Tail: three fanned feathers, the give-away silhouette
+    for i, ang in enumerate((-0.5, 0.0, 0.5)):
+        box(0.02, 0.06, 0.17, x=ang * 0.09, y=-0.19, z=body_z + 0.11,
+            rot=(-0.7, 0, ang), material="hen_feather_dark")
+
+    # Neck and head
+    neck_z = body_z + 0.14
+    box(0.09, 0.09, 0.14, y=0.11, z=neck_z, material="hen_feather")
+    head_z = neck_z + 0.11
+    box(0.09, 0.1, 0.09, y=0.14, z=head_z, material="hen_feather")
+    # Comb along the crown and the wattle under the beak
+    for i in range(3):
+        box(0.02, 0.03, 0.05, y=0.12 + i * 0.03, z=head_z + 0.06,
+            material="comb")
+    box(0.03, 0.03, 0.05, y=0.17, z=head_z - 0.07, material="comb")
+    # Beak and eyes
+    cone(0.03, 0.0, 0.07, y=0.21, z=head_z, material="beak", verts=6,
+         rot=(-math.pi / 2, 0, 0))
+    for sx in (-1, 1):
+        box(0.015, 0.015, 0.015, x=sx * 0.042, y=0.17, z=head_z + 0.02,
+            material="eye")
+
+    # Two scaly legs with splayed toes
+    for sx in (-1, 1):
+        cyl(0.018, 0.12, x=sx * 0.055, y=0.01, z=0.06, material="beak", verts=6)
+        for toe in (-0.35, 0.0, 0.35):
+            box(0.015, 0.06, 0.012, x=sx * 0.055 + math.sin(toe) * 0.03,
+                y=0.05, z=0.008, rot=(0, 0, toe), material="beak")
+    export("chicken", "creatures", origin_at_base=True)
 
 
 # ==========================================================================
@@ -1183,12 +1987,23 @@ BUILDERS = [
     build_foundation, build_wall, build_doorway, build_window_wall,
     build_ceiling, build_stairs, build_wooden_door, build_tool_cupboard,
     build_stone_foundation, build_stone_wall, build_metal_door,
+    build_triangle_foundation, build_half_wall, build_low_wall,
+    build_pillar, build_roof, build_ladder, build_barricade,
+    build_garage_door,
     build_rock, build_stone_hatchet, build_stone_pickaxe,
     build_metal_hatchet, build_metal_pickaxe, build_drill, build_bow,
     build_torch, build_spear,
+    build_chainsaw, build_jackhammer, build_repair_tool,
+    build_binoculars, build_flashlight, build_wire_tool,
     build_workbench_t1, build_research_table, build_furnace,
     build_storage_box, build_large_box,
+    build_recycler, build_advanced_recycler, build_hitech_recycler,
+    build_generator, build_solar_panel, build_wind_turbine, build_battery,
+    build_auto_turret, build_shotgun_trap, build_flame_trap,
+    build_tesla_coil, build_alarm, build_motion_sensor,
+    build_smart_switch, build_camera, build_land_mine, build_bear_trap,
     build_wolf, build_bear, build_deer, build_boar, build_scientist,
+    build_rabbit, build_chicken,
     build_stone_node, build_metal_node, build_sulfur_node,
     build_c4, build_grenade, build_rocket, build_rocket_launcher,
     build_machete, build_ak47, build_pipe_shotgun, build_pistol,

@@ -1583,6 +1583,7 @@ func _run_tests() -> void:
 	_check(data.has("devices") and data.has("wires"),
 		"the electrical grid is written to the save")
 
+	_test_models(game, world)
 	_test_durability(game, world)
 	_test_new_pieces(game, world, StructureScript)
 	_test_ecosystem(game, world)
@@ -1596,6 +1597,62 @@ func _run_tests() -> void:
 		rf.store_string(_save_backup)
 		rf.close()
 	print("SMOKE TEST DONE")
+
+
+# ==================== MODELS ====================
+
+## Coverage, rather than existence: that every path resolves is already
+## checked further up. What matters here is that nothing the world can put
+## down has been left behind without a model, and that the pieces which move
+## at runtime are still assembled to move.
+func _test_models(game, world) -> void:
+	var Registry = load("res://scripts/model_registry.gd")
+
+	# Everything the world can put down should have a model by now, so a
+	# missing one is worth being told about rather than silently boxed.
+	var unmodelled := []
+	for id in game.BUILDING_TYPES:
+		if not Registry.has_model(id):
+			unmodelled.append(id)
+	_check(unmodelled.is_empty(), "every building piece is modelled %s" % str(unmodelled))
+
+	var devices_unmodelled := []
+	for id in game.DEVICES:
+		if not Registry.has_model(id):
+			devices_unmodelled.append(id)
+	_check(devices_unmodelled.is_empty(),
+		"every device is modelled %s" % str(devices_unmodelled))
+
+	var stations_unmodelled := []
+	for id in game.DEPLOYABLES:
+		# The campfire is procedural on purpose: its fire, light and embers
+		# are generated, not modelled.
+		if id != "campfire" and id != "sleeping_bag" and not Registry.has_model(id):
+			stations_unmodelled.append(id)
+	_check(stations_unmodelled.is_empty(),
+		"every deployable station is modelled %s" % str(stations_unmodelled))
+
+	# A modelled device really does get the model, not the fallback block
+	var rig = world._spawn_device("generator", Vector3(160, 0, 160))
+	var has_mesh := false
+	for c in rig.get_children():
+		if c is Node3D and not (c is MeshInstance3D) and not (c is CollisionShape3D) \
+				and not (c is Light3D):
+			has_mesh = true
+	_check(has_mesh, "a deployed generator is built from its model")
+	world.remove_device(rig)
+
+	# The turbine keeps its procedural blades, because they have to turn
+	var mill = world._spawn_device("wind_turbine", Vector3(164, 0, 160))
+	_check(mill._spinner != null and mill._spinner.get_child_count() == 3,
+		"the wind turbine still spins three blades of its own")
+	world.remove_device(mill)
+
+	# And a turret's model hangs off the mount that aims it
+	var gun = world._spawn_device("auto_turret", Vector3(168, 0, 160))
+	_check(gun._head != null and gun._head.get_child_count() > 0,
+		"a turret's model sits on the mount that swings it")
+	world.remove_device(gun)
 
 
 # ==================== TOOL DURABILITY ====================
