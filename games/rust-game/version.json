@@ -1,6 +1,6 @@
 {
   "version": "1.1.0",
-  "buildNumber": 12,
+  "buildNumber": 13,
   "apkUrl": "https://rashid-wep.vercel.app/apks/rust-game-v1.1.0.apk",
   "changelog": "Rust Survival v1.1.0: 5-tier building (Twig to Armored) with doors & stability system, 30+ craftable items, NPCs, full day/night cycle, autosave, PWA offline support, network-first updates",
   "releaseDate": "2026-07-31"
