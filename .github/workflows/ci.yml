@@ -54,6 +54,8 @@ jobs:
 
   flutter-test:
     name: 🎯 Maarifah App Tests
+    # Only run when the Maarifah app actually exists in the repo (folder not yet committed)
+    if: ${{ hashFiles('apps/maarifah-app/pubspec.yaml') != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
