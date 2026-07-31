@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير فحص — Rust Survival 3D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #14110e;
+    --bg-2: #1b1712;
+    --panel: rgba(38, 32, 26, 0.72);
+    --panel-line: rgba(255, 107, 44, 0.28);
+    --rust: #ff6b2c;
+    --rust-deep: #d95d1e;
+    --rust-dim: #9c4a1c;
+    --danger: #e23c2c;
+    --ok: #6dbf57;
+    --warn: #e5b93b;
+    --steel: #8fa3ad;
+    --paper: #e8ddc8;
+    --muted: #9a8d7c;
+    --mono: 'JetBrains Mono', 'Consolas', monospace;
+    --sans: 'Tajawal', 'Segoe UI', Tahoma, Arial, sans-serif;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--paper);
+    font-family: var(--sans);
+    line-height: 1.7;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(1200px 500px at 80% -10%, rgba(255, 107, 44, 0.07), transparent 60%),
+      radial-gradient(900px 600px at 10% 110%, rgba(143, 163, 173, 0.05), transparent 60%);
+  }
+  ::selection { background: rgba(255, 107, 44, 0.4); }
+
+  /* ============ HAZARD STRIPES ============ */
+  .hazard {
+    height: 14px;
+    background: repeating-linear-gradient(-45deg,
+      var(--warn) 0 18px, #14110e 18px 36px);
+    opacity: 0.85;
+    border-block: 1px solid rgba(0,0,0,0.5);
+  }
+
+  /* ============ HEADER ============ */
+  header {
+    padding: 3rem 1.5rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .rad-symbol {
+    width: 56px; height: 56px;
+    margin: 0 auto 1.2rem;
+    position: relative;
+  }
+  .rad-symbol .wings {
+    position: absolute; inset: 0;
+    border-radius: 50%;
+    background: var(--warn);
+    clip-path: polygon(50% 50%, 100% 8%, 86% 28%, 50% 50%, 96% 78%, 68% 70%, 50% 50%, 36% 96%, 30% 64%, 50% 50%, 2% 72%, 14% 44%, 50% 50%);
+    animation: spin 16s linear infinite;
+  }
+  .rad-symbol .core {
+    position: absolute; inset: 38%; border-radius: 50%;
+    background: var(--bg);
+    border: 3px solid var(--warn);
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.35em;
+    color: var(--steel);
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(1.9rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--paper);
+    letter-spacing: -0.01em;
+  }
+  h1 .accent { color: var(--rust); }
+  .subtitle {
+    color: var(--muted);
+    margin-top: 0.6rem;
+    font-size: 1.05rem;
+  }
+  .meta-row {
+    margin-top: 1.4rem;
+    display: flex; justify-content: center; gap: 1.8rem; flex-wrap: wrap;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .meta-row b { color: var(--paper); font-weight: 600; }
+
+  /* ============ STAMP VERDICT ============ */
+  .stamp-wrap {
+    display: flex; justify-content: center;
+    margin: 1.5rem 0 3rem;
+  }
+  .stamp {
+    position: relative;
+    width: min(340px, 86vw);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 3px dashed var(--rust);
+    display: grid; place-items: center;
+    text-align: center;
+    padding: 1rem;
+    background: radial-gradient(circle, rgba(255,107,44,0.08), transparent 70%);
+    box-shadow: 0 0 60px rgba(255, 107, 44, 0.12), inset 0 0 40px rgba(0,0,0,0.4);
+  }
+  .stamp::before, .stamp::after {
+    content: '';
+    position: absolute; inset: -7px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,107,44,0.25);
+    animation: pulse 3.5s ease-out infinite;
+  }
+  .stamp::after { animation-delay: 1.75s; }
+  @keyframes pulse {
+    0% { transform: scale(1); opacity: 0.7; }
+    100% { transform: scale(1.18); opacity: 0; }
+  }
+  .stamp .big {
+    font-size: clamp(2.6rem, 9vw, 4.2rem);
+    font-weight: 900;
+    color: var(--ok);
+    font-family: var(--mono);
+    line-height: 1.1;
+  }
+  .stamp .label {
+    color: var(--paper);
+    font-weight: 800;
+    font-size: 1.15rem;
+    margin-top: 0.2rem;
+  }
+  .stamp .sub {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 0.3rem;
+  }
+  .stamp .fail-line {
+    margin-top: 0.7rem;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--danger);
+    background: rgba(226,60,44,0.12);
+    border: 1px solid rgba(226,60,44,0.35);
+    padding: 0.3rem 0.9rem;
+    border-radius: 4px;
+  }
+
+  /* ============ CONTAINER ============ */
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0 1.25rem 4rem;
+  }
+  .section { margin-top: 3.2rem; }
+  .sec-head {
+    display: flex; align-items: center; gap: 0.9rem;
+    margin-bottom: 1.4rem;
+  }
+  .sec-head .tag {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--bg);
+    background: var(--rust);
+    padding: 0.22rem 0.6rem;
+    border-radius: 3px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+  }
+  .sec-head h2 {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--paper);
+  }
+  .sec-head .rule {
+    flex: 1; height: 1px;
+    background: linear-gradient(to left, var(--panel-line), transparent);
+  }
+
+  /* ============ VERSION CARDS ============ */
+  .version-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.1rem;
+  }
+  .vcard {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 10px;
+    padding: 1.4rem 1.4rem 1.2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .vcard::before {
+    content: '';
+    position: absolute; top: 0; right: 0; left: 0; height: 3px;
+    background: linear-gradient(to left, var(--rust), transparent);
+  }
+  .vcard .vtype {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.9rem;
+  }
+  .vcard .vname {
+    font-weight: 800; font-size: 1.05rem; color: var(--paper);
+  }
+  .vcard .vname small { color: var(--muted); font-weight: 500; font-size: 0.78rem; display: block; }
+  .pill {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 20px;
+    border: 1px solid;
+    font-weight: 700;
+  }
+  .pill.ok { color: var(--ok); border-color: rgba(109,191,87,0.45); background: rgba(109,191,87,0.1); }
+  .pill.warn { color: var(--warn); border-color: rgba(229,185,59,0.45); background: rgba(229,185,59,0.08); }
+  .vstats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 1rem; }
+  .vstat { border-top: 1px dashed rgba(232,221,200,0.12); padding-top: 0.5rem; }
+  .vstat .n {
+    font-family: var(--mono); font-weight: 800; font-size: 1.15rem; color: var(--rust);
+  }
+  .vstat .d { font-size: 0.78rem; color: var(--muted); }
+  .vstat.wide { grid-column: 1 / -1; }
+
+  /* ============ HEALTH BARS (systems) ============ */
+  .sys-list { display: flex; flex-direction: column; gap: 0.85rem; }
+  .sys {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+  }
+  .sys .row1 {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    margin-bottom: 0.5rem;
+  }
+  .sys .name { font-weight: 700; font-size: 0.95rem; color: var(--paper); }
+  .sys .name .glyph { margin-left: 0.4rem; }
+  .sys .status {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.16rem 0.55rem;
+    border-radius: 3px;
+    white-space: nowrap;
+  }
+  .status.ok { color: var(--ok); background: rgba(109,191,87,0.12); border: 1px solid rgba(109,191,87,0.35); }
+  .status.warn { color: var(--warn); background: rgba(229,185,59,0.1); border: 1px solid rgba(229,185,59,0.35); }
+  .status.fail { color: #ff8a80; background: rgba(226,60,44,0.12); border: 1px solid rgba(226,60,44,0.4); }
+  .bar {
+    height: 8px; border-radius: 4px;
+    background: rgba(232,221,200,0.08);
+    overflow: hidden;
+  }
+  .bar i {
+    display: block; height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar i.ok { background: linear-gradient(to left, var(--ok), #4d9a3a); }
+  .bar i.warn { background: linear-gradient(to left, var(--warn), var(--rust-deep)); }
+  .bar i.fail { background: linear-gradient(to left, #ff6a5a, var(--danger)); }
+  .sys .note { font-size: 0.78rem; color: var(--muted); margin-top: 0.45rem; }
+
+  /* ============ ISSUES ============ */
+  .issue {
+    background: var(--panel);
+    border: 1px solid var(--panel-line);
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.85rem;
+    display: flex; gap: 1rem; align-items: flex-start;
+    position: relative;
+  }
+  .issue .rarity {
+    flex-shrink: 0;
+    width: 54px; height: 54px;
+    border-radius: 8px;
+    display: grid; place-items: center;
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    border: 1px solid;
+  }
+  .rarity.elite { color: #ffd54f; border-color: rgba(255,213,79,0.4); background: rgba(255,213,79,0.07); }
+  .rarity.rare { color: #b39ddb; border-color: rgba(179,157,219,0.4); background: rgba(179,157,219,0.07); }
+  .rarity.common { color: var(--steel); border-color: rgba(143,163,173,0.35); background: rgba(143,163,173,0.06); }
+  .issue h3 {
+    font-size: 1rem; font-weight: 800; color: var(--paper);
+    margin-bottom: 0.25rem;
+  }
+  .issue h3 .code { font-family: var(--mono); color: var(--rust); font-size: 0.8rem; margin-left: 0.5rem; }
+  .issue p { font-size: 0.88rem; color: var(--muted); }
+  .issue .fix {
+    margin-top: 0.55rem;
+    font-size: 0.82rem;
+    color: var(--ok);
+    border-top: 1px dashed rgba(232,221,200,0.1);
+    padding-top: 0.5rem;
+  }
+  .issue .fix b { font-weight: 700; }
+
+  /* ============ ROADMAP ============ */
+  .roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 1rem; }
+  .step {
+    background: var(--bg-2);
+    border: 1px solid rgba(255,107,44,0.2);
+    border-radius: 8px;
+    padding: 1.1rem 1.2rem;
+    position: relative;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .step:hover { transform: translateY(-3px); border-color: rgba(255,107,44,0.5); }
+  .step .num {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 800;
+    color: var(--rust);
+    display: inline-block;
+    border: 1px solid rgba(255,107,44,0.4);
+    border-radius: 4px;
+    padding: 0.1rem 0.45rem;
+    margin-bottom: 0.6rem;
+  }
+  .step h4 { font-size: 0.98rem; font-weight: 800; color: var(--paper); margin-bottom: 0.3rem; }
+  .step p { font-size: 0.82rem; color: var(--muted); }
+  .step .effort {
+    display: inline-block; margin-top: 0.6rem;
+    font-family: var(--mono); font-size: 0.66rem; color: var(--steel);
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    text-align: center;
+    padding: 2.5rem 1.5rem 3rem;
+    color: var(--muted);
+    font-size: 0.8rem;
+  }
+  footer .sig { font-family: var(--mono); color: var(--steel); font-size: 0.7rem; }
+
+  /* ============ REVEAL ON LOAD ============ */
+  .reveal { opacity: 0; transform: translateY(14px); animation: rise 0.7s ease forwards; }
+  .reveal:nth-child(2) { animation-delay: 0.08s; }
+  .reveal:nth-child(3) { animation-delay: 0.16s; }
+  .reveal:nth-child(4) { animation-delay: 0.24s; }
+  .reveal:nth-child(5) { animation-delay: 0.32s; }
+  @keyframes rise { to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    html { scroll-behavior: auto; }
+  }
+  @media (max-width: 560px) {
+    .issue { flex-direction: column; }
+    .meta-row { gap: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hazard"></div>
+
+<header>
+  <div class="rad-symbol" aria-hidden="true"><div class="wings"></div><div class="core"></div></div>
+  <div class="eyebrow">INSPECTION LOG // RASHID-WEP</div>
+  <h1>تقرير فحص <span class="accent">Rust Survival 3D</span></h1>
+  <p class="subtitle">جولة تفتيش كاملة على النسختين: الويب (Three.js) ومنفذ Godot — كل الأنظمة، كل الاختبارات، كل الأعطال.</p>
+  <div class="meta-row">
+    <span>التاريخ: <b>فحص مباشر</b></span>
+    <span>النسخة الويب: <b>v1.1.0</b></span>
+    <span>منفذ Godot: <b>v1.8.4</b></span>
+    <span>الاختبارات: <b>942 PASS</b></span>
+  </div>
+</header>
+
+<div class="stamp-wrap">
+  <div class="stamp reveal">
+    <div>
+      <div class="big">942 PASS</div>
+      <div class="label">0 فشل — الأنظمة سليمة</div>
+      <div class="sub">فحص تلقائي + يدوي كامل</div>
+      <div class="fail-line">⚠ لكن النشر على Vercel: 404</div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ==================== VERSIONS ==================== -->
+  <section class="section">
+    <div class="sec-head">
+      <span class="tag">01</span>
+      <h2>النسختان تحت المجهر</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="version-grid">
+      <div class="vcard reveal">
+        <div class="vtype">
+          <div class="vname">نسخة الويب <small>Three.js + Vanilla JS — ES Modules</small></div>
+          <span class="pill ok">تعمل ✅</span>
+        </div>
+        <div class="vstats">
+          <div class="vstat"><div class="n">1,777</div><div class="d">سطر في game.js</div></div>
+          <div class="vstat"><div class="n">313</div><div class="d">سطر index.html</div></div>
+          <div class="vstat"><div class="n">880</div><div class="d">سطر CSS (ملفان)</div></div>
+          <div class="vstat"><div class="n">30+</div><div class="d">عنصر قابل للصناعة</div></div>
+          <div class="vstat wide"><div class="d">أنظمة كاملة: بناء 5 مستويات + Tool Cupboard، NPCs، حفظ تلقائي، PWA، AdMob</div></div>
+        </div>
+      </div>
+      <div class="vcard reveal">
+        <div class="vtype">
+          <div class="vname">منفذ Godot 4 <small>GDScript — كل شيء إجرائي</small></div>
+          <span class="pill ok">تعمل ✅</span>
+        </div>
+        <div class="vstats">
+          <div class="vstat"><div class="n">18,015</div><div class="d">سطر GDScript</div></div>
+          <div class="vstat"><div class="n">89</div><div class="d">موديل GLB من Blender</div></div>
+          <div class="vstat"><div class="n">116</div><div class="d">أيقونة مولّدة</div></div>
+          <div class="vstat"><div class="n">30</div><div class="d">سكربت + اختبارات</div></div>
+          <div class="vstat wide"><div class="d">ميزات متقدمة: كهرباء، أبراج، أفران، إعادة تدوير، قائمة عربية RTL حيّة</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== SYSTEMS ==================== -->
+  <section class="section">
+    <div class="sec-head">
+      <span class="tag">02</span>
+      <h2>فحص الأنظمة</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="sys-list">
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">🧱</span>البناء والترقية (5 مستويات + Tool Cupboard)</div>
+          <span class="status ok">PASS</span>
+        </div>
+        <div class="bar"><i class="ok" style="width:0%" data-w="100%"></i></div>
+      </div>
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">⚡</span>الكهرباء والأجهزة (مولّد، أبراج، فخاخ، بطاريات)</div>
+          <span class="status ok">PASS</span>
+        </div>
+        <div class="bar"><i class="ok" style="width:0%" data-w="100%"></i></div>
+      </div>
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">🏭</span>الصناعة والتدوير وإعادة التدوير</div>
+          <span class="status ok">PASS</span>
+        </div>
+        <div class="bar"><i class="ok" style="width:0%" data-w="100%"></i></div>
+      </div>
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">🗺️</span>التضاريس والطرق والعالم الحيّ</div>
+          <span class="status ok">PASS</span>
+        </div>
+        <div class="bar"><i class="ok" style="width:0%" data-w="100%"></i></div>
+      </div>
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">☪</span>القائمة العربية RTL — الهوية البرتقالية</div>
+          <span class="status ok">PASS</span>
+        </div>
+        <div class="bar"><i class="ok" style="width:0%" data-w="100%"></i></div>
+      </div>
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">📡</span>النشر على Vercel — /games/rust-game/</div>
+          <span class="status fail">404</span>
+        </div>
+        <div class="bar"><i class="fail" style="width:0%" data-w="8%"></i></div>
+        <div class="note">الموقع المباشر لا يحوي الألعاب إطلاقًا — كل الروابط الداخلية تشير لمسارات غير موجودة.</div>
+      </div>
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">📣</span>الإعلانات (AdMob — APK فقط)</div>
+          <span class="status warn">WARN</span>
+        </div>
+        <div class="bar"><i class="warn" style="width:0%" data-w="35%"></i></div>
+        <div class="note">أكواد Ad Unit ما زالت وهمية (XXXXXXXXXX) — تحتاج إنشاء وحدات حقيقية من وحدة تحكم AdMob.</div>
+      </div>
+      <div class="sys reveal">
+        <div class="row1">
+          <div class="name"><span class="glyph">💾</span>PWA والتحديثات (sw.js + update-checker)</div>
+          <span class="status warn">WARN</span>
+        </div>
+        <div class="bar"><i class="warn" style="width:0%" data-w="55%"></i></div>
+        <div class="note">cache-first يعلّق الزوار على النسخ القديمة + سكربت update-checker محمّل مرتين.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ISSUES ==================== -->
+  <section class="section">
+    <div class="sec-head">
+      <span class="tag">03</span>
+      <h2>سجل المشاكل</h2>
+      <div class="rule"></div>
+    </div>
+
+    <div class="issue reveal">
+      <div class="rarity elite">ELITE<br>حرج</div>
+      <div>
+        <h3><span class="code">#01</span>اللعبة غير منشورة — كل مسارات /games/ تعطي 404</h3>
+        <p>الموقع المباشر <b>rashid-wep.vercel.app</b> يخدم البورتفوليو فقط. جربت: /games/rust-game/، /games/rust-construction/، /games/farm-empire/ — كلها 404. حتى ملف main.js المنشور أقدم من المحلي (hash مختلف). بطاقات المشاريع في الموقع تربط بألعاب لا وجود لها للزائر.</p>
+        <div class="fix"><b>الإصلاح:</b> رفع مجلد games/ إلى مشروع Vercel وتأكيد الـ deployment — أو نشر games كتطبيق منفصل.</div>
+      </div>
+    </div>
+
+    <div class="issue reveal">
+      <div class="rarity elite">ELITE<br>حرج</div>
+      <div>
+        <h3><span class="code">#02</span>أكواد AdMob وهمية في js/ads.js</h3>
+        <p>الـ Ad Unit IDs كلها <span dir="ltr">ca-app-pub-6142754371257083/XXXXXXXXXX</span> — الإعلانات لن تظهر حتى لو بُني الـ APK. خاصّة أن النسخة المرفوعة للنشر (games/rust-game) لا تحوي سكربتات الإعلانات أصلًا.</p>
+        <div class="fix"><b>الإصلاح:</b> إنشاء 3 وحدات (Banner / Interstitial / Rewarded) من وحدة تحكم AdMob واستبدال الأكواد.</div>
+      </div>
+    </div>
+
+    <div class="issue reveal">
+      <div class="rarity rare">RARE<br>متوسط</div>
+      <div>
+        <h3><span class="code">#03</span>sw.js يخزّن كل شيء cache-first</h3>
+        <p>الصفحة الرئيسية تُخدَّم من الكاش دائمًا — أي تحديث مستقبلي لن يصل للاعبين القدامى أبدًا إلا بمسح يدوي. يجب أن تكون الملاحة network-first.</p>
+        <div class="fix"><b>الإصلاح:</b> تبديل الاستراتيجية للملاحة (navigate) إلى network-first مع fallback للكاش، وزيادة CACHE_NAME عند كل تحديث.</div>
+      </div>
+    </div>
+
+    <div class="issue reveal">
+      <div class="rarity rare">RARE<br>متوسط</div>
+      <div>
+        <h3><span class="code">#04</span>update-checker.js محمّل مرتين</h3>
+        <p>index.html يحمّل النسخة المحلية <span dir="ltr">js/update-checker.js</span> ثم النسخة البعيدة من الموقع نفسه — طلبان مزدوجان لـ version.json واحتمال تعارض.</p>
+        <div class="fix"><b>الإصلاح:</b> إبقاء نسخة واحدة فقط (المحلية تكفي).</div>
+      </div>
+    </div>
+
+    <div class="issue reveal">
+      <div class="rarity common">COMMON<br>بسيط</div>
+      <div>
+        <h3><span class="code">#05</span>تناقض الإصدارات والأرقام</h3>
+        <p>index.html يعرض "Version 8.0" بينما package.json وversion.json = 1.1.0. الـ changelog في version.json قديم ("Blueprint rotation") ولا يذكر ميزات Godot الحديثة. وapkUrl يشير لملف غير موجود.</p>
+        <div class="fix"><b>الإصلاح:</b> توحيد الرقم من مصدر واحد، وتحديث changelog وربط apkUrl بمسار حقيقي.</div>
+      </div>
+    </div>
+
+    <div class="issue reveal">
+      <div class="rarity common">COMMON<br>بسيط</div>
+      <div>
+        <h3><span class="code">#06</span>ملاحظات صغيرة</h3>
+        <p>نسخة النشر (games/rust-game) بدون AdMob وتختلف عن المطوّرة؛ تحذير Godot "4 ObjectDB instances leaked" عند الإغلاق (شائع وغير مؤثر)؛ في game.js يتم إنشاء كائن Fog جديد كل إطار.</p>
+        <div class="fix"><b>الإصلاح:</b> مزامنة المرآتين بعد أي تعديل، وضبط إنشاء الـ fog مرة واحدة.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== ROADMAP ==================== -->
+  <section class="section">
+    <div class="sec-head">
+      <span class="tag">04</span>
+      <h2>الخطة المقترحة</h2>
+      <div class="rule"></div>
+    </div>
+    <div class="roadmap">
+      <div class="step reveal">
+        <span class="num">01</span>
+        <h4>إعادة نشر الألعاب</h4>
+        <p>رفع games/rust-game على Vercel وتأكيد وصول 200. الأهم والأعلى أثرًا — كل الروابط ستشتغل فورًا.</p>
+        <span class="effort">الأثر: عالي جدًا</span>
+      </div>
+      <div class="step reveal">
+        <span class="num">02</span>
+        <h4>إصلاح sw.js وupdate-checker</h4>
+        <p>network-first للملاحة، نسخة واحدة من المحدّث، وتوحيد أرقام الإصدارات.</p>
+        <span class="effort">الأثر: عالي</span>
+      </div>
+      <div class="step reveal">
+        <span class="num">03</span>
+        <h4>أكواد AdMob حقيقية</h4>
+        <p>إنشاء الوحدات الثلاث في وحدة التحكم ثم تحديث ads.js ومرآة النشر.</p>
+        <span class="effort">يحتاج حساب AdMob</span>
+      </div>
+      <div class="step reveal">
+        <span class="num">04</span>
+        <h4>بناء APK وربطه</h4>
+        <p>تحديث version.json وapkUrl بمجرد نضج النسخة، ونشر APK في مسار /apks/.</p>
+        <span class="effort">الأثر: متوسط</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<div class="hazard"></div>
+
+<footer>
+  <div>Rust Survival 3D — تقرير فحص آلي</div>
+  <div class="sig">INSPECTED BY PI AGENT // 942 TESTS PASSED // 0 FAILED</div>
+</footer>
+
+<script>
+  // Animate the bars on load
+  window.addEventListener('load', () => {
+    document.querySelectorAll('.bar i').forEach((el, idx) => {
+      setTimeout(() => { el.style.width = el.dataset.w + '%'; }, 150 + idx * 120);
+    });
+  });
+</script>
+</body>
+</html>

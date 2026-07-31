@@ -1466,7 +1466,12 @@ try {
         sun.position.set(Math.cos(angle) * 100, Math.sin(angle) * 100, 20);
         sun.intensity = Math.max(0, Math.sin(angle) * 1.5);
         ambientLight.intensity = Math.max(0.1, Math.sin(angle) * 0.4);
-        scene.fog = new THREE.FogExp2(dayProgress > 0.5 && dayProgress < 0.9 ? 0x050510 : 0x87ceeb, 0.01);
+        // Day/Night fog: reuse the existing FogExp2 object, only update color when it changes
+        const fogNight = dayProgress > 0.5 && dayProgress < 0.9;
+        const fogTarget = fogNight ? 0x050510 : 0x87ceeb;
+        if (scene.fog.color.getHex() !== fogTarget) {
+            scene.fog.color.setHex(fogTarget);
+        }
 
         const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
         if (pointerControls.isLocked || isTouch) {

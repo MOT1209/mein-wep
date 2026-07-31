@@ -1,5 +1,5 @@
 // Rust Game Service Worker
-const CACHE_NAME = 'rust-game-v1';
+const CACHE_NAME = 'rust-game-v2';
 const STATIC_ASSETS = [
     '/games/rust-game/',
     '/games/rust-game/index.html',
@@ -36,25 +36,21 @@ self.addEventListener('activate', (event) => {
 
 // Fetch Event
 self.addEventListener('fetch', (event) => {
-    event.respondWith(
-        caches.match(event.request).then(response => {
-            if (response) {
-                return response;
-            }
-            return fetch(event.request)
+    const { request } = event;
+
+    // Navigation requests: network-first so updates are never stuck in cache
+    if (request.mode === 'navigate') {
+        event.respondWith(
+            fetch(request)
                 .then(networkResponse => {
-                    if (!networkResponse || networkResponse.status !== 200) {
-                        return networkResponse;
-                    }
-                    const responseToCache = networkResponse.clone();
-                    caches.open(CACHE_NAME).then(cache => {
-                        cache.put(event.request, responseToCache);
-                    });
+                    const copy = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => cache.put(request, copy));
                     return networkResponse;
                 })
-                .catch(() => {
-                    if (event.request.mode === 'navigate') {
-                        return new Response(
+                .catch(() =>
+                    caches.match(request).then(cached =>
+                        cached ||
+                        new Response(
                             `<!DOCTYPE html>
                             <html>
                             <head><title>Offline - Rust Survival</title></head>
@@ -64,9 +60,31 @@ self.addEventListener('fetch', (event) => {
                             </body>
                             </html>`,
                             { headers: { 'Content-Type': 'text/html' } }
-                        );
+                        )
+                    )
+                )
+        );
+        return;
+    }
+
+    // Static assets: cache-first, then network (runtime caching)
+    event.respondWith(
+        caches.match(request).then(response => {
+            if (response) {
+                return response;
+            }
+            return fetch(request)
+                .then(networkResponse => {
+                    if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === 'opaque') {
+                        return networkResponse;
                     }
-                });
+                    const responseToCache = networkResponse.clone();
+                    caches.open(CACHE_NAME).then(cache => {
+                        cache.put(request, responseToCache);
+                    });
+                    return networkResponse;
+                })
+                .catch(() => new Response('', { status: 408, statusText: 'Offline' }));
         })
     );
 });
