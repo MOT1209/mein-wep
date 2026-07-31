@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="مشغّل مقاطع صوتية للقرآن الكريم — استمع للمقاطع مباشرة من Hugging Face">
+    <meta name="author" content="Rashid (MOT1209)">
+    <title>📖 مشغّل القرآن الكريم</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; media-src https://huggingface.co https://*.huggingface.co; img-src 'self' data:;">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d1b12;
+            --bg-card: #12271a;
+            --gold: #d4af37;
+            --gold-light: #f0d68a;
+            --green: #1a8a4c;
+            --green-dark: #0f5c33;
+            --text: #f2f5ee;
+            --text-dim: #a8c0b0;
+            --border: rgba(212, 175, 55, .25);
+        }
+        [data-theme="light"] {
+            --bg: #f6f8f3;
+            --bg-card: #ffffff;
+            --text: #1a2b20;
+            --text-dim: #5c7365;
+            --border: rgba(26, 138, 76, .25);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: background .4s, color .4s;
+        }
+        /* زخرفة علوية */
+        .ornament { width: 100%; max-width: 640px; height: 14px; opacity:.8;
+            background: radial-gradient(circle at center, var(--gold) 30%, transparent 32%) center / 24px 14px repeat-x; }
+        .container { width: 100%; max-width: 640px; margin-top: 18px; }
+        header { text-align: center; margin-bottom: 24px; }
+        .bismillah { font-family: 'Amiri', serif; font-size: clamp(1.4rem, 4vw, 2rem); color: var(--gold); margin-bottom: 8px; }
+        h1 { font-family: 'Amiri', serif; font-size: clamp(1.8rem, 5vw, 2.6rem); color: var(--gold-light); margin-bottom: 6px; }
+        .subtitle { color: var(--text-dim); font-size: .95rem; }
+        .theme-toggle {
+            position: fixed; top: 16px; left: 16px; z-index: 10;
+            background: var(--bg-card); border: 1px solid var(--border); color: var(--gold);
+            border-radius: 50%; width: 44px; height: 44px; font-size: 1.2rem; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0,0,0,.3);
+        }
+        /* المشغل الرئيسي */
+        .player {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            margin-bottom: 22px;
+            box-shadow: 0 10px 30px rgba(0,0,0,.35);
+        }
+        .now-playing { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+        .cover {
+            width: 64px; height: 64px; border-radius: 14px; flex-shrink: 0;
+            background: linear-gradient(135deg, var(--green-dark), var(--green), var(--gold));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,.4);
+        }
+        .np-info { min-width: 0; }
+        .np-title { font-weight: 700; font-size: 1.1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .np-status { color: var(--text-dim); font-size: .85rem; margin-top: 2px; }
+        .progress { width: 100%; -webkit-appearance: none; appearance: none; height: 6px; border-radius: 3px;
+            background: var(--border); outline: none; cursor: pointer; }
+        .progress::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+            background: var(--gold); border: 2px solid var(--bg-card); box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+        .times { display: flex; justify-content: space-between; color: var(--text-dim); font-size: .8rem; margin: 6px 0 12px; }
+        .controls { display: flex; align-items: center; justify-content: center; gap: 18px; }
+        .ctl { background: none; border: none; color: var(--gold); font-size: 1.5rem; cursor: pointer; transition: transform .15s, opacity .15s; }
+        .ctl:hover { transform: scale(1.15); }
+        .ctl:active { transform: scale(.95); }
+        .ctl.off { opacity: .4; }
+        .play-btn { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--green), var(--green-dark));
+            color: #fff; font-size: 1.6rem; border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 18px rgba(0,0,0,.4); cursor: pointer; transition: transform .15s; }
+        .play-btn:hover { transform: scale(1.06); }
+        /* قائمة التشغيل */
+        .playlist-title { display: flex; align-items: center; gap: 8px; color: var(--gold); font-weight: 700; margin-bottom: 12px; }
+        .playlist { list-style: none; }
+        .track {
+            display: flex; align-items: center; gap: 14px;
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 12px 16px; margin-bottom: 10px; cursor: pointer;
+            transition: transform .15s, border-color .2s, background .2s;
+        }
+        .track:hover { transform: translateX(-4px); border-color: var(--gold); }
+        .track.active { border-color: var(--gold); background: linear-gradient(135deg, rgba(26,138,76,.18), rgba(212,175,55,.10)); }
+        .track-num { width: 36px; height: 36px; border-radius: 50%; background: var(--green-dark); color: var(--gold-light);
+            display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+        .track.active .track-num { background: var(--gold); color: #0d1b12; }
+        .track-info { flex: 1; min-width: 0; }
+        .track-name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .track-dur { color: var(--text-dim); font-size: .8rem; }
+        .track-play { color: var(--gold); font-size: 1.2rem; opacity: .7; }
+        .track.active .track-play { opacity: 1; }
+        footer { margin-top: 26px; text-align: center; color: var(--text-dim); font-size: .82rem; }
+        footer a { color: var(--gold); text-decoration: none; }
+        .back-link { display: inline-block; margin-top: 8px; padding: 8px 18px; border: 1px solid var(--border);
+            border-radius: 20px; color: var(--gold); text-decoration: none; font-size: .9rem; transition: background .2s; }
+        .back-link:hover { background: rgba(212,175,55,.12); }
+        @media (max-width: 480px) {
+            .player { padding: 16px; }
+            .cover { width: 52px; height: 52px; font-size: 1.4rem; }
+            .play-btn { width: 56px; height: 56px; }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <button class="theme-toggle" id="themeToggle" aria-label="تبديل المظهر">🌙</button>
+    <div class="ornament"></div>
+    <div class="container">
+        <header>
+            <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>
+            <h1>مشغّل القرآن الكريم</h1>
+            <p class="subtitle">استمع إلى المقاطع الصوتية مباشرة — مرفوعة على Hugging Face</p>
+        </header>
+
+        <!-- المشغل -->
+        <div class="player">
+            <div class="now-playing">
+                <div class="cover">📖</div>
+                <div class="np-info">
+                    <div class="np-title" id="npTitle">اختر مقطعاً للاستماع</div>
+                    <div class="np-status" id="npStatus">متوقف</div>
+                </div>
+            </div>
+            <input type="range" class="progress" id="progress" min="0" max="100" value="0" step="0.1" aria-label="شريط التقدم">
+            <div class="times">
+                <span id="curTime">00:00</span>
+                <span id="durTime">00:00</span>
+            </div>
+            <div class="controls">
+                <button class="ctl" id="prevBtn" aria-label="السابق">⏮</button>
+                <button class="play-btn" id="playBtn" aria-label="تشغيل/إيقاف">▶</button>
+                <button class="ctl" id="nextBtn" aria-label="التالي">⏭</button>
+            </div>
+        </div>
+
+        <!-- قائمة التشغيل -->
+        <div class="playlist-title">🎧 قائمة المقاطع (6)</div>
+        <ul class="playlist" id="playlist"></ul>
+
+        <footer>
+            <p>المصدر: <a href="https://huggingface.co/datasets/RASHID778/Quran-Audio" target="_blank" rel="noopener">RASHID778/Quran-Audio على Hugging Face</a></p>
+            <a class="back-link" href="index.html">← العودة للموقع الرئيسي</a>
+        </footer>
+    </div>
+
+    <script>
+        // المقاطع الصوتية (مباشرة من Hugging Face)
+        const BASE = "https://huggingface.co/datasets/RASHID778/Quran-Audio/resolve/main/audio/";
+        const TRACKS = [
+            { title: "مقطع 1", file: "quran-01.mp3" },
+            { title: "مقطع 2", file: "quran-02.mp3" },
+            { title: "مقطع 3", file: "quran-03.mp3" },
+            { title: "مقطع 4", file: "quran-04.mp3" },
+            { title: "مقطع 5", file: "quran-05.mp3" },
+            { title: "مقطع 6", file: "quran-06.mp3" }
+        ];
+
+        let current = 0, isPlaying = false;
+        const audio = new Audio();
+        audio.preload = "metadata";
+
+        // بناء القائمة
+        const list = document.getElementById("playlist");
+        TRACKS.forEach((t, i) => {
+            const li = document.createElement("li");
+            li.className = "track";
+            li.dataset.index = i;
+            li.innerHTML = `
+                <div class="track-num">${i + 1}</div>
+                <div class="track-info">
+                    <div class="track-name">${t.title}</div>
+                    <div class="track-dur">اضغط للتشغيل</div>
+                </div>
+                <div class="track-play">${i === 0 ? "▶" : "▶"}</div>`;
+            li.addEventListener("click", () => playTrack(i));
+            list.appendChild(li);
+        });
+
+        function fmt(s) {
+            if (!isFinite(s)) return "00:00";
+            const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+            return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+        }
+
+        function playTrack(i) {
+            current = i;
+            audio.src = BASE + TRACKS[i].file;
+            audio.play();
+            updateUI();
+        }
+
+        function updateUI() {
+            document.querySelectorAll(".track").forEach((el, i) => {
+                el.classList.toggle("active", i === current);
+            });
+            document.getElementById("npTitle").textContent = TRACKS[current].title;
+            document.getElementById("playBtn").textContent = isPlaying ? "⏸" : "▶";
+            document.getElementById("npStatus").textContent = isPlaying ? "يعمل الآن…" : (audio.paused && audio.currentTime > 0 ? "متوقف مؤقتاً" : "متوقف");
+        }
+
+        // عناصر التحكم
+        document.getElementById("playBtn").addEventListener("click", () => {
+            if (!audio.src) { playTrack(0); return; }
+            if (audio.paused) { audio.play(); } else { audio.pause(); }
+        });
+        document.getElementById("nextBtn").addEventListener("click", () => playTrack((current + 1) % TRACKS.length));
+        document.getElementById("prevBtn").addEventListener("click", () => playTrack((current - 1 + TRACKS.length) % TRACKS.length));
+
+        audio.addEventListener("play", () => { isPlaying = true; updateUI(); });
+        audio.addEventListener("pause", () => { isPlaying = false; updateUI(); });
+        audio.addEventListener("ended", () => playTrack((current + 1) % TRACKS.length));
+        audio.addEventListener("loadedmetadata", () => {
+            document.getElementById("durTime").textContent = fmt(audio.duration);
+        });
+        audio.addEventListener("timeupdate", () => {
+            if (audio.duration) {
+                document.getElementById("progress").value = (audio.currentTime / audio.duration) * 100;
+                document.getElementById("curTime").textContent = fmt(audio.currentTime);
+            }
+        });
+        audio.addEventListener("error", () => {
+            document.getElementById("npStatus").textContent = "⚠️ تعذر تحميل المقطع — تحقق من الاتصال";
+        });
+
+        document.getElementById("progress").addEventListener("input", (e) => {
+            if (audio.duration) audio.currentTime = (e.target.value / 100) * audio.duration;
+        });
+
+        // مفتاح المسافة = تشغيل/إيقاف
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "Space" && e.target.tagName !== "INPUT" && e.target.tagName !== "BUTTON") {
+                e.preventDefault();
+                document.getElementById("playBtn").click();
+            }
+        });
+
+        // تبديل المظهر
+        const themeToggle = document.getElementById("themeToggle");
+        themeToggle.addEventListener("click", () => {
+            const body = document.body;
+            const isDark = body.dataset.theme === "dark";
+            body.dataset.theme = isDark ? "light" : "dark";
+            themeToggle.textContent = isDark ? "☀️" : "🌙";
+        });
+    </script>
+</body>
+</html>
