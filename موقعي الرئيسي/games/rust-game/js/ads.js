@@ -5,7 +5,7 @@
  * 
  * Ad Unit IDs:
  * - Banner:      ca-app-pub-6142754371257083/5450421153  ✅ (تم إنشاؤه)
- * - Interstitial: (أنشئه من AdMob Console ثم ضعه هنا)
+ * - Interstitial: ca-app-pub-6142754371257083/4081499165  ✅ (تم إنشاؤه)
  * - Rewarded:    (أنشئه من AdMob Console ثم ضعه هنا)
  */
 
@@ -13,7 +13,7 @@ const IS_PRODUCTION = true;
 
 const AD_UNIT_IDS = {
     banner: 'ca-app-pub-6142754371257083/5450421153',       // ✅ Banner — من AdMob Console
-    interstitial: 'ca-app-pub-6142754371257083/XXXXXXXXXX',  // ← أنشئه من AdMob Console (اختر: Interstitial)
+    interstitial: 'ca-app-pub-6142754371257083/4081499165',  // ✅ Interstitial — من AdMob Console
     rewarded: 'ca-app-pub-6142754371257083/XXXXXXXXXX',      // ← أنشئه من AdMob Console (اختر: Rewarded)
 };
 
