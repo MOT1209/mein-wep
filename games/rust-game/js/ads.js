@@ -1,18 +1,20 @@
 /**
  * AdMob Ads — Rust Survival 3D
  * 
- * ⚠️ AdMob App ID: ca-app-pub-6142754371257083~XXXXXXXX (يُحقن عبر CI)
+ * ✅ AdMob App ID: ca-app-pub-6142754371257083~4464642549 (يُحقن عبر CI)
  * 
- * عيّن Ad Unit IDs الحقيقية من AdMob Console:
- * https://apps.admob.com
+ * Ad Unit IDs:
+ * - Banner:      ca-app-pub-6142754371257083/5450421153  ✅ (تم إنشاؤه)
+ * - Interstitial: (أنشئه من AdMob Console ثم ضعه هنا)
+ * - Rewarded:    (أنشئه من AdMob Console ثم ضعه هنا)
  */
 
 const IS_PRODUCTION = true;
 
 const AD_UNIT_IDS = {
-    banner: 'ca-app-pub-6142754371257083/XXXXXXXXXX',       // ← عيّن من AdMob
-    interstitial: 'ca-app-pub-6142754371257083/XXXXXXXXXX',  // ← عيّن من AdMob
-    rewarded: 'ca-app-pub-6142754371257083/XXXXXXXXXX',      // ← عيّن من AdMob
+    banner: 'ca-app-pub-6142754371257083/5450421153',       // ✅ Banner — من AdMob Console
+    interstitial: 'ca-app-pub-6142754371257083/XXXXXXXXXX',  // ← أنشئه من AdMob Console (اختر: Interstitial)
+    rewarded: 'ca-app-pub-6142754371257083/XXXXXXXXXX',      // ← أنشئه من AdMob Console (اختر: Rewarded)
 };
 
 window.GameAds = {

@@ -156,7 +156,7 @@ jobs:
             apps/quran-app)      ADMOB_APP_ID="ca-app-pub-6142754371257083~8322283070" ;;
             games/farm-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
             games/kingcraft-game) ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
-            games/rust-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
+            games/rust-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~4464642549" ;;
             *) ADMOB_APP_ID="" ;;
           esac
           if [ -n "$ADMOB_APP_ID" ]; then
