@@ -39,9 +39,9 @@ Vercel ينشر من **git HEAD** لريبو mein-wep. مجلد `games/` في ا
 - [x] 4.2 فحص sw.js / manifest / version.json live
 - [x] 4.3 لقطة شاشة للعبة عبر agent-browser (1262×568)
 
-## المرحلة 5 — AdMob (البند الوحيد الذي يحتاج حسابك)
+## المرحلة 5 — AdMob (تم الإعلان الأول — الباقي اختياري)
 - [x] 5.0 بناء الـ APK تلقائيًا (GitHub Actions) — 3.2MB مباشر على الموقع ✅
 - [x] 5.0 إصلاح CI/CD Pipeline (كان يفشل على كل push بسبب مجلد Maarifah الغائب)
-- [ ] 5.1 إنشاء 3 وحدات (Banner/Interstitial/Rewarded) في وحدة تحكم AdMob ← **يحتاج دخولك لحساب Google**
-- [ ] 5.2 استبدال الأكواد في `js/ads.js` + `ca-app-pub-6142754371257083~XXXXXXXXXX` (الـ App ID)
-- [ ] 5.3 إعادة بناء APK (دفعة واحدة كافية — الـ CI يعيد البناء تلقائيًا)
+- [x] 5.1 ✅ **Banner**: `ca-app-pub-6142754371257083/5450421153` + App ID `~4464642549` داخل الـ APK (build 12)
+- [ ] 5.2 اختياري: إنشاء وحدتي **Interstitial** و**Rewarded** وإرسال أكوادهما
+- [x] 5.3 إعادة بناء APK تلقائيًا — تم (build 12)
