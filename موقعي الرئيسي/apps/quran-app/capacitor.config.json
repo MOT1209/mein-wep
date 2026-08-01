@@ -1,0 +1,21 @@
+{
+  "appId": "com.rashid.quranpro",
+  "appName": "Quran Pro",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#020617",
+      "androidSplashResourceName": "splash",
+      "showSpinner": true,
+      "spinnerColor": "#059669"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#020617"
+    }
+  }
+}
