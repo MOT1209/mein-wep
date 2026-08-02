@@ -34,10 +34,15 @@
     --glass-bg: rgba(255, 255, 255, 0.8);
     --glass-border: rgba(255, 255, 255, 0.5);
     
-    /* Quran Page */
-    --quran-bg: #ffffff;
-    --quran-text: #1a1a1a;
-    --quran-border: #059669;
+    /* Quran Page — لوحة المصحف الورقية */
+    --quran-bg: #f7f0dd;
+    --quran-text: #1c1206;
+    --quran-border: #c8a44a;
+    --mushaf-paper-edge: #ede0bf;
+    --mushaf-gold: #c8a44a;
+    --mushaf-gold-light: #e6cd88;
+    --mushaf-gold-dark: #8a6a22;
+    --mushaf-marker-text: #3d2a08;
     
     /* Status Colors */
     --success: #10b981;
@@ -63,9 +68,15 @@
     --glass-bg: rgba(15, 23, 42, 0.85);
     --glass-border: rgba(255, 255, 255, 0.1);
     
-    --quran-bg: #0f172a;
-    --quran-text: #e2e8f0;
-    --quran-border: #34d399;
+    /* مصحف ليلي: نفس الزخرفة على رقٍّ داكن بحبر كريمي */
+    --quran-bg: #14110c;
+    --quran-text: #f2e9d4;
+    --quran-border: #c8a44a;
+    --mushaf-paper-edge: #1e1a11;
+    --mushaf-gold: #c8a44a;
+    --mushaf-gold-light: #e6cd88;
+    --mushaf-gold-dark: #6d5418;
+    --mushaf-marker-text: #14110c;
 }
 
 /* ==================== Base Styles ==================== */
@@ -862,46 +873,113 @@ body {
     margin: 0 auto;
 }
 
+/* ==================== صفحة المصحف ====================
+   إطار مذهّب مزدوج على ورق كريمي، اسم السورة في طُرّة مزخرفة،
+   وعلامات آي مستديرة — يُطبَّق على السور الـ114 جميعها. */
 .verses-wrapper {
     font-family: 'Scheherazade New', 'Amiri', serif;
     font-size: 2.2rem;
-    line-height: 3;
+    line-height: 2.9;
     text-align: justify;
     color: var(--quran-text);
-    padding: 3rem;
+    padding: 2.75rem 2.5rem;
     background: var(--quran-bg);
     direction: rtl;
     position: relative;
     min-height: 600px;
-    border-radius: 16px;
-    border: 2px solid var(--quran-border);
-    box-shadow: var(--shadow-xl);
+    border-radius: 6px;
+    /* الشريط المائل الذهبي هو حاشية الصفحة الخارجية */
+    border: 14px solid var(--mushaf-gold);
+    border-image: repeating-linear-gradient(
+        45deg,
+        var(--mushaf-gold-dark) 0 5px,
+        var(--mushaf-gold-light) 5px 10px
+    ) 14;
+    /* حلقات داخلية تحاكي تجليد المصحف */
+    box-shadow:
+        inset 0 0 0 3px var(--mushaf-gold-dark),
+        inset 0 0 0 8px var(--quran-bg),
+        inset 0 0 0 9px var(--mushaf-gold),
+        var(--shadow-xl);
+}
+
+/* خط الإطار الداخلي الرفيع الذي يحيط بالنص */
+.verses-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 14px;
+    border: 1px solid var(--mushaf-gold);
+    border-radius: 3px;
+    pointer-events: none;
 }
 
 .surah-header-mushaf {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    border-bottom: 2px solid var(--primary);
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
+    position: relative;
+    margin-bottom: 1.75rem;
+    padding-bottom: 1.25rem;
+}
+
+/* طُرّة السورة: شريط مذهّب مزخرف يحيط بلوحة الاسم */
+.surah-cartouche {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: min(72%, 420px);
+    padding: 6px;
+    background: repeating-linear-gradient(
+        45deg,
+        var(--mushaf-gold-dark) 0 4px,
+        var(--mushaf-gold-light) 4px 8px
+    );
+    border-radius: 4px;
+    box-shadow:
+        inset 0 0 0 1px var(--mushaf-gold-dark),
+        0 0 0 1px var(--mushaf-gold-dark);
+}
+
+/* لوحة الاسم نفسها بلون الورق ليبقى النص مقروءاً فوق الزخرفة */
+.surah-cartouche-name {
+    display: block;
+    width: 100%;
+    padding: 0.4rem 1.5rem;
+    background: var(--quran-bg);
+    box-shadow: inset 0 0 0 1px var(--mushaf-gold-dark);
+    font-family: 'Amiri', 'Scheherazade New', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    line-height: 1.7;
+    color: var(--quran-text);
+    text-align: center;
 }
 
 .side-text {
+    position: absolute;
+    inset-inline-end: 0;
+    bottom: 0;
     font-family: 'Amiri', serif;
-    font-size: 1rem;
-    color: var(--primary);
-    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--mushaf-gold-dark);
+    font-weight: 700;
 }
 
 .bismillah {
     text-align: center;
     direction: rtl;
-    font-family: 'Scheherazade New', 'Amiri', serif;
-    font-size: 1.8rem;
+    font-family: 'Amiri', 'Scheherazade New', serif;
+    font-size: 1.6rem;
     font-weight: 700;
-    color: var(--accent-gold);
-    margin: 0 auto 1.5rem;
+    color: var(--quran-text);
+    margin: 0 auto 1.25rem;
+}
+
+/* نص الآيات: تسوية الطرفين كما في المصحف، وتوسيط السطر الأخير */
+.verses-text {
+    text-align: justify;
+    text-align-last: center;
 }
 
 .verse-item {
@@ -914,32 +992,41 @@ body {
 }
 
 .verse-item:hover {
-    background: rgba(5, 150, 105, 0.1);
+    background: rgba(200, 164, 74, 0.18);
 }
 
 .verse-item.playing {
-    background: linear-gradient(90deg, rgba(5, 150, 105, 0.2) 0%, rgba(245, 158, 11, 0.2) 100%);
+    background: linear-gradient(90deg, rgba(200, 164, 74, 0.32) 0%, rgba(5, 150, 105, 0.18) 100%);
     border-radius: 4px;
     animation: highlight-pulse 2s ease-in-out infinite;
 }
 
 @keyframes highlight-pulse {
-    0%, 100% { background: rgba(5, 150, 105, 0.15); }
-    50% { background: rgba(5, 150, 105, 0.3); }
+    0%, 100% { background: rgba(200, 164, 74, 0.2); }
+    50% { background: rgba(200, 164, 74, 0.4); }
 }
 
+/* علامة نهاية الآية: ميدالية مذهّبة بحلقات متراكزة كما في المصحف */
 .verse-number {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-    color: white;
-    font-weight: 600;
-    font-size: 0.8rem;
+    position: relative;
+    width: 38px;
+    height: 38px;
+    background: radial-gradient(
+        circle,
+        var(--mushaf-gold-light) 0 42%,
+        var(--mushaf-gold-dark) 42% 51%,
+        var(--quran-bg) 51% 62%,
+        var(--mushaf-gold) 62% 100%
+    );
+    color: var(--mushaf-marker-text);
+    font-weight: 700;
+    font-size: 0.78rem;
     margin: 0 0.3rem;
     border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--mushaf-gold-dark);
     font-family: 'Cairo', sans-serif;
     vertical-align: middle;
     cursor: pointer;
@@ -951,9 +1038,18 @@ body {
     box-shadow: var(--shadow-glow);
 }
 
+/* الميدالية ذهبية أصلاً، فتُميَّز الآية قيد التلاوة باللون الزمردي */
 .verse-item.playing .verse-number {
     transform: scale(1.15);
-    background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-dark) 100%);
+    background: radial-gradient(
+        circle,
+        var(--primary-light) 0 42%,
+        var(--primary-dark) 42% 51%,
+        var(--quran-bg) 51% 62%,
+        var(--primary) 62% 100%
+    );
+    color: #ffffff;
+    box-shadow: 0 0 0 1px var(--primary-dark);
     animation: rotate-scale 1s ease-in-out;
 }
 
@@ -1923,9 +2019,25 @@ body {
         padding: 0;
     }
     
+    /* الطباعة دائماً على ورق فاتح حتى لو كان الوضع الليلي مفعّلاً */
     .verses-wrapper {
         box-shadow: none;
         border: 1px solid #000;
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .verse-number {
+        background: none;
+        border: 1px solid #000;
+        color: #000000;
+        box-shadow: none;
+    }
+
+    .surah-cartouche {
+        background: none;
+        border: 1px solid #000;
+        box-shadow: none;
     }
 }
 
@@ -2061,19 +2173,42 @@ body {
         padding: 0.5rem;
     }
 
-    /* Verses display */
+    /* Verses display — إطار المصحف أنحف على الجوال ليتسع النص */
     .verses-wrapper {
-        padding: 1rem;
+        padding: 1.15rem 1rem;
         font-size: 1.4rem;
         line-height: 2.2;
+        border-width: 8px;
+        border-image-slice: 8;
+        box-shadow:
+            inset 0 0 0 2px var(--mushaf-gold-dark),
+            inset 0 0 0 5px var(--quran-bg),
+            inset 0 0 0 6px var(--mushaf-gold),
+            var(--shadow-lg);
+    }
+
+    .verses-wrapper::before {
+        inset: 8px;
     }
 
     .surah-header-mushaf {
+        flex-direction: column;
+        gap: 0.5rem;
         padding-bottom: 0.75rem;
         margin-bottom: 1rem;
     }
 
+    .surah-cartouche {
+        min-width: 100%;
+        padding: 0.45rem 1.25rem;
+    }
+
+    .surah-cartouche-name {
+        font-size: 1.15rem;
+    }
+
     .side-text {
+        position: static;
         font-size: 0.8rem;
     }
 
@@ -2083,9 +2218,9 @@ body {
     }
 
     .verse-number {
-        width: 26px;
-        height: 26px;
-        font-size: 0.7rem;
+        width: 28px;
+        height: 28px;
+        font-size: 0.62rem;
         margin: 0 0.15rem;
     }
 

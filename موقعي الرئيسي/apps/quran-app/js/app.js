@@ -887,6 +887,27 @@ function updateSaveButton(isBookmarked) {
 }
 
 // ==================== Display Verses ====================
+// نص المصحف القادم من الـ API يبدأ الآية الأولى بالبسملة في كل سورة عدا
+// الفاتحة والتوبة، فلو عُرضت البسملة المستقلة فوقها لتكرّرت مرّتين.
+const BASMALA_WORD_COUNT = 4;
+
+function stripLeadingBasmala(text) {
+    const expected = normalizeArabicSearchText('بسم الله الرحمن الرحيم').replace(/\s+/g, '');
+    const tokens = text.split(/(\s+)/);
+
+    const words = [];
+    let consumed = 0;
+    for (let i = 0; i < tokens.length && words.length < BASMALA_WORD_COUNT; i++) {
+        consumed = i + 1;
+        if (tokens[i].trim()) words.push(tokens[i]);
+    }
+
+    if (words.length < BASMALA_WORD_COUNT) return text;
+    if (normalizeArabicSearchText(words.join('')).replace(/\s+/g, '') !== expected) return text;
+
+    return tokens.slice(consumed).join('').trimStart();
+}
+
 function displayVerses() {
     if (!state.currentSurah) return;
 
@@ -896,21 +917,30 @@ function displayVerses() {
     wrapper.className = 'verses-wrapper';
     wrapper.style.fontSize = `${fontSize}rem`;
 
-    // Surah header
+    // Surah header — طُرّة المصحف: اسم السورة داخل إطار مزخرف، ورقم الجزء جانبه
     const header = document.createElement('div');
     header.className = 'surah-header-mushaf';
-    const sideText1 = document.createElement('span');
-    sideText1.className = 'side-text';
-    sideText1.textContent = `سُورَةُ ${state.currentSurah.name}`;
-    header.appendChild(sideText1);
-    const sideText2 = document.createElement('span');
-    sideText2.className = 'side-text';
-    sideText2.textContent = `الجزء ${state.currentSurah.ayahs[0]?.juz || 1}`;
-    header.appendChild(sideText2);
+
+    const cartouche = document.createElement('div');
+    cartouche.className = 'surah-cartouche';
+    const cartoucheName = document.createElement('span');
+    cartoucheName.className = 'surah-cartouche-name';
+    // الاسم القادم من الـ API يتضمن كلمة «سُورَةُ» أصلاً، فلا تُضَف مرة ثانية.
+    cartoucheName.textContent = state.currentSurah.name;
+    cartouche.appendChild(cartoucheName);
+    header.appendChild(cartouche);
+
+    const juzBadge = document.createElement('span');
+    juzBadge.className = 'side-text';
+    juzBadge.textContent = `الجزء ${state.currentSurah.ayahs[0]?.juz || 1}`;
+    header.appendChild(juzBadge);
+
     wrapper.appendChild(header);
 
-    // Bismillah
-    if (state.currentSurah.number !== 1 && state.currentSurah.number !== 9) {
+    // Bismillah — الفاتحة تعدّها آية، والتوبة لا بسملة لها
+    const hasStandaloneBasmala =
+        state.currentSurah.number !== 1 && state.currentSurah.number !== 9;
+    if (hasStandaloneBasmala) {
         const bismillah = document.createElement('p');
         bismillah.className = 'bismillah';
         bismillah.textContent = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
@@ -935,7 +965,10 @@ function displayVerses() {
         verseSpan.onclick = () => handleVerseClick(index);
 
         // Verse text
-        verseSpan.appendChild(document.createTextNode(ayah.text));
+        const verseText = (index === 0 && hasStandaloneBasmala)
+            ? stripLeadingBasmala(ayah.text)
+            : ayah.text;
+        verseSpan.appendChild(document.createTextNode(verseText));
 
         // Verse number
         const verseNum = document.createElement('span');
@@ -1702,6 +1735,14 @@ function normalizeArabicSearchText(text) {
     return text
         .normalize('NFKD')
         .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, '')
+        // \u0627\u0644\u0645\u0635\u062D\u0641 \u064A\u0631\u0633\u0645 \u0623\u0644\u0641 \u0627\u0644\u0648\u0635\u0644 \u0648\u0627\u0644\u0647\u0645\u0632\u0627\u062A \u0628\u0623\u0634\u0643\u0627\u0644 \u0644\u0627 \u064A\u0643\u062A\u0628\u0647\u0627 \u0627\u0644\u0645\u0633\u062A\u062E\u062F\u0645 \u0639\u0627\u062F\u0629\u064B\u060C
+        // \u0641\u0646\u0648\u062D\u0651\u062F\u0647\u0627 \u0645\u0639 \u0627\u0644\u062A\u0627\u0621 \u0627\u0644\u0645\u0631\u0628\u0648\u0637\u0629 \u0648\u0627\u0644\u0623\u0644\u0641 \u0627\u0644\u0645\u0642\u0635\u0648\u0631\u0629 \u0642\u0628\u0644 \u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0629.
+        .replace(/[\u0622\u0623\u0625\u0671]/g, '\u0627')
+        .replace(/\u0629/g, '\u0647')
+        // \u0646\u0635 \u0627\u0644\u0645\u0635\u062D\u0641 \u064A\u062E\u0644\u0637 \u0627\u0644\u064A\u0627\u0621 \u0627\u0644\u0639\u0631\u0628\u064A\u0629 \u0628\u0627\u0644\u0641\u0627\u0631\u0633\u064A\u0629 (U+06CC) \u0648\u0627\u0644\u0643\u0627\u0641 \u0643\u0630\u0644\u0643\u060C
+        // \u0641\u0646\u0648\u062D\u0651\u062F\u0647\u0627 \u0645\u0639 \u0627\u0644\u0623\u0644\u0641 \u0627\u0644\u0645\u0642\u0635\u0648\u0631\u0629 \u062D\u062A\u0649 \u062A\u062A\u0637\u0627\u0628\u0642 \u0627\u0644\u0645\u0642\u0627\u0631\u0646\u0629.
+        .replace(/[\u0649\u06CC\u064A]/g, '\u064A')
+        .replace(/[\u06A9\u0643]/g, '\u0643')
         .replace(/ـ/g, '')
         .trim();
 }
@@ -2174,11 +2215,19 @@ function setupEventListeners() {
 
     // Surah search
     elements['surah-search']?.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
+        const rawQuery = e.target.value.trim();
+
+        if (!rawQuery) {
+            displaySurahs(state.allSurahs);
+            return;
+        }
+
+        const arabicQuery = normalizeArabicSearchText(rawQuery);
+        const englishQuery = rawQuery.toLowerCase();
         const filtered = state.allSurahs.filter(s =>
-            s.name.includes(query) ||
-            s.englishName.toLowerCase().includes(query) ||
-            s.number.toString() === query
+            normalizeArabicSearchText(s.name).includes(arabicQuery) ||
+            s.englishName.toLowerCase().includes(englishQuery) ||
+            s.number.toString() === rawQuery
         );
         displaySurahs(filtered);
     });
