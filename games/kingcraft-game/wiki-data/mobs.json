@@ -1,0 +1,439 @@
+﻿{
+  "mobs": [
+    {
+      "id": "zombie",
+      "name": "Zombie",
+      "health": 20,
+      "damage": { "easy": 2.5, "normal": 3, "hard": 4.5 },
+      "speed": 0.23,
+      "spawn": { "light": 0, "biomes": ["overworld"] },
+      "drops": [
+        { "item": "rotten_flesh", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "iron_ingot", "min": 0, "max": 1, "chance": 0.0083 },
+        { "item": "carrot", "min": 0, "max": 1, "chance": 0.0083 },
+        { "item": "potato", "min": 0, "max": 1, "chance": 0.0083 }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Burns in sunlight. Breaks wooden doors on Hard. 5% chance of spawning as baby. Converts to drowned when submerged."
+    },
+    {
+      "id": "creeper",
+      "name": "Creeper",
+      "health": 20,
+      "damage": { "easy": 22.5, "normal": 43, "hard": 64.5 },
+      "speed": 0.23,
+      "spawn": { "light": 0, "biomes": ["overworld"] },
+      "drops": [
+        { "item": "gunpowder", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "music_disc", "min": 0, "max": 1, "chance": 0.0, "condition": "killed by skeleton/stray/bogged" },
+        { "item": "creeper_head", "min": 0, "max": 1, "chance": 0.0, "condition": "killed by charged creeper" }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Explodes after 1.5s fuse when within 3 blocks of player. Explosion power: 3 (normal), 6 (charged). Flees from ocelots/cats."
+    },
+    {
+      "id": "skeleton",
+      "name": "Skeleton",
+      "health": 20,
+      "damage": { "easy": 2.5, "normal": 4, "hard": 6 },
+      "speed": 0.25,
+      "spawn": { "light": 0, "biomes": ["overworld"] },
+      "drops": [
+        { "item": "bone", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "arrow", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "skeleton_skull", "min": 0, "max": 1, "chance": 0.0, "condition": "killed by charged creeper" }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Ranged attack with bow. Burns in sunlight. Shoots 1 arrow per 2-3 seconds. Flees from wolves. Converts to stray in powder snow."
+    },
+    {
+      "id": "spider",
+      "name": "Spider",
+      "health": 16,
+      "damage": { "easy": 2, "normal": 2, "hard": 3 },
+      "speed": 0.3,
+      "spawn": { "light": 0, "biomes": ["overworld"] },
+      "drops": [
+        { "item": "string", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "spider_eye", "min": 0, "max": 1, "chance": 0.33 }
+      ],
+      "xp": 5,
+      "behavior": "neutral",
+      "notes": "Neutral in light level >11. 1% chance to spawn as spider jockey with skeleton. Can climb walls. No poison effect (unlike cave spider)."
+    },
+    {
+      "id": "enderman",
+      "name": "Enderman",
+      "health": 40,
+      "damage": { "easy": 4.5, "normal": 7, "hard": 10.5 },
+      "speed": 0.3,
+      "spawn": { "light": 0, "biomes": ["overworld", "nether", "end"] },
+      "drops": [
+        { "item": "ender_pearl", "min": 0, "max": 1, "chance": 0.5 }
+      ],
+      "xp": 5,
+      "behavior": "neutral",
+      "notes": "Neutral unless stared at. Teleports when hit. Carries blocks. Teleports randomly. Damaged by water/rain. Rare in Overworld, common in The End."
+    },
+    {
+      "id": "witch",
+      "name": "Witch",
+      "health": 26,
+      "damage": { "easy": 3, "normal": 5, "hard": 7 },
+      "speed": 0.25,
+      "spawn": { "light": 0, "biomes": ["overworld"] },
+      "drops": [
+        { "item": "stick", "min": 0, "max": 6, "chance": 0.25 },
+        { "item": "redstone", "min": 0, "max": 6, "chance": 0.25 },
+        { "item": "glowstone_dust", "min": 0, "max": 6, "chance": 0.25 },
+        { "item": "gunpowder", "min": 0, "max": 6, "chance": 0.25 },
+        { "item": "sugar", "min": 0, "max": 6, "chance": 0.25 },
+        { "item": "glass_bottle", "min": 0, "max": 6, "chance": 0.25 }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Throws splash potions (Poison, Slowness, Weakness, Instant Damage). Drinks potions for self-buff (Fire Resistance, Healing, Water Breathing). Spawns in swamp huts."
+    },
+    {
+      "id": "slime",
+      "name": "Slime",
+      "health": 16,
+      "damage": { "easy": 3, "normal": 4, "hard": 6 },
+      "speed": 0.2,
+      "spawn": { "light": 0, "biomes": ["swamp", "mangrove_swamp", "slime_chunk"] },
+      "drops": [
+        { "item": "slimeball", "min": 0, "max": 5, "chance": 1.0, "note": "Small slimes only drop slimeballs" }
+      ],
+      "xp": 4,
+      "behavior": "hostile",
+      "notes": "Spawns in 3 sizes (big/medium/small). Big (4 HP dmg, 16 HP), Medium (3 HP dmg, 4 HP), Small (0 HP dmg, 1 HP). Splits when killed. Slime chunks below Y=40."
+    },
+    {
+      "id": "blaze",
+      "name": "Blaze",
+      "health": 20,
+      "damage": { "easy": 4, "normal": 6, "hard": 9 },
+      "speed": 0.23,
+      "spawn": { "light": 0, "biomes": ["nether_fortress"] },
+      "drops": [
+        { "item": "blaze_rod", "min": 0, "max": 1, "chance": 0.5 }
+      ],
+      "xp": 10,
+      "behavior": "hostile",
+      "notes": "Flies. Shoots 3 fireballs in rapid succession. Damaged by snowballs (3 HP each). Spawn from monster spawners in nether fortresses."
+    },
+    {
+      "id": "ghast",
+      "name": "Ghast",
+      "health": 10,
+      "damage": { "easy": 4, "normal": 6, "hard": 9 },
+      "speed": 0.15,
+      "spawn": { "light": 0, "biomes": ["nether_wastes", "soul_sand_valley", "basalt_deltas"] },
+      "drops": [
+        { "item": "ghast_tear", "min": 0, "max": 1, "chance": 0.333 },
+        { "item": "gunpowder", "min": 0, "max": 2, "chance": 0.333 }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Flies. Shoots explosive fireballs that can be reflected back. Fireball explosion power: 1. Squeaky sounds heard from far away."
+    },
+    {
+      "id": "magma_cube",
+      "name": "Magma Cube",
+      "health": 16,
+      "damage": { "easy": 4, "normal": 6, "hard": 9 },
+      "speed": 0.2,
+      "spawn": { "light": 0, "biomes": ["nether_wastes", "basalt_deltas"] },
+      "drops": [
+        { "item": "magma_cream", "min": 0, "max": 1, "chance": 0.25, "note": "Medium and small sizes" }
+      ],
+      "xp": 4,
+      "behavior": "hostile",
+      "notes": "Spawns in 3 sizes like slime. Immune to fire/lava. High spawn rate in basalt deltas. Big (4 HP dmg), Medium (3 HP dmg), Small (2.5 HP dmg)."
+    },
+    {
+      "id": "drowned",
+      "name": "Drowned",
+      "health": 20,
+      "damage": { "easy": 2.5, "normal": 3, "hard": 4.5 },
+      "speed": 0.23,
+      "spawn": { "light": 0, "biomes": ["ocean", "river", "dripstone_caves"] },
+      "drops": [
+        { "item": "rotten_flesh", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "copper_ingot", "min": 0, "max": 1, "chance": 0.11 },
+        { "item": "trident", "min": 0, "max": 1, "chance": 0.003, "condition": "naturally equipped" },
+        { "item": "nautilus_shell", "min": 0, "max": 1, "chance": 0.03 }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Spawns in water. Zombie variant that can swim. 15% spawn with trident (ranged attack). 6.25% spawn with nautilus shell. Does not burn in sunlight."
+    },
+    {
+      "id": "husk",
+      "name": "Husk",
+      "health": 20,
+      "damage": { "easy": 2.5, "normal": 3, "hard": 4.5 },
+      "speed": 0.23,
+      "spawn": { "light": 0, "biomes": ["desert"] },
+      "drops": [
+        { "item": "rotten_flesh", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "iron_ingot", "min": 0, "max": 1, "chance": 0.0083 },
+        { "item": "carrot", "min": 0, "max": 1, "chance": 0.0083 },
+        { "item": "potato", "min": 0, "max": 1, "chance": 0.0083 }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Zombie variant in deserts. Applies Hunger effect to targets. Does not burn in sunlight. Converts to zombie when submerged, then to drowned."
+    },
+    {
+      "id": "stray",
+      "name": "Stray",
+      "health": 20,
+      "damage": { "easy": 3, "normal": 4, "hard": 6 },
+      "speed": 0.25,
+      "spawn": { "light": 0, "biomes": ["snowy_plains", "ice_spikes", "frozen_ocean", "snowy_taiga", "snowy_beach", "frozen_river"] },
+      "drops": [
+        { "item": "bone", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "arrow", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "arrow_of_slowness", "min": 0, "max": 1, "chance": 0.5 }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Skeleton variant in snowy biomes. Shoots arrows of Slowness (30s). Can be formed when skeleton spends 7s in powder snow then converts after 15s."
+    },
+    {
+      "id": "wither_skeleton",
+      "name": "Wither Skeleton",
+      "health": 20,
+      "damage": { "easy": 5, "normal": 8, "hard": 12 },
+      "speed": 0.23,
+      "spawn": { "light": 0, "biomes": ["nether_fortress"] },
+      "drops": [
+        { "item": "bone", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "coal", "min": 0, "max": 1, "chance": 0.33 },
+        { "item": "wither_skeleton_skull", "min": 0, "max": 1, "chance": 0.025 },
+        { "item": "stone_sword", "min": 0, "max": 1, "chance": 0.085, "condition": "naturally equipped" }
+      ],
+      "xp": 5,
+      "behavior": "hostile",
+      "notes": "Found in Nether fortresses. Applies Wither effect (10s). Taller than regular skeleton (2.4 blocks). 20% of fortress skeletons are replaced by wither skeletons."
+    },
+    {
+      "id": "chicken",
+      "name": "Chicken",
+      "health": 4,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.25,
+      "spawn": { "light": 7, "biomes": ["overworld_grassy"] },
+      "drops": [
+        { "item": "raw_chicken", "min": 1, "max": 1, "chance": 1.0 },
+        { "item": "feather", "min": 0, "max": 2, "chance": 0.5 },
+        { "item": "egg", "min": 1, "max": 1, "chance": 0.0, "condition": "lays eggs every 5-10 min" }
+      ],
+      "xp": 1,
+      "behavior": "passive",
+      "notes": "Immune to fall damage (flaps wings). Follows player holding seeds. Lays eggs every 5-10 minutes. Breeds with seeds."
+    },
+    {
+      "id": "cow",
+      "name": "Cow",
+      "health": 10,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.2,
+      "spawn": { "light": 7, "biomes": ["overworld_grassy"] },
+      "drops": [
+        { "item": "raw_beef", "min": 1, "max": 3, "chance": 1.0 },
+        { "item": "leather", "min": 0, "max": 2, "chance": 0.5 }
+      ],
+      "xp": 1,
+      "behavior": "passive",
+      "notes": "Milked with bucket for milk. Follows player holding wheat. Breeds with wheat."
+    },
+    {
+      "id": "pig",
+      "name": "Pig",
+      "health": 10,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.25,
+      "spawn": { "light": 7, "biomes": ["overworld_grassy"] },
+      "drops": [
+        { "item": "raw_porkchop", "min": 1, "max": 3, "chance": 1.0 }
+      ],
+      "xp": 1,
+      "behavior": "passive",
+      "notes": "Ridable with saddle. Follows player holding carrot, potato or beetroot. Breeds with carrot, potato or beetroot."
+    },
+    {
+      "id": "sheep",
+      "name": "Sheep",
+      "health": 8,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.23,
+      "spawn": { "light": 7, "biomes": ["overworld_grassy"] },
+      "drops": [
+        { "item": "mutton", "min": 1, "max": 2, "chance": 1.0 },
+        { "item": "wool", "min": 1, "max": 1, "chance": 1.0, "condition": "sheared or killed with natural color" }
+      ],
+      "xp": 1,
+      "behavior": "passive",
+      "notes": "Can be sheared for 1-3 wool. Dyeable. Follows player holding wheat. Breeds with wheat. Regrows wool eating grass."
+    },
+    {
+      "id": "rabbit",
+      "name": "Rabbit",
+      "health": 3,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.3,
+      "spawn": { "light": 7, "biomes": ["desert", "flower_forest", "taiga", "snowy_plains", "ice_spikes", "meadow", "grove"] },
+      "drops": [
+        { "item": "rabbit_hide", "min": 0, "max": 1, "chance": 0.5 },
+        { "item": "raw_rabbit", "min": 1, "max": 1, "chance": 1.0 },
+        { "item": "rabbit_foot", "min": 0, "max": 1, "chance": 0.1 }
+      ],
+      "xp": 1,
+      "behavior": "passive",
+      "notes": "There is a hostile 'Killer Bunny' (Java Edition only). Follows player holding carrot, dandelion or golden carrot. Breeds with carrots/dandelions."
+    },
+    {
+      "id": "squid",
+      "name": "Squid",
+      "health": 10,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.2,
+      "spawn": { "light": 0, "biomes": ["ocean", "river"] },
+      "drops": [
+        { "item": "ink_sac", "min": 1, "max": 3, "chance": 1.0 }
+      ],
+      "xp": 1,
+      "behavior": "passive",
+      "notes": "Spends most time in water. Suffocates on land after 15s. Can be found in any ocean/river."
+    },
+    {
+      "id": "mooshroom",
+      "name": "Mooshroom",
+      "health": 10,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.2,
+      "spawn": { "light": 7, "biomes": ["mushroom_fields"] },
+      "drops": [
+        { "item": "raw_beef", "min": 1, "max": 3, "chance": 1.0 },
+        { "item": "leather", "min": 0, "max": 2, "chance": 0.5 }
+      ],
+      "xp": 1,
+      "behavior": "passive",
+      "notes": "Cow variant only in mushroom fields. Milked with bowl for mushroom stew. Has red (default) or brown variants. Brown mooshrooms can be fed flowers for suspicious stew."
+    },
+    {
+      "id": "bat",
+      "name": "Bat",
+      "health": 6,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.5,
+      "spawn": { "light": 0, "biomes": ["overworld", "caves"] },
+      "drops": [],
+      "xp": 0,
+      "behavior": "passive",
+      "notes": "Ambient mob. Flies in dark areas. Spawns below Y=63 at light level <=3. Gives no XP. Hangs upside down when idle."
+    },
+    {
+      "id": "villager",
+      "name": "Villager",
+      "health": 20,
+      "damage": { "easy": 0, "normal": 0, "hard": 0 },
+      "speed": 0.2,
+      "spawn": { "light": 7, "biomes": ["villages_in_plains", "desert", "savanna", "taiga", "snowy_plains"] },
+      "drops": [],
+      "xp": 0,
+      "behavior": "passive",
+      "notes": "Has multiple profession variants. Can breed and trade. Spawns in villages. Zombie infection converts them to zombie villagers. Can be cured with weakness potion + golden apple."
+    },
+    {
+      "id": "wolf",
+      "name": "Wolf",
+      "health": 8,
+      "damage": { "easy": 3, "normal": 4, "hard": 6 },
+      "speed": 0.3,
+      "spawn": { "light": 7, "biomes": ["forest", "taiga", "grove", "old_growth_taiga"] },
+      "drops": [],
+      "xp": 1,
+      "behavior": "neutral",
+      "notes": "Neutral unless provoked. Can be tamed with bones. Tamed wolves attack mobs that attack owner. Tail angle shows health. Follows player."
+    },
+    {
+      "id": "bee",
+      "name": "Bee",
+      "health": 10,
+      "damage": { "easy": 2, "normal": 2, "hard": 2 },
+      "speed": 0.3,
+      "spawn": { "light": 7, "biomes": ["flower_forest", "plains", "sunflower_plains", "meadow", "cherry_grove"] },
+      "drops": [
+        { "item": "honeycomb", "min": 0, "max": 3, "chance": 1.0, "condition": "from bee nests/hives with shears" }
+      ],
+      "xp": 1,
+      "behavior": "neutral",
+      "notes": "Neutral unless provoked. Swarm attacks when stung. Dies 60s after stinging (loses stinger). Pollinates flowers. Returns to hive. Can be bred with flowers."
+    },
+    {
+      "id": "dolphin",
+      "name": "Dolphin",
+      "health": 10,
+      "damage": { "easy": 2.5, "normal": 3, "hard": 4.5 },
+      "speed": 0.3,
+      "spawn": { "light": 7, "biomes": ["ocean", "deep_ocean", "lukewarm_ocean", "warm_ocean"] },
+      "drops": [
+        { "item": "cod", "min": 0, "max": 1, "chance": 0.5 }
+      ],
+      "xp": 1,
+      "behavior": "neutral",
+      "notes": "Neutral unless provoked. Gives Dolphin's Grace to nearby swimming players. Leads players to shipwrecks/buried treasure. Breeds with raw cod/salmon."
+    },
+    {
+      "id": "goat",
+      "name": "Goat",
+      "health": 10,
+      "damage": { "easy": 2, "normal": 3, "hard": 4.5 },
+      "speed": 0.2,
+      "spawn": { "light": 7, "biomes": ["jagged_peaks", "frozen_peaks", "snowy_slopes"] },
+      "drops": [
+        { "item": "mutton", "min": 1, "max": 2, "chance": 1.0 },
+        { "item": "leather", "min": 0, "max": 1, "chance": 0.5 }
+      ],
+      "xp": 1,
+      "behavior": "neutral",
+      "notes": "Neutral unless provoked. Rams players/mobs (4-8 blocks knockback). Can drop goat horns when ramming. Screaming goat variant. Jump height: 5-10 blocks."
+    },
+    {
+      "id": "llama",
+      "name": "Llama",
+      "health": 15,
+      "damage": { "easy": 1, "normal": 1.5, "hard": 1.5 },
+      "speed": 0.175,
+      "spawn": { "light": 7, "biomes": ["savanna", "windswept_hills", "windswept_savanna"] },
+      "drops": [
+        { "item": "leather", "min": 0, "max": 2, "chance": 0.5 }
+      ],
+      "xp": 1,
+      "behavior": "neutral",
+      "notes": "Neutral unless provoked. Spits at attackers (1 HP damage). Can be tamed and ridden. Carpet colors. Can form caravans when led. Breeds with hay bales."
+    },
+    {
+      "id": "zombified_piglin",
+      "name": "Zombified Piglin",
+      "health": 20,
+      "damage": { "easy": 5, "normal": 8, "hard": 12 },
+      "speed": 0.23,
+      "spawn": { "light": 0, "biomes": ["nether_wastes", "crimson_forest"] },
+      "drops": [
+        { "item": "rotten_flesh", "min": 0, "max": 1, "chance": 0.5 },
+        { "item": "gold_nugget", "min": 0, "max": 1, "chance": 0.5 },
+        { "item": "gold_ingot", "min": 0, "max": 1, "chance": 0.025 }
+      ],
+      "xp": 5,
+      "behavior": "neutral",
+      "notes": "Neutral unless provoked. Zombified version of piglin. When attacked, nearby zombified piglins become hostile. Spawn in Nether. Use golden swords."
+    }
+  ]
+}

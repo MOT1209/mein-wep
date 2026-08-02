@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Voxel Realm — A 3D voxel sandbox game built with Three.js. Mine, craft, build, and survive in an immersive block world.">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/games/kingcraft-game/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Voxel Realm — 3D Voxel Sandbox Game">
+    <meta property="og:description" content="A 3D voxel sandbox game in the browser. Built with Three.js, chunk-based rendering, and physics.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/screenshots/kingcraft.webp">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/games/kingcraft-game/">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Voxel Realm — 3D Voxel Sandbox Game">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/screenshots/kingcraft.webp">
+    <title>Voxel Realm — 3D Voxel Sandbox Game | Rashid</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../../css/style.css?v=4.1">
+    <style>
+        body { background: #09090b; }
+        .game-hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            padding: 100px 24px;
+        }
+        .game-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(99,102,241,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .game-hero h1 {
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 800;
+            background: linear-gradient(135deg, #818cf8, #38bdf8, #2dd4bf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+        .game-hero .subtitle {
+            color: #94a3b8;
+            font-size: 1.2rem;
+            margin-bottom: 32px;
+        }
+        .game-hero .badge {
+            display: inline-block;
+            background: rgba(56,189,248,0.15);
+            color: #38bdf8;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            border: 1px solid rgba(56,189,248,0.2);
+        }
+
+        .game-showcase {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px 80px;
+        }
+
+        .game-screenshot {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            overflow: hidden;
+            margin-bottom: 60px;
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-screenshot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .game-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+        .feature-card {
+            background: rgba(24,24,27,0.6);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 16px;
+            padding: 28px 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover { border-color: rgba(56,189,248,0.2); transform: translateY(-3px); }
+        .feature-card i { font-size: 2rem; color: #38bdf8; margin-bottom: 16px; }
+        .feature-card h3 { color: #fff; font-size: 1.1rem; margin-bottom: 8px; }
+        .feature-card p { color: #a1a1aa; font-size: 0.9rem; line-height: 1.6; }
+
+        .game-actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+        .game-actions .btn {
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-play-game {
+            background: linear-gradient(135deg, #6366f1, #38bdf8);
+            color: #fff;
+        }
+        .btn-play-game:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(56,189,248,0.3);
+        }
+        .btn-source {
+            background: rgba(255,255,255,0.05);
+            color: #d4d4d8;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .btn-source:hover {
+            background: rgba(255,255,255,0.1);
+            transform: translateY(-3px);
+        }
+
+        .controls-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 60px;
+        }
+        .control-key {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(24,24,27,0.6);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .control-key kbd {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            color: #38bdf8;
+            min-width: 36px;
+            text-align: center;
+        }
+        .control-key span { color: #a1a1aa; font-size: 0.85rem; }
+
+        @media (max-width: 768px) {
+            .game-hero h1 { font-size: 2.5rem; }
+            .game-features { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="bg-mesh"></div>
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="../../index.html" class="logo">Rashid<span class="accent-dot">.</span></a>
+            <ul class="nav-links">
+                <li><a href="../../index.html">Home</a></li>
+                <li><a href="../../index.html#projects">Projects</a></li>
+                <li><a href="../../index.html#github">GitHub</a></li>
+                <li><a href="../../blog/">Blog</a></li>
+            </ul>
+            <div class="nav-controls">
+                <button id="theme-toggle" aria-label="Switch theme"><i aria-hidden="true" class="fas fa-moon"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <!-- Hero -->
+        <section class="game-hero">
+            <div>
+                <div class="badge"><i aria-hidden="true" class="fas fa-crown"></i> Featured Project</div>
+                <h1>Voxel Realm</h1>
+                <p class="subtitle">A 3D voxel sandbox game built with Three.js — mine, craft, build, and survive!</p>
+                <div class="game-actions">
+                    <a href="index.html" class="btn btn-play-game"><i aria-hidden="true" class="fas fa-play"></i> Play Now</a>
+                    <a href="https://github.com/MOT1209/mein-wep/tree/main/games/kingcraft-game" target="_blank" rel="noopener noreferrer" class="btn btn-source"><i aria-hidden="true" class="fab fa-github"></i> Source Code</a>
+                </div>
+            </div>
+        </section>
+
+        <div class="game-showcase">
+            <!-- Screenshot -->
+            <div class="game-screenshot">
+                <img src="../../images/screenshots/kingcraft.svg" alt="Voxel Realm Game Screenshot" loading="lazy">
+            </div>
+
+            <!-- Features -->
+            <h2 style="color:#fff;font-size:1.5rem;margin-bottom:24px;text-align:center;">🚀 Features</h2>
+            <div class="game-features">
+                <div class="feature-card">
+                    <i aria-hidden="true" class="fas fa-cubes"></i>
+                    <h3>Voxel World</h3>
+                    <p>Infinite procedurally generated world made of blocks. Each block is a voxel in a 16×16×64 chunk system.</p>
+                </div>
+                <div class="feature-card">
+                    <i aria-hidden="true" class="fas fa-running"></i>
+                    <h3>Physics Engine</h3>
+                    <p>Full collision detection, gravity, jumping, sprinting, and flying mode. Smooth player movement with pointer lock.</p>
+                </div>
+                <div class="feature-card">
+                    <i aria-hidden="true" class="fas fa-hand-pointer"></i>
+                    <h3>Block Interaction</h3>
+                    <p>Place and break blocks with raycasting. Left click to break, right click to place. Hotbar with 9 slots.</p>
+                </div>
+                <div class="feature-card">
+                    <i aria-hidden="true" class="fas fa-tachometer-alt"></i>
+                    <h3>Performance</h3>
+                    <p>GPU-instanced rendering, chunk culling, and greedy meshing. Runs at 60fps on modern hardware.</p>
+                </div>
+                <div class="feature-card">
+                    <i aria-hidden="true" class="fas fa-keyboard"></i>
+                    <h3>Keyboard Controls</h3>
+                    <p>WASD movement, Space to jump, Shift to sprint, E for inventory, F3 for debug overlay, and more.</p>
+                </div>
+                <div class="feature-card">
+                    <i aria-hidden="true" class="fas fa-code"></i>
+                    <h3>Open Source</h3>
+                    <p>Fully open source under the main mein-wep repository. Built with vanilla JavaScript and Three.js r160.</p>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <h2 style="color:#fff;font-size:1.5rem;margin-bottom:24px;">🎮 Controls</h2>
+            <div class="controls-section">
+                <div class="control-key"><kbd>W</kbd><span>Move Forward</span></div>
+                <div class="control-key"><kbd>A</kbd><span>Move Left</span></div>
+                <div class="control-key"><kbd>S</kbd><span>Move Backward</span></div>
+                <div class="control-key"><kbd>D</kbd><span>Move Right</span></div>
+                <div class="control-key"><kbd>Space</kbd><span>Jump / Fly</span></div>
+                <div class="control-key"><kbd>Shift</kbd><span>Sprint</span></div>
+                <div class="control-key"><kbd>Ctrl</kbd><span>Run</span></div>
+                <div class="control-key"><kbd>E</kbd><span>Inventory</span></div>
+                <div class="control-key"><kbd>Q</kbd><span>Drop Item</span></div>
+                <div class="control-key"><kbd>T</kbd><span>Chat</span></div>
+                <div class="control-key"><kbd>F</kbd><span>Toggle Hand</span></div>
+                <div class="control-key"><kbd>V</kbd><span>Toggle Perspective</span></div>
+                <div class="control-key"><kbd>F3</kbd><span>Debug Overlay</span></div>
+            </div>
+
+            <!-- Actions -->
+            <div style="text-align:center;padding:40px 0;">
+                <h2 style="color:#fff;font-size:1.5rem;margin-bottom:16px;">Ready to Play?</h2>
+                <p style="color:#a1a1aa;margin-bottom:24px;">Dive into the world of Voxel Realm — build, explore, and survive!</p>
+                <div class="game-actions">
+                    <a href="index.html" class="btn btn-play-game"><i aria-hidden="true" class="fas fa-play"></i> Play Now</a>
+                    <a href="../../blog/building-kingcraft-3d-game.html" class="btn btn-source"><i aria-hidden="true" class="fas fa-book"></i> Read the Dev Blog</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../src/js/main.js" type="module"></script>
+</body>
+</html>

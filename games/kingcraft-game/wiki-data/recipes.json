@@ -1,0 +1,480 @@
+﻿{
+  "recipes": [
+    {
+      "result": "planks",
+      "count": 4,
+      "type": "shaped",
+      "pattern": ["#"],
+      "keys": { "#": { "item": "wood" } },
+      "group": "building"
+    },
+    {
+      "result": "crafting_table",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "##"],
+      "keys": { "#": { "item": "planks" } },
+      "group": "building"
+    },
+    {
+      "result": "furnace",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #", "###"],
+      "keys": { "#": { "item": "cobble" } },
+      "group": "building"
+    },
+    {
+      "result": "iron_block",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "###", "###"],
+      "keys": { "#": { "item": "iron_ingot" } },
+      "group": "building"
+    },
+    {
+      "result": "gold_block",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "###", "###"],
+      "keys": { "#": { "item": "gold_ingot" } },
+      "group": "building"
+    },
+    {
+      "result": "diamond_block",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "###", "###"],
+      "keys": { "#": { "item": "diamond" } },
+      "group": "building"
+    },
+    {
+      "result": "sandstone",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "##"],
+      "keys": { "#": { "item": "sand" } },
+      "group": "building"
+    },
+    {
+      "result": "mossy_cobble",
+      "count": 1,
+      "type": "shapeless",
+      "ingredients": [
+        { "item": "cobble" },
+        { "item": "vine" }
+      ],
+      "group": "building"
+    },
+    {
+      "result": "stick",
+      "count": 4,
+      "type": "shaped",
+      "pattern": ["#", "#"],
+      "keys": { "#": { "item": "planks" } },
+      "group": "materials"
+    },
+    {
+      "result": "white_wool",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "##"],
+      "keys": { "#": { "item": "string" } },
+      "group": "materials"
+    },
+    {
+      "result": "iron_ingot",
+      "count": 9,
+      "type": "shapeless",
+      "ingredients": [
+        { "item": "iron_block" }
+      ],
+      "group": "materials"
+    },
+    {
+      "result": "gold_ingot",
+      "count": 9,
+      "type": "shapeless",
+      "ingredients": [
+        { "item": "gold_block" }
+      ],
+      "group": "materials"
+    },
+    {
+      "result": "diamond",
+      "count": 9,
+      "type": "shapeless",
+      "ingredients": [
+        { "item": "diamond_block" }
+      ],
+      "group": "materials"
+    },
+    {
+      "result": "bread",
+      "count": 2,
+      "type": "shapeless",
+      "ingredients": [
+        { "item": "apple" },
+        { "item": "apple" },
+        { "item": "apple" }
+      ],
+      "group": "food"
+    },
+    {
+      "result": "wooden_pickaxe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", " S ", " S "],
+      "keys": { "#": { "item": "planks" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "wooden_axe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "#S", " S"],
+      "keys": { "#": { "item": "planks" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "wooden_shovel",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "S", "S"],
+      "keys": { "#": { "item": "planks" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "wooden_sword",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "#", "S"],
+      "keys": { "#": { "item": "planks" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "stone_pickaxe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", " S ", " S "],
+      "keys": { "#": { "item": "cobble" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "stone_axe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "#S", " S"],
+      "keys": { "#": { "item": "cobble" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "stone_shovel",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "S", "S"],
+      "keys": { "#": { "item": "cobble" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "stone_sword",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "#", "S"],
+      "keys": { "#": { "item": "cobble" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "iron_pickaxe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", " S ", " S "],
+      "keys": { "#": { "item": "iron_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "iron_axe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "#S", " S"],
+      "keys": { "#": { "item": "iron_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "iron_shovel",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "S", "S"],
+      "keys": { "#": { "item": "iron_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "iron_sword",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "#", "S"],
+      "keys": { "#": { "item": "iron_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "golden_pickaxe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", " S ", " S "],
+      "keys": { "#": { "item": "gold_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "golden_axe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "#S", " S"],
+      "keys": { "#": { "item": "gold_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "golden_shovel",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "S", "S"],
+      "keys": { "#": { "item": "gold_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "golden_sword",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "#", "S"],
+      "keys": { "#": { "item": "gold_ingot" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "diamond_pickaxe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", " S ", " S "],
+      "keys": { "#": { "item": "diamond" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "diamond_axe",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["##", "#S", " S"],
+      "keys": { "#": { "item": "diamond" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "diamond_shovel",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "S", "S"],
+      "keys": { "#": { "item": "diamond" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "diamond_sword",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["#", "#", "S"],
+      "keys": { "#": { "item": "diamond" }, "S": { "item": "stick" } },
+      "group": "tools"
+    },
+    {
+      "result": "leather_helmet",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #"],
+      "keys": { "#": { "item": "leather" } },
+      "group": "combat"
+    },
+    {
+      "result": "leather_chestplate",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "###", "###"],
+      "keys": { "#": { "item": "leather" } },
+      "group": "combat"
+    },
+    {
+      "result": "leather_leggings",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #", "# #"],
+      "keys": { "#": { "item": "leather" } },
+      "group": "combat"
+    },
+    {
+      "result": "leather_boots",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "# #"],
+      "keys": { "#": { "item": "leather" } },
+      "group": "combat"
+    },
+    {
+      "result": "iron_helmet",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #"],
+      "keys": { "#": { "item": "iron_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "iron_chestplate",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "###", "###"],
+      "keys": { "#": { "item": "iron_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "iron_leggings",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #", "# #"],
+      "keys": { "#": { "item": "iron_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "iron_boots",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "# #"],
+      "keys": { "#": { "item": "iron_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "golden_helmet",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #"],
+      "keys": { "#": { "item": "gold_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "golden_chestplate",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "###", "###"],
+      "keys": { "#": { "item": "gold_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "golden_leggings",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #", "# #"],
+      "keys": { "#": { "item": "gold_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "golden_boots",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "# #"],
+      "keys": { "#": { "item": "gold_ingot" } },
+      "group": "combat"
+    },
+    {
+      "result": "diamond_helmet",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #"],
+      "keys": { "#": { "item": "diamond" } },
+      "group": "combat"
+    },
+    {
+      "result": "diamond_chestplate",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "###", "###"],
+      "keys": { "#": { "item": "diamond" } },
+      "group": "combat"
+    },
+    {
+      "result": "diamond_leggings",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["###", "# #", "# #"],
+      "keys": { "#": { "item": "diamond" } },
+      "group": "combat"
+    },
+    {
+      "result": "diamond_boots",
+      "count": 1,
+      "type": "shaped",
+      "pattern": ["# #", "# #"],
+      "keys": { "#": { "item": "diamond" } },
+      "group": "combat"
+    }
+  ],
+  "smelting": [
+    {
+      "input": "iron_ore",
+      "result": "iron_ingot",
+      "xp": 0.7,
+      "cookTime": 200
+    },
+    {
+      "input": "gold_ore",
+      "result": "gold_ingot",
+      "xp": 1.0,
+      "cookTime": 200
+    },
+    {
+      "input": "coal_ore",
+      "result": "coal",
+      "xp": 0.1,
+      "cookTime": 200
+    },
+    {
+      "input": "diamond_ore",
+      "result": "diamond",
+      "xp": 1.0,
+      "cookTime": 200
+    },
+    {
+      "input": "cobble",
+      "result": "stone",
+      "xp": 0.1,
+      "cookTime": 200
+    },
+    {
+      "input": "sand",
+      "result": "glass",
+      "xp": 0.1,
+      "cookTime": 200
+    },
+    {
+      "input": "wood",
+      "result": "charcoal",
+      "xp": 0.15,
+      "cookTime": 200
+    },
+    {
+      "input": "beef",
+      "result": "cooked_beef",
+      "xp": 0.35,
+      "cookTime": 200
+    },
+    {
+      "input": "porkchop",
+      "result": "cooked_porkchop",
+      "xp": 0.35,
+      "cookTime": 200
+    },
+    {
+      "input": "chicken",
+      "result": "cooked_chicken",
+      "xp": 0.35,
+      "cookTime": 200
+    },
+    {
+      "input": "mutton",
+      "result": "cooked_mutton",
+      "xp": 0.35,
+      "cookTime": 200
+    }
+  ]
+}

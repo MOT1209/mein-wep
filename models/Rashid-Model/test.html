@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Chat | Rashid</title>
+    <meta name="description" content="Rashid AI Test Chat — Minimal chat interface for testing AI responses.">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/models/Rashid-app/test.html">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <style>
+        body { font-family: Arial; background: #12121a; color: white; padding: 20px; }
+        #chat { border: 1px solid #333; height: 300px; overflow-y: scroll; padding: 10px; margin-bottom: 10px; }
+        .msg { padding: 8px; margin: 5px 0; border-radius: 5px; }
+        .user { background: #6366f1; text-align: left; }
+        .bot { background: #333; }
+        input { padding: 10px; width: 70%; }
+        button { padding: 10px 20px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>اختبار الدردشة</h2>
+    <div id="chat"></div>
+    <input type="text" id="input" placeholder="اكتب رسالة...">
+    <button id="send">إرسال</button>
+    
+    <script>
+        function generateResponse(q) {
+            return "مرحباً! أنا أعمل! 🟢";
+        }
+        
+        document.getElementById('send').onclick = function() {
+            var input = document.getElementById('input');
+            var chat = document.getElementById('chat');
+            var text = input.value;
+            
+            if (text.trim() === "") return;
+            
+            chat.innerHTML += '<div class="msg user">' + text + '</div>';
+            chat.innerHTML += '<div class="msg bot">' + generateResponse(text) + '</div>';
+            
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+        };
+        
+        document.getElementById('input').onkeypress = function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('send').onclick();
+            }
+        };
+        
+        console.log('Test loaded');
+    </script>
+</body>
+</html>
