@@ -125,6 +125,25 @@ const APP_CONFIG = {
         'ar.shaatree': 'أبو بكر الشاطري'
     },
 
+    // التوقيتات اختيارية: لا تُقبل إلا إذا ذكرت رابط ملف الصوت نفسه.
+    // لا نستخدم تقديراً زمنياً، حتى لا نُظهر آية غير مطابقة للتلاوة.
+    AUDIO_TIMINGS: {
+        manifestBaseUrl: './audio-timestamps',
+        requestTimeoutMs: 5000,
+        audioTimeoutMs: 30000
+    },
+
+    VERSE_RECITER_BY_FULL: {
+        alafasy: 'ar.alafasy',
+        abdulbasit: 'ar.abdulbasitmurattal',
+        minshawi: 'ar.minshawi',
+        husary: 'ar.husary',
+        sudais: 'ar.abdurrahmaansudais',
+        maher: 'ar.mahermuaiqly',
+        yasser: 'ar.yasseraldossari',
+        shatri: 'ar.shaatree'
+    },
+
     // بيانات الأجزاء (30 جزء)
     JUZ_DATA: [
         { number: 1, name: 'الجزء الأول', startSurah: 1, startVerse: 1, endSurah: 2, endVerse: 141 },
@@ -181,7 +200,12 @@ const state = {
     audioElement: null,
     searchDebounceTimer: null,
     cache: new Map(),
-    verseTimings: [], // توقيت كل آية في الملف الكامل
+    verseTimings: [], // لا تُملأ إلا ببيانات مرتبطة بنفس ملف الصوت
+    verseTimingSource: 'none', // 'none' أو 'exact'
+    audioPlaybackKind: 'full_surah', // 'full_surah' أو 'verse'
+    audioRequestId: 0,
+    surahRequestId: 0,
+    audioSeekVersion: 0,
     currentReciter: 'alafasy'
 };
 
@@ -308,34 +332,61 @@ function toggleView() {
 }
 
 // ==================== Media Session API ====================
+function setMediaSessionAction(action, handler) {
+    if (!('mediaSession' in navigator) || typeof navigator.mediaSession.setActionHandler !== 'function') return;
+
+    try {
+        navigator.mediaSession.setActionHandler(action, handler);
+    } catch (error) {
+        // Chrome Android/WebView may expose Media Session but not every action.
+        console.debug(`Media Session action not supported: ${action}`, error);
+    }
+}
+
+async function resumeAudioFromMediaSession() {
+    if (!state.audioElement) return;
+
+    try {
+        await state.audioElement.play();
+    } catch (error) {
+        state.isPlaying = false;
+        updatePlayPauseButton();
+        showToast('اضغط تشغيل من داخل التطبيق للسماح بالتلاوة', 'info');
+    }
+}
+
 function setupMediaSession() {
-    if (!('mediaSession' in navigator)) return;
+    if (!('mediaSession' in navigator) || typeof MediaMetadata === 'undefined') return;
 
-    navigator.mediaSession.metadata = new MediaMetadata({
-        title: 'القرآن الكريم',
-        artist: 'تلاوة',
-        album: 'Quran App',
-        artwork: [
-            { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-            { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
-        ]
-    });
+    try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: 'القرآن الكريم',
+            artist: 'تلاوة',
+            album: 'Quran Pro',
+            artwork: [
+                { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+                { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+            ]
+        });
+    } catch (error) {
+        console.debug('Media Session metadata is unavailable', error);
+    }
 
-    navigator.mediaSession.setActionHandler('play', () => {
-        if (state.audioElement) state.audioElement.play();
+    setMediaSessionAction('play', () => { void resumeAudioFromMediaSession(); });
+    setMediaSessionAction('pause', () => state.audioElement?.pause());
+    setMediaSessionAction('seekbackward', details => {
+        if (state.audioElement) state.audioElement.currentTime = Math.max(0, state.audioElement.currentTime - (details.seekOffset || 10));
     });
-
-    navigator.mediaSession.setActionHandler('pause', () => {
-        if (state.audioElement) state.audioElement.pause();
+    setMediaSessionAction('seekforward', details => {
+        if (state.audioElement) state.audioElement.currentTime = Math.min(state.audioElement.duration || Infinity, state.audioElement.currentTime + (details.seekOffset || 10));
     });
-
-    navigator.mediaSession.setActionHandler('previoustrack', () => {
-        if (state.audioElement) state.audioElement.currentTime -= 10;
+    setMediaSessionAction('seekto', details => {
+        if (!state.audioElement || !Number.isFinite(details.seekTime)) return;
+        if (details.fastSeek && typeof state.audioElement.fastSeek === 'function') state.audioElement.fastSeek(details.seekTime);
+        else state.audioElement.currentTime = details.seekTime;
     });
-
-    navigator.mediaSession.setActionHandler('nexttrack', () => {
-        if (state.audioElement) state.audioElement.currentTime += 10;
-    });
+    setMediaSessionAction('previoustrack', () => playAdjacentVerse(-1));
+    setMediaSessionAction('nexttrack', () => playAdjacentVerse(1));
 }
 
 // ==================== PWA Install Prompt ====================
@@ -415,18 +466,45 @@ function dismissInstall() {
 }
 
 function updateMediaSession() {
-    if (!('mediaSession' in navigator) || !state.currentSurah) return;
+    if (!('mediaSession' in navigator) || !state.currentSurah || typeof MediaMetadata === 'undefined') return;
 
     const ayah = state.currentSurah.ayahs[state.currentVerseIndex];
-    navigator.mediaSession.metadata = new MediaMetadata({
-        title: `سورة ${state.currentSurah.name}`,
-        artist: `الآية ${ayah?.numberInSurah || 1}`,
-        album: 'Quran App',
-        artwork: [
-            { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-            { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
-        ]
-    });
+    const reciter = APP_CONFIG.FULL_SURAH_AUDIO[state.currentReciter];
+    const hasExactVerse = state.audioPlaybackKind === 'verse' || state.verseTimingSource === 'exact';
+    const artist = hasExactVerse
+        ? `${reciter?.name || 'تلاوة'} · الآية ${ayah?.numberInSurah || 1}`
+        : (reciter?.name || 'تلاوة');
+
+    try {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: `سورة ${state.currentSurah.name}`,
+            artist,
+            album: 'Quran Pro',
+            artwork: [
+                { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+                { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
+            ]
+        });
+    } catch (error) {
+        console.debug('Media Session metadata update failed', error);
+    }
+}
+
+function updateMediaSessionPosition() {
+    if (!('mediaSession' in navigator) || typeof navigator.mediaSession.setPositionState !== 'function' || !state.audioElement) return;
+
+    const { duration, currentTime, playbackRate } = state.audioElement;
+    if (!Number.isFinite(duration) || duration <= 0 || !Number.isFinite(currentTime)) return;
+
+    try {
+        navigator.mediaSession.setPositionState({
+            duration,
+            position: Math.min(Math.max(currentTime, 0), duration),
+            playbackRate: Number.isFinite(playbackRate) && playbackRate > 0 ? playbackRate : 1
+        });
+    } catch (error) {
+        console.debug('Media Session position update failed', error);
+    }
 }
 
 // ==================== Last Position Save ====================
@@ -693,6 +771,8 @@ function displaySurahs(surahs) {
  * @returns {Promise<void>}
  */
 async function loadSurah(surahNumber) {
+    const requestId = ++state.surahRequestId;
+
     try {
         const loadingDiv = document.createElement('div');
         loadingDiv.className = 'loading';
@@ -705,7 +785,9 @@ async function loadSurah(surahNumber) {
         elements['verses-container'].textContent = '';
         elements['verses-container'].appendChild(loadingDiv);
 
-        // إيقاف الصوت الحالي
+        // إلغاء أي طلب صوت سابق حتى لا يبدأ بعد تغيير السورة.
+        state.audioRequestId += 1;
+        state.audioSeekVersion += 1;
         if (state.audioElement) {
             state.audioElement.pause();
             state.isPlaying = false;
@@ -715,6 +797,7 @@ async function loadSurah(surahNumber) {
             `${APP_CONFIG.API_BASE}/surah/${surahNumber}`,
             `surah_${surahNumber}`
         );
+        if (requestId !== state.surahRequestId) return;
 
         state.currentSurah = data.data;
         state.currentVerseIndex = 0;
@@ -734,7 +817,9 @@ async function loadSurah(surahNumber) {
         // تحميل الصوت الكامل تلقائياً إذا كان وضع التشغيل التلقائي مفعل
         if (state.settings.autoPlay) {
             setTimeout(() => {
-                playFullSurah();
+                if (requestId === state.surahRequestId && state.currentSurah?.number === surahNumber) {
+                    void playFullSurah();
+                }
             }, 1000);
         }
 
@@ -884,18 +969,126 @@ function createSafeElement(tag, attrs = {}, children = []) {
 // ==================== NEW: Full Surah Audio System ====================
 
 /**
- * تحويل رقم السورة إلى تنسق ثلاثي الأرقام
+ * تحويل رقم السورة إلى تنسيق ثلاثي الأرقام.
  * @param {number} surahNumber - رقم السورة
- * @returns {string} - رقم السورة بتنسيق ثلاثي (001, 002, ...)
+ * @returns {string} رقم السورة بتنسيق 001، 002...
  */
 function getSurahFileName(surahNumber) {
-    return surahNumber.toString().padStart(3, '0');
+    return String(surahNumber).padStart(3, '0');
+}
+
+function getAudioElement() {
+    if (state.audioElement) return state.audioElement;
+    state.audioElement = elements['audio-element'] || new Audio();
+    state.audioElement.id = 'audio-element';
+    if (!state.audioElement.parentNode) document.body.appendChild(state.audioElement);
+    return state.audioElement;
+}
+
+function getAudioErrorMessage(error) {
+    const code = error?.code || state.audioElement?.error?.code;
+    if (code === 1) return 'تم إلغاء تحميل الصوت';
+    if (code === 2) return 'تعذر الاتصال بمصدر الصوت';
+    if (code === 3) return 'ملف الصوت تالف أو غير مدعوم';
+    if (code === 4) return 'صيغة ملف الصوت غير مدعومة على هذا الهاتف';
+    if (error?.message === 'Audio timeout') return 'انتهت مهلة تحميل الصوت';
+    if (error?.name === 'NotAllowedError') return 'اضغط تشغيل من داخل التطبيق للسماح بالتلاوة';
+    return 'تعذر تشغيل ملف الصوت. تحقق من الاتصال وحاول مرة أخرى.';
+}
+
+function waitForAudioReady(audio, timeoutMs = APP_CONFIG.AUDIO_TIMINGS.audioTimeoutMs) {
+    if (audio.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) return Promise.resolve();
+
+    return new Promise((resolve, reject) => {
+        let settled = false;
+        const cleanup = () => {
+            clearTimeout(timeoutId);
+            audio.removeEventListener('canplay', onReady);
+            audio.removeEventListener('loadedmetadata', onMetadata);
+            audio.removeEventListener('error', onError);
+        };
+        const finish = (callback, value) => {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            callback(value);
+        };
+        const onReady = () => finish(resolve);
+        const onMetadata = () => {
+            // Metadata is enough to reveal a valid source; canplay normally follows on mobile.
+            if (audio.readyState >= HTMLMediaElement.HAVE_METADATA) updateMediaSessionPosition();
+        };
+        const onError = () => finish(reject, new Error('Audio source error'));
+        const timeoutId = setTimeout(() => finish(reject, new Error('Audio timeout')), timeoutMs);
+
+        audio.addEventListener('canplay', onReady, { once: true });
+        audio.addEventListener('loadedmetadata', onMetadata);
+        audio.addEventListener('error', onError, { once: true });
+        audio.load();
+    });
+}
+
+function normalizeAudioUrl(url) {
+    try {
+        return new URL(url, window.location.href).href;
+    } catch {
+        return String(url || '');
+    }
+}
+
+function isValidExactTimings(payload, audioUrl, verseCount) {
+    if (!payload || !Array.isArray(payload.timings) || payload.timings.length !== verseCount) return false;
+    if (normalizeAudioUrl(payload.audioUrl) !== normalizeAudioUrl(audioUrl)) return false;
+
+    return payload.timings.every((timing, index, timings) => {
+        const start = Number(timing.start);
+        const end = Number(timing.end);
+        const previousEnd = index > 0 ? Number(timings[index - 1].end) : 0;
+        const verseIndex = Number.isInteger(timing.verseIndex) ? timing.verseIndex : index;
+        return verseIndex === index && Number.isFinite(start) && Number.isFinite(end)
+            && start >= 0 && end > start && start >= previousEnd;
+    });
+}
+
+async function loadExactVerseTimings(reciterKey, surahNumber, audioUrl, requestId) {
+    // Optional local manifest format:
+    // { audioUrl: "exact MP3 URL", timings: [{ start, end, verseIndex }] }
+    // A manifest is ignored unless it matches the selected MP3 exactly.
+    const manifestUrl = `${APP_CONFIG.AUDIO_TIMINGS.manifestBaseUrl}/${encodeURIComponent(reciterKey)}/${getSurahFileName(surahNumber)}.json`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), APP_CONFIG.AUDIO_TIMINGS.requestTimeoutMs);
+
+    try {
+        const response = await fetch(manifestUrl, { signal: controller.signal, cache: 'force-cache' });
+        if (!response.ok) return false;
+        const payload = await response.json();
+        if (requestId !== state.audioRequestId) return false;
+        if (!isValidExactTimings(payload, audioUrl, state.currentSurah?.ayahs.length || 0)) return false;
+        if (requestId !== state.audioRequestId) return false;
+        state.verseTimings = payload.timings.map(timing => ({ start: Number(timing.start), end: Number(timing.end) }));
+        state.verseTimingSource = 'exact';
+        return true;
+    } catch {
+        // Missing optional manifests must never block playback.
+        return false;
+    } finally {
+        clearTimeout(timeoutId);
+    }
+}
+
+function setPlayerStatus(text) {
+    if (elements['player-verse']) elements['player-verse'].textContent = text;
+}
+
+function resetAudioProgress() {
+    if (elements['progress-bar']) elements['progress-bar'].value = 0;
+    if (elements['current-time']) elements['current-time'].textContent = '0:00';
+    if (elements['duration']) elements['duration'].textContent = '0:00';
 }
 
 /**
- * تشغيل السورة كاملة مع MP3
- * @param {number} startVerseIndex - فهرس الآية للبدء منها
- * @returns {Promise<void>}
+ * تشغيل السورة كاملة مع MP3.
+ * لا يتم تخمين الآية الحالية؛ التظليل يكون فقط عند توفر manifest مطابق للصوت.
  */
 async function playFullSurah(startVerseIndex = 0) {
     if (!state.currentSurah) {
@@ -905,93 +1098,93 @@ async function playFullSurah(startVerseIndex = 0) {
 
     const reciterKey = state.currentReciter;
     const reciter = APP_CONFIG.FULL_SURAH_AUDIO[reciterKey];
-
     if (!reciter) {
         showToast('القارئ غير متوفر في وضع السورة الكاملة', 'error');
         return;
     }
 
-    // بناء رابط الملف
-    const surahFileName = getSurahFileName(state.currentSurah.number);
-    const audioUrl = `${reciter.baseUrl}/${surahFileName}.mp3`;
-
-
+    const audio = getAudioElement();
+    const requestId = ++state.audioRequestId;
+    state.audioSeekVersion += 1;
+    const audioUrl = `${reciter.baseUrl}/${getSurahFileName(state.currentSurah.number)}.mp3`;
+    state.audioPlaybackKind = 'full_surah';
+    state.currentVerseIndex = Math.max(0, Math.min(startVerseIndex, state.currentSurah.ayahs.length - 1));
+    state.isPlaying = false;
+    state.verseTimings = [];
+    state.verseTimingSource = 'none';
+    setPlayerStatus('جاري تحميل السورة...');
+    resetAudioProgress();
 
     try {
-        // إظهار حالة التحميل
-        if (elements['player-verse']) {
-            elements['player-verse'].textContent = 'جاري تحميل السورة...';
-        }
-
-        // إعداد عنصر الصوت
-        if (!state.audioElement) {
-            state.audioElement = elements['audio-element'];
-            if (!state.audioElement) {
-                state.audioElement = new Audio();
-                state.audioElement.id = 'audio-element';
-                document.body.appendChild(state.audioElement);
-            }
-        }
-
-        // إيقاف الصوت الحالي
-        state.audioElement.pause();
-        state.audioElement.currentTime = 0;
-
-        // إعداد المصدر الجديد
-        state.audioElement.src = audioUrl;
-        state.audioElement.preload = 'auto';
-        state.audioElement.playbackRate = parseFloat(elements['playback-speed']?.value || 1);
-
-        // إضافة event listeners
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load();
+        audio.src = audioUrl;
+        audio.preload = 'auto';
+        audio.playbackRate = parseFloat(elements['playback-speed']?.value || 1);
         setupFullSurahAudioListeners();
 
-        // تحميل وتشغيل
-        await new Promise((resolve, reject) => {
-            state.audioElement.addEventListener('canplaythrough', resolve, { once: true });
-            state.audioElement.addEventListener('error', reject, { once: true });
-            state.audioElement.load();
+        // التوقيت الاختياري لا يحجب بدء الصوت؛ ملف MP3 يبدأ فور جاهزيته.
+        const timingsPromise = loadExactVerseTimings(reciterKey, state.currentSurah.number, audioUrl, requestId);
+        await waitForAudioReady(audio);
+        if (requestId !== state.audioRequestId) return;
 
-            // timeout بعد 30 ثانية
-            setTimeout(() => reject(new Error('Timeout')), 30000);
-        });
-
-        await state.audioElement.play();
+        await audio.play();
+        const seekVersionAtPlaybackStart = state.audioSeekVersion;
         state.isPlaying = true;
-        state.currentVerseIndex = startVerseIndex;
-
-        // تحديث واجهة المستخدم
         updatePlayerUI();
-        elements['audio-player'].classList.add('active');
+        elements['audio-player']?.classList.add('active');
         updatePlayPauseButton();
-        highlightCurrentVerse(startVerseIndex);
-
+        updateMediaSession();
+        updateMediaSessionPosition();
+        highlightCurrentVerse(-1);
+        setPlayerStatus('تلاوة السورة · جارٍ التحقق من مزامنة الآيات');
         showToast(`جاري تشغيل سورة ${state.currentSurah.name} - ${reciter.name}`, 'success');
 
+        const hasExactTimings = await timingsPromise;
+        if (requestId !== state.audioRequestId) return;
+        if (hasExactTimings && Number.isFinite(audio.duration)) {
+            const finalTiming = state.verseTimings[state.verseTimings.length - 1];
+            if (!finalTiming || finalTiming.end > audio.duration + 0.25) {
+                state.verseTimings = [];
+                state.verseTimingSource = 'none';
+            }
+        }
+        if (state.verseTimingSource === 'exact') {
+            const startTiming = state.verseTimings[state.currentVerseIndex];
+            if (startTiming && state.audioSeekVersion === seekVersionAtPlaybackStart) audio.currentTime = startTiming.start;
+            highlightCurrentVerse(state.currentVerseIndex);
+            updatePlayerUI();
+            setPlayerStatus(`الآية ${state.currentSurah.ayahs[state.currentVerseIndex]?.numberInSurah || 1}`);
+            updateMediaSession();
+            updateMediaSessionPosition();
+        } else {
+            state.currentVerseIndex = 0;
+            setPlayerStatus('تلاوة السورة · بدون مزامنة آيات');
+        }
     } catch (error) {
+        if (requestId !== state.audioRequestId) return;
+        state.isPlaying = false;
+        updatePlayPauseButton();
         console.error('Error playing full surah:', error);
-        showToast('حدث خطأ في تحميل الصوت. جاري المحاولة بآلية بديلة...', 'warning');
 
-        // محاولة استخدام API القديم كبديل
-        setTimeout(() => {
-            playVerseOld(startVerseIndex);
-        }, 2000);
+        // If the selected reciter also has ayah files, use the exact single-ayah
+        // endpoint as a safe fallback instead of mixing another full-surah recording.
+        if (APP_CONFIG.VERSE_RECITER_BY_FULL[reciterKey]) {
+            showToast('تعذر ملف السورة الكاملة؛ سيتم تشغيل الآية الحالية بدقة', 'warning');
+            await playVerseOld(state.currentVerseIndex);
+            return;
+        }
+
+        showToast(getAudioErrorMessage(error), 'error');
     }
 }
 
-// إعداد مستمعي أحداث الصوت للسورة الكاملة
 function setupFullSurahAudioListeners() {
-    if (!state.audioElement) return;
-
-    // إزالة المستمعين القدامى
-    const events = ['timeupdate', 'ended', 'error', 'waiting', 'playing', 'pause'];
-    events.forEach(event => {
-        state.audioElement.removeEventListener(event, handleAudioEvent);
-    });
-
-    // إضافة مستمع جديد
-    events.forEach(event => {
-        state.audioElement.addEventListener(event, handleAudioEvent);
-    });
+    const audio = getAudioElement();
+    const events = ['timeupdate', 'loadedmetadata', 'durationchange', 'seeking', 'ended', 'error', 'stalled', 'waiting', 'canplay', 'playing', 'pause'];
+    events.forEach(event => audio.removeEventListener(event, handleAudioEvent));
+    events.forEach(event => audio.addEventListener(event, handleAudioEvent));
 }
 
 function handleAudioEvent(event) {
@@ -999,22 +1192,38 @@ function handleAudioEvent(event) {
 
     switch (event.type) {
         case 'timeupdate':
+        case 'loadedmetadata':
+        case 'durationchange':
             updateProgressFromTime();
+            updateMediaSessionPosition();
+            break;
+        case 'seeking':
+            state.audioSeekVersion += 1;
             break;
         case 'ended':
             handleAudioEnded();
             break;
         case 'error':
-            console.error('Audio error:', event);
+            state.isPlaying = false;
+            updatePlayPauseButton();
+            setPlayerStatus(getAudioErrorMessage());
             break;
+        case 'stalled':
         case 'waiting':
-            if (elements['player-verse']) {
-                elements['player-verse'].textContent = 'جاري التحميل...';
+            setPlayerStatus('جاري تحميل الصوت...');
+            break;
+        case 'canplay':
+            if (!state.isPlaying) {
+                const hasExactVerse = state.audioPlaybackKind === 'verse' || state.verseTimingSource === 'exact';
+                setPlayerStatus(hasExactVerse
+                    ? `الآية ${state.currentSurah.ayahs[state.currentVerseIndex]?.numberInSurah || 1}`
+                    : 'تلاوة السورة');
             }
             break;
         case 'playing':
             state.isPlaying = true;
             updatePlayPauseButton();
+            updateMediaSession();
             break;
         case 'pause':
             state.isPlaying = false;
@@ -1023,58 +1232,42 @@ function handleAudioEvent(event) {
     }
 }
 
-// تحديث التقدم من الوقت الحالي
 function updateProgressFromTime() {
-    if (!state.audioElement || !state.audioElement.duration) return;
+    const audio = state.audioElement;
+    if (!audio || !Number.isFinite(audio.duration) || audio.duration <= 0) return;
 
-    const currentTime = state.audioElement.currentTime;
-    const duration = state.audioElement.duration;
-    const progress = (currentTime / duration) * 100;
-
-    // تحديث شريط التقدم
-    if (elements['progress-bar']) {
-        elements['progress-bar'].value = progress || 0;
-    }
-
-    // تحديث الوقت
-    if (elements['current-time']) {
-        elements['current-time'].textContent = formatTime(currentTime);
-    }
-    if (elements['duration'] && duration) {
-        elements['duration'].textContent = formatTime(duration);
-    }
-
-    // تحديد الآية الحالية بناءً على الوقت (تقريبي)
-    updateCurrentVerseFromTime(currentTime, duration);
+    const currentTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    const progress = (currentTime / audio.duration) * 100;
+    if (elements['progress-bar']) elements['progress-bar'].value = Math.min(100, Math.max(0, progress));
+    if (elements['current-time']) elements['current-time'].textContent = formatTime(currentTime);
+    if (elements['duration']) elements['duration'].textContent = formatTime(audio.duration);
+    updateCurrentVerseFromTime(currentTime, audio.duration);
 }
 
-// تحديث الآية الحالية بناءً على الوقت
 function updateCurrentVerseFromTime(currentTime, duration) {
     if (!state.currentSurah) return;
 
-    // حساب تقريبي: قسمة الوقت على عدد الآيات
-    const totalVerses = state.currentSurah.ayahs.length;
-    const progressRatio = currentTime / duration;
-    const estimatedVerseIndex = Math.floor(progressRatio * totalVerses);
-
-    // التأكد من الحدود
-    const newIndex = Math.min(estimatedVerseIndex, totalVerses - 1);
+    let newIndex = state.currentVerseIndex;
+    if (state.verseTimingSource === 'exact' && state.verseTimings.length === state.currentSurah.ayahs.length) {
+        const foundIndex = state.verseTimings.findIndex(timing => currentTime >= timing.start && currentTime < timing.end);
+        if (foundIndex === -1) return;
+        newIndex = foundIndex;
+    } else if (state.audioPlaybackKind === 'verse') {
+        // A single-ayah file is exact by construction; never infer from full-surah duration.
+        newIndex = state.currentVerseIndex;
+    } else {
+        // No matching timestamps: keep the UI honest and do not guess the ayah.
+        return;
+    }
 
     if (newIndex !== state.currentVerseIndex) {
         state.currentVerseIndex = newIndex;
         highlightCurrentVerse(newIndex);
-
-        // التمرير إلى الآية
         const verseElement = document.getElementById(`verse-${newIndex}`);
-        if (verseElement) {
-            verseElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-
-        // تحديث نص المشغل
-        if (elements['player-verse']) {
-            const ayah = state.currentSurah.ayahs[newIndex];
-            elements['player-verse'].textContent = `الآية ${ayah?.numberInSurah || 1}`;
-        }
+        verseElement?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        updatePlayerUI();
+        updateMediaSession();
+        saveLastPosition();
     }
 }
 
@@ -1082,48 +1275,100 @@ function handleAudioEnded() {
     state.isPlaying = false;
     updatePlayPauseButton();
 
-    if (state.settings.autoNextSurah && state.currentSurah.number < 114) {
+    if (state.audioPlaybackKind === 'verse' && state.isRepeatEnabled) {
+        const audio = state.audioElement;
+        audio.currentTime = 0;
+        void audio.play().catch(error => showToast(getAudioErrorMessage(error), 'error'));
+        return;
+    }
+
+    if (state.settings.autoNextSurah && state.currentSurah.number < 114 && state.audioPlaybackKind === 'full_surah') {
         showToast('جاري الانتقال للسورة التالية...', 'info');
-        setTimeout(() => {
-            loadSurah(state.currentSurah.number + 1);
-        }, 2000);
+        setTimeout(() => loadSurah(state.currentSurah.number + 1), 1200);
     } else {
         showToast('انتهت التلاوة', 'success');
     }
 }
 
-// التشغيل القديم بالآية (كبديل)
-async function playVerseOld(verseIndex) {
-    if (!state.currentSurah) return;
+function playAdjacentVerse(delta) {
+    if (!state.currentSurah || !state.audioElement) return;
 
-    state.currentVerseIndex = verseIndex;
-    const reciter = Object.keys(APP_CONFIG.VERSE_BY_VERSE)[0]; // alafasy
+    if (state.audioPlaybackKind === 'full_surah' && state.verseTimingSource !== 'exact') {
+        const offset = delta * 10;
+        state.audioElement.currentTime = Math.max(0, Math.min(state.audioElement.duration || Infinity, state.audioElement.currentTime + offset));
+        return;
+    }
+
+    const nextIndex = state.currentVerseIndex + delta;
+    if (nextIndex < 0 || nextIndex >= state.currentSurah.ayahs.length) return;
+
+    if (state.audioPlaybackKind === 'full_surah' && state.verseTimingSource === 'exact') {
+        const timing = state.verseTimings[nextIndex];
+        if (timing) {
+            state.currentVerseIndex = nextIndex;
+            state.audioElement.currentTime = timing.start;
+            highlightCurrentVerse(nextIndex);
+            updatePlayerUI();
+            updateMediaSession();
+            saveLastPosition();
+            return;
+        }
+    }
+
+    // Separate ayah files are exact by construction and are the safe fallback.
+    void playVerseOld(nextIndex);
+}
+
+// تشغيل آية منفردة: التزامن هنا دقيق لأن الملف الصوتي يحتوي آية واحدة فقط.
+async function playVerseOld(verseIndex) {
+    if (!state.currentSurah?.ayahs[verseIndex]) return;
+
     const ayah = state.currentSurah.ayahs[verseIndex];
+    const reciter = APP_CONFIG.VERSE_RECITER_BY_FULL[state.currentReciter];
+    if (!reciter) {
+        showToast('هذا القارئ متوفر للسورة الكاملة فقط؛ اختر قارئاً يدعم الآيات', 'info');
+        return;
+    }
+    const audio = getAudioElement();
+    const requestId = ++state.audioRequestId;
+    state.audioSeekVersion += 1;
+    state.currentVerseIndex = verseIndex;
+    state.audioPlaybackKind = 'verse';
+    state.verseTimings = [];
+    state.verseTimingSource = 'exact';
+    setPlayerStatus(`جاري تحميل الآية ${ayah.numberInSurah}...`);
+    resetAudioProgress();
 
     try {
         const data = await fetchWithCache(
             `${APP_CONFIG.API_BASE}/ayah/${ayah.number}/${reciter}`,
             `audio_${ayah.number}_${reciter}`
         );
+        if (requestId !== state.audioRequestId || !data?.data?.audio) throw new Error('Audio source error');
 
-        if (!state.audioElement) {
-            state.audioElement = new Audio();
-        }
+        audio.pause();
+        audio.src = data.data.audio;
+        audio.preload = 'auto';
+        audio.playbackRate = parseFloat(elements['playback-speed']?.value || 1);
+        setupFullSurahAudioListeners();
+        await waitForAudioReady(audio);
+        if (requestId !== state.audioRequestId) return;
+        await audio.play();
 
-        state.audioElement.src = data.data.audio;
-        state.audioElement.load();
-
-        await state.audioElement.play();
         state.isPlaying = true;
-
         updatePlayerUI();
-        elements['audio-player'].classList.add('active');
+        elements['audio-player']?.classList.add('active');
         updatePlayPauseButton();
         highlightCurrentVerse(verseIndex);
-
+        updateMediaSession();
+        showToast(`جاري تشغيل الآية ${ayah.numberInSurah}`, 'success');
     } catch (error) {
+        if (requestId !== state.audioRequestId) return;
+        state.isPlaying = false;
+        updatePlayPauseButton();
+        setPlayerStatus(getAudioErrorMessage(error));
         console.error('Error playing verse:', error);
-        showToast('حدث خطأ في تشغيل الصوت', 'error');
+        showToast(getAudioErrorMessage(error), 'error');
     }
 }
 
@@ -1133,7 +1378,10 @@ function updatePlayerUI() {
 
     elements['player-surah'].textContent = state.currentSurah.name;
     const ayah = state.currentSurah.ayahs[state.currentVerseIndex];
-    elements['player-verse'].textContent = `الآية ${ayah?.numberInSurah || 1}`;
+    const hasExactVerse = state.audioPlaybackKind === 'verse' || state.verseTimingSource === 'exact';
+    elements['player-verse'].textContent = hasExactVerse
+        ? `الآية ${ayah?.numberInSurah || 1}`
+        : 'تلاوة السورة';
 }
 
 function updatePlayPauseButton() {
@@ -1664,12 +1912,9 @@ function setupEventListeners() {
     elements['auto-play-btn']?.addEventListener('click', toggleAutoPlay);
 
     // Audio controls - NEW
-    elements['play-pause']?.addEventListener('click', () => {
-        if (!state.audioElement) {
-            // بدء تشغيل جديد
-            if (state.currentSurah) {
-                playFullSurah(state.currentVerseIndex);
-            }
+    elements['play-pause']?.addEventListener('click', async () => {
+        if (!state.audioElement?.src) {
+            if (state.currentSurah) await playFullSurah(state.currentVerseIndex);
             return;
         }
 
@@ -1677,10 +1922,16 @@ function setupEventListeners() {
             state.audioElement.pause();
             state.isPlaying = false;
         } else {
-            state.audioElement.play();
-            state.isPlaying = true;
+            try {
+                await state.audioElement.play();
+                state.isPlaying = true;
+            } catch (error) {
+                state.isPlaying = false;
+                showToast(getAudioErrorMessage(error), 'error');
+            }
         }
         updatePlayPauseButton();
+        updateMediaSessionPosition();
     });
 
     // Reciter select - NEW
@@ -1696,13 +1947,17 @@ function setupEventListeners() {
         }
     });
 
+    // Verse navigation: exact timing when available, otherwise exact single-ayah audio.
+    elements['prev-verse']?.addEventListener('click', () => playAdjacentVerse(-1));
+    elements['next-verse']?.addEventListener('click', () => playAdjacentVerse(1));
+
     // Skip buttons
     elements['skip-forward']?.addEventListener('click', () => {
-        if (state.audioElement) state.audioElement.currentTime += 10;
+        if (state.audioElement) state.audioElement.currentTime = Math.min(state.audioElement.duration || Infinity, state.audioElement.currentTime + 10);
     });
 
     elements['skip-back']?.addEventListener('click', () => {
-        if (state.audioElement) state.audioElement.currentTime -= 10;
+        if (state.audioElement) state.audioElement.currentTime = Math.max(0, state.audioElement.currentTime - 10);
     });
 
     // Repeat
@@ -1721,10 +1976,17 @@ function setupEventListeners() {
 
     // Close player
     elements['close-player']?.addEventListener('click', () => {
+        state.audioRequestId += 1;
+        state.audioSeekVersion += 1;
         if (state.audioElement) {
             state.audioElement.pause();
+            state.audioElement.removeAttribute('src');
+            state.audioElement.load();
             state.isPlaying = false;
         }
+        state.verseTimings = [];
+        state.verseTimingSource = 'none';
+        elements['close-player'].blur();
         elements['audio-player'].classList.remove('active');
         document.querySelectorAll('.verse-item').forEach(item => {
             item.classList.remove('playing');
@@ -1900,8 +2162,8 @@ function highlightActiveSurah(surahNumber) {
 }
 
 function handleVerseClick(index) {
-    // تشغيل السورة كاملة من الآية المختارة
-    playFullSurah(index);
+    // ملف الآية المنفردة يضمن تطابقاً دقيقاً؛ لا نستخدم تقديراً من مدة السورة.
+    void playVerseOld(index);
 
     if (document.getElementById('tafsir-modal')?.classList.contains('active')) {
         loadTafsir(index);

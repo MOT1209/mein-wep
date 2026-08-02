@@ -1,1674 +1,436 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تقرير المشروع · Quran Pro Project Report</title>
-<meta name="description" content="تقرير شامل لمشروع Quran Pro - تطبيق قرآن PWA مجاني وخالٍ من الإعلانات مع سحابة مزامنة.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@300;400;600;700&family=Scheherazade+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<style>
-/* ====== DESIGN TOKENS ====== */
-:root {
-  --primary: #059669;
-  --primary-light: #34d399;
-  --primary-dark: #047857;
-  --accent: #f59e0b;
-  --accent-light: #fbbf24;
-  --accent-dark: #d97706;
-  --indigo: #6366f1;
-  --purple: #8b5cf6;
-  --rose: #f43f5e;
-  --emerald: #10b981;
-  --sky: #0ea5e9;
-
-  --bg: #f8fafc;
-  --bg-2: #ffffff;
-  --bg-3: #f1f5f9;
-  --bg-card: rgba(255,255,255,0.85);
-  --text: #0f172a;
-  --text-2: #475569;
-  --text-3: #94a3b8;
-  --border: rgba(148,163,184,0.25);
-  --glass: rgba(255,255,255,0.7);
-  --glass-border: rgba(255,255,255,0.6);
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-  --shadow: 0 4px 6px -1px rgba(0,0,0,.08), 0 2px 4px -2px rgba(0,0,0,.04);
-  --shadow-lg: 0 10px 25px -5px rgba(0,0,0,.1), 0 8px 10px -6px rgba(0,0,0,.04);
-  --shadow-xl: 0 25px 50px -12px rgba(0,0,0,.18);
-  --glow: 0 0 20px rgba(5,150,105,0.3);
-
-  --radius-sm: 8px;
-  --radius: 14px;
-  --radius-lg: 22px;
-
-  --code-bg: #0f172a;
-  --code-text: #e2e8f0;
-}
-
-[data-theme="dark"] {
-  --bg: #020617;
-  --bg-2: #0f172a;
-  --bg-3: #1e293b;
-  --bg-card: rgba(15,23,42,0.85);
-  --text: #f8fafc;
-  --text-2: #cbd5e1;
-  --text-3: #64748b;
-  --border: rgba(148,163,184,0.12);
-  --glass: rgba(15,23,42,0.75);
-  --glass-border: rgba(255,255,255,0.08);
-  --glow: 0 0 25px rgba(52,211,153,0.25);
-}
-
-/* ====== RESET ====== */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Cairo','Inter', system-ui, -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  line-height: 1.7;
-  transition: background 0.3s ease, color 0.3s ease;
-  overflow-x: hidden;
-}
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: var(--bg-3); }
-::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 5px; }
-::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
-
-/* ====== AMBIENT BACKGROUND ====== */
-.ambient {
-  position: fixed; inset: 0; z-index: -1; pointer-events: none; overflow: hidden;
-  background: radial-gradient(ellipse at top, rgba(5,150,105,0.08), transparent 60%),
-              radial-gradient(ellipse at bottom right, rgba(245,158,11,0.06), transparent 60%);
-}
-.ambient::before, .ambient::after {
-  content: ''; position: absolute; width: 600px; height: 600px;
-  border-radius: 50%; filter: blur(80px); opacity: 0.5;
-  animation: float 20s ease-in-out infinite;
-}
-.ambient::before { background: var(--primary); top: -10%; right: -10%; }
-.ambient::after { background: var(--accent); bottom: -10%; left: -10%; animation-delay: -10s; }
-@keyframes float {
-  0%, 100% { transform: translate(0,0) scale(1); }
-  50% { transform: translate(50px,-50px) scale(1.1); }
-}
-[data-theme="dark"] .ambient::before { opacity: 0.35; }
-[data-theme="dark"] .ambient::after { opacity: 0.3; }
-
-/* ====== CONTAINER ====== */
-.container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
-
-/* ====== HEADER ====== */
-header.report-header {
-  position: sticky; top: 0; z-index: 100;
-  background: var(--glass); backdrop-filter: blur(16px) saturate(180%);
-  -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border-bottom: 1px solid var(--glass-border);
-  transition: all 0.3s ease;
-}
-.header-row {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 24px; max-width: 1280px; margin: 0 auto;
-}
-.brand { display: flex; align-items: center; gap: 12px; }
-.brand-logo {
-  width: 42px; height: 42px; border-radius: 11px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 1.2rem; box-shadow: var(--glow);
-}
-.brand-title {
-  font-family: 'Amiri', serif; font-weight: 700; font-size: 1.3rem;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.brand-sub { font-size: 0.72rem; color: var(--text-3); margin-top: -2px; }
-.nav { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.nav a {
-  font-size: 0.82rem; color: var(--text-2); text-decoration: none;
-  padding: 8px 12px; border-radius: 8px; transition: all 0.2s ease;
-  font-weight: 600;
-}
-.nav a:hover { background: var(--bg-3); color: var(--primary); }
-.theme-toggle, .print-btn {
-  background: var(--bg-3); border: 1px solid var(--border); width: 38px; height: 38px;
-  border-radius: 9px; cursor: pointer; color: var(--text);
-  display: flex; align-items: center; justify-content: center; transition: all 0.2s ease;
-  font-size: 0.95rem;
-}
-.theme-toggle:hover, .print-btn:hover {
-  background: var(--primary); color: white; border-color: var(--primary);
-  transform: translateY(-2px);
-}
-@media (max-width: 768px) {
-  .nav { display: none; }
-  .brand-sub { display: none; }
-}
-
-/* ====== HERO ====== */
-.hero {
-  padding: 80px 24px 60px; text-align: center; position: relative;
-}
-.hero-badge {
-  display: inline-flex; align-items: center; gap: 8px;
-  background: var(--glass); border: 1px solid var(--glass-border);
-  padding: 8px 16px; border-radius: 100px; font-size: 0.82rem;
-  color: var(--primary); font-weight: 600; margin-bottom: 28px;
-  backdrop-filter: blur(10px); box-shadow: var(--shadow);
-}
-.hero-badge .dot {
-  width: 8px; height: 8px; border-radius: 50%; background: var(--emerald);
-  animation: pulse-dot 2s ease-in-out infinite;
-}
-@keyframes pulse-dot { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.5; } }
-
-.hero h1 {
-  font-family: 'Amiri', serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 700; line-height: 1.2; margin-bottom: 12px;
-  background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.hero h2 {
-  font-family: 'Inter', sans-serif; font-weight: 800; font-size: clamp(1.1rem, 2.2vw, 1.4rem);
-  color: var(--text-2); margin-bottom: 20px; letter-spacing: -0.5px;
-}
-.hero .tagline {
-  font-size: clamp(1rem, 1.6vw, 1.2rem); color: var(--text-2);
-  max-width: 760px; margin: 0 auto 14px; line-height: 1.7;
-}
-.hero .tagline strong { color: var(--primary); }
-
-.hero-meta {
-  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;
-  margin-top: 30px;
-}
-.meta-chip {
-  background: var(--bg-card); border: 1px solid var(--border);
-  padding: 8px 14px; border-radius: 100px; font-size: 0.85rem;
-  display: inline-flex; align-items: center; gap: 6px; font-weight: 600;
-  color: var(--text-2); box-shadow: var(--shadow-sm);
-}
-.meta-chip i { color: var(--primary); }
-.meta-chip.gold i { color: var(--accent); }
-
-/* ====== BISMILLAH HEADER ====== */
-.bismillah-banner {
-  text-align: center; padding: 18px 24px;
-  background: linear-gradient(90deg, transparent, rgba(5,150,105,0.07), transparent);
-  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-}
-.bismillah-banner p {
-  font-family: 'Scheherazade New','Amiri', serif;
-  font-size: clamp(1.2rem, 2vw, 1.7rem);
-  color: var(--primary); font-weight: 600;
-  letter-spacing: 0.5px;
-}
-
-/* ====== STATS ====== */
-.stats-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px; margin: 50px 0;
-}
-.stat-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 26px;
-  position: relative; overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(10px); box-shadow: var(--shadow);
-}
-.stat-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
-.stat-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  opacity: 0; transition: opacity 0.3s ease; border-radius: var(--radius-lg);
-}
-.stat-card:hover::before { opacity: 0.04; }
-.stat-icon {
-  width: 52px; height: 52px; border-radius: 13px;
-  display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: white; font-size: 1.4rem; margin-bottom: 14px;
-  box-shadow: 0 6px 14px rgba(5,150,105,0.3);
-}
-.stat-card.accent .stat-icon { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); box-shadow: 0 6px 14px rgba(245,158,11,0.3); }
-.stat-card.indigo .stat-icon { background: linear-gradient(135deg, var(--indigo), var(--purple)); box-shadow: 0 6px 14px rgba(99,102,241,0.3); }
-.stat-card.sky .stat-icon { background: linear-gradient(135deg, var(--sky), var(--primary)); box-shadow: 0 6px 14px rgba(14,165,233,0.3); }
-.stat-card.success .stat-icon { background: linear-gradient(135deg, var(--emerald), var(--primary-dark)); box-shadow: 0 6px 14px rgba(16,185,129,0.3); }
-.stat-number {
-  font-family: 'Inter', sans-serif; font-size: 2.4rem; font-weight: 800;
-  line-height: 1; margin-bottom: 8px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.stat-card.indigo .stat-number { background: linear-gradient(135deg, var(--indigo), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-card.sky .stat-number { background: linear-gradient(135deg, var(--sky), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-card.accent .stat-number { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.stat-label { font-size: 0.92rem; color: var(--text-2); font-weight: 600; }
-.stat-sub { font-size: 0.74rem; color: var(--text-3); margin-top: 4px; }
-
-/* ====== SECTION ====== */
-section { padding: 60px 0; }
-.section-head { margin-bottom: 36px; text-align: center; }
-.section-eyebrow {
-  display: inline-block; font-size: 0.78rem; font-weight: 700;
-  color: var(--primary); letter-spacing: 2px; text-transform: uppercase;
-  padding: 6px 14px; border-radius: 100px; background: rgba(5,150,105,0.1);
-  margin-bottom: 14px;
-}
-.section-head h3 {
-  font-family: 'Amiri', serif; font-size: clamp(1.6rem, 3.4vw, 2.4rem);
-  font-weight: 700; margin-bottom: 8px; color: var(--text);
-}
-.section-head h3 .en {
-  display: block; font-family: 'Inter', sans-serif;
-  font-size: 0.42em; color: var(--text-3); margin-top: 8px; font-weight: 600; letter-spacing: 0;
-}
-.section-head p { color: var(--text-2); max-width: 760px; margin: 0 auto; font-size: 1.02rem; }
-
-/* ====== TECH STACK ====== */
-.tech-wrap { display: flex; flex-direction: column; gap: 26px; }
-.tech-row { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow); }
-.tech-row-label {
-  display: flex; align-items: center; gap: 10px;
-  font-weight: 700; color: var(--primary); margin-bottom: 16px;
-  font-size: 1.05rem;
-}
-.tech-row-label i { font-size: 1.3rem; }
-.tech-pills { display: flex; flex-wrap: wrap; gap: 10px; }
-.tech-pill {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 16px; border-radius: 100px; font-size: 0.85rem; font-weight: 600;
-  background: var(--bg-3); color: var(--text); border: 1px solid var(--border);
-  transition: all 0.2s ease;
-}
-.tech-pill:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
-.tech-pill .bullet { width: 10px; height: 10px; border-radius: 50%; }
-.tech-pill.html .bullet { background: #e34c26; }
-.tech-pill.css .bullet { background: #264de4; }
-.tech-pill.js .bullet { background: #f7df1e; }
-.tech-pill.font .bullet { background: #6d8cff; }
-.tech-pill.api .bullet { background: var(--sky); }
-.tech-pill.cloud .bullet { background: var(--emerald); }
-.tech-pill.build .bullet { background: var(--indigo); }
-.tech-pill.ads .bullet { background: var(--accent); }
-.tech-pill.pwa .bullet { background: var(--purple); }
-.tech-pill.ota .bullet { background: var(--rose); }
-.tech-pill small { color: var(--text-3); font-weight: 500; font-size: 0.72rem; }
-
-/* ====== FEATURES GRID ====== */
-.features-grid {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-.feature-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  padding: 28px; border-radius: var(--radius-lg);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-  position: relative; overflow: hidden; backdrop-filter: blur(10px);
-  box-shadow: var(--shadow);
-}
-.feature-card:hover {
-  transform: translateY(-6px); box-shadow: var(--shadow-lg); border-color: var(--primary);
-}
-.feature-card::after {
-  content: ''; position: absolute; top: -40px; right: -40px;
-  width: 120px; height: 120px; background: var(--primary);
-  opacity: 0.05; border-radius: 50%; transition: transform 0.4s ease;
-}
-.feature-card:hover::after { transform: scale(2); }
-.feature-icon {
-  width: 54px; height: 54px; border-radius: 13px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 1.5rem; margin-bottom: 18px;
-  position: relative; z-index: 1;
-  box-shadow: 0 6px 14px rgba(5,150,105,0.25);
-}
-.feature-card.indigo .feature-icon { background: linear-gradient(135deg, var(--indigo), var(--purple)); box-shadow: 0 6px 14px rgba(99,102,241,0.25); }
-.feature-card.accent .feature-icon { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); box-shadow: 0 6px 14px rgba(245,158,11,0.25); }
-.feature-card.sky .feature-icon { background: linear-gradient(135deg, var(--sky), var(--primary)); box-shadow: 0 6px 14px rgba(14,165,233,0.25); }
-.feature-card.rose .feature-icon { background: linear-gradient(135deg, var(--rose), var(--accent)); box-shadow: 0 6px 14px rgba(244,63,94,0.25); }
-.feature-card.purple .feature-icon { background: linear-gradient(135deg, var(--purple), var(--indigo)); box-shadow: 0 6px 14px rgba(139,92,246,0.25); }
-.feature-card.success .feature-icon { background: linear-gradient(135deg, var(--emerald), var(--primary-dark)); box-shadow: 0 6px 14px rgba(16,185,129,0.25); }
-
-.feature-card h4 {
-  font-family: 'Amiri', serif; font-size: 1.3rem; font-weight: 700;
-  margin-bottom: 4px; color: var(--text); position: relative; z-index: 1;
-}
-.feature-card .feature-en {
-  font-family: 'Inter', sans-serif; font-size: 0.78rem;
-  color: var(--text-3); font-weight: 600; margin-bottom: 10px;
-  letter-spacing: 0.5px; text-transform: uppercase;
-  position: relative; z-index: 1;
-}
-.feature-card ul { list-style: none; font-size: 0.9rem; color: var(--text-2); position: relative; z-index: 1; }
-.feature-card ul li {
-  padding: 4px 0; padding-right: 18px; position: relative;
-}
-.feature-card ul li::before {
-  content: '✦'; position: absolute; right: 0; top: 4px;
-  color: var(--primary); font-size: 0.85rem;
-}
-.feature-card.accent ul li::before { color: var(--accent); }
-.feature-card.indigo ul li::before { color: var(--indigo); }
-.feature-card.sky ul li::before { color: var(--sky); }
-.feature-card.rose ul li::before { color: var(--rose); }
-
-/* ====== ARCHITECTURE ====== */
-.arch-canvas {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius-lg); padding: 32px;
-  box-shadow: var(--shadow); backdrop-filter: blur(10px);
-}
-.arch-layers {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px; margin-bottom: 30px;
-}
-.arch-layer {
-  background: var(--bg-3); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px; position: relative;
-  transition: all 0.2s ease;
-}
-.arch-layer:hover { transform: translateY(-3px); box-shadow: var(--shadow); border-color: var(--primary); }
-.arch-layer-icon {
-  width: 38px; height: 38px; border-radius: 9px; display: inline-flex;
-  align-items: center; justify-content: center; color: white;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  font-size: 1rem; margin-bottom: 12px;
-}
-.arch-layer.indigo .arch-layer-icon { background: linear-gradient(135deg, var(--indigo), var(--purple)); }
-.arch-layer.sky .arch-layer-icon { background: linear-gradient(135deg, var(--sky), var(--primary)); }
-.arch-layer.accent .arch-layer-icon { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); }
-.arch-layer.success .arch-layer-icon { background: linear-gradient(135deg, var(--emerald), var(--primary-dark)); }
-.arch-layer.rose .arch-layer-icon { background: linear-gradient(135deg, var(--rose), var(--accent)); }
-.arch-layer-name { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
-.arch-layer-desc { font-size: 0.82rem; color: var(--text-3); margin-bottom: 10px; }
-.arch-layer-items { display: flex; flex-wrap: wrap; gap: 6px; }
-.arch-layer-items span {
-  font-size: 0.7rem; background: var(--bg); padding: 3px 8px;
-  border-radius: 4px; font-weight: 600; color: var(--text-2);
-  border: 1px solid var(--border); font-family: 'JetBrains Mono', monospace;
-}
-
-.flow-diagram {
-  background: var(--bg-3); border-radius: var(--radius); padding: 24px;
-  border: 1px solid var(--border);
-}
-.flow-title { font-weight: 700; margin-bottom: 16px; color: var(--text); display: flex; align-items: center; gap: 8px; }
-.flow-title i { color: var(--primary); }
-.flow-steps {
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 12px; position: relative;
-}
-.flow-step {
-  background: var(--bg); padding: 14px; border-radius: var(--radius-sm);
-  border: 1px solid var(--border); position: relative;
-}
-.flow-step .step-num {
-  position: absolute; top: -10px; right: -10px;
-  width: 28px; height: 28px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: white; font-family: 'Inter', sans-serif; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.8rem; box-shadow: 0 4px 10px rgba(5,150,105,0.3);
-}
-.flow-step strong { font-family: 'Inter', sans-serif; font-size: 0.86rem; display: block; margin-bottom: 4px; color: var(--text); }
-.flow-step .step-desc { font-size: 0.76rem; color: var(--text-3); }
-.flow-step .step-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; background: var(--bg-3); padding: 2px 6px; border-radius: 4px; margin-top: 6px; display: inline-block; color: var(--primary); }
-
-/* ====== FILE TREE ====== */
-.file-tree {
-  background: var(--code-bg); color: var(--code-text);
-  border-radius: var(--radius); padding: 24px;
-  font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
-  box-shadow: var(--shadow-xl); overflow-x: auto;
-  line-height: 1.9;
-}
-.file-tree .folder { color: #fbbf24; font-weight: 600; }
-.file-tree .file { color: #93c5fd; }
-.file-tree .file.js { color: #f7df1e; }
-.file-tree .file.css { color: #c084fc; }
-.file-tree .file.html { color: #fda4af; }
-.file-tree .file.sql { color: #34d399; }
-.file-tree .file.json { color: #fbbf24; }
-.file-tree .config { color: #34d399; }
-.file-tree .comment { color: #64748b; }
-.file-tree .indent-1 { padding-right: 20px; }
-.file-tree .indent-2 { padding-right: 40px; }
-.file-tree .indent-3 { padding-right: 60px; }
-.file-tree .indent-4 { padding-right: 80px; }
-.file-tree .indent-5 { padding-right: 100px; }
-.file-tree .num { color: #64748b; }
-
-/* ====== DB SCHEMA ====== */
-.db-warn {
-  background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(245,158,11,0.05));
-  border: 1px solid rgba(245,158,11,0.3);
-  padding: 14px 18px; border-radius: var(--radius);
-  font-size: 0.85rem; color: var(--text-2);
-  display: flex; gap: 12px; align-items: flex-start;
-  margin-bottom: 22px;
-}
-.db-warn i { color: var(--accent); font-size: 1.2rem; margin-top: 4px; }
-.db-tables { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
-.db-table {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow);
-  backdrop-filter: blur(10px);
-}
-.db-table-name {
-  font-family: 'JetBrains Mono', monospace; font-size: 0.92rem;
-  color: var(--primary); font-weight: 700; margin-bottom: 4px;
-  display: flex; align-items: center; gap: 8px;
-}
-.db-table-name i { color: var(--accent); }
-.db-table-desc { font-size: 0.82rem; color: var(--text-3); margin-bottom: 14px; }
-.db-cols { display: flex; flex-direction: column; gap: 6px; }
-.db-col {
-  display: flex; align-items: center; gap: 8px; font-size: 0.8rem;
-  padding: 6px 10px; background: var(--bg-3); border-radius: var(--radius-sm);
-  font-family: 'JetBrains Mono', monospace;
-}
-.db-col .col-name { color: var(--primary); font-weight: 600; }
-.db-col .col-type { color: var(--text-3); font-size: 0.72rem; }
-.db-col .col-pk { background: var(--primary); color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
-.db-col .col-rls { background: var(--accent); color: white; padding: 1px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 700; }
-
-/* ====== RECITERS TABLE ====== */
-.reciters-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 12px;
-}
-.reciter-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  padding: 14px 16px; border-radius: var(--radius);
-  display: flex; align-items: center; gap: 12px;
-  transition: all 0.2s ease; box-shadow: var(--shadow-sm);
-}
-.reciter-card:hover { transform: translateX(-4px); box-shadow: var(--shadow-md); border-color: var(--primary); }
-.reciter-avatar {
-  width: 42px; height: 42px; border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-weight: 700; font-family: 'Inter', sans-serif;
-  font-size: 0.78rem; flex-shrink: 0;
-}
-.reciter-info { flex: 1; min-width: 0; }
-.reciter-name { font-family: 'Amiri', serif; font-weight: 700; color: var(--text); font-size: 1rem; line-height: 1.3; }
-.reciter-mode { font-size: 0.75rem; color: var(--text-3); margin-top: 2px; }
-.reciter-mode i { color: var(--accent); }
-.reciter-mode.full { color: var(--primary); font-weight: 600; }
-.reciter-mode.full i { color: var(--primary); }
-
-/* ====== COLOR PALETTE ====== */
-.color-swatches { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; }
-.color-swatch {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden;
-  box-shadow: var(--shadow);
-}
-.color-box {
-  height: 100px; display: flex; align-items: flex-end; justify-content: flex-start;
-  padding: 12px; font-family: 'JetBrains Mono', monospace;
-  font-size: 0.76rem; color: white; font-weight: 600;
-  position: relative;
-}
-.color-box::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.15));
-}
-.color-info { padding: 12px 14px; }
-.color-name { font-weight: 700; font-size: 0.92rem; }
-.color-hex { color: var(--text-3); font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; }
-
-/* ====== UI LIST ====== */
-.ui-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
-.ui-item {
-  background: var(--bg-card); border: 1px solid var(--border);
-  padding: 14px 16px; border-radius: var(--radius);
-  display: flex; align-items: center; gap: 10px;
-  font-size: 0.9rem; transition: all 0.2s ease; box-shadow: var(--shadow-sm);
-}
-.ui-item:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: var(--primary); }
-.ui-item i { color: var(--primary); font-size: 1rem; }
-
-/* ====== ISSUES ====== */
-.issues { display: flex; flex-direction: column; gap: 14px; }
-.issue {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 18px 22px;
-  display: flex; gap: 16px; align-items: flex-start;
-  box-shadow: var(--shadow-sm); border-right: 4px solid var(--text-3);
-  transition: all 0.2s ease;
-}
-.issue:hover { box-shadow: var(--shadow-md); transform: translateX(-3px); }
-.issue.critical { border-right-color: var(--rose); }
-.issue.medium { border-right-color: var(--accent); }
-.issue.minor { border-right-color: var(--sky); }
-.issue.resolved { border-right-color: var(--emerald); }
-.issue.resolved .issue-badge { background: var(--emerald); }
-.issue-badge {
-  background: var(--rose); color: white; padding: 4px 10px;
-  border-radius: 100px; font-size: 0.7rem; font-weight: 700; font-family: 'Inter', sans-serif;
-  white-space: nowrap;
-}
-.issue.medium .issue-badge { background: var(--accent); }
-.issue.minor .issue-badge { background: var(--sky); }
-.issue-content { flex: 1; }
-.issue-title { font-family: 'Amiri', serif; font-weight: 700; font-size: 1.05rem; margin-bottom: 4px; color: var(--text); }
-.issue-desc { font-size: 0.86rem; color: var(--text-2); margin-bottom: 8px; }
-.issue-loc { font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; color: var(--text-3); background: var(--code-bg); padding: 2px 8px; border-radius: 4px; display: inline-block; color: var(--code-text); }
-
-/* ====== ROADMAP ====== */
-.roadmap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-.phase {
-  background: var(--bg-card); border: 1px solid var(--border);
-  padding: 24px; border-radius: var(--radius-lg);
-  position: relative; box-shadow: var(--shadow); backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-.phase:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
-.phase.done { border-top: 4px solid var(--emerald); }
-.phase.progress { border-top: 4px solid var(--accent); }
-.phase.todo { border-top: 4px solid var(--text-3); }
-.phase-num {
-  width: 48px; height: 48px; border-radius: 50%;
-  display: inline-flex; align-items: center; justify-content: center;
-  font-family: 'Inter', sans-serif; font-size: 1.4rem; font-weight: 800;
-  margin-bottom: 16px;
-}
-.phase.done .phase-num { background: linear-gradient(135deg, var(--emerald), var(--primary-dark)); color: white; box-shadow: 0 4px 10px rgba(16,185,129,0.3); }
-.phase.progress .phase-num { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); color: white; box-shadow: 0 4px 10px rgba(245,158,11,0.3); }
-.phase.todo .phase-num { background: var(--bg-3); color: var(--text-3); border: 2px dashed var(--border); }
-.phase-name { font-family: 'Amiri', serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 4px; }
-.phase-status { font-size: 0.78rem; color: var(--text-3); margin-bottom: 14px; font-family: 'Inter', sans-serif; font-weight: 600; }
-.phase.done .phase-status { color: var(--emerald); }
-.phase.progress .phase-status { color: var(--accent); }
-.phase-items { font-size: 0.88rem; color: var(--text-2); }
-.phase-items div { padding: 6px 0; padding-right: 18px; position: relative; }
-.phase-items div::before { content: '✓'; position: absolute; right: 0; color: var(--emerald); }
-.phase-items div.todo::before { content: '○'; color: var(--text-3); }
-.phase-items div.progress::before { content: '◐'; color: var(--accent); }
-
-/* ====== DEPLOYMENT ====== */
-.deploy-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-.deploy-card {
-  background: var(--bg-card); border: 1px solid var(--border);
-  padding: 24px; border-radius: var(--radius-lg); box-shadow: var(--shadow);
-  display: flex; gap: 16px; align-items: flex-start;
-}
-.deploy-icon {
-  width: 50px; height: 50px; border-radius: 12px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  color: white; font-size: 1.4rem;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  box-shadow: 0 6px 14px rgba(5,150,105,0.3);
-}
-.deploy-card.vercel .deploy-icon { background: linear-gradient(135deg, #000, #404040); }
-.deploy-card.android .deploy-icon { background: linear-gradient(135deg, #3ddc84, #2c965c); }
-.deploy-card.apk .deploy-icon { background: linear-gradient(135deg, var(--accent), var(--accent-dark)); }
-.deploy-card.pwa .deploy-icon { background: linear-gradient(135deg, var(--purple), var(--indigo)); }
-.deploy-name { font-family: 'Amiri', serif; font-weight: 700; font-size: 1.15rem; margin-bottom: 2px; }
-.deploy-platform { font-size: 0.78rem; color: var(--text-3); font-family: 'Inter', sans-serif; font-weight: 600; margin-bottom: 8px; letter-spacing: 0.5px; text-transform: uppercase; }
-.deploy-url { font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; background: var(--bg-3); padding: 6px 10px; border-radius: 6px; word-break: break-all; color: var(--primary); }
-
-/* ====== LINE CHART ====== */
-.file-chart {
-  display: grid; grid-template-columns: 1fr; gap: 14px;
-}
-.file-bar {
-  display: grid; grid-template-columns: 220px 1fr 90px;
-  align-items: center; gap: 14px;
-}
-.file-bar-name {
-  display: flex; gap: 8px; align-items: center; font-family: 'JetBrains Mono', monospace;
-  font-size: 0.86rem; color: var(--text); font-weight: 600;
-}
-.file-bar-name .lang {
-  width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0;
-}
-.file-bar-name .lang.js { background: #f7df1e; }
-.file-bar-name .lang.css { background: #264de4; }
-.file-bar-name .lang.html { background: #e34c26; }
-.file-bar-name .lang.sw { background: #34d399; }
-.file-bar-name .lang.sql { background: #fbbf24; }
-.file-bar-bg { background: var(--bg-3); height: 26px; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid var(--border); }
-.file-bar-fill {
-  height: 100%; border-radius: 5px;
-  display: flex; align-items: center; padding: 0 10px;
-  color: white; font-family: 'Inter', sans-serif; font-weight: 700;
-  font-size: 0.74rem;
-}
-.file-bar-fill.css { background: linear-gradient(90deg, #264de4, #5b6dd6); }
-.file-bar-fill.js { background: linear-gradient(90deg, #b8a90b, #f7df1e); color: #1e1e1e; }
-.file-bar-fill.html { background: linear-gradient(90deg, #c13826, #e34c26); }
-.file-bar-fill.sw { background: linear-gradient(90deg, #0a8f5a, #34d399); }
-.file-bar-fill.sql { background: linear-gradient(90deg, #c47c0a, #fbbf24); color: #1e1e1e; }
-.file-bar-count { font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; color: var(--text-2); text-align: left; font-weight: 600; }
-@media (max-width: 600px) { .file-bar { grid-template-columns: 1fr; gap: 4px; } }
-
-/* ====== FOOTER ====== */
-footer {
-  margin-top: 60px; padding: 40px 24px;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  color: white; text-align: center;
-}
-footer h3 {
-  font-family: 'Amiri', serif; font-size: 1.6rem; margin-bottom: 6px;
-}
-footer p { opacity: 0.92; font-size: 0.95rem; margin-bottom: 8px; }
-footer .links { margin-top: 18px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-footer .links a {
-  background: rgba(255,255,255,0.15); color: white;
-  padding: 10px 18px; border-radius: 100px; font-size: 0.85rem;
-  text-decoration: none; font-weight: 600;
-  display: inline-flex; align-items: center; gap: 8px;
-  backdrop-filter: blur(10px);
-  transition: all 0.2s ease; border: 1px solid rgba(255,255,255,0.2);
-}
-footer .links a:hover { background: rgba(255,255,255,0.3); transform: translateY(-3px); }
-footer .copyright { margin-top: 22px; font-size: 0.78rem; opacity: 0.75; }
-
-/* ====== ANIMATIONS ====== */
-.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
-.reveal.visible { opacity: 1; transform: translateY(0); }
-
-/* ====== RESPONSIVE ====== */
-@media print {
-  .ambient, .theme-toggle, .print-btn, .nav { display: none !important; }
-  body { background: white; color: black; }
-  section { padding: 20px 0; page-break-inside: avoid; }
-  .stat-card, .feature-card, .phase, .db-table, .reciter-card, .deploy-card { break-inside: avoid; }
-  [data-theme="dark"] { --bg: white; --bg-2: white; --bg-3: #f1f5f9; --text: black; --text-2: #1e293b; --text-3: #475569; --border: #cbd5e1; --bg-card: #f8fafc; }
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="التقرير الفني المحدث لمشروع Quran Pro: القراءة والاستماع والمزامنة السحابية وPWA.">
+  <meta name="theme-color" content="#0b7a62">
+  <title>تقرير Quran Pro — التدقيق الفني</title>
+  <style>
+    :root {
+      --ink: #10231f;
+      --muted: #5e716b;
+      --paper: #f5f7f3;
+      --card: rgba(255,255,255,.88);
+      --line: #dce7df;
+      --green: #0b7a62;
+      --green-2: #14a37d;
+      --deep: #082f2b;
+      --gold: #b7791f;
+      --gold-bg: #fff8e7;
+      --blue: #2365a6;
+      --blue-bg: #eef6ff;
+      --red: #b64747;
+      --red-bg: #fff1f1;
+      --shadow: 0 18px 55px rgba(17, 57, 45, .10);
+      --radius: 22px;
+      --mono: "Cascadia Code", "SFMono-Regular", Consolas, monospace;
+      --sans: "Segoe UI", Tahoma, Arial, sans-serif;
+      --arabic: "Noto Naskh Arabic", "Amiri", "Scheherazade New", serif;
+    }
+    [data-theme="night"] {
+      --ink: #e9f4ee;
+      --muted: #a8c0b7;
+      --paper: #071815;
+      --card: rgba(13, 38, 33, .9);
+      --line: #21473d;
+      --green: #55d1aa;
+      --green-2: #2fae87;
+      --deep: #b5f1dc;
+      --gold: #f5c76a;
+      --gold-bg: #332a15;
+      --blue: #83bcf2;
+      --blue-bg: #102a40;
+      --red: #ff9a9a;
+      --red-bg: #3b2020;
+      --shadow: 0 18px 55px rgba(0, 0, 0, .25);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 8% 4%, rgba(20,163,125,.12), transparent 30rem),
+        radial-gradient(circle at 92% 18%, rgba(183,121,31,.10), transparent 25rem),
+        var(--paper);
+      font: 16px/1.8 var(--sans);
+      transition: background .25s ease, color .25s ease;
+    }
+    a { color: var(--green); }
+    button { font: inherit; }
+    .wrap { width: min(1160px, calc(100% - 36px)); margin-inline: auto; }
+    .topbar {
+      position: sticky; top: 0; z-index: 10;
+      border-bottom: 1px solid var(--line);
+      background: color-mix(in srgb, var(--paper) 86%, transparent);
+      backdrop-filter: blur(16px);
+    }
+    .topbar-inner { min-height: 70px; display: flex; gap: 18px; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--ink); }
+    .brand-mark {
+      width: 42px; height: 42px; display: grid; place-items: center; border-radius: 14px;
+      color: #fff; background: linear-gradient(145deg, var(--green), var(--deep));
+      box-shadow: 0 8px 22px rgba(11,122,98,.22); font-size: 21px;
+    }
+    .brand strong { display: block; font-size: 15px; letter-spacing: .02em; }
+    .brand small { display: block; color: var(--muted); font-size: 11px; }
+    .nav { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; justify-content: center; }
+    .nav a { color: var(--muted); text-decoration: none; padding: 7px 10px; border-radius: 10px; font-size: 13px; }
+    .nav a:hover { color: var(--green); background: var(--card); }
+    .tools { display: flex; gap: 7px; }
+    .icon-btn {
+      width: 38px; height: 38px; border: 1px solid var(--line); border-radius: 11px;
+      color: var(--ink); background: var(--card); cursor: pointer; transition: transform .2s, background .2s;
+    }
+    .icon-btn:hover { transform: translateY(-2px); background: var(--green); color: #fff; }
+    .hero { padding: 78px 0 54px; position: relative; overflow: hidden; }
+    .hero-grid { display: grid; grid-template-columns: 1.35fr .65fr; gap: 42px; align-items: end; }
+    .kicker { color: var(--green); font-size: 12px; font-weight: 800; letter-spacing: .16em; }
+    h1, h2, h3, h4 { line-height: 1.25; margin: 0; }
+    h1 { margin-top: 16px; font: 700 clamp(42px, 8vw, 90px)/.98 var(--arabic); color: var(--deep); }
+    .hero h2 { margin-top: 18px; font-size: clamp(20px, 3vw, 30px); font-weight: 700; }
+    .lead { max-width: 700px; color: var(--muted); font-size: 18px; margin: 18px 0 0; }
+    .meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 27px; }
+    .pill { border: 1px solid var(--line); border-radius: 99px; background: var(--card); padding: 6px 11px; color: var(--muted); font-size: 12px; }
+    .pill b { color: var(--green); }
+    .seal {
+      min-height: 250px; padding: 28px; border: 1px solid var(--line); border-radius: 34px;
+      background: linear-gradient(145deg, rgba(11,122,98,.98), rgba(8,47,43,.98)); color: #fff;
+      box-shadow: var(--shadow); position: relative; overflow: hidden;
+    }
+    .seal::after { content: "۞"; position: absolute; left: -25px; bottom: -52px; color: rgba(255,255,255,.08); font: 180px var(--arabic); }
+    .seal-label { color: #93e5c9; font-size: 11px; font-weight: 800; letter-spacing: .13em; }
+    .seal h3 { margin-top: 17px; font: 700 35px/1.35 var(--arabic); }
+    .seal p { margin: 12px 0 0; color: #c9f2e3; font-size: 13px; }
+    .status-line { display: flex; align-items: center; gap: 7px; margin-top: 20px; font-size: 12px; color: #d5f8eb; }
+    .status-dot { width: 9px; height: 9px; border-radius: 99px; background: #63e6b5; box-shadow: 0 0 0 5px rgba(99,230,181,.15); }
+    section { padding: 48px 0; }
+    .section-head { display: flex; gap: 20px; align-items: end; justify-content: space-between; margin-bottom: 23px; }
+    .section-head h2 { font: 700 32px var(--arabic); color: var(--deep); }
+    .section-head p { color: var(--muted); margin: 5px 0 0; font-size: 14px; }
+    .eyebrow { color: var(--green); font-size: 11px; font-weight: 800; letter-spacing: .13em; }
+    .grid { display: grid; gap: 16px; }
+    .metrics { grid-template-columns: repeat(5, 1fr); }
+    .metric, .card { border: 1px solid var(--line); background: var(--card); box-shadow: var(--shadow); border-radius: var(--radius); }
+    .metric { padding: 20px; min-height: 142px; }
+    .metric-value { color: var(--green); font-size: 34px; font-weight: 800; letter-spacing: -.04em; }
+    .metric-label { margin-top: 5px; font-weight: 700; font-size: 14px; }
+    .metric-note { color: var(--muted); font-size: 11px; margin-top: 5px; }
+    .two { grid-template-columns: repeat(2, 1fr); }
+    .three { grid-template-columns: repeat(3, 1fr); }
+    .card { padding: 24px; }
+    .card h3 { font-size: 19px; margin-bottom: 8px; }
+    .card h4 { color: var(--green); font-size: 14px; margin: 17px 0 6px; }
+    .card p { color: var(--muted); margin: 0; font-size: 14px; }
+    .card ul { padding: 0 19px 0 0; margin: 12px 0 0; color: var(--muted); font-size: 14px; }
+    .card li { margin: 5px 0; }
+    .card li::marker { color: var(--green); }
+    .check-card { border-right: 4px solid var(--green); }
+    .note-card { border-right: 4px solid var(--gold); background: var(--gold-bg); }
+    .info-card { border-right: 4px solid var(--blue); background: var(--blue-bg); }
+    .danger-card { border-right: 4px solid var(--red); background: var(--red-bg); }
+    .check-list { list-style: none; padding: 0 !important; }
+    .check-list li { display: flex; gap: 9px; align-items: flex-start; }
+    .check-list li::before { content: "✓"; flex: 0 0 auto; color: var(--green); font-weight: 900; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 99px; font-size: 11px; font-weight: 800; white-space: nowrap; }
+    .ok { color: var(--green); background: rgba(20,163,125,.12); }
+    .verify-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .verify-table th, .verify-table td { padding: 13px 10px; border-bottom: 1px solid var(--line); text-align: right; vertical-align: top; }
+    .verify-table th { color: var(--muted); font-size: 11px; letter-spacing: .04em; }
+    .verify-table td:first-child { font-weight: 700; }
+    code, .code { font: 12px var(--mono); color: var(--green); direction: ltr; unicode-bidi: plaintext; }
+    .code-block { direction: ltr; text-align: left; overflow: auto; background: #071a17; color: #c8eee0; border-radius: 15px; padding: 18px; font: 12px/1.8 var(--mono); }
+    .architecture { grid-template-columns: repeat(4, 1fr); position: relative; }
+    .architecture .card { position: relative; overflow: hidden; }
+    .architecture .card::before { content: attr(data-step); position: absolute; top: 14px; left: 16px; color: var(--line); font-size: 42px; font-weight: 900; }
+    .architecture .card h3, .architecture .card p { position: relative; }
+    .flow-arrow { display: none; }
+    .feature-grid { grid-template-columns: repeat(3, 1fr); }
+    .feature-card { min-height: 190px; }
+    .feature-icon { font-size: 25px; color: var(--green); margin-bottom: 13px; }
+    .feature-card h3 { font-family: var(--arabic); font-size: 22px; }
+    .feature-card p { font-size: 13px; }
+    .file-tree { direction: ltr; text-align: left; font: 12px/1.9 var(--mono); color: #c8eee0; background: #071a17; padding: 24px; border-radius: 18px; overflow: auto; }
+    .file-tree .folder { color: #f3c969; }
+    .file-tree .source { color: #8dd4ff; }
+    .file-tree .comment { color: #71938a; }
+    .issue-grid { grid-template-columns: repeat(2, 1fr); }
+    .issue { min-height: 158px; }
+    .issue h3 { margin-top: 11px; font-size: 17px; }
+    .issue p { margin-top: 8px; }
+    .roadmap { grid-template-columns: repeat(4, 1fr); }
+    .phase { min-height: 235px; }
+    .phase-number { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 10px; color: #fff; background: var(--green); font-weight: 800; margin-bottom: 15px; }
+    .phase.pending .phase-number { background: var(--muted); }
+    .phase h3 { font-family: var(--arabic); font-size: 21px; }
+    .phase p { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+    .phase ul { list-style: none; padding: 0; color: var(--muted); font-size: 13px; }
+    .phase li { margin: 5px 0; }
+    .phase li::before { content: "✓"; color: var(--green); margin-left: 6px; font-weight: 900; }
+    .phase li.pending::before { content: "○"; color: var(--muted); }
+    .footer { margin-top: 35px; padding: 43px 0; color: #d7f8eb; background: var(--deep); }
+    .footer .wrap { display: flex; justify-content: space-between; gap: 25px; align-items: center; }
+    .footer h2 { font: 700 30px var(--arabic); }
+    .footer p { margin: 5px 0 0; color: #9bc9b9; font-size: 13px; }
+    .footer a { color: #9ee7ce; }
+    .footer-meta { text-align: left; direction: ltr; font: 12px/1.8 var(--mono); color: #9bc9b9; }
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+    @media (max-width: 980px) {
+      .hero-grid, .two { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(3, 1fr); }
+      .architecture { grid-template-columns: repeat(2, 1fr); }
+      .feature-grid, .roadmap { grid-template-columns: repeat(2, 1fr); }
+      .nav { display: none; }
+    }
+    @media (max-width: 620px) {
+      .wrap { width: min(100% - 24px, 1160px); }
+      .hero { padding-top: 48px; }
+      .metrics, .three, .architecture, .feature-grid, .issue-grid, .roadmap { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 8px; }
+      .topbar-inner { min-height: 62px; }
+      .brand small { display: none; }
+      .card, .metric { padding: 18px; }
+      .verify-table { min-width: 610px; }
+      .table-scroll { overflow-x: auto; }
+      .footer .wrap { display: block; }
+      .footer-meta { margin-top: 20px; text-align: right; direction: rtl; }
+    }
+    @media print {
+      body { background: #fff; color: #111; }
+      .topbar { position: static; background: #fff; }
+      .tools, .nav { display: none; }
+      .hero { padding: 30px 0; }
+      section { padding: 22px 0; break-inside: avoid; }
+      .card, .metric { box-shadow: none; }
+      .reveal { opacity: 1; transform: none; }
+      .footer { margin-top: 15px; }
+    }
+  </style>
 </head>
 <body>
-<div class="ambient"></div>
-
-<header class="report-header">
-  <div class="header-row">
-    <div class="brand">
-      <div class="brand-logo"><i class="fas fa-book-quran"></i></div>
-      <div>
-        <div class="brand-title">Quran Pro · تقرير المشروع</div>
-        <div class="brand-sub">Project Report • v1.1.0</div>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="بداية التقرير">
+        <span class="brand-mark">۞</span>
+        <span><strong>Quran Pro</strong><small>التقرير الفني المحدث</small></span>
+      </a>
+      <nav class="nav" aria-label="التنقل داخل التقرير">
+        <a href="#summary">الملخص</a><a href="#verification">التحقق</a><a href="#features">الميزات</a>
+        <a href="#supabase">Supabase</a><a href="#quality">الجودة</a><a href="#roadmap">الخطة</a>
+      </nav>
+      <div class="tools">
+        <button class="icon-btn" id="themeBtn" type="button" aria-label="تبديل الوضع">☾</button>
+        <button class="icon-btn" id="printBtn" type="button" aria-label="طباعة التقرير">⎙</button>
       </div>
     </div>
-    <nav class="nav">
-      <a href="#overview">نظرة عامة</a>
-      <a href="#tech">التقنيات</a>
-      <a href="#features">الميزات</a>
-      <a href="#architecture">البنية</a>
-      <a href="#database">قاعدة البيانات</a>
-      <a href="#issues">المشاكل</a>
-      <a href="#roadmap">الخطة</a>
-    </nav>
-    <div style="display: flex; gap: 8px;">
-      <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-        <i class="fas fa-moon"></i>
-      </button>
-      <button class="print-btn" onclick="window.print()" aria-label="Print report">
-        <i class="fas fa-print"></i>
-      </button>
-    </div>
-  </div>
-</header>
+  </header>
 
-<section class="hero">
-  <div class="container">
-    <span class="hero-badge">
-      <span class="dot"></span>
-      تقرير فني شامل · Comprehensive Audit Report
-    </span>
-    <h1>Quran Pro</h1>
-    <h2>القرآن الكريم · قراءة واستماع</h2>
-    <p class="tagline">
-      تطبيق قرآن <strong>PWA</strong> تقدمي يعمل على الويب و <strong>Android APK</strong> مع مزامنة سحابية عبر
-      <strong>Supabase</strong>، و20 قارئًا، وتفسير، وترجمة، وميزات مفضلة وتقدم القراءة بدون اتصال.
-    </p>
-    <p class="tagline">
-      A full-featured <strong>Progressive Web App</strong> delivering read, listen, search, tafsir, bookmarks,
-      and cloud sync — installable, offline-capable, and bilingual.
-    </p>
-    <div class="hero-meta">
-      <span class="meta-chip"><i class="fas fa-code-branch"></i> Version 1.1.0 · Build 10</span>
-      <span class="meta-chip gold"><i class="fas fa-calendar"></i> 18 · 07 · 2026</span>
-      <span class="meta-chip"><i class="fas fa-user"></i> Rashid (MOT1209)</span>
-      <span class="meta-chip gold"><i class="fas fa-id-badge"></i> com.rashid.quranpro</span>
-      <span class="meta-chip"><i class="fas fa-square-root-variable"></i> Vanilla JS · No Framework</span>
-    </div>
-  </div>
-</section>
-
-<div class="bismillah-banner reveal">
-  <p>بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</p>
-</div>
-
-<section id="overview" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">OVERVIEW · نظرة عامة</span>
-      <h3>إحصائيات المشروع<div class="en">Project metrics at a glance</div></h3>
-      <p>أرقام وحقائق تلخص البنية التقنية وحجم الكود والتغطية الوظيفية.</p>
-    </div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon"><i class="fas fa-code"></i></div>
-        <div class="stat-number">5,813</div>
-        <div class="stat-label">سطر من الكود</div>
-        <div class="stat-sub">Lines of code · across 7 source files</div>
-      </div>
-      <div class="stat-card accent">
-        <div class="stat-icon"><i class="fas fa-book-quran"></i></div>
-        <div class="stat-number">114</div>
-        <div class="stat-label">سورة كاملة</div>
-        <div class="stat-sub">Surahs · 6,236 verses · 30 Juz</div>
-      </div>
-      <div class="stat-card indigo">
-        <div class="stat-icon"><i class="fas fa-microphone"></i></div>
-        <div class="stat-number">20+</div>
-        <div class="stat-label">قارئ مشهور</div>
-        <div class="stat-sub">Renowned reciters via mp3quran.net</div>
-      </div>
-      <div class="stat-card sky">
-        <div class="stat-icon"><i class="fas fa-language"></i></div>
-        <div class="stat-number">9</div>
-        <div class="stat-label">تفاسير وترجمات</div>
-        <div class="stat-sub">Tafsir + translation editions</div>
-      </div>
-      <div class="stat-card success">
-        <div class="stat-icon"><i class="fas fa-database"></i></div>
-        <div class="stat-number">2</div>
-        <div class="stat-label">جداول Supabase</div>
-        <div class="stat-sub">quran_pro_user_data + quran_pro_stats · RLS</div>
-      </div>
-      <div class="stat-card accent">
-        <div class="stat-icon"><i class="fas fa-database"></i></div>
-        <div class="stat-number">2</div>
-        <div class="stat-label">سكربتات SQL</div>
-        <div class="stat-sub">SUPABASE_QURAN_PRO.sql + FIX</div>
-      </div>
-      <div class="stat-card indigo">
-        <div class="stat-icon"><i class="fas fa-icons"></i></div>
-        <div class="stat-number">8</div>
-        <div class="stat-label">أيقونات PWA</div>
-        <div class="stat-sub">From 72px → 512px (maskable)</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="tech" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">TECH STACK · التقنيات</span>
-      <h3>المكدس التقني<div class="en">Zero-framework, lean and powerful</div></h3>
-      <p>التطبيق مكتوب بـ HTML/CSS/Vanilla JS مع مكتبات CDN خارجية، ويستخدم Vite + esbuild لبناء نسخة الإنتاج إلى <code>dist/</code> مع الحفاظ على السكربتات الكلاسيكية.</p>
-    </div>
-
-    <div class="tech-wrap">
-      <div class="tech-row">
-        <div class="tech-row-label"><i class="fas fa-palette"></i> الواجهات والعرض · Frontend Core</div>
-        <div class="tech-pills">
-          <div class="tech-pill html"><span class="bullet"></span> HTML5 <small>· semantic, RTL, ARIA, JSON-LD</small></div>
-          <div class="tech-pill css"><span class="bullet"></span> CSS3 <small>· custom props, glassmorphism</small></div>
-          <div class="tech-pill js"><span class="bullet"></span> Vanilla JS <small>· ES6+, modules, no bundler</small></div>
-          <div class="tech-pill font"><span class="bullet"></span> Google Fonts <small>· Amiri, Cairo, Scheherazade</small></div>
-          <div class="tech-pill font"><span class="bullet"></span> Font Awesome 6.4 <small>· 2,000+ icons</small></div>
-        </div>
-      </div>
-
-      <div class="tech-row">
-        <div class="tech-row-label"><i class="fas fa-cloud"></i> المصادر السحابية والـ API · Cloud & APIs</div>
-        <div class="tech-pills">
-          <div class="tech-pill api"><span class="bullet"></span> alquran.cloud <small>· verses, search, tafsir, translation</small></div>
-          <div class="tech-pill api"><span class="bullet"></span> mp3quran.net <small>· full-surah MP3 audio CDN</small></div>
-          <div class="tech-pill cloud"><span class="bullet"></span> Supabase <small>· auth + PostgreSQL + sync</small></div>
-        </div>
-      </div>
-
-      <div class="tech-row">
-        <div class="tech-row-label"><i class="fas fa-mobile-screen"></i> الجوال والنشر · Mobile & Deployment</div>
-        <div class="tech-pills">
-          <div class="tech-pill build"><span class="bullet"></span> Capacitor 8 <small>· web → Android APK</small></div>
-          <div class="tech-pill ota"><span class="bullet"></span> OTA Updates <small>· version.json + banner</small></div>
-        </div>
-      </div>
-
-      <div class="tech-row">
-        <div class="tech-row-label"><i class="fas fa-globe"></i> PWA · Progressive Web App</div>
-        <div class="tech-pills">
-          <div class="tech-pill pwa"><span class="bullet"></span> Service Worker <small>· cache-first + stale-while-revalidate</small></div>
-          <div class="tech-pill pwa"><span class="bullet"></span> Web App Manifest <small>· 8 sizes, maskable, RTL</small></div>
-          <div class="tech-pill pwa"><span class="bullet"></span> Media Session API <small>· background playback</small></div>
-          <div class="tech-pill pwa"><span class="bullet"></span> Background Sync <small>· bookmarks sync queue</small></div>
-          <div class="tech-pill pwa"><span class="bullet"></span> Push Notifications <small>· service worker push</small></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="features" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">FEATURES · الميزات</span>
-      <h3>ما يقدّمه التطبيق<div class="en">What the app delivers to readers</div></h3>
-      <p>ثمانية محاور رئيسية تغطي تجربة قراءة واستماع شاملة مع مزامنة سحابية ودعم كامل للعربية والإنجليزية.</p>
-    </div>
-
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon"><i class="fas fa-book-open"></i></div>
-        <h4>القراءة</h4>
-        <div class="feature-en">Reading · Mushaf</div>
-        <ul>
-          <li>114 سورة بتصميم مصحف تقليدي</li>
-          <li>تصفية مكية / مدنية + بحث فوري</li>
-          <li>4 خطوط عربية فاخرة</li>
-          <li>بسملة تلقائية + رموز آيات</li>
-          <li>30 جزءاً مع تبديل طريقة عرض</li>
-        </ul>
-      </div>
-
-      <div class="feature-card accent">
-        <div class="feature-icon"><i class="fas fa-headphones"></i></div>
-        <h4>التلاوة والاستماع</h4>
-        <div class="feature-en">Recitation · Audio</div>
-        <ul>
-          <li>20+ قارئ بجودة عالية</li>
-          <li>ملفات MP3 كاملة (لا توقف)</li>
-          <li>سرعة 0.5× إلى 2× مع شريط</li>
-          <li>تخطي 10 ثوانٍ للأمام/الخلف</li>
-          <li>تكرار آية + تلاوة متواصلة</li>
-        </ul>
-      </div>
-
-      <div class="feature-card sky">
-        <div class="feature-icon"><i class="fas fa-search"></i></div>
-        <h4>البحث الذكي</h4>
-        <div class="feature-en">Smart Search</div>
-        <ul>
-          <li>بحث في النص العربي عبر alquran.cloud</li>
-          <li>Debounce 500ms لتوفير الاستعلامات</li>
-          <li>اختصار Ctrl+K / Cmd+K</li>
-          <li>كلمة / جملة / كل النتائج</li>
-          <li>نتائج فورية قابلة للنقر</li>
-        </ul>
-      </div>
-
-      <div class="feature-card indigo">
-        <div class="feature-icon"><i class="fas fa-book-open-reader"></i></div>
-        <h4>التفسير والترجمة</h4>
-        <div class="feature-en">Tafsir & Translation</div>
-        <ul>
-          <li>5 تفاسير: الجلالين، ابن كثير، السعدي…</li>
-          <li>ترجمة: English, Français, اردو</li>
-          <li>اختيار آية من القراءة</li>
-          <li>كاش ذكي لمدة 30 يوماً</li>
-          <li>تنسيق جميل مع رقم المصدر</li>
-        </ul>
-      </div>
-
-      <div class="feature-card rose">
-        <div class="feature-icon"><i class="fas fa-bookmark"></i></div>
-        <h4>المفضلة والتقدم</h4>
-        <div class="feature-en">Bookmarks & Progress</div>
-        <ul>
-          <li>حفظ آيات وسور معاً</li>
-          <li>تقدم قراءة لكل سورة</li>
-          <li>آخر موضع + متابعة تلقائية</li>
-          <li>مزامنة سحابية فورية</li>
-          <li>تصفية: الكل / السور / الآيات</li>
-        </ul>
-      </div>
-
-      <div class="feature-card purple">
-        <div class="feature-icon"><i class="fas fa-cloud"></i></div>
-        <h4>المزامنة السحابية</h4>
-        <div class="feature-en">Supabase Cloud Sync</div>
-        <ul>
-          <li>تسجيل دخول بالبريد/كلمة المرور</li>
-          <li>مزامنة الإشارات والإعدادات عبر الأجهزة</li>
-          <li>RLS آمن لكل مستخدم</li>
-          <li>حفظ محلي + رفع للسحابة</li>
-          <li>بدون حساب يعمل التطبيق محلياً</li>
-        </ul>
-      </div>
-
-      <div class="feature-card success">
-        <div class="feature-icon"><i class="fas fa-wifi-slash"></i></div>
-        <h4>دعم عدم الاتصال</h4>
-        <div class="feature-en">Offline & PWA</div>
-        <ul>
-          <li>Service Worker مع كاش ذكي</li>
-          <li>30 يوم كاش لـ API النصوص</li>
-          <li>50 ملف صوت مؤقتاً</li>
-          <li>صفحة offline جميلة</li>
-          <li>مؤشر عدم اتصال فوري</li>
-        </ul>
-      </div>
-
-      <div class="feature-card accent">
-        <div class="feature-icon"><i class="fas fa-mobile-screen-button"></i></div>
-        <h4>تطبيق قابل للتثبيت</h4>
-        <div class="feature-en">Installable App</div>
-        <ul>
-          <li>PWA Install على Android/iOS/Desktop</li>
-          <li>Capacitor 8 → APK أصلي</li>
-          <li>Splash Screen مخصص</li>
-          <li>Status Bar + Safe Area</li>
-          <li>i18n عربي + إنجليزي</li>
-        </ul>
-      </div>
-
-      <div class="feature-card rose">
-        <div class="feature-icon"><i class="fas fa-arrow-up-from-bracket"></i></div>
-        <h4>تحديثات OTA</h4>
-        <div class="feature-en">Over-The-Air Updates</div>
-        <ul>
-          <li>فحص تلقائي للإصدار البعيد</li>
-          <li>إشعار بانر عند توفر تحديث</li>
-          <li>رابط تحميل APK مباشر</li>
-          <li>زر "لاحقاً" لتأجيل التحديث</li>
-          <li>تذكّر الإصدار المثبت محلياً</li>
-        </ul>
-      </div>
-
-      <div class="feature-card sky">
-        <div class="feature-icon"><i class="fas fa-paintbrush"></i></div>
-        <h4>تجربة UI/UX</h4>
-        <div class="feature-en">UI · UX</div>
-        <ul>
-          <li>الوضع الليلي افتراضي + نهاري</li>
-          <li>أحجام خط قابلة للتعديل 1.5→4rem</li>
-          <li>إشعارات Toast لكل عملية</li>
-          <li>اختصارات لوحة المفاتيح</li>
-          <li>Responsive · RTL · ARIA · iOS Safe Area</li>
-        </ul>
-      </div>
-
-      <div class="feature-card purple">
-        <div class="feature-icon"><i class="fas fa-shield-halved"></i></div>
-        <h4>الأمان والأداء</h4>
-        <div class="feature-en">Security & Performance</div>
-        <ul>
-          <li>DOM API بدلاً من innerHTML</li>
-          <li>textContent بدل HTML</li>
-          <li>CSP-aware + defer scripts</li>
-          <li>contain/paint optimizations</li>
-          <li>prefers-reduced-motion + High Contrast</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="architecture" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">ARCHITECTURE · البنية</span>
-      <h3>طبقات النظام<div class="en">Layered architecture & data flow</div></h3>
-      <p>بنية نظيفة بدون إطار عمل: Vanilla JS في المتصفح، APIs خارجية للنصوص والصوت، Supabase للمصادقة والمزامنة، Capacitor لتغليف Android APK مع Vercel لاستضافة الـ PWA.</p>
-    </div>
-
-    <div class="arch-canvas">
-      <div class="arch-layers">
-        <div class="arch-layer">
-          <div class="arch-layer-icon"><i class="fas fa-window-maximize"></i></div>
-          <div class="arch-layer-name">Presentation</div>
-          <div class="arch-layer-desc">RTL UI · Comic Arabic fonts · Glassmorphism</div>
-          <div class="arch-layer-items">
-            <span>index.html</span><span>style.css</span><span>app.js</span>
-          </div>
-        </div>
-        <div class="arch-layer sky">
-          <div class="arch-layer-icon"><i class="fas fa-plug"></i></div>
-          <div class="arch-layer-name">API Layer</div>
-          <div class="arch-layer-desc">Fetch + cache layer · debounced search</div>
-          <div class="arch-layer-items">
-            <span>alquran.cloud</span><span>mp3quran.net</span>
-          </div>
-        </div>
-        <div class="arch-layer indigo">
-          <div class="arch-layer-icon"><i class="fas fa-key"></i></div>
-          <div class="arch-layer-name">Auth & Sync</div>
-          <div class="arch-layer-desc">Supabase auth + object storage</div>
-          <div class="arch-layer-items">
-            <span>auth.js</span><span>supabase-config.js</span><span>SupabaseSync</span>
-          </div>
-        </div>
-        <div class="arch-layer accent">
-          <div class="arch-layer-icon"><i class="fas fa-database"></i></div>
-          <div class="arch-layer-name">Data Layer</div>
-          <div class="arch-layer-desc">PostgreSQL + RLS + localStorage fallback</div>
-          <div class="arch-layer-items">
-            <span>quran_pro_user_data</span><span>localStorage</span>
-          </div>
-        </div>
-        <div class="arch-layer success">
-          <div class="arch-layer-icon"><i class="fas fa-cloud-arrow-down"></i></div>
-          <div class="arch-layer-name">PWA / SW</div>
-          <div class="arch-layer-desc">Service worker · cache strategies · offline.html</div>
-          <div class="arch-layer-items">
-            <span>sw.js</span><span>manifest.json</span>
-          </div>
-        </div>
-        <div class="arch-layer rose">
-          <div class="arch-layer-icon"><i class="fas fa-mobile-screen"></i></div>
-          <div class="arch-layer-name">Native Shell</div>
-          <div class="arch-layer-desc">Capacitor runtime · Status Bar</div>
-          <div class="arch-layer-items">
-            <span>capacitor.js</span><span>capacitor.config.json</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="flow-diagram">
-        <div class="flow-title"><i class="fas fa-diagram-project"></i> تدفق البيانات · Data flow</div>
-        <div class="flow-steps">
-          <div class="flow-step">
-            <span class="step-num">1</span>
-            <strong>User Action</strong>
-            <div class="step-desc">Click surah / search / play</div>
-            <span class="step-tag">UI Event</span>
-          </div>
-          <div class="flow-step">
-            <span class="step-num">2</span>
-            <strong>Cache Check</strong>
-            <div class="step-desc">localStorage or SW cache</div>
-            <span class="step-tag">cache_*</span>
-          </div>
-          <div class="flow-step">
-            <span class="step-num">3</span>
-            <strong>Fetch API</strong>
-            <div class="step-desc">alquran.cloud / mp3quran</div>
-            <span class="step-tag">fetch + retry</span>
-          </div>
-          <div class="flow-step">
-            <span class="step-num">4</span>
-            <strong>Supabase Sync</strong>
-            <div class="step-desc">upsert user state if signed-in</div>
-            <span class="step-tag">RLS'd rows</span>
-          </div>
-          <div class="flow-step">
-            <span class="step-num">5</span>
-            <strong>Render</strong>
-            <div class="step-desc">DOM API + textContent</div>
-            <span class="step-tag">safe DOM</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="files" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">FILE TREE · هيكل الملفات</span>
-      <h3>شجرة الكود<div class="en">Source layout</div></h3>
-      <p>هيكل واضح قابل للنشر على Vercel، مع نسخة إنتاج مضغوطة في <code>dist/</code> يستخدمها Capacitor.</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-      <div class="file-tree">
-<div><span class="folder">quran-app/</span></div>
-<div><span class="indent-1 folder">├── css/</span></div>
-<div><span class="indent-2 file css">│   └── style.css</span> <span class="comment">// 2,605 lines · emerald+gold theme</span></div>
-<div><span class="indent-1 folder">├── js/</span></div>
-<div><span class="indent-2 file js">│   ├── app.js</span> <span class="comment">// 2,088 lines · main logic</span></div>
-<div><span class="indent-2 file js">│   ├── auth.js</span> <span class="comment">// 186 lines · SupabaseSync + AuthSystem</span></div>
-<div><span class="indent-2 file js">│   ├── supabase-config.js</span> <span class="comment">// 16 lines · client configuration</span></div>
-<div><span class="indent-2 file js">│   ├── update-checker.js</span> <span class="comment">// 97 lines · OTA</span></div>
-<div><span class="indent-2 folder">│   └── vendor/</span></div>
-<div><span class="indent-3 file js">│       ├── capacitor.js</span> <span class="comment">// UMD bundle</span></div>
-<div><span class="indent-1 file html">├── index.html</span> <span class="comment">// 637 lines · semantic + JSON-LD</span></div>
-<div><span class="indent-1 file html">├── offline.html</span> <span class="comment">// beautiful offline fallback</span></div>
-<div><span class="indent-1 file json">├── manifest.json</span> <span class="comment">// PWA · 8 icons</span></div>
-<div><span class="indent-1 file json">├── capacitor.config.json</span></div>
-<div><span class="indent-1 file json">├── package.json</span> <span class="comment">// vite scripts (kept)</span></div>
-<div><span class="indent-1 file json">├── version.json</span> <span class="comment">// OTA payload</span></div>
-<div><span class="indent-1 file">├── sw.js</span> <span class="comment">// 184 lines</span></div>
-<div><span class="indent-1 folder">├── icons/</span> <span class="comment">// icon-72..512.png (8)</span></div>
-<div><span class="indent-1 file sql">├── SUPABASE_QURAN_PRO.sql</span></div>
-<div><span class="indent-1 file sql">└── SUPABASE_FIX.sql</span></div>
-      </div>
-      <div>
-        <div class="section-head" style="text-align: right;">
-          <h3 style="font-size: 1.2rem; margin: 0;">توزيع الأسطر<div class="en" style="font-size: 0.9rem;">LoC distribution</div></h3>
-        </div>
-        <div class="file-chart">
-          <div class="file-bar">
-            <div class="file-bar-name"><span class="lang css"></span> style.css</div>
-            <div class="file-bar-bg"><div class="file-bar-fill css" style="width: 44.8%;">style.css</div></div>
-            <div class="file-bar-count">2,605</div>
-          </div>
-          <div class="file-bar">
-            <div class="file-bar-name"><span class="lang js"></span> app.js</div>
-            <div class="file-bar-bg"><div class="file-bar-fill js" style="width: 35.9%;">app.js</div></div>
-            <div class="file-bar-count">2,088</div>
-          </div>
-          <div class="file-bar">
-            <div class="file-bar-name"><span class="lang html"></span> index.html</div>
-            <div class="file-bar-bg"><div class="file-bar-fill html" style="width: 11.0%;">index.html</div></div>
-            <div class="file-bar-count">638</div>
-          </div>
-          <div class="file-bar">
-            <div class="file-bar-name"><span class="lang sw"></span> sw.js</div>
-            <div class="file-bar-bg"><div class="file-bar-fill sw" style="width: 3.2%;">sw.js</div></div>
-            <div class="file-bar-count">184</div>
-          </div>
-          <div class="file-bar">
-            <div class="file-bar-name"><span class="lang js"></span> auth.js</div>
-            <div class="file-bar-bg"><div class="file-bar-fill js" style="width: 3.2%;">auth.js</div></div>
-            <div class="file-bar-count">186</div>
-          </div>
-          <div class="file-bar">
-            <div class="file-bar-name"><span class="lang js"></span> supabase-config.js</div>
-            <div class="file-bar-bg"><div class="file-bar-fill js" style="width: 0.3%;">supabase-config.js</div></div>
-            <div class="file-bar-count">16</div>
-          </div>
-          <div class="file-bar">
-            <div class="file-bar-name"><span class="lang js"></span> update-checker.js</div>
-            <div class="file-bar-bg"><div class="file-bar-fill js" style="width: 1.7%;">update-checker.js</div></div>
-            <div class="file-bar-count">97</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="database" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">DATABASE · قاعدة البيانات</span>
-      <h3>مخطط Supabase<div class="en">Supabase schema & row-level security</div></h3>
-      <p>Supabase PostgreSQL بنفس اتصال موقع Rashid الرئيسي (kcltollasghlvuoxvjqa) مع RLS صارم.</p>
-    </div>
-
-    <div class="db-warn">
-      <i class="fas fa-triangle-exclamation"></i>
-      <div>
-        <strong>Security note · ملاحظة أمان:</strong>
-        يُنفّذ سكربت <code>SUPABASE_QURAN_PRO.sql</code> على Supabase الخاص بالموقع الرئيسي.
-        يجب عدم تشغيله إلا إذا كنت تتوقع أن تطبيقك يستخدم قاعدة بيانات Rashid.
-        مفاتيح anon مدمجة في <code>supabase-config.js</code> كعميل Supabase العادي.
-      </div>
-    </div>
-
-    <div class="db-tables">
-      <div class="db-table">
-        <div class="db-table-name"><i class="fas fa-table"></i> quran_pro_user_data</div>
-        <div class="db-table-desc">الجدول الرئيسي لمزامنة بيانات المستخدم عبر الأجهزة.</div>
-        <div class="db-cols">
-          <div class="db-col"><span class="col-pk">PK</span> <span class="col-name">id</span> <span class="col-type">UUID · gen_random_uuid()</span></div>
-          <div class="db-col"><span class="col-pk">FK</span> <span class="col-name">user_id</span> <span class="col-type">UUID · refs auth.users(id) · UNIQUE</span></div>
-          <div class="db-col"><span class="col-name">bookmarks</span> <span class="col-type">JSONB default '[]'</span> <span class="col-rls">RLS</span></div>
-          <div class="db-col"><span class="col-name">reading_progress</span> <span class="col-type">JSONB default '{}'</span></div>
-          <div class="db-col"><span class="col-name">settings</span> <span class="col-type">JSONB default '{}'</span></div>
-          <div class="db-col"><span class="col-name">last_position</span> <span class="col-type">JSONB default '{}'</span></div>
-          <div class="db-col"><span class="col-name">last_sync</span> <span class="col-type">TIMESTAMPTZ default NOW()</span></div>
-          <div class="db-col"><span class="col-name">created_at</span> <span class="col-type">TIMESTAMPTZ</span></div>
-          <div class="db-col"><span class="col-name">updated_at</span> <span class="col-type">TIMESTAMPTZ · trigger</span></div>
-        </div>
-      </div>
-
-      <div class="db-table">
-        <div class="db-table-name"><i class="fas fa-table"></i> quran_pro_stats</div>
-        <div class="db-table-desc">جدول إحصائيات القراءة (streak, minutes, achievements).</div>
-        <div class="db-cols">
-          <div class="db-col"><span class="col-pk">PK</span> <span class="col-name">id</span> <span class="col-type">UUID</span></div>
-          <div class="db-col"><span class="col-pk">FK</span> <span class="col-name">user_id</span> <span class="col-type">UUID · refs auth.users(id) UNIQUE</span></div>
-          <div class="db-col"><span class="col-name">total_read_verses</span> <span class="col-type">INT default 0</span> <span class="col-rls">RLS</span></div>
-          <div class="db-col"><span class="col-name">total_listening_minutes</span> <span class="col-type">INT default 0</span></div>
-          <div class="db-col"><span class="col-name">streak_days</span> <span class="col-type">INT default 0</span></div>
-          <div class="db-col"><span class="col-name">last_read_date</span> <span class="col-type">DATE</span></div>
-          <div class="db-col"><span class="col-name">achievements</span> <span class="col-type">JSONB default '[]'</span></div>
-          <div class="db-col"><span class="col-name">updated_at</span> <span class="col-type">TIMESTAMPTZ · trigger</span></div>
-        </div>
-      </div>
-
-      <div class="db-table">
-        <div class="db-table-name"><i class="fas fa-shield-halved"></i> Row Level Security</div>
-        <div class="db-table-desc">سياسات RLS الفعلية من <code>SUPABASE_QURAN_PRO.sql</code> (مُتحقق منها).</div>
-        <div class="db-cols">
-          <div class="db-col"><span class="col-rls">POLICY</span> <span class="col-name">Users can view own quran data</span> <span class="col-type">SELECT · auth.uid() = user_id</span></div>
-          <div class="db-col"><span class="col-rls">POLICY</span> <span class="col-name">Users can insert own quran data</span> <span class="col-type">INSERT · WITH CHECK</span></div>
-          <div class="db-col"><span class="col-rls">POLICY</span> <span class="col-name">Users can update own quran data</span> <span class="col-type">UPDATE · USING</span></div>
-          <div class="db-col"><span class="col-rls">POLICY</span> <span class="col-name">Users can delete own quran data</span> <span class="col-type">DELETE · USING</span></div>
-          <div class="db-col"><span class="col-rls">POLICY</span> <span class="col-name">Users can view own quran stats</span> <span class="col-type">SELECT on quran_pro_stats</span></div>
-          <div class="db-col"><span class="col-rls">POLICY</span> <span class="col-name">Users can upsert own quran stats</span> <span class="col-type">INSERT on quran_pro_stats</span></div>
-          <div class="db-col"><span class="col-rls">POLICY</span> <span class="col-name">Users can update own quran stats</span> <span class="col-type">UPDATE on quran_pro_stats</span></div>
-          <div class="db-col"><span class="col-rls">TRIGGER</span> <span class="col-name">update_quran_pro_updated_at</span> <span class="col-type">BEFORE UPDATE · fn</span></div>
-          <div class="db-col"><span class="col-rls">REALTIME</span> <span class="col-name">supabase_realtime</span> <span class="col-type">publication subscribed</span></div>
-        </div>
-      </div>
-
-      <div class="db-table">
-        <div class="db-table-name"><i class="fas fa-code"></i> API · supabase-js v2</div>
-        <div class="db-table-desc">الاستدعاءات من جانب العميل عبر CDN.</div>
-        <div class="db-cols">
-          <div class="db-col"><span class="col-name">cdn</span> <span class="col-type">cdn.jsdelivr.net/npm/@supabase/supabase-js@2</span></div>
-          <div class="db-col"><span class="col-name">project</span> <span class="col-type">kcltollasghlvuoxvjqa.supabase.co</span></div>
-          <div class="db-col"><span class="col-name">auth.method</span> <span class="col-type">signInWithPassword + signUp</span></div>
-          <div class="db-col"><span class="col-name">strategy</span> <span class="col-type">upsert with onConflict user_id</span></div>
-          <div class="db-col"><span class="col-name">listen</span> <span class="col-type">onAuthStateChange</span></div>
-          <div class="db-col"><span class="col-name">index</span> <span class="col-type">idx_quran_pro_user_data_user</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="reciters" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">RECITERS · القرّاء</span>
-      <h3>20+ قارئ مشهور<div class="en">Full-surah MP3 via mp3quran.net</div></h3>
-      <p>يستخدم التطبيق ملفات MP3 كاملة لكل سورة من خوادم mp3quran.net — بدون توقف بين الآيات.</p>
-    </div>
-
-    <div class="reciters-grid">
-      <div class="reciter-card"><div class="reciter-avatar">01</div><div class="reciter-info"><div class="reciter-name">مشاري العفاسي</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> Default · كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">02</div><div class="reciter-info"><div class="reciter-name">عبد الباسط - مرتل</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">03</div><div class="reciter-info"><div class="reciter-name">عبد الباسط - مجود</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">04</div><div class="reciter-info"><div class="reciter-name">المنشاوي - مرتل</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">05</div><div class="reciter-info"><div class="reciter-name">المنشاوي - مجود</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">06</div><div class="reciter-info"><div class="reciter-name">الحصري - مرتل</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">07</div><div class="reciter-info"><div class="reciter-name">الحصري - مجود</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">08</div><div class="reciter-info"><div class="reciter-name">عبد الرحمن السديس</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">09</div><div class="reciter-info"><div class="reciter-name">ماهر المعيقلي</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">10</div><div class="reciter-info"><div class="reciter-name">ياسر الدوسري</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">11</div><div class="reciter-info"><div class="reciter-name">أبو بكر الشاطري</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">12</div><div class="reciter-info"><div class="reciter-name">أحمد العجمي</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">13</div><div class="reciter-info"><div class="reciter-name">محمد أيوب</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">14</div><div class="reciter-info"><div class="reciter-name">محمد جبريل</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">15</div><div class="reciter-info"><div class="reciter-name">هاني الرفاعي</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">16</div><div class="reciter-info"><div class="reciter-name">ناصر القطامي</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">17</div><div class="reciter-info"><div class="reciter-name">محمد الثبيتي</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">18</div><div class="reciter-info"><div class="reciter-name">توفيق الصايغ</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">19</div><div class="reciter-info"><div class="reciter-name">وديع اليمني</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-      <div class="reciter-card"><div class="reciter-avatar">20</div><div class="reciter-info"><div class="reciter-name">إسلام صبحي</div><div class="reciter-mode full"><i class="fas fa-circle-check"></i> كامل</div></div></div>
-    </div>
-  </div>
-</section>
-
-<section id="palette" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">DESIGN SYSTEM · نظام التصميم</span>
-      <h3>لوحة الألوان والـ UI<div class="en">Color tokens & component palette</div></h3>
-      <p>CSS Custom Properties مع نمط ليلي افتراضي، زجاجي (Glassmorphism)، وانتقالات ناعمة.</p>
-    </div>
-
-    <div class="color-swatches">
-      <div class="color-swatch">
-        <div class="color-box" style="background: #059669;">--primary</div>
-        <div class="color-info"><div class="color-name">Emerald Primary</div><div class="color-hex">#059669</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #34d399;">--primary-light</div>
-        <div class="color-info"><div class="color-name">Emerald Light</div><div class="color-hex">#34d399</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #047857;">--primary-dark</div>
-        <div class="color-info"><div class="color-name">Emerald Dark</div><div class="color-hex">#047857</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #f59e0b;">--accent-gold</div>
-        <div class="color-info"><div class="color-name">Gold Accent</div><div class="color-hex">#f59e0b</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #fbbf24;">--accent-gold-light</div>
-        <div class="color-info"><div class="color-name">Gold Light</div><div class="color-hex">#fbbf24</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #d97706;">--accent-gold-dark</div>
-        <div class="color-info"><div class="color-name">Gold Dark</div><div class="color-hex">#d97706</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #020617; color: white;">--bg (dark)</div>
-        <div class="color-info"><div class="color-name">Background Dark</div><div class="color-hex">#020617</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #0f172a; color: white;">--bg-secondary</div>
-        <div class="color-info"><div class="color-name">Background 2</div><div class="color-hex">#0f172a</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #10b981;">--success</div>
-        <div class="color-info"><div class="color-name">Success</div><div class="color-hex">#10b981</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #ef4444;">--error</div>
-        <div class="color-info"><div class="color-name">Error</div><div class="color-hex">#ef4444</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: #3b82f6;">--info</div>
-        <div class="color-info"><div class="color-name">Info</div><div class="color-hex">#3b82f6</div></div>
-      </div>
-      <div class="color-swatch">
-        <div class="color-box" style="background: linear-gradient(135deg, #059669, #f59e0b);">gradient</div>
-        <div class="color-info"><div class="color-name">Brand Gradient</div><div class="color-hex">emerald → gold</div></div>
-      </div>
-    </div>
-
-    <div style="margin-top: 30px;">
-      <div class="section-head" style="text-align: right;">
-        <h3 style="font-size: 1.2rem; margin: 0;">العناصر الرئيسية في الواجهة · Key UI Elements</h3>
-      </div>
-      <div class="ui-grid">
-        <div class="ui-item"><i class="fas fa-book-quran"></i> Sidebar (114 سورة + 30 جزء)</div>
-        <div class="ui-item"><i class="fas fa-list-ol"></i> Verse number badges</div>
-        <div class="ui-item"><i class="fas fa-circle-dot"></i> Bismillah auto-injection</div>
-        <div class="ui-item"><i class="fas fa-quran"></i> Mushaf-style verses wrapper</div>
-        <div class="ui-item"><i class="fas fa-guitar"></i> Floating Audio Player</div>
-        <div class="ui-item"><i class="fas fa-tachometer-alt"></i> Playback speed (0.5×–2×)</div>
-        <div class="ui-item"><i class="fas fa-code"></i> Skip ±10s controls</div>
-        <div class="ui-item"><i class="fas fa-keyboard"></i> Ctrl+K search shortcut</div>
-        <div class="ui-item"><i class="fas fa-moon"></i> Dark/Light theme toggle</div>
-        <div class="ui-item"><i class="fas fa-text-height"></i> Font ± controls</div>
-        <div class="ui-item"><i class="fas fa-share-nodes"></i> Share + Download Surah</div>
-        <div class="ui-item"><i class="fas fa-arrow-rotate-left"></i> Continue Last Read</div>
-        <div class="ui-item"><i class="fas fa-percent"></i> Reading progress bar</div>
-        <div class="ui-item"><i class="fas fa-circle-check"></i> Toast notifications</div>
-        <div class="ui-item"><i class="fas fa-magnifying-glass"></i> Search filter chips</div>
-        <div class="ui-item"><i class="fas fa-spinner"></i> Loading screen + spinner</div>
-        <div class="ui-item"><i class="fas fa-circle-exclamation"></i> Offline indicator</div>
-        <div class="ui-item"><i class="fas fa-cloud-arrow-up"></i> Sync indicator</div>
-        <div class="ui-item"><i class="fas fa-square-plus"></i> Install banner</div>
-        <div class="ui-item"><i class="fas fa-shield-halved"></i> Skip-link for a11y</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="issues" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">KNOWN ISSUES · مشاكل معروفة</span>
-      <h3>القضايا المرصودة<div class="en">Issues observed during audit</div></h3>
-      <p>الحالة أدناه محدثة بعد الإصلاحات الأخيرة، وتفرّق بين البنود المحلولة والقيود/التحسينات الاختيارية.</p>
-    </div>
-
-    <div class="issues">
-      <div class="issue resolved">
-        <span class="issue-badge">مُحلّة · RESOLVED</span>
-        <div class="issue-content">
-          <div class="issue-title">استخدام <code>innerHTML</code> مع بيانات المستخدم (XSS)</div>
-          <div class="issue-desc">تم استبدال الاستخدامات التنفيذية بـ <code>textContent</code> وDOM API. لا يوجد استخدام تنفيذي لـ <code>innerHTML</code> في <code>app.js</code>؛ ظهوره الحالي داخل تعليق أمني فقط.</div>
-          <span class="issue-loc">js/app.js · تحقق عبر البحث</span>
-        </div>
-      </div>
-      <div class="issue resolved">
-        <span class="issue-badge">مُحلّة · RESOLVED</span>
-        <div class="issue-content">
-          <div class="issue-title">صفحة offline ومسارات Service Worker</div>
-          <div class="issue-desc">تم تحسين الكاش ليشمل shell التطبيق، وأصبح <code>sw.js</code> يحسب مساره من موقعه بدلاً من افتراض مسار ثابت. إذا فشل تحميل أصل أساسي يُلغى تثبيت العامل ويُحذف الكاش الناقص.</div>
-          <span class="issue-loc">sw.js</span>
-        </div>
-      </div>
-      <div class="issue resolved">
-        <span class="issue-badge">مُحلّة · RESOLVED</span>
-        <div class="issue-content">
-          <div class="issue-title">غياب build / minify pipeline</div>
-          <div class="issue-desc">تمت إضافة Vite + esbuild، والبناء الإنتاجي ينسخ ويضغط ملفات التطبيق إلى <code>dist/</code> المتوافق مع Capacitor.</div>
-          <span class="issue-loc">package.json · vite.config.js</span>
-        </div>
-      </div>
-      <div class="issue resolved">
-        <span class="issue-badge">مُحلّة · RESOLVED</span>
-        <div class="issue-content">
-          <div class="issue-title">الدالة القديمة <code>escapeHtml()</code></div>
-          <div class="issue-desc">حُذفت الدالة القديمة و<strong>safeSetHTML</strong> لأنها غير مستخدمة، لمنع عودة نمط معالجة HTML غير الآمن.</div>
-          <span class="issue-loc">js/app.js</span>
-        </div>
-      </div>
-      <div class="issue medium">
-        <span class="issue-badge">متوسط · MEDIUM</span>
-        <div class="issue-content">
-          <div class="issue-title">توقيت الآيات تقريبي فقط</div>
-          <div class="issue-desc">يُحسب رقم الآية حالياً من نسبة الوقت إلى مدة السورة. للحصول على دقة حقيقية يلزم مصدر timestamps لكل آية، لذلك بقي هذا تحسيناً اختيارياً.</div>
-          <span class="issue-loc">js/app.js · updateCurrentVerseFromTime()</span>
-        </div>
-      </div>
-      <div class="issue medium">
-        <span class="issue-badge">ملاحظة · ADVISORY</span>
-        <div class="issue-content">
-          <div class="issue-title">Supabase anon key في الواجهة</div>
-          <div class="issue-desc">هذا متوقع في تطبيقات Supabase ذات العميل العام، وليس سراً بحد ذاته. يجب إبقاء RLS مفعّلاً وربط سجلات المستخدم بـ <code>auth.uid() = user_id</code>.</div>
-          <span class="issue-loc">js/supabase-config.js · سياسات SQL</span>
-        </div>
-      </div>
-      <div class="issue minor">
-        <span class="issue-badge">بسيط · MINOR</span>
-        <div class="issue-content">
-          <div class="issue-title">لا يوجد TypeScript أو types</div>
-          <div class="issue-desc">قيد صيانة وليس خطأ تشغيل. يمكن إضافة JSDoc أو TypeScript تدريجياً إذا كبر المشروع.</div>
-          <span class="issue-loc">المشروع كله</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="roadmap" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">ROADMAP · خطة التطوير</span>
-      <h3>المراحل القادمة<div class="en">Four-phase improvement roadmap</div></h3>
-      <p>بناءً على <code>plan.md</code>، أربعة محاور لتحسين الجودة والأداء وتجربة المستخدم.</p>
-    </div>
-
-    <div class="roadmap">
-      <div class="phase done">
-        <div class="phase-num">1</div>
-        <div class="phase-name">إصلاحات حرجة</div>
-        <div class="phase-status">DONE · مكتمل</div>
-        <div class="phase-items">
-          <div>استبدال innerHTML بـ DOM API</div>
-          <div>صفحة offline محسّنة</div>
-          <div>تنظيف escapeHtml()</div>
-          <div>تجربة خالية من الإعلانات وSDKs الإعلانية</div>
-        </div>
-      </div>
-      <div class="phase done">
-        <div class="phase-num">2</div>
-        <div class="phase-name">تحسينات الأداء</div>
-        <div class="phase-status">DONE · مكتمل جزئياً</div>
-        <div class="phase-items">
-          <div>minification عبر Vite + esbuild — مكتمل</div>
-          <div>كاش shell وAPI وصوت محسّن</div>
-          <div class="todo">Lazy loading للآيات — اختياري</div>
-          <div>defer للسكربتات المحلية</div>
-        </div>
-      </div>
-      <div class="phase todo">
-        <div class="phase-num">3</div>
-        <div class="phase-name">ميزات جديدة</div>
-        <div class="phase-status">PLANNED · مخطط</div>
-        <div class="phase-items">
-          <div class="progress">قائمة الأجزاء (30)</div>
-          <div>Media Session API</div>
-          <div class="progress">آخر موضع + استكمال</div>
-          <div class="todo">تكبير الكلمات عند القراءة</div>
-        </div>
-      </div>
-      <div class="phase todo">
-        <div class="phase-num">4</div>
-        <div class="phase-name">الجودة والاختبار</div>
-        <div class="phase-status">PLANNED · مخطط</div>
-        <div class="phase-items">
-          <div class="todo">Vitest للوحدات الأساسية</div>
-          <div class="todo">مراجعة WCAG 2.1 AA</div>
-          <div class="todo">تحسين SEO + JSON-LD</div>
-          <div class="todo">JSDoc للـ public API</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="deploy" class="reveal">
-  <div class="container">
-    <div class="section-head">
-      <span class="section-eyebrow">DEPLOYMENT · النشر</span>
-      <h3>وجهات النشر<div class="en">Distribution channels</span></h3>
-      <p>التطبيق يُجهّز للنشر عبر الويب (Vercel) وAndroid APK (Capacitor)، مع نسخة PWA قابلة للتثبيت.</p>
-    </div>
-
-    <div class="deploy-grid">
-      <div class="deploy-card vercel">
-        <div class="deploy-icon"><i class="fas fa-triangle" style="color:white"></i></div>
+  <main id="top">
+    <section class="hero">
+      <div class="wrap hero-grid">
         <div>
-          <div class="deploy-name">Vercel (Primary)</div>
-          <div class="deploy-platform">PWA HOSTING</div>
-          <div class="deploy-url">https://rashid-wep.vercel.app/apps/quran-app/</div>
+          <div class="kicker">TECHNICAL AUDIT · 02 AUG 2026</div>
+          <h1>تقرير مشروع<br>Quran Pro</h1>
+          <h2>القرآن الكريم — قراءة، استماع، وتدبر</h2>
+          <p class="lead">نسخة محدثة من التقرير، مبنية على حالة الملفات الحالية ونتائج فحوصات البناء والصياغة والاتصالات الخارجية. تم فصل الحقائق التي تم التحقق منها عن التحسينات المستقبلية بوضوح.</p>
+          <div class="meta-row">
+            <span class="pill"><b>الإصدار</b> 1.1.0 · Build 10</span>
+            <span class="pill"><b>App ID</b> <span class="code">com.rashid.quranpro</span></span>
+            <span class="pill"><b>الترخيص</b> MIT</span>
+            <span class="pill"><b>الإعلانات</b> لا توجد</span>
+          </div>
+        </div>
+        <aside class="seal" aria-label="حالة التقرير">
+          <div class="seal-label">CURRENT RELEASE STATUS</div>
+          <h3>جاهز للبناء<br>والنشر</h3>
+          <p>المصدر يمر بفحوصات JavaScript والبناء الإنتاجي. اتصال API القرآن وواجهتا Supabase استجابتا بنجاح في آخر تحقق.</p>
+          <div class="status-line"><span class="status-dot"></span> حالة الكود: مستقرة في نطاق الفحص الحالي</div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="summary" class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">EXECUTIVE SUMMARY · الملخص التنفيذي</div><h2>الصورة في دقيقة</h2></div><p>نطاق التقرير: مجلد <code>apps/quran-app</code> فقط.</p></div>
+        <div class="grid metrics">
+          <article class="metric"><div class="metric-value">114</div><div class="metric-label">سورة</div><div class="metric-note">تم التحقق من نسخة القرآن العربية عبر API</div></article>
+          <article class="metric"><div class="metric-value">20</div><div class="metric-label">قارئاً للسور الكاملة</div><div class="metric-note">تعريفات صوتية داخل التطبيق</div></article>
+          <article class="metric"><div class="metric-value">2</div><div class="metric-label">جداول Supabase</div><div class="metric-note">بيانات المستخدم وإحصائيات القراءة</div></article>
+          <article class="metric"><div class="metric-value">29</div><div class="metric-label">ملف مصدر</div><div class="metric-note">باستثناء node_modules وdist</div></article>
+          <article class="metric"><div class="metric-value">0</div><div class="metric-label">SDK إعلاني</div><div class="metric-note">تجربة خالية من الإعلانات</div></article>
+        </div>
+        <div class="grid two" style="margin-top:16px">
+          <article class="card check-card"><h3>الحكم العام</h3><p>المشروع في حالة جيدة للنشر ضمن نطاق الفحص الحالي: بنية PWA واضحة، بناء Vite يعمل، API القرآن متاح، وتكامل Supabase مهيأ مع سياسات RLS في ملفات SQL.</p><ul class="check-list"><li>تم إصلاح مسار البحث الذي كان يعيد HTTP 500.</li><li>تم منع تخزين نسخة القرآن الكاملة في localStorage.</li><li>تمت معالجة أخطاء القراءة والحفظ في المزامنة السحابية.</li></ul></article>
+          <article class="card note-card"><h3>حدود التحقق</h3><p>التحقق الخارجي أثبت استجابة الخدمات وتهيئة المشروع، لكنه لم ينشئ مستخدماً ولم ينفذ تسجيل دخول حقيقياً أو اختباراً عملياً لحفظ بيانات مستخدم داخل الحساب.</p><ul><li>يجب تشغيل SQL في مشروع Supabase إذا لم تكن الجداول موجودة بعد.</li><li>اختبار APK الفعلي يحتاج جهاز Android أو محاكي.</li></ul></article>
         </div>
       </div>
-      <div class="deploy-card android">
-        <div class="deploy-icon"><i class="fab fa-android"></i></div>
-        <div>
-          <div class="deploy-name">Android APK</div>
-          <div class="deploy-platform">CAPACITOR BUILD 10</div>
-          <div class="deploy-url">quran-app-v1.1.0.apk · com.rashid.quranpro</div>
+    </section>
+
+    <section id="verification" class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">VERIFICATION · نتائج التحقق</div><h2>ما تم اختباره فعلياً</h2></div><p>آخر فحص قراءة فقط قبل إنشاء هذا التقرير.</p></div>
+        <article class="card table-scroll">
+          <table class="verify-table">
+            <thead><tr><th>الفحص</th><th>النتيجة</th><th>التفاصيل</th><th>المصدر</th></tr></thead>
+            <tbody>
+              <tr><td>Production build</td><td><span class="badge ok">✓ ناجح</span></td><td>تم تنفيذ <code>npm run build</code> وإنشاء <code>dist/</code>.</td><td><code>package.json · vite.config.js</code></td></tr>
+              <tr><td>JavaScript syntax</td><td><span class="badge ok">✓ ناجح</span></td><td>اجتازت الملفات الرئيسية فحص <code>node --check</code>.</td><td><code>js/app.js · auth.js · supabase-config.js · update-checker.js · sw.js</code></td></tr>
+              <tr><td>Quran API</td><td><span class="badge ok">✓ 200 OK</span></td><td>النسخة <code>quran-uthmani</code> أعادت كود API 200 وعدد 114 سورة.</td><td><a href="https://api.alquran.cloud/v1/quran/quran-uthmani" target="_blank" rel="noopener">alquran.cloud</a></td></tr>
+              <tr><td>Supabase REST</td><td><span class="badge ok">✓ 200 OK</span></td><td>مسار جدول <code>quran_pro_user_data</code> استجاب عبر REST.</td><td><code>js/supabase-config.js</code></td></tr>
+              <tr><td>Supabase Auth</td><td><span class="badge ok">✓ 200 OK</span></td><td>إعدادات المصادقة استجابت من مشروع Supabase المهيأ.</td><td><code>/auth/v1/settings</code></td></tr>
+              <tr><td>Ad references</td><td><span class="badge ok">✓ لا توجد</span></td><td>لا توجد مراجع تشغيلية لـ AdMob أو AdSense أو وحدات إعلانية في المصدر.</td><td><code>plan.md · source scan</code></td></tr>
+            </tbody>
+          </table>
+        </article>
+      </div>
+    </section>
+
+    <section id="features" class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">PRODUCT SURFACE · الوظائف</div><h2>ماذا يقدم التطبيق؟</h2></div><p>الميزات التالية مدعومة بمراجع واضحة في HTML وJavaScript الحاليين.</p></div>
+        <div class="grid feature-grid">
+          <article class="card feature-card"><div class="feature-icon">▤</div><h3>قراءة المصحف</h3><p>تحميل السور من alquran.cloud، عرض الآيات بنمط مصحف، أحجام خطوط متعددة، تبديل السور والأجزاء، وحفظ آخر موضع.</p></article>
+          <article class="card feature-card"><div class="feature-icon">◉</div><h3>التلاوة الصوتية</h3><p>وضع السورة الكاملة ووضع آية بآية، تحكم بالتشغيل والسرعة والتكرار والتنقل، وMedia Session آمن على Chrome Android. تظليل السورة لا يظهر إلا عند توفر timestamps مطابقة لملف MP3 نفسه.</p></article>
+          <article class="card feature-card"><div class="feature-icon">⌕</div><h3>البحث العربي</h3><p>يجلب نسخة <code>quran-uthmani</code> مرة واحدة إلى الذاكرة ثم يبحث محلياً بعد إزالة التشكيل؛ لا يحفظ النسخة الكاملة في localStorage.</p></article>
+          <article class="card feature-card"><div class="feature-icon">۩</div><h3>التفسير والترجمة</h3><p>واجهة اختيار تفسير أو ترجمة وتحميل تفسير الآية عبر API مع تخزين مؤقت للاستخدام اللاحق.</p></article>
+          <article class="card feature-card"><div class="feature-icon">☆</div><h3>المفضلة والتقدم</h3><p>حفظ السور والآيات، تتبع تقدم القراءة، واسترجاع آخر موضع محلياً مع إمكانية المزامنة عند تسجيل الدخول.</p></article>
+          <article class="card feature-card"><div class="feature-icon">☁</div><h3>المزامنة السحابية</h3><p>تسجيل دخول بالبريد وكلمة المرور، ورفع المفضلة والإعدادات والتقدم إلى Supabase مع العودة للعمل محلياً دون حساب.</p></article>
+          <article class="card feature-card"><div class="feature-icon">⌁</div><h3>PWA وOffline</h3><p>Manifest، Service Worker، كاش للـ shell وAPI والصوت، وصفحة <code>offline.html</code> عند انقطاع الشبكة.</p></article>
+          <article class="card feature-card"><div class="feature-icon">↥</div><h3>التثبيت والتحديث</h3><p>تثبيت PWA، إعداد Capacitor للتطبيق الأصلي، وفحص <code>version.json</code> لإظهار تحديث APK عند توفره.</p></article>
+          <article class="card feature-card"><div class="feature-icon">◐</div><h3>تجربة الاستخدام</h3><p>RTL، وضع ليلي ونهاري، تصميم متجاوب، Media Session للتلاوة، Toast notifications، واختصارات لوحة المفاتيح.</p></article>
         </div>
       </div>
-      <div class="deploy-card apk">
-        <div class="deploy-icon"><i class="fas fa-download"></i></div>
-        <div>
-          <div class="deploy-name">APK Mirror</div>
-          <div class="deploy-platform">VERCEL APKS BUCKET</div>
-          <div class="deploy-url">https://rashid-wep.vercel.app/apks/quran-app-v1.1.0.apk</div>
+    </section>
+
+    <section id="architecture" class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">ARCHITECTURE · البنية</div><h2>مسار البيانات</h2></div><p>فصل واضح بين واجهة التطبيق ومصادر القرآن والتخزين الاختياري.</p></div>
+        <div class="grid architecture">
+          <article class="card" data-step="01"><h3>واجهة المستخدم</h3><p><code>index.html</code> + <code>css/style.css</code> تعرض السور والآيات والنوافذ وإعدادات القراءة.</p></article>
+          <article class="card" data-step="02"><h3>منطق التطبيق</h3><p><code>js/app.js</code> يدير الحالة، التحميل، الصوت، البحث، المفضلة، الكاش وService Worker registration.</p></article>
+          <article class="card" data-step="03"><h3>مصادر المحتوى</h3><p><code>alquran.cloud</code> للنص والتفسير، وموارد MP3 الخارجية للتلاوة. لا يخزن Supabase نص القرآن.</p></article>
+          <article class="card" data-step="04"><h3>التخزين والمزامنة</h3><p>localStorage للعمل المحلي، ثم Supabase Auth وPostgreSQL لمزامنة بيانات المستخدم عند توفر الحساب.</p></article>
+        </div>
+        <div class="grid two" style="margin-top:16px">
+          <article class="card"><h3>استراتيجية الكاش</h3><ul class="check-list"><li>كاش للبيانات لمدة 30 يوماً حسب إعداد التطبيق.</li><li>نسخة القرآن المستخدمة للبحث تبقى في الذاكرة فقط.</li><li>الكاش الصوتي محدود إلى 50 ملفاً في Service Worker.</li><li>مسار offline يحسب موقع التطبيق ديناميكياً.</li></ul></article>
+          <article class="card"><h3>مسار البناء والنشر</h3><div class="code-block">source files
+    ↓
+npm run build
+    ↓
+Vite + esbuild
+    ↓
+dist/  →  Vercel / Capacitor webDir
+
+GitHub: MOT1209/mein-wep.git
+commit: 56ebf2d</div></article>
         </div>
       </div>
-      <div class="deploy-card pwa">
-        <div class="deploy-icon"><i class="fas fa-globe"></i></div>
-        <div>
-          <div class="deploy-name">PWA Install</div>
-          <div class="deploy-platform">STANDALONE · 8 ICONS</div>
-          <div class="deploy-url">installable from /apps/quran-app/ via web app manifest</div>
+    </section>
+
+    <section id="supabase" class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">BACKEND · SUPABASE</div><h2>حالة قاعدة البيانات</h2></div><p>مهيأة للمستخدمين والمزامنة، وليست مستودعاً لنص القرآن.</p></div>
+        <div class="grid two">
+          <article class="card check-card"><h3>الربط الحالي</h3><ul class="check-list"><li>العميل مهيأ في <code>js/supabase-config.js</code>.</li><li>ترتيب التحميل في <code>index.html</code>: مكتبة Supabase ثم config ثم auth.</li><li>جدول المزامنة: <code>quran_pro_user_data</code>.</li><li>الحقول المستخدمة: <code>bookmarks</code>، <code>reading_progress</code>، <code>settings</code>، <code>last_position</code>، <code>last_sync</code>.</li><li>المستخدم الجديد مدعوم عبر <code>maybeSingle()</code>.</li></ul></article>
+          <article class="card info-card"><h3>ما تم إثباته وما لم يُثبت</h3><p><strong>تم إثباته:</strong> عنوان المشروع يستجيب، REST يصل إلى الجدول، وAuth settings تستجيب.</p><p style="margin-top:10px"><strong>لم يتم إثباته في هذا الفحص:</strong> إنشاء حساب أو تسجيل دخول حقيقي، أو تنفيذ upsert ببيانات مستخدم فعلية. هذا اختبار يحتاج بيانات اعتمادك ولا يتم تنفيذه تلقائياً.</p></article>
+        </div>
+        <div class="grid two" style="margin-top:16px">
+          <article class="card"><h3>مخطط SQL</h3><h4><code>quran_pro_user_data</code></h4><p>سجل واحد لكل مستخدم للمفضلة والتقدم والإعدادات والموضع الأخير.</p><h4><code>quran_pro_stats</code></h4><p>إحصائيات القراءة: الآيات، دقائق الاستماع، السلسلة اليومية والإنجازات.</p><h4>RLS</h4><p>سياسات SELECT/INSERT/UPDATE/DELETE تعتمد على <code>auth.uid() = user_id</code> في ملفي SQL.</p></article>
+          <article class="card note-card"><h3>ملاحظة أمنية</h3><p>مفتاح Supabase المستخدم هو مفتاح <code>anon</code> العام، وظهوره في تطبيق الويب متوقع. الأمان الحقيقي يعتمد على RLS وعدم استخدام service-role key في المتصفح.</p><p style="margin-top:10px">قبل الإنتاج، راجع سياسات RLS من لوحة Supabase وتأكد أن الجداول مفعلة فعلياً في المشروع الصحيح.</p></article>
         </div>
       </div>
+    </section>
+
+    <section id="quality" class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">QUALITY & SECURITY · الجودة والأمان</div><h2>الإصلاحات والملاحظات</h2></div><p>التمييز هنا بين الإصلاحات المنجزة والتحسينات التي ما زالت اختيارية.</p></div>
+        <div class="grid issue-grid">
+          <article class="card check-card issue"><span class="badge ok">مُنجز</span><div><h3>منع HTML غير الآمن</h3><p>تم استخدام DOM API و<code>textContent</code> في مسارات العرض الديناميكية، وأزيلت الدوال القديمة التي كانت تشجع على تمرير النص عبر innerHTML.</p></div></article>
+          <article class="card check-card issue"><span class="badge ok">مُنجز</span><div><h3>بحث القرآن</h3><p>تم استبدال endpoint البحث الذي كان يعيد 500 بتحميل النسخة العربية الرسمية والبحث المحلي مع تطبيع التشكيل.</p></div></article>
+          <article class="card check-card issue"><span class="badge ok">مُنجز</span><div><h3>المزامنة</h3><p>تتم قراءة أخطاء Supabase وفحص أخطاء upsert وتظهر رسالة للمستخدم بدلاً من إظهار نجاح وهمي.</p></div></article>
+          <article class="card check-card issue"><span class="badge ok">مُنجز</span><div><h3>البناء وOffline</h3><p>أضيف Vite + esbuild، وتم تحسين shell والكاش ومسار صفحة عدم الاتصال. البناء الحالي ناجح.</p></div></article>
+          <article class="card check-card issue"><span class="badge ok">مُعالج جزئياً بدقة</span><div><h3>توقيت الآيات</h3><p>أزيل التقدير الخاطئ من نسبة مدة السورة. ملف الآية المنفردة يُظلل بدقة لأنه يحتوي آية واحدة، ويدعم التشغيل الكامل manifest اختيارياً بشرط مطابقة رابط MP3 نفسه؛ بدون ذلك لا يُدّعى تحديد آية.</p></div></article>
+          <article class="card note-card issue"><span class="badge" style="color:var(--gold);background:rgba(183,121,31,.14)">تحسين</span><div><h3>التغطية الاختبارية</h3><p>لا توجد وحدات Vitest أو مراجعة WCAG آلية شاملة حتى الآن؛ يوصى بإضافتها قبل توسيع الميزات.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">PROJECT MAP · خريطة الملفات</div><h2>الهيكل الأساسي</h2></div><p>الملفات التي يعتمد عليها التطبيق في التشغيل والبناء.</p></div>
+        <div class="file-tree"><span class="folder">quran-app/</span>
+├── <span class="source">index.html</span>             <span class="comment"># واجهة التطبيق + تحميل السكربتات</span>
+├── <span class="source">offline.html</span>           <span class="comment"># شاشة عدم الاتصال</span>
+├── <span class="source">manifest.json</span>          <span class="comment"># PWA manifest + 8 icons</span>
+├── <span class="source">sw.js</span>                  <span class="comment"># cache strategies + offline</span>
+├── <span class="source">version.json</span>           <span class="comment"># الإصدار وتحديث APK</span>
+├── <span class="source">package.json</span>           <span class="comment"># Vite scripts</span>
+├── <span class="source">vite.config.js</span>         <span class="comment"># minify + copy PWA assets</span>
+├── <span class="source">capacitor.config.json</span>  <span class="comment"># Android webDir = dist</span>
+├── <span class="source">css/style.css</span>         <span class="comment"># 2,605 lines</span>
+├── <span class="source">js/app.js</span>              <span class="comment"># 2,112 lines — core app</span>
+├── <span class="source">js/auth.js</span>             <span class="comment"># 204 lines — auth + sync</span>
+├── <span class="source">js/supabase-config.js</span> <span class="comment"># client configuration</span>
+├── <span class="source">js/update-checker.js</span>  <span class="comment"># OTA banner</span>
+├── <span class="source">js/vendor/</span>             <span class="comment"># Capacitor browser bundle</span>
+├── <span class="source">icons/</span>                 <span class="comment"># PWA icon sizes</span>
+├── <span class="source">SUPABASE_QURAN_PRO.sql</span> <span class="comment"># schema + RLS</span>
+└── <span class="source">SUPABASE_FIX.sql</span>       <span class="comment"># repeatable policy repair</span></div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="reveal">
+      <div class="wrap">
+        <div class="section-head"><div><div class="eyebrow">ROADMAP · خارطة الطريق</div><h2>الخطوة التالية</h2></div><p>اقتراحات عملية بعد الحالة الحالية.</p></div>
+        <div class="grid roadmap">
+          <article class="card phase"><div class="phase-number">1</div><h3>تثبيت الجودة</h3><p>الأولوية القريبة</p><ul><li>إضافة اختبارات وحدات للتطبيع والبحث والكاش.</li><li>تشغيل اختبار متصفح لفتح السورة والتشغيل.</li><li>مراجعة WCAG 2.1 AA.</li></ul></article>
+          <article class="card phase"><div class="phase-number">2</div><h3>صحة الصوت</h3><p>دقة التلاوة</p><ul><li>إزالة التوقيت التقريبي وإضافة تحقق من manifest المطابق.</li><li>معالجة timeout وstalled وerror مع fallback آية منفردة عند توفره.</li><li>تقوية Media Session؛ اختبار القفل والسماعة على Android الحقيقي ما زال مطلوباً.</li></ul></article>
+          <article class="card phase"><div class="phase-number">3</div><h3>تأكيد Supabase</h3><p>اختبار تكاملي</p><ul><li class="pending">إنشاء مستخدم اختبار في Supabase.</li><li class="pending">تنفيذ login ثم upsert ثم read.</li><li class="pending">مراجعة RLS من لوحة المشروع.</li></ul></article>
+          <article class="card phase pending"><div class="phase-number">4</div><h3>تطوير لاحق</h3><p>تحسينات اختيارية</p><ul><li class="pending">تحميل الآيات تدريجياً.</li><li class="pending">تحسين SEO وJSDoc.</li><li class="pending">إحصائيات قراءة أوسع.</li></ul></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      <div><h2>Quran Pro</h2><p>تقرير فني محدث — تم إنشاؤه من حالة المشروع الحالية.</p><p><a href="https://github.com/MOT1209/mein-wep" target="_blank" rel="noopener">github.com/MOT1209/mein-wep</a></p></div>
+      <div class="footer-meta">report: REPORT.html<br>release: 1.1.0 / build 10<br>audit: 2026-08-02<br>scope: apps/quran-app</div>
     </div>
+  </footer>
 
-    <div style="margin-top: 30px; background: var(--bg-card); border: 1px solid var(--border); padding: 24px; border-radius: var(--radius-lg); box-shadow: var(--shadow);">
-      <h3 style="font-family: 'Amiri', serif; font-weight: 700; font-size: 1.2rem; margin-bottom: 14px; color: var(--primary);">
-        <i class="fas fa-rocket"></i> إعدادات التطبيق
-      </h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
-        <div style="background: var(--bg-3); padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">
-          <div style="color: var(--text-3);">App ID</div>
-          <div style="font-weight: 700;">com.rashid.quranpro</div>
-        </div>
-        <div style="background: var(--bg-3); padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">
-          <div style="color: var(--text-3);">الإعلانات</div>
-          <div style="font-weight: 700; color: var(--emerald);">مُعطّلة بالكامل · Ad-free</div>
-        </div>
-        <div style="background: var(--bg-3); padding: 12px; border-radius: 8px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;">
-          <div style="color: var(--text-3);">Supabase Project</div>
-          <div style="font-weight: 700;">kcltollasghlvuoxvjqa.supabase.co</div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <h3>Quran Pro · مشروع كامل ومتكامل</h3>
-  <p>PWA + Android · 5,813 سطر موثق · Vanilla JS · build إنتاجي جاهز</p>
-  <div class="links">
-    <a href="https://rashid-wep.vercel.app/apps/quran-app/"><i class="fas fa-globe"></i> Live Demo</a>
-    <a href="https://rashid-wep.vercel.app/apks/quran-app-v1.1.0.apk"><i class="fas fa-download"></i> Download APK</a>
-    <a href="manifest.json"><i class="fas fa-file-code"></i> manifest.json</a>
-    <a href="sw.js"><i class="fas fa-gears"></i> sw.js</a>
-    <a href="index.html"><i class="fas fa-code"></i> index.html</a>
-    <a href="https://github.com/MOT1209"><i class="fab fa-github"></i> @MOT1209</a>
-  </div>
-  <p class="copyright">تقرير مراجعة تلقائي · Auto-generated Audit · 2026-08-01</p>
-</footer>
-
-<script>
-// ====== Theme toggle with persistence ======
-const html = document.documentElement;
-function setThemeIcon() {
-  const btn = document.querySelector('.theme-toggle i');
-  if (!btn) return;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  btn.className = isDark ? 'fas fa-sun' : 'fas fa-moon';
-}
-function toggleTheme() {
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  if (isDark) {
-    html.removeAttribute('data-theme');
-    try { localStorage.setItem('report-theme', 'light'); } catch(e){}
-  } else {
-    html.setAttribute('data-theme', 'dark');
-    try { localStorage.setItem('report-theme', 'dark'); } catch(e){}
-  }
-  setThemeIcon();
-}
-try {
-  const saved = localStorage.getItem('report-theme');
-  if (saved === 'dark' || (!saved && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-    html.setAttribute('data-theme', 'dark');
-  }
-} catch(e){}
-setThemeIcon();
-
-// ====== IntersectionObserver for reveal animations ======
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(en => {
-    if (en.isIntersecting) {
-      en.target.classList.add('visible');
-      observer.unobserve(en.target);
-    }
-  });
-}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-
-// ====== Smooth scroll for nav anchors ======
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const id = a.getAttribute('href');
-    if (id === '#') return;
-    const t = document.querySelector(id);
-    if (t) { e.preventDefault(); t.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-  });
-});
-
-// ====== Animated counters ======
-const counters = document.querySelectorAll('.stat-number');
-const counterObserver = new IntersectionObserver(entries => {
-  entries.forEach(en => {
-    if (!en.isIntersecting) return;
-    const el = en.target;
-    const raw = el.textContent.trim();
-    const m = raw.match(/^([\d,]+)/);
-    if (!m) { counterObserver.unobserve(el); return; }
-    const target = parseInt(m[1].replace(/,/g, ''), 10);
-    const suffix = raw.replace(m[1], '');
-    const startTime = performance.now();
-    const duration = 1200;
-    function tick(now) {
-      const p = Math.min(1, (now - startTime) / duration);
-      const eased = 1 - Math.pow(1 - p, 3);
-      const val = Math.round(target * eased);
-      el.textContent = val.toLocaleString() + suffix;
-      if (p < 1) requestAnimationFrame(tick);
-      else el.textContent = raw;
-    }
-    requestAnimationFrame(tick);
-    counterObserver.unobserve(el);
-  });
-}, { threshold: 0.5 });
-counters.forEach(c => counterObserver.observe(c));
-</script>
+  <script>
+    (() => {
+      const root = document.documentElement;
+      const themeBtn = document.getElementById('themeBtn');
+      const printBtn = document.getElementById('printBtn');
+      const safeStorage = {
+        get(key) {
+          try { return window.localStorage.getItem(key); } catch { return null; }
+        },
+        set(key, value) {
+          try { window.localStorage.setItem(key, value); } catch { /* التخزين قد يكون محظوراً */ }
+        }
+      };
+      const savedTheme = safeStorage.get('quranReportTheme');
+      if (savedTheme === 'night') root.dataset.theme = 'night';
+      const syncThemeIcon = () => { themeBtn.textContent = root.dataset.theme === 'night' ? '☀' : '☾'; };
+      syncThemeIcon();
+      themeBtn.addEventListener('click', () => {
+        if (root.dataset.theme === 'night') delete root.dataset.theme;
+        else root.dataset.theme = 'night';
+        safeStorage.set('quranReportTheme', root.dataset.theme || 'day');
+        syncThemeIcon();
+      });
+      printBtn.addEventListener('click', () => window.print());
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } });
+      }, { threshold: .08 });
+      document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    })();
+  </script>
 </body>
 </html>

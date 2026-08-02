@@ -1,0 +1,26 @@
+# Quran Pro local and generated files
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+.idea/
+.vscode/
+*.log
+
+# Credentials, private keys, and local certificates
+*.pem
+*.key
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+credentials*.json
+*service-account*.json
+
+# Local tool and OS files
+.DS_Store
+Thumbs.db
