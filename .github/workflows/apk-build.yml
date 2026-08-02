@@ -153,7 +153,6 @@ jobs:
           case "${{ matrix.project }}" in
             apps/calculator-app) ADMOB_APP_ID="ca-app-pub-6142754371257083~9020699769" ;;
             apps/quiz-app)       ADMOB_APP_ID="ca-app-pub-6142754371257083~1920938942" ;;
-            apps/quran-app)      ADMOB_APP_ID="ca-app-pub-6142754371257083~8322283070" ;;
             games/farm-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
             games/kingcraft-game) ADMOB_APP_ID="ca-app-pub-6142754371257083~XXXXXXXXXX" ;;
             games/rust-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~4464642549" ;;
@@ -166,7 +165,7 @@ jobs:
             sed -i "s#</application>#    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"@string/admob_app_id\"/>\n    </application>#" "$MANIFEST"
             echo "AdMob App ID configured: $ADMOB_APP_ID"
           else
-            echo "No AdMob App ID for this project — skipping (games don't use AdMob)"
+            echo "No AdMob App ID for this project — skipping (ad-free app/game)"
           fi
 
       - name: Get current version
