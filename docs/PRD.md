@@ -2,7 +2,7 @@
 
 **Status**: Living document — reflects current state (v8.0 "Deep Signal" design system)
 **Owner**: Rashid (MOT1209)
-**Last updated**: 2026-07-01
+**Last updated**: 2026-08-02
 
 ---
 
@@ -40,6 +40,7 @@ Rashid's platform is a single-owner, personal web platform combining a developer
 - `about.html`, `contact.html`, `privacy.html`, `terms.html`, `offline.html` (PWA fallback).
 - Blog (`blog/`) — unified data layer, shared CSS, dynamic index, auto-generated RSS.
 - Admin (`admin/`) — login-secured dashboard for content/site management.
+- **Rashid AI v3.0 widget** — floating voice/chat assistant embedded directly in `index.html` (`js/rashid-ai-v2.js`), not a separate page. See 5.4 for how it differs from RashidClaw.
 
 ### 5.2 Games (`games/`)
 | Game | Tech | Status |
@@ -49,14 +50,17 @@ Rashid's platform is a single-owner, personal web platform combining a developer
 | Farm Empire | WebGL | Farming simulation — crops, animals, economy |
 
 ### 5.3 Apps (`apps/`)
-- **Quran Pro** — 40+ reciters, tafsir, bookmarks, offline.
+- **Quran Pro** — 40+ reciters, tafsir, bookmarks, offline. Mobile (<769px) got a dedicated redesign (4-tab bottom nav, mini-player, full-screen views) to prep for a native Android/Play Store release; desktop/tablet (≥769px, sidebar layout) is unchanged by that work.
 - **Calculator Vault** — privacy-first calculator hiding a secret vault.
 - **Quiz Master** — multi-category quiz with progress tracking.
 
 All games/apps are individually installable PWAs (own `manifest.json` + service worker).
 
 ### 5.4 AI models (`models/`)
-- **Rashid AI v2.0** (`models/Rashid-Model/`) — conversational assistant, Gemini API, multilingual, voice input.
+Two distinct assistants exist, with two different security models — don't conflate them:
+
+- **Rashid AI v3.0** — the primary, marketed assistant (Goal #2's "live demo of AI-integration skill"). Lives on `index.html` itself (voice widget + dedicated feature section), not under `models/`. Calls Gemini through the server-side proxy `/api/gemini` (`GEMINI_API_KEY` stays in Vercel env, never reaches the client) — see `js/gemini-config.js` / `js/rashid-ai-v2.js`.
+- **RashidClaw** (`models/Rashid-Model/`) — a separate, standalone assistant page. Architecturally BYOK (bring-your-own-key): Gemini/OpenRouter/Pexels keys are entered by the visitor and read from `localStorage` client-side, calling Google's API directly from the browser (no server proxy). Do not add real default keys to `models/Rashid-Model/config.js` — the placeholder values are intentional.
 - **KING2** — separate AI platform effort; live product deploys from a different repo ([[project-king2-repos]]), Next.js frontend on Vercel with Gemini vision ([[project-king2-nextfrontend]]), plus a standalone SDXL LoRA image model ([[project-king2-image]]). Tracked here only as a cross-linked initiative, not part of this repo's deploy.
 
 ### 5.5 Knowledge vault (`vault/`)
@@ -67,12 +71,12 @@ Next.js 16 + React 19 + TypeScript + Tailwind v4 + Framer Motion, statically exp
 
 ## 6. Tech stack & architecture constraints
 
-- **Frontend**: HTML5 (semantic, ARIA, JSON-LD), CSS3 (custom properties, glassmorphism, dark/light mode), vanilla ES6+ modules (12 modules under `src/js/modules/`). No bundler for the main site.
+- **Frontend**: HTML5 (semantic, ARIA, JSON-LD), CSS3 (custom properties, glassmorphism, dark/light mode), vanilla ES6+ modules (16 modules under `src/js/modules/`). No bundler for the main site.
 - **CSS load order** (last wins): `src/css/main.css` → `css/style.css` (v8.0) → `css/enhancements.css`.
 - **Design system v8.0 "Deep Signal"**: Bricolage Grotesque (display) + Space Grotesk (body) + JetBrains Mono; background `#050507` with CSS-only aurora orbs; accent `#6366f1` (Electric Indigo, JS-overridable) + secondary `#22d3ee` (Cyan).
 - **Backend**: Supabase (DB, auth, CDN client) — anon role requires `EXECUTE` on `is_admin()` or site content 401s ([[project-supabase-isadmin-grant]], project ref `kcltollasghlvuoxvjqa`).
-- **AI**: Google Gemini API (`gemini-1.5-flash`) for Rashid AI.
-- **PWA**: Service worker (`sw.js`, cache `Rashid-v11`), web manifest, offline fallback page.
+- **AI**: Google Gemini API — `gemini-1.5-flash` via the server-side `/api/gemini` proxy for Rashid AI v3.0; `gemini-pro` called directly client-side (BYOK) for RashidClaw. See 5.4.
+- **PWA**: Service worker (`sw.js`, cache `Rashid-v16`), web manifest, offline fallback page.
 - **Deployment**: Vercel (auto-deploy on push to `main`) is primary; GitHub Pages (`.nojekyll`, `enablement: true` in `deploy.yml`) is secondary/mirror.
 - **Monetization**: AdSense across 21 pages, with consent handling and SEO optimization already applied.
 
