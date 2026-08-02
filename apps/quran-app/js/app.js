@@ -227,12 +227,13 @@ function initializeElements() {
     const ids = [
         'surah-list', 'verses-container', 'surah-name', 'surah-details',
         'audio-player', 'audio-element', 'play-pause', 'prev-verse', 'next-verse',
+        'expand-player', 'player-mini-bar', 'player-full-panel',
         'skip-forward', 'skip-back', 'repeat-verse', 'playback-speed', 'close-player',
         'player-surah', 'player-verse', 'progress-bar', 'current-time', 'duration',
-        'theme-toggle', 'menu-toggle', 'sidebar', 'search-btn', 'bookmark-btn',
+        'theme-toggle', 'menu-toggle', 'sidebar', 'continue-reading-card', 'back-to-list-btn',
         'search-modal', 'bookmark-modal', 'tafsir-modal', 'search-input', 'search-results',
         'bookmarks-list', 'reciter-select', 'increase-font', 'decrease-font',
-        'save-surah-main', 'last-read-btn', 'tafsir-btn', 'tafsir-select', 'tafsir-content',
+        'save-surah-main', 'tafsir-btn', 'tafsir-select', 'tafsir-content',
         'surah-search', 'auto-play-btn', 'toast-container', 'reading-progress', 'progress-text',
         'audio-mode-toggle', 'juz-list', 'view-toggle'
     ];
@@ -674,6 +675,8 @@ async function loadSurahs() {
         state.allSurahs = data.data;
         displaySurahs(state.allSurahs);
         updateProgressBar();
+        renderContinueReadingCard();
+        showMobileHome();
     } catch (error) {
         console.error('Error loading surahs:', error);
         showToast('حدث خطأ في تحميل السور', 'error');
@@ -836,6 +839,10 @@ async function loadSurah(surahNumber) {
 
         if (window.innerWidth <= 992) {
             elements['sidebar'].classList.remove('active');
+        }
+        if (window.innerWidth <= 768) {
+            elements['sidebar'].classList.remove('mobile-full');
+            document.querySelector('.content')?.classList.add('mobile-full');
         }
 
         showToast(`تم تحميل سورة ${state.currentSurah.name}`, 'success');
@@ -1506,6 +1513,43 @@ function saveReadingProgress() {
         console.warn('Reading progress save failed:', e);
     }
     if (typeof SupabaseSync !== 'undefined') SupabaseSync.syncToCloud();
+    renderContinueReadingCard();
+}
+
+function renderContinueReadingCard() {
+    const card = elements['continue-reading-card'];
+    if (!card) return;
+
+    const lastRead = Object.entries(state.readingProgress)
+        .sort((a, b) => b[1].lastRead - a[1].lastRead)[0];
+
+    card.textContent = '';
+    if (!lastRead) {
+        card.style.display = 'none';
+        card.onclick = null;
+        return;
+    }
+
+    const surahNumber = parseInt(lastRead[0]);
+    const surah = state.allSurahs.find(s => s.number === surahNumber);
+
+    const icon = document.createElement('i');
+    icon.className = 'fas fa-history';
+    const text = document.createElement('div');
+    text.className = 'continue-reading-text';
+    const label = document.createElement('span');
+    label.className = 'continue-reading-label';
+    label.textContent = 'متابعة القراءة';
+    const name = document.createElement('span');
+    name.className = 'continue-reading-name';
+    name.textContent = surah ? surah.name : `سورة ${surahNumber}`;
+    text.appendChild(label);
+    text.appendChild(name);
+    card.appendChild(icon);
+    card.appendChild(text);
+
+    card.style.display = 'flex';
+    card.onclick = () => loadSurah(surahNumber);
 }
 
 function saveSettings() {
@@ -1889,6 +1933,51 @@ function closeModal(modalId) {
     }
 }
 
+// ==================== Mobile Mini-Player ====================
+function toggleMiniPlayer() {
+    const expanded = elements['audio-player'].classList.toggle('expanded');
+    elements['expand-player']?.setAttribute('aria-expanded', String(expanded));
+}
+
+// ==================== Mobile Bottom Navigation ====================
+function showMobileHome() {
+    const sidebar = elements['sidebar'];
+    const content = document.querySelector('.content');
+    if (state.currentSurah) {
+        sidebar.classList.remove('mobile-full');
+        content?.classList.add('mobile-full');
+    } else {
+        content?.classList.remove('mobile-full');
+        sidebar.classList.add('mobile-full');
+    }
+}
+
+function switchTab(tabName, event) {
+    document.querySelectorAll('.mobile-nav-item').forEach(item => item.classList.remove('active'));
+    event?.currentTarget?.classList.add('active');
+
+    closeModal('search-modal');
+    closeModal('bookmark-modal');
+    closeModal('settings-modal');
+
+    switch (tabName) {
+        case 'search':
+            openModal('search-modal');
+            break;
+        case 'bookmarks':
+            displayBookmarks();
+            openModal('bookmark-modal');
+            break;
+        case 'settings':
+            openModal('settings-modal');
+            break;
+        case 'home':
+        default:
+            showMobileHome();
+            break;
+    }
+}
+
 // ==================== Event Listeners Setup ====================
 function setupEventListeners() {
     // Theme toggle
@@ -1899,15 +1988,13 @@ function setupEventListeners() {
         elements['sidebar'].classList.toggle('active');
     });
 
-    // Search
-    elements['search-btn']?.addEventListener('click', () => openModal('search-modal'));
-    setupSearch();
-
-    // Bookmarks
-    elements['bookmark-btn']?.addEventListener('click', () => {
-        displayBookmarks();
-        openModal('bookmark-modal');
+    // Back to surah list (mobile)
+    elements['back-to-list-btn']?.addEventListener('click', () => {
+        document.querySelector('.content')?.classList.remove('mobile-full');
+        elements['sidebar'].classList.add('mobile-full');
     });
+
+    setupSearch();
 
     // Tafsir
     elements['tafsir-btn']?.addEventListener('click', () => {
@@ -1931,19 +2018,6 @@ function setupEventListeners() {
     elements['save-surah-main']?.addEventListener('click', () => {
         if (state.currentSurah) {
             toggleSurahBookmark(state.currentSurah.number, state.currentSurah.name);
-        }
-    });
-
-    // Last read
-    elements['last-read-btn']?.addEventListener('click', () => {
-        const lastRead = Object.entries(state.readingProgress)
-            .sort((a, b) => b[1].lastRead - a[1].lastRead)[0];
-
-        if (lastRead) {
-            loadSurah(parseInt(lastRead[0]));
-            showToast('تم تحميل آخر قراءة', 'success');
-        } else {
-            showToast('لا توجد قراءة سابقة', 'warning');
         }
     });
 
@@ -2027,9 +2101,17 @@ function setupEventListeners() {
         state.verseTimingSource = 'none';
         elements['close-player'].blur();
         elements['audio-player'].classList.remove('active');
+        elements['audio-player'].classList.remove('expanded');
         document.querySelectorAll('.verse-item').forEach(item => {
             item.classList.remove('playing');
         });
+    });
+
+    // Mini-player expand/collapse (mobile)
+    elements['expand-player']?.addEventListener('click', toggleMiniPlayer);
+    elements['player-mini-bar']?.addEventListener('click', (e) => {
+        if (e.target.closest('#play-pause') || e.target.closest('#close-player') || e.target.closest('#expand-player')) return;
+        toggleMiniPlayer();
     });
 
     // Progress bar
@@ -2411,6 +2493,7 @@ window.loadSurahAndScroll = loadSurahAndScroll;
 window.shareCurrentSurah = shareCurrentSurah;
 window.downloadCurrentSurah = downloadCurrentSurah;
 window.closeModal = closeModal;
+window.switchTab = switchTab;
 window.playFullSurah = playFullSurah;
 window.loadJuz = loadJuz;
 window.toggleView = toggleView;

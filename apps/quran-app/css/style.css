@@ -19,6 +19,9 @@
     --text-secondary: #475569;
     --text-muted: #94a3b8;
     
+    /* Mobile bottom navigation height (icon row only; safe-area added separately) */
+    --mobile-nav-h: 60px;
+
     /* Border & Shadow */
     --border-color: rgba(148, 163, 184, 0.2);
     --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -474,6 +477,37 @@ body {
     top: 50%;
     transform: translateY(-50%);
     color: var(--text-muted);
+}
+
+.continue-reading-card {
+    align-items: center;
+    gap: 0.75rem;
+    margin: 1rem;
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-gold) 100%);
+    color: #fff;
+    cursor: pointer;
+}
+
+.continue-reading-card i {
+    font-size: 1.3rem;
+}
+
+.continue-reading-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.continue-reading-label {
+    font-size: 0.75rem;
+    opacity: 0.85;
+}
+
+.continue-reading-name {
+    font-family: 'Amiri', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
 }
 
 .surah-list {
@@ -1010,6 +1044,20 @@ body {
 .player-text span:last-child {
     font-size: 0.85rem;
     color: var(--text-muted);
+}
+
+.player-mini-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.expand-player-btn {
+    display: none;
+}
+
+.back-to-list-btn {
+    display: none;
 }
 
 .player-controls-main {
@@ -1625,7 +1673,145 @@ body {
     }
 }
 
+/* Mobile Bottom Navigation (shown only under the 768px breakpoint below) */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--bg-secondary);
+    padding: 10px 16px;
+    box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border-color);
+}
+
+.mobile-nav-items {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 6px 16px;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    font-size: 0.65rem;
+    border-radius: 10px;
+    transition: 0.3s;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.mobile-nav-item i {
+    font-size: 1.2rem;
+    transition: 0.3s;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover {
+    color: var(--primary);
+    background: rgba(5, 150, 105, 0.08);
+}
+
+.mobile-nav-item.active i {
+    color: var(--accent-gold);
+    transform: translateY(-2px);
+}
+
 @media (max-width: 768px) {
+    .mobile-nav {
+        display: block;
+    }
+
+    .audio-player {
+        left: 0;
+        right: 0;
+        width: 100%;
+        max-width: none;
+        transform: none;
+        border-radius: 16px 16px 0 0;
+        bottom: -160px;
+    }
+
+    .player-content {
+        display: block;
+    }
+
+    .player-mini-bar {
+        padding: 0.6rem 1rem;
+        cursor: pointer;
+    }
+
+    .expand-player-btn {
+        display: inline-flex;
+    }
+
+    .expand-player-btn i {
+        transition: transform 0.3s ease;
+    }
+
+    .audio-player.expanded .expand-player-btn i {
+        transform: rotate(180deg);
+    }
+
+    .player-full-panel {
+        max-height: 0;
+        overflow: hidden;
+        padding: 0 1rem;
+        transition: max-height 0.35s ease, padding 0.35s ease;
+    }
+
+    .audio-player.expanded .player-full-panel {
+        max-height: 240px;
+        padding: 0.5rem 1rem 1rem;
+    }
+
+    .desktop-only-btn {
+        display: none;
+    }
+
+    .view-panel {
+        position: fixed;
+        inset: 0;
+        z-index: 800;
+        background: var(--bg-primary);
+        backdrop-filter: none;
+        padding: 0;
+        border-radius: 0;
+    }
+
+    .view-panel .modal-content {
+        width: 100%;
+        height: 100%;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+    }
+
+    .sidebar.mobile-full,
+    .content.mobile-full {
+        position: fixed;
+        inset: 0;
+        top: calc(60px + env(safe-area-inset-top));
+        width: 100%;
+        max-width: 100%;
+        transform: none;
+        z-index: 500;
+    }
+
+    .back-to-list-btn {
+        display: inline-flex;
+    }
+
     .header-content {
         padding: 0.75rem 1rem;
     }
@@ -1660,11 +1846,6 @@ body {
     .verses-wrapper {
         padding: 1.5rem;
         font-size: 1.8rem;
-    }
-    
-    .player-content {
-        flex-direction: column;
-        gap: 1rem;
     }
     
     .player-controls-main {
@@ -2170,6 +2351,11 @@ body {
         min-height: 44px;
         min-width: 44px;
     }
+
+    .mobile-nav-item {
+        min-height: 48px;
+        min-width: 48px;
+    }
 }
 
 /* Landscape Mobile */
@@ -2216,8 +2402,20 @@ body {
         margin-top: calc(70px + env(safe-area-inset-top));
     }
 
-    .audio-player.active {
-        bottom: calc(20px + env(safe-area-inset-bottom));
+    @media (min-width: 769px) {
+        .audio-player.active {
+            bottom: calc(20px + env(safe-area-inset-bottom));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .audio-player.active {
+            bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+        }
+    }
+
+    .mobile-nav {
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
     }
 }
 
