@@ -97,7 +97,7 @@ create policy "Admins can manage knowledge" on public.bot_knowledge for all to a
 insert into public.projects (title, category, status, description, link, image_url, technologies)
 values 
 ('Farmer Game', 'Game', 'Public', 'A 3D farming simulation.', 'games/farm-game/index.html', 'fas fa-tractor', ARRAY['3D', 'WebGL']),
-('Quran App', 'App', 'Public', 'Beautiful Quran recitation app.', 'apps/quran-app/index.html', 'fas fa-book-open', ARRAY['Audio', 'PWA']),
+('Quran App', 'App', 'Public', 'Beautiful Quran recitation app.', '/quran-app/', 'fas fa-book-open', ARRAY['Audio', 'PWA']),
 ('Rust Game', 'Game', 'Public', 'Experimental Rust + WASM game.', 'games/rust-game/index.html', 'fab fa-rust', ARRAY['Rust', 'WASM']),
 ('Calculator Vault', 'App', 'Public', 'Privacy-focused calculator vault.', 'apps/calculator-vault/index.html', 'fas fa-user-secret', ARRAY['Security', 'Utility']),
 ('Quiz App', 'App', 'Public', 'Interactive quiz application.', 'apps/quiz-app/index.html', 'fas fa-question', ARRAY['Education', 'JS']);
