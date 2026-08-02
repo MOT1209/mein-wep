@@ -1,0 +1,228 @@
+/* UI Fixes and Overrides */
+
+/* Ensure overlays are hidden by default */
+.shop-overlay,
+.inventory-overlay,
+.crafting-overlay,
+.quests-overlay,
+.achievements-overlay,
+.settings-overlay,
+.dialogue-overlay,
+.upgrades-overlay,
+.map-overlay,
+.chest-overlay,
+.mailbox-overlay,
+.daily-rewards-overlay,
+.challenges-overlay,
+.gallery-overlay,
+.stats-overlay {
+  display: none !important;
+}
+
+/* Show when active */
+.shop-overlay.active,
+.inventory-overlay.active,
+.crafting-overlay.active,
+.quests-overlay.active,
+.achievements-overlay.active,
+.settings-overlay.active,
+.dialogue-overlay.active,
+.upgrades-overlay.active,
+.map-overlay.active,
+.chest-overlay.active,
+.mailbox-overlay.active,
+.daily-rewards-overlay.active,
+.challenges-overlay.active,
+.gallery-overlay.active,
+.stats-overlay.active {
+  display: flex !important;
+}
+
+/* Fix z-index */
+.shop-container,
+.inventory-container,
+.crafting-container,
+.quests-container,
+.achievements-container,
+.settings-container,
+.dialogue-container,
+.upgrades-container,
+.map-container,
+.chest-container,
+.mailbox-container,
+.daily-rewards-container,
+.challenges-container,
+.gallery-container,
+.stats-container {
+  z-index: 1001;
+}
+
+/* RTL Support */
+[dir="rtl"] .shop-tab,
+[dir="rtl"] .inventory-tab,
+[dir="rtl"] .crafting-tab,
+[dir="rtl"] .quest-tab,
+[dir="rtl"] .achievement-tab,
+[dir="rtl"] .upgrade-tab,
+[dir="rtl"] .challenge-tab,
+[dir="rtl"] .gallery-tab {
+  direction: rtl;
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .shop-container,
+  .inventory-container,
+  .crafting-container,
+  .quests-container,
+  .achievements-container,
+  .settings-container,
+  .dialogue-container,
+  .upgrades-container,
+  .map-container,
+  .chest-container,
+  .mailbox-container,
+  .daily-rewards-container,
+  .challenges-container,
+  .gallery-container,
+  .stats-container {
+    width: 95% !important;
+    max-height: 90vh !important;
+  }
+  
+  .shop-grid,
+  .inventory-grid,
+  .crafting-grid,
+  .achievements-grid,
+  .upgrades-grid {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+  }
+  
+  .daily-rewards-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* Animation Fixes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes popupAppear {
+  0% { transform: translate(-50%, -50%) scale(0); }
+  50% { transform: translate(-50%, -50%) scale(1.1); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* Tooltips */
+.tooltip {
+  position: fixed;
+  background: rgba(0, 0, 0, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px;
+  pointer-events: none;
+  z-index: 9999;
+  max-width: 200px;
+}
+
+.tooltip-title {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.tooltip-desc {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 12px;
+}
+
+/* Notification Fixes */
+.notification-container {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  pointer-events: none;
+}
+
+.notification {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 10px;
+  padding: 15px 25px;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+  margin-bottom: 10px;
+  animation: slideUp 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* HUD Fixes */
+.game-hud {
+  pointer-events: none;
+  z-index: 100;
+}
+
+.tool-slots {
+  pointer-events: auto;
+}
+
+.mini-map {
+  pointer-events: auto;
+}
+
+/* Loading Screen */
+.loading-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+.loading-title {
+  color: white;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.loading-bar {
+  width: 300px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.loading-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.loading-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  margin-top: 10px;
+}

@@ -1,0 +1,441 @@
+/* ============================================
+   Map UI Styles — Farming Game
+   World map overlay with zones, player indicator,
+   travel animation, RTL support, and mobile responsive
+   ============================================ */
+
+/* ---------- Overlay ---------- */
+.map-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+/* ---------- Container (glassmorphism) ---------- */
+.map-container {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* ---------- Header ---------- */
+.map-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.map-title {
+  font-size: 24px;
+  color: white;
+  margin: 0;
+}
+
+.map-close {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.3s;
+}
+
+.map-close:hover {
+  background: rgba(255,100,100,0.3);
+}
+
+/* ---------- Content scroll area ---------- */
+.map-content {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(80vh - 80px);
+}
+
+/* ---------- Canvas (the actual map surface) ---------- */
+.map-canvas {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: rgba(0,0,0,0.3);
+  border-radius: 15px;
+  position: relative;
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+/* ---------- Zone tiles ---------- */
+.map-zone {
+  position: absolute;
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.map-zone:hover {
+  border-color: rgba(102,126,234,0.5);
+  background: rgba(102,126,234,0.1);
+  transform: scale(1.05);
+}
+
+.map-zone.current {
+  border-color: #38ef7d;
+  box-shadow: 0 0 20px rgba(56,239,125,0.5);
+}
+
+.map-zone.locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.map-zone.locked .map-zone-icon {
+  filter: grayscale(1);
+}
+
+.map-zone-icon {
+  font-size: 32px;
+  margin-bottom: 5px;
+}
+
+.map-zone-name {
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* ---------- Player indicator ---------- */
+.map-zone-player {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #667eea;
+  border-radius: 50%;
+  border: 2px solid white;
+  transform: translate(-50%, -50%);
+  animation: mapPulse 1s infinite;
+  z-index: 5;
+}
+
+@keyframes mapPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(102,126,234,0.7); }
+  50%       { box-shadow: 0 0 0 10px rgba(102,126,234,0); }
+}
+
+/* ---------- Legend ---------- */
+.map-legend {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.map-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 12px;
+}
+
+.map-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.map-legend-color.player {
+  background: #667eea;
+  border: 2px solid white;
+}
+
+.map-legend-color.zone {
+  background: rgba(255,255,255,0.1);
+  border: 2px solid rgba(255,255,255,0.2);
+}
+
+.map-legend-color.current {
+  background: rgba(56,239,125,0.3);
+  border: 2px solid #38ef7d;
+}
+
+.map-legend-color.locked {
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  opacity: 0.5;
+}
+
+/* ---------- Travel Button ---------- */
+.map-travel-btn {
+  width: 100%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 15px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 15px;
+  transition: all 0.3s;
+}
+
+.map-travel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(102,126,234,0.4);
+}
+
+.map-travel-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(102,126,234,0.3);
+}
+
+.map-travel-btn:disabled {
+  background: rgba(255,255,255,0.2);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------- Travel animation ---------- */
+@keyframes mapTravelFade {
+  0%   { opacity: 1; }
+  50%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.map-traveling .map-canvas {
+  animation: mapTravelFade 1s ease;
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+[dir="rtl"] .map-header {
+  flex-direction: row-reverse;
+}
+
+[dir="rtl"] .map-zone-name {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+}
+
+[dir="rtl"] .map-legend-item {
+  flex-direction: row-reverse;
+}
+
+/* ============================================
+   Mobile Responsive
+   ============================================ */
+
+/* Tablets (max-width: 768px) */
+@media (max-width: 768px) {
+  .map-container {
+    width: 95%;
+    max-height: 90vh;
+    border-radius: 15px;
+  }
+
+  .map-header {
+    padding: 15px;
+  }
+
+  .map-title {
+    font-size: 20px;
+  }
+
+  .map-close {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+
+  .map-content {
+    padding: 15px;
+    max-height: calc(90vh - 70px);
+  }
+
+  .map-canvas {
+    border-radius: 12px;
+  }
+
+  .map-zone-icon {
+    font-size: 26px;
+  }
+
+  .map-zone-name {
+    font-size: 10px;
+  }
+
+  .map-travel-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  .map-legend {
+    gap: 10px;
+  }
+
+  .map-legend-item {
+    font-size: 11px;
+  }
+}
+
+/* Mobile phones (max-width: 480px) */
+@media (max-width: 480px) {
+  .map-container {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    height: 100%;
+  }
+
+  .map-overlay {
+    padding: 0;
+  }
+
+  .map-header {
+    padding: 12px 15px;
+  }
+
+  .map-title {
+    font-size: 18px;
+  }
+
+  .map-close {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .map-content {
+    padding: 12px;
+    max-height: calc(100vh - 60px);
+  }
+
+  .map-canvas {
+    aspect-ratio: 4 / 3;
+    border-radius: 10px;
+  }
+
+  .map-zone {
+    border-width: 1px;
+    border-radius: 8px;
+  }
+
+  .map-zone-icon {
+    font-size: 22px;
+    margin-bottom: 3px;
+  }
+
+  .map-zone-name {
+    font-size: 9px;
+  }
+
+  .map-zone-player {
+    width: 10px;
+    height: 10px;
+  }
+
+  .map-travel-btn {
+    padding: 14px;
+    font-size: 15px;
+    border-radius: 12px;
+  }
+
+  .map-legend {
+    gap: 8px;
+  }
+
+  .map-legend-color {
+    width: 12px;
+    height: 12px;
+  }
+
+  .map-legend-item {
+    font-size: 10px;
+    gap: 5px;
+  }
+}
+
+/* Very small screens (max-width: 360px) */
+@media (max-width: 360px) {
+  .map-title {
+    font-size: 16px;
+  }
+
+  .map-zone-icon {
+    font-size: 18px;
+  }
+
+  .map-zone-name {
+    font-size: 8px;
+  }
+
+  .map-travel-btn {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+/* ============================================
+   Dark overlay for locked zones tooltip
+   ============================================ */
+.map-tooltip {
+  position: absolute;
+  background: rgba(0,0,0,0.85);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 10;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  bottom: calc(100% + 8px);
+  left: 50%;
+}
+
+.map-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(0,0,0,0.85);
+}
+
+/* ============================================
+   Fade-in helper (used by overlay entry)
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

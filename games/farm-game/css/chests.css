@@ -1,0 +1,517 @@
+/* ============================================
+   Chests UI Styles - Farm Game
+   ============================================
+   RTL Support | Mobile Responsive | Glassmorphism
+   Version: 2.2.0
+   ============================================ */
+
+/* Chest Overlay */
+.chest-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+/* Chest Container */
+.chest-container {
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+
+/* Chest Header */
+.chest-header {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chest-title {
+  font-size: 24px;
+  color: white;
+  margin: 0;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.chest-close {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 20px;
+  transition: all 0.3s ease;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chest-close:hover {
+  background: rgba(255,100,100,0.3);
+  transform: rotate(90deg);
+}
+
+/* Chest Content */
+.chest-content {
+  padding: 20px;
+  overflow-y: auto;
+  max-height: calc(80vh - 80px);
+}
+
+/* Custom Scrollbar */
+.chest-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.chest-content::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+}
+
+.chest-content::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 4px;
+}
+
+.chest-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.3);
+}
+
+/* Chest Slots Grid */
+.chest-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Individual Chest Slot */
+.chest-slot {
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.05);
+  border: 2px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.chest-slot:hover {
+  border-color: rgba(255,255,255,0.3);
+  transform: scale(1.05);
+  background: rgba(255,255,255,0.1);
+}
+
+.chest-slot.occupied {
+  border-color: rgba(255,215,0,0.3);
+  background: rgba(255,215,0,0.05);
+}
+
+.chest-slot.occupied:hover {
+  border-color: rgba(255,215,0,0.5);
+}
+
+.chest-slot-icon {
+  font-size: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.chest-slot-count {
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 8px;
+  min-width: 18px;
+  text-align: center;
+}
+
+/* Chest Actions */
+.chest-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.chest-action-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+}
+
+.chest-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+}
+
+.chest-action-btn:active {
+  transform: translateY(0);
+}
+
+.chest-action-btn.deposit {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  box-shadow: 0 4px 15px rgba(17,153,142,0.3);
+}
+
+.chest-action-btn.deposit:hover {
+  box-shadow: 0 6px 20px rgba(17,153,142,0.4);
+}
+
+.chest-action-btn.withdraw {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.chest-action-btn.sort {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  box-shadow: 0 4px 15px rgba(240,147,251,0.3);
+}
+
+.chest-action-btn.sort:hover {
+  box-shadow: 0 6px 20px rgba(240,147,251,0.4);
+}
+
+.chest-action-btn.clear {
+  background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+  box-shadow: 0 4px 15px rgba(250,112,154,0.3);
+}
+
+/* Item Tooltip */
+.item-tooltip {
+  position: fixed;
+  background: rgba(0,0,0,0.95);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 10px;
+  padding: 15px;
+  z-index: 2000;
+  pointer-events: none;
+  max-width: 220px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.item-tooltip-name {
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.item-tooltip-name.rarity-common { color: #ffffff; }
+.item-tooltip-name.rarity-uncommon { color: #1eff00; }
+.item-tooltip-name.rarity-rare { color: #0070dd; }
+.item-tooltip-name.rarity-epic { color: #a335ee; }
+.item-tooltip-name.rarity-legendary { color: #ff8000; }
+
+.item-tooltip-desc {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  margin-bottom: 8px;
+  line-height: 1.4;
+}
+
+.item-tooltip-stats {
+  color: #ffd700;
+  font-size: 11px;
+}
+
+.item-tooltip-stats span {
+  display: block;
+  margin-bottom: 2px;
+}
+
+.item-tooltip-price {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  color: #90EE90;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Drag and Drop States */
+.chest-slot.dragging {
+  opacity: 0.5;
+  border-style: dashed;
+}
+
+.chest-slot.drag-over {
+  border-color: #38ef7d !important;
+  background: rgba(56,239,125,0.15);
+  box-shadow: 0 0 20px rgba(56,239,125,0.3);
+}
+
+.chest-slot.drop-target {
+  border-color: #667eea !important;
+  background: rgba(102,126,234,0.15);
+}
+
+/* Chest Type Variants */
+.chest-container.wooden {
+  border-color: rgba(139,90,43,0.5);
+}
+
+.chest-container.iron {
+  border-color: rgba(192,192,192,0.5);
+}
+
+.chest-container.gold {
+  border-color: rgba(255,215,0,0.5);
+  box-shadow: 0 8px 32px rgba(255,215,0,0.2);
+}
+
+.chest-container.diamond {
+  border-color: rgba(0,191,255,0.5);
+  box-shadow: 0 8px 32px rgba(0,191,255,0.2);
+}
+
+/* Chest Capacity Indicator */
+.chest-capacity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 8px;
+}
+
+.chest-capacity-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.chest-capacity-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #38ef7d, #11998e);
+  transition: width 0.3s ease;
+}
+
+.chest-capacity-fill.warning {
+  background: linear-gradient(90deg, #fee140, #fa709a);
+}
+
+.chest-capacity-fill.full {
+  background: linear-gradient(90deg, #f5576c, #ff4444);
+}
+
+.chest-capacity-text {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* Quick Transfer Button */
+.chest-quick-transfer {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 0.3s ease;
+}
+
+.chest-quick-transfer:hover {
+  background: rgba(56,239,125,0.3);
+}
+
+/* Empty State */
+.chest-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255,255,255,0.5);
+}
+
+.chest-empty-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.chest-empty-text {
+  font-size: 14px;
+}
+
+/* ============================================
+   RTL Support
+   ============================================ */
+[dir="rtl"] .chest-slot-count {
+  right: auto;
+  left: 3px;
+}
+
+[dir="rtl"] .chest-quick-transfer {
+  right: auto;
+  left: 10px;
+}
+
+[dir="rtl"] .chest-title {
+  direction: rtl;
+}
+
+[dir="rtl"] .item-tooltip-name,
+[dir="rtl"] .item-tooltip-desc,
+[dir="rtl"] .item-tooltip-stats span {
+  text-align: right;
+}
+
+/* ============================================
+   Mobile Responsive
+   ============================================ */
+@media (max-width: 768px) {
+  .chest-container {
+    width: 95%;
+    max-height: 90vh;
+    border-radius: 15px;
+  }
+
+  .chest-header {
+    padding: 15px;
+  }
+
+  .chest-title {
+    font-size: 20px;
+  }
+
+  .chest-close {
+    width: 35px;
+    height: 35px;
+    font-size: 18px;
+  }
+
+  .chest-content {
+    padding: 15px;
+    max-height: calc(90vh - 70px);
+  }
+
+  .chest-slots {
+    grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+    gap: 8px;
+  }
+
+  .chest-slot-icon {
+    font-size: 24px;
+  }
+
+  .chest-actions {
+    flex-direction: column;
+  }
+
+  .chest-action-btn {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+  }
+
+  .item-tooltip {
+    max-width: 180px;
+    padding: 12px;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chest-container {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+    height: 100%;
+  }
+
+  .chest-overlay {
+    padding: 0;
+  }
+
+  .chest-slots {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .chest-slot-icon {
+    font-size: 20px;
+  }
+
+  .chest-slot-count {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+}
+
+/* ============================================
+   Animations
+   ============================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.chest-container {
+  animation: slideUp 0.3s ease;
+}
+
+.chest-slot.occupied {
+  animation: pulse 2s infinite;
+}
