@@ -14,6 +14,12 @@ js/gemini-config.js
 .env.local
 **/.env
 **/.env.local
+# ...and every other variant (.env.deploy, .env.production, .env.staging, …) — these
+# carry real keys just as often as plain .env does.
+**/.env.*
+# Exceptions: placeholder templates and the encrypted blobs meant to be committed.
+!**/.env.example
+!**/*.enc
 *.key
 
 # Ignore API keys
