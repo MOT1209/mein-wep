@@ -220,6 +220,38 @@ jobs:
               --signing-type apksigner 2>&1 | tee build.log | tail -40
           fi
 
+      - name: Build AAB (Google Play only — quran-app)
+        if: matrix.project == 'apps/quran-app'
+        working-directory: ${{ matrix.project }}
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+          KS_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KS_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -o pipefail
+          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+            # release-key.jks was already written by the "Build APK" step above
+            npx cap build android \
+              --keystorepath "$PWD/release-key.jks" \
+              --keystorepass "$KS_PASS" \
+              --keystorealias "${KS_ALIAS:-rashid-key}" \
+              --keystorealiaspass "${KS_KEY_PASS:-$KS_PASS}" \
+              --androidreleasetype AAB \
+              --signing-type apksigner 2>&1 | tee build-aab.log | tail -40
+          else
+            echo "No release keystore configured — skipping AAB build (APK-only temp-signed build already produced above)."
+          fi
+
+      - name: Upload AAB artifact (Google Play only — quran-app)
+        if: matrix.project == 'apps/quran-app'
+        uses: actions/upload-artifact@v4
+        with:
+          name: quran-app-aab
+          path: apps/quran-app/android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: warn
+          retention-days: 30
+
       - name: Copy APK to site folder
         id: apk
         run: |
