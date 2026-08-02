@@ -54,19 +54,31 @@ jobs:
 
   flutter-test:
     name: 🎯 Maarifah App Tests
-    # Only run when the Maarifah app actually exists in the repo (folder not yet committed)
-    if: ${{ hashFiles('apps/maarifah-app/pubspec.yaml') != '' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Check if Maarifah app exists
+        id: check
+        # hashFiles() isn't available in a job-level `if:` (no runner/checkout yet
+        # at that evaluation point) — that previously broke parsing for this whole
+        # workflow file, so the existence check has to happen in a step instead.
+        run: |
+          if [ -f apps/maarifah-app/pubspec.yaml ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Set up Flutter
+        if: steps.check.outputs.exists == 'true'
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
       - name: Install dependencies
+        if: steps.check.outputs.exists == 'true'
         working-directory: apps/maarifah-app
         run: flutter pub get
       - name: Run flutter test (unit + widget — the 84 tests referenced in commit history)
+        if: steps.check.outputs.exists == 'true'
         working-directory: apps/maarifah-app
         run: flutter test
       # integration_test/app_test.dart needs a device/emulator per its own header
