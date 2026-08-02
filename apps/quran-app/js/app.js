@@ -180,13 +180,23 @@ const APP_CONFIG = {
 };
 
 // ==================== State Management ====================
+function safeParseLocalStorage(key, fallback) {
+    try {
+        const raw = localStorage.getItem(key);
+        return raw ? JSON.parse(raw) : fallback;
+    } catch (e) {
+        console.warn(`Corrupted localStorage value for ${key}:`, e);
+        return fallback;
+    }
+}
+
 const state = {
     currentSurah: null,
     currentVerseIndex: 0,
     allSurahs: [],
-    bookmarks: JSON.parse(localStorage.getItem('quranBookmarks')) || [],
-    readingProgress: JSON.parse(localStorage.getItem('quranReadingProgress')) || {},
-    settings: JSON.parse(localStorage.getItem('quranSettings')) || {
+    bookmarks: safeParseLocalStorage('quranBookmarks', []),
+    readingProgress: safeParseLocalStorage('quranReadingProgress', {}),
+    settings: safeParseLocalStorage('quranSettings', {
         fontSize: APP_CONFIG.DEFAULT_FONT_SIZE,
         theme: 'dark',
         autoPlay: false,
@@ -194,7 +204,7 @@ const state = {
         reciter: 'alafasy',
         audioMode: 'full_surah', // 'full_surah' أو 'verse_by_verse'
         showTranslation: false
-    },
+    }),
     isPlaying: false,
     isRepeatEnabled: false,
     audioElement: null,
@@ -206,6 +216,7 @@ const state = {
     audioRequestId: 0,
     surahRequestId: 0,
     audioSeekVersion: 0,
+    searchRequestId: 0,
     currentReciter: 'alafasy'
 };
 
@@ -1090,7 +1101,7 @@ function resetAudioProgress() {
  * تشغيل السورة كاملة مع MP3.
  * لا يتم تخمين الآية الحالية؛ التظليل يكون فقط عند توفر manifest مطابق للصوت.
  */
-async function playFullSurah(startVerseIndex = 0) {
+async function playFullSurah(startVerseIndex = 0, resumeTimeSeconds = null) {
     if (!state.currentSurah) {
         showToast('اختر سورة أولاً', 'warning');
         return;
@@ -1160,6 +1171,9 @@ async function playFullSurah(startVerseIndex = 0) {
             updateMediaSessionPosition();
         } else {
             state.currentVerseIndex = 0;
+            if (resumeTimeSeconds && Number.isFinite(audio.duration) && state.audioSeekVersion === seekVersionAtPlaybackStart) {
+                audio.currentTime = Math.min(resumeTimeSeconds, Math.max(0, audio.duration - 0.25));
+            }
             setPlayerStatus('تلاوة السورة · بدون مزامنة آيات');
         }
     } catch (error) {
@@ -1278,6 +1292,15 @@ function handleAudioEnded() {
     if (state.audioPlaybackKind === 'verse' && state.isRepeatEnabled) {
         const audio = state.audioElement;
         audio.currentTime = 0;
+        void audio.play().catch(error => showToast(getAudioErrorMessage(error), 'error'));
+        return;
+    }
+
+    if (state.audioPlaybackKind === 'full_surah' && state.isRepeatEnabled) {
+        const audio = state.audioElement;
+        audio.currentTime = 0;
+        state.isPlaying = true;
+        updatePlayPauseButton();
         void audio.play().catch(error => showToast(getAudioErrorMessage(error), 'error'));
         return;
     }
@@ -1468,17 +1491,29 @@ function toggleSurahBookmark(surahNumber, surahName) {
 }
 
 function saveBookmarks() {
-    localStorage.setItem('quranBookmarks', JSON.stringify(state.bookmarks));
+    try {
+        localStorage.setItem('quranBookmarks', JSON.stringify(state.bookmarks));
+    } catch (e) {
+        console.warn('Bookmark save failed:', e);
+    }
     if (typeof SupabaseSync !== 'undefined') SupabaseSync.syncToCloud();
 }
 
 function saveReadingProgress() {
-    localStorage.setItem('quranReadingProgress', JSON.stringify(state.readingProgress));
+    try {
+        localStorage.setItem('quranReadingProgress', JSON.stringify(state.readingProgress));
+    } catch (e) {
+        console.warn('Reading progress save failed:', e);
+    }
     if (typeof SupabaseSync !== 'undefined') SupabaseSync.syncToCloud();
 }
 
 function saveSettings() {
-    localStorage.setItem('quranSettings', JSON.stringify(state.settings));
+    try {
+        localStorage.setItem('quranSettings', JSON.stringify(state.settings));
+    } catch (e) {
+        console.warn('Settings save failed:', e);
+    }
     if (typeof SupabaseSync !== 'undefined') SupabaseSync.syncToCloud();
 }
 
@@ -1628,6 +1663,7 @@ function normalizeArabicSearchText(text) {
 }
 
 async function searchQuran(query) {
+    const requestId = ++state.searchRequestId;
     const resultsContainer = elements['search-results'];
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'loading';
@@ -1644,6 +1680,8 @@ async function searchQuran(query) {
             `${APP_CONFIG.API_BASE}/quran/quran-uthmani`,
             'quran_uthmani'
         );
+        if (requestId !== state.searchRequestId) return;
+
         const normalizedQuery = normalizeArabicSearchText(query);
         const matches = data.data.surahs.flatMap(surah =>
             surah.ayahs
@@ -1697,6 +1735,7 @@ async function searchQuran(query) {
         });
 
     } catch (error) {
+        if (requestId !== state.searchRequestId) return;
         console.error('Search error:', error);
         const errorDiv = document.createElement('div');
         errorDiv.className = 'search-hint';
@@ -1943,7 +1982,7 @@ function setupEventListeners() {
         // إعادة تشغيل إذا كان يعمل
         if (state.isPlaying && state.currentSurah) {
             const currentTime = state.audioElement?.currentTime || 0;
-            playFullSurah(state.currentVerseIndex);
+            playFullSurah(state.currentVerseIndex, currentTime);
         }
     });
 
@@ -2007,6 +2046,11 @@ function setupEventListeners() {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
 
+            // "الأجزاء" is handled exclusively by toggleView() (its own listener below),
+            // which owns currentView and the list render — skip the surah-filter logic here.
+            if (e.target.id === 'view-toggle') return;
+
+            currentView = 'surahs';
             const filter = e.target.dataset.filter;
             if (filter === 'all') {
                 displaySurahs(state.allSurahs);

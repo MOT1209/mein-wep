@@ -142,7 +142,7 @@ body {
 
 .loader-container {
     text-align: center;
-    animation: fadeInUp 0.8s ease;
+    animation: fadeInUpSimple 0.8s ease;
 }
 
 .islamic-pattern {
@@ -180,7 +180,7 @@ body {
 .loader-subtext {
     color: var(--text-muted);
     font-size: 1rem;
-    animation: pulse 1.5s ease-in-out infinite;
+    animation: pulseOpacitySubtle 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse-glow {
@@ -188,12 +188,12 @@ body {
     50% { box-shadow: 0 0 40px rgba(245, 158, 11, 0.4); }
 }
 
-@keyframes fadeInUp {
+@keyframes fadeInUpSimple {
     from { opacity: 0; transform: translateY(30px); }
     to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse {
+@keyframes pulseOpacitySubtle {
     0%, 100% { opacity: 0.6; }
     50% { opacity: 1; }
 }
@@ -228,6 +228,23 @@ body {
     gap: 0.5rem;
     font-weight: 600;
     animation: slideDown 0.3s ease;
+}
+
+.offline-indicator i {
+    position: relative;
+    display: inline-block;
+}
+
+.offline-indicator i::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: -2px;
+    right: -2px;
+    height: 2px;
+    background: currentColor;
+    transform: rotate(-45deg);
+    transform-origin: center;
 }
 
 @keyframes slideDown {
@@ -843,6 +860,16 @@ body {
     font-weight: 600;
 }
 
+.bismillah {
+    text-align: center;
+    direction: rtl;
+    font-family: 'Scheherazade New', 'Amiri', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--accent-gold);
+    margin: 0 auto 1.5rem;
+}
+
 .verse-item {
     display: inline;
     position: relative;
@@ -998,7 +1025,7 @@ body {
     margin-bottom: 0.75rem;
 }
 
-.control-btn {
+.player-controls .control-btn {
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
     width: 40px;
@@ -1013,7 +1040,7 @@ body {
     justify-content: center;
 }
 
-.control-btn:hover {
+.player-controls .control-btn:hover {
     background: var(--primary);
     color: white;
     transform: scale(1.1);
