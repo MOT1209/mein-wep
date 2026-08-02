@@ -2,7 +2,7 @@
  * GitHub Stats & Activity Module
  * Fetches real data from GitHub API for the portfolio
  */
-import { escapeHTML } from '../utils/dom.js';
+import { escapeHTML, safeUrl } from '../utils/dom.js';
 
 export async function fetchGitHubStats(username = 'MOT1209') {
     try {
@@ -130,7 +130,7 @@ export async function renderGitHubStats(container) {
     const repoCards = data.topRepos.map(r => {
         const updated = new Date(r.updated).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
         return `
-            <a href="${r.url}" target="_blank" rel="noopener noreferrer" class="github-repo-card">
+            <a href="${safeUrl(r.url)}" target="_blank" rel="noopener noreferrer" class="github-repo-card">
                 <div class="repo-header">
                     <i class="fas fa-book" aria-hidden="true"></i>
                     <span class="repo-name">${escapeHTML(r.name)}</span>
@@ -165,11 +165,11 @@ export async function renderGitHubStats(container) {
         <div class="github-section-content">
             <!-- Profile Header -->
             <div class="github-profile">
-                <img src="${data.avatar}" alt="${escapeHTML(data.name)}" class="github-avatar" width="80" height="80" loading="lazy">
+                <img src="${safeUrl(data.avatar)}" alt="${escapeHTML(data.name)}" class="github-avatar" width="80" height="80" loading="lazy">
                 <div class="github-profile-info">
                     <h3>${escapeHTML(data.name)}</h3>
                     <p class="github-bio">${escapeHTML(data.bio)}</p>
-                    <a href="${data.profileUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm">
+                    <a href="${safeUrl(data.profileUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm">
                         <i class="fab fa-github" aria-hidden="true"></i> @MOT1209
                     </a>
                 </div>
