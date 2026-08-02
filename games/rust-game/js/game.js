@@ -35,6 +35,9 @@ const state = {
     gear: { head: null, chest: null, legs: null, feet: null },
     belt: ['building_plan', 'hammer', null, null, null, null],
     stats: { health: 100, hunger: 100, thirst: 100, radiation: 0 },
+    dead: false,
+    deathCount: 0,
+    reviveCount: 0,
     buildMode: false,
     viewMode: 'first',
     controls: { forward: false, backward: false, left: false, right: false, jump: false, canJump: false, crouch: false },
@@ -1475,6 +1478,9 @@ try {
 
         const isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
         if (pointerControls.isLocked || isTouch) {
+            if (state.dead) {
+                // ☠️ اللاعب ميت — تجميد كل المحاكاة (شاشة الموت نشطة)
+            } else {
             // Survival Stats logic
             state.stats.hunger = Math.max(0, state.stats.hunger - 0.05 * delta);
             state.stats.thirst = Math.max(0, state.stats.thirst - 0.08 * delta);
@@ -1529,6 +1535,12 @@ try {
                 document.getElementById('build-info').style.display = 'none';
                 state.building.lookingAtStructure = null;
             }
+
+                // ☠️ فحص الموت — عند وصول الصحة للصفر
+                if (state.stats.health <= 0 && !state.dead) {
+                    triggerDeath();
+                }
+            } // نهاية else: اللاعب حي
         }
         // Camera Smoothing Logic
         if (state.viewMode === 'third') {
@@ -1692,6 +1704,9 @@ try {
         updateHUD();
     }, 1500);
 
+    // 🌐 تصدير مراجع المحرك لنظام الموت/المكافأة (نطاق الوحدة)
+    window.__rustCore = { camera, pointerControls };
+
 } catch (err) {
     console.error("Critical Failure:", err);
     const loader = document.getElementById('loading-screen');
@@ -1780,3 +1795,122 @@ function initPlayerPreview() {
 
 
 
+
+// ==================== ☠️ DEATH & REWARD SYSTEM (شاهد إعلان = عودة للحياة) ====================
+
+function triggerDeath() {
+    if (state.dead) return;
+    state.dead = true;
+    state.deathCount = (state.deathCount || 0) + 1;
+
+    // فك قفل المؤشر لإظهار الشاشة
+    try { if (document.pointerLockElement) document.exitPointerLock(); } catch (_) {}
+
+    const screen = document.getElementById('death-screen');
+    const reason = document.getElementById('death-reason');
+    if (state.stats.radiation >= 100) {
+        reason.textContent = '💀 قتلتك الإشعاعات النووية... شاهد إعلانًا وانهض من جديد!';
+    } else if (state.stats.hunger <= 0) {
+        reason.textContent = '💀 مات جوعًا... شاهد إعلانًا وانهض من جديد!';
+    } else if (state.stats.thirst <= 0) {
+        reason.textContent = '💀 مات عطشًا... شاهد إعلانًا وانهض من جديد!';
+    } else {
+        reason.textContent = '💀 استنفدت قواك... شاهد إعلانًا وانهض من جديد!';
+    }
+    document.getElementById('death-count').textContent = state.deathCount;
+    document.getElementById('revive-count').textContent = state.reviveCount || 0;
+    screen.classList.remove('death-revive-flash');
+    screen.style.display = 'flex';
+    void screen.offsetWidth; // إعادة تشغيل الأنيميشن
+    screen.classList.add('death-revive-flash');
+}
+
+async function reviveWithAd() {
+    const btn = document.getElementById('revive-ad-btn');
+    const status = document.getElementById('revive-status');
+    btn.disabled = true;
+    status.style.display = 'block';
+    status.textContent = '⏳ جاري تحميل الإعلان...';
+
+    let rewarded = false;
+    try {
+        // على الـ APK: إعلان Rewarded حقيقي من AdMob
+        if (window.GameAds && window.GameAds.initialized) {
+            const result = await window.GameAds.showRewarded();
+            rewarded = !!result;
+        }
+    } catch (_) { rewarded = false; }
+
+    if (!rewarded) {
+        // المتصفح: لا يوجد AdMob — محاكاة إعلان بعداد تنازلي
+        for (let i = 5; i > 0; i--) {
+            status.textContent = `📺 إعلان تجريبي (وضع المتصفح) — العودة خلال ${i} ثانية...`;
+            await new Promise(r => setTimeout(r, 1000));
+        }
+    }
+
+    // النجاة!
+    state.reviveCount = (state.reviveCount || 0) + 1;
+    document.getElementById('revive-count').textContent = state.reviveCount;
+    status.textContent = '✨ عُدت إلى الحياة!';
+    const screen = document.getElementById('death-screen');
+    setTimeout(() => {
+        screen.style.display = 'none';
+        btn.disabled = false;
+        status.style.display = 'none';
+    }, 700);
+
+    doRevive();
+    showNotification('✨ نجوت بفضل الإعلان!', '#f39c12');
+}
+
+function giveUpRespawn() {
+    const screen = document.getElementById('death-screen');
+    const status = document.getElementById('revive-status');
+    const btn = document.getElementById('revive-ad-btn');
+    screen.style.display = 'none';
+    status.style.display = 'none';
+    status.textContent = '';
+    btn.disabled = false;
+    doRevive();
+    showNotification('🔄 بدأت من جديد بمعداتك الأساسية', '#e74c3c');
+}
+
+function doRevive() {
+    // استعادة الصحة والجوع والعطش
+    state.stats.health = 100;
+    state.stats.hunger = 80;
+    state.stats.thirst = 80;
+    state.stats.radiation = 0;
+    state.dead = false;
+
+    // العودة لنقطة البداية (المخيم الأساسي)
+    const core = window.__rustCore || {};
+    const groundY = getTerrainHeight(0, 0) + 1.6;
+    if (core.camera) core.camera.position.set(0, groundY, 0);
+    if (typeof velocity !== 'undefined') { velocity.x = 0; velocity.y = 0; velocity.z = 0; }
+    if (playerMesh) playerMesh.position.set(0, groundY - 1.6, 0);
+
+    // إعادة قفل المؤشر (قد تحتاج نقرة واحدة من اللاعب)
+    try { if (core.pointerControls && !core.pointerControls.isLocked) core.pointerControls.lock(); } catch (_) {}
+
+    updateHUD();
+    updateHUDSimulation();
+}
+
+// ربط الأزرار
+document.addEventListener('DOMContentLoaded', () => {
+    const reviveBtn = document.getElementById('revive-ad-btn');
+    const respawnBtn = document.getElementById('death-respawn-btn');
+    if (reviveBtn) reviveBtn.addEventListener('click', () => { reviveWithAd(); });
+    if (respawnBtn) respawnBtn.addEventListener('click', () => { giveUpRespawn(); });
+});
+
+// 🛠️ Debug/Test API — للاختبار الآلي والـ QA (لا يؤثر على اللعب)
+window.RustGameDebug = {
+    die: () => triggerDeath(),
+    setHealth: (v) => { state.stats.health = Math.max(0, v); },
+    getHealth: () => state.stats.health,
+    isDead: () => state.dead,
+    reviveCount: () => state.reviveCount,
+};

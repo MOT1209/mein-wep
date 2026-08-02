@@ -288,6 +288,22 @@
         style="position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; background: radial-gradient(circle, transparent 40%, rgba(39, 174, 96, 0.4) 100%); opacity:0; z-index:90;">
     </div>
 
+    <!-- ☠️ شاشة الموت + نظام المكافأة (شاهد إعلان = عودة للحياة) -->
+    <div id="death-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:1000; display:none; align-items:center; justify-content:center; direction:rtl;">
+        <div class="death-box">
+            <div class="death-skull">☠️</div>
+            <h2 class="death-title">لقد مت!</h2>
+            <p class="death-reason" id="death-reason"></p>
+            <div class="death-stats">
+                <span>☠️ الوفيات: <b id="death-count">0</b></span>
+                <span>💀 مرات النجاة بالإعلان: <b id="revive-count">0</b></span>
+            </div>
+            <button id="revive-ad-btn" class="revive-btn">📺 شاهد إعلان — عُد إلى الحياة</button>
+            <button id="death-respawn-btn" class="respawn-btn">🔄 استسلم (خسارة القاعدة والموارد)</button>
+            <p id="revive-status" class="revive-status" style="display:none;"></p>
+        </div>
+    </div>
+
     <script type="module">
         import './js/game.js?v=6.1';
     </script>
