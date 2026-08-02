@@ -21,7 +21,16 @@
       "headers": [
         { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
       ]
+    },
+    {
+      "source": "/quran-app/(.*)",
+      "headers": [
+        { "key": "X-Frame-Options", "value": "SAMEORIGIN" }
+      ]
     }
+  ],
+  "redirects": [
+    { "source": "/quran-app", "destination": "/quran-app/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/king2", "destination": "https://king2-platform.vercel.app/king2" },
