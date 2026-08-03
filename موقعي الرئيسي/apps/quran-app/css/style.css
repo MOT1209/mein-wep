@@ -21,6 +21,10 @@
     
     /* Mobile bottom navigation height (icon row only; safe-area added separately) */
     --mobile-nav-h: 60px;
+    /* P0: مقياس z-index صريح — المحتوى (0) < المشغّل (10) < الشريط السفلي (20) */
+    --z-content: 0;
+    --z-player: 10;
+    --z-nav: 20;
 
     /* Border & Shadow */
     --border-color: rgba(148, 163, 184, 0.2);
@@ -88,7 +92,8 @@
 
 html {
     scroll-behavior: smooth;
-    contain: layout style;
+    /* P0 fix: contain على html (layout/paint) يجعله حاوية إسناد لعناصر
+       position:fixed فتنهار — أُزيل ليظل الشريط السفلي والمشغّل مثبتين للـ viewport */
 }
 
 body {
@@ -99,7 +104,8 @@ body {
     transition: background 0.3s ease, color 0.3s ease;
     overflow-x: hidden;
     min-height: 100vh;
-    contain: layout style paint;
+    /* P0 fix: contain على body يجعل منه حاوية إسناد لعناصر position:fixed
+       (nav السفلي + المشغّل) فتنهار وتتمرر مع المحتوى — أُزيل ليعود fixed للـ viewport */
 }
 
 /* Performance optimizations */
@@ -1091,7 +1097,8 @@ body {
     border-radius: 20px;
     box-shadow: var(--shadow-xl), var(--shadow-glow);
     padding: 1rem 2rem;
-    z-index: 1000;
+    /* P0: المشغّل تحت الشريط السفلي بمقياس z (z-player: 10 < z-nav: 20) */
+    z-index: 900;
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1904,6 +1911,19 @@ body {
         z-index: 500;
     }
 
+    /* P0 fix: لوحة القراءة هي ScrollArea الوحيدة على الموبايل —
+       محتوى المصحف يمرّر داخلها ولا يفيض خارجها (كان overflow:visible
+       فيخرج المحتوى من اللوحة ويظهر فوق/تحت الشريط السفلي) */
+    .content.mobile-full {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        /* P0 fix: تعطيل min-height الأساسي الذي كان يمدّ اللوحة المثبتة
+           60px خارج الشاشة — الارتفاع الآن من inset فقط (من أسفل الهيدر حتى الشاشة) */
+        min-height: 0;
+        /* تفريغ كامل لارتفاع الشريط السفلي (60px + حشوة 10+10 + هامش أمان 16px) */
+        padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 16px);
+    }
+
     .back-to-list-btn {
         display: inline-flex;
     }
@@ -2234,7 +2254,7 @@ body {
     }
 
     .audio-player.active {
-        bottom: 10px;
+        bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 10px);
     }
 
     .player-content {
@@ -2518,7 +2538,7 @@ body {
     }
 
     .audio-player.active {
-        bottom: 5px;
+        bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 5px);
     }
 }
 
@@ -2604,6 +2624,15 @@ body {
 }
 
 /* Focus styles for accessibility */
+/* Buttons/form controls do not inherit fonts by default (UA style);
+   force inheritance so the design font (Cairo) applies everywhere. */
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,

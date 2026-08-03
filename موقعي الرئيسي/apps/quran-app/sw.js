@@ -4,7 +4,7 @@
 const APP_ROOT = new URL('./', self.location.href);
 const APP_URL = (path) => new URL(path, APP_ROOT).href;
 
-const CACHE_NAME = 'quran-pro-v3';
+const CACHE_NAME = 'quran-pro-v5';
 const API_CACHE_NAME = 'quran-api-cache-v3';
 const API_CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 const AUDIO_CACHE_NAME = 'quran-audio-cache-v1';
@@ -72,9 +72,30 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Handle local and external GET assets with a cache-first strategy.
-    event.respondWith(cacheFirst(request));
+    // P0: جميع الأصول (css/js/صور) network-first — تحديثات الـ APK
+    // تصل فوراً ولا يبقى كاش قديم بعد install -r؛ والكاش يبقى للعمل دون اتصال.
+    event.respondWith(networkFirst(request));
 });
+
+async function networkFirst(request) {
+    try {
+        const networkResponse = await fetch(request);
+        if (networkResponse.ok) {
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(request, networkResponse.clone());
+        }
+        return networkResponse;
+    } catch (error) {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        const offlinePage = await caches.match(OFFLINE_URL);
+        if (offlinePage) return offlinePage;
+        return new Response('Offline', {
+            status: 503,
+            headers: { 'Content-Type': 'text/plain; charset=utf-8' }
+        });
+    }
+}
 
 async function cacheFirst(request) {
     const cached = await caches.match(request);
