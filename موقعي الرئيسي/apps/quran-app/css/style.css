@@ -1884,6 +1884,9 @@ body {
     .view-panel {
         position: fixed;
         inset: 0;
+        /* P1 fix: النافذة تبدأ أسفل الهيدر (ز 1000) — رأس النافذة
+           (العنوان + زر الإغلاق) لم يعد مخفياً خلفه */
+        top: calc(60px + env(safe-area-inset-top));
         z-index: 800;
         background: var(--bg-primary);
         backdrop-filter: none;
@@ -1897,7 +1900,8 @@ body {
         max-width: none;
         max-height: none;
         border-radius: 0;
-        padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom));
+        /* P1 fix: تفريغ كامل للشريط السفلي (74px) — آخر محتوى لا يختفي خلفه */
+        padding-bottom: calc(var(--mobile-nav-h) + env(safe-area-inset-bottom) + 16px);
     }
 
     .sidebar.mobile-full,
@@ -1909,6 +1913,13 @@ body {
         max-width: 100%;
         transform: none;
         z-index: 500;
+    }
+
+    /* P1 fix: قائمة السور — تعطيل height الأساسي (calc(100vh - 70px)) الذي كان
+       يمدّ اللوحة 60px خارج الشاشة؛ الارتفاع الآن من inset فقط، والقائمة
+       (flex:1 + overflow-y) هي المتداول الداخلي */
+    .sidebar.mobile-full {
+        height: auto;
     }
 
     /* P0 fix: لوحة القراءة هي ScrollArea الوحيدة على الموبايل —
