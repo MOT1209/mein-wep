@@ -3030,3 +3030,201 @@ textarea:focus {
     from { opacity: 0; transform: translate(-50%, 10px); }
     to { opacity: 1; transform: translate(-50%, 0); }
 }
+
+/* ==================== Mushaf Reader — page-based reading screen ====================
+   Layer structure (step 1):
+     Root (.mushaf-root)    height 100%, overflow hidden
+       |- Header            fixed, dark, does NOT scroll
+       |- PageArea          flex 1, holds ONE Mushaf page
+       `- BottomBar         fixed, outside PageArea
+   Stacking inside Root: page 0, bottomBar 20. No other stacking contexts.
+   Color system: ONE primary (green) + cream. No orange, no gold.
+   All colors come from tokens below — no hardcoded hex outside this block.
+*/
+.mushaf-root {
+    /* ---- Design tokens (green + cream only) ---- */
+    --mushaf-cream: #f6f1e1;
+    --mushaf-cream-deep: #ece4cd;
+    --mushaf-ink: #23271f;
+    --mushaf-green: #0f7a5f;
+    --mushaf-green-dark: #0a5c47;
+    --mushaf-header-bg: #0c2a22;
+    --mushaf-header-text: #f6f1e1;
+    --mushaf-highlight: rgba(15, 122, 95, 0.22);
+    --mushaf-hairline: rgba(12, 42, 34, 0.16);
+    --mushaf-shadow: rgba(12, 42, 34, 0.18);
+    --mushaf-radius: 10px;
+    --mushaf-tap-min: 44px;
+    /* On-dark (header/bottom-bar) surface alphas — tokens, never hardcoded in rules */
+    --mushaf-on-dark-soft: rgba(246, 241, 225, 0.72);
+    --mushaf-on-dark-border: rgba(246, 241, 225, 0.22);
+    --mushaf-on-dark-faint: rgba(246, 241, 225, 0.08);
+    --mushaf-on-dark-hover: rgba(246, 241, 225, 0.18);
+
+    /* ---- Root: height 100%, overflow hidden ---- */
+    position: fixed;
+    inset: 0;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    direction: rtl; /* RTL set explicitly, never left to automatic bidi */
+
+    background: var(--mushaf-cream);
+    color: var(--mushaf-ink);
+    font-family: 'Scheherazade New', 'Amiri', 'Noto Naskh Arabic', serif;
+    /* Overlay above the app shell (modals sit at 2000; keep reader below them). */
+    z-index: 1500;
+}
+.mushaf-root[hidden] { display: none !important; }
+
+/* ---- Header: fixed, dark, does NOT scroll ---- */
+.mushaf-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    min-height: 52px;
+    padding: calc(env(safe-area-inset-top) + 0.5rem) 0.75rem 0.5rem;
+    background: var(--mushaf-header-bg);
+    color: var(--mushaf-header-text);
+    direction: rtl;
+    box-shadow: 0 1px 0 var(--mushaf-hairline);
+}
+.mushaf-header__spacer { flex: 0 0 auto; width: var(--mushaf-tap-min); }
+.mushaf-header__titles { flex: 1 1 auto; text-align: center; min-width: 0; }
+.mushaf-header__surah {
+    font-size: 1.25rem;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.mushaf-header__meta {
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    color: var(--mushaf-on-dark-soft);
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+}
+.mushaf-header__close {
+    flex: 0 0 auto;
+    min-width: var(--mushaf-tap-min);
+    min-height: var(--mushaf-tap-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--mushaf-on-dark-border);
+    border-radius: var(--mushaf-radius);
+    background: var(--mushaf-on-dark-faint);
+    color: var(--mushaf-header-text);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.12s ease;
+}
+.mushaf-header__close:hover { background: var(--mushaf-on-dark-hover); }
+.mushaf-header__close:active { transform: scale(0.95); }
+.mushaf-header__close:focus-visible {
+    outline: 2px solid var(--mushaf-green);
+    outline-offset: 2px;
+}
+
+/* ---- PageArea: flex 1, holds ONE page, nothing escapes its bounds ---- */
+.mushaf-page-area {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 0; /* page stacking context = 0 */
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    padding: 0.6rem;
+    background: var(--mushaf-cream-deep);
+}
+
+/* ---- ONE Mushaf page ---- */
+.mushaf-page {
+    width: 100%;
+    max-width: 640px;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding: 0.6rem 1.1rem 1.2rem;
+    background: var(--mushaf-cream);
+    border-radius: var(--mushaf-radius);
+    box-shadow: 0 1px 3px var(--mushaf-shadow), inset 0 0 0 1px var(--mushaf-hairline);
+}
+
+/* 15 fixed lines — printed Mushaf structure. Line box == highlight box.
+   (QCF per-page font tuning lands in the next step; structure is frozen here.) */
+.mushaf-page__lines {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    font-size: clamp(1.05rem, 4.6vh, 1.9rem);
+}
+.mushaf-line {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-align: center;
+    padding: 0 0.15rem;
+    /* Verse highlight: rounded, height == the line box exactly, so it can
+       never bleed into the line spacing above or below. */
+    border-radius: 0.4em;
+}
+.mushaf-line.is-highlight {
+    background: var(--mushaf-highlight);
+}
+
+/* ---- BottomBar: fixed, outside PageArea, z 20 ---- */
+.mushaf-bottom-bar {
+    flex: 0 0 auto;
+    position: relative;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem calc(env(safe-area-inset-bottom) + 0.5rem);
+    background: var(--mushaf-header-bg);
+    box-shadow: 0 -1px 0 var(--mushaf-hairline);
+}
+
+/* Every tap target >= 44x44. 5 actions max; extras go to the overflow "more" button. */
+.mushaf-action {
+    min-width: var(--mushaf-tap-min);
+    min-height: var(--mushaf-tap-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--mushaf-radius);
+    background: var(--mushaf-on-dark-faint);
+    color: var(--mushaf-header-text);
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.12s ease;
+}
+.mushaf-action:hover { background: var(--mushaf-on-dark-hover); }
+.mushaf-action:active { transform: scale(0.96); }
+.mushaf-action:focus-visible {
+    outline: 2px solid var(--mushaf-green);
+    outline-offset: 2px;
+}
+
+/* Keep the app shell non-interactive while the reader is open. */
+body.mushaf-open { overflow: hidden; }

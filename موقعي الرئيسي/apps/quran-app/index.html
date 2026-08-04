@@ -186,6 +186,9 @@
                 <button id="menu-toggle" class="icon-btn desktop-only-btn" aria-label="القائمة" title="طي/فتح القائمة">
                     <i class="fas fa-bars"></i>
                 </button>
+                <button id="mushaf-toggle" class="icon-btn" aria-label="قراءة المصحف" title="قراءة المصحف" aria-controls="mushaf-reader" aria-expanded="false">
+                    <i class="fas fa-book-open"></i>
+                </button>
             </div>
         </div>
     </header>
@@ -400,6 +403,74 @@
             </div>
         </div>
     </div>
+
+    <!-- ==================== Mushaf Reader — صفحة قراءة المصحف (هيكل الطبقات) ====================
+         Layer structure (build exactly this):
+           Root (.mushaf-root)    height 100%, overflow hidden
+             ├─ Header            fixed, dark, does NOT scroll
+             ├─ PageArea          flex 1, holds ONE Mushaf page
+             └─ BottomBar         fixed, outside PageArea
+         Stacking inside Root: page 0, bottomBar 20. No other stacking contexts.
+         RTL is set explicitly (dir) — not left to automatic bidi.
+         NOTE: Page text below is placeholder only; QCF per-page fonts and
+         real page data replace it in the next step (structure is frozen here). -->
+    <section class="mushaf-root" id="mushaf-reader" dir="rtl" aria-label="قراءة المصحف" hidden>
+        <header class="mushaf-header">
+            <span class="mushaf-header__spacer" aria-hidden="true"></span>
+            <div class="mushaf-header__titles">
+                <p class="mushaf-header__surah" id="mushaf-surah-name">سُورَةُ الفَاتِحَة</p>
+                <p class="mushaf-header__meta">
+                    <span id="mushaf-juz">الجزء 1</span>
+                    <span aria-hidden="true">·</span>
+                    <span>صفحة <span id="mushaf-page-num">1</span> من 604</span>
+                </p>
+            </div>
+            <button id="mushaf-close" class="mushaf-header__close" aria-label="إغلاق قراءة المصحف" title="إغلاق">
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </header>
+
+        <main class="mushaf-page-area" id="mushaf-page-area" aria-live="polite">
+            <!-- PageArea holds ONE Mushaf page only -->
+            <article class="mushaf-page" id="mushaf-page">
+                <div class="mushaf-page__lines" id="mushaf-lines" aria-label="15 سطراً من صفحة المصحف">
+                    <span class="mushaf-line">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+                    <span class="mushaf-line is-highlight">الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ</span>
+                    <span class="mushaf-line">الرَّحْمَٰنِ الرَّحِيمِ</span>
+                    <span class="mushaf-line">مَالِكِ يَوْمِ الدِّينِ</span>
+                    <span class="mushaf-line">إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ</span>
+                    <span class="mushaf-line">اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ</span>
+                    <span class="mushaf-line">صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ</span>
+                    <span class="mushaf-line">غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ</span>
+                    <span class="mushaf-line">وَلَا الضَّالِّينَ</span>
+                    <span class="mushaf-line">أَعُوذُ بِاللَّهِ مِنَ الشَّيْطَانِ الرَّجِيمِ</span>
+                    <span class="mushaf-line">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</span>
+                    <span class="mushaf-line">الم</span>
+                    <span class="mushaf-line">ذَٰلِكَ الْكِتَابُ لَا رَيْبَ فِيهِ</span>
+                    <span class="mushaf-line">هُدًى لِلْمُتَّقِينَ</span>
+                    <span class="mushaf-line">الَّذِينَ يُؤْمِنُونَ بِالْغَيْبِ</span>
+                </div>
+            </article>
+        </main>
+
+        <nav class="mushaf-bottom-bar" aria-label="أدوات صفحة المصحف">
+            <button class="mushaf-action" data-action="prev-page" aria-label="الصفحة السابقة" title="الصفحة السابقة">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+            <button class="mushaf-action" data-action="play" aria-label="تشغيل تلاوة هذه الصفحة" title="تشغيل تلاوة الصفحة">
+                <i class="fas fa-play"></i>
+            </button>
+            <button class="mushaf-action" data-action="bookmark" aria-label="حفظ موضع القراءة" title="حفظ موضع القراءة">
+                <i class="fas fa-bookmark"></i>
+            </button>
+            <button class="mushaf-action" data-action="more" aria-label="مزيد من الخيارات" aria-haspopup="menu" title="مزيد من الخيارات">
+                <i class="fas fa-ellipsis-h"></i>
+            </button>
+            <button class="mushaf-action" data-action="next-page" aria-label="الصفحة التالية" title="الصفحة التالية">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </nav>
+    </section>
 
     <!-- Search Modal -->
     <div class="modal view-panel" id="search-modal">

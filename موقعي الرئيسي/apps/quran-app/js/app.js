@@ -2548,3 +2548,65 @@ window.loadJuz = loadJuz;
 window.toggleView = toggleView;
 window.installApp = installApp;
 window.dismissInstall = dismissInstall;
+
+// ==================== Mushaf Reader — page-based layer (STEP 1) ====================
+// Layer structure only: Root > Header + PageArea + BottomBar. Frozen here for
+// verification. Fonts, real page data, and navigation land in the next steps.
+// Page state is the SINGLE SOURCE OF TRUTH: every UI value derives from it.
+(function () {
+    'use strict';
+
+    const readerEl = document.getElementById('mushaf-reader');
+    if (!readerEl) return;
+
+    const els = {
+        close: document.getElementById('mushaf-close'),
+        surahName: document.getElementById('mushaf-surah-name'),
+        juz: document.getElementById('mushaf-juz'),
+        pageNum: document.getElementById('mushaf-page-num')
+    };
+
+    // Single source of truth for the reader. Later steps add data & font hooks.
+    const readerState = {
+        page: 1,
+        totalPages: 604,
+        surahName: 'سُورَةُ الفَاتِحَة',
+        juz: 1
+    };
+
+    function renderMeta() {
+        if (els.surahName) els.surahName.textContent = readerState.surahName;
+        if (els.juz) els.juz.textContent = `الجزء ${readerState.juz}`;
+        if (els.pageNum) els.pageNum.textContent = readerState.page;
+    }
+
+    const toggleBtn = document.getElementById('mushaf-toggle');
+
+    function open() {
+        // Step 1: adopt the loaded surah (if any) so the header reflects real state.
+        if (typeof state !== 'undefined' && state.currentSurah) {
+            readerState.surahName = state.currentSurah.name;
+            readerState.juz = state.currentSurah.ayahs[0]?.juz || 1;
+        }
+        readerEl.hidden = false;
+        document.body.classList.add('mushaf-open');
+        renderMeta();
+        if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+        els.close?.focus(); // move focus into the reader overlay
+    }
+
+    function close() {
+        readerEl.hidden = true;
+        document.body.classList.remove('mushaf-open');
+        if (toggleBtn) {
+            toggleBtn.setAttribute('aria-expanded', 'false');
+            toggleBtn.focus(); // restore focus to the entry button
+        }
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', () => readerEl.hidden ? open() : close());
+    if (els.close) els.close.addEventListener('click', close);
+
+    // NOTE: prev/next arrows (data-action) are wired in the navigation step,
+    // once per-page fonts and page data exist.
+})();
