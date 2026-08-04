@@ -3228,3 +3228,163 @@ textarea:focus {
 
 /* Keep the app shell non-interactive while the reader is open. */
 body.mushaf-open { overflow: hidden; }
+
+/* ==================== Mushaf Reader — STEP 2 (data + fonts + navigation) ====================
+   Rendering model: a FIXED reference page (400x620) that is scale-transformed to fit
+   any viewport. Line breaks are therefore IDENTICAL at any screen size by construction.
+*/
+.mushaf-page-area {
+    align-items: center;
+    justify-content: center;
+}
+
+.mushaf-page {
+    flex: none;
+    width: 400px;
+    height: 620px;
+    max-width: none;
+    transform: scale(var(--mushaf-scale, 1));
+    transform-origin: center center;
+    will-change: transform;
+}
+
+/* Flowing 15-line grid: line-height == 620/15 so a full page is exactly 15 lines. */
+.mushaf-page__lines {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    direction: rtl;
+    text-align: justify;
+    text-align-last: center;
+    font-size: var(--mushaf-font-px, 30px);
+    line-height: 41.333px;
+}
+
+/* Verse highlight: inline rounded box that never bleeds into line spacing. */
+.mushaf-verse {
+    cursor: pointer;
+    border-radius: 0.3em;
+    transition: background-color 0.18s ease;
+}
+.mushaf-verse:hover,
+.mushaf-verse.is-highlight { background: var(--mushaf-highlight); }
+
+/* Verse-end medallion (mushaf marker). Green ring only — no gold. */
+.mushaf-medallion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.55em;
+    height: 1.55em;
+    margin-inline-start: 0.2em;
+    margin-inline-end: 0.15em;
+    vertical-align: middle;
+    border: 0.06em solid var(--mushaf-green-dark);
+    border-radius: 50%;
+    color: var(--mushaf-green-dark);
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.55em;
+    line-height: 1;
+}
+
+.mushaf-line-loading {
+    color: var(--mushaf-green);
+    font-family: 'Cairo', sans-serif;
+}
+
+.mushaf-action:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+/* STEP-2 review fixes: the reference box IS the text area (no page padding);
+   the breathing room lives inside the lines container — this keeps measured
+   heights (CONTENT in mushaf.js) identical to the real layout. */
+.mushaf-page { padding: 0; }
+.mushaf-page__lines { padding: 0.4rem 0.9rem 1.1rem; }
+
+/* ==================== Mushaf Reader — STEP 3 (real QCF page fonts + official line data) ====================
+   Rendering model (verified against quran.com source):
+   - Each word is rendered with its QCF glyph codepoint (code_v1) from the API.
+   - Lines 1..15 come from the OFFICIAL mushaf line_number data — NOT text wrapping.
+   - quran.com code_v1 proportions: font-size 3.5vh / line-width 54vh (ratio 15.43)
+     reproduced inside the fixed 400x620 reference page, then scale-transformed.
+*/
+.mushaf-page__lines {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 0;
+    padding: 0.4rem 0.9rem 1.1rem;
+    direction: rtl;
+    text-align: justify;
+    text-align-last: center;
+    font-size: var(--mushaf-font-px, 24px);
+    line-height: 1;
+    overflow: hidden;
+    font-family: var(--mushaf-line-family, 'Amiri Quran', 'Scheherazade New', serif);
+}
+
+/* One printed line — fixed height, words flow RTL and justify across the full width. */
+.mushaf-line {
+    width: 100%;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+
+.mushaf-line:not(.mushaf-line--empty):hover {
+    background: var(--mushaf-highlight);
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.mushaf-line.is-highlight {
+    background: var(--mushaf-highlight);
+    border-radius: 6px;
+    box-shadow: 0 0 0 1px var(--mushaf-green-dark);
+}
+
+.mushaf-word {
+    display: inline-block;
+    line-height: 1;
+    white-space: nowrap;
+    flex-shrink: 0; /* never squash QCF glyphs — overflow must be measurable */
+}
+
+/* Aya end medallion: the 'end' glyph (Arabic-Indic numeral) renders via the page font. */
+.mushaf-word[data-type="end"] {
+    margin-inline-start: 0.1em;
+    color: var(--mushaf-green-dark);
+}
+
+/* Decorative surah header band (sits where lines 1-2 are empty in the official data). */
+.mushaf-surah-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    height: calc(var(--mushaf-line-h, 41.33px) * 2);
+    text-align: center;
+    font-size: clamp(1.05rem, 4.4vh, 1.7rem);
+    color: var(--mushaf-green-dark);
+    background: linear-gradient(90deg, transparent, var(--mushaf-highlight) 50%, transparent);
+    border-block: 1px solid var(--mushaf-hairline);
+    margin-block-end: 0.25rem;
+    border-radius: 8px;
+}
+
+.mushaf-surah-header__name {
+    font-family: 'Amiri', 'Amiri Quran', serif;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+/* Loading / error states */
+.mushaf-line-loading {
+    padding: 1rem;
+    color: var(--mushaf-ink);
+    opacity: 0.7;
+}
