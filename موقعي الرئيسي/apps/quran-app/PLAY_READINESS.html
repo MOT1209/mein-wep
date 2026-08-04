@@ -320,8 +320,29 @@ td .path,td code{font-size:11.5px}
     </div>
   </div>
 
+  <div class="callout c-green" style="margin-bottom:18px">
+    <div class="c-title">✅ حالة التنفيذ — محدّث في 2026-08-04 (كوميت <code>a130c45c</code>)</div>
+    <p>
+      <strong>أُنجزت ٧ من ٨ عوائق حرجة</strong> وجزء من P1/P2، وتم التحقق منها ببناء APK فعلي وفحص محتواه:
+    </p>
+    <ul style="margin:8px 0; padding-inline-start:20px">
+      <li><strong>B0 ✅</strong> — <span class="path">android/</span> صار متتبَّعاً في Git، و<span class="path">.vercelignore</span> يمنع نشر ملفات gradle علناً. لن يمحو سير العمل تعديلاتك بعد الآن.</li>
+      <li><strong>B1 ✅</strong> — أيقونة Capacitor الزرقاء اختفت. رمز ربع الحزب بمسارات vector، وكل المقاسات مولَّدة (512×512 صارت 18,932 بايت بدل 1,884).</li>
+      <li><strong>B3 ✅</strong> — بانر تحميل APK محذوف من بناء Android عبر وضع <code>--mode android</code>، مع حارس يُفشل البناء عند أي تسرّب.</li>
+      <li><strong>B4 ✅ · B5 ✅</strong> — <span class="path">js/mushaf.js</span> و<span class="path">privacy.html</span> و11 خط QCF كلها داخل الـAPK الآن، مع حارسَي سلامة يمنعان التكرار.</li>
+      <li><strong>B6 ✅</strong> — <code>versionCode=11</code> و<code>versionName=1.1.0</code> يُقرآن من <span class="path">version.json</span>.</li>
+      <li><strong>B7 ✅</strong> — <code>npm run release:android</code> يوحّد البناء والمزامنة والحزم.</li>
+      <li><strong>P1 ✅ جزئياً</strong> — حُذف سكربت YouTube، وكود الإشعارات الميت، وFileProvider.</li>
+      <li><strong>P2 ✅ جزئياً</strong> — <span class="path">colors.xml</span> بألوان العلامة، قفل الاتجاه رأسياً، تصحيح اختبار الحزمة.</li>
+    </ul>
+    <p style="margin-bottom:0">
+      <strong>الباقي:</strong> B2 (إنشاء الـkeystore — الإعداد جاهز، يبقى توليد المفتاح يدوياً)،
+      وP1-1 (حذف الحساب)، وP1-2 (سياسة الخصوصية)، وأصول المتجر، وباقي بنود P2.
+    </p>
+  </div>
+
   <div class="callout c-red" style="margin-bottom:18px">
-    <div class="c-title">🔴 عاجل — تعرّض أمني خارج نطاق Play، يجب معالجته اليوم</div>
+    <div class="c-title">🔴 عاجل — تعرّض أمني خارج نطاق Play، ما زال قائماً</div>
     <p>
       المستودع <span class="path">github.com/MOT1209/mein-wep</span> <strong>عام (Public)</strong> — تم التحقق.
       وفيه ملف <span class="path">.github/workflows/setup-keystore.yml</span> يولّد مفتاح توقيع Android،
