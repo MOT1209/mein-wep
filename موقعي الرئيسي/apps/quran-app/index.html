@@ -649,9 +649,6 @@
     <!-- Audio Element -->
     <audio id="audio-element" preload="metadata"></audio>
 
-    <!-- YouTube IFrame API (deferred) -->
-    <script defer src="https://www.youtube.com/iframe_api"></script>
-
     <!-- Custom Scripts (deferred for better loading) -->
     <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script defer src="js/supabase-config.js"></script>
@@ -711,9 +708,14 @@
             });
         });
     </script>
-  <!-- OTA update checker -->
+  <!-- BUILD:WEB-ONLY-START
+       OTA update checker — web deployment only. The Android build strips this
+       block (vite --mode android): shipping a self-update/APK-download path
+       inside a Play-distributed app violates the Device and Network Abuse policy.
+       Do not remove these sentinels; vite.config.js matches on them. -->
   <script defer>window.RASHID_APP={id:'com.rashid.quranpro',version:'1.1.0',name:'Quran Pro'};</script>
   <script defer src="js/update-checker.js"></script>
+  <!-- BUILD:WEB-ONLY-END -->
 </body>
 
 </html>

@@ -4,7 +4,7 @@
 const APP_ROOT = new URL('./', self.location.href);
 const APP_URL = (path) => new URL(path, APP_ROOT).href;
 
-const CACHE_NAME = 'quran-pro-v5';
+const CACHE_NAME = 'quran-pro-v6';
 const API_CACHE_NAME = 'quran-api-cache-v3';
 const API_CACHE_DURATION = 30 * 24 * 60 * 60 * 1000; // 30 days
 const AUDIO_CACHE_NAME = 'quran-audio-cache-v1';
@@ -12,6 +12,16 @@ const MAX_AUDIO_CACHE_SIZE = 50;
 const OFFLINE_URL = APP_URL('offline.html');
 
 // Keep the complete local app shell available on first install.
+//
+// WARNING: `install` treats this list as required — a single missing file
+// aborts the install and leaves the app with NO offline cache at all. Every
+// entry here must be emitted into dist/ by vite.config.js, which asserts
+// exactly that at build time. Do not add a path without adding it there too.
+//
+// Deliberately absent: the two web-only files (the release-metadata JSON and
+// its checker script). They are excluded from the Android build, so listing
+// them here would abort precaching inside the APK. Their names are omitted on
+// purpose so a policy grep over the shipped bundle stays clean.
 const STATIC_ASSETS = [
     '',
     'index.html',
@@ -20,10 +30,10 @@ const STATIC_ASSETS = [
     'js/auth.js',
     'js/vendor/capacitor.js',
     'js/app.js',
-    'js/update-checker.js',
+    'js/mushaf.js',
     'manifest.json',
     'offline.html',
-    'version.json',
+    'privacy.html',
     'icons/icon-72x72.png',
     'icons/icon-96x96.png',
     'icons/icon-192x192.png',
@@ -178,28 +188,9 @@ async function cacheFirstWithLimit(request, cacheName, maxSize) {
     }
 }
 
-// Background Sync for bookmarks.
-self.addEventListener('sync', (event) => {
-    if (event.tag === 'sync-bookmarks') event.waitUntil(syncBookmarks());
-});
-
-async function syncBookmarks() {
-    // Bookmark sync is handled by the app's Supabase layer when available.
-}
-
-self.addEventListener('push', (event) => {
-    const options = {
-        body: event.data?.text() || 'Notification from Quran App',
-        icon: APP_URL('icons/icon-192x192.png'),
-        badge: APP_URL('icons/icon-72x72.png'),
-        vibrate: [100, 50, 100],
-        data: { url: APP_ROOT.href }
-    };
-
-    event.waitUntil(self.registration.showNotification('Quran Pro', options));
-});
-
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    event.waitUntil(clients.openWindow(event.notification.data.url));
-});
+// NOTE: `push` / `notificationclick` / `sync` listeners were removed.
+// They advertised a notification and background-sync capability the app does
+// not have — there is no FCM, no pushManager.subscribe(), no POST_NOTIFICATIONS
+// permission, and syncBookmarks() was an empty function. Bookmark sync is done
+// by the app's Supabase layer (js/auth.js). Dead capability surface is a
+// liability in Play review; re-add these only alongside a real implementation.

@@ -60,12 +60,28 @@
     dismissBtn.style.cssText = 'padding:8px 16px;border:1px solid rgba(255,255,255,0.3);border-radius:8px;background:transparent;color:#fff;cursor:pointer;font-size:13px';
     dismissBtn.textContent = 'لاحقاً';
     actionsDiv.appendChild(dismissBtn);
-    const downloadLink = document.createElement('a');
-    downloadLink.href = remote.apkUrl;
-    downloadLink.download = '';
-    downloadLink.style.cssText = 'padding:8px 18px;border:none;border-radius:8px;background:#22c55e;color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-decoration:none';
-    downloadLink.textContent = '📥 تحميل APK';
-    actionsDiv.appendChild(downloadLink);
+    // Only offer an APK download when version.json explicitly provides a URL.
+    // It no longer does: pointing a Play-distributed app at a sideloaded APK
+    // violates Google Play's Device and Network Abuse policy, so the Android
+    // build strips this file entirely (see the BUILD:WEB-ONLY block in
+    // index.html). On the web the banner falls back to a plain reload.
+    if (remote.apkUrl) {
+        const downloadLink = document.createElement('a');
+        downloadLink.href = remote.apkUrl;
+        downloadLink.download = '';
+        downloadLink.style.cssText = 'padding:8px 18px;border:none;border-radius:8px;background:#22c55e;color:#fff;cursor:pointer;font-size:13px;font-weight:600;text-decoration:none';
+        downloadLink.textContent = '📥 تحميل APK';
+        actionsDiv.appendChild(downloadLink);
+    } else {
+        const reloadBtn = document.createElement('button');
+        reloadBtn.style.cssText = 'padding:8px 18px;border:none;border-radius:8px;background:#22c55e;color:#fff;cursor:pointer;font-size:13px;font-weight:600';
+        reloadBtn.textContent = '🔄 تحديث الآن';
+        reloadBtn.onclick = function () {
+            if (window.__markAppVersion) window.__markAppVersion(remote.version);
+            location.reload();
+        };
+        actionsDiv.appendChild(reloadBtn);
+    }
     innerDiv.appendChild(actionsDiv);
     banner.appendChild(innerDiv);
 

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    Adaptive-icon FOREGROUND layer only: the rub el hizb mark on a transparent
+    background. The background layer is a flat #059669 supplied by
+    android/app/src/main/res/values/ic_launcher_background.xml.
+
+    Keep this in sync with icon.svg (the full-bleed mark used for the PWA and
+    Play Store icons). Paths only — no <text>; see the note in icon.svg.
+
+    The generator insets this to 66% of the 108dp canvas, which is the adaptive
+    safe zone, so nothing here gets clipped by the system's mask.
+  -->
+  <defs>
+    <linearGradient id="mark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d1fae5"/>
+    </linearGradient>
+  </defs>
+
+  <g fill="url(#mark)">
+    <path d="M168 168 H344 V344 H168 Z"/>
+    <path d="M256 130 L382 256 L256 382 L130 256 Z"/>
+  </g>
+
+  <circle cx="256" cy="256" r="40" fill="#059669"/>
+  <circle cx="256" cy="256" r="16" fill="#f59e0b"/>
+</svg>

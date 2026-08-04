@@ -1,11 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    Quran Pro app icon.
+
+    IMPORTANT: every shape here is a <path>/<rect>/<circle>. Do NOT reintroduce
+    a <text> element. The previous version drew the letter "Q" as live text in
+    Arial; headless rasterizers (sharp/librsvg, and the CI runner) have no Arial
+    and no text shaping configured, so the glyph was silently dropped and every
+    generated PNG came out as a flat, empty square — 1,884 bytes for a 512x512.
+    Text must be converted to outlines before it goes in this file.
+
+    Mark: rub el hizb (۞), the traditional Quranic section symbol — two
+    overlapping squares forming an eight-pointed star. Chosen because it reads
+    clearly at 48px and is unmistakably Quranic without relying on a typeface.
+  -->
   <defs>
-    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#059669;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:1" />
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="mark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d1fae5"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="100" fill="url(#grad1)"/>
-  <text x="256" y="320" font-family="Arial, sans-serif" font-size="280" font-weight="bold" fill="white" text-anchor="middle">Q</text>
-  <path d="M256 80c-20 0-40 10-50 30-10-20-30-30-50-30s-40 10-50 30c0 40 100 120 100 120s100-80 100-120c-10-20-30-30-50-30z" fill="white" opacity="0.2"/>
+
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+
+  <!-- Rub el hizb: axis-aligned square + 45deg square, unioned. -->
+  <g fill="url(#mark)">
+    <path d="M168 168 H344 V344 H168 Z"/>
+    <path d="M256 130 L382 256 L256 382 L130 256 Z"/>
+  </g>
+
+  <!-- Center aperture, echoing the printed symbol. -->
+  <circle cx="256" cy="256" r="40" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="16" fill="#f59e0b"/>
 </svg>

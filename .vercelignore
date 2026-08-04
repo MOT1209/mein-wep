@@ -1,0 +1,31 @@
+# Vercel deploy exclusions.
+#
+# The repository root IS the Vercel deploy root, so anything committed here is
+# publicly served unless it is listed below.
+#
+# This file became necessary when apps/quran-app/android/ started being tracked
+# in git (it holds release-critical native state that CI was otherwise
+# regenerating from scratch). Without these rules the Gradle build files, the
+# Android manifest and the gradle wrapper would be reachable at
+# https://rashid-wep.vercel.app/.../android/app/build.gradle
+
+# Android native projects — needed in git, never served over HTTP.
+**/android/
+**/.gradle/
+**/*.apk
+**/*.aab
+**/*.jks
+**/*.keystore
+**/keystore.properties
+
+# Build inputs and outputs that the site does not serve.
+**/node_modules/
+**/dist/
+**/www/
+**/.idea/
+
+# Local tooling and notes.
+.agents/
+.opencode/
+.testsprite/
+**/*.log

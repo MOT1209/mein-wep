@@ -1,0 +1,123 @@
+apply plugin: 'com.android.application'
+
+// Single source of truth for the app version: ../../version.json.
+// Previously versionCode/versionName were hardcoded here as 1 / "1.0" while
+// package.json, version.json and window.RASHID_APP all said 1.1.0 — and Play
+// rejects any upload whose versionCode is not strictly greater than the last.
+// buildNumber is that monotonic integer; bump it for every upload, and never
+// reuse a value, not even for a rejected build.
+def versionJsonFile = file('../../version.json')
+def appVersionName = "1.1.0"
+def appVersionCode = 11
+if (versionJsonFile.exists()) {
+    try {
+        def v = new groovy.json.JsonSlurper().parseText(versionJsonFile.text)
+        if (v.version) appVersionName = v.version
+        if (v.buildNumber) appVersionCode = v.buildNumber as int
+    } catch (Exception e) {
+        logger.warn("Could not parse version.json (${e.message}); using ${appVersionName}/${appVersionCode}")
+    }
+}
+logger.lifecycle("Quran Pro version: ${appVersionName} (versionCode ${appVersionCode})")
+
+android {
+    namespace = "com.rashid.quranpro"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.rashid.quranpro"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode appVersionCode
+        versionName appVersionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+    }
+    // Release signing. The keystore and its passwords live OUTSIDE this
+    // repository on purpose: the repo root is the Vercel deploy root and the
+    // remote is public, so anything inside the tree can leak three different
+    // ways (a stray `git add`, a Vercel deploy, or `npx cap add android`).
+    //
+    // Point QURANPRO_KEYSTORE_PROPERTIES at a properties file containing:
+    //     storeFile=C:/Users/<you>/AndroidKeystores/quranpro-upload.p12
+    //     storePassword=...
+    //     keyAlias=quranpro-upload
+    //     keyPassword=...
+    // If the file is absent (fresh clone, CI without secrets), the release
+    // signing config is simply not created and debug builds still work.
+    def keystorePropsPath = System.getenv('QURANPRO_KEYSTORE_PROPERTIES')
+    def keystorePropsFile = keystorePropsPath ? file(keystorePropsPath) : null
+    def keystoreProps = null
+    if (keystorePropsFile != null && keystorePropsFile.exists()) {
+        keystoreProps = new Properties()
+        keystorePropsFile.withInputStream { keystoreProps.load(it) }
+    } else {
+        logger.warn("No release keystore configured (set QURANPRO_KEYSTORE_PROPERTIES) — release builds will be unsigned.")
+    }
+
+    signingConfigs {
+        if (keystoreProps != null) {
+            release {
+                storeFile file(keystoreProps['storeFile'])
+                storePassword keystoreProps['storePassword']
+                keyAlias keystoreProps['keyAlias']
+                keyPassword keystoreProps['keyPassword']
+                // minSdk is 24, so the v1 (JAR) signature is unnecessary.
+                enableV1Signing false
+                enableV2Signing true
+                enableV3Signing true
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (keystoreProps != null) {
+                signingConfig signingConfigs.release
+            }
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    bundle {
+        // The UI language lives in the WebView, not in Android resources, so a
+        // language split would gain nothing and risks a missing-split edge case
+        // on sideloaded installs. Density/ABI splits stay on (defaults).
+        language {
+            enableSplit = false
+        }
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

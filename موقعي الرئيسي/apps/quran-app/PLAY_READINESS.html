@@ -1,0 +1,2083 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="تقرير جاهزية Quran Pro للنشر على Google Play — فحص شامل، العوائق الحرجة، مخاطر السياسات، وخارطة طريق الإطلاق.">
+<meta name="robots" content="noindex, nofollow">
+<title>Quran Pro — تقرير جاهزية النشر على Google Play</title>
+<style>
+:root{
+  --ink:#10231f; --muted:#5e716b; --paper:#f5f7f3; --card:rgba(255,255,255,.9);
+  --line:#dce7df; --line-soft:#e8f0ea;
+  --green:#0b7a62; --green-2:#14a37d; --deep:#082f2b;
+  --gold:#b7791f; --gold-bg:#fff8e7;
+  --blue:#2365a6; --blue-bg:#eef6ff;
+  --red:#b64747; --red-bg:#fff1f1;
+  --orange:#c2691a; --orange-bg:#fff4e8;
+  --grey:#6b7a76; --grey-bg:#f1f4f2;
+  --code-bg:#f2f6f3; --code-ink:#0d3b31;
+  --shadow:0 18px 55px rgba(17,57,45,.10);
+  --radius:22px;
+  --mono:"Cascadia Code","SFMono-Regular",Consolas,"Courier New",monospace;
+  --sans:"Segoe UI",Tahoma,Arial,sans-serif;
+  --arabic:"Noto Naskh Arabic","Amiri","Scheherazade New",serif;
+}
+[data-theme="night"]{
+  --ink:#e9f4ee; --muted:#a8c0b7; --paper:#071815; --card:rgba(13,38,33,.9);
+  --line:#21473d; --line-soft:#193830;
+  --green:#55d1aa; --green-2:#2fae87; --deep:#b5f1dc;
+  --gold:#f5c76a; --gold-bg:#332a15;
+  --blue:#83bcf2; --blue-bg:#102a40;
+  --red:#ff9a9a; --red-bg:#3b2020;
+  --orange:#ffb877; --orange-bg:#3a2716;
+  --grey:#9fb2ac; --grey-bg:#152e28;
+  --code-bg:#0c2620; --code-ink:#9fe8ce;
+  --shadow:0 18px 55px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:88px}
+body{
+  margin:0; color:var(--ink);
+  background:
+    radial-gradient(circle at 8% 4%, rgba(20,163,125,.12), transparent 30rem),
+    radial-gradient(circle at 92% 18%, rgba(183,121,31,.10), transparent 25rem),
+    var(--paper);
+  font:16px/1.85 var(--sans);
+  transition:background .25s ease,color .25s ease;
+  -webkit-text-size-adjust:100%;
+}
+a{color:var(--green)}
+button{font:inherit}
+h1,h2,h3,h4{line-height:1.3; margin:0}
+p{margin:0 0 12px}
+.wrap{width:min(1160px, calc(100% - 32px)); margin-inline:auto}
+
+/* ---------- topbar ---------- */
+.topbar{position:sticky; top:0; z-index:50; border-bottom:1px solid var(--line);
+  background:color-mix(in srgb, var(--paper) 88%, transparent); backdrop-filter:blur(16px)}
+.topbar-inner{min-height:68px; display:flex; gap:16px; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 0}
+.brand{display:flex; align-items:center; gap:12px; text-decoration:none; color:var(--ink)}
+.brand-mark{width:42px; height:42px; display:grid; place-items:center; border-radius:14px; color:#fff;
+  background:linear-gradient(145deg,var(--green),var(--deep)); box-shadow:0 8px 22px rgba(11,122,98,.22); font-size:20px; flex-shrink:0}
+[data-theme="night"] .brand-mark{color:#062019}
+.brand strong{display:block; font-size:15px}
+.brand small{display:block; color:var(--muted); font-size:11px}
+.nav{display:flex; align-items:center; gap:2px; flex-wrap:wrap; justify-content:center}
+.nav a{color:var(--muted); text-decoration:none; padding:6px 9px; border-radius:10px; font-size:12.5px; white-space:nowrap}
+.nav a:hover{color:var(--green); background:var(--card)}
+.icon-btn{width:38px; height:38px; border:1px solid var(--line); border-radius:11px; color:var(--ink);
+  background:var(--card); cursor:pointer; transition:transform .2s,background .2s; font-size:16px; flex-shrink:0}
+.icon-btn:hover{transform:translateY(-2px); background:var(--green); color:#fff}
+.icon-btn:focus-visible{outline:2px solid var(--green); outline-offset:2px}
+
+/* ---------- hero ---------- */
+.hero{padding:64px 0 40px}
+.hero-grid{display:grid; grid-template-columns:1.3fr .7fr; gap:40px; align-items:end}
+.kicker{color:var(--green); font-size:12px; font-weight:800; letter-spacing:.16em}
+h1{margin-top:14px; font:700 clamp(38px,7vw,76px)/1 var(--arabic); color:var(--deep)}
+.hero .sub{margin-top:16px; font-size:clamp(18px,2.6vw,26px); font-weight:700}
+.lead{max-width:720px; color:var(--muted); font-size:17px; margin:16px 0 0}
+.meta-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:24px}
+.pill{border:1px solid var(--line); border-radius:99px; background:var(--card); padding:6px 12px; color:var(--muted); font-size:12px}
+.pill b{color:var(--green)}
+.verdict{min-height:250px; padding:28px; border-radius:34px; color:#fff;
+  background:linear-gradient(145deg, rgba(150,45,45,.97), rgba(70,20,20,.98));
+  box-shadow:var(--shadow); position:relative; overflow:hidden}
+.verdict::after{content:"۞"; position:absolute; left:-25px; bottom:-52px; color:rgba(255,255,255,.08); font:180px var(--arabic)}
+.verdict-label{color:#ffc9c9; font-size:11px; font-weight:800; letter-spacing:.13em}
+.verdict h3{margin-top:14px; font:700 34px/1.35 var(--arabic)}
+.verdict p{margin:10px 0 0; color:#ffdcdc; font-size:13px}
+.verdict-stats{display:flex; gap:18px; margin-top:22px; flex-wrap:wrap}
+.vs-item b{display:block; font-size:26px; font-weight:800; line-height:1.1}
+.vs-item span{font-size:11px; color:#ffd0d0}
+
+/* ---------- sections ---------- */
+section{padding:44px 0; scroll-margin-top:80px}
+.section-head{display:flex; gap:20px; align-items:end; justify-content:space-between; margin-bottom:22px; flex-wrap:wrap}
+.section-head h2{font:700 clamp(24px,4vw,32px) var(--arabic); color:var(--deep)}
+.section-head p{color:var(--muted); margin:4px 0 0; font-size:14px}
+.eyebrow{color:var(--green); font-size:11px; font-weight:800; letter-spacing:.13em}
+.grid{display:grid; gap:16px}
+.two{grid-template-columns:repeat(2,1fr)}
+.three{grid-template-columns:repeat(3,1fr)}
+.metrics{grid-template-columns:repeat(5,1fr)}
+.card,.metric{border:1px solid var(--line); background:var(--card); box-shadow:var(--shadow); border-radius:var(--radius)}
+.card{padding:22px}
+.metric{padding:18px; min-height:130px}
+.metric-value{color:var(--green); font-size:32px; font-weight:800; letter-spacing:-.03em; line-height:1.1}
+.metric-value.bad{color:var(--red)}
+.metric-value.warn{color:var(--orange)}
+.metric-label{margin-top:6px; font-weight:700; font-size:14px}
+.metric-note{color:var(--muted); font-size:11px; margin-top:4px; line-height:1.6}
+.card h3{font:700 20px var(--arabic); color:var(--deep); margin-bottom:8px}
+.card h4{font-size:15px; font-weight:700; margin-bottom:6px}
+.card p:last-child{margin-bottom:0}
+
+/* ---------- issue cards ---------- */
+.issue{border:1px solid var(--line); background:var(--card); border-radius:var(--radius);
+  box-shadow:var(--shadow); overflow:hidden; margin-bottom:16px}
+.issue-head{display:flex; gap:14px; align-items:flex-start; padding:20px 22px; border-bottom:1px solid var(--line-soft)}
+.badge{flex-shrink:0; min-width:44px; height:30px; padding:0 10px; display:grid; place-items:center;
+  border-radius:9px; font-size:12.5px; font-weight:800; letter-spacing:.02em}
+.b-red{background:var(--red-bg); color:var(--red); border:1px solid color-mix(in srgb,var(--red) 30%, transparent)}
+.b-orange{background:var(--orange-bg); color:var(--orange); border:1px solid color-mix(in srgb,var(--orange) 30%, transparent)}
+.b-blue{background:var(--blue-bg); color:var(--blue); border:1px solid color-mix(in srgb,var(--blue) 30%, transparent)}
+.b-grey{background:var(--grey-bg); color:var(--grey); border:1px solid var(--line)}
+.b-green{background:color-mix(in srgb,var(--green) 12%, transparent); color:var(--green); border:1px solid color-mix(in srgb,var(--green) 30%, transparent)}
+.issue-title{flex:1; min-width:0}
+.issue-title h3{font:700 19px/1.45 var(--arabic); color:var(--deep); margin:0}
+.issue-title .why{color:var(--muted); font-size:13.5px; margin-top:5px; line-height:1.7}
+.issue-body{padding:18px 22px 22px}
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+.field-label{font-size:11px; font-weight:800; letter-spacing:.1em; color:var(--green); margin-bottom:6px}
+.field-label.danger{color:var(--red)}
+.field p{font-size:14.5px; margin:0 0 8px}
+.field ul{margin:6px 0 0; padding-inline-start:20px; font-size:14.5px}
+.field li{margin-bottom:5px}
+.effort{display:inline-flex; align-items:center; gap:6px; background:var(--grey-bg); border:1px solid var(--line);
+  border-radius:99px; padding:4px 12px; font-size:12px; color:var(--muted); font-weight:600}
+
+/* ---------- code ---------- */
+code{font:13px/1.7 var(--mono); background:var(--code-bg); color:var(--code-ink);
+  padding:2px 6px; border-radius:6px; direction:ltr; display:inline-block; unicode-bidi:embed}
+pre{background:var(--code-bg); color:var(--code-ink); border:1px solid var(--line);
+  border-radius:14px; padding:14px 16px; overflow-x:auto; direction:ltr; text-align:left;
+  font:12.5px/1.75 var(--mono); margin:8px 0}
+pre code{background:none; padding:0; font-size:inherit; display:block}
+.path{font:12px var(--mono); color:var(--gold); direction:ltr; unicode-bidi:embed; display:inline-block; word-break:break-all}
+
+/* ---------- tables ---------- */
+.table-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--card); box-shadow:var(--shadow)}
+table{width:100%; border-collapse:collapse; min-width:560px}
+th,td{padding:11px 14px; text-align:right; border-bottom:1px solid var(--line-soft); font-size:13.5px; vertical-align:top}
+th{background:color-mix(in srgb,var(--green) 8%, transparent); color:var(--deep); font-weight:700; font-size:12.5px;
+  white-space:nowrap; position:sticky; top:0}
+tr:last-child td{border-bottom:none}
+tbody tr:hover{background:color-mix(in srgb,var(--green) 4%, transparent)}
+td .path,td code{font-size:11.5px}
+
+/* ---------- callouts ---------- */
+.callout{border-radius:16px; padding:16px 18px; margin:14px 0; font-size:14.5px; border:1px solid}
+.callout p:last-child{margin-bottom:0}
+.callout strong{font-weight:800}
+.c-red{background:var(--red-bg); border-color:color-mix(in srgb,var(--red) 28%, transparent); color:var(--ink)}
+.c-gold{background:var(--gold-bg); border-color:color-mix(in srgb,var(--gold) 28%, transparent); color:var(--ink)}
+.c-blue{background:var(--blue-bg); border-color:color-mix(in srgb,var(--blue) 28%, transparent); color:var(--ink)}
+.c-green{background:color-mix(in srgb,var(--green) 9%, transparent); border-color:color-mix(in srgb,var(--green) 28%, transparent); color:var(--ink)}
+.c-title{font-weight:800; margin-bottom:6px; display:flex; align-items:center; gap:8px}
+
+/* ---------- checklist ---------- */
+.progress-wrap{background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+  padding:20px 22px; box-shadow:var(--shadow); margin-bottom:18px; position:sticky; top:78px; z-index:20}
+.progress-top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; flex-wrap:wrap; gap:8px}
+.progress-top strong{font-size:17px; font-family:var(--arabic)}
+.progress-count{color:var(--green); font-weight:800; font-size:15px}
+.bar{height:10px; background:var(--grey-bg); border-radius:99px; overflow:hidden}
+.bar span{display:block; height:100%; width:0; background:linear-gradient(90deg,var(--green-2),var(--green));
+  border-radius:99px; transition:width .4s ease}
+.ck-group{margin-bottom:20px}
+.ck-group > h4{font:700 17px var(--arabic); color:var(--deep); margin-bottom:10px; display:flex; align-items:center; gap:9px}
+.ck{display:flex; gap:11px; align-items:flex-start; padding:11px 14px; border:1px solid var(--line);
+  border-radius:13px; background:var(--card); margin-bottom:7px; cursor:pointer; transition:border-color .2s, background .2s}
+.ck:hover{border-color:var(--green)}
+.ck input{margin:4px 0 0; width:17px; height:17px; accent-color:var(--green); cursor:pointer; flex-shrink:0}
+.ck span{font-size:14px; line-height:1.65}
+.ck.done{background:color-mix(in srgb,var(--green) 7%, transparent); border-color:color-mix(in srgb,var(--green) 30%, transparent)}
+.ck.done span{text-decoration:line-through; color:var(--muted)}
+
+/* ---------- roadmap ---------- */
+.phase{display:grid; grid-template-columns:auto 1fr; gap:18px; margin-bottom:6px}
+.phase-rail{display:flex; flex-direction:column; align-items:center}
+.phase-dot{width:38px; height:38px; border-radius:50%; display:grid; place-items:center; font-weight:800;
+  font-size:14px; color:#fff; background:linear-gradient(145deg,var(--green),var(--deep)); flex-shrink:0}
+[data-theme="night"] .phase-dot{color:#062019}
+.phase-line{flex:1; width:2px; background:var(--line); margin:6px 0; min-height:16px}
+.phase:last-child .phase-line{display:none}
+.phase-body{padding-bottom:22px}
+.phase-body h4{font:700 18px var(--arabic); color:var(--deep)}
+.phase-body .when{color:var(--gold); font-size:12px; font-weight:700; margin-top:2px}
+.phase-body ul{margin:9px 0 0; padding-inline-start:20px; font-size:14px; color:var(--muted)}
+.phase-body li{margin-bottom:4px}
+
+/* ---------- misc ---------- */
+.good-list{list-style:none; padding:0; margin:0}
+.good-list li{display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-bottom:1px solid var(--line-soft); font-size:14px}
+.good-list li:last-child{border-bottom:none}
+.good-list .tick{color:var(--green); font-weight:800; flex-shrink:0}
+.foot{border-top:1px solid var(--line); padding:32px 0 44px; color:var(--muted); font-size:13px}
+.foot-grid{display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; align-items:center}
+.toc-note{font-size:13px; color:var(--muted); margin-top:8px}
+.evidence{border-inline-start:3px solid var(--red); padding-inline-start:14px; margin:8px 0}
+.evidence.ok{border-inline-start-color:var(--green)}
+.swatch{display:inline-block; width:13px; height:13px; border-radius:4px; border:1px solid var(--line);
+  vertical-align:-2px; margin-inline-end:5px}
+
+/* ---------- responsive ---------- */
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .two,.three{grid-template-columns:1fr}
+  .nav{display:none}
+  .progress-wrap{position:static}
+}
+@media (max-width:420px){
+  .metrics{grid-template-columns:1fr}
+  .issue-head{padding:16px}
+  .issue-body{padding:14px 16px 18px}
+  .card{padding:18px}
+}
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important; animation:none !important}
+  html{scroll-behavior:auto}
+}
+@media print{
+  .topbar,.icon-btn,.progress-wrap{display:none !important}
+  body{background:#fff; color:#000; font-size:11pt}
+  .card,.issue,.metric,.table-scroll{box-shadow:none; break-inside:avoid; page-break-inside:avoid}
+  section{padding:16px 0; break-inside:auto}
+  .verdict{background:#eee !important; color:#000 !important}
+  .verdict p,.verdict-label,.vs-item span{color:#333 !important}
+  a{text-decoration:none; color:#000}
+  pre{white-space:pre-wrap; word-break:break-word}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark">۞</span>
+      <span>
+        <strong>Quran Pro</strong>
+        <small>تقرير جاهزية Google Play</small>
+      </span>
+    </a>
+    <nav class="nav">
+      <a href="#summary">الملخص</a>
+      <a href="#blockers">العوائق</a>
+      <a href="#policy">السياسات</a>
+      <a href="#quality">الجودة</a>
+      <a href="#assets">الأصول</a>
+      <a href="#account">الحساب</a>
+      <a href="#roadmap">خارطة الطريق</a>
+      <a href="#map">خريطة المشروع</a>
+      <a href="#good">نقاط القوة</a>
+      <a href="#checklist">قائمة التحقق</a>
+    </nav>
+    <div style="display:flex; gap:7px">
+      <button class="icon-btn" id="themeBtn" title="تبديل الوضع الليلي" aria-label="تبديل الوضع الليلي">🌙</button>
+      <button class="icon-btn" id="printBtn" title="طباعة التقرير" aria-label="طباعة التقرير">🖨</button>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ==================== HERO ==================== -->
+<div class="wrap hero">
+  <div class="hero-grid">
+    <div>
+      <div class="kicker">تدقيق ما قبل النشر · GOOGLE PLAY</div>
+      <h1>هل التطبيق جاهز للمتجر؟</h1>
+      <div class="sub">فحص شامل لـ <strong>Quran Pro</strong> — الكود، البناء، الأصول، والامتثال</div>
+      <p class="lead">
+        فُحص التطبيق بالكامل: 6,900 سطر مصدر، إعدادات Android، خط أنابيب البناء، عامل الخدمة،
+        الأصول البصرية، والاتصالات الشبكية الفعلية. النتيجة واضحة ومزدوجة:
+        <strong>المنتج نفسه ناضج وآمن، لكن طبقة النشر لم تُبنَ بعد.</strong>
+        كل بند أدناه مدعوم بمسار ملف ورقم سطر تم التحقق منه فعلياً — لا تخمين ولا افتراضات.
+      </p>
+      <div class="meta-row">
+        <span class="pill">التطبيق <b>com.rashid.quranpro</b></span>
+        <span class="pill">الإطار <b>Capacitor 8.5</b></span>
+        <span class="pill">targetSdk <b>36</b></span>
+        <span class="pill">minSdk <b>24</b> (Android 7+)</span>
+        <span class="pill">تاريخ الفحص <b>2026-08-04</b></span>
+      </div>
+    </div>
+    <aside class="verdict">
+      <div class="verdict-label">الحكم النهائي</div>
+      <h3>غير جاهز للنشر</h3>
+      <p>ثمانية عوائق تمنع الرفع أو تؤدي للرفض المباشر — بالإضافة إلى تعرّض أمني يجب معالجته فوراً.</p>
+      <div class="verdict-stats">
+        <div class="vs-item"><b>8</b><span>عائق حرج</span></div>
+        <div class="vs-item"><b>7</b><span>خطر سياسات</span></div>
+        <div class="vs-item"><b>13</b><span>مسألة جودة</span></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ==================== SUMMARY ==================== -->
+<section id="summary" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم الأول</div>
+      <h2>الملخص التنفيذي</h2>
+      <p>ما الذي وجدناه، ولماذا لا يمكن الرفع اليوم.</p>
+    </div>
+  </div>
+
+  <div class="callout c-red" style="margin-bottom:18px">
+    <div class="c-title">🔴 عاجل — تعرّض أمني خارج نطاق Play، يجب معالجته اليوم</div>
+    <p>
+      المستودع <span class="path">github.com/MOT1209/mein-wep</span> <strong>عام (Public)</strong> — تم التحقق.
+      وفيه ملف <span class="path">.github/workflows/setup-keystore.yml</span> يولّد مفتاح توقيع Android،
+      وفيه سطران خطيران:
+    </p>
+    <ul style="margin:8px 0; padding-inline-start:20px">
+      <li>
+        <strong>كلمة مرور مكتوبة في الملف علناً</strong> —
+        <span class="path">setup-keystore.yml:13</span> فيه قيمة
+        <code>default</code> نصّية لكلمة مرور المفتاح (لا تُعاد كتابتها هنا عمداً؛
+        راجعها في الملف نفسه)، والحقل معرّف <code>type: string</code> وليس secret،
+        فتُسجَّل قيمته في بيانات تشغيل Actions.
+      </li>
+      <li>
+        <strong>المفتاح الخاص يُرفع كملف قابل للتنزيل</strong> —
+        السطران <span class="path">60-65</span> و<span class="path">83-88</span> يرفعان
+        <span class="path">rashid-release-key.jks</span> ونسخته base64 كـ artifacts.
+        في مستودع عام، هذه قابلة للتنزيل من خارج حسابك.
+      </li>
+    </ul>
+    <p style="margin-bottom:0">
+      <strong>المطلوب:</strong> إذا شُغّل هذا الـworkflow يوماً، فاعتبر ذلك المفتاح
+      <strong>محروقاً ولا تستخدمه أبداً كمفتاح رفع لـPlay</strong> — احذف الـworkflow، واحذف الـartifacts
+      من سجل Actions، وولّد مفتاحاً جديداً بكلمة مرور عشوائية (انظر B2).
+      يتسق هذا مع نمط سابق في نفس المستودع، فيُستحسن مراجعة بقية الأسرار كذلك.
+    </p>
+  </div>
+
+  <div class="grid metrics" style="margin-bottom:18px">
+    <div class="metric">
+      <div class="metric-value">~6,900</div>
+      <div class="metric-label">سطر مصدر</div>
+      <div class="metric-note">app.js 2,552 · style.css 3,390 · index.html 720 · mushaf.js 397</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value">22</div>
+      <div class="metric-label">ميزة عاملة</div>
+      <div class="metric-note">قراءة، صوت، مصحف، إشارات، بحث، تفسير، مزامنة</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value bad">0</div>
+      <div class="metric-label">ملف متتبَّع في <code style="font-size:11px">android/</code></div>
+      <div class="metric-note">المشروع الأصلي كله خارج Git — ويُعاد توليده في كل بناء</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value bad">1</div>
+      <div class="metric-label">مخالفة سياسة مباشرة</div>
+      <div class="metric-note">بانر تحميل APK خارج المتجر</div>
+    </div>
+    <div class="metric">
+      <div class="metric-value warn">3</div>
+      <div class="metric-label">ملفات لا تُشحن</div>
+      <div class="metric-note">mushaf.js · privacy.html · خطوط QCF</div>
+    </div>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>الخلاصة في ثلاث جمل</h3>
+      <p>
+        <strong>١ — الكود جيد.</strong> صفر استخدام لـ <code>innerHTML</code> مع بناء آمن للـDOM،
+        سياسات RLS مفعّلة على Supabase مع اختبار سلوكي يثبتها، دعم RTL و safe-area صحيح،
+        وMedia Session API كامل. لا إعلانات ولا تتبّع ولا تحليلات — وهذا ميزة حقيقية للتطبيق.
+      </p>
+      <p>
+        <strong>٢ — البناء ناقص.</strong> ملف <span class="path">js/mushaf.js</span> — الميزة الرئيسية
+        التي بُنيت مؤخراً — غير مُدرج في خط أنابيب البناء، فهو ببساطة <strong>غير موجود داخل التطبيق</strong>.
+        وكذلك <span class="path">privacy.html</span> وخطوط المصحف.
+      </p>
+      <p>
+        <strong>٣ — طبقة النشر لم تُلمس.</strong> الأيقونة على الهاتف ما زالت شعار Capacitor الأزرق
+        الافتراضي، ولا يوجد توقيع، وهناك كود يحمّل APK من خارج المتجر — وهو ما يرفضه Google آلياً.
+      </p>
+      <div class="callout c-gold" style="margin-top:12px; margin-bottom:0">
+        <div class="c-title">🎯 السبب الجذري — أهم اكتشاف في هذا التقرير</div>
+        <p style="margin:0">
+          مجلد <span class="path">android/</span> <strong>غير متتبَّع في Git إطلاقاً</strong>
+          (مستثنى بـ <span class="path">.gitignore:34</span>)، وسير عمل البناء في GitHub
+          يعيد توليده من الصفر بـ<code>npx cap add android</code> في كل مرة.
+          <strong>أي تعديل أصلي تجريه — أيقونة، ألوان، توقيع، صلاحيات — يُمحى تلقائياً.</strong>
+          هذا ليس عائقاً منفصلاً، بل هو السبب الذي جعل الأيقونة تبقى افتراضية.
+          إصلاحه <strong>أولاً</strong> شرط لأن يصمد أي إصلاح آخر. انظر B0.
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>ما الذي يفصلنا عن الإطلاق؟</h3>
+      <p style="color:var(--muted); font-size:14px">
+        العمل التقني المتبقي محدود ومعروف. القيد الحقيقي ليس تقنياً بل زمنياً:
+      </p>
+      <div class="callout c-gold" style="margin-top:10px">
+        <div class="c-title">⏳ القيد الحاكم</div>
+        <p>
+          حسابك <strong>شخصي</strong>، لذا يفرض Google اختباراً مغلقاً بـ
+          <strong>12 مختبِراً على الأقل، متواصلاً 14 يوماً</strong>، قبل السماح بالنشر العام.
+          هذه المدة لا يمكن اختصارها — لذا يجب <strong>البدء بجمع المختبِرين اليوم</strong>،
+          بالتوازي مع الإصلاحات، لا بعدها.
+        </p>
+      </div>
+      <p style="font-size:14px; margin-top:12px">
+        <strong>التقدير الواقعي:</strong>
+      </p>
+      <div class="table-scroll" style="box-shadow:none; margin-bottom:10px">
+        <table style="min-width:auto">
+          <thead><tr><th>المرحلة</th><th>ساعات</th></tr></thead>
+          <tbody>
+            <tr><td>P0 — العوائق الحرجة</td><td><strong>٣٠–٤٣</strong></td></tr>
+            <tr><td>P1 — السياسات والامتثال</td><td><strong>١٦–٢٣</strong></td></tr>
+            <tr><td>P2 — الجودة (يمكن أثناء الاختبار)</td><td>٣٤–٤٥</td></tr>
+            <tr style="background:color-mix(in srgb,var(--green) 8%, transparent)">
+              <td><strong>الحد الأدنى للتقديم (P0+P1)</strong></td><td><strong>٤٦–٦٦ ساعة</strong></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:14px; margin-bottom:0">
+        أي <strong>٦–٩ أيام عمل مركّزة</strong>، ثم ١٤ يوماً إلزامية للاختبار المغلق تجري بالتوازي.
+        <strong>الإطلاق ممكن خلال ٣–٤ أسابيع</strong> إذا بدأ مسار المختبِرين فوراً.
+      </p>
+    </div>
+  </div>
+
+  <div class="callout c-blue" style="margin-top:16px">
+    <div class="c-title">📄 علاقة هذا التقرير بـ <span class="path">REPORT.html</span></div>
+    <p>
+      يوجد في المجلد تقرير فني عام سابق يصف بنية المشروع ومعمارية البيانات.
+      هذا التقرير <strong>مختلف الغرض تماماً</strong>: هدفه الوحيد هو الإجابة على سؤال
+      «ماذا يلزم بالضبط لقبول هذا التطبيق في متجر Google Play؟» — لذا يركّز على البناء والأصول والامتثال،
+      وليس على شرح المعمارية.
+    </p>
+  </div>
+</section>
+
+<!-- ==================== P0 BLOCKERS ==================== -->
+<section id="blockers" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم الثاني · الأولوية P0</div>
+      <h2>العوائق الحرجة</h2>
+      <p>لا يمكن الرفع — أو سيُرفض فوراً — ما لم تُحل كل هذه البنود الثمانية.</p>
+    </div>
+    <span class="badge b-red" style="height:34px; padding:0 16px">٨ عوائق</span>
+  </div>
+
+  <!-- B0 -->
+  <article class="issue" style="border-color:var(--red); border-width:2px">
+    <div class="issue-head">
+      <span class="badge b-red">B0</span>
+      <div class="issue-title">
+        <h3>مجلد <code>android/</code> غير متتبَّع — وسير العمل يمحو كل تعديل أصلي</h3>
+        <div class="why">
+          <strong>ابدأ من هنا.</strong> هذا ليس عائقاً عادياً بل السبب الجذري لعائق الأيقونة،
+          وأي إصلاح أصلي تكتبه قبل حلّه سيضيع.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل — تم التحقق بالأمر مباشرة</div>
+        <pre><code>$ git ls-files apps/quran-app/android | wc -l
+0
+
+$ grep -n "android" .gitignore
+34:apps/*/android/
+37:games/*/android/</code></pre>
+        <p>
+          صفر ملف متتبَّع. المشروع الأصلي بأكمله — <span class="path">build.gradle</span>،
+          <span class="path">AndroidManifest.xml</span>، الأيقونات، الثيمات — موجود
+          <strong>على جهازك فقط</strong> ولم يدخل أي كوميت قط.
+        </p>
+        <p>والأسوأ، <span class="path">.github/workflows/apk-build.yml:126-130</span>:</p>
+        <pre><code>- name: Add Android platform
+  run: |
+    if [ ! -d "android" ]; then
+      npx cap add android
+    fi</code></pre>
+        <p>
+          بما أن <span class="path">android/</span> غير متتبَّع، فهو <strong>لا يوجد أبداً</strong>
+          على خادم البناء — فيُنفَّذ <code>cap add android</code> في كل مرة ويُولَّد مشروع
+          Capacitor افتراضي نظيف. <strong>هذا بالضبط سبب بقاء أيقونة Capacitor الزرقاء.</strong>
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label danger">تناقض ثانٍ في نفس الملف</div>
+        <p>
+          <span class="path">apk-build.yml:138</span> يبني أصول الويب عبر
+          <code>node ../../scripts/copy-to-www.mjs .</code> فيُنتج مجلد <span class="path">www/</span> —
+          بينما <span class="path">capacitor.config.json</span> يعرّف <code>"webDir": "dist"</code>.
+          فيقرأ <code>cap sync</code> من <span class="path">dist/</span> الذي لا وجود له على الخادم
+          (مستثنى من Git). أي أن الـAPK الذي تنتجه المنصة مبني على جذر ويب فارغ أو ناقص.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <ul>
+          <li>
+            في <span class="path">.gitignore</span> الجذر، استبدل السطر 34 <code>apps/*/android/</code>
+            بأسطر صريحة لكل مشروع <strong>عدا</strong> quran-app.
+            <strong>ملاحظة مهمة:</strong> إضافة <code>!apps/quran-app/android/</code> لن تنجح —
+            Git لا يدخل مجلداً مستثنى أصلاً، فيجب أن يتوقف النمط الأب عن مطابقته.
+          </li>
+          <li>
+            ملف <span class="path">apps/quran-app/android/.gitignore</span> موجود أصلاً ويستثني
+            <span class="path">build/</span> و<span class="path">.gradle/</span> و<span class="path">local.properties</span>.
+            المتتبَّع فعلياً ~1.5 ميجابايت فقط من أصل 22 (الباقي مخلّفات بناء).
+          </li>
+          <li>
+            <strong>أنشئ <span class="path">.vercelignore</span> في الجذر</strong> يستثني
+            <code>apps/*/android/</code>. جذر المستودع هو جذر نشر Vercel — فتتبّع
+            <span class="path">android/</span> بدون هذا الملف ينشر
+            <span class="path">build.gradle</span> والـmanifest علناً على موقعك.
+          </li>
+          <li>
+            أضف الملفات <strong>بمسار صريح</strong>:
+            <code>git add apps/quran-app/android .gitignore .vercelignore</code> —
+            ثم راجع <code>git diff --cached --stat</code> وتأكد أن
+            <span class="path">local.properties</span> (يحوي مسار SDK على جهازك) و
+            <span class="path">app/build/</span> غير مُدرجَين.
+            <strong>لا تستخدم <code>git add .</code> إطلاقاً في هذا المستودع.</strong>
+          </li>
+          <li>وحّد سير العمل على <code>npm run build</code> + <code>cap sync</code> بدل <span class="path">copy-to-www.mjs</span> لهذا المشروع.</li>
+        </ul>
+      </div>
+      <div class="field">
+        <div class="field-label">التحقق</div>
+        <p>
+          <code>git ls-files apps/quran-app/android | wc -l</code> يجب أن يتجاوز 100 ويتضمن
+          <span class="path">app/build.gradle</span> و<span class="path">app/src/main/AndroidManifest.xml</span>.
+          ثم استنسخ المستودع في مجلد مؤقت وابنِ منه — يجب أن ينجح دون <code>cap add</code>.
+        </p>
+      </div>
+      <span class="effort">⏱ التقدير: ساعتان – ٣ ساعات</span>
+    </div>
+  </article>
+
+  <!-- B1 -->
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-red">B1</span>
+      <div class="issue-title">
+        <h3>التطبيق يعرض أيقونة Capacitor الافتراضية على الهاتف</h3>
+        <div class="why">
+          أخطر بند في التقرير من ناحية الانطباع. أيقونة التطبيق على شاشة الهاتف وفي المتجر
+          هي شعار Capacitor الأزرق — لم تُستبدل أبداً منذ إنشاء المشروع.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل — مُتحقق بصرياً</div>
+        <p>فُتحت ملفات PNG وعُوينت مباشرة، لا استنتاج من أحجام الملفات:</p>
+        <div class="evidence">
+          <p style="margin-bottom:6px">
+            <span class="path">android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png</span><br>
+            → شعار Capacitor: علامة <strong>X زرقاء</strong> على خلفية بيضاء بنقشة شبكية.
+            هذا هو الملف الذي يراه المستخدم على شاشته الرئيسية. ونفس الشيء في كل كثافات
+            <span class="path">mipmap-{m,h,x,xx,xxx}hdpi</span>.
+          </p>
+          <p style="margin-bottom:0">
+            <span class="path">icons/icon-512x512.png</span> (وباقي المقاسات الثمانية)<br>
+            → <strong>مربع أخضر <span class="swatch" style="background:#059669"></span> فارغ تماماً</strong>.
+            لا حرف Q، لا زوايا دائرية، لا تدرّج. حرف الـQ في
+            <span class="path">icons/icon.svg</span> لم يُرسم إطلاقاً عند التحويل إلى PNG
+            (أداة التحويل لم تُصيّر عنصر <code>&lt;text&gt;</code>)، وهذا يفسّر الحجم الضئيل:
+            1,884 بايت فقط لصورة 512×512.
+          </p>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label danger">لماذا يرفضه Play</div>
+        <p>
+          مراجعة Google ترفض الأصول الافتراضية/النائبة (placeholder) صراحةً ضمن سياسة
+          <em>Spam and Minimum Functionality</em>. حتى لو مرّ آلياً، فأيقونة Capacitor على تطبيق قرآن
+          تدمّر المصداقية فوراً وتُبلَّغ من المستخدمين.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label danger">لماذا خرجت الأيقونات فارغة — الآلية بالضبط</div>
+        <p>
+          يوجد مولّد أيقونات جاهز وصحيح: <span class="path">scripts/gen-icons.mjs</span>.
+          مصفوفة الكثافات فيه سليمة تماماً (48/72/96/144/192 للأيقونة، و108→432 للطبقة الأمامية
+          بحشوة أمان 66٪ صحيحة). المشكلة ليست فيه بل في <strong>مصدره</strong>:
+        </p>
+        <p>
+          السطر 36 يفضّل <span class="path">icons/icon.svg</span>، وهذا الملف يرسم الحرف كنص حيّ:
+        </p>
+        <pre><code>&lt;text ... font-family="Arial, sans-serif" ...&gt;Q&lt;/text&gt;</code></pre>
+        <p>
+          عند التصيير بلا واجهة على خادم Linux، لا يوجد خط Arial ولا إعداد تشكيل نصوص —
+          <strong>فيُسقَط الحرف بصمت</strong> وتخرج الصورة مربعاً مصمتاً. والأسوأ أن السكربت
+          <strong>يفشل بهدوء</strong>: كل مسارات الخطأ فيه تنتهي بـ<code>process.exit(0)</code>
+          (الأسطر 55، 63، 71، 123) حتى لا يكسر البناء — فلا أحد يلاحظ.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل — بهذا الترتيب</div>
+        <ul>
+          <li>
+            <strong>أصلح ملف SVG المصدر أولاً.</strong> حوّل الحرف إلى
+            <code>&lt;path&gt;</code> بمسارات حقيقية بدل <code>&lt;text&gt;</code> —
+            أو الأفضل لتطبيق قرآن: استغنِ عن الحرف اللاتيني كلياً واستخدم رمزاً هندسياً
+            (مصحف/زخرفة/هلال) مرسوماً بمسارات. أي نص حيّ متبقٍّ سيختفي مجدداً.
+          </li>
+          <li>
+            <strong>تحقق من التصيير قبل الربط.</strong> صيّر الـSVG إلى PNG وافتحه بعينك.
+            حجم أقل من ٣ كيلوبايت لصورة 512×512 هو <strong>بصمة الصورة الفارغة</strong> —
+            الملف الحالي 1,884 بايت.
+          </li>
+          <li>شغّل <code>node ../../scripts/gen-icons.mjs .</code> بعد إصلاح المصدر — المولّد نفسه سليم.</li>
+          <li>اضبط <span class="path">res/values/ic_launcher_background.xml</span> على <code>#059669</code> بدل الأبيض.</li>
+          <li>أعد توليد <span class="path">icons/*.png</span> الثمانية، وأنتج أيقونة المتجر 512×512 كتصدير منفصل.</li>
+          <li>
+            أضف وضعاً صارماً للمولّد يخرج برمز خطأ بدل <code>exit(0)</code> في مسار الإصدار،
+            حتى لا يتكرر الفشل الصامت.
+          </li>
+          <li>ملاحظة: كل الأيقونات في <span class="path">manifest.json</span> معلّمة <code>"purpose": "maskable any"</code> بلا حشوة أمان، فسيُقتطع محتواها عند القص الدائري. أضف حشوة أو افصل نسختين.</li>
+        </ul>
+      </div>
+      <div class="callout c-gold">
+        <p style="margin:0">
+          <strong>تنبيه ترتيب:</strong> لا فائدة من إصلاح الأيقونات قبل <strong>B0</strong> —
+          فأي ملف تكتبه في <span class="path">android/res/</span> سيُمحى في البناء التالي.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">التحقق</div>
+        <p>ثبّت الـAPK على هاتف حقيقي وانظر للشاشة الرئيسية ودرج التطبيقات. وافتح كل ملف PNG مولَّد بصرياً قبل الاعتماد.</p>
+      </div>
+      <span class="effort">⏱ التقدير: ٣–٤ ساعات (يشمل التصميم)</span>
+    </div>
+  </article>
+
+  <!-- B2 -->
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-red">B2</span>
+      <div class="issue-title">
+        <h3>لا يوجد توقيع ولا keystore ولا ملف AAB</h3>
+        <div class="why">
+          Google Play لا يقبل إلا حزمة <strong>AAB موقّعة بمفتاح إصدار</strong>. المشروع لم يُنتج
+          سوى <span class="path">app-debug.apk</span> موقّعاً بمفتاح التصحيح.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p>
+          البحث عن <code>signingConfig</code> / <code>storeFile</code> / <code>keyAlias</code> في كل ملفات
+          <span class="path">*.gradle</span> و <span class="path">*.properties</span> لا يُرجع شيئاً.
+          لا يوجد أي ملف <span class="path">.jks</span> أو <span class="path">.keystore</span>،
+          ولا كتلة <code>bundle {}</code>. الموجود فقط:
+        </p>
+        <pre><code>android/app/build/outputs/apk/debug/app-debug.apk</code></pre>
+        <p>وكتلة الإصدار في <span class="path">android/app/build.gradle</span> فارغة من التوقيع:</p>
+        <pre><code>buildTypes {
+    release {
+        minifyEnabled false
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+    }
+}</code></pre>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل — مسار التوقيع الموصى به</div>
+        <ul>
+          <li>أنشئ keystore إصدار بـ <code>keytool</code> بصلاحية 25+ سنة (Play يشترط انتهاءً بعد 2033 على الأقل).</li>
+          <li>فعّل <strong>Play App Signing</strong> — يحتفظ Google بمفتاح التوقيع النهائي وأنت تحتفظ بمفتاح الرفع فقط. هذا يحميك من كارثة فقدان المفتاح (بدونه، ضياع المفتاح = فقدان القدرة على تحديث التطبيق نهائياً).</li>
+          <li>أضف <code>signingConfigs.release</code> في <span class="path">android/app/build.gradle</span> يقرأ القيم من ملف <span class="path">keystore.properties</span> غير متتبَّع في Git.</li>
+          <li>ابنِ الحزمة بـ <code>./gradlew bundleRelease</code> → المخرج <span class="path">app/build/outputs/bundle/release/app-release.aab</span>.</li>
+        </ul>
+      </div>
+      <div class="callout c-red">
+        <div class="c-title">🚫 لا تستخدم المفتاح المشترك <code>rashid-key</code></div>
+        <p>
+          <span class="path">.github/workflows/setup-keystore.yml</span> في هذا المستودع
+          <strong>العام</strong> يولّد مفتاحاً باسم <code>rashid-key</code> بكلمة مرور افتراضية
+          مكتوبة في الملف نفسه (السطر 13)، ويرفع المفتاح الخاص
+          <span class="path">rashid-release-key.jks</span> كـartifact قابل للتنزيل (السطران 60-65).
+          إن كان قد شُغّل يوماً، فذلك المفتاح <strong>محروق</strong>.
+        </p>
+        <p style="margin-bottom:0">
+          <strong>افعل:</strong> احذف هذا الـworkflow، احذف الـartifacts من سجل Actions،
+          وولّد مفتاحاً <strong>جديداً خاصاً بهذا التطبيق</strong> بكلمة مرور عشوائية طويلة
+          من مدير كلمات مرور، وأسراراً منفصلة في GitHub.
+        </p>
+      </div>
+      <div class="callout c-red">
+        <div class="c-title">🔐 أين يُخزَّن المفتاح</div>
+        <p>
+          جذر المستودع هو <strong>جذر النشر على Vercel</strong>. ضع الـkeystore وملف
+          <span class="path">keystore.properties</span> <strong>خارج شجرة المستودع كلياً</strong>
+          (مثلاً <span class="path">C:\Users\aihmo\AndroidKeystores\</span>) وأشِر إليهما بمسار مطلق.
+          داخل المستودع توجد ثلاث طرق مستقلة لتسريبه: <code>git add</code> خاطئ، نشر Vercel،
+          أو محوه بـ<code>cap add android</code>.
+        </p>
+        <p style="margin-bottom:0">
+          استخدم <code>PKCS12</code> بدل <code>JKS</code> المهجور، ومفتاح <code>RSA 4096</code>،
+          و<code>-validity 10000</code> (يتجاوز شرط Play بانتهاء بعد 2033).
+          واحتفظ بثلاث نسخ احتياطية على وسيطين مختلفين، مع تسجيل بصمتَي
+          SHA-1 وSHA-256 للمقارنة لاحقاً مع Play Console.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">التحقق</div>
+        <p>
+          <code>jarsigner -verify -verbose app-release.aab</code>، ثم اختبار التثبيت الفعلي عبر
+          <code>bundletool build-apks --connected-device</code> قبل الرفع.
+        </p>
+      </div>
+      <span class="effort">⏱ التقدير: ساعة – ساعتان</span>
+    </div>
+  </article>
+
+  <!-- B3 -->
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-red">B3</span>
+      <div class="issue-title">
+        <h3>بانر «تحميل APK» — مخالفة مباشرة لسياسة Google</h3>
+        <div class="why">
+          التطبيق يفحص إصداراً بعيداً ويعرض بانراً يحمّل ملف APK من خارج المتجر.
+          هذه مخالفة صريحة لسياسة <em>Device and Network Abuse</em> وتؤدي للرفض أو الإزالة.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p><span class="path">js/update-checker.js:63-68</span></p>
+        <pre><code>const downloadLink = document.createElement('a');
+downloadLink.href = remote.apkUrl;
+downloadLink.download = '';
+downloadLink.textContent = '📥 تحميل APK';</code></pre>
+        <p>والمصدر <span class="path">version.json:4</span>:</p>
+        <pre><code>"apkUrl": "https://rashid-wep.vercel.app/apks/quran-app-v1.1.0.apk"</code></pre>
+        <p>
+          الملف يُحمَّل في <span class="path">index.html</span> ويُنسخ إلى <span class="path">dist/</span>
+          ومن ثم إلى داخل الـAPK — أي أن الكود المخالف <strong>يُشحن فعلياً</strong> مع التطبيق.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label danger">لماذا يرفضه Play</div>
+        <p>
+          السياسة تمنع أي تطبيق مُوزَّع عبر Play من <strong>تنزيل أو تثبيت أو تحديث نفسه</strong>
+          بأي آلية خارج المتجر. التحديثات يجب أن تمرّ حصراً عبر Google Play. هذه من المخالفات
+          التي تُكتشف آلياً في الفحص الثابت للكود.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل الموصى به — فصل النسختين</div>
+        <p>
+          الميزة مشروعة ومفيدة <strong>لنسخة الويب</strong> على Vercel، لكنها ممنوعة داخل تطبيق Play.
+          الحل ليس حذفها من المشروع، بل استثناؤها من بناء Android:
+        </p>
+        <ul>
+          <li>احذف <code>&lt;script src="js/update-checker.js"&gt;</code> و<code>window.RASHID_APP</code> من نسخة Android عبر متغيّر بيئة في البناء (مثل <code>BUILD_TARGET=android</code>) يتحكم بقائمة الملفات في <span class="path">vite.config.js</span>.</li>
+          <li>استثنِ <span class="path">version.json</span> و<span class="path">js/update-checker.js</span> من <code>PWA_STATIC_FILES</code> و<code>CLASSIC_JS_FILES</code> عند البناء لأندرويد.</li>
+          <li>البديل الأبسط إن أردت التوحيد: احذف الميزة نهائياً واعتمد على تحديثات Play وحدها.</li>
+        </ul>
+        <p style="margin-top:10px">
+          <strong>احذر البوابة البرمجية وحدها.</strong> إضافة شرط مثل
+          <code>if (Capacitor.isNativePlatform()) return;</code> ستمنع التنفيذ، لكن الـAPK
+          سيظل <strong>يحتوي</strong> كود التنزيل ونص الرابط. مراجعة Play تفحص وجود القدرة
+          لا تنفيذها فقط — لذا الاستثناء يجب أن يكون وقت البناء.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label danger">المصدر الحقيقي للسلسلة — سير العمل نفسه</div>
+        <p>
+          <span class="path">.github/workflows/apk-build.yml</span> هو ما <strong>يُنشئ</strong>
+          هذه السلسلة: السطر 255 يبني رابط
+          <code>https://rashid-wep.vercel.app/apks/…</code>، والسطر 260 يكتبه داخل
+          <code>version.json.apkUrl</code>، والسطر 271 يضيف ملف الـAPK إلى المستودع بكوميت تلقائي.
+          حذف السكربت من التطبيق وحده لا يكفي — يجب إخراج quran-app من هذا المسار
+          وتحويله لإنتاج <strong>AAB كـartifact</strong> بدلاً منه.
+        </p>
+        <p style="margin-bottom:0">
+          للتوضيح: استضافة ملفات APK على موقعك ليست مخالفة بحد ذاتها —
+          المخالفة أن يشير <strong>التطبيق المنشور على Play</strong> إليها.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">التحقق</div>
+        <p>
+          اجعل هذا خطوة في سير العمل تفشل البناء عند أي تطابق، لا فحصاً يدوياً:
+        </p>
+        <pre><code>grep -rniE "apkUrl|vercel\.app/apks|update-checker|تحميل APK" \
+  android/app/src/main/assets/public/ &amp;&amp; exit 1</code></pre>
+      </div>
+      <span class="effort">⏱ التقدير: ٣–٤ ساعات (شاملة سير العمل)</span>
+    </div>
+  </article>
+
+  <!-- B4 -->
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-red">B4</span>
+      <div class="issue-title">
+        <h3>ميزة المصحف — الميزة الرئيسية — غير موجودة داخل التطبيق</h3>
+        <div class="why">
+          آخر وأهم ما بُني في المشروع (قارئ المصحف الحقيقي بخطوط QCF، 604 صفحات)
+          غير مُدرج في خط أنابيب البناء إطلاقاً. المستخدم لن يراه.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p>
+          <span class="path">index.html:661</span> يحمّل الملف:
+          <code>&lt;script defer src="js/mushaf.js"&gt;&lt;/script&gt;</code>
+        </p>
+        <p>لكن <span class="path">vite.config.js:23-29</span> لا يذكره:</p>
+        <pre><code>const CLASSIC_JS_FILES = [
+  'js/supabase-config.js',
+  'js/auth.js',
+  'js/vendor/capacitor.js',
+  'js/app.js',
+  'js/update-checker.js',
+];   // ← js/mushaf.js مفقود</code></pre>
+        <p>النتيجة المؤكدة:</p>
+        <ul>
+          <li>لا وجود لـ <span class="path">dist/js/mushaf.js</span></li>
+          <li>لا وجود لـ <span class="path">android/app/src/main/assets/public/js/mushaf.js</span></li>
+          <li><code>grep -c mushaf dist/index.html</code> → <strong>0</strong></li>
+          <li>وأيضاً غير مُدرج في <code>STATIC_ASSETS</code> داخل <span class="path">sw.js:15-31</span></li>
+        </ul>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <ul>
+          <li>أضف <code>'js/mushaf.js'</code> إلى <code>CLASSIC_JS_FILES</code> في <span class="path">vite.config.js</span>.</li>
+          <li>أضفه كذلك إلى <code>STATIC_ASSETS</code> في <span class="path">sw.js</span> وارفع رقم <code>CACHE_NAME</code> من <code>quran-pro-v5</code> إلى <code>v6</code> ليُبطل الكاش القديم.</li>
+          <li>انسخ مجلد <span class="path">fonts/qcf/</span> إلى <code>dist</code> (انظر B5).</li>
+          <li>أضف مساراً في عامل الخدمة لـ <code>api.quran.com</code> — حالياً لا يوجد له أي تعامل، فالمصحف هو أقل ميزة تعمل دون إنترنت رغم أنه الأكثر ادّعاءً لذلك.</li>
+        </ul>
+      </div>
+      <div class="field">
+        <div class="field-label">التحقق</div>
+        <p>بعد <code>npm run build</code>: تأكد من وجود <span class="path">dist/js/mushaf.js</span>، ثم افتح تبويب المصحف في الـAPK وتصفّح 3 صفحات على الأقل.</p>
+      </div>
+      <span class="effort">⏱ التقدير: ساعة – ساعتان</span>
+    </div>
+  </article>
+
+  <!-- B5 -->
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-red">B5</span>
+      <div class="issue-title">
+        <h3>رابط سياسة الخصوصية يعطي 404 داخل التطبيق</h3>
+        <div class="why">
+          <span class="path">privacy.html</span> موجود ومكتوب جيداً، لكنه لا يُنسخ إلى مجلد البناء —
+          فالرابط داخل التطبيق مكسور. وسياسة الخصوصية شرط إلزامي في Play.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p><span class="path">index.html:600</span> يحتوي:</p>
+        <pre><code>&lt;a href="privacy.html" target="_blank"&gt;سياسة الخصوصية&lt;/a&gt;</code></pre>
+        <p>لكن <span class="path">vite.config.js:16-21</span>:</p>
+        <pre><code>const PWA_STATIC_FILES = [
+  'manifest.json',
+  'sw.js',
+  'offline.html',
+  'version.json',
+];   // ← privacy.html مفقود، و fonts/ لا تُنسخ أبداً</code></pre>
+        <p>
+          نفس المشكلة تصيب <span class="path">fonts/qcf/*.woff2</span> (11 ملفاً، 850 KB):
+          غير منسوخة، فيسقط المصحف دائماً على شبكة jsDelivr — أي أن ادّعاء «الصفحات 1–10 تعمل دون إنترنت» غير محقّق.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <ul>
+          <li>أضف <code>'privacy.html'</code> إلى <code>PWA_STATIC_FILES</code>.</li>
+          <li>أضف نسخاً متكرراً لمجلد <span class="path">fonts</span> بجانب النسخ الحالي لمجلد <span class="path">icons</span> في <span class="path">vite.config.js:72-74</span>.</li>
+          <li>انشر سياسة الخصوصية أيضاً على رابط عام ثابت (Play Console يطلب URL وليس ملفاً داخلياً): <span class="path">https://rashid-wep.vercel.app/apps/quran-app/privacy.html</span> — وتأكد أن الرابط يعمل فعلاً قبل إدخاله في النموذج.</li>
+        </ul>
+      </div>
+      <div class="callout c-blue">
+        <div class="c-title">🛡 الإصلاح الذي يمنع تكرار B4 وB5 نهائياً</div>
+        <p>
+          إضافة الملفات الناقصة تحلّ المشكلة اليوم فقط. الحل الدائم حارسان في
+          <span class="path">vite.config.js</span> داخل <code>closeBundle</code>:
+        </p>
+        <ol style="margin:8px 0 0; padding-inline-start:20px">
+          <li>
+            <strong>حارس مراجع HTML</strong> — امسح كل <code>src=</code> و<code>href=</code>
+            نسبي في <span class="path">dist/index.html</span> وتحقق من وجود الملف فعلياً،
+            وأفشِل البناء مع قائمة المفقود. هذا وحده كان سيكتشف
+            <span class="path">js/mushaf.js</span> و<span class="path">privacy.html</span>
+            لحظة البناء بدل مراجعة Play.
+          </li>
+          <li>
+            <strong>حارس عامل الخدمة</strong> — تحقق أن كل عنصر في <code>STATIC_ASSETS</code>
+            موجود في <span class="path">dist/</span>. هذا حرج: <span class="path">sw.js</span>
+            يحذف الكاش ويرمي استثناءً عند فشل أي ملف واحد، أي أن
+            <strong>ملفاً مفقوداً واحداً يُلغي العمل دون إنترنت بالكامل</strong>.
+            الأفضل: ولّد القائمة آلياً من الملفات المنتَجة فعلاً.
+          </li>
+        </ol>
+      </div>
+      <div class="field">
+        <div class="field-label">التحقق</div>
+        <p>افتح الرابط من داخل الـAPK نفسه، ثم افتح رابط الويب العام في متصفح خارجي.</p>
+      </div>
+      <span class="effort">⏱ التقدير: ٣٠ دقيقة (الإضافة) · ٢–٣ ساعات (الحارسان)</span>
+    </div>
+  </article>
+
+  <!-- B6 -->
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-red">B6</span>
+      <div class="issue-title">
+        <h3>أرقام الإصدار متضاربة في أربعة أماكن</h3>
+        <div class="why">
+          <code>versionCode</code> هو ما يعتمد عليه Play لترتيب التحديثات — ولا يمكن إعادة استخدام رقم أبداً.
+          البدء بقيم خاطئة يسبب فوضى دائمة في سجل الإصدارات.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <div class="table-scroll" style="box-shadow:none">
+          <table style="min-width:auto">
+            <thead><tr><th>المصدر</th><th>القيمة</th></tr></thead>
+            <tbody>
+              <tr><td><span class="path">android/app/build.gradle</span></td><td><code>versionCode 1</code> / <code>versionName "1.0"</code></td></tr>
+              <tr><td><span class="path">package.json</span></td><td><code>1.1.0</code></td></tr>
+              <tr><td><span class="path">version.json</span></td><td><code>1.1.0</code> / <code>buildNumber 10</code></td></tr>
+              <tr><td><span class="path">index.html</span> (<code>window.RASHID_APP</code>)</td><td><code>1.1.0</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <ul>
+          <li>وحّد على <code>versionName "1.1.0"</code> و<code>versionCode 10</code> (مطابقاً لـ <code>buildNumber</code>).</li>
+          <li>اجعل <code>versionCode</code> عدداً صحيحاً يتزايد <strong>دائماً</strong> مع كل رفع — حتى لو لم يتغيّر <code>versionName</code>.</li>
+          <li>الأفضل: اقرأ الرقمين من <span class="path">package.json</span> داخل <span class="path">build.gradle</span> لتصبح نقطة حقيقة واحدة، فلا يتكرر التضارب.</li>
+        </ul>
+      </div>
+      <span class="effort">⏱ التقدير: ٣٠ دقيقة</span>
+    </div>
+  </article>
+
+  <!-- B7 -->
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-red">B7</span>
+      <div class="issue-title">
+        <h3>مجلد البناء وأصول Android قديمة — الـAPK لا يحوي آخر عمل</h3>
+        <div class="why">
+          حتى لو أُصلح كل ما سبق، البناء الحالي قديم فعلياً. أي اختبار على الـAPK الموجود
+          يختبر نسخة سابقة من التطبيق.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل — أوقات التعديل</div>
+        <div class="table-scroll" style="box-shadow:none">
+          <table style="min-width:auto">
+            <thead><tr><th>الملف</th><th>آخر تعديل</th></tr></thead>
+            <tbody>
+              <tr><td><span class="path">js/mushaf.js</span> (مصدر)</td><td>10:32</td></tr>
+              <tr><td><span class="path">css/style.css</span> (مصدر)</td><td>10:31</td></tr>
+              <tr><td><span class="path">js/app.js</span> (مصدر)</td><td>08:54</td></tr>
+              <tr><td><span class="path">dist/index.html</span></td><td style="color:var(--red)"><strong>07:56</strong></td></tr>
+              <tr><td><span class="path">android/.../assets/public/index.html</span></td><td style="color:var(--red)"><strong>07:56</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:10px">
+          مجلد <span class="path">dist/</span> يسبق آخر ثلاث تعديلات على المصدر.
+          كما أن <span class="path">android/app/build/</span> يحتوي ~19 MB من مخلّفات Gradle
+          و<span class="path">app-debug.apk</span> قديماً.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل — تسلسل البناء الصحيح</div>
+        <ul>
+          <li><code>npm run build</code> — يولّد <span class="path">dist/</span> محدّثاً</li>
+          <li><code>npx cap sync android</code> — ينسخ <span class="path">dist/</span> إلى <span class="path">android/app/src/main/assets/public/</span></li>
+          <li><code>cd android &amp;&amp; ./gradlew clean bundleRelease</code></li>
+          <li>اجعل هذا التسلسل سكربت واحداً في <span class="path">package.json</span> (مثل <code>"build:android"</code>) حتى لا تُنسى خطوة المزامنة مجدداً — وهي بالضبط الخطوة التي أُهملت هذه المرة.</li>
+        </ul>
+      </div>
+      <span class="effort">⏱ التقدير: ٣٠ دقيقة</span>
+    </div>
+  </article>
+</section>
+
+<!-- ==================== P1 POLICY ==================== -->
+<section id="policy" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم الثالث · الأولوية P1</div>
+      <h2>مخاطر السياسات والامتثال</h2>
+      <p>لن تمنع الرفع تقنياً، لكنها ترجّح الرفض في المراجعة أو الإزالة لاحقاً.</p>
+    </div>
+    <span class="badge b-orange" style="height:34px; padding:0 16px">٧ مخاطر</span>
+  </div>
+
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-orange">P1-1</span>
+      <div class="issue-title">
+        <h3>لا يوجد حذف حساب داخل التطبيق</h3>
+        <div class="why">
+          التطبيق يسمح بإنشاء حساب بالبريد عبر Supabase — وسياسة Play تشترط عندها
+          توفير مسار لحذف الحساب والبيانات.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p>
+          <span class="path">PLAY_DATA_SAFETY.md</span> يقرّ بذلك حرفياً:
+          «لا يوجد حالياً زر حذف ذاتي داخل التطبيق؛ الحذف يتم يدوياً خلال أيام قليلة من الطلب».
+          و<span class="path">privacy.html</span> يوجّه المستخدم لمراسلة بريد إلكتروني فقط.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">ما يشترطه Play بالضبط</div>
+        <p>
+          لكل تطبيق يتيح إنشاء حساب: <strong>مسار حذف داخل التطبيق</strong> +
+          <strong>رابط ويب عام</strong> يمكن الوصول إليه دون تثبيت التطبيق، يُدخَل في
+          Play Console ضمن قسم <em>Data deletion</em>. الطلب عبر البريد وحده <strong>لا يُقبل</strong>.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <ul>
+          <li>أضف زر «حذف الحساب نهائياً» في نافذة الإعدادات مع تأكيد مزدوج.</li>
+          <li>الجدول <code>quran_pro_user_data</code> معرّف أصلاً بـ <code>ON DELETE CASCADE</code> على <code>auth.users(id)</code> — فحذف المستخدم يحذف بياناته تلقائياً. البنية جاهزة، ينقص الزر فقط.</li>
+          <li>حذف المستخدم نفسه يتطلب صلاحية إدارية، لذا الطريقة الصحيحة هي <strong>Supabase Edge Function</strong> تستدعي <code>auth.admin.deleteUser()</code> — ولا تضع مفتاح service-role في كود العميل إطلاقاً.</li>
+          <li>أنشئ صفحة ويب عامة لطلب الحذف وأدخل رابطها في Play Console.</li>
+        </ul>
+      </div>
+      <span class="effort">⏱ التقدير: ٣–٤ ساعات</span>
+    </div>
+  </article>
+
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-orange">P1-2</span>
+      <div class="issue-title">
+        <h3>سياسة الخصوصية لا تُفصح عن نصف الاتصالات الفعلية</h3>
+        <div class="why">
+          تناقض بين ما تعلنه السياسة وما يفعله التطبيق فعلياً — وهذا سبب شائع للرفض
+          ولمخالفة قسم Data Safety.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الفجوة</div>
+        <p>
+          <span class="path">privacy.html</span> يذكر مضيفَين اثنين فقط:
+          <code>alquran.cloud</code> و<code>mp3quran.net</code>. لكن التطبيق يتصل فعلياً بـ<strong>عشرة</strong> مضيفات:
+        </p>
+        <div class="table-scroll" style="box-shadow:none">
+          <table>
+            <thead><tr><th>المضيف</th><th>الغرض</th><th>مُفصح عنه؟</th></tr></thead>
+            <tbody>
+              <tr><td><code>api.alquran.cloud</code></td><td>نص القرآن، التفسير، الترجمات</td><td style="color:var(--green)">✔ نعم</td></tr>
+              <tr><td><code>*.mp3quran.net</code></td><td>بث الصوت (7 نطاقات فرعية)</td><td style="color:var(--green)">✔ نعم</td></tr>
+              <tr><td><code>api.quran.com</code></td><td>بيانات صفحات المصحف</td><td style="color:var(--red)">✘ لا</td></tr>
+              <tr><td><code>kcltollasghlvuoxvjqa.supabase.co</code></td><td>المصادقة والمزامنة</td><td style="color:var(--green)">✔ نعم</td></tr>
+              <tr><td><code>cdn.jsdelivr.net</code></td><td>خطوط QCF + مكتبة Supabase</td><td style="color:var(--red)">✘ لا</td></tr>
+              <tr><td><code>fonts.googleapis.com</code> / <code>fonts.gstatic.com</code></td><td>خطوط الواجهة</td><td style="color:var(--red)">✘ لا</td></tr>
+              <tr><td><code>cdnjs.cloudflare.com</code></td><td>Font Awesome 6.4.0</td><td style="color:var(--red)">✘ لا</td></tr>
+              <tr><td><code>www.youtube.com</code></td><td><strong>لا شيء — سكربت ميت</strong></td><td style="color:var(--red)">✘ لا</td></tr>
+              <tr><td><code>rashid-wep.vercel.app</code></td><td>فحص التحديث + رابط APK</td><td style="color:var(--red)">✘ لا</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <ul>
+          <li>أضف قسماً في <span class="path">privacy.html</span> يسرد كل مضيف والغرض منه ونوع البيانات المرسلة (عنوان IP وUser-Agent يصلان لكل واحد منها بحكم طبيعة HTTP — وهذا يجب ذكره صراحةً).</li>
+          <li>الأفضل: <strong>قلّل عدد المضيفات</strong> بدل توثيقها. استضف الخطوط وFont Awesome محلياً — يحسّن الخصوصية والأداء والعمل دون إنترنت معاً، ويقلّص السياسة إلى أربعة مضيفات.</li>
+        </ul>
+      </div>
+      <span class="effort">⏱ التقدير: ساعتان (توثيق) أو ٤ ساعات (استضافة محلية)</span>
+    </div>
+  </article>
+
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-orange">P1-3</span>
+      <div class="issue-title">
+        <h3>سكربت YouTube ميت يُحمَّل في كل إقلاع</h3>
+        <div class="why">
+          اتصال بطرف ثالث (Google) في كل تشغيل، بلا أي استخدام — تكلفة أداء ومسؤولية خصوصية بلا مقابل.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p><span class="path">index.html:653</span></p>
+        <pre><code>&lt;script defer src="https://www.youtube.com/iframe_api"&gt;&lt;/script&gt;</code></pre>
+        <p>
+          البحث في كل ملفات المشروع عن <code>YT.</code> أو <code>onYouTubeIframeAPIReady</code>
+          لا يُرجع <strong>أي</strong> نتيجة. السكربت غير مستخدم إطلاقاً.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <p>احذف السطر. سطر واحد، ويقلّل زمن الإقلاع ويحذف مضيفاً كاملاً من إفصاح الخصوصية.</p>
+      </div>
+      <span class="effort">⏱ التقدير: دقيقتان</span>
+    </div>
+  </article>
+
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-orange">P1-4</span>
+      <div class="issue-title">
+        <h3>كود إشعارات ميت في عامل الخدمة</h3>
+        <div class="why">
+          <span class="path">sw.js</span> يطبّق مستمعي <code>push</code> و<code>notificationclick</code>
+          بلا أي بنية إشعارات خلفهما — سطح ميت يثير أسئلة في المراجعة.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p>في <span class="path">sw.js</span> مستمعان كاملان يعرضان إشعار «Quran Pro» باهتزاز <code>[100,50,100]</code>، بينما:</p>
+        <ul>
+          <li>لا يوجد <span class="path">google-services.json</span> ولا FCM</li>
+          <li>لا يوجد كود اشتراك (<code>pushManager.subscribe</code>) في أي مكان</li>
+          <li>لا توجد صلاحية <code>POST_NOTIFICATIONS</code> في <span class="path">AndroidManifest.xml</span></li>
+          <li>ومستمع <code>sync</code> لوسم <code>sync-bookmarks</code> يستدعي دالة <strong>فارغة تماماً</strong></li>
+          <li>ويوجد كذلك خيار «تفعيل الإشعارات» في نافذة الإعدادات بلا أي كود خلفه</li>
+        </ul>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <p>
+          احذف المستمعَين ودالة المزامنة الفارغة، واحذف خيار الإشعارات من الواجهة —
+          <strong>أو</strong> نفّذ الميزة فعلياً (تذكير بالورد اليومي مثلاً) بشكل كامل.
+          الأسوأ هو الوضع الحالي: واجهة تَعِد بشيء والكود لا يفعله.
+        </p>
+      </div>
+      <span class="effort">⏱ التقدير: ٣٠ دقيقة (حذف) · ٤ ساعات (تنفيذ)</span>
+    </div>
+  </article>
+
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-orange">P1-5</span>
+      <div class="issue-title">
+        <h3>رخصة خطوط المصحف غير موثّقة — والخطوط نفسها خارج Git</h3>
+        <div class="why">
+          خطوط QCF ملكية مجمع الملك فهد. Play حسّاس تجاه المحتوى الديني وحقوق الأصول،
+          والمصحف الرقمي تحديداً يخضع لتدقيق إضافي.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p>
+          <span class="path">fonts/qcf/README.md</span> يشير للمصدر
+          (<code>github.com/nuqayah/qpc-fonts</code>) لكنه <strong>لا يضمّن نص الرخصة</strong>.
+          والأخطر: <span class="path">.gitignore</span> يستبعد <code>fonts/qcf/*.woff2</code> —
+          فأي نسخة جديدة من المستودع تفقد الخطوط كلياً، ولا يبقى منها إلا ملف README واحد متتبَّع.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <ul>
+          <li>أضف ملف <span class="path">fonts/qcf/LICENSE</span> بنص الرخصة الرسمي كاملاً.</li>
+          <li>أزل استثناء <code>*.woff2</code> من <span class="path">.gitignore</span> — 850 KB مقبولة تماماً، والبناء القابل للتكرار أهم بكثير من توفيرها.</li>
+          <li>أضف شاشة «المصادر والتراخيص» داخل التطبيق تنسب: خطوط مجمع الملك فهد، بيانات alquran.cloud و quran.com، تلاوات mp3quran.net.</li>
+          <li>في وصف المتجر، اذكر مصدر النص القرآني (رواية حفص عن عاصم، مصحف المدينة) — يطمئن المراجع والمستخدم معاً.</li>
+        </ul>
+      </div>
+      <span class="effort">⏱ التقدير: ساعتان</span>
+    </div>
+  </article>
+
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-orange">P1-6</span>
+      <div class="issue-title">
+        <h3>نطاق FileProvider واسع بلا أي مستهلك</h3>
+        <div class="why">
+          سطح هجوم مفتوح بلا فائدة — وبند يلفت نظر أي فحص أمني آلي.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label danger">الدليل</div>
+        <p><span class="path">android/app/src/main/res/xml/file_paths.xml</span></p>
+        <pre><code>&lt;external-path name="my_images" path="." /&gt;
+&lt;cache-path name="my_cache_images" path="." /&gt;</code></pre>
+        <p>
+          <code>path="."</code> يعني <strong>الجذر بالكامل</strong>. وهذا قالب Capacitor الافتراضي —
+          والتطبيق لا يسجّل أي إضافة (<span class="path">capacitor.plugins.json</span> = <code>[]</code>)،
+          فلا مستهلك له إطلاقاً.
+        </p>
+      </div>
+      <div class="field">
+        <div class="field-label">الحل</div>
+        <p>
+          احذف <code>&lt;provider&gt;</code> من <span class="path">AndroidManifest.xml</span> وملف
+          <span class="path">file_paths.xml</span> معاً. وإن احتجته لاحقاً، ضيّق المسار لمجلد محدّد.
+        </p>
+      </div>
+      <div class="callout c-gold">
+        <div class="c-title">🔎 بنود إضافية في نفس السياق</div>
+        <p>
+          <strong>إعدادات Splash و StatusBar معطّلة فعلياً:</strong> <span class="path">capacitor.config.json</span>
+          يعرّف إعدادات <code>SplashScreen</code> و<code>StatusBar</code>، لكن الإضافتين
+          <strong>غير مثبّتتين كاعتماديات</strong> — فالإعدادات بلا أثر، والسبلاش يعمل فقط عبر الثيم الأصلي.
+          إما ثبّت الإضافتين أو احذف الإعدادات المضلّلة.
+        </p>
+      </div>
+      <span class="effort">⏱ التقدير: ٢٠ دقيقة</span>
+    </div>
+  </article>
+
+  <article class="issue">
+    <div class="issue-head">
+      <span class="badge b-orange">P1-7</span>
+      <div class="issue-title">
+        <h3>نموذج Data Safety — الإجابات الصحيحة</h3>
+        <div class="why">
+          <span class="path">PLAY_DATA_SAFETY.md</span> الحالي دقيق في الأساس، لكنه يحتاج تصحيحين
+          مهمّين قبل الإدخال في Play Console. الإفصاح الخاطئ سبب مباشر للتعليق.
+        </div>
+      </div>
+    </div>
+    <div class="issue-body">
+      <div class="field">
+        <div class="field-label">الجدول الجاهز للإدخال</div>
+        <div class="table-scroll" style="box-shadow:none">
+          <table>
+            <thead><tr><th>السؤال</th><th>الإجابة</th><th>ملاحظة</th></tr></thead>
+            <tbody>
+              <tr><td>هل يجمع التطبيق بيانات؟</td><td><strong>نعم</strong></td><td>فقط عند إنشاء حساب اختياري</td></tr>
+              <tr><td>هل تُشارَك مع أطراف ثالثة؟</td><td><strong>لا</strong></td><td>صحيح — لا SDK إعلانات ولا تحليلات</td></tr>
+              <tr><td>Personal info → Email</td><td>اختياري · إدارة الحساب</td><td>عبر Supabase Auth</td></tr>
+              <tr><td>App activity → User-generated content</td><td>اختياري · وظائف التطبيق</td><td>الإشارات المرجعية</td></tr>
+              <tr><td>App activity → App interactions</td><td>اختياري · وظائف التطبيق</td><td>تقدّم القراءة والموضع الأخير</td></tr>
+              <tr><td>مشفّرة أثناء النقل؟</td><td><strong>نعم</strong></td><td>كل الاتصالات HTTPS</td></tr>
+              <tr><td>يمكن طلب الحذف؟</td><td><strong>نعم</strong></td><td style="color:var(--red)"><strong>يتطلب إصلاح P1-1 أولاً</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="field">
+        <div class="field-label danger">تصحيحان مطلوبان على الملف الحالي</div>
+        <ul>
+          <li>
+            <strong>لا تُجب «نعم» على سؤال الحذف قبل تنفيذ P1-1.</strong>
+            الإفصاح بوجود آلية حذف بينما لا يوجد إلا بريد إلكتروني = إفصاح غير دقيق.
+          </li>
+          <li>
+            <strong>راجع بند «Device or other IDs».</strong> الملف الحالي يقول إنها لا تُجمع أبداً.
+            هذا صحيح بالنسبة لكودك، لكن Supabase Auth يصدر رموز جلسة، والمضيفات الخارجية العشرة
+            تستقبل عنوان IP. اقرأ تعريف Play بدقة قبل التأكيد.
+          </li>
+        </ul>
+      </div>
+      <span class="effort">⏱ التقدير: ساعة</span>
+    </div>
+  </article>
+</section>
+
+<!-- ==================== P2 QUALITY ==================== -->
+<section id="quality" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم الرابع · الأولوية P2</div>
+      <h2>الجودة قبل الإطلاق</h2>
+      <p>لن يرفضها Play، لكنها الفارق بين إصدار أول محترم وإصدار يجلب تقييمات سيئة.</p>
+    </div>
+    <span class="badge b-blue" style="height:34px; padding:0 16px">١٣ بنداً</span>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>🔌 واجهة معطّلة — تسع عناصر لا تفعل شيئاً</h3>
+      <p style="font-size:14px">
+        هذا أخطر بند في P2: المستخدم يضغط ولا يحدث شيء. مصدر مباشر لتقييمات النجمة الواحدة.
+      </p>
+      <ul style="font-size:14px; padding-inline-start:20px">
+        <li>
+          <strong>نافذة الإعدادات</strong> (<span class="path">index.html:572-594</span>) —
+          خمسة عناصر بلا أي مستمع أحداث في كل مجلد <span class="path">js/</span>:
+          <code>default-font-size</code>، <code>show-translation</code>، <code>auto-repeat</code>،
+          <code>auto-next-surah</code>، <code>enable-notifications</code>.
+          والأغرب أن <code>showTranslation</code> و<code>autoNextSurah</code> تُهيّأ في الحالة
+          وتُزامَن مع Supabase — لكنها <strong>لا تُقرأ أبداً</strong>.
+        </li>
+        <li>
+          <strong>شريط المصحف السفلي</strong> (<span class="path">index.html:444-452</span>) —
+          ثلاثة أزرار ظاهرة: <code>play</code>، <code>bookmark</code>، <code>more</code>.
+          <span class="path">mushaf.js:48-49</span> يربط <code>prev-page</code> و<code>next-page</code> فقط.
+        </li>
+        <li>
+          <strong>شرائح فلترة البحث</strong> (<span class="path">index.html:475-477</span>) — بلا مستمع.
+        </li>
+      </ul>
+      <p style="font-size:14px; margin-top:10px">
+        <strong>الحل:</strong> إما اربطها فعلياً أو أخفِها حتى الإصدار القادم. لا تشحن زراً لا يعمل.
+      </p>
+      <span class="effort">⏱ ٤–٦ ساعات (ربط) · ٣٠ دقيقة (إخفاء)</span>
+    </div>
+
+    <div class="card">
+      <h3>🎨 ألوان العلامة مفقودة في الطبقة الأصلية</h3>
+      <p style="font-size:14px">
+        <span class="path">res/values/styles.xml</span> يشير إلى <code>colorPrimary</code> و
+        <code>colorAccent</code>، لكن <strong>لا يوجد ملف
+        <span class="path">res/values/colors.xml</span> في التطبيق</strong> — فتُؤخذ القيم من مكتبة
+        Capacitor الافتراضية:
+      </p>
+      <p style="font-size:14px">
+        <span class="swatch" style="background:#3F51B5"></span><code>#3F51B5</code> نيلي ·
+        <span class="swatch" style="background:#FF4081"></span><code>#FF4081</code> وردي
+      </p>
+      <p style="font-size:14px">
+        بينما هوية التطبيق:
+        <span class="swatch" style="background:#059669"></span><code>#059669</code> أخضر ·
+        <span class="swatch" style="background:#020617"></span><code>#020617</code> داكن.
+      </p>
+      <p style="font-size:14px; margin-bottom:0">
+        <strong>الأثر:</strong> شاشة البداية وشريط النظام ونافذة «التطبيقات الحديثة» تعرض ألواناً
+        غريبة عن التطبيق. <strong>الحل:</strong> أنشئ <span class="path">res/values/colors.xml</span>
+        بألوان العلامة، وأضف <code>colors.xml</code> بنسخة ليلية.
+      </p>
+      <span class="effort">⏱ ٤٥ دقيقة</span>
+    </div>
+
+    <div class="card">
+      <h3>📱 لا قفل لاتجاه الشاشة</h3>
+      <p style="font-size:14px">
+        <span class="path">manifest.json</span> يطلب <code>"orientation": "portrait-primary"</code>،
+        لكن هذا <strong>لا ينطبق إطلاقاً</strong> على WebView داخل Capacitor —
+        فهو توجيه للمتصفح لا لأندرويد. و<span class="path">AndroidManifest.xml</span>
+        لا يحتوي <code>android:screenOrientation</code>.
+      </p>
+      <p style="font-size:14px; margin-bottom:0">
+        <strong>الأثر:</strong> تدوير الجهاز يعيد تخطيط المصحف بالكامل — والمصحف مصمّم على صفحة
+        مرجعية ثابتة 400×620، فالنتيجة في الوضع الأفقي رديئة.
+        <strong>الحل:</strong> أضف <code>android:screenOrientation="portrait"</code> على
+        <code>MainActivity</code>، أو صمّم تخطيطاً أفقياً حقيقياً.
+      </p>
+      <span class="effort">⏱ ١٥ دقيقة</span>
+    </div>
+
+    <div class="card">
+      <h3>💾 كاش الصوت قد يبتلع مئات الميغابايت</h3>
+      <p style="font-size:14px">
+        <span class="path">sw.js</span> يحدّ كاش الصوت بـ<strong>عدد الملفات فقط</strong>:
+        <code>MAX_AUDIO_CACHE_SIZE = 50</code> بإخراج FIFO — بلا أي حدّ بالبايتات.
+      </p>
+      <p style="font-size:14px; margin-bottom:0">
+        ملف السورة الواحدة بين 5 و30 ميجابايت. خمسون ملفاً قد تعني
+        <strong>أكثر من 500 ميجابايت</strong> من مساحة المستخدم دون علمه أو إذنه.
+        <strong>الحل:</strong> احسب الحجم التراكمي عبر <code>Content-Length</code> واضبط سقفاً
+        (200 MB مثلاً)، وأضف عدّاد استهلاك وزر «مسح الملفات المؤقتة» في الإعدادات.
+      </p>
+      <span class="effort">⏱ ٣ ساعات</span>
+    </div>
+
+    <div class="card">
+      <h3>♿ إمكانية الوصول — ثلاث فجوات</h3>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0">
+        <li>
+          <strong>لا دعم لـ <code>prefers-color-scheme</code></strong> — الوضع الليلي مبني على
+          كلاس فقط، فيُتجاهل إعداد نظام المستخدم في أول فتح.
+        </li>
+        <li>
+          <strong>النوافذ المنبثقة بلا حبس تركيز</strong> — لا <code>role="dialog"</code> ولا
+          <code>aria-modal</code> ولا focus trap ولا إعادة تركيز عند الإغلاق.
+          مفتاح Escape يعمل، لكن قارئ الشاشة يتيه خارج النافذة.
+        </li>
+        <li>
+          <strong>عناصر <code>div</code> قابلة للنقر بلا دعم لوحة مفاتيح</strong> —
+          <span class="path">app.js:730</span> (السور)، <code>:259</code> (الأجزاء)،
+          <code>:965</code> (الآيات)، <code>:1801</code> (نتائج البحث).
+          لا <code>tabindex</code> ولا معالج <code>keydown</code>.
+        </li>
+      </ul>
+      <p style="font-size:14px; margin:10px 0 0">
+        <strong>يُنصف التطبيق:</strong> البنية الأساسية ممتازة أصلاً — رابط تخطٍّ، أدوار landmark،
+        <code>aria-live</code>، <code>:focus-visible</code>، أهداف لمس 44px، ودعم
+        <code>prefers-reduced-motion</code> و<code>prefers-contrast</code>. الفجوات محدودة وقابلة للسد.
+      </p>
+      <span class="effort">⏱ ٤ ساعات</span>
+    </div>
+
+    <div class="card">
+      <h3>⚡ الأداء — عمليتان مكلفتان</h3>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0">
+        <li>
+          <strong>البحث ينزّل المصحف كاملاً</strong> (<span class="path">app.js:1750</span>) —
+          طلب واحد يجلب كل نسخة «quran-uthmani»، ثم يعيد تطبيع <strong>6,236 آية</strong>
+          بستة استبدالات regex متسلسلة مع <code>normalize('NFKD')</code> في كل استعلام،
+          بلا فهرس محفوظ. مكلف جداً على هاتف متوسط.
+          <strong>الحل:</strong> ابنِ فهرساً مطبَّعاً مرة واحدة واحفظه في IndexedDB.
+        </li>
+        <li>
+          <strong>إعادة رسم كاملة عند كل إشارة مرجعية</strong> (<span class="path">app.js:1502</span>) —
+          <code>displayVerses()</code> تُعاد بالكامل وتبني DOM السورة من الصفر لمجرد تبديل أيقونة نجمة.
+          <strong>الحل:</strong> بدّل الكلاس على العنصر المعني فقط.
+        </li>
+      </ul>
+      <span class="effort">⏱ ٥ ساعات</span>
+    </div>
+
+    <div class="card">
+      <h3>🧪 لا توجد اختبارات إطلاقاً</h3>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0">
+        <li>لا Vitest ولا Playwright ولا Jest — ولا سكربت <code>test</code> في <span class="path">package.json</span>.</li>
+        <li>الاختبار الوحيد <span class="path">scripts/supabase-integration-test.mjs</span> يضرب <strong>قاعدة Supabase الإنتاجية</strong> مباشرة. مفيد لكنه محفوف بالمخاطر.</li>
+        <li><span class="path">androidTest</span> stub يتحقق أن اسم الحزمة <code>"com.getcapacitor.app"</code> — بينما الاسم الفعلي <code>com.rashid.quranpro</code>، فسيفشل لو شُغّل.</li>
+      </ul>
+      <p style="font-size:14px; margin:10px 0 0">
+        <strong>الحد الأدنى المعقول قبل الإطلاق:</strong> اختبار Playwright واحد يمرّ على المسار
+        الحرج (فتح التطبيق ← اختيار سورة ← عرض الآيات ← فتح المصحف ← تصفّح صفحة)، يُشغَّل على الـ
+        <span class="path">dist/</span> المبني — وكان سيكتشف عائق B4 فوراً.
+      </p>
+      <span class="effort">⏱ ٤ ساعات</span>
+    </div>
+
+    <div class="card">
+      <h3>🧹 بنود متفرقة</h3>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0">
+        <li><strong><code>minifyEnabled false</code></strong> في بناء الإصدار — فعّل R8 لتقليص الحجم (<span class="path">proguard-rules.pro</span> فارغ من التعليقات أصلاً).</li>
+        <li><strong>كتلة <code>catch</code> فارغة</strong> حول <code>navigator.share</code> (<span class="path">app.js:2284-2286</span>) — الفشل الحقيقي لا يُميَّز عن إلغاء المستخدم، وبلا أي إشعار.</li>
+        <li><strong>سجلات على المسار الساخن</strong> — <span class="path">mushaf.js:352</span> يطبع تقرير ذاكرة في كل تقليب صفحة، وهناك متغيّر عام دائم <code>window.__mushafReport</code>.</li>
+        <li><strong>منطق مكرر</strong> — اختصار Ctrl+K منفّذ مرتين (<span class="path">index.html:687-694</span> و<span class="path">app.js:2246-2251</span>)، والنسخة المضمّنة تتجاوز <code>openModal</code> فلا يُقفل تمرير الصفحة. ومعالجات أزرار الدخول مكررة أيضاً.</li>
+        <li><strong>فحص الخطوط غير محكم</strong> — <span class="path">mushaf.js:121-130</span> يعتبر أي استجابة <code>res.ok</code> دليلاً على توفر خط QCF، فقد يعتمد على صفحة HTML مرتجعة بدل ملف خط فعلي.</li>
+      </ul>
+      <span class="effort">⏱ ٣ ساعات مجتمعة</span>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== P3 ==================== -->
+<section id="future" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم الخامس · الأولوية P3</div>
+      <h2>ما بعد الإطلاق</h2>
+      <p>لا تؤخّر الإصدار الأول من أجلها — لكنها ما يجعل التطبيق ينمو.</p>
+    </div>
+    <span class="badge b-grey" style="height:34px; padding:0 16px">لاحقاً</span>
+  </div>
+  <div class="grid three">
+    <div class="card">
+      <h4>🏗 صحة الكود</h4>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0; color:var(--muted)">
+        <li>تقسيم <span class="path">app.js</span> (2,552 سطراً في ملف واحد يضم كل شيء)</li>
+        <li>تقسيم <span class="path">style.css</span> (3,390 سطراً)</li>
+        <li>الانتقال إلى ES Modules الحقيقية بدل السكربتات الكلاسيكية والمتغيّرات العامة</li>
+        <li>TypeScript أو JSDoc للأنواع</li>
+        <li>توحيد بناء حالات الخطأ (~150 سطراً مكرراً تقريباً في 15 موضعاً)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>✨ ميزات</h4>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0; color:var(--muted)">
+        <li>تنزيل السور صراحةً للاستماع دون إنترنت (بدل الكاش العرضي)</li>
+        <li>حفظ صفحات المصحف محلياً لتصفّح كامل دون إنترنت</li>
+        <li>مواقيت الصلاة والأذكار</li>
+        <li>الوضع الليلي التلقائي حسب توقيت الغروب</li>
+        <li>ختمة مجدولة مع تذكير يومي</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>🚀 النمو</h4>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0; color:var(--muted)">
+        <li>تحسين صفحة المتجر (ASO) بالعربية والإنجليزية</li>
+        <li>مراجعة WCAG 2.1 كاملة</li>
+        <li>ترجمة الواجهة للإنجليزية والأردية</li>
+        <li>نسخة iOS (Capacitor يدعمها بنفس القاعدة)</li>
+        <li>ربط CI يبني AAB آلياً عند كل وسم إصدار</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ASSETS ==================== -->
+<section id="assets" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم السادس</div>
+      <h2>أصول Google Play المطلوبة</h2>
+      <p>كل ما يجب تجهيزه قبل فتح Play Console — بالمقاسات الدقيقة.</p>
+    </div>
+  </div>
+
+  <div class="callout c-red">
+    <div class="c-title">⚠ الوضع الحالي</div>
+    <p>
+      <strong>لا يوجد أي أصل من هذه القائمة جاهزاً.</strong> الموجود فقط
+      <span class="path">icons/icon.svg</span> — مربع متدرّج بحرف Q بخط Arial، وهو غير صالح كهوية
+      لتطبيق قرآن، ولم يُصيَّر أصلاً في نسخ الـPNG.
+    </p>
+  </div>
+
+  <div class="table-scroll" style="margin-bottom:16px">
+    <table>
+      <thead>
+        <tr><th>الأصل</th><th>المقاس</th><th>الصيغة</th><th>إلزامي؟</th><th>ملاحظات</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>أيقونة المتجر</td><td><strong>512 × 512</strong></td><td>PNG 32-bit</td><td style="color:var(--red)">نعم</td><td>حد أقصى 1 MB · بلا شفافية · بلا زوايا دائرية (Play يقصّها)</td></tr>
+        <tr><td>الصورة المميّزة</td><td><strong>1024 × 500</strong></td><td>PNG / JPG</td><td style="color:var(--red)">نعم</td><td>تظهر أعلى صفحة المتجر · تجنّب النص قرب الحواف</td></tr>
+        <tr><td>لقطات الهاتف</td><td>عرض 1080 × 1920 مثلاً</td><td>PNG / JPG</td><td style="color:var(--red)">نعم — ٢ على الأقل</td><td>حتى ٨ · الضلع بين 320 و3840px · يُنصح بـ٦ مع تعليقات عربية</td></tr>
+        <tr><td>لقطات جهاز لوحي 7"</td><td>1200 × 1920 مثلاً</td><td>PNG / JPG</td><td>اختياري</td><td>مطلوب إن أعلنت دعم الأجهزة اللوحية</td></tr>
+        <tr><td>أيقونة التطبيق (mipmap)</td><td>48/72/96/144/192</td><td>PNG</td><td style="color:var(--red)">نعم</td><td>لكل كثافة: mdpi → xxxhdpi</td></tr>
+        <tr><td>الأيقونة التكيّفية</td><td><strong>108 × 108 dp</strong></td><td>PNG / VectorDrawable</td><td style="color:var(--red)">نعم</td><td>منطقة الأمان 66dp فقط — كل ما خارجها يُقتطع</td></tr>
+        <tr><td>شاشة البداية</td><td>حتى 1280 × 1920</td><td>PNG</td><td>موجودة</td><td>الموجود حالياً قالب Capacitor — يجب استبداله</td></tr>
+        <tr><td>فيديو ترويجي</td><td>—</td><td>رابط YouTube</td><td>اختياري</td><td>يرفع معدّل التثبيت بوضوح</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>📝 نصوص صفحة المتجر</h3>
+      <ul style="font-size:14px; padding-inline-start:20px">
+        <li><strong>اسم التطبيق</strong> — حتى 30 حرفاً. مقترح: «Quran Pro — القرآن الكريم»</li>
+        <li><strong>الوصف المختصر</strong> — حتى 80 حرفاً. يظهر في نتائج البحث، وهو أهم نص في الصفحة كلها.</li>
+        <li><strong>الوصف الكامل</strong> — حتى 4,000 حرف. اذكر: المصحف بخطوط المدينة، 20 قارئاً، التفسير والترجمات، المزامنة، <strong>وبلا إعلانات</strong> (نقطة بيع قوية في هذه الفئة).</li>
+        <li><strong>التصنيف</strong> — <em>Books &amp; Reference</em> (أو <em>Lifestyle</em>). حالياً <span class="path">manifest.json</span> يعلن <code>["books","education","lifestyle"]</code>.</li>
+        <li><strong>استبيان تصنيف المحتوى</strong> — إلزامي. التطبيق «للجميع» بلا محتوى حسّاس.</li>
+        <li><strong>بريد الدعم</strong> — <code>zwnt45602@gmail.com</code> (المستخدم في السياسة). تأكد أنه مُراقَب فعلاً.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>💡 توصية بشأن اللقطات</h3>
+      <p style="font-size:14px">
+        اللقطات هي العامل الأول في قرار التثبيت. لا ترفع لقطات خام — أضف إطار هاتف وعنواناً عربياً قصيراً فوق كل لقطة:
+      </p>
+      <ul style="font-size:14px; padding-inline-start:20px; margin-bottom:0">
+        <li>المصحف بخطوط المدينة الرسمية</li>
+        <li>٢٠ قارئاً بجودة عالية</li>
+        <li>التفسير والترجمة بضغطة</li>
+        <li>تابع قراءتك من حيث توقفت</li>
+        <li>مزامنة سحابية بين أجهزتك</li>
+        <li>بلا إعلانات · بلا تتبّع</li>
+      </ul>
+      <div class="callout c-gold" style="margin-top:12px; margin-bottom:0">
+        <p style="margin:0">
+          <strong>مهم:</strong> التقط اللقطات من الـAPK <strong>بعد</strong> إصلاح B4 —
+          وإلا لن تتمكن من تصوير ميزة المصحف أصلاً، لأنها غير موجودة في البناء الحالي.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ACCOUNT ==================== -->
+<section id="account" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم السابع</div>
+      <h2>مسار الحساب الشخصي</h2>
+      <p>الشرط الذي يحكم الجدول الزمني بأكمله.</p>
+    </div>
+  </div>
+
+  <div class="callout c-red">
+    <div class="c-title">🚨 ابدأ هذا اليوم — قبل أي إصلاح كود</div>
+    <p>
+      حسابك <strong>شخصي</strong>، فيلزمك اختبار مغلق بـ<strong>١٢ مختبِراً على الأقل</strong>،
+      <strong>مشتركين ومستمرين ١٤ يوماً متواصلة</strong>، قبل أن يفتح Google إمكانية التقديم للنشر العام.
+      العدّاد <strong>يُصفَّر</strong> إذا نزل عدد المختبِرين المشتركين عن ١٢ في أي يوم.
+      هذه المدة لا تُختصر بأي وسيلة — لذا كل يوم تأخير في جمع المختبِرين هو يوم تأخير في الإطلاق.
+    </p>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>الخطوات بالترتيب</h3>
+      <ol style="font-size:14px; padding-inline-start:20px; margin:0">
+        <li><strong>اجمع ١٢ حساب Gmail حقيقياً</strong> (أهل، أصدقاء، زملاء) — يجب أن يقبلوا الدعوة فعلياً ويثبّتوا التطبيق.</li>
+        <li>أنشئ التطبيق في Play Console وأكمل بيانات صفحة المتجر.</li>
+        <li>ارفع أول AAB على مسار <strong>Internal testing</strong> للتحقق التقني السريع.</li>
+        <li>أنشئ مسار <strong>Closed testing</strong> وأضف قائمة البريد، وأرسل رابط الاشتراك.</li>
+        <li>تأكد أن الـ١٢ اشتركوا فعلاً — العدّاد يبدأ من لحظة اكتمال العدد.</li>
+        <li>انتظر ١٤ يوماً مع إبقاء الاشتراكات فعّالة، وارفع تحديثات خلالها بلا مشكلة.</li>
+        <li>قدّم طلب <strong>الوصول للإنتاج</strong> — يسأل Google عن نتائج الاختبار وكيف جمعت التغذية الراجعة.</li>
+        <li>بعد الموافقة: انشر على <strong>Production</strong> (المراجعة عادة أيام قليلة، وقد تطول للتطبيق الأول).</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>ملاحظات تمنع المفاجآت</h3>
+      <ul style="font-size:14px; padding-inline-start:20px; margin:0">
+        <li><strong>الـ١٤ يوماً تجري بالتوازي مع الإصلاحات</strong> — لا تنتظر اكتمال الكود لتبدأ. ارفع نسخة أولى للاختبار المغلق فور حل B1/B2/B4، وواصل باقي الإصلاحات أثناءها.</li>
+        <li><strong>التحقق من الهوية</strong> — الحسابات الشخصية تحتاج إثبات هوية رسمياً. أنجزه مبكراً؛ قد يستغرق أياماً.</li>
+        <li><strong>العنوان العام</strong> — سيُعرض عنوانك في صفحة المتجر. راجع خياراتك المتاحة قبل الإدخال.</li>
+        <li><strong>مفتاح الرفع</strong> — فعّل Play App Signing من اليوم الأول (انظر B2). لا يمكن التراجع لاحقاً بسهولة.</li>
+        <li><strong>الرسوم</strong> — ٢٥ دولاراً لمرة واحدة، ويبدو أنك دفعتها بالفعل ما دام الحساب قائماً.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ROADMAP ==================== -->
+<section id="roadmap" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم الثامن</div>
+      <h2>خارطة الطريق</h2>
+      <p>ترتيب تنفيذي مقترح — إجمالي العمل الفعلي ٣–٥ أيام، والمدة الكلية ٣ أسابيع.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="phase">
+      <div class="phase-rail"><div class="phase-dot">٠</div><div class="phase-line"></div></div>
+      <div class="phase-body">
+        <h4>اليوم صفر — الأمان والعدّاد</h4>
+        <div class="when">اليوم · قبل أي شيء آخر</div>
+        <ul>
+          <li><strong>احذف <span class="path">setup-keystore.yml</span> وامسح artifacts المفاتيح من سجل Actions</strong></li>
+          <li><strong>تتبّع <span class="path">android/</span> في Git + أنشئ <span class="path">.vercelignore</span> <em>(B0)</em> — كل ما بعده يعتمد عليه</strong></li>
+          <li>اجمع ١٢ مختبِراً وجهّز قائمة بريدهم</li>
+          <li>أكمل التحقق من الهوية في Play Console إن لم يكن مكتملاً</li>
+          <li>ولّد keystore جديداً خارج المستودع وفعّل Play App Signing <em>(B2)</em></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-rail"><div class="phase-dot">١</div><div class="phase-line"></div></div>
+      <div class="phase-body">
+        <h4>المرحلة الأولى — إصلاح البناء</h4>
+        <div class="when">يوم واحد · ٦–٨ ساعات</div>
+        <ul>
+          <li>أضف <span class="path">js/mushaf.js</span> و<span class="path">privacy.html</span> و<span class="path">fonts/</span> إلى البناء <em>(B4, B5)</em></li>
+          <li>أضف حارسَي سلامة البناء حتى لا تتكرر المشكلة <em>(B5)</em></li>
+          <li>احذف مُحدّث الـAPK من التطبيق ومن سير العمل <em>(B3)</em></li>
+          <li>وحّد أرقام الإصدار <em>(B6)</em></li>
+          <li>أنشئ سكربت <code>release:android</code> موحّداً وأصلح تناقض <code>www/</code> ↔ <code>dist/</code> <em>(B7)</em></li>
+          <li>احذف سكربت YouTube الميت <em>(P1-3)</em> وكود الإشعارات الميت <em>(P1-4)</em> وFileProvider <em>(P1-6)</em></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-rail"><div class="phase-dot">٢</div><div class="phase-line"></div></div>
+      <div class="phase-body">
+        <h4>المرحلة الثانية — الهوية البصرية</h4>
+        <div class="when">يوم واحد · ٦–٨ ساعات</div>
+        <ul>
+          <li>صمّم الأيقونة وولّد كل المقاسات <strong>مع تحقق بصري</strong> <em>(B1)</em></li>
+          <li>أضف <span class="path">res/values/colors.xml</span> بألوان العلامة</li>
+          <li>استبدل شاشة البداية الافتراضية</li>
+          <li>اقفل الاتجاه على الوضع الرأسي</li>
+          <li>ابنِ أول AAB وارفعه على <strong>Internal testing</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-rail"><div class="phase-dot">٣</div><div class="phase-line"></div></div>
+      <div class="phase-body">
+        <h4>المرحلة الثالثة — الامتثال وصفحة المتجر</h4>
+        <div class="when">يوم – يوم ونصف</div>
+        <ul>
+          <li>نفّذ حذف الحساب داخل التطبيق + صفحة الحذف العامة <em>(P1-1)</em></li>
+          <li>حدّث سياسة الخصوصية بكل المضيفات <em>(P1-2)</em> وأضف رخصة الخطوط <em>(P1-5)</em></li>
+          <li>جهّز الأصول: 512×512، 1024×500، ٦ لقطات</li>
+          <li>اكتب نصوص المتجر واملأ نموذج Data Safety <em>(P1-7)</em></li>
+          <li><strong>افتح مسار Closed testing وأرسل الدعوات — يبدأ عدّاد الـ١٤ يوماً</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-rail"><div class="phase-dot">٤</div><div class="phase-line"></div></div>
+      <div class="phase-body">
+        <h4>المرحلة الرابعة — الصقل أثناء الاختبار</h4>
+        <div class="when">١٤ يوماً · بالتوازي</div>
+        <ul>
+          <li>اربط أو أخفِ عناصر الواجهة المعطّلة التسعة</li>
+          <li>أضف حدّاً بالبايتات لكاش الصوت + زر مسح</li>
+          <li>سدّ فجوات إمكانية الوصول الثلاث</li>
+          <li>أضف اختبار Playwright للمسار الحرج</li>
+          <li>فعّل <code>minifyEnabled true</code> واختبر بعناية</li>
+          <li>اجمع ملاحظات المختبِرين وارفع تحديثات</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-rail"><div class="phase-dot">٥</div></div>
+      <div class="phase-body">
+        <h4>المرحلة الخامسة — الإطلاق</h4>
+        <div class="when">بعد اكتمال الـ١٤ يوماً</div>
+        <ul>
+          <li>قدّم طلب الوصول للإنتاج</li>
+          <li>بعد الموافقة: انشر على Production (يُفضّل طرحاً تدريجياً ٢٠٪ ثم توسيعه)</li>
+          <li>راقب Android Vitals وتقارير الأعطال في الأيام الأولى</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PROJECT MAP ==================== -->
+<section id="map" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم التاسع</div>
+      <h2>خريطة المشروع</h2>
+      <p>مرجع سريع لما هو موجود فعلاً — ما فُحص وما وُجد.</p>
+    </div>
+  </div>
+
+  <h3 style="font:700 19px var(--arabic); color:var(--deep); margin:0 0 10px">الميزات وملفاتها</h3>
+  <div class="table-scroll" style="margin-bottom:22px">
+    <table>
+      <thead><tr><th>الميزة</th><th>الحالة</th><th>الملف</th></tr></thead>
+      <tbody>
+        <tr><td>قائمة السور (114) مع فلترة وبحث</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:704</span></td></tr>
+        <tr><td>قائمة الأجزاء (30)</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:249</span></td></tr>
+        <tr><td>عارض الآيات بتنسيق مصحفي</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:911</span></td></tr>
+        <tr><td><strong>قارئ المصحف (604 صفحة، خطوط QCF)</strong></td><td style="color:var(--red)"><strong>لا تُشحن</strong></td><td><span class="path">js/mushaf.js</span></td></tr>
+        <tr><td>الصوت الكامل — 20 قارئاً</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:12-114</span></td></tr>
+        <tr><td>الصوت آية بآية — 8 قرّاء</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:117</span></td></tr>
+        <tr><td>مشغّل كامل (سرعة، تكرار، تنقّل)</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:2069-2164</span></td></tr>
+        <tr><td>Media Session (تحكم شاشة القفل)</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:370</span></td></tr>
+        <tr><td>الإشارات المرجعية</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:1479</span></td></tr>
+        <tr><td>تقدّم القراءة + متابعة من حيث توقفت</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:1542</span></td></tr>
+        <tr><td>البحث في القرآن (تطبيع عربي)</td><td style="color:var(--orange)">تعمل — بطيئة</td><td><span class="path">app.js:1708</span></td></tr>
+        <tr><td>التفسير والترجمات (9 نسخ)</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:1840</span></td></tr>
+        <tr><td>المزامنة السحابية + تسجيل الدخول</td><td style="color:var(--green)">تعمل</td><td><span class="path">js/auth.js</span></td></tr>
+        <tr><td>مشاركة وتنزيل السورة نصاً</td><td style="color:var(--green)">تعمل</td><td><span class="path">app.js:2268</span></td></tr>
+        <tr><td>نافذة الإعدادات (٥ عناصر)</td><td style="color:var(--red)"><strong>معطّلة</strong></td><td><span class="path">index.html:572-594</span></td></tr>
+        <tr><td>أزرار شريط المصحف (٣)</td><td style="color:var(--red)"><strong>معطّلة</strong></td><td><span class="path">index.html:444-452</span></td></tr>
+        <tr><td>شرائح فلترة البحث</td><td style="color:var(--red)"><strong>معطّلة</strong></td><td><span class="path">index.html:475-477</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid two">
+    <div>
+      <h3 style="font:700 19px var(--arabic); color:var(--deep); margin:0 0 10px">التخزين المحلي</h3>
+      <div class="table-scroll">
+        <table style="min-width:auto">
+          <thead><tr><th>المفتاح</th><th>المحتوى</th></tr></thead>
+          <tbody>
+            <tr><td><code>quranBookmarks</code></td><td>الإشارات المرجعية</td></tr>
+            <tr><td><code>quranReadingProgress</code></td><td>تقدّم القراءة لكل سورة</td></tr>
+            <tr><td><code>quranSettings</code></td><td>الخط، الثيم، القارئ</td></tr>
+            <tr><td><code>quranLastPosition</code></td><td>آخر موضع قراءة</td></tr>
+            <tr><td><code>quranAppErrors</code></td><td>آخر ٥٠ خطأ JS</td></tr>
+            <tr><td><code>cache_*</code></td><td>استجابات API — ٣٠ يوماً</td></tr>
+            <tr><td><code>mushaf_page_*</code></td><td>صفحات المصحف — سقف ٤٠</td></tr>
+            <tr><td><code>app_latest_version</code></td><td>حالة مُحدّث APK <span style="color:var(--red)">(يُحذف)</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="toc-note">لا يوجد استخدام لـ IndexedDB ولا sessionStorage. الكاش الإضافي عبر Cache Storage في عامل الخدمة (٣ مخازن).</p>
+    </div>
+
+    <div>
+      <h3 style="font:700 19px var(--arabic); color:var(--deep); margin:0 0 10px">إعدادات المنصة</h3>
+      <div class="table-scroll">
+        <table style="min-width:auto">
+          <thead><tr><th>البند</th><th>القيمة</th></tr></thead>
+          <tbody>
+            <tr><td>applicationId</td><td><code>com.rashid.quranpro</code></td></tr>
+            <tr><td>minSdk / target / compile</td><td><code>24 / 36 / 36</code></td></tr>
+            <tr><td>Capacitor</td><td><code>8.5.0</code></td></tr>
+            <tr><td>Android Gradle Plugin</td><td><code>8.13.0</code></td></tr>
+            <tr><td>Gradle</td><td><code>8.14.3</code></td></tr>
+            <tr><td>Java</td><td><code>VERSION_21</code></td></tr>
+            <tr><td>الصلاحيات</td><td><code>INTERNET</code> فقط</td></tr>
+            <tr><td>إضافات Capacitor</td><td><code>[]</code> — لا شيء</td></tr>
+            <tr><td>أدوات البناء</td><td>Vite 8 + esbuild</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="toc-note">
+        <code>INTERNET</code> فقط صلاحية ممتازة — لا موقع، لا كاميرا، لا جهات اتصال، لا تخزين.
+        هذا يبسّط المراجعة كثيراً ويستحق الذكر في وصف المتجر.
+      </p>
+    </div>
+  </div>
+
+  <h3 style="font:700 19px var(--arabic); color:var(--deep); margin:24px 0 10px">سير عمل البناء (GitHub Actions)</h3>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th>الملف</th><th>ما يفعله</th><th>الحالة</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="path">apk-build.yml</span></td>
+          <td>يبني APK لستة مشاريع، يولّد الأيقونات، يضيف الـAPK للمستودع بكوميت تلقائي، ويكتب <code>apkUrl</code></td>
+          <td style="color:var(--red)"><strong>يحتاج إصلاحاً جوهرياً</strong> — يعيد توليد <code>android/</code>، ويبني <code>www/</code> بينما <code>webDir</code> هو <code>dist</code>، وينتج سلسلة الـOTA المخالفة</td>
+        </tr>
+        <tr>
+          <td><span class="path">setup-keystore.yml</span></td>
+          <td>يولّد keystore ويرفعه كـartifact</td>
+          <td style="color:var(--red)"><strong>احذفه</strong> — كلمة مرور افتراضية علنية + مفتاح خاص قابل للتنزيل في مستودع عام</td>
+        </tr>
+        <tr>
+          <td><span class="path">ci.yml</span> · <span class="path">deploy.yml</span></td>
+          <td>فحص عام ونشر Vercel</td>
+          <td style="color:var(--muted)">خارج نطاق هذا التقرير</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="toc-note">
+    الخلاصة: سير العمل الحالي <strong>لا يمكنه إنتاج حزمة صالحة للنشر</strong> —
+    ينتج APK تصحيح من جذر ويب ناقص بأيقونات افتراضية. الهدف تحويله لإنتاج
+    <strong>AAB موقّع كـartifact</strong> بعد إصلاح B0.
+  </p>
+</section>
+
+<!-- ==================== GOOD ==================== -->
+<section id="good" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم العاشر</div>
+      <h2>ما هو جيد بالفعل</h2>
+      <p>التقرير ليس قائمة عيوب — هذه أساسات قوية بُنيت بعناية حقيقية، ويجب ألا تُكسر أثناء الإصلاح.</p>
+    </div>
+    <span class="badge b-green" style="height:34px; padding:0 16px">نقاط قوة</span>
+  </div>
+
+  <div class="grid two">
+    <div class="card">
+      <h3>🛡 الأمان</h3>
+      <ul class="good-list">
+        <li><span class="tick">✔</span><span><strong>صفر استخدام لـ <code>innerHTML</code> في المشروع كله.</strong> كل نص ديناميكي يمرّ عبر <code>textContent</code>، مع تعليق أمني في <span class="path">app.js:993-1000</span> يشرح لماذا حُذفت دوال <code>escapeHtml</code> القديمة — قرار هندسي صحيح ونادر.</span></li>
+        <li><span class="tick">✔</span><span><strong>سياسات RLS كاملة</strong> على جدولَي Supabase: أربع سياسات لكل جدول مقيّدة بـ <code>auth.uid() = user_id</code>، مع <code>WITH CHECK</code> صحيح.</span></li>
+        <li><span class="tick">✔</span><span><strong>اختبار سلوكي يثبت العزل</strong> — <span class="path">scripts/supabase-integration-test.mjs</span> يتحقق فعلياً من منع القراءة المجهولة، مع تحذير صريح من استخدام مفتاح service-role.</span></li>
+        <li><span class="tick">✔</span><span><span class="path">.gitignore</span> يستبعد المفاتيح والشهادات و<code>.env</code> احترازياً.</span></li>
+        <li><span class="tick">✔</span><span>لا مفاتيح سرية في الكود — الوحيد الظاهر هو مفتاح Supabase <code>anon</code> العلني، وهو تصميم صحيح ما دامت RLS مفعّلة.</span></li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h3>🧭 التجربة والبنية</h3>
+      <ul class="good-list">
+        <li><span class="tick">✔</span><span><strong>دعم RTL صحيح</strong> — <code>lang="ar" dir="rtl"</code>، وجذر المصحف يعيد تعريف الاتجاه صراحةً بدل الاعتماد على التوريث.</span></li>
+        <li><span class="tick">✔</span><span><strong>safe-area insets</strong> مطبّقة في ٨ مواضع، مع <code>viewport-fit=cover</code> — نادراً ما يُضبط هذا بشكل صحيح.</span></li>
+        <li><span class="tick">✔</span><span><strong>تكبير الصفحة مسموح</strong> (<code>maximum-scale=5.0</code>) — قرار وصول صحيح، وكثيرون يعطّلونه خطأً.</span></li>
+        <li><span class="tick">✔</span><span><strong>Media Session API كامل</strong> بالبيانات الوصفية والصور ومعالج <code>seekto</code> — تحكم احترافي من شاشة القفل.</span></li>
+        <li><span class="tick">✔</span><span><strong>عامل خدمة مدروس</strong> — ثلاث استراتيجيات حسب نوع المورد، ومنع التفعيل الجزئي عند فشل التخزين المسبق (تفصيل يغفله الأكثرون).</span></li>
+        <li><span class="tick">✔</span><span><strong>إدارة ذاكرة خطوط QCF ممتازة</strong> — تحميل الصفحة الحالية ±1 فقط مع إزالة الوجوه القديمة عبر <code>document.fonts.delete</code>.</span></li>
+        <li><span class="tick">✔</span><span><strong>لا إعلانات ولا تحليلات ولا تتبّع</strong> — مؤكَّد بالفحص، لا مجرد ادّعاء. ميزة تنافسية حقيقية في هذه الفئة.</span></li>
+        <li><span class="tick">✔</span><span>لا يوجد أي تعليق <code>TODO</code> أو <code>FIXME</code> متروك في المصدر.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== CHECKLIST ==================== -->
+<section id="checklist" class="wrap">
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">القسم الحادي عشر</div>
+      <h2>قائمة التحقق</h2>
+      <p>تُحفظ حالتها في متصفحك تلقائياً — استخدمها لمتابعة التنفيذ.</p>
+    </div>
+    <button class="icon-btn" id="resetBtn" title="إعادة تعيين القائمة" aria-label="إعادة تعيين القائمة" style="width:auto; padding:0 14px">↺ تصفير</button>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <strong>التقدّم نحو الإطلاق</strong>
+      <span class="progress-count"><span id="ckDone">0</span> / <span id="ckTotal">0</span></span>
+    </div>
+    <div class="bar"><span id="ckBar"></span></div>
+  </div>
+
+  <div class="ck-group">
+    <h4><span class="badge b-red">🔴</span> عاجل — أمني</h4>
+    <label class="ck"><input type="checkbox" data-ck="sec1"><span>حذف <code>.github/workflows/setup-keystore.yml</code> من المستودع العام</span></label>
+    <label class="ck"><input type="checkbox" data-ck="sec2"><span>حذف artifacts المفاتيح (<code>rashid-release-keystore</code> و<code>-b64</code>) من سجل Actions</span></label>
+    <label class="ck"><input type="checkbox" data-ck="sec3"><span>اعتبار مفتاح <code>rashid-key</code> محروقاً — وعدم استخدامه لـPlay</span></label>
+  </div>
+
+  <div class="ck-group">
+    <h4><span class="badge b-red">P0</span> العوائق الحرجة</h4>
+    <label class="ck"><input type="checkbox" data-ck="b0"><span><strong>B0</strong> — تتبّع <code>android/</code> في Git + <code>.vercelignore</code> + إيقاف إعادة التوليد <strong>(ابدأ هنا)</strong></span></label>
+    <label class="ck"><input type="checkbox" data-ck="b1a"><span><strong>B1أ</strong> — تحويل نص <code>icon.svg</code> إلى مسارات (سبب الأيقونات الفارغة)</span></label>
+    <label class="ck"><input type="checkbox" data-ck="b1"><span><strong>B1ب</strong> — تشغيل <code>gen-icons.mjs</code> وتوليد كل المقاسات مع تحقق بصري</span></label>
+    <label class="ck"><input type="checkbox" data-ck="b2"><span><strong>B2</strong> — keystore جديد خارج المستودع + إعداد التوقيع + تفعيل Play App Signing</span></label>
+    <label class="ck"><input type="checkbox" data-ck="b3"><span><strong>B3</strong> — إزالة مُحدّث APK من التطبيق ومن <code>apk-build.yml</code></span></label>
+    <label class="ck"><input type="checkbox" data-ck="b4"><span><strong>B4</strong> — إضافة <code>js/mushaf.js</code> للبناء وعامل الخدمة</span></label>
+    <label class="ck"><input type="checkbox" data-ck="b5"><span><strong>B5</strong> — نسخ <code>privacy.html</code> و<code>fonts/</code> إلى البناء + نشر رابط عام</span></label>
+    <label class="ck"><input type="checkbox" data-ck="b5g"><span><strong>B5+</strong> — حارسا سلامة البناء (مراجع HTML + عامل الخدمة)</span></label>
+    <label class="ck"><input type="checkbox" data-ck="b6"><span><strong>B6</strong> — توحيد أرقام الإصدار على 1.1.0 / versionCode 10</span></label>
+    <label class="ck"><input type="checkbox" data-ck="b7"><span><strong>B7</strong> — سكربت <code>release:android</code> موحّد + إصلاح تناقض <code>www/</code> ↔ <code>dist/</code></span></label>
+  </div>
+
+  <div class="ck-group">
+    <h4><span class="badge b-orange">P1</span> السياسات والامتثال</h4>
+    <label class="ck"><input type="checkbox" data-ck="p1"><span>حذف الحساب داخل التطبيق + Edge Function + صفحة حذف عامة</span></label>
+    <label class="ck"><input type="checkbox" data-ck="p2"><span>تحديث سياسة الخصوصية بكل المضيفات العشرة</span></label>
+    <label class="ck"><input type="checkbox" data-ck="p3"><span>حذف سكربت YouTube الميت</span></label>
+    <label class="ck"><input type="checkbox" data-ck="p4"><span>حذف كود الإشعارات الميت من عامل الخدمة والواجهة</span></label>
+    <label class="ck"><input type="checkbox" data-ck="p5"><span>إضافة رخصة خطوط QCF + إلغاء استثنائها من Git + شاشة المصادر</span></label>
+    <label class="ck"><input type="checkbox" data-ck="p6"><span>حذف FileProvider غير المستخدم + تنظيف إعدادات الإضافات الوهمية</span></label>
+    <label class="ck"><input type="checkbox" data-ck="p7"><span>ملء نموذج Data Safety بالإجابات المصحّحة</span></label>
+  </div>
+
+  <div class="ck-group">
+    <h4><span class="badge b-blue">P2</span> الجودة</h4>
+    <label class="ck"><input type="checkbox" data-ck="q1"><span>ربط أو إخفاء عناصر الواجهة المعطّلة التسعة</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q2"><span>إضافة <code>res/values/colors.xml</code> بألوان العلامة</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q3"><span>قفل الاتجاه على الوضع الرأسي</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q4"><span>حدّ بالبايتات لكاش الصوت + زر مسح في الإعدادات</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q5"><span>سد فجوات الوصول: prefers-color-scheme، حبس التركيز، لوحة المفاتيح</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q6"><span>فهرس بحث محفوظ + إلغاء إعادة الرسم الكامل عند الإشارة</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q7"><span>اختبار Playwright للمسار الحرج على <code>dist/</code> المبني</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q8"><span>تفعيل <code>minifyEnabled true</code> واختباره</span></label>
+    <label class="ck"><input type="checkbox" data-ck="q9"><span>تنظيف: catch فارغ، سجلات المسار الساخن، المنطق المكرر</span></label>
+  </div>
+
+  <div class="ck-group">
+    <h4><span class="badge b-green">▶</span> المتجر والإطلاق</h4>
+    <label class="ck"><input type="checkbox" data-ck="s1"><span>جمع ١٢ مختبِراً وإكمال التحقق من الهوية</span></label>
+    <label class="ck"><input type="checkbox" data-ck="s2"><span>أيقونة المتجر 512×512 + الصورة المميّزة 1024×500</span></label>
+    <label class="ck"><input type="checkbox" data-ck="s3"><span>٦ لقطات شاشة (بعد إصلاح B4 حتى يظهر المصحف)</span></label>
+    <label class="ck"><input type="checkbox" data-ck="s4"><span>نصوص المتجر + استبيان تصنيف المحتوى</span></label>
+    <label class="ck"><input type="checkbox" data-ck="s5"><span>رفع AAB على Internal testing</span></label>
+    <label class="ck"><input type="checkbox" data-ck="s6"><span>فتح Closed testing وبدء عدّاد الـ١٤ يوماً</span></label>
+    <label class="ck"><input type="checkbox" data-ck="s7"><span>تقديم طلب الوصول للإنتاج</span></label>
+    <label class="ck"><input type="checkbox" data-ck="s8"><span>النشر على Production بطرح تدريجي</span></label>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <strong style="color:var(--ink)">Quran Pro — تقرير جاهزية Google Play</strong><br>
+      فُحص في 2026-08-04 · <span class="path">apps/quran-app</span> · الفرع <code>main</code>
+    </div>
+    <div style="text-align:left">
+      كل بند مدعوم بمسار ملف تم التحقق منه<br>
+      انظر أيضاً: <span class="path">REPORT.html</span> · <span class="path">PLAY_DATA_SAFETY.md</span> · <span class="path">plan.md</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ---------- theme ---------- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById('themeBtn');
+  var THEME_KEY = 'qp_play_report_theme';
+
+  function applyTheme(mode) {
+    if (mode === 'night') {
+      root.setAttribute('data-theme', 'night');
+      themeBtn.textContent = '☀';
+    } else {
+      root.removeAttribute('data-theme');
+      themeBtn.textContent = '🌙';
+    }
+  }
+
+  var stored = null;
+  try { stored = localStorage.getItem(THEME_KEY); } catch (e) {}
+  if (stored) {
+    applyTheme(stored);
+  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    applyTheme('night');
+  } else {
+    applyTheme('day');
+  }
+
+  themeBtn.addEventListener('click', function () {
+    var next = root.getAttribute('data-theme') === 'night' ? 'day' : 'night';
+    applyTheme(next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+  });
+
+  /* ---------- print ---------- */
+  document.getElementById('printBtn').addEventListener('click', function () {
+    window.print();
+  });
+
+  /* ---------- checklist ---------- */
+  var CK_KEY = 'qp_play_report_checklist';
+  var boxes = Array.prototype.slice.call(document.querySelectorAll('[data-ck]'));
+  var doneEl = document.getElementById('ckDone');
+  var totalEl = document.getElementById('ckTotal');
+  var barEl = document.getElementById('ckBar');
+
+  function readState() {
+    try {
+      var raw = localStorage.getItem(CK_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+
+  function writeState(state) {
+    try { localStorage.setItem(CK_KEY, JSON.stringify(state)); } catch (e) {}
+  }
+
+  function render() {
+    var done = 0;
+    boxes.forEach(function (box) {
+      var label = box.closest('.ck');
+      if (box.checked) { done++; label.classList.add('done'); }
+      else { label.classList.remove('done'); }
+    });
+    doneEl.textContent = String(done);
+    totalEl.textContent = String(boxes.length);
+    barEl.style.width = boxes.length ? (done / boxes.length * 100) + '%' : '0%';
+  }
+
+  var state = readState();
+  boxes.forEach(function (box) {
+    var id = box.getAttribute('data-ck');
+    box.checked = state[id] === true;
+    box.addEventListener('change', function () {
+      var s = readState();
+      s[id] = box.checked;
+      writeState(s);
+      render();
+    });
+  });
+  render();
+
+  document.getElementById('resetBtn').addEventListener('click', function () {
+    writeState({});
+    boxes.forEach(function (box) { box.checked = false; });
+    render();
+  });
+})();
+</script>
+
+</body>
+</html>

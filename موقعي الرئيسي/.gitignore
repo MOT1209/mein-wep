@@ -1,0 +1,85 @@
+# Claude / local agent settings (contain API keys)
+.claude/sittings.json
+.claude/settings.local.json
+.claude/launch.json
+.claude/scheduled_tasks.lock
+
+# Gemini Configuration Files
+
+# Ignore actual config with API keys
+js/gemini-config.js
+
+# Ignore environment files (any depth — protects nested project secrets like models/king2 ai-Model/.env)
+.env
+.env.local
+**/.env
+**/.env.local
+*.key
+
+# Ignore API keys
+**/api-keys/
+**/*-key.json
+
+# Ignore temporary and workspace files
+temp_db_check.js
+package-lock.json
+*.code-workspace
+.vercel
+.playwright-mcp/
+console-errors.log
+*.log
+
+# Capacitor / Android generated files (built in CI)
+apps/*/node_modules/
+apps/*/www/
+games/*/node_modules/
+games/*/android/
+games/*/www/
+games/kingcraft-game/dist/
+
+# Android native projects.
+#
+# quran-app is DELIBERATELY not in this list: it is being released on Google
+# Play, and its android/ project carries release-critical state (launcher
+# icons, brand colors, orientation lock, signing config, manifest). While it
+# was ignored, .github/workflows/apk-build.yml ran `npx cap add android` on
+# every build — the directory never existed on the runner — which regenerated
+# a stock Capacitor project and silently discarded all of it. That is why the
+# shipped app still showed the default Capacitor launcher icon.
+#
+# A negation like `!apps/quran-app/android/` does NOT work here: git does not
+# descend into an excluded directory, so the parent glob has to stop matching.
+# Hence the explicit per-project list below.
+#
+# quran-app/android/.gitignore still excludes build/, .gradle/ and
+# local.properties, so only ~1.5 MB of real source is tracked.
+apps/calculator-app/android/
+apps/quiz-app/android/
+apps/maarifah-app/android/
+
+# Keystore (sensitive)
+**/*.jks
+**/*.keystore
+**/keystore.properties
+
+# Vendored library files (local fallback for CDN-disabled environments)
+# games/*/js/lib/
+
+# Don't ignore APK files in apks/ (they're committed for site hosting)
+!apks/*.apk
+
+# king2 model: tracked in main repo; secrets are committed only as encrypted .enc
+# (plaintext .env* stay ignored via models/king2 ai-Model/.gitignore)
+
+# king2 training data files (large generated artifacts, not source)
+models/king2\ ai-Model/data/*.json
+models/king2\ ai-Model/data/*colab*.ipynb
+models/king2\ ai-Model/data/*TEST*
+
+# Cloned skill repos (skills extracted to .agents/skills/)
+google-skills/
+flutter-skills/
+dart-skills/
+
+# Environment-injected agent skills (not project code)
+.agents/

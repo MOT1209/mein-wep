@@ -7,6 +7,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:android": "vite build --mode android",
+    "sync:android": "npm run build:android && npx cap sync android",
+    "release:android": "npm run sync:android && cd android && gradlew.bat bundleRelease",
     "test:supabase": "node scripts/supabase-integration-test.mjs",
     "preview": "vite preview"
   },
