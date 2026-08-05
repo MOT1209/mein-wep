@@ -1185,6 +1185,9 @@ async function playFullSurah(startVerseIndex = 0, resumeTimeSeconds = null) {
         state.isPlaying = true;
         updatePlayerUI();
         elements['audio-player']?.classList.add('active');
+        // Drives the extra bottom padding on the scroll containers so the
+        // docked player never hides the last item in the list.
+        document.body.classList.add('player-active');
         updatePlayPauseButton();
         updateMediaSession();
         updateMediaSessionPosition();
@@ -1421,6 +1424,9 @@ async function playVerseOld(verseIndex) {
         state.isPlaying = true;
         updatePlayerUI();
         elements['audio-player']?.classList.add('active');
+        // Drives the extra bottom padding on the scroll containers so the
+        // docked player never hides the last item in the list.
+        document.body.classList.add('player-active');
         updatePlayPauseButton();
         highlightCurrentVerse(verseIndex);
         updateMediaSession();
@@ -2118,6 +2124,9 @@ function setupEventListeners() {
     elements['repeat-verse']?.addEventListener('click', () => {
         state.isRepeatEnabled = !state.isRepeatEnabled;
         elements['repeat-verse'].classList.toggle('active', state.isRepeatEnabled);
+        // aria-pressed is both the a11y state and the CSS hook for the chip's
+        // "on" styling, so the toggle reads unambiguously without a tooltip.
+        elements['repeat-verse'].setAttribute('aria-pressed', String(state.isRepeatEnabled));
         showToast(state.isRepeatEnabled ? 'تم تفعيل التكرار' : 'تم إيقاف التكرار', 'info');
     });
 
@@ -2143,6 +2152,7 @@ function setupEventListeners() {
         elements['close-player'].blur();
         elements['audio-player'].classList.remove('active');
         elements['audio-player'].classList.remove('expanded');
+        document.body.classList.remove('player-active');
         document.querySelectorAll('.verse-item').forEach(item => {
             item.classList.remove('playing');
         });

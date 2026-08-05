@@ -186,7 +186,9 @@
                 <button id="menu-toggle" class="icon-btn desktop-only-btn" aria-label="القائمة" title="طي/فتح القائمة">
                     <i class="fas fa-bars"></i>
                 </button>
-                <button id="mushaf-toggle" class="icon-btn" aria-label="قراءة المصحف" title="قراءة المصحف" aria-controls="mushaf-reader" aria-expanded="false">
+                <!-- Desktop only: on mobile this lives in the bottom nav
+                     instead, so all navigation sits in one place. -->
+                <button id="mushaf-toggle" class="icon-btn desktop-only-btn" data-mushaf-toggle aria-label="قراءة المصحف" title="قراءة المصحف" aria-controls="mushaf-reader" aria-expanded="false">
                     <i class="fas fa-book-open"></i>
                 </button>
             </div>
@@ -327,6 +329,14 @@
                 <i class="fas fa-book-quran"></i>
                 <span>القرآن</span>
             </button>
+            <!-- المصحف: overlay reader, not a tab — so no switchTab().
+                 data-mushaf-toggle is wired in js/mushaf.js alongside the
+                 header button, so both triggers stay in sync. -->
+            <button class="mobile-nav-item" data-mushaf-toggle aria-label="المصحف"
+                    aria-controls="mushaf-reader" aria-expanded="false">
+                <i class="fas fa-book-open"></i>
+                <span>المصحف</span>
+            </button>
             <button class="mobile-nav-item" data-tab="search" onclick="switchTab('search', event)" aria-label="بحث">
                 <i class="fas fa-search"></i>
                 <span>بحث</span>
@@ -365,40 +375,57 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
+            <!-- Expanded panel, three tidy rows instead of one scattered row:
+                 1) transport, in reading order (السابق · ترجيع · تقديم · التالي)
+                 2) progress
+                 3) secondary options (تكرار · السرعة)
+                 Play/pause stays in the mini bar so it is reachable without
+                 expanding. Icons were previously ambiguous — skip-forward
+                 (fa-redo) and repeat (fa-redo-alt) rendered almost identically;
+                 they are now rotate-right / rotate-left / repeat, each with a
+                 visible Arabic label. -->
             <div class="player-controls-main player-full-panel" id="player-full-panel">
                 <div class="player-controls">
-                    <button id="repeat-verse" class="control-btn tiny-btn" title="تكرار الآية">
-                        <i class="fas fa-redo-alt"></i>
+                    <button id="prev-verse" class="control-btn labeled-btn" aria-label="الآية السابقة">
+                        <i class="fas fa-step-backward" aria-hidden="true"></i>
+                        <span class="btn-label">السابقة</span>
                     </button>
-                    <button id="skip-back" class="control-btn small-btn" title="ترجيع 10 ثواني">
-                        <i class="fas fa-undo"></i>
+                    <button id="skip-back" class="control-btn labeled-btn" aria-label="ترجيع 10 ثوانٍ">
+                        <i class="fas fa-rotate-left" aria-hidden="true"></i>
+                        <span class="btn-label">١٠ ثوانٍ</span>
                     </button>
-                    <button id="prev-verse" class="control-btn" aria-label="السابق">
-                        <i class="fas fa-step-backward"></i>
+                    <button id="skip-forward" class="control-btn labeled-btn" aria-label="تقديم 10 ثوانٍ">
+                        <i class="fas fa-rotate-right" aria-hidden="true"></i>
+                        <span class="btn-label">١٠ ثوانٍ</span>
                     </button>
-                    <button id="next-verse" class="control-btn" aria-label="التالي">
-                        <i class="fas fa-step-forward"></i>
+                    <button id="next-verse" class="control-btn labeled-btn" aria-label="الآية التالية">
+                        <i class="fas fa-step-forward" aria-hidden="true"></i>
+                        <span class="btn-label">التالية</span>
                     </button>
-                    <button id="skip-forward" class="control-btn small-btn" title="تقديم 10 ثواني">
-                        <i class="fas fa-redo"></i>
-                    </button>
-                    <div class="speed-control">
-                        <select id="playback-speed" class="speed-select">
-                            <option value="0.5">x0.5</option>
-                            <option value="0.75">x0.75</option>
-                            <option value="1" selected>x1.0</option>
-                            <option value="1.25">x1.25</option>
-                            <option value="1.5">x1.5</option>
-                            <option value="2">x2.0</option>
-                        </select>
-                    </div>
                 </div>
                 <div class="player-progress">
                     <span id="current-time">0:00</span>
                     <div class="progress-bar-wrapper">
-                        <input type="range" id="progress-bar" min="0" max="100" value="0">
+                        <input type="range" id="progress-bar" min="0" max="100" value="0" aria-label="موضع التشغيل">
                     </div>
                     <span id="duration">0:00</span>
+                </div>
+                <div class="player-options">
+                    <button id="repeat-verse" class="option-chip" aria-pressed="false" aria-label="تكرار الآية">
+                        <i class="fas fa-repeat" aria-hidden="true"></i>
+                        <span>تكرار</span>
+                    </button>
+                    <label class="option-chip speed-control" for="playback-speed">
+                        <i class="fas fa-gauge-high" aria-hidden="true"></i>
+                        <select id="playback-speed" class="speed-select" aria-label="سرعة التلاوة">
+                            <option value="0.5">×0.5</option>
+                            <option value="0.75">×0.75</option>
+                            <option value="1" selected>×1.0</option>
+                            <option value="1.25">×1.25</option>
+                            <option value="1.5">×1.5</option>
+                            <option value="2">×2.0</option>
+                        </select>
+                    </label>
                 </div>
             </div>
         </div>

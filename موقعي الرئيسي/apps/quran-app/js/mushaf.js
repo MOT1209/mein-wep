@@ -36,9 +36,15 @@
     const readerEl = document.getElementById('mushaf-reader');
     if (!readerEl) return;
 
+    // The reader can be opened from more than one place: the header button on
+    // desktop, and the "المصحف" item in the bottom nav on mobile. Both carry
+    // data-mushaf-toggle so their aria-expanded and active states stay in sync.
+    const toggles = Array.from(document.querySelectorAll('[data-mushaf-toggle]'));
+    // Which toggle was last used, so closing returns focus to it.
+    let lastToggle = null;
+
     const els = {
         close: document.getElementById('mushaf-close'),
-        toggle: document.getElementById('mushaf-toggle'),
         surahName: document.getElementById('mushaf-surah-name'),
         juz: document.getElementById('mushaf-juz'),
         pageNum: document.getElementById('mushaf-page-num'),
@@ -362,7 +368,10 @@
         mushafState.page = start;
         readerEl.hidden = false;
         document.body.classList.add('mushaf-open');
-        if (els.toggle) els.toggle.setAttribute('aria-expanded', 'true');
+        toggles.forEach((t) => {
+            t.setAttribute('aria-expanded', 'true');
+            t.classList.add('active');
+        });
         computeScale();
         void renderPage();
         els.close?.focus();
@@ -371,13 +380,20 @@
     function close() {
         readerEl.hidden = true;
         document.body.classList.remove('mushaf-open');
-        if (els.toggle) {
-            els.toggle.setAttribute('aria-expanded', 'false');
-            els.toggle.focus();
-        }
+        toggles.forEach((t) => {
+            t.setAttribute('aria-expanded', 'false');
+            t.classList.remove('active');
+        });
+        // Return focus to whichever control opened the reader, not a fixed one.
+        (lastToggle || toggles[0])?.focus();
     }
 
-    if (els.toggle) els.toggle.addEventListener('click', () => readerEl.hidden ? open() : close());
+    toggles.forEach((t) => {
+        t.addEventListener('click', () => {
+            lastToggle = t;
+            readerEl.hidden ? open() : close();
+        });
+    });
     if (els.close) els.close.addEventListener('click', close);
     if (els.prev) els.prev.addEventListener('click', () => void goTo(mushafState.page - 1));
     if (els.next) els.next.addEventListener('click', () => void goTo(mushafState.page + 1));
