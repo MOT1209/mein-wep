@@ -209,6 +209,8 @@ const state = {
     isRepeatEnabled: false,
     audioElement: null,
     searchDebounceTimer: null,
+    // Which .filter-chip is selected: 'all' | 'word' | 'phrase'.
+    searchMode: 'all',
     cache: new Map(),
     verseTimings: [], // لا تُملأ إلا ببيانات مرتبطة بنفس ملف الصوت
     verseTimingSource: 'none', // 'none' أو 'exact'
@@ -235,7 +237,9 @@ function initializeElements() {
         'bookmarks-list', 'reciter-select', 'increase-font', 'decrease-font',
         'save-surah-main', 'tafsir-btn', 'tafsir-select', 'tafsir-content',
         'surah-search', 'auto-play-btn', 'toast-container', 'reading-progress', 'progress-text',
-        'audio-mode-toggle', 'juz-list', 'view-toggle'
+        'audio-mode-toggle', 'juz-list', 'view-toggle',
+        // Settings modal controls, wired in setupSettingsControls().
+        'default-font-size', 'auto-next-surah', 'auto-repeat'
     ];
 
     ids.forEach(id => {
@@ -1753,6 +1757,43 @@ function normalizeArabicSearchText(text) {
         .trim();
 }
 
+/**
+ * Applies the .filter-chip mode to an already-normalized ayah/query pair.
+ * The chips existed in the markup with no listener, so every mode behaved as
+ * "الكل" (plain substring). Arabic word boundaries here are whitespace, which
+ * is sufficient because normalizeArabicSearchText() has already stripped
+ * diacritics and punctuation.
+ *
+ * @param {string} normText  normalized ayah text
+ * @param {string} normQuery normalized search query
+ * @param {'all'|'word'|'phrase'} mode
+ * @returns {boolean}
+ */
+function matchesSearchMode(normText, normQuery, mode) {
+    if (!normQuery) return false;
+
+    if (mode === 'word') {
+        // Whole token only: "نور" must not match "النور".
+        return normText.split(/\s+/).some(token => token === normQuery);
+    }
+
+    if (mode === 'phrase') {
+        // Contiguous run bounded by word edges on both sides.
+        let from = 0;
+        for (;;) {
+            const i = normText.indexOf(normQuery, from);
+            if (i === -1) return false;
+            const end = i + normQuery.length;
+            const startOk = i === 0 || /\s/.test(normText[i - 1]);
+            const endOk = end === normText.length || /\s/.test(normText[end]);
+            if (startOk && endOk) return true;
+            from = i + 1;
+        }
+    }
+
+    return normText.includes(normQuery);
+}
+
 async function searchQuran(query) {
     const requestId = ++state.searchRequestId;
     const resultsContainer = elements['search-results'];
@@ -1776,7 +1817,7 @@ async function searchQuran(query) {
         const normalizedQuery = normalizeArabicSearchText(query);
         const matches = data.data.surahs.flatMap(surah =>
             surah.ayahs
-                .filter(ayah => normalizeArabicSearchText(ayah.text).includes(normalizedQuery))
+                .filter(ayah => matchesSearchMode(normalizeArabicSearchText(ayah.text), normalizedQuery, state.searchMode))
                 .map(ayah => ({
                     surah: { number: surah.number, name: surah.name },
                     numberInSurah: ayah.numberInSurah,
@@ -2025,6 +2066,69 @@ function switchTab(tabName, event) {
     }
 }
 
+// ==================== Settings Panel ====================
+// These three controls existed in the markup with no listeners at all, so the
+// settings modal silently did nothing. Each one below maps to behaviour that is
+// actually implemented; the two that had no implementation (تفعيل الترجمة,
+// تفعيل الإشعارات) were removed from index.html rather than left as dead UI.
+// Search mode chips (الكل · كلمة · جملة). They had no listener, so all three
+// looked selectable but every search ran in "الكل" mode.
+function setupSearchFilterChips() {
+    const chips = document.querySelectorAll('.filter-chip');
+    if (!chips.length) return;
+
+    chips.forEach((chip) => {
+        chip.addEventListener('click', () => {
+            const mode = chip.dataset.filter || 'all';
+            if (mode === state.searchMode) return;
+            state.searchMode = mode;
+            chips.forEach((c) => c.classList.toggle('active', c === chip));
+            // Re-run against the current query so the change is visible at once.
+            const query = elements['search-input']?.value.trim();
+            if (query && query.length >= 2) void searchQuran(query);
+        });
+    });
+}
+
+function setupSettingsControls() {
+    const fontSize = elements['default-font-size'];
+    if (fontSize) {
+        fontSize.value = state.settings.fontSize;
+        fontSize.addEventListener('input', (e) => {
+            const size = parseFloat(e.target.value);
+            if (!Number.isFinite(size)) return;
+            state.settings.fontSize = size;
+            const wrapper = document.querySelector('.verses-wrapper');
+            if (wrapper) wrapper.style.fontSize = `${size}rem`;
+            saveSettings();
+        });
+    }
+
+    const autoNext = elements['auto-next-surah'];
+    if (autoNext) {
+        // Read back in playFullSurah() to chain into the next surah.
+        autoNext.checked = state.settings.autoNextSurah !== false;
+        autoNext.addEventListener('change', (e) => {
+            state.settings.autoNextSurah = e.target.checked;
+            saveSettings();
+        });
+    }
+
+    const autoRepeat = elements['auto-repeat'];
+    if (autoRepeat) {
+        // Shares state with the player's repeat chip, so the two stay in sync.
+        autoRepeat.checked = state.isRepeatEnabled;
+        autoRepeat.addEventListener('change', (e) => {
+            state.isRepeatEnabled = e.target.checked;
+            const chip = elements['repeat-verse'];
+            if (chip) {
+                chip.classList.toggle('active', state.isRepeatEnabled);
+                chip.setAttribute('aria-pressed', String(state.isRepeatEnabled));
+            }
+        });
+    }
+}
+
 // ==================== Event Listeners Setup ====================
 function setupEventListeners() {
     // Theme toggle
@@ -2127,6 +2231,8 @@ function setupEventListeners() {
         // aria-pressed is both the a11y state and the CSS hook for the chip's
         // "on" styling, so the toggle reads unambiguously without a tooltip.
         elements['repeat-verse'].setAttribute('aria-pressed', String(state.isRepeatEnabled));
+        // Same underlying state as "التكرار التلقائي" in the settings modal.
+        if (elements['auto-repeat']) elements['auto-repeat'].checked = state.isRepeatEnabled;
         showToast(state.isRepeatEnabled ? 'تم تفعيل التكرار' : 'تم إيقاف التكرار', 'info');
     });
 
@@ -2488,6 +2594,8 @@ function rafThrottle(func) {
 function initApp() {
     initializeElements();
     setupEventListeners();
+    setupSettingsControls();
+    setupSearchFilterChips();
     setupVerseLazyLoading();
 
     // Load saved settings

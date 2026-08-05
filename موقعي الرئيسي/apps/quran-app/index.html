@@ -474,9 +474,9 @@
             <button class="mushaf-action" data-action="bookmark" aria-label="حفظ موضع القراءة" title="حفظ موضع القراءة">
                 <i class="fas fa-bookmark"></i>
             </button>
-            <button class="mushaf-action" data-action="more" aria-label="مزيد من الخيارات" aria-haspopup="menu" title="مزيد من الخيارات">
-                <i class="fas fa-ellipsis-h"></i>
-            </button>
+            <!-- The "more" button was removed: it opened no menu and had no
+                 handler. Re-add it together with an actual sheet (go-to-page,
+                 font size, go-to-juz) rather than as an empty affordance. -->
             <button class="mushaf-action" data-action="next-page" aria-label="الصفحة التالية" title="الصفحة التالية">
                 <i class="fas fa-chevron-left"></i>
             </button>
@@ -598,10 +598,10 @@
                         <label>حجم الخط الافتراضي</label>
                         <input type="range" id="default-font-size" min="1.5" max="4" step="0.1" value="2.2">
                     </div>
-                    <div class="setting-item">
-                        <label>تفعيل الترجمة</label>
-                        <input type="checkbox" id="show-translation">
-                    </div>
+                    <!-- "تفعيل الترجمة" was removed for 1.0: the checkbox had no
+                         listener and state.settings.showTranslation was never read
+                         anywhere, so it promised a feature the app does not have.
+                         Translations remain available in the tafsir modal. -->
                 </div>
                 <div class="settings-group">
                     <h4>التلاوة</h4>
@@ -614,13 +614,10 @@
                         <input type="checkbox" id="auto-next-surah" checked>
                     </div>
                 </div>
-                <div class="settings-group">
-                    <h4>التنبيهات</h4>
-                    <div class="setting-item">
-                        <label>تفعيل الإشعارات</label>
-                        <input type="checkbox" id="enable-notifications">
-                    </div>
-                </div>
+                <!-- The "التنبيهات" group was removed: there is no FCM, no push
+                     subscription and no POST_NOTIFICATIONS permission, so the
+                     toggle could never do anything. The matching dead push /
+                     notificationclick listeners were removed from sw.js. -->
                 <div class="settings-group">
                     <h4>حول التطبيق</h4>
                     <div class="setting-item">

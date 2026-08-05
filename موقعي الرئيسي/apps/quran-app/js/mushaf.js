@@ -52,7 +52,9 @@
         page: document.getElementById('mushaf-page'),
         lines: document.getElementById('mushaf-lines'),
         prev: readerEl.querySelector('[data-action="prev-page"]'),
-        next: readerEl.querySelector('[data-action="next-page"]')
+        next: readerEl.querySelector('[data-action="next-page"]'),
+        play: readerEl.querySelector('[data-action="play"]'),
+        bookmark: readerEl.querySelector('[data-action="bookmark"]')
     };
 
     // Single source of truth for the reader.
@@ -361,9 +363,15 @@
     // ---------- open / close + wiring ----------
     function open() {
         let start = 1;
+        // A surah open in the app wins: the reader should follow what the user
+        // is already reading. Otherwise fall back to the position last saved
+        // from the bottom bar, so that button has a visible effect.
         if (typeof state !== 'undefined' && state.currentSurah && state.currentSurah.ayahs && state.currentSurah.ayahs[0]) {
             const p = state.currentSurah.ayahs[0].page;
             if (Number.isInteger(p) && p >= 1 && p <= PAGE_TOTAL) start = p;
+        } else {
+            const saved = parseInt(localStorage.getItem('quranLastMushafPage') || '', 10);
+            if (Number.isInteger(saved) && saved >= 1 && saved <= PAGE_TOTAL) start = saved;
         }
         mushafState.page = start;
         readerEl.hidden = false;
@@ -397,6 +405,51 @@
     if (els.close) els.close.addEventListener('click', close);
     if (els.prev) els.prev.addEventListener('click', () => void goTo(mushafState.page - 1));
     if (els.next) els.next.addEventListener('click', () => void goTo(mushafState.page + 1));
+
+    // The surah this page opens with, derived from the first verse key ("31:1").
+    function currentPageSurah() {
+        const first = mushafState.verses[0];
+        if (!first || !first.key) return null;
+        const n = parseInt(String(first.key).split(':')[0], 10);
+        return Number.isInteger(n) ? n : null;
+    }
+
+    // Play: reuse the app's full-surah player for the surah on this page.
+    // Previously this button had no handler at all.
+    if (els.play) {
+        els.play.addEventListener('click', async () => {
+            const surahNum = currentPageSurah();
+            if (!surahNum || typeof loadSurah !== 'function' || typeof playFullSurah !== 'function') {
+                if (typeof showToast === 'function') showToast('تعذّر تشغيل التلاوة', 'error');
+                return;
+            }
+            try {
+                if (!state.currentSurah || state.currentSurah.number !== surahNum) {
+                    await loadSurah(surahNum);
+                }
+                await playFullSurah();
+            } catch (err) {
+                if (typeof showToast === 'function') showToast('تعذّر تشغيل التلاوة', 'error');
+            }
+        });
+    }
+
+    // Bookmark: the label is "حفظ موضع القراءة", so this saves the reading
+    // position rather than creating a verse bookmark.
+    if (els.bookmark) {
+        els.bookmark.addEventListener('click', () => {
+            const surahNum = currentPageSurah();
+            if (surahNum && typeof state !== 'undefined') {
+                state.lastMushafPage = mushafState.page;
+                try {
+                    localStorage.setItem('quranLastMushafPage', String(mushafState.page));
+                } catch (e) { /* storage full or blocked — position simply is not persisted */ }
+            }
+            if (typeof showToast === 'function') {
+                showToast('تم حفظ موضع القراءة · صفحة ' + mushafState.page, 'success');
+            }
+        });
+    }
 
     let resizeTimer;
     window.addEventListener('resize', () => {
