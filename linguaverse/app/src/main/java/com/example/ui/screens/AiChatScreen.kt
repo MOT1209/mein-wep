@@ -21,6 +21,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.ai.AiFailure
 import com.example.data.model.ChatMessage
 import com.example.ui.components.AiErrorBanner
@@ -62,7 +64,7 @@ fun AiChatScreen(
                             Box(contentAlignment = Alignment.Center) {
                                 Icon(
                                     imageVector = Icons.Default.SmartToy,
-                                    contentDescription = "AI Teacher",
+                                    contentDescription = stringResource(R.string.ai_teacher),
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(20.dp)
                                 )
@@ -73,13 +75,13 @@ fun AiChatScreen(
 
                         Column {
                             Text(
-                                text = "AI Teacher Tutor",
+                                text = stringResource(R.string.ai_teacher_tutor),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Bold
                             )
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    text = "Level: ",
+                                    text = stringResource(R.string.level),
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -90,7 +92,7 @@ fun AiChatScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )

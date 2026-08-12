@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.data.model.LeaderboardEntry
 import com.example.ui.theme.extendedColors
 
@@ -53,7 +55,7 @@ fun LeaderboardScreen(
         ) {
             Column {
                 Text(
-                    text = "Weekly League",
+                    text = stringResource(R.string.weekly_league),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold
                 )
@@ -80,7 +82,7 @@ fun LeaderboardScreen(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "3 Days Left",
+                        text = stringResource(R.string.s_3_days_left),
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
                         color = MaterialTheme.extendedColors.onXpContainer

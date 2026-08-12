@@ -24,6 +24,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import com.example.R
 import com.example.data.model.*
 import com.example.ui.components.*
@@ -161,7 +162,7 @@ fun HomeScreen(
                                 shape = RoundedCornerShape(8.dp)
                             ) {
                                 Text(
-                                    text = "CONTINUE LEARNING",
+                                    text = stringResource(R.string.continue_learning),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp,
                                     color = MaterialTheme.colorScheme.onPrimary,
@@ -234,7 +235,7 @@ fun HomeScreen(
                         )
                         Column {
                             Text(
-                                text = "Daily Goal",
+                                text = stringResource(R.string.daily_goal),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp
                             )
@@ -263,13 +264,13 @@ fun HomeScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.SmartToy,
-                                contentDescription = "AI Teacher",
+                                contentDescription = stringResource(R.string.ai_teacher),
                                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
                                 modifier = Modifier.size(24.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
                             Text(
-                                text = "AI Tutor",
+                                text = stringResource(R.string.ai_tutor),
                                 fontWeight = FontWeight.Bold,
                                 fontSize = 15.sp,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -296,13 +297,13 @@ fun HomeScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Skill Practice (15 Modules)",
+                    text = stringResource(R.string.skill_practice_15_modules),
                     fontWeight = FontWeight.ExtraBold,
                     fontSize = 18.sp
                 )
 
                 TextButton(onClick = onNavigateToSkills) {
-                    Text(text = "View All", fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.view_all), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -359,7 +360,7 @@ fun HomeScreen(
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Course Curriculum",
+                text = stringResource(R.string.course_curriculum),
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 18.sp,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)

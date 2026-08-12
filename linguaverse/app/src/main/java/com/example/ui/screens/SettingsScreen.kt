@@ -15,6 +15,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.BuildConfig
 import com.example.data.model.Language
 import com.example.ui.components.AudioSpeedSelector
@@ -69,7 +71,7 @@ fun SettingsScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.DarkMode, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = "Dark Mode", fontSize = 15.sp)
+                            Text(text = stringResource(R.string.dark_mode), fontSize = 15.sp)
                         }
                         Switch(
                             checked = isDarkTheme,
@@ -101,7 +103,7 @@ fun SettingsScreen(
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Speed, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                             Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = "Default Audio Speed", fontSize = 15.sp)
+                            Text(text = stringResource(R.string.default_audio_speed), fontSize = 15.sp)
                         }
                         AudioSpeedSelector(
                             currentSpeed = audioSpeed,

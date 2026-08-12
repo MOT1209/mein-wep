@@ -23,6 +23,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.ai.AiFailure
 import com.example.ai.WritingEvaluationResult
 import com.example.data.model.*
@@ -60,7 +62,7 @@ fun SkillDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -137,7 +139,7 @@ fun VocabularyView(
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Search vocabulary...") },
+            placeholder = { Text(stringResource(R.string.search_vocabulary)) },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,7 +164,7 @@ fun VocabularyView(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { onSpeakText(vocab.word) }) {
-                            Icon(Icons.Default.VolumeUp, contentDescription = "Play", tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.play), tint = MaterialTheme.colorScheme.primary)
                         }
 
                         Spacer(modifier = Modifier.width(8.dp))
@@ -178,7 +180,7 @@ fun VocabularyView(
                         IconButton(onClick = { onToggleFavorite(vocab) }) {
                             Icon(
                                 imageVector = if (vocab.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                                contentDescription = "Favorite",
+                                contentDescription = stringResource(R.string.favorite),
                                 tint = if (vocab.isFavorite) MaterialTheme.extendedColors.favorite else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
@@ -223,7 +225,7 @@ fun GrammarView(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             IconButton(onClick = { onSpeakText(rule.exampleSentence) }) {
-                                Icon(Icons.Default.VolumeUp, contentDescription = "Play", tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.play), tint = MaterialTheme.colorScheme.primary)
                             }
                             Column {
                                 Text(text = rule.exampleSentence, fontWeight = FontWeight.Bold, fontSize = 14.sp)
@@ -244,7 +246,7 @@ fun FlashcardsView(
 ) {
     if (flashcards.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text("No flashcards available yet.")
+            Text(stringResource(R.string.no_flashcards_available_yet))
         }
         return
     }
@@ -316,7 +318,7 @@ fun FlashcardsView(
                     IconButton(onClick = { onSpeakText(currentCard.frontWord) }) {
                         Icon(
                             imageVector = Icons.Default.VolumeUp,
-                            contentDescription = "Speak",
+                            contentDescription = stringResource(R.string.speak),
                             tint = if (showBack) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
@@ -335,7 +337,7 @@ fun FlashcardsView(
                 modifier = Modifier.weight(1f),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Next Card")
+                Text(stringResource(R.string.next_card))
             }
         }
     }
@@ -436,7 +438,7 @@ fun WritingPracticeView(
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Prompt:", fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.prompt), fontWeight = FontWeight.Bold)
                 Text(text = prompt, fontSize = 14.sp)
             }
         }
@@ -446,7 +448,7 @@ fun WritingPracticeView(
         OutlinedTextField(
             value = textInput,
             onValueChange = { textInput = it },
-            placeholder = { Text("Escribe aquí tu respuesta...") },
+            placeholder = { Text(stringResource(R.string.escribe_aqu_tu_respuesta)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(140.dp)
@@ -491,7 +493,7 @@ fun WritingPracticeView(
                     Text(text = "Corrected Version:", fontWeight = FontWeight.Bold)
                     Text(text = eval.correctedText, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "AI Feedback:", fontWeight = FontWeight.Bold)
+                    Text(text = stringResource(R.string.ai_feedback), fontWeight = FontWeight.Bold)
                     Text(text = eval.feedback, fontSize = 13.sp)
                 }
             }
@@ -583,7 +585,7 @@ fun DailyPhrasesView(onSpeakText: (String) -> Unit) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { onSpeakText(spanish) }) {
-                        Icon(Icons.Default.VolumeUp, contentDescription = "Play", tint = MaterialTheme.colorScheme.primary)
+                        Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.play), tint = MaterialTheme.colorScheme.primary)
                     }
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {

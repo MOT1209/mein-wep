@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.data.model.*
 import com.example.domain.AnswerGrader
 import com.example.ui.components.AudioSpeedSelector
@@ -81,7 +83,7 @@ fun LessonScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onCloseLesson) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                        Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.close))
                     }
                 },
                 actions = {
@@ -222,7 +224,7 @@ fun LessonScreen(
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.VolumeUp,
-                                    contentDescription = "Speak Text",
+                                    contentDescription = stringResource(R.string.speak_text),
                                     tint = MaterialTheme.colorScheme.primary
                                 )
                             }
@@ -333,7 +335,7 @@ private fun PracticePromptCard(
             Spacer(modifier = Modifier.width(12.dp))
             Column {
                 Text(
-                    text = "Practice out loud",
+                    text = stringResource(R.string.practice_out_loud),
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
@@ -366,7 +368,7 @@ fun LessonCompletionView(
         ) {
             Icon(
                 imageVector = Icons.Default.EmojiEvents,
-                contentDescription = "Success",
+                contentDescription = stringResource(R.string.success),
                 tint = MaterialTheme.extendedColors.warning,
                 modifier = Modifier.size(96.dp)
             )

@@ -19,6 +19,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.data.model.Achievement
 import com.example.data.model.UserProfile
 import com.example.ui.components.LevelChip
@@ -57,7 +59,7 @@ fun ProfileScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Person,
-                            contentDescription = "Avatar",
+                            contentDescription = stringResource(R.string.avatar),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(48.dp)
                         )
@@ -131,7 +133,7 @@ fun ProfileScreen(
                         Icon(Icons.Default.WorkspacePremium, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer)
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "CEFR Certificate Ready",
+                            text = stringResource(R.string.cefr_certificate_ready),
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
@@ -155,7 +157,7 @@ fun ProfileScreen(
                     ) {
                         Icon(Icons.Default.CardMembership, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("View Official Certificate")
+                        Text(stringResource(R.string.view_official_certificate))
                     }
                 }
             }

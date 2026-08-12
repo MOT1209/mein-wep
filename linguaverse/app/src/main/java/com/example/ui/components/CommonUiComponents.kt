@@ -25,6 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.ai.AiFailure
 import com.example.data.model.CefrLevel
 import com.example.ui.theme.extendedColors
@@ -100,7 +102,7 @@ fun StreakBadge(
         ) {
             Icon(
                 imageVector = Icons.Filled.LocalFireDepartment,
-                contentDescription = "Streak",
+                contentDescription = stringResource(R.string.streak),
                 tint = MaterialTheme.extendedColors.streak,
                 modifier = Modifier.size(18.dp)
             )

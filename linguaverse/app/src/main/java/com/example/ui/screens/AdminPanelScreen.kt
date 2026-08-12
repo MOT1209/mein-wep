@@ -16,6 +16,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.example.R
 import com.example.data.model.CefrLevel
 import com.example.ui.theme.extendedColors
 
@@ -36,7 +38,7 @@ fun AdminPanelScreen(
                 title = { Text("Admin Panel & Content Studio", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -53,7 +55,7 @@ fun AdminPanelScreen(
                 Tab(selected = activeTab == 0, onClick = { activeTab = 0 }, text = { Text("Analytics") })
                 Tab(selected = activeTab == 1, onClick = { activeTab = 1 }, text = { Text("Languages") })
                 Tab(selected = activeTab == 2, onClick = { activeTab = 2 }, text = { Text("Lessons") })
-                Tab(selected = activeTab == 3, onClick = { activeTab = 3 }, text = { Text("Vocabulary") })
+                Tab(selected = activeTab == 3, onClick = { activeTab = 3 }, text = { Text(stringResource(R.string.vocabulary)) })
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -71,7 +73,7 @@ fun AdminPanelScreen(
 @Composable
 fun AdminAnalyticsTab() {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text(text = "System Overview", fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
+        Text(text = stringResource(R.string.system_overview), fontWeight = FontWeight.ExtraBold, fontSize = 18.sp)
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -81,8 +83,8 @@ fun AdminAnalyticsTab() {
             Column(modifier = Modifier.padding(18.dp)) {
                 Text(text = "Active Learners: 12,450", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Text(text = "Supported Languages: Unlimited (12 Defaults Enabled)", fontSize = 13.sp)
-                Text(text = "Total Exercises Completed: 148,920", fontSize = 13.sp)
-                Text(text = "AI Server Uptime: 99.98%", fontSize = 13.sp)
+                Text(text = stringResource(R.string.total_exercises_completed_148_920), fontSize = 13.sp)
+                Text(text = stringResource(R.string.ai_server_uptime_99_98), fontSize = 13.sp)
             }
         }
     }
@@ -130,7 +132,7 @@ fun AdminAddLanguageTab(onAddLanguage: (String, String, String, String, String) 
             OutlinedTextField(
                 value = flagEmoji,
                 onValueChange = { flagEmoji = it },
-                label = { Text("Flag Emoji (e.g., '🇳🇱')") },
+                label = { Text(stringResource(R.string.flag_emoji_e_g)) },
                 modifier = Modifier.fillMaxWidth().testTag("admin_lang_flag"),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -191,7 +193,7 @@ fun AdminAddLessonTab(onAddLesson: (String, String, CefrLevel, Int, String, Stri
             OutlinedTextField(
                 value = category,
                 onValueChange = { category = it },
-                label = { Text("Category (e.g., Travel, Food)") },
+                label = { Text(stringResource(R.string.category_e_g_travel_food)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -247,7 +249,7 @@ fun AdminAddVocabTab(onAddVocabulary: (String, String, String, String) -> Unit) 
     var showSuccess by remember { mutableStateOf(false) }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        item { Text(text = "Add Vocabulary Word", fontWeight = FontWeight.Bold, fontSize = 18.sp) }
+        item { Text(text = stringResource(R.string.add_vocabulary_word), fontWeight = FontWeight.Bold, fontSize = 18.sp) }
         item {
             OutlinedTextField(
                 value = word,
@@ -288,12 +290,12 @@ fun AdminAddVocabTab(onAddVocabulary: (String, String, String, String) -> Unit) 
                 modifier = Modifier.fillMaxWidth().height(48.dp).testTag("admin_submit_vocab_button"),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Add Word to Vocabulary")
+                Text(stringResource(R.string.add_word_to_vocabulary))
             }
         }
         if (showSuccess) {
             item {
-                Text(text = "Vocabulary word added!", color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.vocabulary_word_added), color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
             }
         }
     }
