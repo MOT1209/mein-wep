@@ -1,0 +1,409 @@
+package com.example.ui.screens
+
+import androidx.compose.animation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.data.model.*
+import com.example.ui.components.AudioSpeedSelector
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun LessonScreen(
+    lesson: Lesson,
+    exercises: List<Exercise>,
+    currentIndex: Int,
+    isCompleted: Boolean,
+    audioSpeed: Float,
+    onSpeakText: (String) -> Unit,
+    onSetAudioSpeed: (Float) -> Unit,
+    onSubmitAnswer: (String) -> Boolean,
+    onNextExercise: () -> Unit,
+    onCloseLesson: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (isCompleted) {
+        LessonCompletionView(
+            lesson = lesson,
+            onCloseLesson = onCloseLesson,
+            modifier = modifier
+        )
+        return
+    }
+
+    if (exercises.isEmpty()) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val currentExercise = exercises.getOrNull(currentIndex) ?: return
+    var selectedOption by remember(currentIndex) { mutableStateOf("") }
+    var userTextInput by remember(currentIndex) { mutableStateOf("") }
+    var answerChecked by remember(currentIndex) { mutableStateOf(false) }
+    var isAnswerCorrect by remember(currentIndex) { mutableStateOf(false) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(
+                            text = lesson.title,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            text = "Question ${currentIndex + 1} of ${exercises.size}",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onCloseLesson) {
+                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                    }
+                },
+                actions = {
+                    AudioSpeedSelector(
+                        currentSpeed = audioSpeed,
+                        onSpeedSelected = onSetAudioSpeed,
+                        modifier = Modifier.padding(end = 12.dp)
+                    )
+                }
+            )
+        },
+        bottomBar = {
+            Surface(
+                tonalElevation = 8.dp,
+                color = when {
+                    !answerChecked -> MaterialTheme.colorScheme.surface
+                    isAnswerCorrect -> Color(0xFFDCFCE7)
+                    else -> Color(0xFFFEE2E2)
+                }
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp)
+                ) {
+                    if (answerChecked) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = if (isAnswerCorrect) Icons.Default.CheckCircle else Icons.Default.Cancel,
+                                contentDescription = null,
+                                tint = if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C),
+                                modifier = Modifier.size(28.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Column {
+                                Text(
+                                    text = if (isAnswerCorrect) "Excellent!" else "Not quite right",
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 16.sp,
+                                    color = if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C)
+                                )
+                                Text(
+                                    text = if (isAnswerCorrect) "Correct answer!" else "Correct: ${currentExercise.correctAnswer}",
+                                    fontSize = 13.sp,
+                                    color = if (isAnswerCorrect) Color(0xFF166534) else Color(0xFF991B1B)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+                    }
+
+                    Button(
+                        onClick = {
+                            if (!answerChecked) {
+                                val answer = if (currentExercise.type == ExerciseType.WRITING) userTextInput else selectedOption
+                                isAnswerCorrect = onSubmitAnswer(answer)
+                                answerChecked = true
+                            } else {
+                                onNextExercise()
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .testTag("submit_exercise_button"),
+                        enabled = answerChecked || selectedOption.isNotEmpty() || userTextInput.isNotEmpty(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (answerChecked) {
+                                if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C)
+                            } else MaterialTheme.colorScheme.primary
+                        ),
+                        shape = RoundedCornerShape(14.dp)
+                    ) {
+                        Text(
+                            text = if (!answerChecked) "Check Answer" else "Continue",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
+                    }
+                }
+            }
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(20.dp)
+        ) {
+            // Linear Progress Bar
+            LinearProgressIndicator(
+                progress = { (currentIndex + 1).toFloat() / exercises.size.toFloat() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .clip(CircleShape),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.surfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Exercise Prompt Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        text = currentExercise.prompt,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    if (currentExercise.targetText.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(
+                                onClick = { onSpeakText(currentExercise.targetText) },
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.VolumeUp,
+                                    contentDescription = "Speak Text",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    text = currentExercise.targetText,
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                if (currentExercise.phoneticText.isNotEmpty()) {
+                                    Text(
+                                        text = "[${currentExercise.phoneticText}]",
+                                        fontSize = 13.sp,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Exercise Input Area
+            if (currentExercise.type == ExerciseType.WRITING) {
+                OutlinedTextField(
+                    value = userTextInput,
+                    onValueChange = { userTextInput = it },
+                    label = { Text("Type your answer in Spanish") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("writing_input_field"),
+                    shape = RoundedCornerShape(16.dp)
+                )
+            } else {
+                // Parse Options JSON
+                val options = parseOptionsJson(currentExercise.optionsJson)
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    options.forEach { option ->
+                        val isSelected = selectedOption == option
+                        Surface(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .testTag("exercise_option_$option")
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                                    shape = RoundedCornerShape(16.dp)
+                                )
+                                .clickable { selectedOption = option },
+                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = 0.5f
+                            ) else MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(16.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                RadioButton(
+                                    selected = isSelected,
+                                    onClick = { selectedOption = option }
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = option,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun LessonCompletionView(
+    lesson: Lesson,
+    onCloseLesson: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.EmojiEvents,
+                contentDescription = "Success",
+                tint = Color(0xFFF59E0B),
+                modifier = Modifier.size(96.dp)
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Lesson Completed!",
+                fontSize = 28.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+
+            Text(
+                text = "You completed '${lesson.title}'",
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Surface(
+                    color = Color(0xFFFEF3C7),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Stars,
+                            contentDescription = null,
+                            tint = Color(0xFFD97706)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "+${lesson.xpReward} XP",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFB45309)
+                        )
+                    }
+                }
+
+                Surface(
+                    color = Color(0xFFDCFCE7),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MonetizationOn,
+                            contentDescription = null,
+                            tint = Color(0xFF15803D)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "+${lesson.xpReward / 2} Coins",
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF166534)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Button(
+                onClick = onCloseLesson,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp)
+                    .testTag("finish_lesson_button"),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text(
+                    text = "Return to Dashboard",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+        }
+    }
+}
+
+private fun parseOptionsJson(json: String): List<String> {
+    return try {
+        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+        val adapter = moshi.adapter<List<String>>(
+            Types.newParameterizedType(List::class.java, String::class.java)
+        )
+        adapter.fromJson(json) ?: emptyList()
+    } catch (e: Exception) {
+        emptyList()
+    }
+}

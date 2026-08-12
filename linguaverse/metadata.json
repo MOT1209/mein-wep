@@ -1,0 +1,6 @@
+{
+  "name": "LinguaVerse",
+  "description": "AI-powered language learning application with interactive lessons, speaking practice, quizzes, flashcards, and AI tutor conversations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
