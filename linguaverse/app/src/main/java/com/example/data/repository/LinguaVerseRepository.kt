@@ -24,6 +24,8 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
 
     suspend fun getExercisesForLesson(lessonId: String): List<Exercise> = dao.getExercisesForLesson(lessonId)
 
+    suspend fun getLessonById(lessonId: String): Lesson? = dao.getLessonById(lessonId)
+
     /**
      * Populates first-run content. Every block here is guarded by an emptiness
      * check: re-seeding on an existing database would overwrite rows via

@@ -151,6 +151,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    /**
+     * Loads a lesson by id, for navigation routes that carry only the id.
+     * No-ops if the lesson is already loaded, so returning to the screen after a
+     * configuration change does not reset the learner's position.
+     */
+    fun startLessonById(lessonId: String) {
+        if (_activeLesson.value?.id == lessonId) return
+        viewModelScope.launch {
+            val lesson = repository.getLessonById(lessonId) ?: return@launch
+            startLesson(lesson)
+        }
+    }
+
     fun startLesson(lesson: Lesson) {
         viewModelScope.launch {
             _activeLesson.value = lesson
