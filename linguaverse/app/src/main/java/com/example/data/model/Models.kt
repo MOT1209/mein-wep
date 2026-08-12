@@ -1,6 +1,7 @@
 package com.example.data.model
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
 import com.squareup.moshi.Moshi
@@ -79,7 +80,10 @@ data class UserProfile(
     val todayXp: Int = 30
 )
 
-@Entity(tableName = "lessons")
+@Entity(
+    tableName = "lessons",
+    indices = [Index("languageCode"), Index("languageCode", "orderIndex")]
+)
 data class Lesson(
     @PrimaryKey val id: String,
     val languageCode: String,
@@ -93,7 +97,10 @@ data class Lesson(
     val orderIndex: Int = 0
 )
 
-@Entity(tableName = "exercises")
+@Entity(
+    tableName = "exercises",
+    indices = [Index("lessonId")]
+)
 data class Exercise(
     @PrimaryKey val id: String,
     val lessonId: String,
@@ -110,7 +117,10 @@ data class Exercise(
     val imageResName: String = ""
 )
 
-@Entity(tableName = "vocabularies")
+@Entity(
+    tableName = "vocabularies",
+    indices = [Index("languageCode"), Index("languageCode", "isFavorite")]
+)
 data class Vocabulary(
     @PrimaryKey val id: String,
     val languageCode: String,
@@ -124,7 +134,10 @@ data class Vocabulary(
     val needsReview: Boolean = false
 )
 
-@Entity(tableName = "grammar_rules")
+@Entity(
+    tableName = "grammar_rules",
+    indices = [Index("languageCode")]
+)
 data class GrammarRule(
     @PrimaryKey val id: String,
     val languageCode: String,
@@ -136,7 +149,10 @@ data class GrammarRule(
     val exampleTranslation: String
 )
 
-@Entity(tableName = "flashcards")
+@Entity(
+    tableName = "flashcards",
+    indices = [Index("languageCode")]
+)
 data class Flashcard(
     @PrimaryKey val id: String,
     val languageCode: String,
@@ -160,7 +176,10 @@ data class Achievement(
     val rewardXp: Int = 50
 )
 
-@Entity(tableName = "chat_messages")
+@Entity(
+    tableName = "chat_messages",
+    indices = [Index("timestamp")]
+)
 data class ChatMessage(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val sender: String, // "user" or "ai"

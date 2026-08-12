@@ -21,9 +21,16 @@ interface LinguaVerseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLanguage(language: Language)
 
+    @Query("SELECT COUNT(*) FROM languages")
+    suspend fun countLanguages(): Int
+
     // User Profile
     @Query("SELECT * FROM user_profile WHERE id = 'user_default'")
     fun getUserProfile(): Flow<UserProfile?>
+
+    /** Single read, for callers that need the current profile rather than a stream. */
+    @Query("SELECT * FROM user_profile WHERE id = 'user_default'")
+    suspend fun getUserProfileOnce(): UserProfile?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateProfile(profile: UserProfile)
@@ -37,6 +44,9 @@ interface LinguaVerseDao {
 
     @Query("SELECT * FROM lessons WHERE id = :lessonId")
     suspend fun getLessonById(lessonId: String): Lesson?
+
+    @Query("SELECT COUNT(*) FROM lessons WHERE languageCode = :langCode")
+    suspend fun countLessons(langCode: String): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLessons(lessons: List<Lesson>)
@@ -93,6 +103,9 @@ interface LinguaVerseDao {
     // Achievements
     @Query("SELECT * FROM achievements")
     fun getAllAchievements(): Flow<List<Achievement>>
+
+    @Query("SELECT COUNT(*) FROM achievements")
+    suspend fun countAchievements(): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAchievements(achievements: List<Achievement>)

@@ -4,9 +4,12 @@ import com.example.ai.AiTeacherReply
 import com.example.data.db.LinguaVerseDao
 import com.example.data.model.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
 
 class LinguaVerseRepository(private val dao: LinguaVerseDao) {
+
+    private companion object {
+        const val SEED_LANGUAGE_CODE = "es"
+    }
 
     val allLanguages: Flow<List<Language>> = dao.getAllLanguages()
     val userProfile: Flow<UserProfile?> = dao.getUserProfile()
@@ -21,10 +24,14 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
 
     suspend fun getExercisesForLesson(lessonId: String): List<Exercise> = dao.getExercisesForLesson(lessonId)
 
+    /**
+     * Populates first-run content. Every block here is guarded by an emptiness
+     * check: re-seeding on an existing database would overwrite rows via
+     * OnConflictStrategy.REPLACE and reset the user's progress.
+     */
     suspend fun initializeSeedData() {
         // Seed languages if empty
-        val existingLanguages = allLanguages.firstOrNull() ?: emptyList()
-        if (existingLanguages.isEmpty()) {
+        if (dao.countLanguages() == 0) {
             val defaultLanguages = listOf(
                 Language("es", "Spanish", "Español", "🇪🇸", true, 36, "Master Spanish with conversational fluency"),
                 Language("en", "English", "English", "🇺🇸", true, 48, "Global English communication"),
@@ -43,8 +50,7 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
         }
 
         // Seed profile if empty
-        val existingProfile = userProfile.firstOrNull()
-        if (existingProfile == null) {
+        if (dao.getUserProfileOnce() == null) {
             dao.insertOrUpdateProfile(
                 UserProfile(
                     id = "user_default",
@@ -60,12 +66,15 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
             )
         }
 
-        // Seed sample lessons for Spanish
-        seedSpanishContent()
+        // Seed sample lessons for Spanish, but only once. This used to run on
+        // every launch, and because the inserts use REPLACE it reset
+        // isCompleted on every seeded lesson each time the app was opened.
+        if (dao.countLessons(SEED_LANGUAGE_CODE) == 0) {
+            seedSpanishContent()
+        }
 
         // Seed achievements if empty
-        val existingAchievements = achievements.firstOrNull() ?: emptyList()
-        if (existingAchievements.isEmpty()) {
+        if (dao.countAchievements() == 0) {
             val defaultAchievements = listOf(
                 Achievement("ach_1", "First Steps", "Complete your first lesson", "school", true, 1, 1, 50),
                 Achievement("ach_2", "On Fire!", "Maintain a 7-day learning streak", "local_fire_department", true, 7, 7, 100),
@@ -181,7 +190,7 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
         val updatedLesson = lesson.copy(isCompleted = true)
         dao.updateLesson(updatedLesson)
 
-        val profile = userProfile.firstOrNull() ?: return
+        val profile = dao.getUserProfileOnce() ?: return
         val newXp = profile.xp + xpEarned
         val newTodayXp = profile.todayXp + xpEarned
         val newCompletedCount = profile.totalCompletedLessons + 1
@@ -198,7 +207,7 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
     }
 
     suspend fun updateTargetLanguage(langCode: String) {
-        val profile = userProfile.firstOrNull() ?: return
+        val profile = dao.getUserProfileOnce() ?: return
         dao.updateProfile(profile.copy(targetLanguageCode = langCode))
     }
 
