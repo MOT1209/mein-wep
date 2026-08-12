@@ -1,5 +1,6 @@
 package com.example.ai
 
+import android.util.Log
 import com.example.BuildConfig
 import com.example.data.model.CefrLevel
 import com.example.data.model.ChatMessage
@@ -11,6 +12,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 import java.util.concurrent.TimeUnit
 
@@ -28,8 +30,9 @@ data class GeminiCandidate(val content: GeminiCandidateContent = GeminiCandidate
 data class GeminiResponse(val candidates: List<GeminiCandidate> = emptyList())
 
 interface GeminiApi {
-    @POST("v1beta/models/gemini-3.5-flash:generateContent")
+    @POST("v1beta/models/{model}:generateContent")
     suspend fun generateContent(
+        @Path("model") model: String,
         @Query("key") apiKey: String,
         @Body request: GeminiRequest
     ): GeminiResponse
@@ -51,6 +54,23 @@ data class WritingEvaluationResult(
 
 object GeminiTutorService {
 
+    private const val TAG = "GeminiTutorService"
+
+    /**
+     * The previous value, "gemini-3.5-flash", is not a model that exists, so every
+     * live call returned 404 and fell through to the hard-coded reply. No live AI
+     * response was ever produced by this app.
+     */
+    private const val MODEL = "gemini-2.5-flash"
+
+    private const val PLACEHOLDER_API_KEY = "MY_GEMINI_API_KEY"
+
+    private val apiKey: String
+        get() = BuildConfig.GEMINI_API_KEY
+
+    private fun hasUsableApiKey(): Boolean =
+        apiKey.isNotBlank() && apiKey != PLACEHOLDER_API_KEY
+
     private val okHttpClient = OkHttpClient.Builder()
         .connectTimeout(30, TimeUnit.SECONDS)
         .readTimeout(30, TimeUnit.SECONDS)
@@ -70,15 +90,9 @@ object GeminiTutorService {
         targetLanguage: String,
         cefrLevel: CefrLevel,
         chatHistory: List<ChatMessage>
-    ): AiTeacherReply = withContext(Dispatchers.IO) {
-        val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-            return@withContext AiTeacherReply(
-                replyText = "¡Hola! I am your AI language tutor. (Note: Add your Gemini API Key in Secrets to unlock full live AI responses). How are you doing today?",
-                correction = null,
-                suggestion = "Try asking: 'How do I introduce myself in $targetLanguage?'",
-                grammarExplanation = "Remember to match gender and number in nouns and adjectives!"
-            )
+    ): AiOutcome<AiTeacherReply> = withContext(Dispatchers.IO) {
+        if (!hasUsableApiKey()) {
+            return@withContext AiOutcome.Failure(AiFailure.NOT_CONFIGURED)
         }
 
         val systemPrompt = """
@@ -108,16 +122,16 @@ object GeminiTutorService {
         )
 
         try {
-            val response = api.generateContent(apiKey, request)
-            val rawText = response.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
-            parseAiReply(rawText, targetLanguage)
+            val response = api.generateContent(MODEL, apiKey, request)
+            val rawText = response.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text.orEmpty()
+            if (rawText.isBlank()) {
+                AiOutcome.Failure(AiFailure.EMPTY_RESPONSE)
+            } else {
+                AiOutcome.Success(parseAiReply(rawText))
+            }
         } catch (e: Exception) {
-            AiTeacherReply(
-                replyText = "I understood your message! Keep practicing in $targetLanguage.",
-                correction = null,
-                suggestion = "Try responding with a complete sentence.",
-                grammarExplanation = "Keep up the great work!"
-            )
+            Log.w(TAG, "AI tutor chat request failed", e)
+            AiOutcome.Failure(AiFailure.UNREACHABLE)
         }
     }
 
@@ -125,15 +139,9 @@ object GeminiTutorService {
         userText: String,
         prompt: String,
         targetLanguage: String
-    ): WritingEvaluationResult = withContext(Dispatchers.IO) {
-        val apiKey = BuildConfig.GEMINI_API_KEY
-        if (apiKey.isEmpty() || apiKey == "MY_GEMINI_API_KEY") {
-            return@withContext WritingEvaluationResult(
-                score = 88,
-                correctedText = userText,
-                feedback = "Great effort! Your sentence communicates your idea clearly. Ensure correct verb conjugation for formal situations.",
-                suggestions = listOf("Use transition words to connect ideas", "Pay attention to gender agreement")
-            )
+    ): AiOutcome<WritingEvaluationResult> = withContext(Dispatchers.IO) {
+        if (!hasUsableApiKey()) {
+            return@withContext AiOutcome.Failure(AiFailure.NOT_CONFIGURED)
         }
 
         val systemPrompt = """
@@ -152,20 +160,20 @@ object GeminiTutorService {
         )
 
         try {
-            val response = api.generateContent(apiKey, request)
-            val rawText = response.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text ?: ""
-            parseWritingResult(rawText, userText)
+            val response = api.generateContent(MODEL, apiKey, request)
+            val rawText = response.candidates.firstOrNull()?.content?.parts?.firstOrNull()?.text.orEmpty()
+            if (rawText.isBlank()) {
+                AiOutcome.Failure(AiFailure.EMPTY_RESPONSE)
+            } else {
+                AiOutcome.Success(parseWritingResult(rawText, userText))
+            }
         } catch (e: Exception) {
-            WritingEvaluationResult(
-                score = 85,
-                correctedText = userText,
-                feedback = "Well done! Your writing matches the prompt objectives.",
-                suggestions = listOf("Expand your vocabulary with descriptive adjectives")
-            )
+            Log.w(TAG, "Writing evaluation request failed", e)
+            AiOutcome.Failure(AiFailure.UNREACHABLE)
         }
     }
 
-    private fun parseAiReply(raw: String, targetLanguage: String): AiTeacherReply {
+    private fun parseAiReply(raw: String): AiTeacherReply {
         var reply = ""
         var correction: String? = null
         var suggestion: String? = null

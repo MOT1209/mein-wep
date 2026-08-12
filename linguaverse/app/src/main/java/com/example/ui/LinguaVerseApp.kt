@@ -55,7 +55,9 @@ fun LinguaVerseApp(
     val lessonCompleted by viewModel.lessonCompleted.collectAsStateWithLifecycle()
 
     val isAiChatLoading by viewModel.isAiChatLoading.collectAsStateWithLifecycle()
+    val aiChatError by viewModel.aiChatError.collectAsStateWithLifecycle()
     val writingEvaluation by viewModel.writingEvaluation.collectAsStateWithLifecycle()
+    val writingEvaluationError by viewModel.writingEvaluationError.collectAsStateWithLifecycle()
     val isEvaluatingWriting by viewModel.isEvaluatingWriting.collectAsStateWithLifecycle()
     val audioSpeed by viewModel.audioSpeed.collectAsStateWithLifecycle()
     val isDarkTheme by viewModel.isDarkTheme.collectAsStateWithLifecycle()
@@ -104,6 +106,7 @@ fun LinguaVerseApp(
             flashcards = flashcards,
             audioSpeed = audioSpeed,
             writingEvaluation = writingEvaluation,
+            writingEvaluationError = writingEvaluationError,
             isEvaluatingWriting = isEvaluatingWriting,
             onSpeakText = { viewModel.speakText(it) },
             onSetAudioSpeed = { viewModel.setAudioSpeed(it) },
@@ -178,6 +181,7 @@ fun LinguaVerseApp(
                 MainDestination.AI_CHAT -> AiChatScreen(
                     messages = chatMessages,
                     isLoading = isAiChatLoading,
+                    error = aiChatError,
                     currentLevel = userProfile.currentLevel,
                     onSendMessage = { viewModel.sendAiChatMessage(it) },
                     onSpeakText = { viewModel.speakText(it) },

@@ -31,7 +31,6 @@ fun SettingsScreen(
     modifier: Modifier = Modifier
 ) {
     var isOfflineDownloaded by remember { mutableStateOf(true) }
-    var speechRecognitionEnabled by remember { mutableStateOf(true) }
 
     LazyColumn(
         modifier = modifier
@@ -109,23 +108,6 @@ fun SettingsScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Mic, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(text = "Speech Recognition", fontSize = 15.sp)
-                        }
-                        Switch(
-                            checked = speechRecognitionEnabled,
-                            onCheckedChange = { speechRecognitionEnabled = it }
-                        )
-                    }
                 }
             }
         }

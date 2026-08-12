@@ -3,7 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <!--
+      RECORD_AUDIO was declared but never requested and never used: the speaking
+      screen fabricated a score without recording anything. Declaring a sensitive
+      permission an app does not use is a Play policy problem, so it is removed
+      until real speech recognition is implemented.
+    -->
 
     <application
         android:allowBackup="true"

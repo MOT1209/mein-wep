@@ -22,8 +22,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ai.AiFailure
 import com.example.ai.WritingEvaluationResult
 import com.example.data.model.*
+import com.example.ui.components.AiErrorBanner
 import com.example.ui.components.AudioSpeedSelector
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -36,6 +38,7 @@ fun SkillDetailScreen(
     flashcards: List<Flashcard>,
     audioSpeed: Float,
     writingEvaluation: WritingEvaluationResult?,
+    writingEvaluationError: AiFailure?,
     isEvaluatingWriting: Boolean,
     onSpeakText: (String) -> Unit,
     onSetAudioSpeed: (Float) -> Unit,
@@ -92,6 +95,7 @@ fun SkillDetailScreen(
                 )
                 SkillType.WRITING -> WritingPracticeView(
                     evaluation = writingEvaluation,
+                    error = writingEvaluationError,
                     isLoading = isEvaluatingWriting,
                     onEvaluateWriting = onEvaluateWriting
                 )
@@ -410,6 +414,7 @@ private val wordTranslationMap = mapOf(
 @Composable
 fun WritingPracticeView(
     evaluation: WritingEvaluationResult?,
+    error: AiFailure?,
     isLoading: Boolean,
     onEvaluateWriting: (String, String) -> Unit
 ) {
@@ -464,6 +469,11 @@ fun WritingPracticeView(
             }
         }
 
+        if (error != null) {
+            Spacer(modifier = Modifier.height(16.dp))
+            AiErrorBanner(failure = error)
+        }
+
         evaluation?.let { eval ->
             Spacer(modifier = Modifier.height(20.dp))
             Card(
@@ -487,10 +497,13 @@ fun WritingPracticeView(
     }
 }
 
+/**
+ * Listen-and-repeat drill. There is deliberately no score here: the app has no
+ * speech recognition, and the previous version faked a 92% pronunciation score
+ * and 95% word accuracy from a button tap without ever recording audio.
+ */
 @Composable
 fun SpeakingPracticeView(onSpeakText: (String) -> Unit) {
-    var isRecording by remember { mutableStateOf(false) }
-    var score by remember { mutableStateOf<Int?>(null) }
     val targetSentence = "Me gusta aprender nuevos idiomas todos los días."
 
     Column(
@@ -518,42 +531,26 @@ fun SpeakingPracticeView(onSpeakText: (String) -> Unit) {
             }
         }
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-        IconButton(
-            onClick = {
-                isRecording = !isRecording
-                if (!isRecording) score = 92
-            },
+        Button(
+            onClick = { onSpeakText(targetSentence) },
             modifier = Modifier
-                .size(80.dp)
-                .clip(CircleShape)
-                .background(if (isRecording) Color(0xFFEF4444) else MaterialTheme.colorScheme.primary)
+                .fillMaxWidth()
+                .testTag("speaking_replay_button"),
+            shape = RoundedCornerShape(14.dp)
         ) {
-            Icon(
-                imageVector = if (isRecording) Icons.Default.Stop else Icons.Default.Mic,
-                contentDescription = "Record",
-                tint = Color.White,
-                modifier = Modifier.size(36.dp)
-            )
+            Icon(Icons.Default.VolumeUp, contentDescription = null)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text("Play again")
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = if (isRecording) "Listening... Speak now!" else "Tap microphone to speak",
-            fontSize = 14.sp,
+            text = "Listen, then repeat the sentence out loud at your own pace.",
+            fontSize = 13.sp,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-
-        score?.let { s ->
-            Spacer(modifier = Modifier.height(24.dp))
-            Card(colors = CardDefaults.cardColors(containerColor = Color(0xFFDCFCE7))) {
-                Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(text = "Pronunciation Score: $s%", fontWeight = FontWeight.Bold, color = Color(0xFF15803D))
-                    Text(text = "Word Accuracy: 95% | Accent Balance: Natural", fontSize = 12.sp, color = Color(0xFF166534))
-                }
-            }
-        }
     }
 }
 

@@ -3,7 +3,8 @@ package com.example.ui.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.ai.AiTeacherReply
+import com.example.ai.AiFailure
+import com.example.ai.AiOutcome
 import com.example.ai.GeminiTutorService
 import com.example.ai.WritingEvaluationResult
 import com.example.audio.TtsManager
@@ -115,12 +116,20 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _isAiChatLoading = MutableStateFlow(false)
     val isAiChatLoading: StateFlow<Boolean> = _isAiChatLoading.asStateFlow()
 
+    /** Non-null when the last AI tutor request failed. Cleared on the next attempt. */
+    private val _aiChatError = MutableStateFlow<AiFailure?>(null)
+    val aiChatError: StateFlow<AiFailure?> = _aiChatError.asStateFlow()
+
     // Writing Evaluation State
     private val _writingEvaluation = MutableStateFlow<WritingEvaluationResult?>(null)
     val writingEvaluation: StateFlow<WritingEvaluationResult?> = _writingEvaluation.asStateFlow()
 
     private val _isEvaluatingWriting = MutableStateFlow(false)
     val isEvaluatingWriting: StateFlow<Boolean> = _isEvaluatingWriting.asStateFlow()
+
+    /** Non-null when the last writing evaluation failed. Cleared on the next attempt. */
+    private val _writingEvaluationError = MutableStateFlow<AiFailure?>(null)
+    val writingEvaluationError: StateFlow<AiFailure?> = _writingEvaluationError.asStateFlow()
 
     // Audio Speed Preference
     private val _audioSpeed = MutableStateFlow(1.0f)
@@ -199,17 +208,22 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             _isAiChatLoading.value = true
+            _aiChatError.value = null
             val profile = userProfile.value
-            val history = chatMessages.value
 
-            val reply = GeminiTutorService.chatWithAiTeacher(
-                userMessage = userText,
-                targetLanguage = profile.targetLanguageCode,
-                cefrLevel = profile.currentLevel,
-                chatHistory = history
-            )
-
-            repository.sendChatMessage(userText, reply)
+            when (
+                val outcome = GeminiTutorService.chatWithAiTeacher(
+                    userMessage = userText,
+                    targetLanguage = profile.targetLanguageCode,
+                    cefrLevel = profile.currentLevel,
+                    chatHistory = chatMessages.value
+                )
+            ) {
+                // Only a real answer is persisted. A failed request must not leave
+                // an invented tutor message in the user's chat history.
+                is AiOutcome.Success -> repository.sendChatMessage(userText, outcome.value)
+                is AiOutcome.Failure -> _aiChatError.value = outcome.reason
+            }
             _isAiChatLoading.value = false
         }
     }
@@ -219,9 +233,19 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             _isEvaluatingWriting.value = true
-            val langCode = targetLanguageCode.value
-            val result = GeminiTutorService.evaluateWriting(userText, prompt, langCode)
-            _writingEvaluation.value = result
+            _writingEvaluationError.value = null
+            _writingEvaluation.value = null
+
+            when (
+                val outcome = GeminiTutorService.evaluateWriting(
+                    userText = userText,
+                    prompt = prompt,
+                    targetLanguage = targetLanguageCode.value
+                )
+            ) {
+                is AiOutcome.Success -> _writingEvaluation.value = outcome.value
+                is AiOutcome.Failure -> _writingEvaluationError.value = outcome.reason
+            }
             _isEvaluatingWriting.value = false
         }
     }

@@ -20,7 +20,9 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ai.AiFailure
 import com.example.data.model.ChatMessage
+import com.example.ui.components.AiErrorBanner
 import com.example.ui.components.LevelChip
 import com.example.data.model.CefrLevel
 
@@ -29,6 +31,7 @@ import com.example.data.model.CefrLevel
 fun AiChatScreen(
     messages: List<ChatMessage>,
     isLoading: Boolean,
+    error: AiFailure?,
     currentLevel: CefrLevel,
     onSendMessage: (String) -> Unit,
     onSpeakText: (String) -> Unit,
@@ -95,6 +98,10 @@ fun AiChatScreen(
                 tonalElevation = 8.dp,
                 color = MaterialTheme.colorScheme.surface
             ) {
+                Column {
+                    if (error != null) {
+                        AiErrorBanner(failure = error)
+                    }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -137,6 +144,7 @@ fun AiChatScreen(
                             )
                         }
                     }
+                }
                 }
             }
         }

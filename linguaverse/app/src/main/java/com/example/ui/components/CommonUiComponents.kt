@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ai.AiFailure
 import com.example.data.model.CefrLevel
 
 @Composable
@@ -172,6 +173,50 @@ fun AudioSpeedSelector(
                     color = textColor
                 )
             }
+        }
+    }
+}
+
+/**
+ * Tells the user plainly that an AI request failed. The app used to present a
+ * hard-coded reply in this situation, so an outage looked like a working tutor.
+ */
+@Composable
+fun AiErrorBanner(
+    failure: AiFailure,
+    modifier: Modifier = Modifier
+) {
+    val message = when (failure) {
+        AiFailure.NOT_CONFIGURED ->
+            "AI tutor is not set up. Add a Gemini API key to enable live responses."
+        AiFailure.UNREACHABLE ->
+            "Couldn't reach the AI tutor. Check your connection and try again."
+        AiFailure.EMPTY_RESPONSE ->
+            "The AI tutor didn't return an answer. Please try again."
+    }
+
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .testTag("ai_error_banner"),
+        color = MaterialTheme.colorScheme.errorContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Filled.ErrorOutline,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = message,
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onErrorContainer
+            )
         }
     }
 }
