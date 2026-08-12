@@ -72,7 +72,7 @@ fun LinguaVerseApp(
             onSetAudioSpeed = { viewModel.setAudioSpeed(it) },
             onSubmitAnswer = { viewModel.submitExerciseAnswer(it) },
             onNextExercise = { viewModel.nextExercise() },
-            onCloseLesson = { viewModel.startLesson(activeLesson!!) /* resets or closes */ ; viewModel.nextExercise() }
+            onCloseLesson = { viewModel.closeLesson() }
         )
         return
     }

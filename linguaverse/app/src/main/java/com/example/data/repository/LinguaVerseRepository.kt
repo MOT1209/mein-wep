@@ -187,8 +187,12 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
 
     suspend fun completeLesson(lessonId: String, xpEarned: Int) {
         val lesson = dao.getLessonById(lessonId) ?: return
-        val updatedLesson = lesson.copy(isCompleted = true)
-        dao.updateLesson(updatedLesson)
+
+        // Replaying a finished lesson is allowed, but it must not farm XP, coins
+        // and completion count again.
+        if (lesson.isCompleted) return
+
+        dao.updateLesson(lesson.copy(isCompleted = true))
 
         val profile = dao.getUserProfileOnce() ?: return
         val newXp = profile.xp + xpEarned

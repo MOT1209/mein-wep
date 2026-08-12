@@ -10,6 +10,7 @@ import com.example.audio.TtsManager
 import com.example.data.db.AppDatabase
 import com.example.data.model.*
 import com.example.data.repository.LinguaVerseRepository
+import com.example.domain.AnswerGrader
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
@@ -152,15 +153,16 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun submitExerciseAnswer(userAnswer: String): Boolean {
-        val exercises = _activeExercises.value
-        val currentIndex = _currentExerciseIndex.value
-        if (exercises.isEmpty() || currentIndex >= exercises.size) return false
+        val exercise = _activeExercises.value.getOrNull(_currentExerciseIndex.value) ?: return false
+        return AnswerGrader.isCorrect(exercise, userAnswer)
+    }
 
-        val exercise = exercises[currentIndex]
-        val isCorrect = userAnswer.trim().equals(exercise.correctAnswer.trim(), ignoreCase = true) ||
-                (exercise.type == ExerciseType.WRITING && userAnswer.length > 3)
-
-        return isCorrect
+    /** Leaves lesson mode and returns to the tab that was showing before. */
+    fun closeLesson() {
+        _activeLesson.value = null
+        _activeExercises.value = emptyList()
+        _currentExerciseIndex.value = 0
+        _lessonCompleted.value = false
     }
 
     fun nextExercise() {

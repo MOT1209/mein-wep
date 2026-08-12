@@ -44,6 +44,7 @@ com.example
 | C9 | `seedSpanishContent()` يعمل عند **كل إقلاع** بـ`OnConflictStrategy.REPLACE` | `Repository.kt:64,80-89` | **تقدّم المستخدم في الدروس يُمسح عند كل فتح للتطبيق** (`isCompleted` يعود false) |
 | C10 | `fallbackToDestructiveMigration()` + `exportSchema = false` | `AppDatabase.kt:23,39` | أي تعديل على المخطّط يمحو كل بيانات المستخدمين، بلا هجرات ولا مخطّط مُصدَّر |
 | C11 | `namespace = "com.example"` كحزمة للتطبيق كله | `app/build.gradle.kts:12` | حزمة عيّنة؛ تصادم أسماء واسم غير احترافي في كل أثر (stack trace) |
+| C14 | تمرين `ex_es_3_3` نوعه `SPEAKING` بلا `correctAnswer` وبلا خيارات، و`LessonScreen` يعرض قائمة خيارات فارغة وزر الإرسال يبقى معطّلًا | `Repository.kt:126` + `LessonScreen.kt` | **الدرس الوحيد القابل للعب في التطبيق لا يمكن إنهاؤه** — يتوقّف عند السؤال 3 من 5 بلا أي مخرج |
 | C13 | `org.gradle.jvmargs` لا يثبّت اللغة، فتعمل الـJVM بلغة النظام (`ar`) | `gradle.properties` | **البناء يفشل كليًا على أي جهاز بلغة عربية**: مولّد Room يكتب أرقامًا هندية عربية في شيفرة Kotlin المولّدة (`var _argIndex: Int = ١`) فيفشل التصريف. مُثبَت تجريبيًا في هذا التدقيق |
 | C12 | `signingConfigs.debugConfig` يشير إلى `debug.keystore` في جذر المستودع، **والملف مُدرَج في `.gitignore` وغير موجود** | `app/build.gradle.kts` + `.gitignore` | **`assembleDebug` يفشل على أي نسخة جديدة من المستودع** عند `validateSigningDebug`. مُثبَت تجريبيًا في هذا التدقيق |
 

@@ -20,10 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.*
+import com.example.domain.AnswerGrader
 import com.example.ui.components.AudioSpeedSelector
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,6 +55,7 @@ fun LessonScreen(
     }
 
     val currentExercise = exercises.getOrNull(currentIndex) ?: return
+    val isPracticeOnly = AnswerGrader.isPracticeOnly(currentExercise)
     var selectedOption by remember(currentIndex) { mutableStateOf("") }
     var userTextInput by remember(currentIndex) { mutableStateOf("") }
     var answerChecked by remember(currentIndex) { mutableStateOf(false) }
@@ -118,13 +117,22 @@ fun LessonScreen(
                             Spacer(modifier = Modifier.width(10.dp))
                             Column {
                                 Text(
-                                    text = if (isAnswerCorrect) "Excellent!" else "Not quite right",
+                                    text = when {
+                                        isPracticeOnly -> "Nice practice!"
+                                        isAnswerCorrect -> "Excellent!"
+                                        else -> "Not quite right"
+                                    },
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp,
                                     color = if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C)
                                 )
                                 Text(
-                                    text = if (isAnswerCorrect) "Correct answer!" else "Correct: ${currentExercise.correctAnswer}",
+                                    text = when {
+                                        isPracticeOnly -> currentExercise.explanation
+                                            .ifBlank { "Keep going." }
+                                        isAnswerCorrect -> "Correct answer!"
+                                        else -> "Correct: ${currentExercise.correctAnswer}"
+                                    },
                                     fontSize = 13.sp,
                                     color = if (isAnswerCorrect) Color(0xFF166534) else Color(0xFF991B1B)
                                 )
@@ -147,7 +155,8 @@ fun LessonScreen(
                             .fillMaxWidth()
                             .height(52.dp)
                             .testTag("submit_exercise_button"),
-                        enabled = answerChecked || selectedOption.isNotEmpty() || userTextInput.isNotEmpty(),
+                        enabled = answerChecked || isPracticeOnly ||
+                            selectedOption.isNotEmpty() || userTextInput.isNotEmpty(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (answerChecked) {
                                 if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C)
@@ -156,7 +165,11 @@ fun LessonScreen(
                         shape = RoundedCornerShape(14.dp)
                     ) {
                         Text(
-                            text = if (!answerChecked) "Check Answer" else "Continue",
+                            text = when {
+                                answerChecked -> "Continue"
+                                isPracticeOnly -> "I practiced this"
+                                else -> "Check Answer"
+                            },
                             fontWeight = FontWeight.Bold,
                             fontSize = 16.sp
                         )
@@ -236,7 +249,9 @@ fun LessonScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Exercise Input Area
-            if (currentExercise.type == ExerciseType.WRITING) {
+            if (isPracticeOnly) {
+                PracticePromptCard(exercise = currentExercise)
+            } else if (currentExercise.type == ExerciseType.WRITING) {
                 OutlinedTextField(
                     value = userTextInput,
                     onValueChange = { userTextInput = it },
@@ -248,7 +263,7 @@ fun LessonScreen(
                 )
             } else {
                 // Parse Options JSON
-                val options = parseOptionsJson(currentExercise.optionsJson)
+                val options = AnswerGrader.parseOptions(currentExercise.optionsJson)
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     options.forEach { option ->
                         val isSelected = selectedOption == option
@@ -285,6 +300,48 @@ fun LessonScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Shown for exercises that carry a prompt to practise rather than a question to
+ * answer, such as speaking drills. Without this the screen rendered an empty
+ * option list and the submit button stayed disabled, leaving the lesson stuck.
+ */
+@Composable
+private fun PracticePromptCard(
+    exercise: Exercise,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.RecordVoiceOver,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column {
+                Text(
+                    text = "Practice out loud",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 15.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+                Text(
+                    text = exercise.translation.ifBlank { "Take your time, then continue." },
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
+                )
             }
         }
     }
@@ -396,14 +453,3 @@ fun LessonCompletionView(
     }
 }
 
-private fun parseOptionsJson(json: String): List<String> {
-    return try {
-        val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-        val adapter = moshi.adapter<List<String>>(
-            Types.newParameterizedType(List::class.java, String::class.java)
-        )
-        adapter.fromJson(json) ?: emptyList()
-    } catch (e: Exception) {
-        emptyList()
-    }
-}
