@@ -9,6 +9,8 @@ import com.example.ai.GeminiTutorService
 import com.example.ai.WritingEvaluationResult
 import com.example.audio.TtsManager
 import com.example.data.db.AppDatabase
+import com.example.data.prefs.UserPreferences
+import com.example.data.prefs.UserPreferencesRepository
 import com.example.data.model.*
 import com.example.data.repository.LinguaVerseRepository
 import com.example.domain.AnswerGrader
@@ -19,7 +21,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     private val db = AppDatabase.getDatabase(application)
     val repository = LinguaVerseRepository(db.linguaVerseDao())
+    private val preferencesRepository = UserPreferencesRepository(application)
     val ttsManager = TtsManager(application)
+
+    private val preferences: StateFlow<UserPreferences> = preferencesRepository.preferences
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = UserPreferences()
+        )
 
     // User Profile State
     val userProfile: StateFlow<UserProfile> = repository.userProfile
@@ -131,13 +141,23 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _writingEvaluationError = MutableStateFlow<AiFailure?>(null)
     val writingEvaluationError: StateFlow<AiFailure?> = _writingEvaluationError.asStateFlow()
 
-    // Audio Speed Preference
-    private val _audioSpeed = MutableStateFlow(1.0f)
-    val audioSpeed: StateFlow<Float> = _audioSpeed.asStateFlow()
+    // Audio speed and theme are read from persisted preferences, so they survive
+    // process death and app restarts.
+    val audioSpeed: StateFlow<Float> = preferences
+        .map { it.audioSpeed }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = UserPreferences.DEFAULT_AUDIO_SPEED
+        )
 
-    // Dark Theme Preference
-    private val _isDarkTheme = MutableStateFlow(false)
-    val isDarkTheme: StateFlow<Boolean> = _isDarkTheme.asStateFlow()
+    val isDarkTheme: StateFlow<Boolean> = preferences
+        .map { it.isDarkTheme }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     init {
         viewModelScope.launch {
@@ -205,15 +225,15 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun speakText(text: String) {
-        ttsManager.speak(text, targetLanguageCode.value, _audioSpeed.value)
+        ttsManager.speak(text, targetLanguageCode.value, audioSpeed.value)
     }
 
     fun setAudioSpeed(speed: Float) {
-        _audioSpeed.value = speed
+        viewModelScope.launch { preferencesRepository.setAudioSpeed(speed) }
     }
 
     fun toggleDarkTheme() {
-        _isDarkTheme.value = !_isDarkTheme.value
+        viewModelScope.launch { preferencesRepository.setDarkTheme(!isDarkTheme.value) }
     }
 
     fun sendAiChatMessage(userText: String) {
