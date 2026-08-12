@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +26,7 @@ import com.example.data.model.ChatMessage
 import com.example.ui.components.AiErrorBanner
 import com.example.ui.components.LevelChip
 import com.example.data.model.CefrLevel
+import com.example.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +90,7 @@ fun AiChatScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -239,13 +241,13 @@ fun AiChatScreen(
                         message.correction?.let { corr ->
                             Spacer(modifier = Modifier.height(4.dp))
                             Surface(
-                                color = Color(0xFFFEF2F2),
+                                color = MaterialTheme.colorScheme.errorContainer,
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
                                     text = "💡 Correction: $corr",
                                     fontSize = 11.sp,
-                                    color = Color(0xFF991B1B),
+                                    color = MaterialTheme.colorScheme.onErrorContainer,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                                 )
                             }
@@ -254,13 +256,13 @@ fun AiChatScreen(
                         message.suggestion?.let { sug ->
                             Spacer(modifier = Modifier.height(4.dp))
                             Surface(
-                                color = Color(0xFFEFF6FF),
+                                color = MaterialTheme.extendedColors.infoContainer,
                                 shape = RoundedCornerShape(12.dp)
                             ) {
                                 Text(
                                     text = "✨ Better phrasing: $sug",
                                     fontSize = 11.sp,
-                                    color = Color(0xFF1E40AF),
+                                    color = MaterialTheme.extendedColors.info,
                                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                                 )
                             }

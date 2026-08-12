@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.data.model.*
 import com.example.ui.components.*
+import com.example.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -402,7 +403,7 @@ fun LessonItemCard(
                     .clip(CircleShape)
                     .background(
                         when {
-                            lesson.isCompleted -> Color(0xFF10B981)
+                            lesson.isCompleted -> MaterialTheme.extendedColors.success
                             lesson.isLocked -> MaterialTheme.colorScheme.outlineVariant
                             else -> MaterialTheme.colorScheme.primary
                         }
@@ -457,7 +458,7 @@ fun LessonItemCard(
                 text = "+${lesson.xpReward} XP",
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
-                color = Color(0xFFD97706)
+                color = MaterialTheme.extendedColors.xp
             )
         }
     }

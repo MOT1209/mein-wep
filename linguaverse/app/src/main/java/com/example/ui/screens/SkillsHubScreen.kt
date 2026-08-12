@@ -19,12 +19,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.SkillType
+import com.example.ui.theme.extendedColors
 
 data class SkillCategoryInfo(
     val type: SkillType,
     val icon: ImageVector,
     val description: String,
-    val color: Color
+    /** Index into MaterialTheme.extendedColors.skillPalette, so the accent adapts to the theme. */
+    val paletteIndex: Int
 )
 
 @Composable
@@ -33,20 +35,20 @@ fun SkillsHubScreen(
     modifier: Modifier = Modifier
 ) {
     val skillCategories = listOf(
-        SkillCategoryInfo(SkillType.AI_CHAT, Icons.Default.SmartToy, "Interactive AI Teacher Chat", Color(0xFF4F46E5)),
-        SkillCategoryInfo(SkillType.LISTENING, Icons.Default.Hearing, "Audio Speed & Comprehension", Color(0xFF0284C7)),
-        SkillCategoryInfo(SkillType.SPEAKING, Icons.Default.Mic, "Speech Recognition & Pronunciation", Color(0xFF059669)),
-        SkillCategoryInfo(SkillType.READING, Icons.Default.Book, "Stories & Tap Dictionary", Color(0xFFD97706)),
-        SkillCategoryInfo(SkillType.WRITING, Icons.Default.Edit, "Free Writing & AI Correction", Color(0xFF7C3AED)),
-        SkillCategoryInfo(SkillType.VOCABULARY, Icons.Default.Translate, "Word Deck & Pronunciation", Color(0xFFDB2777)),
-        SkillCategoryInfo(SkillType.GRAMMAR, Icons.Default.Rule, "CEFR Rules & Examples", Color(0xFF4338CA)),
-        SkillCategoryInfo(SkillType.FLASHCARDS, Icons.Default.Style, "Spaced Repetition Cards", Color(0xFF059669)),
-        SkillCategoryInfo(SkillType.QUIZZES, Icons.Default.Quiz, "Multi-Format Practice Tests", Color(0xFFEA580C)),
-        SkillCategoryInfo(SkillType.DAILY_PHRASES, Icons.Default.ChatBubbleOutline, "Categorized Phrasebook", Color(0xFF2563EB)),
-        SkillCategoryInfo(SkillType.CONVERSATION, Icons.Default.Forum, "Scenario Roleplaying", Color(0xFF0D9488)),
-        SkillCategoryInfo(SkillType.PRONUNCIATION, Icons.Default.RecordVoiceOver, "Phonetics & Voice Feedback", Color(0xFF65A30D)),
-        SkillCategoryInfo(SkillType.TRANSLATION, Icons.Default.SwapHoriz, "Sentence Translation Challenges", Color(0xFF9333EA)),
-        SkillCategoryInfo(SkillType.REVIEW, Icons.Default.Replay, "Smart Weak Point Practice", Color(0xFFC026D3))
+        SkillCategoryInfo(SkillType.AI_CHAT, Icons.Default.SmartToy, "Interactive AI Teacher Chat", 0),
+        SkillCategoryInfo(SkillType.LISTENING, Icons.Default.Hearing, "Audio Speed & Comprehension", 1),
+        SkillCategoryInfo(SkillType.SPEAKING, Icons.Default.Mic, "Speech Recognition & Pronunciation", 2),
+        SkillCategoryInfo(SkillType.READING, Icons.Default.Book, "Stories & Tap Dictionary", 3),
+        SkillCategoryInfo(SkillType.WRITING, Icons.Default.Edit, "Free Writing & AI Correction", 4),
+        SkillCategoryInfo(SkillType.VOCABULARY, Icons.Default.Translate, "Word Deck & Pronunciation", 5),
+        SkillCategoryInfo(SkillType.GRAMMAR, Icons.Default.Rule, "CEFR Rules & Examples", 6),
+        SkillCategoryInfo(SkillType.FLASHCARDS, Icons.Default.Style, "Spaced Repetition Cards", 7),
+        SkillCategoryInfo(SkillType.QUIZZES, Icons.Default.Quiz, "Multi-Format Practice Tests", 8),
+        SkillCategoryInfo(SkillType.DAILY_PHRASES, Icons.Default.ChatBubbleOutline, "Categorized Phrasebook", 9),
+        SkillCategoryInfo(SkillType.CONVERSATION, Icons.Default.Forum, "Scenario Roleplaying", 10),
+        SkillCategoryInfo(SkillType.PRONUNCIATION, Icons.Default.RecordVoiceOver, "Phonetics & Voice Feedback", 11),
+        SkillCategoryInfo(SkillType.TRANSLATION, Icons.Default.SwapHoriz, "Sentence Translation Challenges", 12),
+        SkillCategoryInfo(SkillType.REVIEW, Icons.Default.Replay, "Smart Weak Point Practice", 13)
     )
 
     Column(
@@ -76,6 +78,8 @@ fun SkillsHubScreen(
             contentPadding = PaddingValues(bottom = 80.dp)
         ) {
             items(skillCategories) { skill ->
+                val palette = MaterialTheme.extendedColors.skillPalette
+                val accent = palette[skill.paletteIndex % palette.size]
                 Surface(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -89,13 +93,13 @@ fun SkillsHubScreen(
                         horizontalAlignment = Alignment.Start
                     ) {
                         Surface(
-                            color = skill.color.copy(alpha = 0.15f),
+                            color = accent.copy(alpha = 0.15f),
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Icon(
                                 imageVector = skill.icon,
                                 contentDescription = skill.type.displayName,
-                                tint = skill.color,
+                                tint = accent,
                                 modifier = Modifier
                                     .padding(10.dp)
                                     .size(28.dp)

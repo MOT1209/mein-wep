@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.BuildConfig
 import com.example.data.model.Language
 import com.example.ui.components.AudioSpeedSelector
 
@@ -146,8 +147,9 @@ fun SettingsScreen(
             }
         }
 
-        // Admin Studio Button
-        item {
+        // Admin Studio Button. This writes directly to the content database with no
+        // authentication, so it must not be reachable in a release build.
+        if (BuildConfig.DEBUG) item {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()

@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.LeaderboardEntry
+import com.example.ui.theme.extendedColors
 
 @Composable
 fun LeaderboardScreen(
@@ -64,7 +65,7 @@ fun LeaderboardScreen(
             }
 
             Surface(
-                color = Color(0xFFFEF3C7),
+                color = MaterialTheme.extendedColors.xpContainer,
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Row(
@@ -74,7 +75,7 @@ fun LeaderboardScreen(
                     Icon(
                         imageVector = Icons.Default.EmojiEvents,
                         contentDescription = null,
-                        tint = Color(0xFFD97706),
+                        tint = MaterialTheme.extendedColors.xp,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -82,7 +83,7 @@ fun LeaderboardScreen(
                         text = "3 Days Left",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
-                        color = Color(0xFFB45309)
+                        color = MaterialTheme.extendedColors.onXpContainer
                     )
                 }
             }
@@ -108,7 +109,7 @@ fun LeaderboardScreen(
                             text = "#${entry.rank}",
                             fontWeight = FontWeight.ExtraBold,
                             fontSize = 16.sp,
-                            color = if (entry.rank <= 3) Color(0xFFD97706) else MaterialTheme.colorScheme.onSurface
+                            color = if (entry.rank <= 3) MaterialTheme.extendedColors.xp else MaterialTheme.colorScheme.onSurface
                         )
 
                         Spacer(modifier = Modifier.width(16.dp))
@@ -143,7 +144,7 @@ fun LeaderboardScreen(
                             Icon(
                                 imageVector = Icons.Default.Stars,
                                 contentDescription = null,
-                                tint = Color(0xFFD97706),
+                                tint = MaterialTheme.extendedColors.xp,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(4.dp))
@@ -151,7 +152,7 @@ fun LeaderboardScreen(
                                 text = "${entry.xp} XP",
                                 fontWeight = FontWeight.ExtraBold,
                                 fontSize = 14.sp,
-                                color = Color(0xFFB45309)
+                                color = MaterialTheme.extendedColors.onXpContainer
                             )
                         }
                     }

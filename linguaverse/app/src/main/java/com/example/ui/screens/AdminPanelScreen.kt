@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +17,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.CefrLevel
+import com.example.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,7 +36,7 @@ fun AdminPanelScreen(
                 title = { Text("Admin Panel & Content Studio", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -160,7 +162,7 @@ fun AdminAddLanguageTab(onAddLanguage: (String, String, String, String, String) 
         }
         if (showSuccess) {
             item {
-                Text(text = "Language successfully added!", color = Color(0xFF15803D), fontWeight = FontWeight.Bold)
+                Text(text = "Language successfully added!", color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -230,7 +232,7 @@ fun AdminAddLessonTab(onAddLesson: (String, String, CefrLevel, Int, String, Stri
         }
         if (showSuccess) {
             item {
-                Text(text = "Lesson successfully published!", color = Color(0xFF15803D), fontWeight = FontWeight.Bold)
+                Text(text = "Lesson successfully published!", color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -291,7 +293,7 @@ fun AdminAddVocabTab(onAddVocabulary: (String, String, String, String) -> Unit) 
         }
         if (showSuccess) {
             item {
-                Text(text = "Vocabulary word added!", color = Color(0xFF15803D), fontWeight = FontWeight.Bold)
+                Text(text = "Vocabulary word added!", color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
             }
         }
     }

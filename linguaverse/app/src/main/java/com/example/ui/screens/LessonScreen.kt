@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.*
 import com.example.domain.AnswerGrader
 import com.example.ui.components.AudioSpeedSelector
+import com.example.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,8 +98,8 @@ fun LessonScreen(
                 tonalElevation = 8.dp,
                 color = when {
                     !answerChecked -> MaterialTheme.colorScheme.surface
-                    isAnswerCorrect -> Color(0xFFDCFCE7)
-                    else -> Color(0xFFFEE2E2)
+                    isAnswerCorrect -> MaterialTheme.extendedColors.successContainer
+                    else -> MaterialTheme.colorScheme.errorContainer
                 }
             ) {
                 Column(
@@ -111,7 +112,7 @@ fun LessonScreen(
                             Icon(
                                 imageVector = if (isAnswerCorrect) Icons.Default.CheckCircle else Icons.Default.Cancel,
                                 contentDescription = null,
-                                tint = if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C),
+                                tint = if (isAnswerCorrect) MaterialTheme.extendedColors.success else MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(28.dp)
                             )
                             Spacer(modifier = Modifier.width(10.dp))
@@ -124,7 +125,7 @@ fun LessonScreen(
                                     },
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 16.sp,
-                                    color = if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C)
+                                    color = if (isAnswerCorrect) MaterialTheme.extendedColors.success else MaterialTheme.colorScheme.error
                                 )
                                 Text(
                                     text = when {
@@ -134,7 +135,7 @@ fun LessonScreen(
                                         else -> "Correct: ${currentExercise.correctAnswer}"
                                     },
                                     fontSize = 13.sp,
-                                    color = if (isAnswerCorrect) Color(0xFF166534) else Color(0xFF991B1B)
+                                    color = if (isAnswerCorrect) MaterialTheme.extendedColors.onSuccessContainer else MaterialTheme.colorScheme.onErrorContainer
                                 )
                             }
                         }
@@ -159,7 +160,7 @@ fun LessonScreen(
                             selectedOption.isNotEmpty() || userTextInput.isNotEmpty(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (answerChecked) {
-                                if (isAnswerCorrect) Color(0xFF15803D) else Color(0xFFB91C1C)
+                                if (isAnswerCorrect) MaterialTheme.extendedColors.success else MaterialTheme.colorScheme.error
                             } else MaterialTheme.colorScheme.primary
                         ),
                         shape = RoundedCornerShape(14.dp)
@@ -366,7 +367,7 @@ fun LessonCompletionView(
             Icon(
                 imageVector = Icons.Default.EmojiEvents,
                 contentDescription = "Success",
-                tint = Color(0xFFF59E0B),
+                tint = MaterialTheme.extendedColors.warning,
                 modifier = Modifier.size(96.dp)
             )
 
@@ -389,7 +390,7 @@ fun LessonCompletionView(
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 Surface(
-                    color = Color(0xFFFEF3C7),
+                    color = MaterialTheme.extendedColors.xpContainer,
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Row(
@@ -399,19 +400,19 @@ fun LessonCompletionView(
                         Icon(
                             imageVector = Icons.Default.Stars,
                             contentDescription = null,
-                            tint = Color(0xFFD97706)
+                            tint = MaterialTheme.extendedColors.xp
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "+${lesson.xpReward} XP",
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFFB45309)
+                            color = MaterialTheme.extendedColors.onXpContainer
                         )
                     }
                 }
 
                 Surface(
-                    color = Color(0xFFDCFCE7),
+                    color = MaterialTheme.extendedColors.successContainer,
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Row(
@@ -421,13 +422,13 @@ fun LessonCompletionView(
                         Icon(
                             imageVector = Icons.Default.MonetizationOn,
                             contentDescription = null,
-                            tint = Color(0xFF15803D)
+                            tint = MaterialTheme.extendedColors.success
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "+${lesson.xpReward / 2} Coins",
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF166534)
+                            color = MaterialTheme.extendedColors.onSuccessContainer
                         )
                     }
                 }

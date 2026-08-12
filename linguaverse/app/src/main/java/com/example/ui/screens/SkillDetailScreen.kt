@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import com.example.ai.WritingEvaluationResult
 import com.example.data.model.*
 import com.example.ui.components.AiErrorBanner
 import com.example.ui.components.AudioSpeedSelector
+import com.example.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -58,7 +60,7 @@ fun SkillDetailScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -177,7 +179,7 @@ fun VocabularyView(
                             Icon(
                                 imageVector = if (vocab.isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Favorite",
-                                tint = if (vocab.isFavorite) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurfaceVariant
+                                tint = if (vocab.isFavorite) MaterialTheme.extendedColors.favorite else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }

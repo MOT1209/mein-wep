@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.example.data.model.Achievement
 import com.example.data.model.UserProfile
 import com.example.ui.components.LevelChip
+import com.example.ui.theme.extendedColors
 
 @Composable
 fun ProfileScreen(
@@ -83,9 +84,9 @@ fun ProfileScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        ProfileStatItem(title = "Total XP", value = "${userProfile.xp}", icon = Icons.Default.Stars, color = Color(0xFFD97706))
-                        ProfileStatItem(title = "Streak", value = "${userProfile.streakCount} days", icon = Icons.Default.LocalFireDepartment, color = Color(0xFFEA580C))
-                        ProfileStatItem(title = "Lessons", value = "${userProfile.totalCompletedLessons}", icon = Icons.Default.School, color = Color(0xFF2563EB))
+                        ProfileStatItem(title = "Total XP", value = "${userProfile.xp}", icon = Icons.Default.Stars, color = MaterialTheme.extendedColors.xp)
+                        ProfileStatItem(title = "Streak", value = "${userProfile.streakCount} days", icon = Icons.Default.LocalFireDepartment, color = MaterialTheme.extendedColors.streak)
+                        ProfileStatItem(title = "Lessons", value = "${userProfile.totalCompletedLessons}", icon = Icons.Default.School, color = MaterialTheme.extendedColors.skillPalette[9])
                     }
                 }
             }
@@ -107,12 +108,12 @@ fun ProfileScreen(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
             ) {
                 Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    SkillScoreBar("Vocabulary", userProfile.vocabularyScore, Color(0xFFDB2777))
-                    SkillScoreBar("Reading", userProfile.readingScore, Color(0xFFD97706))
-                    SkillScoreBar("Listening", userProfile.listeningScore, Color(0xFF0284C7))
-                    SkillScoreBar("Speaking", userProfile.speakingScore, Color(0xFF059669))
-                    SkillScoreBar("Writing", userProfile.writingScore, Color(0xFF7C3AED))
-                    SkillScoreBar("Grammar", userProfile.grammarScore, Color(0xFF4338CA))
+                    SkillScoreBar("Vocabulary", userProfile.vocabularyScore, MaterialTheme.extendedColors.skillPalette[5])
+                    SkillScoreBar("Reading", userProfile.readingScore, MaterialTheme.extendedColors.xp)
+                    SkillScoreBar("Listening", userProfile.listeningScore, MaterialTheme.extendedColors.skillPalette[1])
+                    SkillScoreBar("Speaking", userProfile.speakingScore, MaterialTheme.extendedColors.skillPalette[2])
+                    SkillScoreBar("Writing", userProfile.writingScore, MaterialTheme.extendedColors.skillPalette[4])
+                    SkillScoreBar("Grammar", userProfile.grammarScore, MaterialTheme.extendedColors.skillPalette[6])
                 }
             }
         }
@@ -188,13 +189,13 @@ fun ProfileScreen(
                         modifier = Modifier
                             .size(44.dp)
                             .clip(CircleShape)
-                            .background(if (ach.isUnlocked) Color(0xFFFEF3C7) else MaterialTheme.colorScheme.surfaceContainerHighest),
+                            .background(if (ach.isUnlocked) MaterialTheme.extendedColors.xpContainer else MaterialTheme.colorScheme.surfaceContainerHighest),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = if (ach.isUnlocked) Icons.Default.EmojiEvents else Icons.Default.Lock,
                             contentDescription = null,
-                            tint = if (ach.isUnlocked) Color(0xFFD97706) else MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = if (ach.isUnlocked) MaterialTheme.extendedColors.xp else MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
@@ -209,7 +210,7 @@ fun ProfileScreen(
                         text = "+${ach.rewardXp} XP",
                         fontWeight = FontWeight.Bold,
                         fontSize = 12.sp,
-                        color = Color(0xFFD97706)
+                        color = MaterialTheme.extendedColors.xp
                     )
                 }
             }

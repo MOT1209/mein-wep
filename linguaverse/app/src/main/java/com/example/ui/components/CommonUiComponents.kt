@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ai.AiFailure
 import com.example.data.model.CefrLevel
+import com.example.ui.theme.extendedColors
 
 @Composable
 fun GlassCard(
@@ -59,7 +60,7 @@ fun XpBadge(
 ) {
     Surface(
         modifier = modifier.testTag("xp_badge"),
-        color = Color(0xFFFEF3C7),
+        color = MaterialTheme.extendedColors.xpContainer,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -69,7 +70,7 @@ fun XpBadge(
             Icon(
                 imageVector = Icons.Filled.Stars,
                 contentDescription = "XP Points",
-                tint = Color(0xFFD97706),
+                tint = MaterialTheme.extendedColors.xp,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(4.dp))
@@ -77,7 +78,7 @@ fun XpBadge(
                 text = "$xp XP",
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
-                color = Color(0xFFB45309)
+                color = MaterialTheme.extendedColors.onXpContainer
             )
         }
     }
@@ -90,7 +91,7 @@ fun StreakBadge(
 ) {
     Surface(
         modifier = modifier.testTag("streak_badge"),
-        color = Color(0xFFFFEDD5),
+        color = MaterialTheme.extendedColors.streakContainer,
         shape = RoundedCornerShape(12.dp)
     ) {
         Row(
@@ -100,7 +101,7 @@ fun StreakBadge(
             Icon(
                 imageVector = Icons.Filled.LocalFireDepartment,
                 contentDescription = "Streak",
-                tint = Color(0xFFEA580C),
+                tint = MaterialTheme.extendedColors.streak,
                 modifier = Modifier.size(18.dp)
             )
             Spacer(modifier = Modifier.width(4.dp))
@@ -108,7 +109,7 @@ fun StreakBadge(
                 text = "$streakCount Days",
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
-                color = Color(0xFFC2410C)
+                color = MaterialTheme.extendedColors.onStreakContainer
             )
         }
     }
@@ -120,9 +121,13 @@ fun LevelChip(
     modifier: Modifier = Modifier
 ) {
     val (bgColor, textColor) = when (level) {
-        CefrLevel.A1, CefrLevel.A2 -> Color(0xFFDCFCE7) to Color(0xFF15803D)
-        CefrLevel.B1, CefrLevel.B2 -> Color(0xFFE0E7FF) to Color(0xFF4338CA)
-        CefrLevel.C1, CefrLevel.C2 -> Color(0xFFF3E8FF) to Color(0xFF6B21A8)
+        CefrLevel.A1, CefrLevel.A2 -> MaterialTheme.extendedColors.successContainer to MaterialTheme.extendedColors.success
+        CefrLevel.B1, CefrLevel.B2 ->
+            MaterialTheme.extendedColors.levelIntermediateContainer to
+                MaterialTheme.extendedColors.levelIntermediate
+        CefrLevel.C1, CefrLevel.C2 ->
+            MaterialTheme.extendedColors.levelAdvancedContainer to
+                MaterialTheme.extendedColors.levelAdvanced
     }
 
     Surface(
@@ -241,7 +246,7 @@ fun DailyGoalProgressRing(
         CircularProgressIndicator(
             progress = { animatedProgress },
             modifier = Modifier.fillMaxSize(),
-            color = Color(0xFF10B981),
+            color = MaterialTheme.extendedColors.success,
             strokeWidth = 6.dp,
             trackColor = MaterialTheme.colorScheme.surfaceVariant
         )
