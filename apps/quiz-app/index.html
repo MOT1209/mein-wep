@@ -18,8 +18,29 @@
     <meta name="twitter:title" content="اسألني | تطبيق الاختبارات الذكي">
     <meta name="twitter:description" content="اسألني — تطبيق الاختبارات الذكي مع تصنيفات متعددة.">
     <meta name="twitter:image" content="../../images/logo.png">
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
+    <!-- Google AdSense — للويب فقط.
+         عرض AdSense داخل WebView مُحزَّم (APK) مخالف لسياسة Google؛
+         الإعلانات داخل التطبيق تأتي من AdMob عبر js/ads.js. -->
+    <script>
+        // ننتظر DOMContentLoaded لأن js/vendor/capacitor.js يُحمَّل في <body>،
+        // أي أن window.Capacitor غير معرَّف بعد عند تنفيذ سكربتات <head>.
+        document.addEventListener('DOMContentLoaded', function () {
+            var isNative = !!(window.Capacitor &&
+                typeof window.Capacitor.isNativePlatform === 'function' &&
+                window.Capacitor.isNativePlatform());
+            // احتياط: WebView الخاص بـ Capacitor يقدّم الصفحة من localhost/capacitor://
+            var nativeHost = location.hostname === 'localhost' ||
+                location.protocol === 'capacitor:' ||
+                location.protocol === 'file:';
+            if (isNative || nativeHost) return;
+
+            var s = document.createElement('script');
+            s.async = true;
+            s.crossOrigin = 'anonymous';
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958';
+            document.head.appendChild(s);
+        });
+    </script>
     <!-- Google Fonts: Cairo and Outfit -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&family=Outfit:wght@300;400;600&display=swap"
         rel="stylesheet">
@@ -593,8 +614,7 @@
                 .catch(err => console.log('[Quiz] SW registration failed:', err));
         }
     </script>
-  <script src="js/update-checker.js"></script>
-  <!-- OTA update checker -->
+  <!-- OTA update checker (المشترك فقط — يعمل داخل تطبيق Capacitor حصراً) -->
   <script>window.RASHID_APP={id:'com.rashid.quizmaster',version:'1.4.1',name:'Quiz Master'};</script>
   <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
 </body>

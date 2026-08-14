@@ -808,7 +808,12 @@ function showQuestion() {
         const div = document.createElement('div');
         div.className = 'option';
         div.style.animationDelay = (index * 0.07) + 's'; // staggered entrance
-        div.innerHTML = `<span>${option}</span><i class="far fa-circle"></i>`;
+        // بناء بالـ DOM لا بـ innerHTML — يمنع أي حقن لو صارت الأسئلة ديناميكية
+        const label = document.createElement('span');
+        label.textContent = option;
+        const mark = document.createElement('i');
+        mark.className = 'far fa-circle';
+        div.append(label, mark);
         div.addEventListener('click', () => selectOption(index, div));
         optionsContainer.appendChild(div);
     });
