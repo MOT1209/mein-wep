@@ -9,22 +9,71 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
     primary = PrimaryIndigoDark,
-    secondary = SecondaryEmerald,
-    tertiary = TertiaryAmber,
+    onPrimary = Color(0xFF1B1B3A),
+    primaryContainer = Color(0xFF373080),
+    onPrimaryContainer = Color(0xFFE2E1FF),
+    secondary = SecondaryEmeraldDark,
+    onSecondary = Color(0xFF00382A),
+    secondaryContainer = Color(0xFF00513D),
+    onSecondaryContainer = Color(0xFF9AF7D0),
+    tertiary = TertiaryAmberDark,
+    onTertiary = Color(0xFF402D00),
+    tertiaryContainer = Color(0xFF5D4300),
+    onTertiaryContainer = Color(0xFFFFDEA0),
+    error = ErrorRedLight,
+    onError = Color(0xFF601410),
+    errorContainer = Color(0xFF8C1D18),
+    onErrorContainer = Color(0xFFFFDAD6),
     background = SurfaceDark,
-    surface = SurfaceContainerDark
+    onBackground = Color(0xFFE4E7F4),
+    surface = SurfaceContainerDark,
+    onSurface = Color(0xFFE4E7F4),
+    surfaceTint = PrimaryIndigoDark,
+    surfaceVariant = SurfaceContainerHighDark,
+    onSurfaceVariant = Color(0xFFBDC3D7),
+    outline = Color(0xFF8B91A7),
+    outlineVariant = Color(0xFF41485F),
+    inverseSurface = SurfaceContainerHighestDark,
+    inverseOnSurface = Color(0xFF2B3756),
+    inversePrimary = PrimaryIndigo,
+    scrim = ScrimDark
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = PrimaryIndigo,
+    onPrimary = White,
+    primaryContainer = Color(0xFFE3E2FF),
+    onPrimaryContainer = Color(0xFF15134C),
     secondary = SecondaryEmerald,
+    onSecondary = White,
+    secondaryContainer = Color(0xFFB7F2DA),
+    onSecondaryContainer = Color(0xFF002117),
     tertiary = TertiaryAmber,
+    onTertiary = White,
+    tertiaryContainer = Color(0xFFFFE4B4),
+    onTertiaryContainer = Color(0xFF2B1A00),
+    error = ErrorRed,
+    onError = White,
+    errorContainer = Color(0xFFFEE2E2),
+    onErrorContainer = Color(0xFF7F1D1D),
     background = SurfaceLight,
-    surface = SurfaceContainerLight
+    onBackground = Color(0xFF171923),
+    surface = SurfaceContainerLight,
+    onSurface = Color(0xFF171923),
+    surfaceTint = PrimaryIndigo,
+    surfaceVariant = SurfaceContainerHighLight,
+    onSurfaceVariant = Color(0xFF5D6070),
+    outline = Color(0xFF77798A),
+    outlineVariant = Color(0xFFD9D9E5),
+    inverseSurface = SurfaceContainerHighestLight,
+    inverseOnSurface = Color(0xFFF0F1F8),
+    inversePrimary = PrimaryIndigoLight,
+    scrim = ScrimLight
 )
 
 @Composable
@@ -47,7 +96,8 @@ fun LinguaVerseTheme(
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = Typography,
+            typography = LinguaVerseTypography,
+            shapes = LinguaVerseShapes,
             content = content
         )
     }

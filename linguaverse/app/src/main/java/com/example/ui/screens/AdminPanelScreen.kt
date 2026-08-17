@@ -30,12 +30,12 @@ fun AdminPanelScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var activeTab by remember { mutableStateOf(0) } // 0: Analytics, 1: Languages, 2: Lessons, 3: Vocab
+    var activeTab by remember { mutableIntStateOf(0) } // 0: Analytics, 1: Languages, 2: Lessons, 3: Vocab
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Admin Panel & Content Studio", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.admin_panel_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
@@ -52,9 +52,9 @@ fun AdminPanelScreen(
                 .testTag("admin_panel_screen")
         ) {
             SecondaryTabRow(selectedTabIndex = activeTab) {
-                Tab(selected = activeTab == 0, onClick = { activeTab = 0 }, text = { Text("Analytics") })
-                Tab(selected = activeTab == 1, onClick = { activeTab = 1 }, text = { Text("Languages") })
-                Tab(selected = activeTab == 2, onClick = { activeTab = 2 }, text = { Text("Lessons") })
+                Tab(selected = activeTab == 0, onClick = { activeTab = 0 }, text = { Text(stringResource(R.string.tab_analytics)) })
+                Tab(selected = activeTab == 1, onClick = { activeTab = 1 }, text = { Text(stringResource(R.string.tab_languages)) })
+                Tab(selected = activeTab == 2, onClick = { activeTab = 2 }, text = { Text(stringResource(R.string.tab_lessons)) })
                 Tab(selected = activeTab == 3, onClick = { activeTab = 3 }, text = { Text(stringResource(R.string.vocabulary)) })
             }
 
@@ -81,8 +81,8 @@ fun AdminAnalyticsTab() {
             shape = RoundedCornerShape(18.dp)
         ) {
             Column(modifier = Modifier.padding(18.dp)) {
-                Text(text = "Active Learners: 12,450", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(text = "Supported Languages: Unlimited (12 Defaults Enabled)", fontSize = 13.sp)
+                Text(text = stringResource(R.string.active_learners_count), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                Text(text = stringResource(R.string.supported_languages_text), fontSize = 13.sp)
                 Text(text = stringResource(R.string.total_exercises_completed_148_920), fontSize = 13.sp)
                 Text(text = stringResource(R.string.ai_server_uptime_99_98), fontSize = 13.sp)
             }
@@ -100,12 +100,12 @@ fun AdminAddLanguageTab(onAddLanguage: (String, String, String, String, String) 
     var showSuccess by remember { mutableStateOf(false) }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        item { Text(text = "Add New Language", fontWeight = FontWeight.Bold, fontSize = 18.sp) }
+        item { Text(text = stringResource(R.string.add_new_language), fontWeight = FontWeight.Bold, fontSize = 18.sp) }
         item {
             OutlinedTextField(
                 value = code,
                 onValueChange = { code = it },
-                label = { Text("Language Code (e.g., 'nl', 'hi', 'sv')") },
+                label = { Text(stringResource(R.string.lang_code_hint)) },
                 modifier = Modifier.fillMaxWidth().testTag("admin_lang_code"),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -114,7 +114,7 @@ fun AdminAddLanguageTab(onAddLanguage: (String, String, String, String, String) 
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Language Name (e.g., 'Dutch')") },
+                label = { Text(stringResource(R.string.lang_name_hint)) },
                 modifier = Modifier.fillMaxWidth().testTag("admin_lang_name"),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -123,7 +123,7 @@ fun AdminAddLanguageTab(onAddLanguage: (String, String, String, String, String) 
             OutlinedTextField(
                 value = nativeName,
                 onValueChange = { nativeName = it },
-                label = { Text("Native Name (e.g., 'Nederlands')") },
+                label = { Text(stringResource(R.string.native_name_hint)) },
                 modifier = Modifier.fillMaxWidth().testTag("admin_lang_native"),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -141,7 +141,7 @@ fun AdminAddLanguageTab(onAddLanguage: (String, String, String, String, String) 
             OutlinedTextField(
                 value = description,
                 onValueChange = { description = it },
-                label = { Text("Description") },
+                label = { Text(stringResource(R.string.description_hint)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -159,12 +159,12 @@ fun AdminAddLanguageTab(onAddLanguage: (String, String, String, String, String) 
                 modifier = Modifier.fillMaxWidth().height(48.dp).testTag("admin_submit_lang_button"),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Add Language to Catalog")
+                Text(stringResource(R.string.add_language_btn))
             }
         }
         if (showSuccess) {
             item {
-                Text(text = "Language successfully added!", color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.language_added), color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -179,12 +179,12 @@ fun AdminAddLessonTab(onAddLesson: (String, String, CefrLevel, Int, String, Stri
     var showSuccess by remember { mutableStateOf(false) }
 
     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        item { Text(text = "Create Custom Lesson", fontWeight = FontWeight.Bold, fontSize = 18.sp) }
+        item { Text(text = stringResource(R.string.create_lesson), fontWeight = FontWeight.Bold, fontSize = 18.sp) }
         item {
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Lesson Title") },
+                label = { Text(stringResource(R.string.lesson_title_hint)) },
                 modifier = Modifier.fillMaxWidth().testTag("admin_lesson_title"),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -202,7 +202,7 @@ fun AdminAddLessonTab(onAddLesson: (String, String, CefrLevel, Int, String, Stri
             OutlinedTextField(
                 value = prompt,
                 onValueChange = { prompt = it },
-                label = { Text("Sample Exercise Question") },
+                label = { Text(stringResource(R.string.exercise_question_hint)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -211,7 +211,7 @@ fun AdminAddLessonTab(onAddLesson: (String, String, CefrLevel, Int, String, Stri
             OutlinedTextField(
                 value = answer,
                 onValueChange = { answer = it },
-                label = { Text("Correct Answer") },
+                label = { Text(stringResource(R.string.correct_answer_hint)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -229,12 +229,12 @@ fun AdminAddLessonTab(onAddLesson: (String, String, CefrLevel, Int, String, Stri
                 modifier = Modifier.fillMaxWidth().height(48.dp).testTag("admin_submit_lesson_button"),
                 shape = RoundedCornerShape(14.dp)
             ) {
-                Text("Save Custom Lesson")
+                Text(stringResource(R.string.save_lesson_btn))
             }
         }
         if (showSuccess) {
             item {
-                Text(text = "Lesson successfully published!", color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
+                Text(text = stringResource(R.string.lesson_published), color = MaterialTheme.extendedColors.success, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -254,7 +254,7 @@ fun AdminAddVocabTab(onAddVocabulary: (String, String, String, String) -> Unit) 
             OutlinedTextField(
                 value = word,
                 onValueChange = { word = it },
-                label = { Text("Target Language Word") },
+                label = { Text(stringResource(R.string.target_word_hint)) },
                 modifier = Modifier.fillMaxWidth().testTag("admin_vocab_word"),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -263,7 +263,7 @@ fun AdminAddVocabTab(onAddVocabulary: (String, String, String, String) -> Unit) 
             OutlinedTextField(
                 value = translation,
                 onValueChange = { translation = it },
-                label = { Text("Translation") },
+                label = { Text(stringResource(R.string.translation_hint)) },
                 modifier = Modifier.fillMaxWidth().testTag("admin_vocab_trans"),
                 shape = RoundedCornerShape(14.dp)
             )
@@ -272,7 +272,7 @@ fun AdminAddVocabTab(onAddVocabulary: (String, String, String, String) -> Unit) 
             OutlinedTextField(
                 value = example,
                 onValueChange = { example = it },
-                label = { Text("Example Sentence") },
+                label = { Text(stringResource(R.string.example_sentence_hint)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp)
             )

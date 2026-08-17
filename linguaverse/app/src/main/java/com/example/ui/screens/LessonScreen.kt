@@ -1,29 +1,29 @@
 package com.example.ui.screens
 
 import androidx.compose.animation.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.data.model.*
 import com.example.domain.AnswerGrader
 import com.example.ui.components.AudioSpeedSelector
+import com.example.ui.components.buttons.ButtonSize
+import com.example.ui.components.buttons.LinguaPrimaryButton
+import com.example.ui.components.display.LinguaCard
+import com.example.ui.components.navigation.LinguaTopBar
+import com.example.ui.theme.LinguaVerseDimens
 import com.example.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +34,7 @@ fun LessonScreen(
     currentIndex: Int,
     isCompleted: Boolean,
     audioSpeed: Float,
+    targetLanguageName: String,
     onSpeakText: (String) -> Unit,
     onSetAudioSpeed: (Float) -> Unit,
     onSubmitAnswer: (String) -> Boolean,
@@ -66,38 +67,21 @@ fun LessonScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = lesson.title,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "Question ${currentIndex + 1} of ${exercises.size}",
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onCloseLesson) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = stringResource(R.string.close))
-                    }
-                },
+            LinguaTopBar(
+                title = lesson.title,
+                onBack = onCloseLesson,
                 actions = {
                     AudioSpeedSelector(
                         currentSpeed = audioSpeed,
                         onSpeedSelected = onSetAudioSpeed,
-                        modifier = Modifier.padding(end = 12.dp)
+                        modifier = Modifier.padding(end = LinguaVerseDimens.CompactSpacing)
                     )
                 }
             )
         },
         bottomBar = {
             Surface(
-                tonalElevation = 8.dp,
+                tonalElevation = LinguaVerseDimens.FloatingElevation,
                 color = when {
                     !answerChecked -> MaterialTheme.colorScheme.surface
                     isAnswerCorrect -> MaterialTheme.extendedColors.successContainer
@@ -107,7 +91,7 @@ fun LessonScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp)
+                        .padding(LinguaVerseDimens.ScreenHorizontalPadding)
                 ) {
                     if (answerChecked) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -115,36 +99,40 @@ fun LessonScreen(
                                 imageVector = if (isAnswerCorrect) Icons.Default.CheckCircle else Icons.Default.Cancel,
                                 contentDescription = null,
                                 tint = if (isAnswerCorrect) MaterialTheme.extendedColors.success else MaterialTheme.colorScheme.error,
-                                modifier = Modifier.size(28.dp)
+                                modifier = Modifier.size(LinguaVerseDimens.IconLarge)
                             )
-                            Spacer(modifier = Modifier.width(10.dp))
+                            Spacer(modifier = Modifier.width(LinguaVerseDimens.ComponentSpacing))
                             Column {
                                 Text(
                                     text = when {
-                                        isPracticeOnly -> "Nice practice!"
-                                        isAnswerCorrect -> "Excellent!"
-                                        else -> "Not quite right"
+                                        isPracticeOnly -> stringResource(R.string.nice_practice)
+                                        isAnswerCorrect -> stringResource(R.string.excellent)
+                                        else -> stringResource(R.string.not_quite_right)
                                     },
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 16.sp,
+                                    style = MaterialTheme.typography.titleMedium,
                                     color = if (isAnswerCorrect) MaterialTheme.extendedColors.success else MaterialTheme.colorScheme.error
                                 )
                                 Text(
                                     text = when {
                                         isPracticeOnly -> currentExercise.explanation
-                                            .ifBlank { "Keep going." }
-                                        isAnswerCorrect -> "Correct answer!"
-                                        else -> "Correct: ${currentExercise.correctAnswer}"
+                                            .ifBlank { stringResource(R.string.keep_going) }
+                                        isAnswerCorrect -> stringResource(R.string.correct_answer)
+                                        else -> stringResource(R.string.correct_answer_feedback, currentExercise.correctAnswer)
                                     },
-                                    fontSize = 13.sp,
+                                    style = MaterialTheme.typography.bodySmall,
                                     color = if (isAnswerCorrect) MaterialTheme.extendedColors.onSuccessContainer else MaterialTheme.colorScheme.onErrorContainer
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
                     }
 
-                    Button(
+                    LinguaPrimaryButton(
+                        text = when {
+                            answerChecked -> stringResource(R.string.continue_action)
+                            isPracticeOnly -> stringResource(R.string.practiced_this)
+                            else -> stringResource(R.string.check_answer)
+                        },
                         onClick = {
                             if (!answerChecked) {
                                 val answer = if (currentExercise.type == ExerciseType.WRITING) userTextInput else selectedOption
@@ -154,29 +142,11 @@ fun LessonScreen(
                                 onNextExercise()
                             }
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("submit_exercise_button"),
                         enabled = answerChecked || isPracticeOnly ||
-                            selectedOption.isNotEmpty() || userTextInput.isNotEmpty(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (answerChecked) {
-                                if (isAnswerCorrect) MaterialTheme.extendedColors.success else MaterialTheme.colorScheme.error
-                            } else MaterialTheme.colorScheme.primary
-                        ),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Text(
-                            text = when {
-                                answerChecked -> "Continue"
-                                isPracticeOnly -> "I practiced this"
-                                else -> "Check Answer"
-                            },
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
-                    }
+                                selectedOption.isNotEmpty() || userTextInput.isNotEmpty(),
+                        modifier = Modifier.fillMaxWidth().testTag("submit_exercise_button"),
+                        size = ButtonSize.Large
+                    )
                 }
             }
         }
@@ -185,9 +155,9 @@ fun LessonScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(20.dp)
+                .padding(LinguaVerseDimens.ScreenHorizontalPadding)
         ) {
-            // Linear Progress Bar
+            // Progress Bar
             LinearProgressIndicator(
                 progress = { (currentIndex + 1).toFloat() / exercises.size.toFloat() },
                 modifier = Modifier
@@ -198,58 +168,54 @@ fun LessonScreen(
                 trackColor = MaterialTheme.colorScheme.surfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
             // Exercise Prompt Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Text(
-                        text = currentExercise.prompt,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+            LinguaCard(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = currentExercise.prompt,
+                    style = MaterialTheme.typography.titleLarge
+                )
 
-                    if (currentExercise.targetText.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(
-                                onClick = { onSpeakText(currentExercise.targetText) },
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.primaryContainer)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.VolumeUp,
-                                    contentDescription = stringResource(R.string.speak_text),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    text = currentExercise.targetText,
-                                    fontSize = 20.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                                if (currentExercise.phoneticText.isNotEmpty()) {
-                                    Text(
-                                        text = "[${currentExercise.phoneticText}]",
-                                        fontSize = 13.sp,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                if (currentExercise.targetText.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = CircleShape,
+                            modifier = Modifier.size(LinguaVerseDimens.ButtonHeightMedium)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                IconButton(onClick = { onSpeakText(currentExercise.targetText) }) {
+                                    Icon(
+                                        imageVector = Icons.Default.VolumeUp,
+                                        contentDescription = stringResource(R.string.speak_text),
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(LinguaVerseDimens.IconMedium)
                                     )
                                 }
+                            }
+                        }
+                        Spacer(modifier = Modifier.width(LinguaVerseDimens.ComponentSpacing))
+                        Column {
+                            Text(
+                                text = currentExercise.targetText,
+                                style = MaterialTheme.typography.headlineSmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            if (currentExercise.phoneticText.isNotEmpty()) {
+                                Text(
+                                    text = "[${currentExercise.phoneticText}]",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
             // Exercise Input Area
             if (isPracticeOnly) {
@@ -258,46 +224,47 @@ fun LessonScreen(
                 OutlinedTextField(
                     value = userTextInput,
                     onValueChange = { userTextInput = it },
-                    label = { Text("Type your answer in Spanish") },
+                    label = { Text(stringResource(R.string.type_answer_in_language, targetLanguageName)) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("writing_input_field"),
-                    shape = RoundedCornerShape(16.dp)
+                    shape = MaterialTheme.shapes.small
                 )
             } else {
-                // Parse Options JSON
                 val options = AnswerGrader.parseOptions(currentExercise.optionsJson)
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(LinguaVerseDimens.ComponentSpacing)) {
                     options.forEach { option ->
                         val isSelected = selectedOption == option
-                        Surface(
+                        LinguaCard(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .testTag("exercise_option_$option")
                                 .border(
                                     width = if (isSelected) 2.dp else 1.dp,
                                     color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
-                                    shape = RoundedCornerShape(16.dp)
+                                    shape = MaterialTheme.shapes.small
                                 )
                                 .clickable { selectedOption = option },
-                            color = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(
-                                alpha = 0.5f
-                            ) else MaterialTheme.colorScheme.surface,
-                            shape = RoundedCornerShape(16.dp)
+                            backgroundColor = if (isSelected) {
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            },
+                            borderColor = if (isSelected) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.outlineVariant
+                            }
                         ) {
-                            Row(
-                                modifier = Modifier.padding(16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
                                 RadioButton(
                                     selected = isSelected,
                                     onClick = { selectedOption = option }
                                 )
-                                Spacer(modifier = Modifier.width(12.dp))
+                                Spacer(modifier = Modifier.width(LinguaVerseDimens.ComponentSpacing))
                                 Text(
                                     text = option,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Medium
+                                    style = MaterialTheme.typography.bodyLarge
                                 )
                             }
                         }
@@ -308,41 +275,32 @@ fun LessonScreen(
     }
 }
 
-/**
- * Shown for exercises that carry a prompt to practise rather than a question to
- * answer, such as speaking drills. Without this the screen rendered an empty
- * option list and the submit button stayed disabled, leaving the lesson stuck.
- */
 @Composable
 private fun PracticePromptCard(
     exercise: Exercise,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    LinguaCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+        backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+        borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Default.RecordVoiceOver,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer
             )
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(LinguaVerseDimens.ComponentSpacing))
             Column {
                 Text(
                     text = stringResource(R.string.practice_out_loud),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
+                    style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
                 Text(
                     text = exercise.translation.ifBlank { "Take your time, then continue." },
-                    fontSize = 13.sp,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.85f)
                 )
             }
@@ -357,14 +315,12 @@ fun LessonCompletionView(
     modifier: Modifier = Modifier
 ) {
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(32.dp)
+            modifier = Modifier.padding(LinguaVerseDimens.SectionSpacing)
         ) {
             Icon(
                 imageVector = Icons.Default.EmojiEvents,
@@ -373,86 +329,72 @@ fun LessonCompletionView(
                 modifier = Modifier.size(96.dp)
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
             Text(
-                text = "Lesson Completed!",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
+                text = stringResource(R.string.lesson_completed),
+                style = MaterialTheme.typography.displaySmall,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
-                text = "You completed '${lesson.title}'",
-                fontSize = 16.sp,
+                text = stringResource(R.string.you_completed_title, lesson.title),
+                style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Surface(
-                    color = MaterialTheme.extendedColors.xpContainer,
-                    shape = RoundedCornerShape(16.dp)
+            Row(horizontalArrangement = Arrangement.spacedBy(LinguaVerseDimens.ComponentSpacing)) {
+                LinguaCard(
+                    backgroundColor = MaterialTheme.extendedColors.xpContainer,
+                    borderColor = MaterialTheme.extendedColors.xp.copy(alpha = 0.3f)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.Stars,
                             contentDescription = null,
                             tint = MaterialTheme.extendedColors.xp
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(LinguaVerseDimens.CompactSpacing))
                         Text(
-                            text = "+${lesson.xpReward} XP",
-                            fontWeight = FontWeight.Bold,
+                            text = stringResource(R.string.xp_reward, lesson.xpReward),
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.extendedColors.onXpContainer
                         )
                     }
                 }
 
-                Surface(
-                    color = MaterialTheme.extendedColors.successContainer,
-                    shape = RoundedCornerShape(16.dp)
+                LinguaCard(
+                    backgroundColor = MaterialTheme.extendedColors.successContainer,
+                    borderColor = MaterialTheme.extendedColors.success.copy(alpha = 0.3f)
                 ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = Icons.Default.MonetizationOn,
                             contentDescription = null,
                             tint = MaterialTheme.extendedColors.success
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(LinguaVerseDimens.CompactSpacing))
                         Text(
-                            text = "+${lesson.xpReward / 2} Coins",
-                            fontWeight = FontWeight.Bold,
+                            text = stringResource(R.string.coins_reward, lesson.xpReward / 2),
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.extendedColors.onSuccessContainer
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(40.dp))
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.ScreenHorizontalPadding))
 
-            Button(
+            LinguaPrimaryButton(
+                text = stringResource(R.string.return_to_dashboard),
                 onClick = onCloseLesson,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
                     .testTag("finish_lesson_button"),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                    text = "Return to Dashboard",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-            }
+                size = ButtonSize.Large
+            )
         }
     }
 }
-

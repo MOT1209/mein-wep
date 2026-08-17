@@ -1,5 +1,6 @@
 package com.example.ui.components
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -9,143 +10,140 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.example.R
 import com.example.ai.AiFailure
 import com.example.data.model.CefrLevel
+import com.example.ui.theme.LinguaVerseDimens
 import com.example.ui.theme.extendedColors
+
+// ── Legacy GlassCard — kept for backward compatibility ──────────────────────────
+// Prefer LinguaCard from display/LinguaDisplay.kt for new code.
 
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    backgroundColor: Color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-    borderColor: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
-    shape: RoundedCornerShape = RoundedCornerShape(20.dp),
+    backgroundColor: Color = MaterialTheme.colorScheme.surfaceColorAtElevation(LinguaVerseDimens.CardElevation),
+    borderColor: Color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f),
+    shape: Shape = RoundedCornerShape(LinguaVerseDimens.CardRadius),
     content: @Composable ColumnScope.() -> Unit
 ) {
     Surface(
         modifier = modifier
+            .animateContentSize(animationSpec = tween(LinguaVerseDimens.MotionStandard))
             .clip(shape)
             .border(1.dp, borderColor, shape),
         color = backgroundColor,
         shape = shape,
-        tonalElevation = 2.dp,
-        shadowElevation = 4.dp
+        tonalElevation = LinguaVerseDimens.CardElevation,
+        shadowElevation = 1.dp
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier.padding(LinguaVerseDimens.CardPadding),
             content = content
         )
     }
 }
 
+// ── XpBadge — kept, now backed by LinguaBadge semantics ─────────────────────────
+
 @Composable
-fun XpBadge(
-    xp: Int,
-    modifier: Modifier = Modifier
-) {
+fun XpBadge(xp: Int, modifier: Modifier = Modifier) {
     Surface(
-        modifier = modifier.testTag("xp_badge"),
+        modifier = modifier.heightIn(min = LinguaVerseDimens.MinimumTouchTarget),
         color = MaterialTheme.extendedColors.xpContainer,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(LinguaVerseDimens.ControlRadius)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Filled.Stars,
-                contentDescription = "XP Points",
+                contentDescription = stringResource(R.string.xp_points),
                 tint = MaterialTheme.extendedColors.xp,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(LinguaVerseDimens.IconSmall)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = "$xp XP",
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.extendedColors.onXpContainer
             )
         }
     }
 }
 
+// ── StreakBadge ─────────────────────────────────────────────────────────────────
+
 @Composable
-fun StreakBadge(
-    streakCount: Int,
-    modifier: Modifier = Modifier
-) {
+fun StreakBadge(streakCount: Int, modifier: Modifier = Modifier) {
     Surface(
-        modifier = modifier.testTag("streak_badge"),
+        modifier = modifier.heightIn(min = LinguaVerseDimens.MinimumTouchTarget),
         color = MaterialTheme.extendedColors.streakContainer,
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(LinguaVerseDimens.ControlRadius)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Filled.LocalFireDepartment,
                 contentDescription = stringResource(R.string.streak),
                 tint = MaterialTheme.extendedColors.streak,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(LinguaVerseDimens.IconSmall)
             )
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(6.dp))
             Text(
                 text = "$streakCount Days",
-                fontWeight = FontWeight.Bold,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.extendedColors.onStreakContainer
             )
         }
     }
 }
 
+// ── LevelChip — uses new levelBeginner color from ExtendedColors ────────────────
+
 @Composable
-fun LevelChip(
-    level: CefrLevel,
-    modifier: Modifier = Modifier
-) {
-    val (bgColor, textColor) = when (level) {
-        CefrLevel.A1, CefrLevel.A2 -> MaterialTheme.extendedColors.successContainer to MaterialTheme.extendedColors.success
-        CefrLevel.B1, CefrLevel.B2 ->
-            MaterialTheme.extendedColors.levelIntermediateContainer to
-                MaterialTheme.extendedColors.levelIntermediate
-        CefrLevel.C1, CefrLevel.C2 ->
-            MaterialTheme.extendedColors.levelAdvancedContainer to
-                MaterialTheme.extendedColors.levelAdvanced
+fun LevelChip(level: CefrLevel, modifier: Modifier = Modifier) {
+    val (background, content) = when (level) {
+        CefrLevel.A1, CefrLevel.A2 -> MaterialTheme.extendedColors.levelBeginnerContainer to MaterialTheme.extendedColors.levelBeginner
+        CefrLevel.B1, CefrLevel.B2 -> MaterialTheme.extendedColors.levelIntermediateContainer to MaterialTheme.extendedColors.levelIntermediate
+        CefrLevel.C1, CefrLevel.C2 -> MaterialTheme.extendedColors.levelAdvancedContainer to MaterialTheme.extendedColors.levelAdvanced
     }
 
     Surface(
-        modifier = modifier.testTag("level_chip"),
-        color = bgColor,
+        modifier = modifier.heightIn(min = 28.dp),
+        color = background,
         shape = RoundedCornerShape(8.dp)
     ) {
         Text(
             text = level.code,
-            fontWeight = FontWeight.ExtraBold,
-            fontSize = 12.sp,
-            color = textColor,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+            style = MaterialTheme.typography.labelMedium,
+            color = content,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 9.dp, vertical = 6.dp)
         )
     }
 }
+
+// ── AudioSpeedSelector ──────────────────────────────────────────────────────────
 
 @Composable
 fun AudioSpeedSelector(
@@ -156,77 +154,71 @@ fun AudioSpeedSelector(
     Row(
         modifier = modifier
             .clip(CircleShape)
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        val speeds = listOf(0.5f, 0.8f, 1.0f)
-        speeds.forEach { speed ->
-            val isSelected = currentSpeed == speed
-            val bgColor = if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-            val textColor = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-
-            Box(
+        listOf(0.5f, 0.8f, 1.0f).forEach { speed ->
+            val selected = currentSpeed == speed
+            Surface(
                 modifier = Modifier
+                    .heightIn(min = 40.dp)
                     .clip(CircleShape)
-                    .background(bgColor)
-                    .clickable { onSpeedSelected(speed) }
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .clickable { onSpeedSelected(speed) },
+                color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
+                shape = CircleShape
             ) {
-                Text(
-                    text = "${speed}x",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = textColor
-                )
+                Box(
+                    modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "${speed}x",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
 }
 
-/**
- * Tells the user plainly that an AI request failed. The app used to present a
- * hard-coded reply in this situation, so an outage looked like a working tutor.
- */
+// ── AiErrorBanner ───────────────────────────────────────────────────────────────
+
 @Composable
-fun AiErrorBanner(
-    failure: AiFailure,
-    modifier: Modifier = Modifier
-) {
+fun AiErrorBanner(failure: AiFailure, modifier: Modifier = Modifier) {
     val message = when (failure) {
-        AiFailure.NOT_CONFIGURED ->
-            "AI tutor is not set up. Add a Gemini API key to enable live responses."
-        AiFailure.UNREACHABLE ->
-            "Couldn't reach the AI tutor. Check your connection and try again."
-        AiFailure.EMPTY_RESPONSE ->
-            "The AI tutor didn't return an answer. Please try again."
+        AiFailure.NOT_CONFIGURED -> "AI tutor is not set up. Add a Gemini API key to enable live responses."
+        AiFailure.UNREACHABLE -> "Couldn't reach the AI tutor. Check your connection and try again."
+        AiFailure.EMPTY_RESPONSE -> "The AI tutor didn't return an answer. Please try again."
     }
 
     Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .testTag("ai_error_banner"),
-        color = MaterialTheme.colorScheme.errorContainer
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.errorContainer,
+        shape = MaterialTheme.shapes.medium
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Filled.ErrorOutline,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onErrorContainer,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(LinguaVerseDimens.IconMedium)
             )
             Spacer(modifier = Modifier.width(10.dp))
             Text(
                 text = message,
-                fontSize = 13.sp,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onErrorContainer
             )
         }
     }
 }
+
+// ── DailyGoalProgressRing ───────────────────────────────────────────────────────
 
 @Composable
 fun DailyGoalProgressRing(
@@ -234,11 +226,11 @@ fun DailyGoalProgressRing(
     goalXp: Int,
     modifier: Modifier = Modifier
 ) {
-    val progress = (currentXp.toFloat() / goalXp.toFloat()).coerceIn(0f, 1f)
+    val progress = if (goalXp > 0) (currentXp.toFloat() / goalXp).coerceIn(0f, 1f) else 0f
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
-        animationSpec = tween(durationMillis = 800),
-        label = "progress"
+        animationSpec = tween(durationMillis = LinguaVerseDimens.MotionCelebration),
+        label = "daily_goal_progress"
     )
 
     Box(
@@ -255,13 +247,12 @@ fun DailyGoalProgressRing(
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = "$currentXp",
-                fontWeight = FontWeight.ExtraBold,
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = "/$goalXp",
-                fontSize = 10.sp,
+                style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
