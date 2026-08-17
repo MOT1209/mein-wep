@@ -3,48 +3,6 @@ package com.example.data.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.Types
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-
-enum class CefrLevel(val code: String, val title: String, val description: String) {
-    A1("A1", "Beginner", "Basic phrases & simple interactions"),
-    A2("A2", "Elementary", "Routine tasks & direct information"),
-    B1("B1", "Intermediate", "Main points on familiar topics"),
-    B2("B2", "Upper-Intermediate", "Complex topics & fluent interaction"),
-    C1("C1", "Advanced", "Express ideas fluently & spontaneously"),
-    C2("C2", "Mastery", "Understand with ease & native nuance")
-}
-
-enum class SkillType(val id: String, val displayName: String, val iconName: String) {
-    LISTENING("listening", "Listening", "hearing"),
-    SPEAKING("speaking", "Speaking", "mic"),
-    READING("reading", "Reading", "book"),
-    WRITING("writing", "Writing", "edit"),
-    VOCABULARY("vocabulary", "Vocabulary", "translate"),
-    GRAMMAR("grammar", "Grammar", "rule"),
-    PRONUNCIATION("pronunciation", "Pronunciation", "record_voice_over"),
-    CONVERSATION("conversation", "Conversation", "forum"),
-    TRANSLATION("translation", "Translation", "swap_horiz"),
-    DAILY_PHRASES("daily_phrases", "Daily Phrases", "chat_bubble_outline"),
-    QUIZZES("quizzes", "Quizzes", "quiz"),
-    REVIEW("review", "Review", "replay"),
-    AI_CHAT("ai_chat", "AI Chat", "smart_toy"),
-    FLASHCARDS("flashcards", "Flashcards", "style")
-}
-
-enum class ExerciseType {
-    VOCABULARY,
-    GRAMMAR,
-    LISTENING,
-    READING,
-    WRITING,
-    SPEAKING,
-    CONVERSATION,
-    QUIZ,
-    FLASHCARD
-}
 
 @Entity(tableName = "languages")
 data class Language(
@@ -108,7 +66,7 @@ data class Exercise(
     val prompt: String,
     val targetText: String = "",
     val translation: String = "",
-    val optionsJson: String = "[]", // List of String
+    val optionsJson: String = "[]",
     val correctAnswer: String = "",
     val audioUrl: String = "",
     val phoneticText: String = "",
@@ -182,66 +140,10 @@ data class Achievement(
 )
 data class ChatMessage(
     @PrimaryKey(autoGenerate = true) val id: Long = 0,
-    val sender: String, // "user" or "ai"
+    val sender: String,
     val text: String,
     val correction: String? = null,
     val suggestion: String? = null,
     val grammarExplanation: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
-
-data class ReadingStory(
-    val id: String,
-    val title: String,
-    val level: CefrLevel,
-    val content: String,
-    val translation: String,
-    val vocabularyMap: Map<String, String> // word -> definition
-)
-
-data class LeaderboardEntry(
-    val rank: Int,
-    val username: String,
-    val avatarEmoji: String,
-    val xp: Int,
-    val isCurrentUser: Boolean = false,
-    val badge: String = "Bronze"
-)
-
-// Converters for Room
-class Converters {
-    private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-    private val stringListAdapter = moshi.adapter<List<String>>(
-        Types.newParameterizedType(List::class.java, String::class.java)
-    )
-
-    @TypeConverter
-    fun fromCefrLevel(level: CefrLevel): String = level.name
-
-    @TypeConverter
-    fun toCefrLevel(name: String): CefrLevel = try {
-        CefrLevel.valueOf(name)
-    } catch (e: Exception) {
-        CefrLevel.A1
-    }
-
-    @TypeConverter
-    fun fromExerciseType(type: ExerciseType): String = type.name
-
-    @TypeConverter
-    fun toExerciseType(name: String): ExerciseType = try {
-        ExerciseType.valueOf(name)
-    } catch (e: Exception) {
-        ExerciseType.VOCABULARY
-    }
-
-    @TypeConverter
-    fun fromStringList(list: List<String>): String = stringListAdapter.toJson(list)
-
-    @TypeConverter
-    fun toStringList(json: String): List<String> = try {
-        stringListAdapter.fromJson(json) ?: emptyList()
-    } catch (e: Exception) {
-        emptyList()
-    }
-}
