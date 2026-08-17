@@ -1,0 +1,1764 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinguaVerse — تقرير التدقيق الشامل</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a26;
+            --bg-card-hover: #22222f;
+            --bg-elevated: #252533;
+            --border-primary: #2a2a3a;
+            --border-accent: #3a3a4f;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b5;
+            --text-muted: #6a6a80;
+            --accent-indigo: #6366f1;
+            --accent-indigo-dim: #4f46e5;
+            --accent-mint: #34d399;
+            --accent-amber: #fbbf24;
+            --accent-red: #ef4444;
+            --accent-red-dim: #dc2626;
+            --accent-orange: #f97316;
+            --accent-blue: #3b82f6;
+            --accent-purple: #a855f7;
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #34d399 100%);
+            --gradient-card: linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(168,85,247,0.04) 100%);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.5);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.6);
+            --shadow-glow: 0 0 40px rgba(99,102,241,0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans Arabic', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 600px;
+            background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.06) 40%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== HEADER ===== */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99,102,241,0.12);
+            border: 1px solid rgba(99,102,241,0.25);
+            color: var(--accent-indigo);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            letter-spacing: 0.5px;
+        }
+
+        .hero-badge .dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-mint);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+            line-height: 1.2;
+        }
+
+        .hero .subtitle {
+            font-size: 1.15rem;
+            color: var(--text-secondary);
+            font-weight: 400;
+            margin-bottom: 8px;
+        }
+
+        .hero .date {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .hero .date span {
+            direction: ltr;
+            display: inline-block;
+        }
+
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 40px 0;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--gradient-primary);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            font-family: 'Inter', sans-serif;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .stat-number.red { color: var(--accent-red); }
+        .stat-number.orange { color: var(--accent-orange); }
+        .stat-number.amber { color: var(--accent-amber); }
+        .stat-number.blue { color: var(--accent-blue); }
+        .stat-number.mint { color: var(--accent-mint); }
+        .stat-number.indigo { color: var(--accent-indigo); }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* ===== VERDICT ===== */
+        .verdict {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin: 40px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verdict::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-orange), var(--accent-amber));
+        }
+
+        .verdict h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .verdict p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.9;
+        }
+
+        .verdict strong {
+            color: var(--accent-amber);
+            font-weight: 600;
+        }
+
+        /* ===== SECTION HEADERS ===== */
+        .section {
+            margin: 60px 0 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .section-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .section-icon.critical { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+        .section-icon.high { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
+        .section-icon.medium { background: rgba(251,191,36,0.15); color: var(--accent-amber); }
+        .section-icon.low { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+        .section-icon.success { background: rgba(52,211,153,0.15); color: var(--accent-mint); }
+        .section-icon.arch { background: rgba(99,102,241,0.15); color: var(--accent-indigo); }
+        .section-icon.road { background: rgba(168,85,247,0.15); color: var(--accent-purple); }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .section-count {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ===== COLLAPSIBLE ===== */
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .collapsible:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .collapse-icon {
+            margin-right: auto;
+            transition: transform 0.3s ease;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .collapse-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .collapse-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .collapse-content.open {
+            max-height: 20000px;
+        }
+
+        /* ===== ISSUE CARDS ===== */
+        .issues-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .issue-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .issue-card:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--border-accent);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .issue-card::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 12px;
+            bottom: 12px;
+            width: 3px;
+            border-radius: 3px;
+        }
+
+        .issue-card.critical::before { background: var(--accent-red); }
+        .issue-card.high::before { background: var(--accent-orange); }
+        .issue-card.medium::before { background: var(--accent-amber); }
+        .issue-card.low::before { background: var(--accent-blue); }
+
+        .issue-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .issue-id {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .issue-id.critical { background: rgba(239,68,68,0.15); color: var(--accent-red); }
+        .issue-id.high { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
+        .issue-id.medium { background: rgba(251,191,36,0.15); color: var(--accent-amber); }
+        .issue-id.low { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+
+        .issue-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .issue-desc {
+            color: var(--text-secondary);
+            font-size: 0.92rem;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .issue-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .issue-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: var(--bg-elevated);
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .issue-tag code {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            direction: ltr;
+            color: var(--accent-indigo);
+        }
+
+        /* ===== ARCHITECTURE ===== */
+        .arch-tree {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.82rem;
+            line-height: 2;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+            color: var(--text-secondary);
+        }
+
+        .arch-tree .highlight {
+            color: var(--accent-red);
+            font-weight: 500;
+        }
+
+        .arch-tree .ok {
+            color: var(--accent-mint);
+        }
+
+        .arch-tree .warn {
+            color: var(--accent-amber);
+        }
+
+        .arch-summary {
+            margin-top: 20px;
+            padding: 20px 24px;
+            background: rgba(239,68,68,0.06);
+            border: 1px solid rgba(239,68,68,0.15);
+            border-radius: var(--radius-md);
+            color: var(--text-secondary);
+            line-height: 1.9;
+        }
+
+        .arch-summary strong {
+            color: var(--accent-red);
+        }
+
+        /* ===== ROADMAP ===== */
+        .roadmap {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+        }
+
+        .roadmap::before {
+            content: '';
+            position: absolute;
+            right: 23px;
+            top: 32px;
+            bottom: 32px;
+            width: 2px;
+            background: var(--border-primary);
+        }
+
+        .roadmap-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 16px 0;
+            position: relative;
+        }
+
+        .roadmap-marker {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 700;
+            flex-shrink: 0;
+            z-index: 2;
+            border: 3px solid var(--bg-primary);
+        }
+
+        .roadmap-marker.done {
+            background: var(--accent-mint);
+            color: #000;
+        }
+
+        .roadmap-marker.pending {
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+            border-color: var(--border-accent);
+        }
+
+        .roadmap-content {
+            flex: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 18px 24px;
+            transition: all 0.2s ease;
+        }
+
+        .roadmap-content:hover {
+            border-color: var(--border-accent);
+            background: var(--bg-card-hover);
+        }
+
+        .roadmap-content.done {
+            border-right-color: var(--accent-mint);
+        }
+
+        .roadmap-phase {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .roadmap-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .roadmap-desc {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+        }
+
+        .roadmap-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .roadmap-tag {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: var(--bg-elevated);
+            color: var(--text-muted);
+        }
+
+        .roadmap-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .roadmap-status.done {
+            background: rgba(52,211,153,0.12);
+            color: var(--accent-mint);
+        }
+
+        .roadmap-status.pending {
+            background: rgba(251,191,36,0.12);
+            color: var(--accent-amber);
+        }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin: 40px 0;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .progress-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .progress-percent {
+            font-family: 'Inter', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: var(--bg-elevated);
+            border-radius: 100px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 100px;
+            width: 0%;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== POSITIVE CARDS ===== */
+        .positive-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 16px;
+        }
+
+        .positive-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transition: all 0.25s ease;
+        }
+
+        .positive-card:hover {
+            background: var(--bg-card-hover);
+            border-color: rgba(52,211,153,0.3);
+            transform: translateY(-1px);
+        }
+
+        .positive-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: rgba(52,211,153,0.12);
+            color: var(--accent-mint);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .positive-text {
+            font-size: 0.92rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .positive-text strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        /* ===== WARNING BOX ===== */
+        .warning-box {
+            background: rgba(251,191,36,0.06);
+            border: 1px solid rgba(251,191,36,0.2);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            margin: 40px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .warning-box .icon {
+            font-size: 20px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .warning-box p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .warning-box strong {
+            color: var(--accent-amber);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            margin-top: 80px;
+            padding: 40px 0;
+            border-top: 1px solid var(--border-primary);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .footer a {
+            color: var(--accent-indigo);
+            text-decoration: none;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .container { padding: 0 16px; }
+            .hero { padding: 50px 0 40px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .stat-card { padding: 18px 14px; }
+            .stat-number { font-size: 1.8rem; }
+            .section-header { flex-wrap: wrap; }
+            .positive-grid { grid-template-columns: 1fr; }
+            .issue-meta { flex-direction: column; gap: 8px; }
+            .roadmap::before { right: 18px; }
+            .roadmap-marker { width: 38px; height: 38px; font-size: 14px; }
+        }
+
+        /* ===== SCROLL ANIMATIONS ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ===== NAVIGATION DOTS ===== */
+        .nav-dots {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border-accent);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-dot:hover,
+        .nav-dot.active {
+            background: var(--accent-indigo);
+            transform: scale(1.3);
+        }
+
+        .nav-dot:hover::after {
+            content: attr(data-label);
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-elevated);
+            color: var(--text-primary);
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            white-space: nowrap;
+            box-shadow: var(--shadow-md);
+        }
+
+        @media (max-width: 768px) {
+            .nav-dots { display: none; }
+        }
+
+        /* ===== BACK TO TOP ===== */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent-indigo);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            z-index: 100;
+            border: none;
+            font-size: 18px;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.4);
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .back-to-top:hover {
+            background: var(--accent-indigo-dim);
+            transform: translateY(-2px) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Dots -->
+    <nav class="nav-dots" id="navDots">
+        <div class="nav-dot active" data-target="hero" data-label="المقدمة"></div>
+        <div class="nav-dot" data-target="stats" data-label="الإحصائيات"></div>
+        <div class="nav-dot" data-target="verdict" data-label="الحكم العام"></div>
+        <div class="nav-dot" data-target="architecture" data-label="البنية"></div>
+        <div class="nav-dot" data-target="critical" data-label="حرجة"></div>
+        <div class="nav-dot" data-target="high" data-label="عالية"></div>
+        <div class="nav-dot" data-target="medium" data-label="متوسطة"></div>
+        <div class="nav-dot" data-target="low" data-label="منخفضة"></div>
+        <div class="nav-dot" data-target="roadmap" data-label="خارطة التنفيذ"></div>
+        <div class="nav-dot" data-target="positive" data-label="ما هو سليم"></div>
+    </nav>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">&#8593;</button>
+
+    <!-- ===== HERO ===== -->
+    <header class="hero" id="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span class="dot"></span>
+                تقرير تدقيق تقني شامل
+            </div>
+            <h1>LinguaVerse</h1>
+            <p class="subtitle">تطبيق تعلّم اللغات بالذكاء الاصطناعي — تقرير التدقيق والتحسين</p>
+            <p class="date">تاريخ التدقيق: <span>2026-08-11</span></p>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- ===== STATS ===== -->
+        <section id="stats" class="stats-grid fade-in">
+            <div class="stat-card">
+                <div class="stat-number indigo">26</div>
+                <div class="stat-label">ملف Kotlin</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number mint">4,661</div>
+                <div class="stat-label">سطر كود</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number red">14</div>
+                <div class="stat-label">مشكلة حرجة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number orange">11</div>
+                <div class="stat-label">مشكلة عالية</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number amber">10</div>
+                <div class="stat-label">مشكلة متوسطة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number blue">5</div>
+                <div class="stat-label">مشكلة منخفضة</div>
+            </div>
+        </section>
+
+        <!-- ===== VERDICT ===== -->
+        <section id="verdict" class="verdict fade-in">
+            <h2>
+                <span class="section-icon critical" style="width:32px;height:32px;font-size:16px;border-radius:8px;">!</span>
+                الحكم العام
+            </h2>
+            <p>
+                نموذج أولي (MVP) بواجهة جيدة المظهر لكنه <strong>يوهم بميزات غير موجودة</strong>، وطبقة بياناته تمسح تقدّم المستخدم عند كل إقلاع، وحزمة الاختبارات لا تُصرَّف أصلًا. التطبيق يدعم <strong>12 لغة</strong> ويتضمن دروسًا تفاعلية ومدربًا بالذكاء الاصطناعي، لكن كثيرًا من الميزات المعلنة غير مُنفَّذة فعليًا.
+            </p>
+        </section>
+
+        <!-- ===== ARCHITECTURE ===== -->
+        <section id="architecture" class="section fade-in">
+            <div class="section-header">
+                <div class="section-icon arch">&#9881;</div>
+                <h2 class="section-title">1. البنية الحالية</h2>
+            </div>
+
+            <div class="arch-tree">
+<pre style="margin:0;white-space:pre;direction:ltr;text-align:left;">
+<span class="warn">com.example</span>
+├── MainActivity            (39)   — Activity واحد، ViewModel واحد
+├── ai/GeminiTutorService   (235)  — object مفرد، Retrofit، <span class="highlight">بدون حَقن</span>
+├── audio/TtsManager        (57)   — TTS
+├── data/
+│   ├── db/AppDatabase      (45)   — Room، <span class="highlight">fallbackToDestructiveMigration</span>
+│   ├── db/LinguaVerseDao   (112)  — DAO واحد لكل الكيانات التسعة
+│   ├── model/Models.kt     (228)  — 9 كيانات + 3 enums + Converters
+│   └── repository/         (240)  — Repository واحد + بيانات البذور المضمّنة
+└── ui/
+    ├── LinguaVerseApp      (207)  — <span class="highlight">"تنقّل" يدوي عبر when/booleans</span>
+    ├── viewmodel/MainViewModel (292) — <span class="highlight">ViewModel إله واحد لكل التطبيق</span>
+    ├── components/         (217)
+    └── screens/ ×8         (2,231)
+</pre>
+            </div>
+
+            <div class="arch-summary">
+                <strong>الخلاصة المعمارية:</strong> لا توجد طبقة نطاق (domain)، لا حَقن اعتماديات، لا واجهات (interfaces) لأي تبعية، لا وحدات (modules)، ViewModel واحد يعرف كل شيء. كل شاشة تستقبل حالتها كوسائط من الجذر — أي تغيير في أي تدفّق يعيد تركيب الشجرة بأكملها.
+            </div>
+        </section>
+
+        <!-- ===== CRITICAL ===== -->
+        <section id="critical" class="section fade-in">
+            <div class="section-header collapsible" onclick="toggleSection('critical-list')">
+                <div class="section-icon critical">&#9888;</div>
+                <h2 class="section-title">2. الأولوية: حرجة (Critical)</h2>
+                <span class="section-count">14 مشكلة</span>
+                <span class="collapse-icon" id="critical-list-icon">&#9660;</span>
+            </div>
+            <div class="collapse-content open" id="critical-list">
+                <div class="issues-list">
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C1</span>
+                            <span class="issue-title">اختبار Screenshot مكسور</span>
+                        </div>
+                        <p class="issue-desc">اختبار <code>GreetingScreenshotTest</code> يستدعي <code>MyApplicationTheme</code> و <code>Greeting</code> — لا وجود لأيٍّ منهما. مجموعة مصادر الاختبار لا تُصرَّف؛ <code>gradlew test</code> يفشل قبل تشغيل أي اختبار.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>GreetingScreenshotTest.kt</code></span>
+                            <span class="issue-tag">&#9888; الاختبارات لا تُصرَّف</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C2</span>
+                            <span class="issue-title">اختبار Robolectric خاطئ</span>
+                        </div>
+                        <p class="issue-desc"><code>ExampleRobolectricTest</code> يتوقّع أن قيمة <code>app_name == "My Application"</code> بينما القيمة الفعلية <code>"LinguaVerse"</code>.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>ExampleRobolectricTest.kt</code></span>
+                            <span class="issue-tag">&#9888; اختبار فاشل</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C3</span>
+                            <span class="issue-title">اختبار Instrumented خاطئ</span>
+                        </div>
+                        <p class="issue-desc"><code>ExampleInstrumentedTest</code> يتوقّع أن <code>packageName == "com.example"</code> بينما <code>applicationId = "com.aistudio.linguaverse.app"</code>.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>androidTest/...</code></span>
+                            <span class="issue-tag">&#9888; اختبار فاشل</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C4</span>
+                            <span class="issue-title">لا يوجد Gradle Wrapper</span>
+                        </div>
+                        <p class="issue-desc">لا يوجد <code>gradlew</code> ولا <code>gradle-wrapper.properties</code> في المستودع. البناء غير قابل لإعادة الإنتاج؛ CI مستحيل؛ كل مطوّر ببنية مختلفة.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#127759; جذر المشروع</span>
+                            <span class="issue-tag">&#9888; بناء غير مُعاد الإنتاج</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C5</span>
+                            <span class="issue-title">مفتاح Gemini مكشوف في الـAPK</span>
+                        </div>
+                        <p class="issue-desc">مفتاح Gemini يُحزَم داخل الـAPK عبر <code>BuildConfig.GEMINI_API_KEY</code> ويُرسل كمعامل رابط <code>?key=</code>. أي شخص يستخرج المفتاح من الـAPK خلال دقائق.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>GeminiTutorService.kt</code></span>
+                            <span class="issue-tag">&#128274; ثغرة أمنية</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C6</span>
+                            <span class="issue-title">اسم النموذج غير موجود</span>
+                        </div>
+                        <p class="issue-desc">اسم النموذج <code>gemini-3.5-flash</code> غير موجود. كل استدعاء حقيقي يعيد خطأ 404.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>GeminiTutorService.kt:325</code></span>
+                            <span class="issue-tag">&#128680; خطأ 404</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C7</span>
+                            <span class="issue-title">الأخطاء تُبتلع وتُزيّف النجاح</span>
+                        </div>
+                        <p class="issue-desc"><code>catch (e: Exception)</code> يبتلع الخطأ ويُرجع ردًّا مزيّفًا جاهزًا. مع C6: ميزة "المعلّم الذكي" لم تعمل قط ولا سبيل لاكتشاف ذلك — الفشل يبدو كنجاح.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>GeminiTutorService.kt:408,452</code></span>
+                            <span class="issue-tag">&#128679; نجاح مزيّف</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C8</span>
+                            <span class="issue-title">لا سبيل للخروج من الدرس</span>
+                        </div>
+                        <p class="issue-desc"><code>onCloseLesson</code> يعيد تشغيل الدرس ثم يقفز؛ و<code>startLesson</code> غير متزامن فيتسابق مع <code>nextExercise</code>. يمنح XP مكرّرًا.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>LinguaVerseApp.kt:663</code></span>
+                            <span class="issue-tag">&#128260; حلقة مغلقة</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C9</span>
+                            <span class="issue-title">تقدم المستخدم يُمسح عند كل إقلاع</span>
+                        </div>
+                        <p class="issue-desc"><code>seedSpanishContent()</code> يعمل عند كل إقلاع بـ<code>OnConflictStrategy.REPLACE</code>. تقدّم المستخدم في الدروس يُمسح عند كل فتح للتطبيق (<code>isCompleted</code> يعود false).</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>Repository.kt:64,80-89</code></span>
+                            <span class="issue-tag">&#128190; فقدان بيانات</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C10</span>
+                            <span class="issue-title">دمار قاعدة البيانات عند الترقية</span>
+                        </div>
+                        <p class="issue-desc"><code>fallbackToDestructiveMigration()</code> + <code>exportSchema = false</code>: أي تعديل على المخطّط يمحو كل بيانات المستخدمين، بلا هجرات ولا مخطّط مُصدَّر.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>AppDatabase.kt:23,39</code></span>
+                            <span class="issue-tag">&#9888; فقدان بيانات</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C11</span>
+                            <span class="issue-title">حزمة عيّنة في الإنتاج</span>
+                        </div>
+                        <p class="issue-desc"><code>namespace = "com.example"</code> كحزمة للتطبيق كله. حزمة عيّنة؛ تصادم أسماء واسم غير احترافي في كل أثر.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>app/build.gradle.kts:12</code></span>
+                            <span class="issue-tag">&#128736; ضعف المعمارية</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C12</span>
+                            <span class="issue-title">调试 توقيع مفقود</span>
+                        </div>
+                        <p class="issue-desc"><code>signingConfigs.debugConfig</code> يشير إلى <code>debug.keystore</code> في جذر المستودع، والملف مُدرَج في <code>.gitignore</code> وغير موجود. <code>assembleDebug</code> يفشل على أي نسخة جديدة.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>app/build.gradle.kts</code></span>
+                            <span class="issue-tag">&#128260; بناء مكسور</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C13</span>
+                            <span class="issue-title">بناء يفشل باللغة العربية</span>
+                        </div>
+                        <p class="issue-desc">ملفات gradle.properties لا تثبّت اللغة، فتعمل الـJVM بلغة النظام (Arabic). مولّد Room يكتب أرقامًا هندية عربية في شيفرة Kotlin فيفشل التصريف. مُثبَت تجريبيًا.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>gradle.properties</code></span>
+                            <span class="issue-tag">&#127760; مشكلة تعريب</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card critical">
+                        <div class="issue-header">
+                            <span class="issue-id critical">C14</span>
+                            <span class="issue-title">الدرس القابل للعب لا يمكن إنهاؤه</span>
+                        </div>
+                        <p class="issue-desc">تمرين <code>ex_es_3_3</code> نوعه SPEAKING بلا <code>correctAnswer</code> وبلا خيارات، و<code>LessonScreen</code> يعرض قائمة خيارات فارغة وزر الإرسال يبقى معطّلًا. الدرس يتوقّف عند السؤال 3 من 5 بلا أي مخرج.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>Repository.kt:126</code> + <code>LessonScreen.kt</code></span>
+                            <span class="issue-tag">&#128683; ميزة مكسورة</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== HIGH ===== -->
+        <section id="high" class="section fade-in">
+            <div class="section-header collapsible" onclick="toggleSection('high-list')">
+                <div class="section-icon high">&#9650;</div>
+                <h2 class="section-title">3. الأولوية: عالية (High)</h2>
+                <span class="section-count">11 مشكلة</span>
+                <span class="collapse-icon" id="high-list-icon">&#9660;</span>
+            </div>
+            <div class="collapse-content open" id="high-list">
+                <div class="issues-list">
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H1</span>
+                            <span class="issue-title">التنقّل مُلفَّق يدويًا</span>
+                        </div>
+                        <p class="issue-desc"><code>navigation-compose</code> مُعلَنة لكنها غير مستخدمة. التنقّل عبارة عن <code>if/when</code> يدوي. النتيجة: زر الرجوع لا يعمل، لا مكدّس رجوع، لا روابط عميقة، وكل الحالة تضيع عند موت العملية.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>LinguaVerseApp.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H2</span>
+                            <span class="issue-title">ViewModel إله واحد</span>
+                        </div>
+                        <p class="issue-desc"><code>MainViewModel</code> (292 سطر) يبني AppDatabase وRepository وTtsManager بنفسه، ويحمل 20 تدفّقًا. لا يمكن اختباره وحدةً. <code>LinguaVerseApp</code> يجمع 15 تدفّقًا في الجذر.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>MainViewModel.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H3</span>
+                            <span class="issue-title">لا حَقن اعتماديات ولا واجهات</span>
+                        </div>
+                        <p class="issue-desc"><code>GeminiTutorService</code> هو object مفرد ثابت. <code>LinguaVerseRepository</code> صنف ملموس. لا يمكن استبدال أيٍّ منهما بمزيّف في اختبار.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; عدة ملفات</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H4</span>
+                            <span class="issue-title">منطق التصحيح خاطئ ومدفون</span>
+                        </div>
+                        <p class="issue-desc"><code>submitExerciseAnswer</code> يعتبر أي إجابة كتابية طولها &gt; 3 أحرف صحيحة (أي "aaaa" ينجح). المنطق داخل الـViewModel لا في طبقة نطاق قابلة للاختبار.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>MainViewModel.kt:162</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H5</span>
+                            <span class="issue-title">التفضيلات لا تُحفظ</span>
+                        </div>
+                        <p class="issue-desc"><code>_isDarkTheme</code> و <code>_audioSpeed</code> في الذاكرة فقط → تُصفَّر عند كل إقلاع. DataStore موجود في كتالوج الإصدارات لكنه معطّل بتعليق.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>MainViewModel.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H6</span>
+                            <span class="issue-title">إذن ميكروفون مُعلَن ولا يُستخدم</span>
+                        </div>
+                        <p class="issue-desc"><code>SpeakingPracticeView</code> يزيّف درجة 92% ودقّة 95% بلا أي تسجيل. هذا خطر سياسات على Google Play (إذن بلا استخدام + ادّعاء ميزة غير موجودة).</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>SkillDetailScreen.kt:937</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H7</span>
+                            <span class="issue-title">محتوى إسباني ثابت</span>
+                        </div>
+                        <p class="issue-desc">ReadingStoryView، DailyPhrasesView، SpeakingPracticeView، LeaderboardScreen تحوي نصوصًا إسبانية حرفية. اختيار اليابانية أو العربية لا يغيّر شيئًا.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; عدة شاشات</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H8</span>
+                            <span class="issue-title">لا تدويل (i18n)</span>
+                        </div>
+                        <p class="issue-desc">تطبيق لتعلّم اللغات بلا تدويل. <code>strings.xml</code> يحوي مُدخلًا واحدًا. مئات السلاسل مثبّتة في الشيفرة. العربية لغة هدف ولا شيء اختُبر للاتجاه RTL.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>res/values/strings.xml</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H9</span>
+                            <span class="issue-title">لا فهارس ولا مفاتيح أجنبية</span>
+                        </div>
+                        <p class="issue-desc"><code>exercises.lessonId</code>، <code>lessons.languageCode</code>، <code>vocabularies.languageCode</code> كلها بلا @Index وبل ForeignKey. مسح كامل للجدول عند كل استعلام.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>AppDatabase.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H10</span>
+                            <span class="issue-title">لوحة الإدارة بلا حماية</span>
+                        </div>
+                        <p class="issue-desc"><code>AdminPanelScreen</code> متاحة من الإعدادات لأي مستخدم، وتكتب مباشرة في قاعدة البيانات.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>AdminPanelScreen.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card high">
+                        <div class="issue-header">
+                            <span class="issue-id high">H11</span>
+                            <span class="issue-title">قدرات مُعلَنة غير مُنفَّذة</span>
+                        </div>
+                        <p class="issue-desc"><code>Flashcard.intervalDays/isMastered</code> و <code>Vocabulary.needsReview</code> حقول ميتة. واجهة تعد بـ"Spaced Repetition Cards" بلا تنفيذ. درجات الملف الشخصي قيم ابتدائية لا يحدّثها أي مسار.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>Models.kt</code> + <code>SkillDetailScreen.kt</code></span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== MEDIUM ===== -->
+        <section id="medium" class="section fade-in">
+            <div class="section-header collapsible" onclick="toggleSection('medium-list')">
+                <div class="section-icon medium">&#9679;</div>
+                <h2 class="section-title">4. الأولوية: متوسطة (Medium)</h2>
+                <span class="section-count">10 مشكلة</span>
+                <span class="collapse-icon" id="medium-list-icon">&#9660;</span>
+            </div>
+            <div class="collapse-content" id="medium-list">
+                <div class="issues-list">
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M1</span>
+                            <span class="issue-title">منطق مكرّر + Moshi جديد في كل تركيب</span>
+                        </div>
+                        <p class="issue-desc"><code>parseOptionsJson</code> نسخة مكرّرة من Converters، وينشئ كائن Moshi جديدًا عند كل إعادة تركيب.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>LessonScreen.kt:400</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M2</span>
+                            <span class="issue-title">ألوان ثابتة تتجاوز الثيم</span>
+                        </div>
+                        <p class="issue-desc">~30 موضعًا بألوان فاتحة ثابتة → غير مقروءة في الوضع الداكن.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; عدة ملفات</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M3</span>
+                            <span class="issue-title">إعدادات الإصدار مكسورة</span>
+                        </div>
+                        <p class="issue-desc"><code>isMinifyEnabled = false</code>، SigningConfigs تشير إلى JKS غير موجود.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>app/build.gradle.kts</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M4</span>
+                            <span class="issue-title">Moshi غير مضبوط لـKotlin</span>
+                        </div>
+                        <p class="issue-desc">بلا KotlinJsonAdapterFactory، قد لا تُطبَّق القيم الافتراضية في الـDTOs.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>GeminiTutorService.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M5</span>
+                            <span class="issue-title">اعتماديات غير مستخدمة تُثقل الحزمة</span>
+                        </div>
+                        <p class="issue-desc">coil-compose، firebase-ai، firebase-appcheck-recaptcha، logging-interceptor، google-services بلا ملف.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>build.gradle.kts</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M6</span>
+                            <span class="issue-title">شريط تنقّل بستة عناصر</span>
+                        </div>
+                        <p class="issue-desc">Material 3 تحدّد 3–5 عناصر كحدٍّ أقصى.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>LinguaVerseApp.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M7</span>
+                            <span class="issue-title">TTS لا يتحقق من النتيجة</span>
+                        </div>
+                        <p class="issue-desc">يتجاهل LANG_MISSING_DATA / LANG_NOT_SUPPORTED → ينطق بلغة خاطئة صامتًا.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>TtsManager.kt</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M8</span>
+                            <span class="issue-title">لا حالات تحميل/فراغ/خطأ</span>
+                        </div>
+                        <p class="issue-desc">معظم القوائم تعرض شاشة بيضاء عند الفراغ. لا رسالة خطأ في أي مكان.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; عدة شاشات</span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M9</span>
+                            <span class="issue-title">لوحة الصدارة وهمية بالكامل</span>
+                        </div>
+                        <p class="issue-desc">بيانات ثابتة مثبّتة في الشاشة.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; <code>LeaderboardScreen.kt:31-38</code></span>
+                        </div>
+                    </div>
+
+                    <div class="issue-card medium">
+                        <div class="issue-header">
+                            <span class="issue-id medium">M10</span>
+                            <span class="issue-title">تفاصيل Compose محسّنة</span>
+                        </div>
+                        <p class="issue-desc"><code>mutableStateOf(0)</code> بدل <code>mutableIntStateOf</code>؛ ArrowBack غير معكوس تلقائيًا؛ استيرادات wildcard.</p>
+                        <div class="issue-meta">
+                            <span class="issue-tag">&#128196; عدة ملفات</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== LOW ===== -->
+        <section id="low" class="section fade-in">
+            <div class="section-header collapsible" onclick="toggleSection('low-list')">
+                <div class="section-icon low">&#9675;</div>
+                <h2 class="section-title">5. الأولوية: منخفضة (Low)</h2>
+                <span class="section-count">5 مشكلات</span>
+                <span class="collapse-icon" id="low-list-icon">&#9660;</span>
+            </div>
+            <div class="collapse-content" id="low-list">
+                <div class="issues-list">
+
+                    <div class="issue-card low">
+                        <div class="issue-header">
+                            <span class="issue-id low">L1</span>
+                            <span class="issue-title">بقايا سقالة AI Studio</span>
+                        </div>
+                        <p class="issue-desc">Assets وREADME وthemes.xml باسم <code>Theme.MyApplication</code>.</p>
+                    </div>
+
+                    <div class="issue-card low">
+                        <div class="issue-header">
+                            <span class="issue-id low">L2</span>
+                            <span class="issue-title">Models.kt ملف ضخم</span>
+                        </div>
+                        <p class="issue-desc">ملف واحد يجمع 9 كيانات + 3 enums + المحوّلات — يجب تفكيكه.</p>
+                    </div>
+
+                    <div class="issue-card low">
+                        <div class="issue-header">
+                            <span class="issue-id low">L3</span>
+                            <span class="issue-title">لا أدوات ل.format</span>
+                        </div>
+                        <p class="issue-desc">لا ktlint / detekt / .editorconfig.</p>
+                    </div>
+
+                    <div class="issue-card low">
+                        <div class="issue-header">
+                            <span class="issue-id low">L4</span>
+                            <span class="issue-title">~12 اعتمادية غير مستخدمة</span>
+                        </div>
+                        <p class="issue-desc">camera، location، accompanist، credentials، googleid في كتالوج الإصدارات.</p>
+                    </div>
+
+                    <div class="issue-card low">
+                        <div class="issue-header">
+                            <span class="issue-id low">L5</span>
+                            <span class="issue-title">EdgeToEdge غير مُعالَج</span>
+                        </div>
+                        <p class="issue-desc"><code>enableEdgeToEdge()</code> مُفعَّل لكن الفروع غير المبنية على Scaffold لا تعالج حشوة شريط الحالة.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== PROGRESS BAR ===== -->
+        <div class="progress-section fade-in">
+            <div class="progress-header">
+                <span class="progress-title">تقدّم مراحل التنفيذ</span>
+                <span class="progress-percent">67%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-labels">
+                <span>6 من 9 مراحل مكتملة</span>
+                <span>3 مراحل متبقّية</span>
+            </div>
+        </div>
+
+        <!-- ===== ROADMAP ===== -->
+        <section id="roadmap" class="section fade-in">
+            <div class="section-header">
+                <div class="section-icon road">&#128218;</div>
+                <h2 class="section-title">6. خارطة التنفيذ</h2>
+            </div>
+
+            <div class="roadmap">
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker done">0</div>
+                    <div class="roadmap-content done">
+                        <div class="roadmap-phase">المرحلة 0</div>
+                        <div class="roadmap-title">تثبيت البناء</div>
+                        <p class="roadmap-desc">Gradle Wrapper، حذف اختبارات السقالة الميتة، إصلاح توقيع debug، تثبيت لغة الـJVM.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">C1–C4</span>
+                            <span class="roadmap-tag">C12</span>
+                            <span class="roadmap-tag">C13</span>
+                        </div>
+                        <div class="roadmap-status done">&#10003; مكتمل — 209b57c8</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker done">1</div>
+                    <div class="roadmap-content done">
+                        <div class="roadmap-phase">المرحلة 1</div>
+                        <div class="roadmap-title">إيقاف فقدان البيانات</div>
+                        <p class="roadmap-desc">بذور لمرة واحدة، هجرة Room + exportSchema، ثمانية فهارس.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">C9</span>
+                            <span class="roadmap-tag">C10</span>
+                            <span class="roadmap-tag">H9</span>
+                        </div>
+                        <div class="roadmap-status done">&#10003; مكتمل — a776f6d0</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker done">2</div>
+                    <div class="roadmap-content done">
+                        <div class="roadmap-phase">المرحلة 2</div>
+                        <div class="roadmap-title">تدفّق الدرس</div>
+                        <p class="roadmap-desc">إصلاح الدرس غير القابل للإنهاء والخروج منه، منطق تصحيح مُختبَر.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">C8</span>
+                            <span class="roadmap-tag">C14</span>
+                            <span class="roadmap-tag">H4</span>
+                            <span class="roadmap-tag">M1</span>
+                        </div>
+                        <div class="roadmap-status done">&#10003; مكتمل — 9432b599</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker done">3</div>
+                    <div class="roadmap-content done">
+                        <div class="roadmap-phase">المرحلة 3</div>
+                        <div class="roadmap-title">الصدق</div>
+                        <p class="roadmap-desc">تصحيح اسم النموذج، إظهار الأخطاء بدل تزييف النجاح، حذف درجة النطق المزيّفة.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">C6</span>
+                            <span class="roadmap-tag">C7</span>
+                            <span class="roadmap-tag">H6</span>
+                        </div>
+                        <div class="roadmap-status done">&#10003; مكتمل — 478025ea</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker done">4</div>
+                    <div class="roadmap-content done">
+                        <div class="roadmap-phase">المرحلة 4</div>
+                        <div class="roadmap-title">التنقّل</div>
+                        <p class="roadmap-desc">navigation-compose بمكدّس رجوع حقيقي.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">H1</span>
+                        </div>
+                        <div class="roadmap-status done">&#10003; مكتمل — 3b11a27f</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker done">5</div>
+                    <div class="roadmap-content done">
+                        <div class="roadmap-phase">المرحلة 5</div>
+                        <div class="roadmap-title">الاستمرارية</div>
+                        <p class="roadmap-desc">DataStore للثيم وسرعة الصوت.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">H5</span>
+                        </div>
+                        <div class="roadmap-status done">&#10003; مكتمل — b8765f62</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker pending">6</div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-phase">المرحلة 6</div>
+                        <div class="roadmap-title">المعمارية</div>
+                        <p class="roadmap-desc">حَقن اعتماديات + واجهات للمستودع وخدمة الذكاء + ViewModels لكل شاشة.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">H2</span>
+                            <span class="roadmap-tag">H3</span>
+                        </div>
+                        <div class="roadmap-status pending">&#128316; متبقٍّ</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker pending">7</div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-phase">المرحلة 7</div>
+                        <div class="roadmap-title">الثيم والتدويل</div>
+                        <p class="roadmap-desc">نقل الألوان المثبّتة، إصلاح الوضع الداكن، استخراج السلاسل، دعم RTL، حماية لوحة الإدارة.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">M2</span>
+                            <span class="roadmap-tag">H7</span>
+                            <span class="roadmap-tag">H8</span>
+                            <span class="roadmap-tag">H10</span>
+                        </div>
+                        <div class="roadmap-status pending">&#128316; متبقٍّ</div>
+                    </div>
+                </div>
+
+                <div class="roadmap-item">
+                    <div class="roadmap-marker pending">8</div>
+                    <div class="roadmap-content">
+                        <div class="roadmap-phase">المرحلة 8</div>
+                        <div class="roadmap-title">التنظيف</div>
+                        <p class="roadmap-desc">إزالة الاعتماديات غير المستخدمة، إصلاح Moshi + ProGuard، تفعيل التصغير، حذف الشيفرة الميتة، مفاتيح أجنبية.</p>
+                        <div class="roadmap-tags">
+                            <span class="roadmap-tag">M4</span>
+                            <span class="roadmap-tag">M5</span>
+                            <span class="roadmap-tag">C11</span>
+                            <span class="roadmap-tag">H11</span>
+                            <span class="roadmap-tag">L1–L5</span>
+                        </div>
+                        <div class="roadmap-status pending">&#128316; متبقٍّ</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===== WARNING ===== -->
+        <div class="warning-box fade-in">
+            <span class="icon">&#9888;</span>
+            <p>
+                <strong>لا يُصلَح بالشيفرة وحدها:</strong> مشكلة C5 (مفتاح Gemini داخل الـAPK) تحتاج خادمًا وسيطًا أو Firebase AI Logic مع App Check وملف <code>google-services.json</code>.
+            </p>
+        </div>
+
+        <!-- ===== POSITIVE ===== -->
+        <section id="positive" class="section fade-in">
+            <div class="section-header">
+                <div class="section-icon success">&#10003;</div>
+                <h2 class="section-title">7. ما هو سليم فعلًا (يُحافَظ عليه)</h2>
+            </div>
+
+            <div class="positive-grid">
+
+                <div class="positive-card">
+                    <div class="positive-icon">&#9733;</div>
+                    <div class="positive-text"><strong>كتالوج الإصدارات</strong> منظّم ومركزي في <code>libs.versions.toml</code>.</div>
+                </div>
+
+                <div class="positive-card">
+                    <div class="positive-icon">&#128230;</div>
+                    <div class="positive-text"><strong>الكيانات</strong> مُعرَّفة كـ<code>data class</code> غير قابلة للتغيير مع <code>copy()</code> — نمط سليم.</div>
+                </div>
+
+                <div class="positive-card">
+                    <div class="positive-icon">&#128260;</div>
+                    <div class="positive-text"><strong>Flow + stateIn</strong> هو النمط الصحيح لربط Room بالواجهة.</div>
+                </div>
+
+                <div class="positive-card">
+                    <div class="positive-icon">&#128736;</div>
+                    <div class="positive-text"><strong>المكوّنات المشتركة</strong> في <code>CommonUiComponents.kt</code> قابلة لإعادة الاستخدام ومُرفوعة الحالة بشكل صحيح.</div>
+                </div>
+
+                <div class="positive-card">
+                    <div class="positive-icon">&#128100;</div>
+                    <div class="positive-text"><strong>testTag</strong> موجودة على معظم العناصر التفاعلية — أساس جاهز لاختبارات الواجهة.</div>
+                </div>
+
+                <div class="positive-card">
+                    <div class="positive-icon">&#127912;</div>
+                    <div class="positive-text"><strong>اللغة البصرية</strong> للتصميم متماسكة: زوايا دائرية، تباعد، تدرّج هرمي.</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===== RULE ===== -->
+        <div class="warning-box fade-in" style="margin-top:40px;border-color:rgba(52,211,153,0.2);background:rgba(52,211,153,0.04);">
+            <span class="icon">&#128161;</span>
+            <p>
+                <strong style="color:var(--accent-mint);">قاعدة التنفيذ:</strong> لا إعادة كتابة من الصفر. كل مرحلة تحافظ على السلوك العامل، وتُصرَّف وتُبنى قبل الـcommit.
+            </p>
+        </div>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <div class="container">
+            <p>LinguaVerse Audit Report — أُنشئ تلقائيًا بناءً على التدقيق الشامل للشفرة</p>
+            <p style="margin-top:8px;font-size:0.8rem;direction:ltr;">2026-08-11 &middot; 26 Kotlin Files &middot; 4,661 LOC &middot; 40 Issues Found</p>
+        </div>
+    </footer>
+
+    <script>
+        // Toggle collapsible sections
+        function toggleSection(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(id + '-icon');
+            if (content && icon) {
+                content.classList.toggle('open');
+                icon.classList.toggle('rotated');
+            }
+        }
+
+        // Scroll-triggered fade-in animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+        // Progress bar animation
+        setTimeout(() => {
+            const fill = document.getElementById('progressFill');
+            if (fill) fill.style.width = '67%';
+        }, 500);
+
+        // Back to top button
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('visible', window.scrollY > 400);
+        });
+
+        // Navigation dots active state
+        const sections = ['hero', 'stats', 'verdict', 'architecture', 'critical', 'high', 'medium', 'low', 'roadmap', 'positive'];
+        const dots = document.querySelectorAll('.nav-dot');
+
+        // Dot click navigation
+        dots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const target = document.getElementById(dot.dataset.target);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        // Update active dot on scroll
+        window.addEventListener('scroll', () => {
+            let current = sections[0];
+            for (const id of sections) {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top <= 200) {
+                    current = id;
+                }
+            }
+            dots.forEach(dot => {
+                dot.classList.toggle('active', dot.dataset.target === current);
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Home') {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    </script>
+</body>
+</html>
