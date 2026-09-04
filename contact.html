@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -13,13 +13,13 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="Contact | Rashid">
     <meta property="og:description" content="Contact Rashid — Get in touch for collaboration, project inquiries, or just to say hello.">
-    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta property="og:url" content="https://rashid-wep.vercel.app/contact.html">
     <meta property="og:site_name" content="Rashid Portfolio">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Contact | Rashid">
     <meta name="twitter:description" content="Contact Rashid — Get in touch for collaboration, project inquiries, or just to say hello.">
-    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta name="keywords" content="Contact Rashid, Hire Developer, Web Development, AI Integration, Game Development, Portfolio">
     <title>Contact | Rashid</title>
 
@@ -37,11 +37,11 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css?v=9.1">
+    <link rel="stylesheet" href="css/style.css?v=10.2">
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <style>
@@ -52,7 +52,7 @@
         .contact-card { background: rgba(24, 24, 27, 0.8); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 40px; }
         .contact-card .form-group { margin-bottom: 25px; }
         .contact-card label { display: block; color: #a1a1aa; margin-bottom: 8px; font-size: 0.9rem; }
-        .contact-card input, .contact-card textarea { width: 100%; background: rgba(10,10,10,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; padding: 14px 18px; font-size: 0.95rem; font-family: 'Outfit', sans-serif; box-sizing: border-box; transition: 0.3s; }
+        .contact-card input, .contact-card textarea { width: 100%; background: rgba(10,10,10,0.6); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; color: #fff; padding: 14px 18px; font-size: 0.95rem; font-family: var(--font-body), sans-serif; box-sizing: border-box; transition: 0.3s; }
         .contact-card input:focus, .contact-card textarea:focus { outline: none; border-color: #38bdf8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.2); }
         .contact-card textarea { resize: vertical; min-height: 140px; }
         .contact-card .btn-submit { background: #38bdf8; color: #000; border: none; padding: 14px 30px; border-radius: 12px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: 0.3s; width: 100%; }
@@ -197,7 +197,6 @@
         </div>
     </footer>
 
-    <script src="js/script.js?v=3.7"></script>
     <script>
         (function() {
             var form = document.getElementById('contact-form');
@@ -299,23 +298,8 @@
     </div>
   </div>
 </div>
-<script>
-(function() {
-  const banner = document.getElementById('cookie-consent');
-  if (localStorage.getItem('cookieConsent')) { return; }
-  setTimeout(() => banner.classList.add('visible'), 500);
-  document.getElementById('cookie-accept').addEventListener('click', function() {
-    localStorage.setItem('cookieConsent', 'accepted');
-    banner.classList.remove('visible');
-    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
-  });
-  document.getElementById('cookie-decline').addEventListener('click', function() {
-    localStorage.setItem('cookieConsent', 'declined');
-    banner.classList.remove('visible');
-    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
-  });
-})();
-</script>
+<script src="js/cookie-consent.js?v=1.0"></script>
+<script>CookieConsent.init();</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

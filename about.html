@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -13,13 +13,13 @@
     <meta property="og:type" content="website">
     <meta property="og:title" content="About | Rashid">
     <meta property="og:description" content="About Rashid (MOT1209) — Full-Stack Developer passionate about JavaScript, Python, Supabase, and Three.js.">
-    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta property="og:url" content="https://rashid-wep.vercel.app/about.html">
     <meta property="og:site_name" content="Rashid Portfolio">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="About | Rashid">
     <meta name="twitter:description" content="About Rashid (MOT1209) — Full-Stack Developer passionate about JavaScript, Python, Supabase, and Three.js.">
-    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta name="keywords" content="Rashid, Full-Stack Developer, AI Engineer, JavaScript, Three.js, Supabase, Portfolio, About">
     <title>About | Rashid</title>
 
@@ -43,11 +43,11 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css?v=9.1">
+    <link rel="stylesheet" href="css/style.css?v=10.2">
     <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958" crossorigin="anonymous"></script>
     <style>
@@ -240,8 +240,6 @@
         </div>
     </footer>
 
-    <script src="js/script.js?v=3.7"></script>
-
 <!-- Cookie Consent Banner -->
 <div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
   <div class="cookie-content">
@@ -255,23 +253,8 @@
     </div>
   </div>
 </div>
-<script>
-(function() {
-  const banner = document.getElementById('cookie-consent');
-  if (localStorage.getItem('cookieConsent')) { return; }
-  setTimeout(() => banner.classList.add('visible'), 500);
-  document.getElementById('cookie-accept').addEventListener('click', function() {
-    localStorage.setItem('cookieConsent', 'accepted');
-    banner.classList.remove('visible');
-    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' });
-  });
-  document.getElementById('cookie-decline').addEventListener('click', function() {
-    localStorage.setItem('cookieConsent', 'declined');
-    banner.classList.remove('visible');
-    if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' });
-  });
-})();
-</script>
+<script src="js/cookie-consent.js?v=1.0"></script>
+<script>CookieConsent.init();</script>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",

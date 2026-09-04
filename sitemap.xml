@@ -1,32 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
         <loc>https://rashid-wep.vercel.app/</loc>
-        <lastmod>2026-07-01</lastmod>
+        <lastmod>2026-09-04</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/about.html</loc>
-        <lastmod>2026-07-01</lastmod>
+        <lastmod>2026-09-04</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/contact.html</loc>
-        <lastmod>2026-07-01</lastmod>
+        <lastmod>2026-09-04</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.7</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/privacy.html</loc>
-        <lastmod>2026-06-15</lastmod>
+        <lastmod>2026-09-04</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/terms.html</loc>
-        <lastmod>2026-06-15</lastmod>
+        <lastmod>2026-09-04</lastmod>
         <changefreq>yearly</changefreq>
         <priority>0.4</priority>
     </url>
@@ -44,15 +44,15 @@
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/devos.html</loc>
-        <lastmod>2026-06-15</lastmod>
+        <lastmod>2026-09-04</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/404.html</loc>
-        <lastmod>2026-06-15</lastmod>
-        <changefreq>yearly</changefreq>
-        <priority>0.1</priority>
+        <loc>https://rashid-wep.vercel.app/quran.html</loc>
+        <lastmod>2026-09-04</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/blog/</loc>
@@ -115,12 +115,6 @@
         <priority>0.7</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/apps/maarifah-web/</loc>
-        <lastmod>2026-07-01</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
         <loc>https://rashid-wep.vercel.app/models/Rashid-Model/</loc>
         <lastmod>2026-07-01</lastmod>
         <changefreq>monthly</changefreq>
@@ -164,7 +158,7 @@
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/learning.html</loc>
-        <lastmod>2026-06-20</lastmod>
+        <lastmod>2026-09-04</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.6</priority>
     </url>

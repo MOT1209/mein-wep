@@ -30,7 +30,6 @@ import { initLatestUpdates } from './modules/updates.js';
 import { initStatistics } from './modules/statistics.js';
 import { initVaultSearch } from './modules/vault.js';
 import { renderGitHubStats } from './modules/github.js';
-import { initAdmin, initVaultLock } from './modules/admin.js';
 
 let cached = null; // will be filled once DOM is ready
 let authUnsubscribe = null;
@@ -51,7 +50,8 @@ const boot = async () => {
     // You could also reload private data here if needed
   });
 
-  // 3️⃣ Admin (session based)
+  // 3️⃣ Admin (session based) — dynamically loaded to keep initial bundle slim
+  const { initAdmin, initVaultLock } = await import('./modules/admin.js');
   initAdmin();
 
   // 4️⃣ Core UI

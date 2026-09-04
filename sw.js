@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'Rashid-v16';
+const CACHE_NAME = 'Rashid-v18';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -12,11 +12,10 @@ const ASSETS_TO_CACHE = [
     './css/style.css',
     './css/admin.css',
     './css/app-mode.css',
-    './js/script.js',
     './js/rashid-ai-v2.js',
     './js/supabase-config.js',
     './js/pwa-installer.js',
-    './js/admin.js',
+'./js/cookie-consent.js',
     './src/js/main.js',
     './src/js/utils/cache.js',
     './src/js/utils/dom.js',

@@ -17,7 +17,6 @@
 - Calculator App: https://rashid-wep.vercel.app/apps/calculator-app/
 - Quran App (digital Quran reader): https://rashid-wep.vercel.app/quran-app/
 - Quiz App (interactive quizzes): https://rashid-wep.vercel.app/apps/quiz-app/
-- Maarifah Web (knowledge platform): https://rashid-wep.vercel.app/apps/maarifah-web/
 
 ### AI Models
 - Rashid Model: https://rashid-wep.vercel.app/models/Rashid-Model/

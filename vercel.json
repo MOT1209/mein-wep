@@ -13,7 +13,15 @@
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Strict-Transport-Security", "value": "max-age=31536000; includeSubDomains; preload" },
         { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=(), interest-cohort=(), payment=(), usb=(), magnetometer=(), accelerometer=(), gyroscope=(), display-capture=()" },
+        { "key": "Cross-Origin-Opener-Policy", "value": "same-origin" },
+        { "key": "Cross-Origin-Resource-Policy", "value": "same-origin" },
         { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.supabase.co https://rashid-wep.vercel.app; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://*.onrender.com wss://*.onrender.com https://api.alquran.cloud https://*.mp3quran.net https://www.google-analytics.com https://generativelanguage.googleapis.com https://openrouter.ai https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://rashid-wep.vercel.app; frame-src 'self' https://*.supabase.co https://pagead2.googlesyndication.com https://www.youtube.com https://youtube.com https://www.tiktok.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com https://www.google.com; worker-src 'self' blob:; media-src 'self' https:; object-src 'none'; base-uri 'self'" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(css|js|webp|svg|woff2|ico|png|jpg|jpeg|gif|mp3|mp4|woff|ttf|eot)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
       ]
     },
     {
@@ -47,12 +55,12 @@
     { "source": "/apps/quiz-master", "destination": "/apps/quiz-app" },
     { "source": "/apps/quiz-master/", "destination": "/apps/quiz-app/" },
     { "source": "/apps/quiz-master/:path*", "destination": "/apps/quiz-app/:path*" },
-    { "source": "/apps/quran-pro", "destination": "/apps/quran-app" },
-    { "source": "/apps/quran-pro/", "destination": "/apps/quran-app/" },
-    { "source": "/apps/quran-pro/:path*", "destination": "/apps/quran-app/:path*" },
-    { "source": "/quran-app", "destination": "/apps/quran-app" },
-    { "source": "/quran-app/", "destination": "/apps/quran-app/" },
-    { "source": "/quran-app/:path*", "destination": "/apps/quran-app/:path*" },
+    { "source": "/apps/quran-pro", "destination": "/quran.html" },
+    { "source": "/apps/quran-pro/", "destination": "/quran.html" },
+    { "source": "/apps/quran-pro/:path*", "destination": "/quran.html" },
+    { "source": "/quran-app", "destination": "/quran.html" },
+    { "source": "/quran-app/", "destination": "/quran.html" },
+    { "source": "/quran-app/:path*", "destination": "/quran.html" },
     { "source": "/admin", "destination": "/admin/login.html" },
     { "source": "/admin/", "destination": "/admin/login.html" },
     { "source": "/about", "destination": "/about.html" },

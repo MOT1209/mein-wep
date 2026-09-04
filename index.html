@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -11,17 +11,17 @@
     <link rel="alternate" hreflang="ar" href="https://rashid-wep.vercel.app/?lang=ar">
     <link rel="alternate" hreflang="de" href="https://rashid-wep.vercel.app/?lang=de">
     <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.google.com https://*.doubleclick.net https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.vercel.app https://www.google-analytics.com https://generativelanguage.googleapis.com https://openrouter.ai https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com; frame-src 'self' https://*.supabase.co https://pagead2.googlesyndication.com https://www.youtube.com https://youtube.com; worker-src 'self' blob:; media-src 'self' https:; object-src 'none'; base-uri 'self'">
+    <!-- CSP is served as an HTTP header from vercel.json — do NOT add a meta CSP here (browsers apply the intersection of both, which breaks Quran/Audio features). -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Rashid — Full-Stack Developer & AI Engineer">
     <meta property="og:description" content="Building AI-powered platforms, 3D games, and open-source tools. Creator of KingCraft, Alking, and Rashid AI.">
-    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta property="og:url" content="https://rashid-wep.vercel.app/">
     <meta property="og:site_name" content="Rashid Portfolio">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Rashid — Full-Stack Developer & AI Engineer">
     <meta name="twitter:description" content="Building AI-powered platforms, 3D games, and open-source tools.">
-    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.svg">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta name="twitter:creator" content="@MOT1209">
     <meta name="keywords" content="Rashid, MOT1209, Full-Stack Developer, AI Engineer, JavaScript, Three.js, Supabase, KingCraft, Portfolio, Web Development, Game Development">
     <title>Rashid — Full-Stack Developer & AI Engineer</title>
@@ -34,7 +34,7 @@
       "name": "Rashid",
       "alternateName": "MOT1209",
       "url": "https://rashid-wep.vercel.app",
-      "image": "https://rashid-wep.vercel.app/images/og-image.svg",
+      "image": "https://rashid-wep.vercel.app/images/og-image.png",
       "jobTitle": "Full-Stack Developer & AI Engineer",
       "description": "Building AI-powered platforms, 3D games with Three.js, and open-source tools. Creator of KingCraft and Alking AI.",
       "knowsAbout": ["JavaScript","TypeScript","Python","Next.js","Three.js","Supabase","React","Node.js","AI","PWA","PostgreSQL","Gemini"],
@@ -72,7 +72,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css?v=10.1">
+    <link rel="stylesheet" href="css/style.css?v=10.2">
     <style>
         .blog-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
         .blog-preview-card { display: flex; flex-direction: column; gap: 14px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; text-decoration: none; transition: var(--transition); position: relative; overflow: hidden; }
@@ -605,10 +605,10 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/gemini-config.js"></script>
-    <script src="js/rashid-ai-v2.js?v=3.0"></script>
+    <script src="js/gemini-config.js" defer></script>
+    <script src="js/rashid-ai-v2.js?v=3.0" defer></script>
     <script type="module" src="src/js/main.js?v=2.0"></script>
-    <script src="js/admin.js?v=3.1" defer></script>
+    <!-- js/admin.js removed from public pages (R5): the standalone admin panel lives at /admin/login.html -->
 
 <!-- Cookie Consent Banner -->
 <div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
@@ -623,33 +623,9 @@
     </div>
   </div>
 </div>
+<script src="js/cookie-consent.js?v=1.0"></script>
 <script>
 (function() {
-  var banner = document.getElementById('cookie-consent');
-  if (!banner) return;
-  // Safe localStorage access (works in private browsing)
-  var getConsent, setConsent;
-  try {
-    getConsent = function() { return localStorage.getItem('cookieConsent'); };
-    setConsent = function(v) { localStorage.setItem('cookieConsent', v); };
-  } catch(e) {
-    getConsent = function() { return null; };
-    setConsent = function() {};
-  }
-  // Check existing consent (accepted/declined)
-  var existingConsent = getConsent();
-  if (existingConsent) {
-    banner.style.display = 'none';
-    if (existingConsent === 'accepted') loadAdSense();
-    return;
-  }
-  // Show banner after short delay
-  setTimeout(function() {
-    banner.style.display = 'flex';
-    requestAnimationFrame(function() {
-      banner.classList.add('visible');
-    });
-  }, 500);
   var AD_CLIENT = 'ca-pub-4804302403615958';
   var AD_SLOT = '5604153803';
   var ADSENSE_URL = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + AD_CLIENT;
@@ -657,7 +633,6 @@
   function loadAdSense() {
     var container = document.getElementById('adsense-container');
     if (!container) return;
-    // Create ad unit markup
     var ins = document.createElement('ins');
     ins.className = 'adsbygoogle';
     ins.style.cssText = 'display:block';
@@ -667,7 +642,6 @@
     ins.setAttribute('data-full-width-responsive', 'true');
     container.appendChild(ins);
     container.style.display = '';
-    // Load AdSense script if not already loaded
     if (!window.adsbygoogle) {
       var s = document.createElement('script');
       s.src = ADSENSE_URL;
@@ -682,23 +656,13 @@
     }
   }
 
-  // Accept
-  document.getElementById('cookie-accept').addEventListener('click', function accept() {
-    setConsent('accepted');
-    banner.classList.remove('visible');
-    setTimeout(function() { banner.style.display = 'none'; }, 500);
-    try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'granted', 'ad_storage': 'granted' }); } catch(e) {}
-    loadAdSense();
-  });
-  // Decline
-  document.getElementById('cookie-decline').addEventListener('click', function decline() {
-    setConsent('declined');
-    banner.classList.remove('visible');
-    setTimeout(function() { banner.style.display = 'none'; }, 500);
-    try { if (typeof gtag !== 'undefined') gtag('consent', 'update', { 'analytics_storage': 'denied', 'ad_storage': 'denied' }); } catch(e) {}
-    // Remove ad container completely
-    var c = document.getElementById('adsense-container');
-    if (c) c.remove();
+  CookieConsent.init({
+    onLoad: loadAdSense,
+    onAccept: loadAdSense,
+    onDecline: function() {
+      var c = document.getElementById('adsense-container');
+      if (c) c.remove();
+    }
   });
 })();
 </script>
