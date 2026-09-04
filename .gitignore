@@ -66,3 +66,16 @@ dart-skills/
 # Environment-injected agent skills (not project code)
 .agents/
 موقعي الرئيسي/
+
+# === Independent repo (mein-wep) — R1/R2 cleanup ===
+.claude/
+.opencode/
+.testsprite/
+.trailhead/
+node_modules/
+**/node_modules/
+denkmalen/_next/
+.vercel
+dist/
+build/
+.tools/

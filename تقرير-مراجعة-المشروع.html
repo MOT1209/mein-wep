@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير مراجعة المشروع الشامل — Rashid Portfolio (mein-wep)</title>
+<style>
+:root{
+  --bg:#0b0f17;--bg2:#111827;--card:#151c2c;--card2:#1a2337;
+  --border:#26304a;--text:#e7ecf5;--muted:#93a0b8;
+  --accent:#38bdf8;--accent2:#8b5cf6;
+  --ok:#34d399;--warn:#fbbf24;--high:#fb923c;--crit:#f87171;--info:#60a5fa;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.8;padding-bottom:60px}
+.wrap,.content{max-width:1100px;margin:0 auto;padding:24px}
+.toc{max-width:1100px;margin:24px auto;padding:20px 24px}
+header.hero{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(139,92,246,.12));border-bottom:1px solid var(--border);padding:48px 0;text-align:center}
+header.hero h1{font-size:2rem;margin-bottom:8px}
+header.hero p{color:var(--muted);max-width:720px;margin:0 auto}
+.meta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:.85rem;color:var(--muted)}
+.meta span{background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:100px}
+h2{font-size:1.45rem;margin:44px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px}
+h2 .ico{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--card2);font-size:1.1rem}
+h3{font-size:1.1rem;margin:22px 0 10px;color:var(--accent)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin:14px 0}
+.card h4{font-size:1rem;margin-bottom:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.badge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:100px;margin-inline-start:8px;vertical-align:middle}
+.b-ok{background:rgba(52,211,153,.15);color:var(--ok)}
+.b-warn{background:rgba(251,191,36,.15);color:var(--warn)}
+.b-high{background:rgba(251,146,60,.15);color:var(--high)}
+.b-crit{background:rgba(248,113,113,.15);color:var(--crit)}
+.b-info{background:rgba(96,165,250,.15);color:var(--info)}
+ul.clean{list-style:none;padding:0}
+ul.clean li{padding:8px 0 8px 0;border-bottom:1px dashed var(--border);position:relative;padding-inline-start:26px}
+ul.clean li:last-child{border-bottom:0}
+ul.clean li::before{content:"◂";position:absolute;inset-inline-start:0;color:var(--accent)}
+ul.checks li::before{content:"✔";color:var(--ok)}
+ul.cross li::before{content:"✖";color:var(--crit)}
+ul.arrow li::before{content:"→";color:var(--info)}
+code,.mono{font-family:Consolas,"Courier New",monospace;background:#0d1420;border:1px solid var(--border);padding:2px 7px;border-radius:6px;font-size:.85em;color:#a5d8ff;direction:ltr;display:inline-block}
+blockquote{border-inline-start:4px solid var(--accent2);background:var(--card2);padding:14px 18px;border-radius:0 10px 10px 0;color:var(--muted);margin:12px 0;font-size:.92rem}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem}
+th{background:var(--card2);text-align:right;padding:11px 12px;border:1px solid var(--border);color:var(--accent);white-space:nowrap}
+td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
+tr:nth-child(even) td{background:rgba(255,255,255,.02)}
+.toc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:24px}
+.toc a{color:var(--accent);text-decoration:none}
+.toc a:hover{text-decoration:underline}
+.toc ol{padding-inline-start:22px}
+.score{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0}
+.score .s{flex:1;min-width:150px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
+.score .s b{display:block;font-size:1.9rem}
+.score .s span{color:var(--muted);font-size:.82rem}
+.s-green b{color:var(--ok)}.s-yellow b{color:var(--warn)}.s-red b{color:var(--crit)}.s-blue b{color:var(--info)}
+.phase{border-inline-start:3px solid var(--accent);padding-inline-start:18px;margin:20px 0}
+.phase.p0{border-color:var(--crit)}.phase.p1{border-color:var(--high)}.phase.p2{border-color:var(--warn)}.phase.p3{border-color:var(--ok)}
+.phase .ph-head{font-weight:700;font-size:1.05rem;margin-bottom:8px}
+footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:50px;padding-top:20px;border-top:1px solid var(--border)}
+@media(max-width:640px){header.hero h1{font-size:1.5rem}h2{font-size:1.2rem}table{font-size:.8rem}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>📋 تقرير المراجعة الشامل — موقع راشد الشخصي</h1>
+    <p>فحص دقيق واحترافي لمشروع <span class="mono">mein-wep</span> (Rashid Portfolio — AI Workspace &amp; Developer Portfolio) من جميع النواحي: البنية، الأمان، الأداء، SEO، جودة الكود، والجاهزية للتطوير.</p>
+    <div class="meta">
+      <span>📅 التاريخ: 2026-09-03</span>
+      <span>🔀 الفرع: main</span>
+      <span>🔒 آخر كوميت: aee78ec</span>
+      <span>🧰 التقنية: Vanilla HTML/CSS/JS + Supabase + Three.js + Vercel</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+<div class="toc">
+  <strong>📑 محتويات التقرير</strong>
+  <ol>
+    <li><a href="#summary">الملخص التنفيذي والتقييم العام</a></li>
+    <li><a href="#strengths">ماذا أُحسِن — نقاط القوة</a></li>
+    <li><a href="#best">أهم ما عجبني</a></li>
+    <li><a href="#errors">الأخطاء الموجودة</a></li>
+    <li><a href="#fixes">الإصلاحات اللازمة</a></li>
+    <li><a href="#dev">التطوير اللازم</a></li>
+    <li><a href="#suggestions">اقتراحاتي الاستراتيجية</a></li>
+    <li><a href="#roadmap">خريطة العمل (Roadmap)</a></li>
+  </ol>
+</div>
+
+<div class="content">
+
+<!-- ============ 1. الملخص التنفيذي ============ -->
+<h2 id="summary"><span class="ico">🎯</span> 1. الملخص التنفيذي والتقييم العام</h2>
+
+<div class="score">
+  <div class="s s-green"><b>8/10</b><span>البنية والتنظيم</span></div>
+  <div class="s s-green"><b>9/10</b><span>SEO والتوثيق</span></div>
+  <div class="s s-yellow"><b>6/10</b><span>الأمان والصيانة</span></div>
+  <div class="s s-red"><b>4/10</b><span>سلامة المستودع (Git)</span></div>
+  <div class="s s-yellow"><b>6/10</b><span>جاهزية التطوير المستقبلي</span></div>
+</div>
+
+<div class="card">
+  <h4>الخلاصة</h4>
+  <p>الموقع <strong>مبني باحترافية عالية</strong> من ناحية المحتوى والتنظيم والـ SEO، لكنه يعاني من <strong>مشكلة بنيوية حرجة</strong> هي سبب "الخربان" الذي ذكرته: <strong>جذر Git هو المجلد الأب</strong> <span class="mono">alle folder von code</span> الذي يحتوي ~25 مشروعًا غير ذي صلة، وليس <span class="mono">mein-wep</span>. هذا جعل حالة العمل فوضوية (مئات الحذف المعلّق في <span class="mono">.agents/</span>)، وصعّب تتبع التغييرات الحقيقية، ورفع خطر تسريب أسرار من المشاريع الأخرى — وهو نفس الخطر الذي وثّقته بنفسك في <span class="mono">CLAUDE.md</span>.</p>
+  <p>إضافة لذلك توجد <strong>روابط وإعادة توجيه مكسورة</strong> (quran-app، maarifah-web، game-vault)، و<strong>ازدواجية أنظمة</strong> (لوحا إدارة، تهيئة مزدوجة لـ Supabase)، وملفات بناء ضخمة داخل مجلد المصدر.</p>
+  <blockquote>💡 الخبر الجيد: كل هذه المشاكل قابلة للإصلاح خلال جلسة عمل منظمة واحدة إلى جلستين. الأساس التقني (الوحدات، الـ PWA، الـ SEO) ممتاز ويستحق البناء عليه بدل البدء من الصفر.</blockquote>
+</div>
+
+<!-- ============ 2. نقاط القوة ============ -->
+<h2 id="strengths"><span class="ico">💪</span> 2. ماذا أُحسِن — نقاط القوة</h2>
+
+<div class="grid">
+  <div class="card">
+    <h4>🔍 SEO ممتاز <span class="badge b-ok">قوي جدًا</span></h4>
+    <ul class="clean checks">
+      <li>بيانات منظّمة <code>JSON-LD</code> ثلاثية (Person + WebSite + BreadcrumbList).</li>
+      <li><code>sitemap.xml</code> + <code>robots.txt</code> بسياسات صريحة لبوتات الذكاء الاصطناعي.</li>
+      <li>ملف <code>llms.txt</code> — إضافة عصرية ذكية لمحركات الـ AI.</li>
+      <li>Open Graph + Twitter Cards + <code>hreflang</code> + <code>canonical</code>.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🛡️ وعي أمني حقيقي <span class="badge b-ok">نادر ومميز</span></h4>
+    <ul class="clean checks">
+      <li>ترويسات أمان كاملة: HSTS، X-Frame-Options، Referrer-Policy، Permissions-Policy، CSP.</li>
+      <li>بروكسي <code>api/gemini.js</code> يُبقي المفتاح على الخادم + Rate-limit + قائمة origins بيضاء.</li>
+      <li>سياسات RLS على جداول Supabase + ملف إصلاح أمني يُبطل <code>add_admin_user</code> من anon.</li>
+      <li>لوحة الإدارة تعتمد Supabase Auth (لا كلمات سر في الكود).</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🧩 بنية معيارية نظيفة <span class="badge b-ok">معمارية جيدة</span></h4>
+    <ul class="clean checks">
+      <li><code>src/js/main.js</code> يهيّئ النظام عبر ES Modules حقيقية (12 وحدة).</li>
+      <li>فصل واضح: config / services / modules / utils.</li>
+      <li>مستند معماري كامل في <code>docs/DESIGN_BACKUP.md</code>.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>📱 PWA متكاملة <span class="badge b-ok">متمكن</span></h4>
+    <ul class="clean checks">
+      <li><code>manifest.json</code> كامل مع shortcuts وdisplay_override.</li>
+      <li><code>sw.js</code> بمنطق ناضج: تخزين كل ملف على حدة (<code>Promise.allSettled</code>) حتى لا يفشل التثبيت كله، مع offline fallback.</li>
+      <li>كل لعبة/تطبيق PWA مستقلة بـ manifest + sw خاص.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h4>⚖️ امتثال GDPR وخصوصية <span class="badge b-ok">احترافي</span></h4>
+    <ul class="clean checks">
+      <li>GA4 وAdSense بنظام الموافقة (consent-aware) مع banner يخزّن القرار ويحدّث <code>gtag('consent')</code>.</li>
+      <li><code>anonymize_ip</code> مُفعّل في GA4.</li>
+      <li>صفحات Privacy وTerms موجودة ومربوطة.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🌍 وصولية وتعدد لغات <span class="badge b-ok">مهذّب</span></h4>
+    <ul class="clean checks">
+      <li>RTL/العربية مدعومة في manifest (<code>dir: rtl, lang: ar</code>) وخطوط Cairo.</li>
+      <li>Mobile-first + Dark/Light + Skip link + aria-labels + prefers-reduced-motion.</li>
+      <li>إصلاح iOS viewport (<code>--vh</code>) — تفصيلة يجهلها كثيرون.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>📚 توثيق داخلي ممتاز <span class="badge b-ok">ما يُنسى أبدًا</span></h4>
+    <ul class="clean checks">
+      <li><code>CLAUDE.md</code> يوثّق 10 خطوات إجبارية وينبّه صراحة من خطر <code>git add .</code>.</li>
+      <li><code>README.md</code> شامل بمخطط بنية وتقنيات.</li>
+      <li>ملفات SQL مهاجرة موثّقة باسم وصفي.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🎁 محتوى غني ومتنوع <span class="badge b-ok">ميزة تنافسية</span></h4>
+    <ul class="clean checks">
+      <li>3 ألعاب ثلاثية الأبعاد تعمل في المتصفح — إنجاز حقيقي.</li>
+      <li>مساعد AI بصوت + أفاتار ثلاثي الأبعاد متفاعل.</li>
+      <li>خزينة معرفة (Vault) بستة أقسام + مدونة + صفحة تنزيلات.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ 3. أهم ما عجبني ============ -->
+<h2 id="best"><span class="ico">⭐</span> 3. أهم ما عجبني</h2>
+<div class="card">
+  <ul class="clean arrow">
+    <li><strong>فصل النظامين الأمنيين بوعي</strong> — بروكسي Gemini (مفتاح خادم) مقابل Rashid-Model (BYOK — يُدخل الزائر مفتاحه بنفسه)، ووثّقته في <code>docs/PRD.md</code>. مستوى تفكير أمني يفتقده محترفون.</li>
+    <li><strong>معالجة الفشل في Service Worker</strong> — <code>Promise.allSettled</code> بدل <code>Promise.all</code> في التخزين المسبق يمنع فشل التثبيت كاملًا لو ملف واحد مفقود.</li>
+    <li><strong>حل الكاش الكلاسيكي</strong> — نسخ <code>?v=</code> مع <code>ignoreSearch: true</code> في الـ SW.</li>
+    <li><strong>سجل كوميتات منضبط</strong> بنمط <span class="mono">type(scope): description</span> بالعربية والإنجليزية.</li>
+    <li><strong>.gitignore دفاعي بنّي</strong> — يحمي <span class="mono">.env</span> بأي عمق، ويستثني <code>.env.example</code> و<code>*.enc</code>، ويمنع Keystore.</li>
+    <li><strong>llms.txt وOKF bundle</strong> — استبقتَ اتجاه نشر المحتوى لمحركات AI.</li>
+  </ul>
+</div>
+
+<!-- ============ 4. الأخطاء ============ -->
+<h2 id="errors"><span class="ico">🐛</span> 4. الأخطاء الموجودة</h2>
+
+<h3>🔴 حرجة — بنيوية (يجب حلها أولًا)</h3>
+<div class="card">
+  <h4>E1. جذر Git هو المجلد الأب وليس <span class="mono">mein-wep</span> <span class="badge b-crit">حرجة</span></h4>
+  <p>فحص <span class="mono">git rev-parse --show-toplevel</span> أعاد <span class="mono">C:/Users/aihmo/alle folder von code</span>. المجلد <span class="mono">mein-wep</span> مجرد مجلد فرعي داخل مستودع ضخم يجمع <strong>~25 مشروعًا غير ذي صلة</strong> (Block Blast, Bot tik tok, islams wep, متجر إلكتروني, VS code...). النتائج:</p>
+  <ul class="clean cross">
+    <li><code>git add .</code> واحد قد يرفع مشاريع كاملة وأسرارًا إلى مستودع عام (حادثة سابقة وثّقتها في CLAUDE.md).</li>
+    <li>Vercel ينشر من المستودع — نطاق النشر مبهم ويشمل مجلدات لا علاقة لها بالموقع.</li>
+    <li>حالة العمل مسمومة: <strong>مئات الملفات المحذوفة المعلّقة</strong> في <span class="mono">.agents/</span> و<span class="mono">.claude/</span> و<span class="mono">.opencode/</span> — يستحيل معها تتبع التغيير الحقيقي.</li>
+  </ul>
+</div>
+
+<h3>🔗 روابط وإعادة توجيه مكسورة (404 فعلية)</h3>
+<div class="card">
+  <h4>E2. إعادة توجيه <code>/quran-app</code> إلى مسار غير موجود <span class="badge b-crit">عالية</span></h4>
+  <p><code>vercel.json</code> يعيد توجيه <span class="mono">/quran-app*</span> إلى <span class="mono">/apps/quran-app*</span>، لكن <strong>المجلد <span class="mono">apps/quran-app</span> غير موجود</strong> (توجد فقط <span class="mono">quran.html</span> في الجذر). النتيجة: أي زيارة للرابط المعلن → <strong>404</strong>. نفس الشيء مذكور في <code>llms.txt</code>.</p>
+</div>
+<div class="card">
+  <h4>E3. روابط وثائقية لمشاريع غير موجودة <span class="badge b-high">عالية</span></h4>
+  <ul class="clean cross">
+    <li><code>llms.txt</code> يشير إلى <span class="mono">apps/maarifah-web</span> — غير موجود.</li>
+    <li><code>README.md</code> يشير إلى <span class="mono">game-vault/</span> (static export لـ game-hoster) — غير موجود.</li>
+    <li>لا يوجد <span class="mono">apps/index.html</span> رغم أن مجلد apps واجهة للزوار.</li>
+  </ul>
+</div>
+
+<h3>🧹 ازدواجية وتقادم (Legacy)</h3>
+<div class="card">
+  <h4>E4. نظاما إدارة مزدوجان يتنافسان <span class="badge b-high">عالية</span></h4>
+  <p>يوجد <code>admin/login.html</code> (صفحة مستقلة عبر Supabase Auth، اختصار <span class="mono">Ctrl+Shift+A</span>)، و<code>js/admin.js</code> (نافذة modal، اختصار <span class="mono">Ctrl+Shift+L</span>). كل منهما يهيّئ جلسة مستقلة، والاختصاران يتصادمان. <code>js/admin.js</code> يُحمَّل على <strong>كل صفحات الموقع</strong> رغم أنه يخدم لوحة الإدارة فقط.</p>
+</div>
+<div class="card">
+  <h4>E5. تهيئة Supabase مزدوجة <span class="badge b-high">عالية</span></h4>
+  <p>الصفحة الرئيسية تُحمّل <code>js/supabase-config.js</code> (ينشئ <span class="mono">window.supabaseClient</span>) <strong>و</strong><code>src/js/main.js</code> الذي يستدعي <span class="mono">initSupabase()</span> وينشئ singleton آخر. عميلان متوازيان لنفس المشروع = أحداث auth مكررة، وزيارات مضاعفة، وسلوك غير متوقّع.</p>
+</div>
+<div class="card">
+  <h4>E6. كود قديم محفوظ بلا فائدة <span class="badge b-warn">متوسطة</span></h4>
+  <ul class="clean cross">
+    <li><code>js/script.js</code> أصبح ملفًا فارغًا ("Retained for legacy compatibility") لكن <code>sw.js</code> ما زال يخزّنه مسبقًا.</li>
+    <li><code>js/rashid-ai-v2.js</code> يحمّل Three.js r128 من CDN عند الحاجة فقط، لكنه يُحمَّل نفسه على كل صفحة رئيسية.</li>
+    <li>رأس الملف يقول "v3.0 / rashid-ai-v3.js" بينما الاسم v2 — تشويش توثيقي.</li>
+  </ul>
+</div>
+
+<h3>🎨 PWA وManifest</h3>
+<div class="card">
+  <h4>E7. أيقونات وهمية في manifest.json <span class="badge b-warn">متوسطة</span></h4>
+  <ul class="clean cross">
+    <li>كل المقاسات (48→512px) تشير إلى <strong>نفس الملف</strong> <span class="mono">images/logo.webp</span> — المتصفح يكبّر الصورة الصغيرة فيضبع التفاصيل.</li>
+    <li><code>purpose: "any maskable"</code> على نفس الأيقونة — يجعل الأيقونة maskable غير قابلة للاستخدام عمليًا (سيُقصّ الحواف).</li>
+    <li><code>screenshots</code> يشير إلى الشعار وليس لقطات فعلية — يُضعف عرض التثبيت الغني (Rich Install UI).</li>
+    <li>عدم تطابق <code>theme_color</code>: <span class="mono">#09090b</span> في manifest مقابل <span class="mono">#0a0a0b</span> في الصفحة الرئيسية.</li>
+  </ul>
+</div>
+
+<h3>🔒 أمان وأداء</h3>
+<div class="card">
+  <h4>E8. نسختان متعارضتان من CSP <span class="badge b-high">عالية</span></h4>
+  <p>توجد CSP في <code>vercel.json</code> (ترويسة HTTP) وأخرى في <code>index.html</code> (meta tag) <strong>بمحتوى مختلف</strong>. المتصفح يطبّق <strong>الأكثر تقييدًا</strong> — لذلك الميزات التي تعتمد على نطاقات موجودة في الترويسة فقط (مثل <span class="mono">api.alquran.cloud</span>، <span class="mono">*.mp3quran.net</span>، <span class="mono">*.onrender.com</span>) قد تنكسر داخل الصفحة الرئيسية رغم أنها تعمل في صفحات أخرى. يجب توحيدهما في مكان واحد (الترويسة أفضل).</p>
+</div>
+<div class="card">
+  <h4>E9. إعدادات Supabase منسوخة يدويًا في 3 ملفات <span class="badge b-warn">متوسطة</span></h4>
+  <p>URL + anon key مكتوبة حرفيًا في: <code>js/supabase-config.js</code>، <code>src/js/config/supabase.js</code>، و<code>api/contact.js</code>. التغيير المستقبلي يتطلب تعديل 3 أماكن — انجراف إعدادات مضمون. (ملاحظة: anon key علنية بالتصميم فهي ليست تسريبًا، لكن التمركز مطلوب.)</p>
+</div>
+<div class="card">
+  <h4>E10. BOM في بداية ملفات حرجة <span class="badge b-warn">متوسطة</span></h4>
+  <p><code>index.html</code> و<code>sw.js</code> يبدآن بحرف BOM (<span class="mono">U+FEFF</span>). قد يُفسّر بعض السياقات قراءة الملف أو تحليله — وإصلاحه سطر واحد.</p>
+</div>
+<div class="card">
+  <h4>E11. ملفات بناء ضخمة داخل مجلد المصدر <span class="badge b-warn">متوسطة</span></h4>
+  <ul class="clean cross">
+    <li><span class="mono">denkmalen/_next/</span> — مخرجات بناء Next.js كاملة داخل الشجرة.</li>
+    <li><span class="mono">games/farm-game/js/lib/three.min.js</span> (~388KB) مكرر من CDN.</li>
+    <li>مجلدات أبحاث وملاحظات (<span class="mono">mcp/colab-mcp</span>، <span class="mono">notebooks</span>) داخل مجلد نشر.</li>
+  </ul>
+</div>
+<div class="card">
+  <h4>E12. مشاكل فرعية في linguaverse (Android) <span class="badge b-info">فرعية</span></h4>
+  <p>ملف <code>linguaverse/docs/AUDIT.md</code> يوثّق بنفسك: اسم موديل <span class="mono">gemini-3.5-flash</span> غير موجود (404 لكل استدعاء)، و<code>catch</code> يبتلع الأخطاء ويُرجع ردًا مزيّفًا، ولا يوجد Gradle Wrapper، والبناء يفشل على أجهزة لغتها العربية. مشاكل داخل التطبيق وليس الموقع لكنها تُضعف المنتج المُعلَن.</p>
+</div>
+<div class="card">
+  <h4>E13. تفاصيل SEO ثانوية <span class="badge b-info">منخفضة</span></h4>
+  <ul class="clean cross">
+    <li><code>sitemap.xml</code> يحمل تواريخ <code>lastmod</code> مستقبلية/ثابتة (2026-07-01) لا تعكس التعديل الفعلي.</li>
+    <li><code>index.html</code> معلن <span class="mono">lang="en"</span> مع hreflang عربي <span class="mono">?lang=ar</span> لكن لا توجد لغة عربية فعلية مكتشفة تلقائيًا.</li>
+    <li>صفحات vault تُحمّل <code>css/style.css</code> مرتين (نسختان بإصدارات مختلفة).</li>
+  </ul>
+</div>
+
+<!-- ============ 5. الإصلاحات ============ -->
+<h2 id="fixes"><span class="ico">🔧</span> 5. الإصلاحات اللازمة</h2>
+
+<table>
+  <tr><th>#</th><th>الإصلاح</th><th>الخطوات العملية</th><th>الجهد</th></tr>
+  <tr>
+    <td><strong>R1</strong></td>
+    <td>فصل مستودع <span class="mono">mein-wep</span> عن المجلد الأب</td>
+    <td>أنشئ <span class="mono">.git</span> مستقلًا داخل <span class="mono">mein-wep</span> (أو انقل المستودع الحالي لمجلد معزول)، وضَع <span class="mono">.gitignore</span> صحيحًا يغطي <span class="mono">node_modules</span> و<span class="mono">_next</span> و<span class="mono">dist</span>. ثم تحقّق أن Vercel مربوط بالمستودع الصحيح.</td>
+    <td>ساعة</td>
+  </tr>
+  <tr>
+    <td><strong>R2</strong></td>
+    <td>تنظيف حالة العمل المسمومة</td>
+    <td><span class="mono">git status</span> ثم قرّر: استعادة الملفات المطلوبة، أو <span class="mono">git rm -r --cached</span> للمجلدات الحصرية (<span class="mono">.agents</span>, <span class="mono">.opencode</span>, <span class="mono">.claude</span>) لإزالتها من التتبع مع بقائها محليًا.</td>
+    <td>30 د</td>
+  </tr>
+  <tr>
+    <td><strong>R3</strong></td>
+    <td>إصلاح <code>/quran-app</code></td>
+    <td>إمّا انقل <span class="mono">quran.html</span> وأصوله إلى <span class="mono">apps/quran-app/</span>، أو غيّر rewrites في <code>vercel.json</code> لتشير إلى <span class="mono">/quran.html</span>. حدّث <code>llms.txt</code> و<code>README</code> بعدها.</td>
+    <td>20 د</td>
+  </tr>
+  <tr>
+    <td><strong>R4</strong></td>
+    <td>توحيد CSP</td>
+    <td>احذف CSP من <code>index.html</code> واعتمد ترويسة <code>vercel.json</code> كمصدر وحيد، أو اجعل المتصفح يطبّق الأكثر تساهلًا بينهما (لأنها تُطبّق جميعًا). ثم اختبر كل الميزات: Quran API، صوت، AdSense.</td>
+    <td>30 د</td>
+  </tr>
+  <tr>
+    <td><strong>R5</strong></td>
+    <td>إزالة الازدواجية (admin + supabase)</td>
+    <td>اختر لوحة إدارة واحدة (الموصى بها: <span class="mono">admin/login.html</span> المستقلة)، واحذف <code>js/admin.js</code> من الصفحات العامة، واتركه محمّلًا داخل لوحة التحكم فقط. وحِدّ تهيئة Supabase في <span class="mono">js/supabase-config.js</span> واستورده من <span class="mono">src</span>.</td>
+    <td>45 د</td>
+  </tr>
+  <tr>
+    <td><strong>R6</strong></td>
+    <td>إصلاح manifest.json</td>
+    <td>أضف أيقونات فعلية متعددة المقاسات (192/512/128) + أيقونة maskable منفصلة (safe-zone 80%)، ولقطات شاشة حقيقية للموقع، ووحّد <span class="mono">theme_color</span>.</td>
+    <td>30 د</td>
+  </tr>
+  <tr>
+    <td><strong>R7</strong></td>
+    <td>إزالة BOM</td>
+    <td>احفظ <code>index.html</code> و<code>sw.js</code> بترميز UTF-8 بدون BOM، وارفع رقم <code>CACHE_NAME</code>.</td>
+    <td>5 د</td>
+  </tr>
+  <tr>
+    <td><strong>R8</strong></td>
+    <td>توسيط إعدادات Supabase</td>
+    <td>اعتمد <code>js/supabase-config.js</code> كمصدر وحيد واجعل الملفين الآخرين يقرآن منه (أو عبر متغيرات Vercel للـ API).</td>
+    <td>20 د</td>
+  </tr>
+  <tr>
+    <td><strong>R9</strong></td>
+    <td>تنظيف المجلد المصدر</td>
+    <td>انقل مخرجات البناء خارج <span class="mono">mein-wep</span> أو أضفها إلى <span class="mono">.gitignore</span>، واحذف المكرر (<span class="mono">three.min.js</span>، CSS المكرر في vault).</td>
+    <td>40 د</td>
+  </tr>
+</table>
+
+<!-- ============ 6. التطوير ============ -->
+<h2 id="dev"><span class="ico">🚀</span> 6. التطوير اللازم</h2>
+<div class="grid">
+  <div class="card">
+    <h4>🔁 أتمتة CI/CD</h4>
+    <ul class="clean arrow">
+      <li>GitHub Actions: Lighthouse CI على كل PR، فحص روابط مكسورة (توجد <span class="mono">tools/site_scan.py</span> جاهزة — اربطها).</li>
+      <li>تشغيل <span class="mono">.testsprite/test3.py</span> تلقائيًا قبل الدفع.</li>
+      <li>نسخ sitemap.xml تلقائيًا من شجرة الملفات الحقيقية.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🌍 تعريب حقيقي (i18n)</h4>
+    <ul class="clean arrow">
+      <li>الرئيسية معلنة <span class="mono">lang="en"</span> رغم أن جمهورك عربي — وفّر نسخة عربية كاملة أو كشف لغة المتصفح تلقائيًا.</li>
+      <li>وحّد <code>hreflang</code> مع المسارات الحقيقية.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>⚡ أداء</h4>
+    <ul class="clean arrow">
+      <li>حمّل <code>js/rashid-ai-v2.js</code> وThree.js <strong>بطلب</strong> (dynamic import) عند فتح واجهة AI فقط.</li>
+      <li>حمّل <code>admin.js</code> داخل لوحة الإدارة فقط.</li>
+      <li>حوّل Three.js r128 إلى نسخة حديثة (r160+) وحمّلها محليًا.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🛡️ أمان إضافي</h4>
+    <ul class="clean arrow">
+      <li>Rate limit حقيقي للـ Gemini proxy (Upstash/Redis بدل Map في الذاكرة).</li>
+      <li>حدّث موديل <code>gemini-2.0-flash</code> في بروكسي API ووحّد النسخ المستخدمة.</li>
+      <li>مراجعة إذن <code>anon</code> على جداول Vault — تأكد أن RLS يقيّد الكتابة فعليًا.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>📊 مراقبة</h4>
+    <ul class="clean arrow">
+      <li>Sentry أو Vercel Log Drains للأخطاء في production (لا تراقب حاليًا).</li>
+      <li>تتبّع أخطاء SW + أخطاء fetch في GA4 كأحداث exception.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🧪 جودة كود</h4>
+    <ul class="clean arrow">
+      <li>ESLint + Prettier للمشروع (لا يوجد إعداد lint).</li>
+      <li>اختبارات Playwright للصفحات الحرجة (الرئيسية، تسجيل دخول الإدارة، إرسال رسالة تواصل).</li>
+      <li>اعتمادhusky pre-commit يمنع رفع <span class="mono">.env</span> أو مخرجات بناء.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ============ 7. الاقتراحات ============ -->
+<h2 id="suggestions"><span class="ico">💡</span> 7. اقتراحاتي الاستراتيجية</h2>
+<div class="card">
+  <ul class="clean arrow">
+    <li><strong>ابنِ على الأساس، لا تبدأ من الصفر</strong> — الأساس معماري (ES Modules + PWA + Supabase) ممتاز. البدء من الصفر سيُضيّع عملًا ناضجًا. حدّد بدلًا من ذلك "الحفرة الثلاثية": git/CSS/scripts ثم نظّف تدريجيًا.</li>
+    <li><strong>افصل المشاريع الحتمية</strong> — أنشئ مجلد <span class="mono">projects/</span> خارج مستودع الموقع، وضع فيه linguaverse وdenkmalen وmcp وnotebooks. الموقع = نشر، والمشاريع = تطوير. هذا وحده يُحلّ 60% من الفوضى.</li>
+    <li><strong>احترم أصحاب المصير</strong> — لديك أدوات ذكية لكن لم تُستثمَر: <span class="mono">tools/site_scan.py</span> (فحص روابط) و<span class="mono">.testsprite</span> (اختبارات) و<span class="mono">.opencode/agents/</span> (وكلاء تخصصيين). شغّلها في CI حتى تصبح في الواقع.</li>
+    <li><strong>اجعل اللغة العربية مواطنًا من الدرجة الأولى</strong> — إضافة نسخة عربية + كشف تلقائي + تخطيط RTL كامل ستفتح جمهورك الحقيقي وتزيد الـ SEO العربي بشكل كبير (كلمات مفتاحية أقل منافسة).</li>
+    <li><strong>حوّل "Vault" من ثابت إلى ديناميكي</strong> — بياناته في Supabase بالفعل، لكن الصفحات ما زالت HTML ثابتًا مكررًا. استخدم قالبًا واحدًا يقرأ من Supabase — سيقلّل الحجم ويزيد التحديث.</li>
+    <li><strong>وحّد هوية التصميم</strong> — لديك Design System في docs لكن بعض الصفحات تستخدم CSS قديم بأسلوب مختلف. طبّق متغيّرات CSS موحّدة عبر كل الصفحات (About, Contact, Privacy…) لتحصل على تماسك بصري حقيقي.</li>
+    <li><strong>وثّق مشروعك كمنصة</strong> — README يقول "AI Workspace" لكن البنية ليست معلنة بهذه الصفة في الموقع. ضع صفحة "What is Rashid?" تشرح القصة والمعمارية — سترفع قيمتك المهنية أمام الزائر.</li>
+  </ul>
+</div>
+
+<!-- ============ 8. خريطة العمل ============ -->
+<h2 id="roadmap"><span class="ico">🗺️</span> 8. خريطة العمل (Roadmap)</h2>
+
+<div class="phase p0">
+  <div class="ph-head">🚨 المرحلة 0 — الإنقاذ (يوم واحد، إجبارية قبل أي شيء)</div>
+  <ul class="clean">
+    <li><strong>R1</strong> فصل مستودع mein-wep عن المجلد الأب.</li>
+    <li><strong>R2</strong> تنظيف حالة Git المسمومة (<span class="mono">.agents</span> وغيرها).</li>
+    <li>نسخة احتياطية كاملة من مجلد <span class="mono">mein-wep</span> قبل أي تعديل.</li>
+    <li>التحقق أن Vercel يبني وينشر من المستودع الصحيح بنجاح.</li>
+  </ul>
+</div>
+
+<div class="phase p1">
+  <div class="ph-head">🟠 المرحلة 1 — إصلاح ما هو مكسور (2-3 أيام)</div>
+  <ul class="clean">
+    <li><strong>R3</strong> إصلاح <code>/quran-app</code> وتحديث <code>llms.txt</code> و<code>README</code>.</li>
+    <li><strong>R4</strong> توحيد CSP في مكان واحد.</li>
+    <li><strong>R5</strong> إزالة ازدواجية لوحة الإدارة وتهيئة Supabase.</li>
+    <li><strong>R7</strong> إزالة BOM + رفع <code>CACHE_NAME</code>.</li>
+    <li>اختبار يدوي لكل الروابط في الشريط العلوي + نموذج التواصل.</li>
+  </ul>
+</div>
+
+<div class="phase p2">
+  <div class="ph-head">🟡 المرحلة 2 — الصيانة والجودة (أسبوع)</div>
+  <ul class="clean">
+    <li><strong>R6</strong> إصلاح manifest (أيقونات، maskable، screenshots، theme_color).</li>
+    <li><strong>R8</strong> توسيط إعدادات Supabase في ملف واحد.</li>
+    <li><strong>R9</strong> تنظيف مخرجات البناء والملفات المكررة.</li>
+    <li>إضافة ESLint + Prettier + husky pre-commit.</li>
+    <li>ربط <span class="mono">site_scan.py</span> و<span class="mono">testsprite</span> بـ GitHub Actions.</li>
+  </ul>
+</div>
+
+<div class="phase p3">
+  <div class="ph-head">🟢 المرحلة 3 — التطوير والنمو (2-4 أسابيع)</div>
+  <ul class="clean">
+    <li>تعريب كامل (نسخة عربية + كشف تلقائي + RTL).</li>
+    <li>تحويل Vault إلى صفحة ديناميكية واحدة تقرأ من Supabase.</li>
+    <li>تحديث Three.js إلى r160+ مع dynamic import.</li>
+    <li>إضافة Sentry للمراقبة + Lighthouse CI في كل PR.</li>
+    <li>صفحة "What is Rashid?" لتقديم المنصة للزوار.</li>
+    <li>إصلاح مشاكل linguaverse الموثّقة في <span class="mono">AUDIT.md</span> (الاسم غير الصحيح للموديل، وGradle Wrapper).</li>
+  </ul>
+</div>
+
+<div class="card">
+  <h4>📌 ملاحظة أخيرة</h4>
+  <p>المشروع <strong>ليس فاشلًا</strong> — إنه <strong>ناجح معماريًا لكنه يفتقد الانضباط في الأطراف</strong>. هذا نمط شائع في مشاريع شخصية تكبر بسرعة: البنية الداخلية قوية، لكن الجراءة نحو النشر جعلت الحواف متعبًة. مراحل العمل أعلاه مصمّمة لتُعيد لك الثقة في النشر <strong>قبل</strong> أي ميزة جديدة — لأن الإصلاح بلا استقرار سيُفقد.</p>
+</div>
+
+</div><!-- /content -->
+
+<footer>
+  تقرير المراجعة الشامل — أُعدّ آليًا بناءً على فحص فعلي لملفات المشروع · mein-wep (Rashid Portfolio) · 2026-09-03
+</footer>
+
+</body>
+</html>
