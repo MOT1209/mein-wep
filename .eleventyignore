@@ -1,0 +1,24 @@
+# F13: mirrors .vercelignore so the dist/ build output equals the surface
+# that Vercel actually serves today. Eleventy reads this in addition to the
+# root .gitignore (which already excludes node_modules/, dist/, dot-dirs).
+
+# Android / Capacitor generated files (built in CI)
+**/android/
+**/.gradle/
+**/*.apk
+**/*.aab
+**/*.jks
+**/*.keystore
+**/keystore.properties
+
+# Never deploy dependencies, builds, or local tools
+**/node_modules/
+**/dist/
+**/www/
+**/.idea/
+**/*.log
+
+# Agent / skill directories (local only)
+.agents/
+.opencode/
+.testsprite/

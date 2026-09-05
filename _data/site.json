@@ -1,0 +1,14 @@
+{
+  "siteUrl": "https://rashid-wep.vercel.app",
+  "cssVersion": "10.2",
+  "swVersion": "v18",
+  "gaId": "G-W139X3X20X",
+  "adsClient": "ca-pub-4804302403615958",
+  "adsSlot": "5604153803",
+  "fonts": {
+    "themeColorDark": "#0a0a0b",
+    "themeColorLight": "#fafafa",
+    "bodyFont": "Inter",
+    "monoFont": "JetBrains Mono"
+  }
+}

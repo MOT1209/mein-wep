@@ -1,0 +1,18 @@
+{
+  "name": "mein-wep",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Rashid portfolio static site (Eleventy).",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "eleventy --config=eleventy.config.mjs",
+    "verify": "node scripts/check-url-surface.mjs",
+    "start": "eleventy --serve --config=eleventy.config.mjs"
+  },
+  "devDependencies": {
+    "@11ty/eleventy": "^3.1.6"
+  }
+}
