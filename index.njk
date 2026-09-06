@@ -126,7 +126,7 @@ layout: layouts/base.njk
 
     <!-- Mobile bar — the rail collapses into this below 1024px -->
     <div class="topbar">
-        <a href="#releases" class="rail-name">Rashid<span class="dot">.</span></a>
+        <a href="#intro" class="rail-name">Rashid<span class="dot">.</span></a>
         <div class="topbar-actions">
             <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button>
             <button class="icon-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders"></i></button>
@@ -144,7 +144,7 @@ layout: layouts/base.njk
         <!-- Rail: identity, index, status -->
         <aside class="rail">
             <div class="rail-id">
-                <a href="#releases" class="rail-name">Rashid<span class="dot">.</span></a>
+                <a href="#intro" class="rail-name">Rashid<span class="dot">.</span></a>
                 <span class="rail-role">Full-stack developer &amp; AI engineer</span>
             </div>
 
@@ -166,29 +166,14 @@ layout: layouts/base.njk
 
         <main class="main" id="main">
 
-            <!-- ===== Releases: the opening statement is what actually shipped ===== -->
-            <section id="releases" class="section">
-                <div class="manifest-intro">
-                    <span class="eyebrow">Build ledger</span>
-                    <h1>I ship small things, often.</h1>
-                    <p>Six installable apps and 3D browser games, each a PWA with an Android build. This is what went out most recently — read straight from the release file the build bot writes, so it can't quietly go stale.</p>
-                </div>
-
-                <div class="manifest">
-                    <div class="manifest-bar">
-                        <span class="eyebrow">Latest releases</span>
-                        <a href="downloads.html" class="eyebrow" style="color:var(--signal);">All downloads →</a>
-                    </div>
-                    {%- for r in releases.items %}
-                    <a class="release" href="{{ r.href }}">
-                        <span class="release-name">{{ r.name }}</span>
-                        <span class="release-note" dir="auto">{{ r.note }}</span>
-                        <span class="release-meta">
-                            <span class="version">v{{ r.version }}</span>
-                            <span class="release-date">{{ r.date }}</span>
-                        </span>
-                    </a>
-                    {%- endfor %}
+            <!-- ===== Intro ===== -->
+            <section id="intro" class="intro">
+                <span class="eyebrow">Rashid · MOT1209</span>
+                <h1>I build apps, 3D games and AI tools — and ship them.</h1>
+                <p>Full-stack developer and AI engineer. Six installable apps and browser games running in production, all open source.</p>
+                <div class="intro-actions">
+                    <a href="#projects" class="btn btn-primary">See the projects</a>
+                    <a href="#contact" class="btn btn-secondary">Get in touch</a>
                 </div>
             </section>
 
@@ -212,34 +197,6 @@ layout: layouts/base.njk
                 </div>
 
                 <div class="grid" id="gaming-grid"></div>
-            </section>
-
-            <!-- ===== Rashid AI ===== -->
-            <section id="ai" class="section">
-                <div class="section-head">
-                    <span class="eyebrow">Flagship</span>
-                    <h2>Rashid AI <span class="version">v3.0</span></h2>
-                    <p>A development assistant that runs in the browser.</p>
-                </div>
-
-                <div class="grid">
-                    <div class="card">
-                        <h3>What it does</h3>
-                        <p>Understands code, generates solutions, and answers in 10+ languages through the Gemini and OpenRouter APIs.</p>
-                    </div>
-                    <div class="card">
-                        <h3>Voice and chat</h3>
-                        <p>Speak or type. It handles voice input on Chrome and Edge, speaks its answers back, and keeps context across a conversation.</p>
-                    </div>
-                    <div class="card">
-                        <h3>3D avatar <span class="tag">Beta</span></h3>
-                        <p>An interactive robot assistant with head tracking and voice-driven animation, so every exchange has visual feedback.</p>
-                    </div>
-                    <div class="card">
-                        <h3>Where it helps</h3>
-                        <p>Refactoring, debugging, API integration, translation, and drafting. Open it from the button in the corner.</p>
-                    </div>
-                </div>
             </section>
 
             <!-- ===== About ===== -->
@@ -275,60 +232,6 @@ layout: layouts/base.njk
                         <div class="fact"><dt>Based</dt><dd>Germany</dd></div>
                     </dl>
                 </div>
-            </section>
-
-            <!-- ===== Timeline ===== -->
-            <section id="timeline" class="section">
-                <div class="section-head">
-                    <span class="eyebrow">Path</span>
-                    <h2>Timeline</h2>
-                </div>
-
-                <div class="timeline">
-                    <div class="tl-item">
-                        <div class="tl-year">2025</div>
-                        <div class="tl-body">
-                            <h3>Rashid AI v3.0 and the 3D engine</h3>
-                            <p>Shipped the multilingual assistant with voice synthesis, a 3D avatar, and Gemini integration. Rebuilt KingCraft and Rust Construction on improved physics and rendering.</p>
-                            <div class="stack"><span class="tag">AI</span><span class="tag">Three.js</span><span class="tag">Launch</span></div>
-                        </div>
-                    </div>
-                    <div class="tl-item">
-                        <div class="tl-year">2024</div>
-                        <div class="tl-body">
-                            <h3>Next.js, Supabase, and 3D simulation</h3>
-                            <p>Built full-stack portals on Next.js and Supabase alongside interactive Three.js simulations, including Alking and Gem-PRO.</p>
-                            <div class="stack"><span class="tag">Next.js</span><span class="tag">Supabase</span><span class="tag">Full-stack</span></div>
-                        </div>
-                    </div>
-                    <div class="tl-item">
-                        <div class="tl-year">2023</div>
-                        <div class="tl-body">
-                            <h3>Backend and the first 3D work</h3>
-                            <p>Moved to Supabase for real-time data and auth, shipped responsive PWAs and automation tools, and started building with Three.js.</p>
-                            <div class="stack"><span class="tag">PWA</span><span class="tag">Supabase</span><span class="tag">Backend</span></div>
-                        </div>
-                    </div>
-                    <div class="tl-item">
-                        <div class="tl-year">2022</div>
-                        <div class="tl-body">
-                            <h3>Going open source</h3>
-                            <p>Set up the MOT1209 workspace and started publishing utilities, web projects, and tools in the open.</p>
-                            <div class="stack"><span class="tag">Open source</span><span class="tag">GitHub</span></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- ===== Writing ===== -->
-            <section id="writing" class="section">
-                <div class="section-head">
-                    <span class="eyebrow">Notes</span>
-                    <h2>Writing</h2>
-                    <p>Build logs and things worth writing down.</p>
-                </div>
-                <div class="blog-preview-grid" id="blog-preview-grid"></div>
-                <p style="margin-top:var(--s-5);"><a href="blog/" class="btn btn-secondary">All articles <i class="fas fa-arrow-right"></i></a></p>
             </section>
 
             <!-- ===== Contact ===== -->
@@ -515,28 +418,5 @@ layout: layouts/base.njk
     });
     </script>
 
-    <script>
-    (function() {
-        var grid = document.getElementById('blog-preview-grid');
-        if (!grid) return;
-        fetch('blog/posts.json?_=' + Date.now())
-            .then(function(r) { return r.json(); })
-            .then(function(posts) {
-                var sorted = posts.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-                var top = sorted.slice(0, 3);
-                grid.innerHTML = top.map(function(p) {
-                    var d = new Date(p.date + 'T00:00:00Z');
-                    var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                    return '<a href="blog/' + p.id + '.html" class="blog-preview-card">' +
-                        '<div class="bpc-icon" style="background:' + p.iconBg + ';color:' + p.iconColor + ';"><i class="fas fa-' + p.icon + '"></i></div>' +
-                        '<h3>' + p.title + '</h3>' +
-                        '<p>' + p.description + '</p>' +
-                        '<div class="bpc-meta"><span><i class="fas fa-calendar"></i> ' + ds + '</span><span><i class="fas fa-clock"></i> ' + p.readTime + ' min</span></div>' +
-                    '</a>';
-                }).join('');
-            })
-            .catch(function() { grid.innerHTML = '<p class="desc">Could not load articles.</p>'; });
-    })();
-    </script>
-</body>
+    </body>
 </html>

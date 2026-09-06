@@ -13,12 +13,8 @@
     "monoFont": "JetBrains Mono"
   },
   "nav": [
-    { "label": "Releases", "href": "#releases" },
     { "label": "Projects", "href": "#projects" },
-    { "label": "Rashid AI", "href": "#ai" },
     { "label": "About", "href": "#about" },
-    { "label": "Timeline", "href": "#timeline" },
-    { "label": "Writing", "href": "#writing" },
     { "label": "Contact", "href": "#contact" }
   ],
   "navExternal": [

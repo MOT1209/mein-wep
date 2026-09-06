@@ -230,96 +230,19 @@ img { max-width: 100%; height: auto; }
 .section-head h2 { font-size: clamp(1.5rem, 2.4vw, 1.875rem); margin: var(--s-2) 0 var(--s-2); }
 .section-head p { color: var(--ink-muted); max-width: var(--measure); margin: 0; }
 
-/* ==================== Manifest (the signature) ====================
+/* ============================ Intro ============================
 
-   The opening block is the release ledger, not a marketing headline: name,
-   version, date, and the actual change note for the six things most recently
-   shipped, read at build time from apks/updates.json.                       */
+   The page opens with a short statement rather than a hero: this is a
+   workbench, and the work itself starts one screen-height sooner without it. */
 
-.manifest-intro { margin-bottom: var(--s-6); }
-.manifest-intro h1 {
-  font-size: clamp(1.875rem, 4vw, 2.75rem);
-  max-width: 18ch;
+.intro { padding-bottom: var(--s-8); }
+.intro h1 {
+  font-size: clamp(1.75rem, 3.6vw, 2.5rem);
+  max-width: 20ch;
   margin: var(--s-3) 0 var(--s-4);
 }
-.manifest-intro p { color: var(--ink-muted); max-width: var(--measure); }
-
-.manifest {
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  background: var(--card);
-  overflow: hidden;
-}
-
-.manifest-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--s-3);
-  padding: var(--s-3) var(--s-4);
-  border-bottom: 1px solid var(--rule);
-  background: var(--card-sunk);
-}
-
-.release {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: var(--s-1) var(--s-4);
-  padding: var(--s-4);
-  border-top: 1px solid var(--rule);
-  text-decoration: none;
-  color: inherit;
-  transition: background-color 0.15s ease;
-}
-.manifest .release:first-of-type { border-top: 0; }
-.release:hover { background: var(--card-sunk); }
-
-.release-name {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1rem;
-  letter-spacing: -0.01em;
-}
-.release-note {
-  grid-column: 1;
-  font-size: 0.875rem;
-  color: var(--ink-muted);
-  max-width: 60ch;
-  /* Notes carry dir="auto" so Arabic reads correctly inside the run, but the
-     block itself must stay left-aligned — otherwise an Arabic note drifts to
-     the far edge of the row, away from the title it belongs to. */
-  text-align: left;
-}
-.release-meta {
-  grid-row: 1 / span 2;
-  grid-column: 2;
-  display: flex;
-  align-items: center;
-  gap: var(--s-3);
-  align-self: start;
-}
-.version {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--signal);
-  background: var(--signal-wash);
-  border: 1px solid var(--signal-edge);
-  border-radius: 100px;
-  padding: 2px 9px;
-  white-space: nowrap;
-}
-.release-date {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  color: var(--ink-faint);
-  white-space: nowrap;
-}
-
-@media (max-width: 620px) {
-  .release { grid-template-columns: 1fr; }
-  .release-meta { grid-row: auto; grid-column: 1; margin-top: var(--s-1); }
-}
+.intro p { color: var(--ink-muted); max-width: var(--measure); }
+.intro-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-5); }
 
 /* ============================ Buttons ============================ */
 
@@ -460,57 +383,6 @@ img { max-width: 100%; height: auto; }
 .fact dd { margin: 0; font-family: var(--font-mono); font-size: 0.875rem; color: var(--ink); }
 
 .stack { display: flex; flex-wrap: wrap; gap: var(--s-2); }
-
-/* ============================ Timeline ============================ */
-
-.timeline { display: flex; flex-direction: column; }
-.tl-item {
-  display: grid;
-  grid-template-columns: 76px 1fr;
-  gap: var(--s-5);
-  padding: var(--s-5) 0;
-  border-top: 1px solid var(--rule);
-}
-.tl-item:first-child { border-top: 0; padding-top: 0; }
-.tl-year { font-family: var(--font-mono); font-size: 0.875rem; color: var(--signal); padding-top: 2px; }
-.tl-body h3 { font-size: 1.0625rem; margin-bottom: var(--s-2); }
-.tl-body p { color: var(--ink-muted); font-size: 0.9375rem; margin-bottom: var(--s-3); }
-@media (max-width: 620px) { .tl-item { grid-template-columns: 1fr; gap: var(--s-2); } }
-
-/* ============================ Blog ============================ */
-
-.blog-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--s-4); }
-.blog-preview-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-3);
-  padding: var(--s-5);
-  background: var(--card);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  text-decoration: none;
-  color: inherit;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-.blog-preview-card:hover { border-color: var(--rule-strong); box-shadow: var(--lift-hover); }
-.blog-preview-card h3 { font-size: 1rem; }
-.blog-preview-card p { color: var(--ink-muted); font-size: 0.9375rem; margin: 0; }
-.bpc-icon {
-  width: 34px;
-  height: 34px;
-  display: grid;
-  place-items: center;
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-}
-.bpc-meta {
-  display: flex;
-  gap: var(--s-4);
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  color: var(--ink-faint);
-  margin-top: auto;
-}
 
 /* ============================ Contact ============================ */
 
@@ -800,30 +672,15 @@ img { max-width: 100%; height: auto; }
 
 /* ============================ Motion ============================
 
-   One orchestrated moment: the manifest rows arrive in sequence on load.
-   Everything else is a 150ms state change. Anything already visible stays
-   visible if the observer never runs. */
+   No entrance animation. The staggered reveal here belonged to the release
+   ledger; with that section gone there is nothing left whose arrival carries
+   meaning, and motion added for its own sake is the thing that makes a page
+   feel generated. What remains is 150ms state feedback on hover and focus.
+
+   .reveal is kept at full opacity on purpose: other scripts still add the
+   class, and content must never depend on an observer to become visible. */
 
 .reveal { opacity: 1; }
-
-@media (prefers-reduced-motion: no-preference) {
-  .manifest .release {
-    animation: rise 0.4s cubic-bezier(0.2, 0, 0.2, 1) backwards;
-  }
-  /* nth-of-type, not nth-child: .manifest-bar is the first child, so
-     nth-child(2) would be the FIRST release and the stagger would start
-     one row late. */
-  .manifest .release:nth-of-type(2) { animation-delay: 0.04s; }
-  .manifest .release:nth-of-type(3) { animation-delay: 0.08s; }
-  .manifest .release:nth-of-type(4) { animation-delay: 0.12s; }
-  .manifest .release:nth-of-type(5) { animation-delay: 0.16s; }
-  .manifest .release:nth-of-type(6) { animation-delay: 0.2s; }
-}
-
-@keyframes rise {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
-}
 
 body.reduce-motion *,
 body.performance-mode * {
