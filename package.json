@@ -8,11 +8,13 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "eleventy --config=eleventy.config.mjs",
+    "build:css": "node scripts/minify-css.mjs",
+    "build": "npm run build:css && eleventy --config=eleventy.config.mjs",
     "verify": "node scripts/check-url-surface.mjs",
     "start": "eleventy --serve --config=eleventy.config.mjs"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^3.1.6"
+    "@11ty/eleventy": "^3.1.6",
+    "clean-css": "^5.3.3"
   }
 }

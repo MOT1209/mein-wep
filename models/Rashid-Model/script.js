@@ -456,7 +456,7 @@ generateBtn.addEventListener('click', async () => {
         
     } catch (error) {
         console.error('Image generation error:', error);
-        imageResult.innerHTML = `<div style="text-align:center;padding:30px;"><p style="color:var(--accent-red);font-size:18px;margin-bottom:15px;">❌ فشل توليد الصورة</p><p style="color:var(--text-muted);">حاول مرة أخرى أو غير الوصف</p><p style="color:var(--text-muted);font-size:12px;margin-top:10px;">${error.message}</p></div>`;
+        imageResult.innerHTML = `<div style="text-align:center;padding:30px;"><p style="color:var(--accent-red);font-size:18px;margin-bottom:15px;">❌ فشل توليد الصورة</p><p style="color:var(--text-muted);">حاول مرة أخرى أو غير الوصف</p><p style="color:var(--text-muted);font-size:12px;margin-top:10px;">${escapeHtml(error.message)}</p></div>`;
         showTemporaryMessage('فشل توليد الصورة', 'error');
     } finally {
         generateBtn.disabled = false;
@@ -1243,7 +1243,7 @@ async function translateText() {
     } catch (error) {
         resultContainer.innerHTML = `
             <p style="color: var(--accent-red); text-align: center; padding: 20px;">
-                ❌ ${error.message || 'حدث خطأ أثناء الترجمة'}
+                ❌ ${escapeHtml(error.message || 'حدث خطأ أثناء الترجمة')}
             </p>
         `;
         showTemporaryMessage('فشل الترجمة، حاول مرة أخرى', 'error');

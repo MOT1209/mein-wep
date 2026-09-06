@@ -13,6 +13,10 @@
 **/android/
 **/.gradle/
 **/*.apk
+# ...except apks/ — the intentional public release folder linked from
+# downloads.html. Every tracked .apk lives there; stray android build
+# output is already caught by **/android/ and **/.gradle/ above.
+!/apks/*.apk
 **/*.aab
 **/*.jks
 **/*.keystore
@@ -29,3 +33,17 @@
 .opencode/
 .testsprite/
 **/*.log
+
+# Unrelated sub-projects and internal tooling — not linked from any page,
+# not part of the served site. See eleventy.config.mjs VERCEL_IGNORE for
+# the matching build-time exclusion.
+/linguaverse/
+/denkmalen/
+/mcp/
+/notebooks/
+/tools/
+/agents/
+/docs/
+/.pi/
+**/__pycache__/
+**/*.pyc

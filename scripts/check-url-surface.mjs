@@ -23,16 +23,19 @@ const NOT_SERVED = [
   /^node_modules\//,
   /^package(?:-lock)?\.json$/,
   /^eleventy\.config\.mjs$/,
+  /^\.eleventyignore$/,
   /^_data\//,
   /^_includes\//,
   /^scripts\/check-url-surface\.mjs$/,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.
+// Kept in sync with VERCEL_IGNORE in eleventy.config.mjs.
 const VERCEL_IGNORE = [
   /\/android\//,
   /\/\.gradle\//,
-  /\.apk$/,
+  // See the matching comment in eleventy.config.mjs: apks/*.apk is the
+  // intentional public release folder, not stray android build output.
   /\.aab$/,
   /\.jks$/,
   /\.keystore$/,
@@ -45,6 +48,16 @@ const VERCEL_IGNORE = [
   /^\.agents\//,
   /^\.opencode\//,
   /^\.testsprite\//,
+  /^linguaverse\//,
+  /^denkmalen\//,
+  /^mcp\//,
+  /^notebooks\//,
+  /^tools\//,
+  /^agents\//,
+  /^docs\//,
+  /^\.pi\//,
+  /__pycache__\//,
+  /\.pyc$/,
 ];
 
 function walk(dir, base = '', out = []) {
@@ -70,8 +83,11 @@ function isExcluded(p) {
   return false;
 }
 
-const tracked = execSync('git ls-files', { cwd: ROOT, encoding: 'utf8' })
-  .split('\n')
+// `-z` + null-byte splitting: see the matching comment in
+// eleventy.config.mjs — plain `git ls-files` octal-escapes non-ASCII
+// filenames, which breaks comparison against the real paths on disk.
+const tracked = execSync('git ls-files -z', { cwd: ROOT, encoding: 'utf8' })
+  .split('\0')
   .map((l) => l.trim())
   .filter(Boolean)
   .filter((p) => !isExcluded(p));

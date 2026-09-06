@@ -26,6 +26,7 @@ const NOT_SERVED = [
   /^package(?:-lock)?\.json$/,
   /^eleventy\.config\.mjs$/,
   /^\.eleventyignore$/,
+  /^\.eleventyignore$/,
   /^_data\//,
   /^_includes\//,
   /^scripts\/check-url-surface\.mjs$/,
@@ -36,7 +37,12 @@ const NOT_SERVED = [
 const VERCEL_IGNORE = [
   /\/android\//,
   /\/\.gradle\//,
-  /\.apk$/,
+  // Deliberately NOT /\.apk$/ here: every tracked .apk lives under apks/,
+  // the intentional public release folder linked from downloads.html.
+  // Stray android build .apk output is already caught by /android\// and
+  // /\.gradle\// above (it always lives inside one of those directories),
+  // so a blanket .apk rule only serves to break real downloads once
+  // passthrough copying is done per-file instead of per-directory.
   /\.aab$/,
   /\.jks$/,
   /\.keystore$/,
@@ -49,11 +55,30 @@ const VERCEL_IGNORE = [
   /^\.agents\//,
   /^\.opencode\//,
   /^\.testsprite\//,
+  // Unrelated sub-projects and internal tooling that live in this repo but
+  // are not part of the served site — none of these are linked from any
+  // page. Listed here (not just as a stray top-level dir) so they can never
+  // reach dist/ again regardless of how passthrough copying is wired.
+  /^linguaverse\//,
+  /^denkmalen\//,
+  /^mcp\//,
+  /^notebooks\//,
+  /^tools\//,
+  /^agents\//,
+  /^docs\//,
+  /^\.pi\//,
+  /__pycache__\//,
+  /\.pyc$/,
 ];
 
 function servedFiles() {
-  const tracked = execSync('git ls-files', { encoding: 'utf8' })
-    .split('\n')
+  // `-z` + null-byte splitting (not plain `git ls-files`) is required here:
+  // git otherwise quotes non-ASCII filenames as octal escape sequences
+  // (e.g. a Arabic filename becomes the literal string `"\330\252..."`),
+  // which silently fails to match anything on disk and drops that file
+  // from every passthrough copy.
+  const tracked = execSync('git ls-files -z', { encoding: 'utf8' })
+    .split('\0')
     .map((l) => l.trim())
     .filter(Boolean)
     .filter((p) => {
@@ -73,14 +98,14 @@ export default function (eleventyConfig) {
   eleventyConfig.ignores.add('_data/**');
   eleventyConfig.ignores.add('_includes/**');
 
-  const served = servedFiles();
-  const topLevelDirs = [...new Set(served.map((p) => p.split('/')[0]))];
-  const rootFiles = served.filter((p) => !p.includes('/'));
-
-  for (const dir of topLevelDirs.sort()) {
-    eleventyConfig.addPassthroughCopy(dir);
-  }
-  for (const file of rootFiles.sort()) {
+  // Passthrough copy is registered per served FILE (not per top-level
+  // directory). Directory-level passthrough (addPassthroughCopy('apps'))
+  // copies a directory verbatim from disk and does not apply VERCEL_IGNORE
+  // to files nested inside it — that previously let excluded content
+  // (e.g. an android/ build folder under a sub-project) ride along with
+  // its legitimately-served siblings. Per-file passthrough closes that gap
+  // structurally: nothing reaches dist/ that servedFiles() didn't name.
+  for (const file of servedFiles().sort()) {
     eleventyConfig.addPassthroughCopy(file);
   }
 
