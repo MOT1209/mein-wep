@@ -843,7 +843,7 @@
             container.innerHTML = '<p style="text-align:center;color:var(--text-muted);">Loading...</p>';
             const { data, error } = await client.from('app_updates').select('*');
             if (error) {
-                container.innerHTML = '<p style="color:var(--danger)">جدول app_updates غير موجود — شغّل SUPABASE_APP_UPDATES.sql أولاً. ' + escapeHTML(error.message) + '</p>';
+                container.innerHTML = '<p style="color:var(--danger)">جدول app_updates غير موجود — شغّل db/SUPABASE_APP_UPDATES.sql أولاً. ' + escapeHTML(error.message) + '</p>';
                 return;
             }
             _appUpdates = {};

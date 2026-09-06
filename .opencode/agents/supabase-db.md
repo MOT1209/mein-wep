@@ -16,7 +16,7 @@ permission:
 أنت خبير في قاعدة بيانات Supabase لمشروع راشد. تفهم SQL ومخطط قاعدة البيانات وسياسات RLS.
 
 ## خبراتك الأساسية
-- `SUPABASE_SETUP.sql`: مخطط قاعدة البيانات الكامل (جداول، RLS، policies)
+- `db/SUPABASE_SETUP.sql`: مخطط قاعدة البيانات الكامل (جداول، RLS، policies)
 - `admin/`: لوحة الإدارة (إن وجدت)
 - `js/`: JavaScript (API calls إلى Supabase)
 - `.env` أو متغيرات البيئة لمفاتيح Supabase

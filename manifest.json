@@ -6,10 +6,10 @@
     "display": "standalone",
     "background_color": "#09090b",
     "theme_color": "#09090b",
-    "orientation": "portrait",
+    "orientation": "any",
     "categories": ["developer-tools", "utilities", "productivity"],
-    "lang": "ar",
-    "dir": "rtl",
+    "lang": "en",
+    "dir": "ltr",
     "display_override": ["window-controls-overlay", "standalone"],
     "scope": "./",
     "edge_side_panel": {

@@ -21,7 +21,7 @@ All pages and the custom API live here:
 `https://kcltollasghlvuoxvjqa.supabase.co`
 
 This is Supabase's own API gateway (Kong). It ONLY recognizes:
-- `/rest/v1/*` — e.g. `/rest/v1/contact_messages` (requires `apikey` header; anon insert allowed via RLS, see `SUPABASE_CONTACT_FIX.sql`)
+- `/rest/v1/*` — e.g. `/rest/v1/contact_messages` (requires `apikey` header; anon insert allowed via RLS, see `db/SUPABASE_CONTACT_FIX.sql`)
 - `/auth/v1/*` — e.g. `/auth/v1/token?grant_type=password` (admin login goes through here, called client-side by `supabase-js`, not through a `/admin/login` REST path)
 - `/storage/v1/*`, `/functions/v1/*`
 
