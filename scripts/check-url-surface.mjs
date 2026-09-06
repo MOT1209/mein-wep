@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { TEMPLATE_OUTPUTS } from './site-templates.mjs';
 
 /**
  * URL-surface parity gate.
@@ -27,6 +28,7 @@ const NOT_SERVED = [
   /^_data\//,
   /^_includes\//,
   /^scripts\/check-url-surface\.mjs$/,
+  /^scripts\/site-templates\.mjs$/,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.
@@ -90,7 +92,10 @@ const tracked = execSync('git ls-files -z', { cwd: ROOT, encoding: 'utf8' })
   .split('\0')
   .map((l) => l.trim())
   .filter(Boolean)
-  .filter((p) => !isExcluded(p));
+  .filter((p) => !isExcluded(p))
+  // git knows a page as `index.njk`; dist/ contains the rendered `index.html`.
+  // Compare like for like. See scripts/site-templates.mjs.
+  .map((p) => TEMPLATE_OUTPUTS[p] ?? p);
 
 const actual = walk(DIST).filter((p) => !isExcluded(p));
 

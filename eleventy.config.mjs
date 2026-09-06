@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import { TEMPLATE_SOURCES } from './scripts/site-templates.mjs';
 
 /**
  * Eleventy config for the Rashid portfolio static site.
@@ -30,6 +31,7 @@ const NOT_SERVED = [
   /^_data\//,
   /^_includes\//,
   /^scripts\/check-url-surface\.mjs$/,
+  /^scripts\/site-templates\.mjs$/,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.
@@ -84,6 +86,10 @@ function servedFiles() {
     .filter((p) => {
       if (NOT_SERVED.some((re) => re.test(p))) return false;
       if (VERCEL_IGNORE.some((re) => re.test(p))) return false;
+      // Eleventy renders these itself; passing them to addPassthroughCopy
+      // would also emit the unrendered source (dist/index.njk) next to the
+      // rendered page. See scripts/site-templates.mjs.
+      if (TEMPLATE_SOURCES.has(p)) return false;
       return true;
     });
   return tracked;

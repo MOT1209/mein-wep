@@ -1,0 +1,12 @@
+{#
+  Base page shell.
+
+  Deliberately empty of markup for now: this layout exists so pages can be
+  migrated onto it one at a time without changing a single byte of their
+  output. Shared <head>, nav and footer partials move in here next, and each
+  page drops its copy as it adopts them.
+
+  No trailing newline after the content tag — it would append a byte to every
+  rendered page and break byte-for-byte comparison against the pre-migration
+  output.
+#}{{ content | safe }}
