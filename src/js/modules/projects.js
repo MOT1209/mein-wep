@@ -20,13 +20,18 @@ const projectScreenshots = {
 };
 
 // Projects that have Android APK builds
+// Kept in step with apks/updates.json, which the release bot writes.
+// Farm Empire pointed at v2.0.0 — a file that does not exist — so its
+// Install APK button 404'd and verifyApkButtons() silently hid it, making
+// Farm Empire the one game you could not install. The other three were a
+// release behind.
 const apkProjects = {
     'KingCraft': { url: '/apks/kingcraft-game-v0.6.0.apk', version: '0.6.0' },
     'Rust Construction': { url: '/apks/rust-game-v1.1.0.apk', version: '1.1.0' },
-    'Farm Empire': { url: '/apks/farm-game-v2.0.0.apk', version: '2.0.0' },
-    'Quran Pro': { url: '/apks/quran-app-v1.0.0.apk', version: '1.0.0' },
-    'Calculator App': { url: '/apks/calculator-app-v1.0.0.apk', version: '1.0.0' },
-    'Quiz Master': { url: '/apks/quiz-app-v1.4.0.apk', version: '1.4.0' }
+    'Farm Empire': { url: '/apks/farm-game-v2.5.0.apk', version: '2.5.0' },
+    'Quran Pro': { url: '/apks/quran-app-v1.0.1.apk', version: '1.0.1' },
+    'Calculator App': { url: '/apks/calculator-app-v1.0.1.apk', version: '1.0.1' },
+    'Quiz Master': { url: '/apks/quiz-app-v1.4.1.apk', version: '1.4.1' }
 };
 
 const fallbackProjects = [
@@ -258,11 +263,13 @@ function createProjectCard(project, lang) {
         : `<img src="../images/screenshots/default.svg" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`;
     const isOpenSource = !!project.github_link;
     const isLocal = project.link && /^(games|apps|models)\//.test(project.link);
+    // Colours come from the stylesheet, not from inline styles: these were
+    // hardcoded dark-theme neons and washed out on a light background.
     const statusBadge = isOpenSource
-        ? '<div class="project-status-badge" style="background:rgba(56,189,248,0.15);color:#38bdf8;border-color:rgba(56,189,248,0.3);">\u25CF Open Source</div>'
+        ? '<div class="project-status-badge is-source">\u25CF Open Source</div>'
         : isLocal
-            ? '<div class="project-status-badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;border-color:rgba(251,191,36,0.3);">\u25CF Live Demo</div>'
-            : '<div class="project-status-badge" style="background:rgba(52,211,153,0.15);color:#34d399;border-color:rgba(52,211,153,0.3);">\u25CF Active</div>';
+            ? '<div class="project-status-badge is-demo">\u25CF Live Demo</div>'
+            : '<div class="project-status-badge is-active">\u25CF Active</div>';
     const tagsHTML = techArray.filter(Boolean).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
     const apkTag = hasAPK ? '<span class="tag apk-tag"><i class="fas fa-android"></i> APK</span>' : '';
     // APK button is hidden by default and only revealed after verifyApkButtons()

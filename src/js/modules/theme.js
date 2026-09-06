@@ -13,21 +13,32 @@ export const initTheme = (cached) => {
 
   // ---------- helpers ----------
   const setTheme = (isLight) => {
+    // Two theming mechanisms run side by side during the redesign:
+    // body.light-mode is what css/style.css understands (every page that has
+    // not been redesigned yet), and data-theme on <html> is what
+    // css/tokens.css understands. Writing both keeps old and new pages in
+    // sync off one toggle.
     body.classList.toggle('light-mode', isLight);
+    document.documentElement.setAttribute('data-theme', isLight ? 'light' : 'dark');
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
     updateThemeIcon();
     updateThemeOptions();
   };
+  // Resolved theme. Redesigned pages declare data-theme on <html> (set before
+  // paint by an inline script); pages still on css/style.css only have the
+  // body class, so fall back to it there.
+  const currentTheme = () =>
+    document.documentElement.getAttribute('data-theme') ||
+    (body.classList.contains('light-mode') ? 'light' : 'dark');
+
   const updateThemeIcon = () => {
     const icon = themeToggle?.querySelector('i');
     if (!icon) return;
-    icon.className = body.classList.contains('light-mode')
-      ? 'fas fa-moon'
-      : 'fas fa-sun';
+    icon.className = currentTheme() === 'light' ? 'fas fa-moon' : 'fas fa-sun';
   };
   // Sync the Dark/Light buttons inside the settings modal
   const updateThemeOptions = () => {
-    const current = body.classList.contains('light-mode') ? 'light' : 'dark';
+    const current = currentTheme();
     qsa('.theme-opt').forEach((opt) => {
       opt.classList.toggle('active', opt.dataset.theme === current);
     });
@@ -35,6 +46,10 @@ export const initTheme = (cached) => {
   const setAccent = (color) => {
     root.style.setProperty('--accent', color);
     root.style.setProperty('--accent-glow', `${color}33`); // 20% opacity
+    // --signal is the redesigned pages' accent token. Without this the
+    // picker is a dead control on any page built on css/tokens.css.
+    root.style.setProperty('--signal', color);
+    root.style.setProperty('--signal-hover', color);
     qsa('.accent-dot').forEach((dot) => dot.classList.remove('active'));
     const activeDot = qs(`.accent-dot[data-color="${color}"]`);
     if (activeDot) activeDot.classList.add('active');
@@ -65,7 +80,7 @@ export const initTheme = (cached) => {
   };
 
   // ---------- initialization from storage ----------
-  const savedTheme = localStorage.getItem('theme') === 'light';
+  const storedTheme = localStorage.getItem('theme');
   const savedAccent = localStorage.getItem('accentColor');
   const savedPerf = localStorage.getItem('perfMode') === 'true';
   const savedMotion = localStorage.getItem('reduceMotion') === 'true';
@@ -73,12 +88,22 @@ export const initTheme = (cached) => {
 
   if (savedBanana) setNanoBanana(true);
   if (savedAccent) setAccent(savedAccent);
-  setTheme(savedTheme);
+  if (storedTheme) {
+    setTheme(storedTheme === 'light');
+  } else {
+    // No explicit choice yet. Deliberately leave both switches alone:
+    // css/tokens.css already defaults to light and follows the OS via
+    // prefers-color-scheme, while pages still on css/style.css keep their
+    // existing dark default. Forcing either one here would flip a set of
+    // pages into a theme they were not designed for.
+    updateThemeIcon();
+    updateThemeOptions();
+  }
   setPerfMode(savedPerf);
   setReduceMotion(savedMotion);
 
   // ---------- event listeners ----------
-  themeToggle?.addEventListener('click', () => setTheme(!body.classList.contains('light-mode')));
+  themeToggle?.addEventListener('click', () => setTheme(currentTheme() !== 'light'));
 
   // Dark/Light buttons inside the settings modal
   qsa('.theme-opt').forEach((opt) => {

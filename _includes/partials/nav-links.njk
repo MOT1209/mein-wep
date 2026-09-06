@@ -1,0 +1,12 @@
+{#
+  The one list of navigation links, rendered into both the desktop rail and
+  the mobile menu. Before this partial the two lists were separate copies and
+  had already drifted — the mobile menu was silently missing an entry the
+  desktop nav had. Source of truth: _data/site.json.
+#}
+{%- for item in site.nav %}
+        <a href="{{ item.href }}">{{ item.label }}</a>
+{%- endfor %}
+{%- for item in site.navExternal %}
+        <a href="{{ item.href }}">{{ item.label }} <span class="count">↗</span></a>
+{%- endfor %}

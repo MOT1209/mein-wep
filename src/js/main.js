@@ -184,8 +184,11 @@ const boot = async () => {
   // 9️⃣ Dynamic numbers — replace hardcoded stats
   (async () => {
     const { count } = await countProjects();
-    const repoCountEls = document.querySelectorAll('.hero-status-item:nth-child(3) span:last-child, .stat-box:nth-child(1) .stat-num');
-    const projectCountEls = document.querySelectorAll('.hero-status-item:nth-child(2) span:last-child, .stat-box:nth-child(2) .stat-num');
+    // The [data-fact] hooks are the redesigned homepage; the positional
+    // selectors are the pages still on the old markup. Both are queried so
+    // the counts stay live on either.
+    const repoCountEls = document.querySelectorAll('.hero-status-item:nth-child(3) span:last-child, .stat-box:nth-child(1) .stat-num, [data-fact="repos"]');
+    const projectCountEls = document.querySelectorAll('.hero-status-item:nth-child(2) span:last-child, .stat-box:nth-child(2) .stat-num, [data-fact="projects"]');
     if (count !== null && count > 0) {
       projectCountEls.forEach(el => el.textContent = count + '+');
     }

@@ -1,0 +1,122 @@
+/* =========================================================================
+   Design tokens — single source of truth for the redesigned surfaces.
+
+   Deliberately namespaced (--paper, --ink, --signal…) rather than reusing the
+   legacy names (--bg-main, --accent, --text-high…). css/style.css contains
+   four competing :root blocks that disagree with each other, and pages other
+   than the homepage still depend on them. New names mean the new design owns
+   its values outright, with no cascade fight and no risk to pages that have
+   not been redesigned yet.
+
+   Light is the default. Dark is opt-in via [data-theme="dark"] on <html>,
+   which is also what src/js/modules/theme.js writes.
+   ========================================================================= */
+
+:root {
+  /* ---- Surface ---- */
+  --paper: #fafafb;        /* page ground — cool off-white, not cream */
+  --card: #ffffff;         /* raised surfaces read as lifted on the ground */
+  --card-sunk: #f4f5f7;    /* inset wells: code, manifest rows on hover */
+  --rule: #e4e7ec;         /* hairlines */
+  --rule-strong: #ced3da;  /* dividers that need to carry weight */
+
+  /* ---- Ink ---- */
+  --ink: #12161c;          /* near-black, cool slate bias */
+  --ink-soft: #384250;     /* secondary headings */
+  --ink-muted: #5a6472;    /* supporting copy, metadata */
+  --ink-faint: #68727f;    /* timestamps, eyebrows, metadata — 4.68:1 on
+                              --paper. The lighter grey this started as sat
+                              at 2.94:1 and failed AA on text that carries
+                              real information (release dates, section
+                              labels), so it was darkened rather than kept
+                              decorative. */
+
+  /* ---- Signal: the one accent. Burnt orange = build/release vernacular. ---- */
+  --signal: #c2410c;
+  --signal-hover: #9a3412;
+  --signal-wash: #fff4ed;  /* version chips, active nav background */
+  --signal-edge: #fbd5bd;
+
+  /* ---- Semantic (status only — never decorative) ---- */
+  --ok: #15803d;
+  --ok-wash: #eefbf2;
+
+  /* ---- Type ---- */
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", sans-serif;
+  --font-body: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Consolas, monospace;
+
+  /* ---- Space: a real scale, not ad-hoc px ---- */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 64px;
+  --s-9: 96px;
+
+  /* ---- Form ---- */
+  --radius: 10px;
+  --radius-sm: 6px;
+  --rail-width: 264px;
+  --measure: 68ch;         /* running text stays readable */
+
+  /* Shadows stay nearly invisible: on light ground, hairlines do the work
+     that heavy shadows did on the dark glass design. */
+  --lift: 0 1px 2px rgba(18, 22, 28, 0.04), 0 1px 1px rgba(18, 22, 28, 0.03);
+  --lift-hover: 0 4px 12px rgba(18, 22, 28, 0.07), 0 1px 3px rgba(18, 22, 28, 0.04);
+}
+
+:root[data-theme="dark"] {
+  --paper: #0c0e12;
+  --card: #14171d;
+  --card-sunk: #1a1e25;
+  --rule: #252a33;
+  --rule-strong: #333a45;
+
+  --ink: #eef1f5;
+  --ink-soft: #c4ccd6;
+  --ink-muted: #929cab;
+  --ink-faint: #828c99;    /* 5.67:1 on the dark ground */
+
+  --signal: #fb7a4a;
+  --signal-hover: #fd9a73;
+  --signal-wash: #24160f;
+  --signal-edge: #4a2a1a;
+
+  --ok: #4ade80;
+  --ok-wash: #10231a;
+
+  --lift: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --lift-hover: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+/* Viewers who never touched the toggle and whose OS asks for dark get it,
+   without overriding an explicit light choice. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0c0e12;
+    --card: #14171d;
+    --card-sunk: #1a1e25;
+    --rule: #252a33;
+    --rule-strong: #333a45;
+
+    --ink: #eef1f5;
+    --ink-soft: #c4ccd6;
+    --ink-muted: #929cab;
+    --ink-faint: #828c99;    /* 5.67:1 on the dark ground */
+
+    --signal: #fb7a4a;
+    --signal-hover: #fd9a73;
+    --signal-wash: #24160f;
+    --signal-edge: #4a2a1a;
+
+    --ok: #4ade80;
+    --ok-wash: #10231a;
+
+    --lift: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --lift-hover: 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+}

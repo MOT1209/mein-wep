@@ -66,29 +66,30 @@ layout: layouts/base.njk
     }
     </script>
 
-    <!-- Fonts: Inter + JetBrains Mono -->
+    <!-- Fonts: Bricolage Grotesque (display) + IBM Plex Sans (body) + JetBrains Mono (data) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
     <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/style.css?v=10.2">
-    <style>
-        .blog-preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .blog-preview-card { display: flex; flex-direction: column; gap: 14px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 24px; text-decoration: none; transition: var(--transition); position: relative; overflow: hidden; }
-        .blog-preview-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); opacity: 0; transition: var(--transition); }
-        .blog-preview-card:hover { border-color: var(--accent); transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.2); }
-        .blog-preview-card:hover::before { opacity: 1; }
-        .blog-preview-card .bpc-icon { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; font-size: 1.1rem; }
-        .blog-preview-card h3 { color: var(--text-high); font-size: 1rem; font-weight: 600; margin: 0; line-height: 1.35; }
-        .blog-preview-card p { color: var(--text-med); font-size: 0.82rem; line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .blog-preview-card .bpc-meta { display: flex; gap: 10px; font-size: 0.75rem; color: var(--text-muted); }
-        .blog-preview-card .bpc-meta span { display: flex; align-items: center; gap: 4px; }
-        @media (max-width: 768px) { .blog-preview-grid { grid-template-columns: 1fr; } }
-    </style>
+    <!-- Resolve the theme before first paint, so the page never renders in one
+         theme and then swaps. Runs ahead of the stylesheets on purpose. -->
+    <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (e) { /* private mode: fall through to the CSS default */ }
+    })();
+    </script>
+
+    <!-- CSS: tokens first, then the page. This page deliberately does NOT load
+         css/style.css — the redesign owns its own styles end to end. -->
+    <link rel="stylesheet" href="css/tokens.css?v={{ site.cssVersion }}">
+    <link rel="stylesheet" href="css/home.css?v={{ site.cssVersion }}">
 
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
@@ -96,13 +97,13 @@ layout: layouts/base.njk
 
     <!-- PWA -->
     <link rel="manifest" href="manifest.json?v=2">
-    <meta name="theme-color" content="#0a0a0b" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="{{ site.fonts.themeColorDark }}" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="{{ site.fonts.themeColorLight }}" media="(prefers-color-scheme: light)">
 
     <!-- GA4 (consent-aware) -->
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied'});</script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-W139X3X20X"></script>
-    <script>gtag('js',new Date());gtag('config','G-W139X3X20X',{'anonymize_ip':true});</script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.gaId }}"></script>
+    <script>gtag('js',new Date());gtag('config','{{ site.gaId }}',{'anonymize_ip':true});</script>
 
     <script type="application/ld+json">
 {
@@ -117,434 +118,296 @@ layout: layouts/base.njk
     }
   ]
 }
-</script>
+    </script>
 </head>
-<body class="dark-mode">
+<body>
 
-    <!-- Skip Link -->
-    <a href="#main" class="skip-link" tabindex="1">Skip to main content</a>
+    <a href="#main" class="skip-link">Skip to main content</a>
 
-    <!-- Navigation -->
-    <nav class="navbar" role="navigation">
-        <div class="nav-inner">
-            <a href="#home" class="nav-logo">Rashid<span>.</span></a>
-            <div class="nav-links">
-                <a href="#home" class="active">Home</a>
-                <a href="#about">About</a>
-                <a href="#projects">Projects</a>
-                <a href="#skills">Skills</a>
-                <a href="#timeline">Timeline</a>
-                <a href="#github">Open Source</a>
-                <a href="#vault">Vault</a>
-                <a href="blog/">Blog</a>
-                <a href="downloads.html">Downloads</a>
-                <a href="quran.html">📖 Quran</a>
-                <a href="#contact">Contact</a>
-            </div>
-            <div class="nav-actions">
-                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
-                <button class="nav-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders-h"></i></button>
-                <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
-            </div>
+    <!-- Mobile bar — the rail collapses into this below 1024px -->
+    <div class="topbar">
+        <a href="#releases" class="rail-name">Rashid<span class="dot">.</span></a>
+        <div class="topbar-actions">
+            <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button>
+            <button class="icon-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders"></i></button>
+            <button class="icon-btn" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
         </div>
-    </nav>
-
-    <!-- Mobile Menu -->
-    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
-        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
-        <a href="#home">Home</a>
-        <a href="#about">About</a>
-        <a href="#projects">Projects</a>
-        <a href="#skills">Skills</a>
-        <a href="#timeline">Timeline</a>
-        <a href="#github">Open Source</a>
-        <a href="#vault">Vault</a>
-        <a href="blog/">Blog</a>
-        <a href="downloads.html">Downloads</a>
-        <a href="#contact">Contact</a>
     </div>
 
-    <!-- Hero -->
-    <section id="home" class="hero reveal">
-        <div class="container hero-grid">
-            <div>
-                <div class="hero-tag">Available for collaboration</div>
-                <h1>Building the future with <span>code &amp; AI</span></h1>
-                <p>I'm <strong style="color:var(--text);">Rashid</strong> — a Full-Stack Developer and AI Engineer. I build AI-powered platforms, 3D games, and open-source tools that push the boundaries of what the web can do.</p>
-                <div class="hero-cta">
-                    <a href="#projects" class="btn btn-primary">View Projects <i class="fas fa-arrow-right"></i></a>
-                    <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+        {% include "partials/nav-links.njk" %}
+    </div>
+
+    <div class="shell">
+
+        <!-- Rail: identity, index, status -->
+        <aside class="rail">
+            <div class="rail-id">
+                <a href="#releases" class="rail-name">Rashid<span class="dot">.</span></a>
+                <span class="rail-role">Full-stack developer &amp; AI engineer</span>
+            </div>
+
+            <nav class="rail-nav" aria-label="Sections">
+                {% include "partials/nav-links.njk" %}
+            </nav>
+
+            <div class="rail-foot">
+                <div class="rail-status">
+                    <span class="status-dot"></span>
+                    <span>Last build {{ releases.updatedAt }}</span>
                 </div>
-                <div class="hero-tech">
-                    <span class="tech-badge">Next.js</span>
-                    <span class="tech-badge">Python</span>
-                    <span class="tech-badge">Supabase</span>
-                    <span class="tech-badge">Three.js</span>
-                    <span class="tech-badge">React</span>
-                    <span class="tech-badge">Node.js</span>
+                <div class="rail-actions">
+                    <button class="icon-btn" id="theme-toggle-rail" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button>
+                    <button class="icon-btn" id="settings-btn-rail" aria-label="Settings"><i class="fas fa-sliders"></i></button>
                 </div>
             </div>
-            <div class="hero-visual">
-                <div class="hero-image">
-                    <img src="images/logo.webp" alt="Rashid" width="320" height="320" fetchpriority="high">
+        </aside>
+
+        <main class="main" id="main">
+
+            <!-- ===== Releases: the opening statement is what actually shipped ===== -->
+            <section id="releases" class="section">
+                <div class="manifest-intro">
+                    <span class="eyebrow">Build ledger</span>
+                    <h1>I ship small things, often.</h1>
+                    <p>Six installable apps and 3D browser games, each a PWA with an Android build. This is what went out most recently — read straight from the release file the build bot writes, so it can't quietly go stale.</p>
                 </div>
-                <div class="hero-status">
-                    <div class="hero-status-item"><span>Status</span><span style="color:#22c55e;">Active</span></div>
-                    <div class="hero-status-item"><span>Projects</span><span>13+</span></div>
-                    <div class="hero-status-item"><span>Repos</span><span>15</span></div>
-                    <div class="hero-status-item"><span>AI Model</span><span>v3.0</span></div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- AdSense Ad Unit (loaded after consent) -->
-    <div id="adsense-container" class="container" style="padding: 20px 20px 0; min-height: 90px; display:none;"></div>
-
-    <div class="section-divider"></div>
-
-    <!-- About -->
-    <section id="about" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>About Me</h2>
-                <p>Full-Stack Developer &amp; AI Engineer — building the future one project at a time.</p>
-            </div>
-            <div class="about-grid">
-                <div class="about-card">
-                    <h3>Rashid <span style="color:var(--accent);">(MOT1209)</span></h3>
-                    <div class="subtitle">Lead Architect &amp; AI Engineer</div>
-                    <p>I build AI-powered tools, 3D game engines, and full-stack platforms — all open-source. My journey started with curiosity: manipulating CSS, breaking JavaScript, rebuilding everything better. Now I create intelligent systems that push web capabilities forward.</p>
-                    <p><strong>What I build:</strong> AI assistants powered by Gemini &amp; OpenRouter, 3D sandbox worlds with Three.js, full-stack platforms with Next.js 15 + Supabase, and open-source tools that help developers ship faster.</p>
-                    <p><strong>Mission:</strong> Democratizing AI and 3D web development through open-source tools, educational content, and community-driven platforms.</p>
-                    <div class="about-stats">
-                        <div class="stat-box"><span class="stat-num">15+</span><span class="stat-label">Repos</span></div>
-                        <div class="stat-box"><span class="stat-num">13+</span><span class="stat-label">Projects</span></div>
-                        <div class="stat-box"><span class="stat-num">24/7</span><span class="stat-label">Live</span></div>
+                <div class="manifest">
+                    <div class="manifest-bar">
+                        <span class="eyebrow">Latest releases</span>
+                        <a href="downloads.html" class="eyebrow" style="color:var(--signal);">All downloads →</a>
                     </div>
+                    {%- for r in releases.items %}
+                    <a class="release" href="{{ r.href }}">
+                        <span class="release-name">{{ r.name }}</span>
+                        <span class="release-note" dir="auto">{{ r.note }}</span>
+                        <span class="release-meta">
+                            <span class="version">v{{ r.version }}</span>
+                            <span class="release-date">{{ r.date }}</span>
+                        </span>
+                    </a>
+                    {%- endfor %}
                 </div>
-                <div>
-                    <div class="about-card" style="margin-bottom:20px;">
-                        <h3 style="margin-bottom:16px;">Core Technologies</h3>
-                        <div class="skills-grid">
-                            <span class="skill-tag"><i class="fab fa-js"></i> JavaScript</span>
-                            <span class="skill-tag"><i class="fab fa-react"></i> React</span>
-                            <span class="skill-tag"><i class="fab fa-python"></i> Python</span>
-                            <span class="skill-tag"><i class="fab fa-node"></i> Node.js</span>
-                            <span class="skill-tag"><i class="fas fa-database"></i> Supabase</span>
-                            <span class="skill-tag"><i class="fas fa-cube"></i> Three.js</span>
-                            <span class="skill-tag"><i class="fas fa-cloud"></i> Vercel</span>
-                            <span class="skill-tag"><i class="fab fa-git-alt"></i> Git</span>
-                            <span class="skill-tag"><i class="fas fa-robot"></i> AI/ML</span>
-                            <span class="skill-tag"><i class="fas fa-mobile-alt"></i> PWA</span>
-                        </div>
-                    </div>
-                    <div class="about-card">
-                        <p style="font-style:italic;color:var(--text-muted);text-align:center;">
-                            <i class="fas fa-quote-left" style="color:var(--accent);opacity:0.5;"></i>
-                            "Code is not just syntax — it's a tool to shape reality. Every line is a brick in the future we're building."
-                            <i class="fas fa-quote-right" style="color:var(--accent);opacity:0.5;"></i>
-                        </p>
-                    </div>
+            </section>
+
+            <!-- AdSense slot (revealed after consent) -->
+            <div id="adsense-container" style="min-height:90px;display:none;"></div>
+
+            <!-- ===== Projects ===== -->
+            <section id="projects" class="section">
+                <div class="section-head">
+                    <span class="eyebrow">Built</span>
+                    <h2>Projects</h2>
+                    <p>Games, apps, AI models and tools. Every one is a PWA — installable, offline-ready, and running in production.</p>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <div class="section-divider"></div>
-
-    <!-- Projects (Core section) -->
-    <section id="projects" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>Projects</h2>
-                <p>Games, apps, AI models, and tools I've built. Each project is a PWA — installable, offline-ready, and performant.</p>
-            </div>
-            <div class="projects-header">
-                <div class="filter-group">
+                <div class="filters">
                     <button class="filter-btn active" data-filter="all">All</button>
                     <button class="filter-btn" data-filter="games">Games</button>
-                    <button class="filter-btn" data-filter="app">Apps</button>
-                    <button class="filter-btn" data-filter="model">AI Models</button>
-                    <button class="filter-btn" data-filter="tool">Tools</button>
+                    <button class="filter-btn" data-filter="apps">Apps</button>
+                    <button class="filter-btn" data-filter="ai">AI Models</button>
+                    <button class="filter-btn" data-filter="tools">Tools</button>
                 </div>
-            </div>
-            <div class="projects-grid" id="gaming-grid">
-                <!-- Projects injected by JS -->
-            </div>
-        </div>
-    </section>
 
-    <div class="section-divider"></div>
+                <div class="grid" id="gaming-grid"></div>
+            </section>
 
-    <!-- Rashid AI v3.0 — Product Feature -->
-    <section id="ai-product" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>Rashid AI <span style="font-size:0.6em;vertical-align:middle;padding:4px 12px;background:var(--accent-subtle);color:var(--accent);border-radius:100px;">v3.0</span></h2>
-                <p>Your AI-powered development assistant — built into the browser.</p>
-            </div>
-            <div class="ai-grid">
-                <div class="ai-card">
-                    <div class="ai-card-icon"><i class="fas fa-brain"></i></div>
-                    <h4>What It Does</h4>
-                    <p>Rashid AI is a multimodal assistant that understands code, generates solutions, and responds in 10+ languages using Gemini &amp; OpenRouter APIs.</p>
+            <!-- ===== Rashid AI ===== -->
+            <section id="ai" class="section">
+                <div class="section-head">
+                    <span class="eyebrow">Flagship</span>
+                    <h2>Rashid AI <span class="version">v3.0</span></h2>
+                    <p>A development assistant that runs in the browser.</p>
                 </div>
-                <div class="ai-card">
-                    <div class="ai-card-icon"><i class="fas fa-microphone-alt"></i></div>
-                    <h4>Voice &amp; Chat</h4>
-                    <p>Speak naturally or type. Rashid AI processes voice input (Chrome/Edge), generates speech output, and maintains context across conversations.</p>
+
+                <div class="grid">
+                    <div class="card">
+                        <h3>What it does</h3>
+                        <p>Understands code, generates solutions, and answers in 10+ languages through the Gemini and OpenRouter APIs.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Voice and chat</h3>
+                        <p>Speak or type. It handles voice input on Chrome and Edge, speaks its answers back, and keeps context across a conversation.</p>
+                    </div>
+                    <div class="card">
+                        <h3>3D avatar <span class="tag">Beta</span></h3>
+                        <p>An interactive robot assistant with head tracking and voice-driven animation, so every exchange has visual feedback.</p>
+                    </div>
+                    <div class="card">
+                        <h3>Where it helps</h3>
+                        <p>Refactoring, debugging, API integration, translation, and drafting. Open it from the button in the corner.</p>
+                    </div>
                 </div>
-                <div class="ai-card">
-                    <div class="ai-card-icon"><i class="fas fa-cube"></i></div>
-                    <h4>3D Avatar <span style="font-size:0.7em;padding:2px 8px;background:rgba(251,191,36,0.2);color:#fbbf24;border-radius:100px;">Beta</span></h4>
-                    <p>Interactive 3D robot assistant with real-time head tracking and voice animation. Visual feedback for every interaction.</p>
+            </section>
+
+            <!-- ===== About ===== -->
+            <section id="about" class="section">
+                <div class="section-head">
+                    <span class="eyebrow">Who</span>
+                    <h2>About</h2>
                 </div>
-                <div class="ai-card ai-card-wide">
-                    <div class="ai-card-icon"><i class="fas fa-code"></i></div>
+
+                <div class="about-grid">
                     <div>
-                        <h4>Use Cases</h4>
-                        <p>Code refactoring · Debugging · API integration · Language translation · Creative writing · Learning assistance · System prompts · Automation scripts</p>
-                        <a href="#contact" class="btn btn-primary" style="margin-top:16px;">Try It Now <i class="fas fa-arrow-right"></i></a>
+                        <p class="about-lede">I'm Rashid — I build AI tools, 3D game engines, and full-stack platforms, and I publish them as open source.</p>
+                        <p>It started with curiosity: changing CSS to see what broke, breaking JavaScript to see why, then rebuilding it properly. It turned into shipping real software — browser games running custom Three.js engines, offline-capable apps people install on their phones, and an assistant wired into Gemini.</p>
+                        <p>Everything here is built in the open. If something looks useful, the source is on GitHub.</p>
+                        <div class="stack">
+                            <span class="tag">JavaScript</span>
+                            <span class="tag">React</span>
+                            <span class="tag">Python</span>
+                            <span class="tag">Node.js</span>
+                            <span class="tag">Supabase</span>
+                            <span class="tag">Three.js</span>
+                            <span class="tag">Vercel</span>
+                            <span class="tag">Git</span>
+                            <span class="tag">AI/ML</span>
+                            <span class="tag">PWA</span>
+                        </div>
+                    </div>
+                    <dl class="facts">
+                        <div class="fact"><dt>Public repositories</dt><dd data-fact="repos">15</dd></div>
+                        <div class="fact"><dt>Shipped projects</dt><dd data-fact="projects">13</dd></div>
+                        <div class="fact"><dt>Android builds</dt><dd>{{ releases.items | length }}</dd></div>
+                        <div class="fact"><dt>Latest release</dt><dd>{{ releases.updatedAt }}</dd></div>
+                        <div class="fact"><dt>Based</dt><dd>Germany</dd></div>
+                    </dl>
+                </div>
+            </section>
+
+            <!-- ===== Timeline ===== -->
+            <section id="timeline" class="section">
+                <div class="section-head">
+                    <span class="eyebrow">Path</span>
+                    <h2>Timeline</h2>
+                </div>
+
+                <div class="timeline">
+                    <div class="tl-item">
+                        <div class="tl-year">2025</div>
+                        <div class="tl-body">
+                            <h3>Rashid AI v3.0 and the 3D engine</h3>
+                            <p>Shipped the multilingual assistant with voice synthesis, a 3D avatar, and Gemini integration. Rebuilt KingCraft and Rust Construction on improved physics and rendering.</p>
+                            <div class="stack"><span class="tag">AI</span><span class="tag">Three.js</span><span class="tag">Launch</span></div>
+                        </div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-year">2024</div>
+                        <div class="tl-body">
+                            <h3>Next.js, Supabase, and 3D simulation</h3>
+                            <p>Built full-stack portals on Next.js and Supabase alongside interactive Three.js simulations, including Alking and Gem-PRO.</p>
+                            <div class="stack"><span class="tag">Next.js</span><span class="tag">Supabase</span><span class="tag">Full-stack</span></div>
+                        </div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-year">2023</div>
+                        <div class="tl-body">
+                            <h3>Backend and the first 3D work</h3>
+                            <p>Moved to Supabase for real-time data and auth, shipped responsive PWAs and automation tools, and started building with Three.js.</p>
+                            <div class="stack"><span class="tag">PWA</span><span class="tag">Supabase</span><span class="tag">Backend</span></div>
+                        </div>
+                    </div>
+                    <div class="tl-item">
+                        <div class="tl-year">2022</div>
+                        <div class="tl-body">
+                            <h3>Going open source</h3>
+                            <p>Set up the MOT1209 workspace and started publishing utilities, web projects, and tools in the open.</p>
+                            <div class="stack"><span class="tag">Open source</span><span class="tag">GitHub</span></div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <div class="section-divider"></div>
+            <!-- ===== Writing ===== -->
+            <section id="writing" class="section">
+                <div class="section-head">
+                    <span class="eyebrow">Notes</span>
+                    <h2>Writing</h2>
+                    <p>Build logs and things worth writing down.</p>
+                </div>
+                <div class="blog-preview-grid" id="blog-preview-grid"></div>
+                <p style="margin-top:var(--s-5);"><a href="blog/" class="btn btn-secondary">All articles <i class="fas fa-arrow-right"></i></a></p>
+            </section>
 
-    <!-- Skills — Progress Bars -->
-    <section id="skills" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>Skills</h2>
-                <p>Technologies I use daily to build production-ready systems.</p>
-            </div>
-            <div class="sk-progress-grid">
-                <div class="sk-progress-group">
-                    <h3>Frontend</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">React</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Next.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Three.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Tailwind CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">HTML/CSS</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div></div>
+            <!-- ===== Contact ===== -->
+            <section id="contact" class="section">
+                <div class="section-head">
+                    <span class="eyebrow">Reach me</span>
+                    <h2>Get in touch</h2>
+                    <p>Questions, collaboration, or a bug in something I built — all welcome.</p>
                 </div>
-                <div class="sk-progress-group">
-                    <h3>Backend</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">Node.js</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Python</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">REST APIs</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:93%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">WebSockets</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:75%"></div></div></div>
-                </div>
-                <div class="sk-progress-group">
-                    <h3>Databases</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">PostgreSQL</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Supabase</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">SQLite</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div></div>
-                </div>
-                <div class="sk-progress-group">
-                    <h3>DevOps</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">Vercel</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:92%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Git</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">CI/CD</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:80%"></div></div></div>
-                </div>
-                <div class="sk-progress-group">
-                    <h3>AI & ML</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">Gemini API</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:90%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">OpenRouter</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">LLMs & NLP</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:82%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">RAG</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:70%"></div></div></div>
-                </div>
-                <div class="sk-progress-group">
-                    <h3>Tools</h3>
-                    <div class="sk-progress"><span class="sk-progress-label">VS Code</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:95%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">Figma</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:72%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">ES Modules</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:88%"></div></div></div>
-                    <div class="sk-progress"><span class="sk-progress-label">PWA</span><div class="sk-progress-bar"><div class="sk-progress-fill" style="width:85%"></div></div></div>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <div class="section-divider"></div>
-
-    <!-- Timeline — Alternating -->
-    <section id="timeline" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>Timeline</h2>
-                <p>The evolution of my creative coding journey.</p>
-            </div>
-            <div class="tl">
-                <div class="tl-item">
-                    <div class="tl-marker"><span>2025</span></div>
-                    <div class="tl-content">
-                        <h4>Rashid AI v3.0 &amp; 3D Game Engine</h4>
-                        <p>Launched multilingual AI assistant with voice synthesis, 3D avatar, and Gemini API integration. Upgraded KingCraft and Rust Construction with improved physics and rendering.</p>
-                        <div class="tl-tags"><span>AI</span><span>Three.js</span><span>Product Launch</span></div>
+                <div class="contact-grid">
+                    <div class="channels">
+                        <a href="mailto:zwnt45602@gmail.com" class="channel ct-btn" aria-label="Send email to zwnt45602@gmail.com"><i class="fas fa-envelope"></i><span>Email</span><small class="handle">zwnt45602@gmail.com</small></a>
+                        <a href="https://github.com/MOT1209" target="_blank" rel="noopener" class="channel ct-btn" aria-label="GitHub profile MOT1209"><i class="fab fa-github"></i><span>GitHub</span><small class="handle">@MOT1209</small></a>
+                        <a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener" class="channel ct-btn" aria-label="YouTube channel"><i class="fab fa-youtube"></i><span>YouTube</span><small class="handle" dir="auto">مختبر البرمجه</small></a>
+                        <a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener" class="channel ct-btn" aria-label="TikTok profile"><i class="fab fa-tiktok"></i><span>TikTok</span><small class="handle">@programmierlabor</small></a>
                     </div>
+
+                    <form class="ct-form">
+                        <!-- Honeypot: hidden from humans, bots tend to fill it. Submissions with a value are dropped. -->
+                        <div class="ct-hp hp" aria-hidden="true">
+                            <label for="ct-website">Website</label>
+                            <input type="text" id="ct-website" name="website" tabindex="-1" autocomplete="off">
+                        </div>
+                        <div class="field">
+                            <label for="ct-name">Name</label>
+                            <input type="text" id="ct-name" class="ct-input" placeholder="Your name" required>
+                        </div>
+                        <div class="field">
+                            <label for="ct-email">Email</label>
+                            <input type="email" id="ct-email" class="ct-input" placeholder="name@example.com" required>
+                        </div>
+                        <div class="field">
+                            <label for="ct-msg">Message</label>
+                            <textarea id="ct-msg" class="ct-input" rows="5" placeholder="What are you working on?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send message <i class="fas fa-paper-plane"></i></button>
+                    </form>
                 </div>
-                <div class="tl-item">
-                    <div class="tl-marker"><span>2024</span></div>
-                    <div class="tl-content">
-                        <h4>Next-Gen Frameworks &amp; Supabase</h4>
-                        <p>Developing premium full-stack portals using Next.js and Supabase, alongside interactive 3D simulations using Three.js. Built Alking and Gem-PRO.</p>
-                        <div class="tl-tags"><span>Next.js</span><span>Supabase</span><span>Full-Stack</span></div>
-                    </div>
-                </div>
-                <div class="tl-item">
-                    <div class="tl-marker"><span>2023</span></div>
-                    <div class="tl-content">
-                        <h4>Full-Stack &amp; Backend Integration</h4>
-                        <p>Leveraging Supabase for real-time databases and user authentication, building responsive PWAs, and developing automation tools. Started the 3D game journey with Three.js.</p>
-                        <div class="tl-tags"><span>PWA</span><span>Supabase</span><span>Backend</span></div>
-                    </div>
-                </div>
-                <div class="tl-item">
-                    <div class="tl-marker"><span>2022</span></div>
-                    <div class="tl-content">
-                        <h4>GitHub Launch &amp; Open Source</h4>
-                        <p>Established the MOT1209 GitHub workspace, publishing original utilities, web projects, and open-source tools. Started contributing to the developer community.</p>
-                        <div class="tl-tags"><span>Open Source</span><span>GitHub</span><span>Launch</span></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            </section>
 
-    <div class="section-divider"></div>
+            <footer class="site-footer">
+                <p style="margin:0;">&copy; <span class="copyright-year"></span> Rashid. Built in the open.</p>
+                <nav>
+                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener">GitHub</a>
+                    <a href="blog/">Blog</a>
+                    <a href="downloads.html">Downloads</a>
+                    <a href="privacy.html">Privacy</a>
+                    <a href="terms.html">Terms</a>
+                </nav>
+            </footer>
 
-    <!-- GitHub / Open Source — Dashboard -->
-    <section id="github" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>Open Source</h2>
-                <p>Real-time GitHub dashboard — stats, repos, and activity.</p>
-            </div>
-            <div class="gh-dashboard" id="github-stats">
-                <p style="color:var(--text-muted);text-align:center;padding:60px;">Loading GitHub data...</p>
-            </div>
-        </div>
-    </section>
+        </main>
+    </div>
 
-    <div class="section-divider"></div>
-
-    <!-- Vault — Knowledge Hub -->
-    <section id="vault" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>The Vault</h2>
-                <p>Knowledge repository — prompts, code, media, docs, and archives.</p>
-            </div>
-            <div class="vault-toolbar">
-                <div class="vault-search-wrap">
-                    <i class="fas fa-search"></i>
-                    <input type="text" class="vault-search" placeholder="Search vault..." aria-label="Search vault">
-                </div>
-                <div class="vault-toolbar-actions">
-                    <div class="vault-filters" role="tablist" aria-label="Vault categories">
-                        <button class="vault-filter active" data-filter="prompts" role="tab" aria-selected="true">Prompts</button>
-                        <button class="vault-filter" data-filter="code" role="tab" aria-selected="false">Code</button>
-                        <button class="vault-filter" data-filter="media" role="tab" aria-selected="false">Media</button>
-                        <button class="vault-filter" data-filter="docs" role="tab" aria-selected="false">Docs</button>
-                        <button class="vault-filter" data-filter="archives" role="tab" aria-selected="false">Archives</button>
-                    </div>
-                    <button class="vault-add-btn" id="vault-add-btn"><i class="fas fa-plus"></i> Add</button>
-                </div>
-            </div>
-            <div class="vault-section-desc" id="vault-section-desc">Click an item to copy, view, or download.</div>
-            <div class="vault-grid" id="vault-grid">
-                <!-- Items rendered by vault.js -->
-            </div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
-    <!-- Blog Preview -->
-    <section id="blog" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>Latest from the <span style="color:var(--accent);">Blog</span></h2>
-                <p>Tutorials, deep dives, and dev logs on web, game dev, AI, and open-source.</p>
-            </div>
-            <div class="blog-preview-grid" id="blog-preview-grid">
-                <div style="text-align:center;padding:40px;color:var(--text-muted);"><i class="fas fa-spinner fa-spin"></i></div>
-            </div>
-            <div style="text-align:center;margin-top:30px;">
-                <a href="blog/" class="btn btn-primary">View All Articles <i class="fas fa-arrow-right"></i></a>
-            </div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
-
-    <!-- Contact — Final Section -->
-    <section id="contact" class="section reveal">
-        <div class="container">
-            <div class="section-head">
-                <h2>Get in Touch</h2>
-                <p>Let's build something great together. Reach out anytime.</p>
-            </div>
-            <div class="ct-grid">
-                <div class="ct-channels">
-                    <a href="mailto:zwnt45602@gmail.com" class="ct-btn ct-email" aria-label="Send email to zwnt45602@gmail.com"><i class="fas fa-envelope"></i><span>Email</span><small>zwnt45602@gmail.com</small></a>
-                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener" class="ct-btn ct-gh" aria-label="GitHub profile MOT1209"><i class="fab fa-github"></i><span>GitHub</span><small>@MOT1209</small></a>
-                    <a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener" class="ct-btn ct-yt" aria-label="YouTube channel"><i class="fab fa-youtube"></i><span>YouTube</span><small>مختبر البرمجه</small></a>
-                    <a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener" class="ct-btn ct-tt" aria-label="TikTok profile"><i class="fab fa-tiktok"></i><span>TikTok</span><small>@programmierlabor</small></a>
-                </div>
-                <form class="ct-form">
-                    <!-- Honeypot: hidden from humans, bots tend to fill it. Submissions with a value are dropped. -->
-                    <div class="ct-hp" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
-                        <label for="ct-website">Website</label>
-                        <input type="text" id="ct-website" name="website" tabindex="-1" autocomplete="off">
-                    </div>
-                    <label for="ct-name">Name</label>
-                    <input type="text" id="ct-name" class="ct-input" placeholder="Your name" required>
-                    <label for="ct-email">Email</label>
-                    <input type="email" id="ct-email" class="ct-input" placeholder="name@example.com" required>
-                    <label for="ct-msg">Message</label>
-                    <textarea id="ct-msg" class="ct-input" rows="4" placeholder="Tell me about your project..." required></textarea>
-                    <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:14px 24px;font-size:1rem;">Send Message <i class="fas fa-paper-plane"></i></button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer container" style="max-width:var(--max-width);">
-        <p>&copy; <span class="copyright-year"></span> Rashid. Built with <i class="fas fa-heart" style="color:var(--accent);"></i> and open source.</p>
-        <div class="footer-links">
-            <a href="https://github.com/MOT1209" target="_blank" rel="noopener">GitHub</a>
-            <a href="blog/">Blog</a>
-        </div>
-    </footer>
-
-    <!-- Settings Modal — Customize Workspace -->
+    <!-- Settings -->
     <div class="settings-overlay" id="settings-overlay"></div>
-    <div class="settings-modal blur-glass" id="settings-modal" role="dialog" aria-label="Customize Workspace">
+    <div class="settings-modal" id="settings-modal" role="dialog" aria-label="Settings">
         <div class="settings-header">
-            <h3><i class="fas fa-palette"></i> Customize Workspace</h3>
-            <button class="close-settings" id="close-settings"><i class="fas fa-times"></i></button>
+            <h3>Settings</h3>
+            <button class="close-settings" id="close-settings" aria-label="Close settings"><i class="fas fa-times"></i></button>
         </div>
         <div class="settings-body">
             <div class="setting-section">
                 <h4>Theme</h4>
                 <div class="theme-selector">
-                    <button class="theme-opt active" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
                     <button class="theme-opt" data-theme="light"><i class="fas fa-sun"></i> Light</button>
+                    <button class="theme-opt" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
                 </div>
             </div>
             <div class="setting-section">
-                <h4>Accent Color</h4>
+                <h4>Accent</h4>
                 <div class="accent-picker">
-                    <div class="accent-dot active" data-color="#38bdf8" style="background:#38bdf8;"></div>
-                    <div class="accent-dot" data-color="#f472b6" style="background:#f472b6;"></div>
-                    <div class="accent-dot" data-color="#34d399" style="background:#34d399;"></div>
-                    <div class="accent-dot" data-color="#fbbf24" style="background:#fbbf24;"></div>
-                    <div class="accent-dot" data-color="#a78bfa" style="background:#a78bfa;"></div>
-                    <div class="accent-dot" data-color="#f97316" style="background:#f97316;"></div>
+                    <div class="accent-dot active" data-color="#c2410c" style="background:#c2410c;" title="Ember"></div>
+                    <div class="accent-dot" data-color="#1d4ed8" style="background:#1d4ed8;" title="Ink blue"></div>
+                    <div class="accent-dot" data-color="#15803d" style="background:#15803d;" title="Pine"></div>
+                    <div class="accent-dot" data-color="#7e22ce" style="background:#7e22ce;" title="Violet"></div>
+                    <div class="accent-dot" data-color="#b91c1c" style="background:#b91c1c;" title="Brick"></div>
+                    <div class="accent-dot" data-color="#0f766e" style="background:#0f766e;" title="Teal"></div>
                 </div>
             </div>
             <div class="setting-section">
@@ -559,34 +422,33 @@ layout: layouts/base.njk
                 <h4>Performance</h4>
                 <div class="toggle-row">
                     <div>
-                        <span>Performance Mode</span>
-                        <p class="desc">Disable animations and 3D effects for speed.</p>
+                        <span>Performance mode</span>
+                        <p class="desc">Turn off animations and 3D effects.</p>
                     </div>
                     <label class="switch"><input type="checkbox" id="perf-mode"><span class="slider"></span></label>
                 </div>
                 <div class="toggle-row">
                     <div>
-                        <span>Reduce Motion</span>
-                        <p class="desc">Minimize transitions and motion effects.</p>
+                        <span>Reduce motion</span>
+                        <p class="desc">Minimise transitions.</p>
                     </div>
                     <label class="switch"><input type="checkbox" id="reduce-motion"><span class="slider"></span></label>
                 </div>
             </div>
             <div class="setting-section">
-                <h4>Info</h4>
-                <p class="desc">Design System v9 · Built with Inter + JetBrains Mono</p>
+                <p class="desc">Set in {{ site.fonts.displayFont }}, {{ site.fonts.bodyFont }} and {{ site.fonts.monoFont }}.</p>
             </div>
         </div>
     </div>
 
-    <!-- Voice / AI Widget -->
+    <!-- Voice / AI widget -->
     <div id="voice-widget">
-        <div class="voice-widget-toggle"><i class="fas fa-microphone-alt"></i></div>
+        <div class="voice-widget-toggle" role="button" tabindex="0" aria-label="Open Rashid AI"><i class="fas fa-microphone-alt"></i></div>
         <div class="voice-glow-ring"></div>
         <div class="voice-panel" id="voice-panel">
             <div class="voice-header">
-                <h3><span class="voice-status-dot"></span> Rashid-AI v3.0</h3>
-                <span class="voice-close"><i class="fas fa-times"></i></span>
+                <h3><span class="voice-status-dot"></span> Rashid AI v3.0</h3>
+                <span class="voice-close" role="button" tabindex="0" aria-label="Close"><i class="fas fa-times"></i></span>
             </div>
             <div class="visualizer-container" id="avatar-viewport">
                 <div id="voice-visualizer">
@@ -594,116 +456,65 @@ layout: layouts/base.njk
                 </div>
             </div>
             <div class="voice-chat-body" id="voice-chat-body">
-                <div class="chat-msg bot">Hello! I am your unified AI assistant. How can I help you today?</div>
+                <div class="chat-msg bot">Ask me about the code here, or anything you're building.</div>
             </div>
             <div class="voice-footer">
-                <button id="voice-speaker-toggle" class="footer-btn"><i class="fas fa-volume-up"></i></button>
+                <button id="voice-speaker-toggle" class="footer-btn" aria-label="Toggle speech"><i class="fas fa-volume-up"></i></button>
                 <div class="voice-input-wrapper">
-                    <input type="text" id="voice-input" class="voice-input" placeholder="Ask me anything about code...">
-                    <button id="voice-mic-btn" class="mic-btn"><i class="fas fa-microphone"></i></button>
+                    <input type="text" id="voice-input" class="voice-input" placeholder="Ask a question…">
+                    <button id="voice-mic-btn" class="mic-btn" aria-label="Voice input"><i class="fas fa-microphone"></i></button>
                 </div>
-                <button id="voice-send-btn" class="footer-btn"><i class="fas fa-paper-plane"></i></button>
+                <button id="voice-send-btn" class="footer-btn" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
-    <script src="js/gemini-config.js" defer></script>
+    <script type="module" src="src/js/main.js?v=11.0"></script>
+    <script src="js/cookie-consent.js?v=1.0" defer></script>
+    <script src="js/gemini-config.js?v=1.0" defer></script>
     <script src="js/rashid-ai-v2.js?v=3.0" defer></script>
-    <script type="module" src="src/js/main.js?v=2.0"></script>
-    <!-- js/admin.js removed from public pages (R5): the standalone admin panel lives at /admin/login.html -->
 
-<!-- Cookie Consent Banner -->
-<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
-  <div class="cookie-content">
-    <div class="cookie-text">
-      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
-      <span>This site uses cookies for analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
-    </div>
-    <div class="cookie-actions">
-      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
-      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
-    </div>
-  </div>
-</div>
-<script src="js/cookie-consent.js?v=1.0"></script>
-<script>
-(function() {
-  var AD_CLIENT = 'ca-pub-4804302403615958';
-  var AD_SLOT = '5604153803';
-  var ADSENSE_URL = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=' + AD_CLIENT;
-
-  function loadAdSense() {
-    var container = document.getElementById('adsense-container');
-    if (!container) return;
-    var ins = document.createElement('ins');
-    ins.className = 'adsbygoogle';
-    ins.style.cssText = 'display:block';
-    ins.setAttribute('data-ad-client', AD_CLIENT);
-    ins.setAttribute('data-ad-slot', AD_SLOT);
-    ins.setAttribute('data-ad-format', 'auto');
-    ins.setAttribute('data-full-width-responsive', 'true');
-    container.appendChild(ins);
-    container.style.display = '';
-    if (!window.adsbygoogle) {
-      var s = document.createElement('script');
-      s.src = ADSENSE_URL;
-      s.async = true;
-      s.crossOrigin = 'anonymous';
-      s.onload = function() {
-        (adsbygoogle = window.adsbygoogle || []).push({});
-      };
-      document.head.appendChild(s);
-    } else {
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    }
-  }
-
-  CookieConsent.init({
-    onLoad: loadAdSense,
-    onAccept: loadAdSense,
-    onDecline: function() {
-      var c = document.getElementById('adsense-container');
-      if (c) c.remove();
-    }
-  });
-})();
-</script>
-    <script src="js/pwa-installer.js?v=1.1" defer></script>
     <script>
-    // Dynamic year
-    document.querySelectorAll('.copyright-year').forEach(function(el){el.textContent=new Date().getFullYear();});
-    // Mobile menu
-    (function(){
-      var hm=document.getElementById('hamburger'),mm=document.getElementById('mobile-menu'),mc=document.getElementById('mobile-menu-close');
-      function openMenu(){if(mm){mm.classList.add('open');if(hm)hm.setAttribute('aria-expanded','true');document.body.style.overflow='hidden';}}
-      function closeMenu(){if(mm){mm.classList.remove('open');if(hm)hm.setAttribute('aria-expanded','false');document.body.style.overflow='';}}
-      if(hm){hm.addEventListener('click',function(){if(mm&&mm.classList.contains('open')){closeMenu();}else{openMenu();}});}
-      if(mc){mc.addEventListener('click',closeMenu);}
-      document.querySelectorAll('.mobile-menu a').forEach(function(a){
-        a.addEventListener('click',closeMenu);
-      });
-      document.addEventListener('keydown',function(e){if(e.key==='Escape'&&mm&&mm.classList.contains('open')){closeMenu();}});
-    })();
-    // iOS viewport fix
-    (function(){var vh=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh+'px');window.addEventListener('resize',function(){var vh2=window.innerHeight*0.01;document.documentElement.style.setProperty('--vh',vh2+'px');});})();
-    // Nav scroll highlight
-    document.addEventListener('scroll',function(){
-      var sections=document.querySelectorAll('section[id]');
-      var scrollPos=window.scrollY+120;
-      sections.forEach(function(s){
-        if(s.offsetTop<=scrollPos&&s.offsetTop+s.offsetHeight>scrollPos){
-          document.querySelectorAll('.nav-links a').forEach(function(a){a.classList.remove('active');});
-          var link=document.querySelector('.nav-links a[href="#'+s.id+'"]');
-          if(link)link.classList.add('active');
-        }
-      });
+    // Footer year.
+    document.querySelectorAll('.copyright-year').forEach(function (el) {
+      el.textContent = new Date().getFullYear();
     });
+
+    // The rail and the mobile bar each carry a theme and settings button;
+    // both drive the same handlers the modules bind to the primary ids.
+    ['theme-toggle', 'settings-btn'].forEach(function (id) {
+      var primary = document.getElementById(id);
+      var twin = document.getElementById(id + '-rail');
+      if (primary && twin) twin.addEventListener('click', function () { primary.click(); });
+    });
+
+    // Mark the rail link for the section currently in view.
+    (function () {
+      var links = Array.prototype.slice.call(document.querySelectorAll('.rail-nav a[href^="#"]'));
+      if (!links.length || !('IntersectionObserver' in window)) return;
+      var byId = {};
+      links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          links.forEach(function (a) { a.classList.remove('is-active'); });
+          var active = byId[entry.target.id];
+          if (active) active.classList.add('is-active');
+        });
+      }, { rootMargin: '-40% 0px -55% 0px' });
+      Object.keys(byId).forEach(function (id) {
+        var section = document.getElementById(id);
+        if (section) obs.observe(section);
+      });
+    })();
+
     // Hidden admin access: Ctrl+Shift+A (not publicly documented)
-    document.addEventListener('keydown',function(e){
-      if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();window.open('admin/login.html','_blank');}
+    document.addEventListener('keydown', function (e) {
+      if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); window.open('admin/login.html', '_blank'); }
     });
     </script>
+
     <script>
     (function() {
         var grid = document.getElementById('blog-preview-grid');
@@ -724,7 +535,7 @@ layout: layouts/base.njk
                     '</a>';
                 }).join('');
             })
-            .catch(function() { grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">Could not load articles.</div>'; });
+            .catch(function() { grid.innerHTML = '<p class="desc">Could not load articles.</p>'; });
     })();
     </script>
 </body>

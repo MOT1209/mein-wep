@@ -1,14 +1,28 @@
 {
   "siteUrl": "https://rashid-wep.vercel.app",
-  "cssVersion": "10.2",
+  "cssVersion": "11.0",
   "swVersion": "v18",
   "gaId": "G-W139X3X20X",
   "adsClient": "ca-pub-4804302403615958",
   "adsSlot": "5604153803",
   "fonts": {
-    "themeColorDark": "#0a0a0b",
-    "themeColorLight": "#fafafa",
-    "bodyFont": "Inter",
+    "themeColorDark": "#0c0e12",
+    "themeColorLight": "#fafafb",
+    "displayFont": "Bricolage Grotesque",
+    "bodyFont": "IBM Plex Sans",
     "monoFont": "JetBrains Mono"
-  }
+  },
+  "nav": [
+    { "label": "Releases", "href": "#releases" },
+    { "label": "Projects", "href": "#projects" },
+    { "label": "Rashid AI", "href": "#ai" },
+    { "label": "About", "href": "#about" },
+    { "label": "Timeline", "href": "#timeline" },
+    { "label": "Writing", "href": "#writing" },
+    { "label": "Contact", "href": "#contact" }
+  ],
+  "navExternal": [
+    { "label": "Downloads", "href": "downloads.html" },
+    { "label": "Blog", "href": "blog/" }
+  ]
 }
