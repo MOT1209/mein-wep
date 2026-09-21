@@ -5,6 +5,8 @@ import os
 import codecs
 import re
 
+from _proxy_http import http_get, urllib_ssl_context
+
 # Fix Windows console encoding
 if sys.platform == 'win32':
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
@@ -35,36 +37,11 @@ def read_supabase_config():
 SUPABASE_URL, SUPABASE_ANON_KEY = read_supabase_config()
 VERCEL_URL = 'https://rashid-wep.vercel.app'
 
-async def http_get(url):
-    """Fetch URL using asyncio and return status + body."""
-    import asyncio as aio
-    try:
-        import ssl
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        
-        reader, writer = await aio.open_connection(url.split('/')[2], 443, ssl=ctx)
-        path = '/' + '/'.join(url.split('/')[3:])
-        request = f"GET {path} HTTP/1.1\r\nHost: {url.split('/')[2]}\r\nUser-Agent: Mozilla/5.0\r\nAccept: */*\r\nConnection: close\r\n\r\n"
-        writer.write(request.encode())
-        await writer.drain()
-        
-        response = b""
-        while True:
-            chunk = await reader.read(4096)
-            if not chunk:
-                break
-            response += chunk
-        writer.close()
-        await writer.wait_closed()
-        
-        # Parse status line
-        status_line = response.split(b'\r\n')[0].decode()
-        status = int(status_line.split(' ')[1])
-        return status, response.decode('utf-8', errors='replace')
-    except Exception as e:
-        return 0, str(e)
+# http_get(url) -> (status, body) now lives in _proxy_http.py, shared with
+# test_games_page.py / test_maarifah_web.py. It transparently tunnels through
+# HTTPS_PROXY when set (needed in sandboxed agent environments where a raw
+# socket to the target host can't be opened directly) and falls back to a
+# direct connection otherwise, unchanged from before for CI / local runs.
 
 async def test_page(url, name, expected_status=200, min_body_len=0):
     """Test that a page returns expected status and has content."""
@@ -74,6 +51,12 @@ async def test_page(url, name, expected_status=200, min_body_len=0):
         print(f"  [PASS] PASS: {status}")
     else:
         print(f"  [FAIL] FAIL: expected {expected_status}, got {status}")
+        if status == 0:
+            # body carries the connection/TLS error text in this case (see
+            # _proxy_http.http_get) — e.g. a policy-denied CONNECT vs. a
+            # genuine unreachable host. Printing it turns a bare "got 0"
+            # into an actionable diagnosis.
+            print(f"         reason: {body}")
         return False
     if min_body_len > 0 and len(body) < min_body_len:
         print(f"  [FAIL] FAIL: body too short ({len(body)} < {min_body_len})")
@@ -83,7 +66,8 @@ async def test_page(url, name, expected_status=200, min_body_len=0):
 async def run_test():
     passed = 0
     failed = 0
-    
+    skipped = 0
+
     tests = [
         # Vercel static pages
         ("/about.html", "About Page", 200, 100),
@@ -126,11 +110,11 @@ async def run_test():
     print(f"\n[Supabase Auth Login]")
     try:
         import urllib.request
-        import ssl
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        
+        # urlopen's default opener already honors HTTPS_PROXY via getproxies();
+        # only the certificate verification needs to match http_get's (see
+        # _proxy_http.py docstring for why this isn't ssl.CERT_NONE).
+        ctx = urllib_ssl_context()
+
         req_data = json.dumps({"email":"test@test.com","password":"wrongpassword"}).encode()
         req = urllib.request.Request(
             f"{SUPABASE_URL}/auth/v1/token?grant_type=password",
@@ -165,42 +149,51 @@ async def run_test():
         failed += 1
     
     # Test Contact API POST
+    # api/contact.js inserts a real row into the production Supabase
+    # contact_messages table on every successful call — this is a
+    # side-effecting request, not a read-only check. Off by default so
+    # ad-hoc/diagnostic runs don't write test data into production; CI sets
+    # TESTSPRITE_ALLOW_SIDE_EFFECTS=1 to keep exercising the endpoint.
     print(f"\n[Contact API POST]")
-    try:
-        req_data = json.dumps({"name":"Test","email":"test@test.com","message":"Test message for testing purposes"}).encode()
-        req = urllib.request.Request(
-            f"{VERCEL_URL}/api/contact",
-            data=req_data,
-            headers={"Content-Type": "application/json"},
-            method="POST",
-        )
-        resp = urllib.request.urlopen(req, context=ctx, timeout=15)
-        contact_status = resp.status
-        resp_body = resp.read().decode()
-        print(f"  Status: {contact_status}, Body: {resp_body[:80]}")
-        if contact_status in (200, 201):
-            print(f"  [PASS] Contact API works")
-            passed += 1
-        else:
-            print(f"  [WARN] Unexpected status {contact_status}")
-            failed += 1
-    except urllib.error.HTTPError as e:
-        contact_status = e.code
-        print(f"  Status: {contact_status}")
-        if contact_status in (200, 201, 405):
-            print(f"  [PASS] Contact API responds ({contact_status})")
-            passed += 1
-        else:
-            print(f"  [WARN] Contact API error: {contact_status}")
-            passed += 1  # Soft fail
-    except Exception as e:
-        print(f"  [INFO] Contact API unreachable: {str(e)[:100]}")
-        passed += 1  # Soft fail - may need redeploy
-    
+    if os.environ.get("TESTSPRITE_ALLOW_SIDE_EFFECTS") != "1":
+        print("  [SKIP] side-effecting (writes to production DB) — set TESTSPRITE_ALLOW_SIDE_EFFECTS=1 to run")
+        skipped += 1
+    else:
+        try:
+            req_data = json.dumps({"name":"Test","email":"test@test.com","message":"Test message for testing purposes"}).encode()
+            req = urllib.request.Request(
+                f"{VERCEL_URL}/api/contact",
+                data=req_data,
+                headers={"Content-Type": "application/json"},
+                method="POST",
+            )
+            resp = urllib.request.urlopen(req, context=ctx, timeout=15)
+            contact_status = resp.status
+            resp_body = resp.read().decode()
+            print(f"  Status: {contact_status}, Body: {resp_body[:80]}")
+            if contact_status in (200, 201):
+                print(f"  [PASS] Contact API works")
+                passed += 1
+            else:
+                print(f"  [WARN] Unexpected status {contact_status}")
+                failed += 1
+        except urllib.error.HTTPError as e:
+            contact_status = e.code
+            print(f"  Status: {contact_status}")
+            if contact_status in (200, 201, 405):
+                print(f"  [PASS] Contact API responds ({contact_status})")
+                passed += 1
+            else:
+                print(f"  [WARN] Contact API error: {contact_status}")
+                passed += 1  # Soft fail
+        except Exception as e:
+            print(f"  [INFO] Contact API unreachable: {str(e)[:100]}")
+            passed += 1  # Soft fail - may need redeploy
+
     # Summary
     total = passed + failed
     print(f"\n{'='*50}")
-    print(f"[STATS] RESULTS: {passed}/{total} passed, {failed} failed")
+    print(f"[STATS] RESULTS: {passed}/{total} passed, {failed} failed, {skipped} skipped")
     if failed > 0:
         print("[FAIL] SOME TESTS FAILED")
     else:

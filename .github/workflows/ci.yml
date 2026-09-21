@@ -96,6 +96,12 @@ jobs:
         with:
           python-version: '3.12'
       - name: Run test3.py (24 API & page checks)
+        # TESTSPRITE_ALLOW_SIDE_EFFECTS opts into the Contact API POST check,
+        # which writes a real row to the production Supabase contact_messages
+        # table. Kept on here to preserve CI's existing coverage; off by
+        # default for local/diagnostic runs of test3.py (see _proxy_http.py).
+        env:
+          TESTSPRITE_ALLOW_SIDE_EFFECTS: "1"
         run: python .testsprite/test3.py
       - name: Run games tests
         run: python .testsprite/test_games_page.py

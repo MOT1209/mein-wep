@@ -3,37 +3,17 @@ import sys
 import os
 import codecs
 
+from _proxy_http import http_status
+
 if sys.platform == 'win32':
     sys.stdout = codecs.getwriter('utf-8')(sys.stdout.buffer, 'strict')
     sys.stderr = codecs.getwriter('utf-8')(sys.stderr.buffer, 'strict')
 
 VERCEL_URL = 'https://rashid-wep.vercel.app'
 
-async def http_status(url):
-    """Return HTTP status code using raw TCP (no external deps)."""
-    import ssl
-    try:
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = False
-        ctx.verify_mode = ssl.CERT_NONE
-        host = url.split('/')[2]
-        path = '/' + '/'.join(url.split('/')[3:])
-        reader, writer = await asyncio.open_connection(host, 443, ssl=ctx)
-        request = f"GET {path} HTTP/1.1\r\nHost: {host}\r\nUser-Agent: Mozilla/5.0\r\nConnection: close\r\n\r\n"
-        writer.write(request.encode())
-        await writer.drain()
-        response = b""
-        while True:
-            chunk = await reader.read(4096)
-            if not chunk:
-                break
-            response += chunk
-        writer.close()
-        await writer.wait_closed()
-        status_line = response.split(b'\r\n')[0].decode()
-        return int(status_line.split(' ')[1])
-    except Exception:
-        return 0
+# http_status(url) -> int now lives in _proxy_http.py, shared with test3.py /
+# test_maarifah_web.py. Tunnels through HTTPS_PROXY when set, otherwise
+# connects directly as before.
 
 async def run_test():
     passed = 0
