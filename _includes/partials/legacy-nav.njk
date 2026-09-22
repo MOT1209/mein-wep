@@ -1,0 +1,18 @@
+    <nav class="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Rashid<span class="accent-dot">.</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li>{% if activeNav == "about" %}<a href="#" class="active" style="color:var(--accent)">About</a>{% else %}<a href="about.html">About</a>{% endif %}</li>
+                <li>{% if activeNav == "contact" %}<a href="#" class="active" style="color:var(--accent)">Contact</a>{% else %}<a href="contact.html">Contact</a>{% endif %}</li>
+            </ul>
+            <div class="nav-controls">
+                <button class="hamburger" aria-label="Open navigation menu" aria-controls="mobile-menu" aria-expanded="false">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </button>
+            </div>
+        </div>
+    </nav>

@@ -1,12 +1,104 @@
 {#
   Base page shell.
 
-  Deliberately empty of markup for now: this layout exists so pages can be
-  migrated onto it one at a time without changing a single byte of their
-  output. Shared <head>, nav and footer partials move in here next, and each
-  page drops its copy as it adopts them.
+  Two modes, selected by the `legacyShell` front-matter flag:
+   - Unset/false (index.njk): inert passthrough, byte-identical to before —
+     index.njk owns its entire HTML document and must not get anything
+     injected around it.
+   - `legacyShell: true` (about/contact/privacy/terms.njk): renders the
+     shared head/nav/footer shell for the legacy static pages. See
+     partials/legacy-nav.njk and partials/legacy-footer.njk. Do not confuse
+     these with partials/nav-links.njk, which is a different design used
+     only by index.njk.
 
-  No trailing newline after the content tag — it would append a byte to every
-  rendered page and break byte-for-byte comparison against the pre-migration
-  output.
-#}{{ content | safe }}
+  No trailing newline after the final tag in either branch — it would
+  append a byte to every rendered page and break byte-for-byte comparison
+  against the pre-migration output.
+
+  The legacyShell branch emits a leading UTF-8 BOM: all 4 source pages
+  (about/contact/privacy/terms) had one in their original raw HTML files.
+  Front-matter parsing strips a file-level BOM on read, so it's re-emitted
+  here via a Nunjucks string escape rather than relying on file bytes.
+#}{%- if legacyShell -%}{{ "﻿" | safe }}<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ metaDescription }}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ canonical }}">
+    <link rel="alternate" hreflang="en" href="{{ canonical }}">
+    <link rel="alternate" hreflang="ar" href="{{ canonical }}?lang=ar">
+    <link rel="alternate" hreflang="de" href="{{ canonical }}?lang=de">
+    <link rel="alternate" hreflang="x-default" href="{{ canonical }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ ogDescription or metaDescription }}">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
+    <meta property="og:url" content="{{ canonical }}">
+    <meta property="og:site_name" content="Rashid Portfolio">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ title }}">
+    <meta name="twitter:description" content="{{ ogDescription or metaDescription }}">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.png">
+    <meta name="keywords" content="{{ metaKeywords }}">
+    <title>{{ title }}</title>
+{%- if headTop %}
+{% include headTop %}
+{%- endif %}
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css?v=10.2">
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsClient }}" crossorigin="anonymous"></script>
+{% include headExtra %}
+</head>
+<body class="dark-mode">
+    <div class="bg-mesh"></div>
+{% include "partials/legacy-nav.njk" %}
+{{ content | safe }}
+{%- if showAdUnit %}
+    <!-- AdSense Ad Unit -->
+    <div class="container" style="padding: 20px;">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="{{ site.adsClient }}"
+             data-ad-slot="{{ site.adsSlot }}"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
+{% endif %}
+{% include "partials/legacy-footer.njk" %}
+{%- if extraBodyScript %}
+{% include extraBodyScript %}{% endif %}{% if showCookieConsent %}
+<!-- Cookie Consent Banner -->
+<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+  <div class="cookie-content">
+    <div class="cookie-text">
+      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
+      <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+    </div>
+    <div class="cookie-actions">
+      <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+    </div>
+  </div>
+</div>
+<script src="js/cookie-consent.js?v=1.0"></script>
+<script>CookieConsent.init();</script>
+{%- endif %}
+{%- if trailingJsonLd %}
+{% include trailingJsonLd %}
+{%- endif %}
+{{ copyrightScriptIndent }}<script>document.querySelectorAll('.copyright-year').forEach(function(el) { el.textContent = new Date().getFullYear(); });</script>
+</body>
+</html>
+{% else %}{{ content | safe }}{%- endif -%}

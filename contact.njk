@@ -1,0 +1,62 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+permalink: /contact.html
+title: "Contact | Rashid"
+metaDescription: "Contact Rashid — Get in touch for collaboration, project inquiries, or just to say hello."
+metaKeywords: "Contact Rashid, Hire Developer, Web Development, AI Integration, Game Development, Portfolio"
+canonical: "https://rashid-wep.vercel.app/contact.html"
+activeNav: contact
+showAdUnit: true
+showCookieConsent: true
+headTop: "partials/legacy-pages/contact-head-top.njk"
+headExtra: "partials/legacy-pages/contact-head-extra.njk"
+extraBodyScript: "partials/legacy-pages/contact-body-script.njk"
+trailingJsonLd: "partials/legacy-pages/contact-trailing-jsonld.njk"
+---
+    <div class="contact-page">
+        <h1>Contact Me</h1>
+        <p class="subtitle">Have a project idea, collaboration proposal, or just want to say hello? Reach out!</p>
+
+        <div id="form-feedback"></div>
+
+        <div class="contact-card">
+            <form id="contact-form" action="https://formsubmit.co/zwnt45602@gmail.com" method="POST">
+                <input type="hidden" name="_captcha" value="true">
+                <input type="hidden" name="_template" value="box">
+                <input type="hidden" name="_next" value="https://rashid-wep.vercel.app/contact.html?success=true">
+                <input type="text" id="hp_website" name="_hp_website" style="position:absolute;left:-9999px;top:-9999px" tabindex="-1" autocomplete="off">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Your name" required minlength="2">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="name@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" placeholder="What is this regarding?" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" placeholder="Tell me about your project or inquiry..." required minlength="10"></textarea>
+                </div>
+                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane"></i> Send Message</button>
+            </form>
+            <p style="color: #52525b; font-size: 0.8rem; margin-top: 15px; text-align: center;">Your data is protected. View our <a href="privacy.html" style="color: #38bdf8;">Privacy Policy</a>.</p>
+        </div>
+
+        <div class="contact-methods">
+            <div class="contact-method-item">
+                <i class="fas fa-envelope"></i>
+                <h3>Email</h3>
+                <p><a href="mailto:zwnt45602@gmail.com">zwnt45602@gmail.com</a></p>
+            </div>
+            <div class="contact-method-item">
+                <i class="fab fa-github"></i>
+                <h3>GitHub</h3>
+                <p><a href="https://github.com/MOT1209" target="_blank" rel="noopener">MOT1209</a></p>
+            </div>
+        </div>
+    </div>

@@ -19,6 +19,10 @@
  */
 export const TEMPLATE_OUTPUTS = {
   'index.njk': 'index.html',
+  'terms.njk': 'terms.html',
+  'about.njk': 'about.html',
+  'contact.njk': 'contact.html',
+  'privacy.njk': 'privacy.html',
 };
 
 export const TEMPLATE_SOURCES = new Set(Object.keys(TEMPLATE_OUTPUTS));
