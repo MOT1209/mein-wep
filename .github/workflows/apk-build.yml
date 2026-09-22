@@ -277,33 +277,72 @@ jobs:
             exit 1
           fi
 
-      - name: Update version.json with site URL
+      - name: Publish APK to GitHub Release
+        id: publish
+        if: steps.apk.outputs.path != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # apks/*.apk used to be committed straight to git here (see docs/APK_HOSTING.md
+          # for why that was a repo-weight problem: every build added a binary that never
+          # left .git history). New builds now go to a GitHub Release instead — nothing
+          # binary reaches git from this workflow any more. The release is an asset bucket,
+          # not a git ref, so it's safe for concurrent matrix jobs to share one tag.
+          TAG="apks-latest"
+          FOLDER="${{ steps.info.outputs.folder }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          APK_PATH="${{ steps.apk.outputs.path }}"
+          ASSET_NAME="${FOLDER}-v${VERSION}.apk"
+
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --title "APK downloads" \
+              --notes "Built and published automatically by apk-build.yml. App catalog: downloads.html." \
+              || gh release view "$TAG" >/dev/null 2>&1 \
+              || { echo "::error::could not create or find release $TAG"; exit 1; }
+          fi
+
+          uploaded=0
+          for i in 1 2 3 4 5; do
+            if gh release upload "$TAG" "$APK_PATH#$ASSET_NAME" --clobber; then
+              echo "uploaded $ASSET_NAME on attempt $i"
+              uploaded=1
+              break
+            fi
+            echo "upload failed (attempt $i), retrying..."
+            sleep $((RANDOM % 5 + 1))
+          done
+          if [ "$uploaded" != "1" ]; then
+            echo "::error::Failed to upload $ASSET_NAME to release $TAG after retries"
+            exit 1
+          fi
+
+          echo "url=https://github.com/${{ github.repository }}/releases/download/$TAG/$ASSET_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Update version.json with Release URL
         if: steps.apk.outputs.path != ''
         run: |
           VER_FILE="${{ matrix.project }}/version.json"
-          FOLDER="${{ steps.info.outputs.folder }}"
-          VERSION="${{ steps.version.outputs.version }}"
           BUILD="${{ steps.version.outputs.build }}"
-          SITE_URL="https://rashid-wep.vercel.app/apks/${FOLDER}-v${VERSION}.apk"
+          RELEASE_URL="${{ steps.publish.outputs.url }}"
           if [ -f "$VER_FILE" ]; then
             NEW_VER=$(cat $VER_FILE | jq \
-              --arg url "$SITE_URL" \
+              --arg url "$RELEASE_URL" \
               --argjson bld "$BUILD" \
               '.apkUrl = $url | .buildNumber = $bld')
             echo "$NEW_VER" > "$VER_FILE"
-            echo "Updated version.json with site URL"
+            echo "Updated version.json with Release URL"
           fi
 
-      - name: Commit APK + version.json
+      - name: Commit version.json
         if: steps.apk.outputs.path != ''
         run: |
           git config user.name "APK Bot"
           git config user.email "bot@rashid.app"
           git add "${{ matrix.project }}/version.json"
-          git add "apks/${{ steps.info.outputs.folder }}-v${{ steps.version.outputs.version }}.apk"
           git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
-          git commit -m "add apk: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }}"
-          # Parallel matrix jobs push concurrently — rebase & retry to avoid losing APKs to a push race
+          git commit -m "apk: ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }} -> GitHub Release"
+          # Parallel matrix jobs push concurrently — rebase & retry to avoid losing updates to a push race
           for i in 1 2 3 4 5; do
             if git push; then
               echo "pushed on attempt $i"; exit 0
@@ -312,5 +351,5 @@ jobs:
             git pull --rebase --autostash origin main || true
             sleep $((RANDOM % 5 + 1))
           done
-          echo "::error::Failed to push APK after retries"
+          echo "::error::Failed to push version.json after retries"
           exit 1

@@ -11,8 +11,12 @@ reclaim the space already spent, forces a disruptive force-push, and adds a fetc
 every checkout/build. Releases needs none of that.
 
 ## One-time setup (do this, then tell Claude the release exists)
-This step needs a human with push access — Claude Code does not currently have GitHub
-release-creation or asset-upload tools available in this environment.
+This step needs a human with push access. Claude Code's *interactive session* has no
+release-creation or asset-upload tool in this environment (verified — only read tools like
+`list_releases`/`get_release_by_tag` exist); only `gh`/the REST API can do it, and a human has
+that. CI's own token can (see "Every future app update" below) — but that only covers builds
+`apk-build.yml` triggers going forward, not this one-time migration of the 6 files already
+sitting in `apks/` today.
 
 1. Go to **github.com/MOT1209/mein-wep → Releases → Draft a new release**.
 2. Tag: `apks-latest` (not tied to a git ref/branch — this is just an asset bucket, not a
@@ -32,14 +36,22 @@ Resulting asset URLs follow this fixed pattern:
 https://github.com/MOT1209/mein-wep/releases/download/apks-latest/<filename>.apk
 ```
 
-## Every future app update
-Instead of committing a new `.apk` to `apks/`:
-1. Upload the new file as an asset to the **same** `apks-latest` release (GitHub lets you add
-   assets to an existing release at any time — no new tag needed).
-2. Delete the old asset for that app from the release (optional — old asset URLs will otherwise
-   sit unused but harmless).
-3. Update `apks/updates.json` and `downloads.html` to point at the new asset URL and version
-   (same edit you'd make today, only the URL scheme changes — see below).
+## Every future app update — now automatic
+`.github/workflows/apk-build.yml` used to `git commit`+push each freshly built APK straight
+into `apks/`, which is exactly what re-grew the repo after every cleanup. As of the
+`apk-build.yml` fix, its "Publish APK to GitHub Release" step instead runs
+`gh release upload apks-latest <file> --clobber` (creating the `apks-latest` release first if
+it doesn't exist yet) and writes the resulting Release URL into that project's own
+`version.json` (`apkUrl` + `buildNumber`). **No `.apk` file reaches git from that workflow any
+more.** This uses the workflow's own `GITHUB_TOKEN` (`gh` is preinstalled on GitHub-hosted
+runners, and the token already has the `contents: write` permission Releases need) — a
+capability Claude Code does not have from this environment (see below).
+
+**What this does NOT do automatically**, so don't assume it: it doesn't touch
+`apks/updates.json` or `downloads.html`'s hardcoded `apkUrl`/`sha256` values — those still
+need a manual update (or a future automation) to point at the new asset and its recomputed
+hash before a new version shows up for site visitors. Check `<project>/version.json` after a
+build to get the live URL to copy in.
 
 ## The switch-over (do not apply until step 4 above is done for all 6 files)
 Once the release is published and all 6 assets are confirmed live, two files change:
