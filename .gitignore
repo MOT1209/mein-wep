@@ -79,3 +79,6 @@ denkmalen/_next/
 dist/
 build/
 .tools/
+
+# chat-app embedded PostgreSQL data directories
+apps/chat-app/.pgdata*/
