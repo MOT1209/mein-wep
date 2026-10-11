@@ -165,14 +165,11 @@ const boot = async () => {
         const planeIcon = document.createElement('i');
         planeIcon.className = 'fas fa-paper-plane';
         submitBtn.appendChild(planeIcon);
-        submitBtn.appendChild(document.createTextNode(' Send Message ')); }
+        submitBtn.prepend(document.createTextNode('Send message ')); }
       if (error && !emailed) {
-        showToast('Saved locally — will sync when available.', 'info');
-        const msgs = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
-        msgs.push({ name: nameVal, email: emailVal, message: msgVal, date: new Date().toLocaleString() });
-        localStorage.setItem('contactMessages', JSON.stringify(msgs));
-        trackContactFormSubmit();
-        contactForm.reset();
+        // Neither channel accepted it. Keep the form filled so nothing is lost
+        // and point to email instead of pretending it was queued.
+        showToast('Could not send right now — please email zwnt45602@gmail.com directly.', 'info');
       } else {
         showToast('Message sent! I\'ll get back to you soon.', 'success');
         trackContactFormSubmit();

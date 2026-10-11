@@ -1,4 +1,4 @@
-import { qs, qsa, on } from '../utils/dom.js?v=1.1';
+import { qs, on } from '../utils/dom.js?v=1.1';
 
 export function initSettings() {
     const body = document.body;
@@ -49,25 +49,4 @@ export function initSettings() {
     on(qs('#close-settings'), 'click', () => toggleSettings(false));
     on(settingsOverlay, 'click', () => toggleSettings(false));
     on(document, 'keydown', trapFocus);
-
-    const setLanguage = (langCode) => {
-        if (!langCode) return;
-        document.cookie = `googtrans=/en/${langCode}; path=/`;
-        localStorage.setItem('lastLang', langCode);
-        document.documentElement.lang = langCode;
-        document.documentElement.dir = langCode === 'ar' ? 'rtl' : 'ltr';
-        setTimeout(() => location.reload(), 300);
-    };
-
-    qsa('.lang-btn').forEach(btn => {
-        on(btn, 'click', () => {
-            qsa('.lang-btn').forEach(item => item.classList.remove('active'));
-            btn.classList.add('active');
-            setLanguage(btn.getAttribute('data-lang'));
-        });
-    });
-
-    qsa('.lang-option').forEach(option => {
-        on(option, 'click', () => setLanguage(option.getAttribute('data-lang')));
-    });
 }
