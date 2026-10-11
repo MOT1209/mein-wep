@@ -1,6 +1,8 @@
-# Deploy to Vercel + Lint Check
+# Site CI: the same build Vercel runs, plus the checks that keep it safe.
+# Vercel auto-deploys main on its own; this workflow is the gate that tells
+# you (and blocks a PR) when that build would be broken or leak files.
 
-name: CI/CD Pipeline
+name: CI
 
 on:
   push:
@@ -8,24 +10,26 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      prod_smoke:
+        description: Also run the read-only smoke checks against the live site
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  lint:
-    name: 🧹 Lint & Validate
+  secrets:
+    name: Secret scan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Check HTML validity
-        run: |
-          echo "✅ HTML files found: $(find . -name '*.html' -not -path '*/node_modules/*' -not -path '*/.git/*' | wc -l)"
-          # Basic validation: check for unclosed tags
-          for f in $(find . -name '*.html' -not -path '*/node_modules/*' -not -path '*/.git/*'); do
-            if grep -q "</html>" "$f" 2>/dev/null; then
-              echo "✅ $(basename $f)"
-            fi
-          done
-      
+
       - name: Check for exposed API keys
         run: |
           set -o pipefail
@@ -41,82 +45,39 @@ jobs:
             echo "::error::Potential exposed secret(s) found in client-side code — see matches above"
             exit 1
           fi
-          echo "✅ No exposed API keys"
+          echo "No exposed API keys"
 
-  lighthouse:
-    name: 📊 Lighthouse CI
+  build:
+    name: Build, verify, test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run Lighthouse
-        run: |
-          echo "🔍 Run Lighthouse locally: npx lighthouse https://rashid-wep.vercel.app/ --output=json"
 
-  flutter-test:
-    name: 🎯 Maarifah App Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check if Maarifah app exists
-        id: check
-        # hashFiles() isn't available in a job-level `if:` (no runner/checkout yet
-        # at that evaluation point) — that previously broke parsing for this whole
-        # workflow file, so the existence check has to happen in a step instead.
-        run: |
-          if [ -f apps/maarifah-app/pubspec.yaml ]; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Set up Flutter
-        if: steps.check.outputs.exists == 'true'
-        uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v4
         with:
-          channel: 'stable'
-      - name: Install dependencies
-        if: steps.check.outputs.exists == 'true'
-        working-directory: apps/maarifah-app
-        run: flutter pub get
-      - name: Run flutter test (unit + widget — the 84 tests referenced in commit history)
-        if: steps.check.outputs.exists == 'true'
-        working-directory: apps/maarifah-app
-        run: flutter test
-      # integration_test/app_test.dart needs a device/emulator per its own header
-      # comment — not wired into CI here to avoid an unverified, possibly-flaky
-      # Android emulator setup; run it locally with `flutter test integration_test`.
+          node-version: 22
+          cache: npm
 
-  test:
-    name: 🧪 API & Pages Tests
-    needs: [lint]
+      - run: npm ci
+
+      # Same command Vercel runs (vercel.json buildCommand).
+      - run: npm run build
+
+      # dist/ must equal tracked files minus the exclusion lists.
+      - run: npm run verify
+
+      # API handler unit tests + dist/ leak guard (needs the build above).
+      - run: npm test
+
+  prod-smoke:
+    name: Live site smoke checks (read-only)
+    if: github.event_name == 'workflow_dispatch' && inputs.prod_smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Run test3.py (24 API & page checks)
-        # TESTSPRITE_ALLOW_SIDE_EFFECTS opts into the Contact API POST check,
-        # which writes a real row to the production Supabase contact_messages
-        # table. Kept on here to preserve CI's existing coverage; off by
-        # default for local/diagnostic runs of test3.py (see _proxy_http.py).
-        env:
-          TESTSPRITE_ALLOW_SIDE_EFFECTS: "1"
-        run: python .testsprite/test3.py
-      - name: Run games tests
-        run: python .testsprite/test_games_page.py
-      - name: Run apps tests
-        run: python .testsprite/test_maarifah_web.py
-
-  deploy:
-    name: 🚀 Deploy
-    needs: [test]
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to Vercel
-        run: |
-          echo "✅ Ready for deployment!"
-          echo "Vercel auto-deploys from main branch."
-          echo "URL: https://rashid-wep.vercel.app/"
+      # No TESTSPRITE_ALLOW_SIDE_EFFECTS: never write rows to production.
+      - run: python .testsprite/test3.py
+      - run: python .testsprite/test_games_page.py

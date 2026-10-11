@@ -30,6 +30,7 @@ const NOT_SERVED = [
   /^\.eleventyignore$/,
   /^_data\//,
   /^_includes\//,
+  /^tests\//,
   /^scripts\/check-url-surface\.mjs$/,
   /^scripts\/site-templates\.mjs$/,
 ];

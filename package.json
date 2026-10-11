@@ -11,7 +11,8 @@
     "build:css": "node scripts/minify-css.mjs",
     "build": "npm run build:css && eleventy --config=eleventy.config.mjs",
     "verify": "node scripts/check-url-surface.mjs",
-    "start": "eleventy --serve --config=eleventy.config.mjs"
+    "start": "eleventy --serve --config=eleventy.config.mjs",
+    "test": "node --test tests/*.test.mjs"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6",
