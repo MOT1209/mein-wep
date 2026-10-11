@@ -13,6 +13,7 @@
 | 5 | [`SUPABASE_SETUP_FIXED.sql`](db/SUPABASE_SETUP_FIXED.sql) | يُصلح سياسات RLS لجدولَي `projects` و`bot_knowledge` (كانت تسمح لأي مستخدم مسجّل بالكتابة، وليس الأدمن فقط) | نعم (idempotent) |
 | 6 | [`SUPABASE_SECURITY_FIX.sql`](db/SUPABASE_SECURITY_FIX.sql) | إصلاحات أمنية حرجة: صلاحية `add_admin_user`، Rate Limiting لنموذج التواصل، تأكيد RLS للأدمن | نعم (idempotent) |
 | 7 | [`SUPABASE_FARM_GAME.sql`](db/SUPABASE_FARM_GAME.sql) | جداول لعبة Farm Empire (`game_saves` وغيرها) — مستقلة عن ترقيم 1-6، تُشغَّل عند تفعيل حفظ اللعبة على الخادم | نعم — تضيف جداول جديدة فقط، لا تلمس القائمة الحالية |
+| 8 | [`SUPABASE_PHASE1_FIX.sql`](db/SUPABASE_PHASE1_FIX.sql) | قراءة `vault_items` الخاصة للأدمن فقط (كانت لأي مستخدم مسجَّل) + حدود طول لـ `contact_messages` | نعم (idempotent) |
 
 ## كيف تستخدم هذا الفهرس
 

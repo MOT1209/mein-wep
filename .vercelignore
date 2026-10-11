@@ -47,3 +47,18 @@
 /.pi/
 **/__pycache__/
 **/*.pyc
+
+# Internal docs, tooling config, DB schema and unrelated backends.
+# Mirrors VERCEL_IGNORE in eleventy.config.mjs (dist/ is what is served).
+/.claude/
+/.github/
+/.vscode/
+/*.md
+/apks/*.md
+/db/
+/render.yaml
+/skills-lock.json
+/king-colab-MCP/
+/apps/chat-app/
+/روابط-الإدارة.txt
+/تقرير-مراجعة-المشروع.html

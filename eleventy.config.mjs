@@ -69,6 +69,20 @@ const VERCEL_IGNORE = [
   /^agents\//,
   /^docs\//,
   /^\.pi\//,
+  // Internal docs, tooling config, DB schema and unrelated backends — never
+  // linked from any page. Root-level *.md only: okf/*.md is served on purpose.
+  /^\.claude\//,
+  /^\.github\//,
+  /^\.vscode\//,
+  /^[^/]+\.md$/,
+  /^apks\/[^/]+\.md$/,
+  /^db\//,
+  /^render\.yaml$/,
+  /^skills-lock\.json$/,
+  /^king-colab-MCP\//,
+  /^apps\/chat-app\//,
+  /^روابط-الإدارة\.txt$/,
+  /^تقرير-مراجعة-المشروع\.html$/,
   /__pycache__\//,
   /\.pyc$/,
 ];

@@ -9,12 +9,10 @@
  * Environment variables (set in Vercel dashboard):
  *   SUPABASE_URL       — Supabase project URL
  *   SUPABASE_ANON_KEY  — Supabase anon/public key
- *
- * Fallback values are provided for local dev convenience.
  */
 
-const SUPABASE_URL = process.env.SUPABASE_URL || 'https://kcltollasghlvuoxvjqa.supabase.co';
-const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjbHRvbGxhc2dobHZ1b3h2anFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEyODI5NDksImV4cCI6MjA5Njg1ODk0OX0.w-op2d4THYCrKjql9t1j7BiBZM2krDEkw-vdOwFzXFE';
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
 // Rate limiting — 5 رسائل لكل دقيقة لكل IP
 const RATE_LIMIT = 5;
@@ -32,7 +30,7 @@ function isRateLimited(ip) {
   return entry.count > RATE_LIMIT;
 }
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // Rate limiting
   const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
   if (isRateLimited(clientIp)) {
@@ -70,8 +68,8 @@ module.exports = async (req, res) => {
   }
 
   // Validation
-  if (!name || typeof name !== 'string' || name.trim().length < 2) {
-    return res.status(400).json({ error: 'Name is required (min 2 characters)' });
+  if (!name || typeof name !== 'string' || name.trim().length < 2 || name.trim().length > 100) {
+    return res.status(400).json({ error: 'Name is required (2-100 characters)' });
   }
   if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: 'A valid email is required' });
@@ -83,6 +81,11 @@ module.exports = async (req, res) => {
   // Check message max length
   if (message.trim().length > 2000) {
     return res.status(400).json({ error: 'Message is too long (max 2000 characters)' });
+  }
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.error('SUPABASE_URL / SUPABASE_ANON_KEY not set in Vercel environment');
+    return res.status(500).json({ error: 'Server misconfigured' });
   }
 
   try {
