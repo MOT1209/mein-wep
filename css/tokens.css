@@ -34,6 +34,7 @@
   /* ---- Signal: the one accent. Burnt orange = build/release vernacular. ---- */
   --signal: #c2410c;
   --signal-hover: #9a3412;
+  --on-signal: #ffffff;
   --signal-wash: #fff4ed;  /* version chips, active nav background */
   --signal-edge: #fbd5bd;
 
@@ -83,6 +84,7 @@
 
   --signal: #fb7a4a;
   --signal-hover: #fd9a73;
+  --on-signal: #111111;
   --signal-wash: #24160f;
   --signal-edge: #4a2a1a;
 
@@ -110,6 +112,7 @@
 
     --signal: #fb7a4a;
     --signal-hover: #fd9a73;
+    --on-signal: #111111;
     --signal-wash: #24160f;
     --signal-edge: #4a2a1a;
 

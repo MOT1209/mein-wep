@@ -243,6 +243,19 @@ img { max-width: 100%; height: auto; }
 }
 .intro p { color: var(--ink-muted); max-width: var(--measure); }
 .intro-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-top: var(--s-5); }
+.intro .availability {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  margin: 0;
+  padding: var(--s-1) var(--s-3);
+  border: 1px solid var(--ok);
+  border-radius: 999px;
+  background: var(--ok-wash);
+  color: var(--ink);
+  font-size: 0.875rem;
+  max-width: 100%;
+}
 
 /* ============================ Buttons ============================ */
 
@@ -260,7 +273,7 @@ img { max-width: 100%; height: auto; }
   border: 1px solid transparent;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
-.btn-primary { background: var(--signal); color: #fff; }
+.btn-primary { background: var(--signal); color: var(--on-signal); }
 .btn-primary:hover { background: var(--signal-hover); }
 .btn-secondary,
 .btn-glass {
