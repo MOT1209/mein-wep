@@ -5,9 +5,10 @@
 -- ============================================================
 
 -- 1. vault_items: سياسة "Authenticated users can read all vault items"
---    (SUPABASE_VAULT_UPDATE.sql) تسمح لأي مستخدم مسجَّل — وأي شخص يستطيع
---    التسجيل بالمفتاح العام — بقراءة العناصر الخاصة (Private).
---    SUPABASE_SECURITY_FIX.sql أصلح insert/update/delete فقط ونسي select.
+--    كما هي في SUPABASE_VAULT_UPDATE.sql تسمح لأي مستخدم مسجَّل بقراءة
+--    العناصر الخاصة (Private)، ولا يوجد ملف في db/ يصلحها.
+--    في قاعدة الإنتاج (فُحصت 2026-10-11) هي مُصلَحة يدوياً إلى is_admin()
+--    لكن باسم مضلِّل. هذه الخطوة تجعل الملفات مطابقة للواقع وتصحح الاسم.
 drop policy if exists "Authenticated users can read all vault items" on public.vault_items;
 drop policy if exists "Admins can read all vault items" on public.vault_items;
 create policy "Admins can read all vault items"
