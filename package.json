@@ -1,0 +1,36 @@
+{
+  "name": "blockworld",
+  "version": "0.1.0",
+  "description": "Block World - an original 3D voxel sandbox survival, building, exploration and crafting game",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "check": "npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [
+    "voxel",
+    "sandbox",
+    "game",
+    "three.js"
+  ],
+  "author": "Block World Team",
+  "license": "MIT",
+  "dependencies": {
+    "three": "^0.168.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.168.0",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.0",
+    "vitest": "^2.1.1"
+  },
+  "allowScripts": {
+    "esbuild@0.21.5": true
+  }
+}
