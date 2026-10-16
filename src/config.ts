@@ -60,6 +60,10 @@ export const ITEM_PICKUP_RADIUS = 1.6;
 export const MAX_LIGHT_LEVEL = 15;
 export const WATER_LIGHT_ATTENUATION = 1;
 
+export const ATLAS_TILES_PER_ROW = 16;
+export const ATLAS_TILE_PIXELS = 16;
+export const ATLAS_TILE_COUNT = ATLAS_TILES_PER_ROW * ATLAS_TILES_PER_ROW;
+
 export const AUTOSAVE_INTERVAL_SECONDS = 60;
 
 export const CHUNK_UNLOAD_MARGIN = 2;

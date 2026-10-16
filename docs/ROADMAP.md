@@ -20,26 +20,26 @@ It is updated phase-by-phase as work lands and is verified.
 
 | Item | Status |
 | ---- | ------ |
-| Chunk storage (16×16×96, `Uint8Array`) | not started |
-| World container with cross-chunk access | not started |
-| Face-culled chunk mesher with AO + light | not started |
+| Chunk storage (16×16×96, `Uint8Array`) | done |
+| World container with cross-chunk access | done |
+| Face-culled chunk mesher with AO + light | in progress (culling + light done; AO pending) |
 | Texture atlas (procedural, original) | not started |
 | Collision + raycast targeting | not started |
 | Block break / place with validation | not started |
-| Chunk load/unload streaming | not started |
-| in-memory lighting (sky + block light flood fill) | not started |
+| Chunk load/unload streaming | partial (load/unload primitives exist; no radius streaming yet) |
+| in-memory lighting (sky + block light flood fill) | done |
 
 ## Phase 3 — World generation
 
 | Item | Status |
 | ---- | ------ |
-| Seeded deterministic generation | not started |
-| Terrain height, oceans, beaches | not started |
-| Biomes (plains, forest, desert, mountains, taiga snow) | not started |
-| Caves (3D noise) | not started |
-| Ore distribution by depth | not started |
-| Trees, vegetation, decorations | not started |
-| Surface structures (ruins, camps) | not started |
+| Seeded deterministic generation | done |
+| Terrain height, oceans, beaches | done |
+| Biomes (plains, forest, desert, mountains, taiga snow) | done |
+| Caves (3D noise) | done |
+| Ore distribution by depth | done |
+| Trees, vegetation, decorations | done |
+| Surface structures (ruins, camps) | partial (camps + boulders done; ruins and buried loot pending) |
 
 ## Phase 4 — Gameplay loop
 
@@ -122,7 +122,7 @@ It is updated phase-by-phase as work lands and is verified.
 
 | Item | Status |
 | ---- | ------ |
-| Automated test suite | not started |
+| Automated test suite | in progress (world generation suite landed; suites grow per phase) |
 | Production build (`npm run build`) | not started |
 | Acceptance checklist (`docs/TESTING.md`) | not started |
 | Native packaging (desktop/mobile stores) | blocked — requires native toolchains not present in this environment |
