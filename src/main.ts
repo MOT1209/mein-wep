@@ -1,165 +1,86 @@
-import * as THREE from "three";
-import { DEFAULT_RENDER_DISTANCE, QUALITY_PRESETS } from "./config";
+import { CHUNK_SX, CHUNK_SZ, TICK_MS } from "./config";
+import { Game } from "./game";
+import { GameLoop } from "./render/loop";
 import { World } from "./voxels/world";
-import { ChunkRenderer } from "./render/chunkRenderer";
-import { createChunkMaterials } from "./render/materials";
-import { buildAtlasTexture } from "./render/textures";
 
-function requiredElement<T extends Element>(selector: string): T {
-  const element = document.querySelector<T>(selector);
-  if (!element) throw new Error(`Block World requires ${selector} in index.html`);
-  return element;
+const DEFAULT_SEED = 271828;
+const OVERLAY_INTERVAL_MS = 250;
+
+function parseSeed(search: string): number {
+  const raw = new URLSearchParams(search).get("seed");
+  if (raw === null) return DEFAULT_SEED;
+  const value = Number(raw);
+  return Number.isSafeInteger(value) ? value >>> 0 : DEFAULT_SEED;
 }
 
-const canvas = requiredElement<HTMLCanvasElement>("#game-canvas");
-const uiRoot = requiredElement<HTMLDivElement>("#ui-root");
+function createOverlay(uiRoot: HTMLElement): HTMLElement {
+  const overlay = document.createElement("div");
+  overlay.className = "bw-panel";
+  overlay.style.cssText =
+    "position:absolute;left:12px;bottom:12px;padding:8px 12px;font:13px/1.5 var(--ui-font);pointer-events:none;white-space:pre;";
+  uiRoot.append(overlay);
+  return overlay;
+}
 
-const quality = QUALITY_PRESETS.medium;
-const params = new URLSearchParams(window.location.search);
-const seedParam = params.get("seed");
-const requestedSeed = seedParam === null ? Number.NaN : Number(seedParam);
-const seed = Number.isSafeInteger(requestedSeed) ? requestedSeed >>> 0 : 271828;
-const world = new World(seed);
-const spawn = world.findSpawn();
-const centerChunkX = Math.floor(spawn.x / 16);
-const centerChunkZ = Math.floor(spawn.z / 16);
-
-for (let dz = -1; dz <= 1; dz++) {
-  for (let dx = -1; dx <= 1; dx++) {
-    world.ensureChunk(centerChunkX + dx, centerChunkZ + dz);
+function boot(): void {
+  const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
+  const uiRoot = document.querySelector<HTMLDivElement>("#ui-root");
+  if (!canvas || !uiRoot) {
+    throw new Error("Block World requires #game-canvas and #ui-root in index.html");
   }
-}
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x9ac5e6);
-
-const camera = new THREE.PerspectiveCamera(
-  65,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  (DEFAULT_RENDER_DISTANCE + 2) * 16
-);
-
-const renderer = new THREE.WebGLRenderer({
-  canvas,
-  antialias: true,
-  powerPreference: "high-performance"
-});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, quality.pixelRatioCap));
-renderer.setSize(window.innerWidth, window.innerHeight, false);
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.setClearColor(0x9ac5e6);
-
-const atlas = buildAtlasTexture();
-const materials = createChunkMaterials(atlas, "medium");
-const chunkRenderer = new ChunkRenderer(scene, world, { atlas, materials });
-const target = new THREE.Vector3(spawn.x, spawn.y, spawn.z);
-let yaw = 0.68;
-let pitch = 0.42;
-let radius = 26;
-let dragging = false;
-let lastPointerX = 0;
-let lastPointerY = 0;
-let frame = 0;
-let disposed = false;
-
-function updateCamera(): void {
-  const horizontal = Math.cos(pitch) * radius;
-  camera.position.set(
-    target.x + Math.sin(yaw) * horizontal,
-    target.y + Math.sin(pitch) * radius,
-    target.z + Math.cos(yaw) * horizontal
-  );
-  camera.lookAt(target);
-  camera.updateMatrixWorld();
-}
-
-function resize(): void {
-  const width = Math.max(1, window.innerWidth);
-  const height = Math.max(1, window.innerHeight);
-  camera.aspect = width / height;
-  camera.updateProjectionMatrix();
-  renderer.setSize(width, height, false);
-}
-
-function onPointerDown(event: PointerEvent): void {
-  dragging = true;
-  lastPointerX = event.clientX;
-  lastPointerY = event.clientY;
-  canvas.setPointerCapture(event.pointerId);
-}
-
-function onPointerMove(event: PointerEvent): void {
-  if (!dragging) return;
-  yaw -= (event.clientX - lastPointerX) * 0.006;
-  pitch = THREE.MathUtils.clamp(pitch + (event.clientY - lastPointerY) * 0.004, 0.08, 1.25);
-  lastPointerX = event.clientX;
-  lastPointerY = event.clientY;
-  updateCamera();
-}
-
-function onPointerUp(): void {
-  dragging = false;
-}
-
-function onWheel(event: WheelEvent): void {
-  radius = THREE.MathUtils.clamp(radius * Math.exp(event.deltaY * 0.001), 8, 72);
-  updateCamera();
-  event.preventDefault();
-}
-
-const status = document.createElement("section");
-status.className = "bw-panel";
-status.setAttribute("role", "status");
-status.style.cssText =
-  "position:absolute;left:16px;top:16px;padding:12px 16px;pointer-events:none;font:14px/1.5 var(--ui-font);";
-const title = document.createElement("strong");
-title.textContent = "Block World";
-title.style.cssText = "display:block;font-size:16px;letter-spacing:.04em";
-const details = document.createElement("span");
-details.textContent = `Seed ${seed} · ${world.loadedChunkCount} chunks · drag to orbit, scroll to zoom`;
-details.style.cssText = "color:#b9c7d4";
-status.append(title, details);
-uiRoot.append(status);
-
-updateCamera();
-chunkRenderer.update(centerChunkX, centerChunkZ);
-
-function animate(): void {
-  if (disposed) return;
-  frame = window.requestAnimationFrame(animate);
-  chunkRenderer.update(centerChunkX, centerChunkZ);
-  chunkRenderer.rebuildBudgeted(4);
-  for (const material of [materials.terrain, materials.water, materials.plants]) {
-    material.uniforms.uDay.value = world.dayFactor;
-    material.uniforms.uCameraPosition.value.copy(camera.position);
+  const world = new World(parseSeed(window.location.search));
+  const spawn = world.findSpawn();
+  const centerCx = Math.floor(spawn.x / CHUNK_SX);
+  const centerCz = Math.floor(spawn.z / CHUNK_SZ);
+  for (let dz = -1; dz <= 1; dz++) {
+    for (let dx = -1; dx <= 1; dx++) {
+      world.ensureChunk(centerCx + dx, centerCz + dz);
+    }
   }
-  renderer.render(scene, camera);
+
+  const game = new Game(canvas, world);
+  const overlay = createOverlay(uiRoot);
+  let overlayStamped = 0;
+
+  const loop = new GameLoop(TICK_MS, {
+    tick: () => {
+      game.tick();
+    },
+    render: () => {
+      game.render();
+      const now = performance.now();
+      if (now - overlayStamped >= OVERLAY_INTERVAL_MS) {
+        overlayStamped = now;
+        const pos = game.playerPosition;
+        overlay.textContent = `FPS ${loop.fps.toFixed(0)}  ·  xyz ${pos.x.toFixed(1)} ${pos.y.toFixed(1)} ${pos.z.toFixed(1)}  ·  chunks ${world.loadedChunkCount}`;
+      }
+    }
+  });
+
+  const onResize = (): void => {
+    game.resize(Math.max(1, window.innerWidth), Math.max(1, window.innerHeight));
+  };
+  const onKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === "F3") {
+      event.preventDefault();
+      overlay.classList.toggle("hidden");
+    }
+  };
+  const onPageHide = (): void => {
+    loop.stop();
+    game.dispose();
+  };
+
+  window.addEventListener("resize", onResize);
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("pagehide", onPageHide, { once: true });
+  onResize();
+  loop.start();
 }
 
-function dispose(): void {
-  if (disposed) return;
-  disposed = true;
-  window.cancelAnimationFrame(frame);
-  window.removeEventListener("resize", resize);
-  canvas.removeEventListener("pointerdown", onPointerDown);
-  canvas.removeEventListener("pointermove", onPointerMove);
-  canvas.removeEventListener("pointerup", onPointerUp);
-  canvas.removeEventListener("pointercancel", onPointerUp);
-  canvas.removeEventListener("wheel", onWheel);
-  for (const chunk of world.chunks.values()) chunkRenderer.dispose(chunk.cx, chunk.cz);
-  materials.terrain.dispose();
-  materials.water.dispose();
-  materials.plants.dispose();
-  atlas.dispose();
-  renderer.dispose();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", boot, { once: true });
+} else {
+  boot();
 }
-
-window.addEventListener("resize", resize);
-canvas.addEventListener("pointerdown", onPointerDown);
-canvas.addEventListener("pointermove", onPointerMove);
-canvas.addEventListener("pointerup", onPointerUp);
-canvas.addEventListener("pointercancel", onPointerUp);
-canvas.addEventListener("wheel", onWheel, { passive: false });
-window.addEventListener("pagehide", dispose, { once: true });
-frame = window.requestAnimationFrame(animate);
