@@ -23,7 +23,7 @@ It is updated phase-by-phase as work lands and is verified.
 | Chunk storage (16×16×96, `Uint8Array`) | done |
 | World container with cross-chunk access | done |
 | Face-culled chunk mesher with AO + light | in progress (culling + light done; AO pending) |
-| Texture atlas (procedural, original) | not started |
+| Texture atlas (procedural, original) | done |
 | Collision + raycast targeting | not started |
 | Block break / place with validation | not started |
 | Chunk load/unload streaming | partial (load/unload primitives exist; no radius streaming yet) |
