@@ -1,19 +1,10 @@
 import * as THREE from "three";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { B } from "../src/content/blocks";
 import { Chunk } from "../src/voxels/chunk";
 import { buildChunkMesh } from "../src/voxels/mesher";
 import { ChunkRenderer } from "../src/render/chunkRenderer";
-import { createChunkMaterials } from "../src/render/materials";
-
-class TestScene extends THREE.Scene {
-  readonly additions: THREE.Object3D[] = [];
-
-  override add(...objects: THREE.Object3D[]): this {
-    this.additions.push(...objects);
-    return super.add(...objects);
-  }
-}
+import { createChunkMaterials, type ChunkMaterials } from "../src/render/materials";
 
 class TestWorld {
   readonly chunks = new Map<string, Chunk>();
@@ -45,62 +36,88 @@ class TestWorld {
   }
 }
 
-const atlas = new THREE.Texture();
+let atlas: THREE.Texture;
+let materials: ChunkMaterials;
 const tileOf = (): number => 0;
-const renderOptions = { atlas, clock: () => 0 };
+
+function renderOptions() {
+  return { atlas, materials, clock: () => 0 };
+}
 
 function meshesIn(scene: THREE.Scene): THREE.Mesh[] {
   return scene.children.filter((child): child is THREE.Mesh => child instanceof THREE.Mesh);
 }
 
+beforeEach(() => {
+  atlas = new THREE.Texture();
+  materials = createChunkMaterials(atlas);
+});
+
 afterEach(() => {
+  materials.terrain.dispose();
+  materials.water.dispose();
+  materials.plants.dispose();
   atlas.dispose();
 });
 
 describe("ChunkRenderer", () => {
-  it("packs every mesh attribute with the source array vertex count", () => {
-    const scene = new TestScene();
+  it("packs terrain, water, and plant batches with matching geometry attributes", () => {
+    const scene = new THREE.Scene();
     const world = new TestWorld();
     const chunk = world.addChunk(0, 0);
+    chunk.setBlockRaw(4, 1, 1, B.WATER);
+    chunk.setBlockRaw(7, 1, 1, B.TALL_GRASS);
     const expected = buildChunkMesh(world, chunk, tileOf);
-    const renderer = new ChunkRenderer(scene, world, renderOptions);
+    const renderer = new ChunkRenderer(scene, world, renderOptions());
 
     renderer.update(0, 0);
     renderer.rebuildBudgeted(100);
 
-    const [mesh] = meshesIn(scene);
-    expect(mesh).toBeDefined();
-    const arrays = expected.opaque;
-    expect(mesh.geometry.getAttribute("position").count).toBe(arrays.positions.length / 3);
-    expect(mesh.geometry.getAttribute("normal").count).toBe(arrays.normals.length / 3);
-    expect(mesh.geometry.getAttribute("uv").count).toBe(arrays.uvs.length / 2);
-    expect(mesh.geometry.getAttribute("sky").count).toBe(arrays.sky.length);
-    expect(mesh.geometry.getAttribute("block").count).toBe(arrays.block.length);
-    expect(mesh.geometry.getIndex()?.count).toBe(arrays.indices.length);
-    expect(mesh.position.toArray()).toEqual([0, 0, 0]);
+    const meshes = meshesIn(scene);
+    const batches = [
+      { arrays: expected.opaque, material: materials.terrain },
+      { arrays: expected.water, material: materials.water },
+      { arrays: expected.plants, material: materials.plants }
+    ];
+
+    expect(expected.opaque.indices.length).toBeGreaterThan(0);
+    expect(expected.water.indices.length).toBeGreaterThan(0);
+    expect(expected.plants.indices.length).toBeGreaterThan(0);
+    expect(meshes).toHaveLength(batches.length);
+    for (const [index, { arrays, material }] of batches.entries()) {
+      const mesh = meshes[index];
+      expect(mesh.geometry.getAttribute("position").count).toBe(arrays.positions.length / 3);
+      expect(mesh.geometry.getAttribute("normal").count).toBe(arrays.normals.length / 3);
+      expect(mesh.geometry.getAttribute("uv").count).toBe(arrays.uvs.length / 2);
+      expect(mesh.geometry.getAttribute("sky").count).toBe(arrays.sky.length);
+      expect(mesh.geometry.getAttribute("block").count).toBe(arrays.block.length);
+      expect(mesh.geometry.getIndex()?.count).toBe(arrays.indices.length);
+      expect(mesh.material).toBe(material);
+      expect(mesh.position.toArray()).toEqual([0, 0, 0]);
+    }
   });
 
   it("rebuilds queued chunks nearest to the current chunk first", () => {
-    const scene = new TestScene();
+    const scene = new THREE.Scene();
     const world = new TestWorld();
     world.addChunk(0, 0);
     world.addChunk(1, 0);
     world.addChunk(5, 0);
-    const renderer = new ChunkRenderer(scene, world, renderOptions);
+    const renderer = new ChunkRenderer(scene, world, renderOptions());
 
     renderer.update(0, 0);
     renderer.markDirty(5, 0);
     renderer.markDirty(1, 0);
     renderer.rebuildBudgeted(100);
 
-    expect(scene.additions.map((object) => object.position.x)).toEqual([0, 16, 80]);
+    expect(meshesIn(scene).map((mesh) => mesh.userData.chunkX)).toEqual([0, 1, 5]);
   });
 
   it("removes meshes and disposes their geometries when a chunk is disposed", () => {
-    const scene = new TestScene();
+    const scene = new THREE.Scene();
     const world = new TestWorld();
     world.addChunk(2, -1);
-    const renderer = new ChunkRenderer(scene, world, renderOptions);
+    const renderer = new ChunkRenderer(scene, world, renderOptions());
 
     renderer.markDirty(2, -1);
     renderer.rebuildBudgeted(100);
@@ -117,28 +134,29 @@ describe("ChunkRenderer", () => {
   });
 
   it("finishes the first chunk that overruns the time budget and leaves later work queued", () => {
-    const scene = new TestScene();
+    const scene = new THREE.Scene();
     const world = new TestWorld();
     world.addChunk(0, 0);
     world.addChunk(1, 0);
     world.addChunk(2, 0);
-    const times = [0, 8, 20, 21];
+    const times = [0, 8, 10, 18, 20, 28];
     const renderer = new ChunkRenderer(scene, world, {
-      atlas,
-      clock: () => times.shift() ?? 21
+      ...renderOptions(),
+      clock: () => times.shift() ?? 28
     });
 
     renderer.update(0, 0);
     renderer.markDirty(1, 0);
     renderer.markDirty(2, 0);
-    renderer.rebuildBudgeted(5);
-
-    expect(scene.additions.map((object) => object.position.x)).toEqual([0]);
+    expect(renderer.rebuildBudgeted(5)).toBe(1);
+    expect(meshesIn(scene).map((mesh) => mesh.userData.chunkX)).toEqual([0]);
+    expect(renderer.rebuildBudgeted(5)).toBe(1);
+    expect(meshesIn(scene).map((mesh) => mesh.userData.chunkX)).toEqual([0, 1]);
+    expect(renderer.rebuildBudgeted(5)).toBe(1);
+    expect(meshesIn(scene).map((mesh) => mesh.userData.chunkX)).toEqual([0, 1, 2]);
   });
 
   it("configures water transparency and plant alpha clipping with the shared vertex shader", () => {
-    const materials = createChunkMaterials(atlas);
-
     expect(materials.terrain.vertexShader).toBe(materials.water.vertexShader);
     expect(materials.terrain.vertexShader).toBe(materials.plants.vertexShader);
     expect(materials.water.transparent).toBe(true);
@@ -146,8 +164,5 @@ describe("ChunkRenderer", () => {
     expect(materials.water.uniforms.uWaterAlpha.value).toBeCloseTo(0.75);
     expect(materials.plants.side).toBe(THREE.DoubleSide);
     expect(materials.plants.alphaTest).toBeCloseTo(0.5);
-    materials.terrain.dispose();
-    materials.water.dispose();
-    materials.plants.dispose();
   });
 });
