@@ -8,5 +8,5 @@
         <a href="{{ item.href }}">{{ item.label }}</a>
 {%- endfor %}
 {%- for item in site.navExternal %}
-        <a href="{{ item.href }}">{{ item.label }} <span class="count">↗</span></a>
+        <a href="{{ item.href }}">{{ item.label }}{% if not item.internal %} <span class="count">↗</span>{% endif %}</a>
 {%- endfor %}

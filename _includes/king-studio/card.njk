@@ -1,0 +1,29 @@
+{#- One catalogue card. Expects `project` and `root`; `cardHeading` (default h3)
+    picks the title's heading level so catalogue pages (h1 -> h2) stay in order. Optional pieces are only
+    rendered when the data exists: no empty buttons, no broken images. -#}
+<li class="ks-card" data-ks-item data-search="{{ project.searchText }}" data-platforms="{{ project.platforms | join('|') }}" data-status="{{ project.status }}">
+  <a class="ks-card-media" href="{{ root }}{{ project.detailUrl }}" tabindex="-1" aria-hidden="true">
+    {%- if project.image %}
+    <img src="{{ root }}{{ project.image }}" alt="" loading="lazy" decoding="async" width="640" height="360" class="{{ 'is-icon' if 'icons/' in project.image }}">
+    {%- else %}
+    <span class="ks-monogram">{{ project.title | first }}</span>
+    {%- endif %}
+  </a>
+  <div class="ks-card-body">
+    <div class="ks-card-meta">
+      {% include "king-studio/status.njk" %}
+      {%- if project.category %}<span class="ks-category">{{ project.category }}</span>{% endif %}
+    </div>
+    <{{ cardHeading or "h3" }} class="ks-card-title"><a href="{{ root }}{{ project.detailUrl }}">{{ project.title }}</a></{{ cardHeading or "h3" }}>
+    <p class="ks-card-desc">{{ project.description }}</p>
+    {%- if project.platforms | length %}
+    <ul class="ks-platforms" aria-label="Platforms">
+      {%- for pl in project.platforms %}<li>{{ pl }}</li>{% endfor %}
+    </ul>
+    {%- endif %}
+    <div class="ks-card-actions">
+      {%- if project.launchUrl %}<a class="ks-btn ks-btn-primary" href="{{ root }}{{ project.launchUrl }}">{{ 'Play' if project.type == 'Game' else 'Open' }}<span class="ks-visually-hidden"> {{ project.title }}</span></a>{% endif %}
+      <a class="ks-btn ks-btn-ghost" href="{{ root }}{{ project.detailUrl }}">Details<span class="ks-visually-hidden"> for {{ project.title }}</span></a>
+    </div>
+  </div>
+</li>

@@ -110,7 +110,7 @@ const tracked = execSync('git ls-files -z', { cwd: ROOT, encoding: 'utf8' })
   .filter((p) => !isExcluded(p))
   // git knows a page as `index.njk`; dist/ contains the rendered `index.html`.
   // Compare like for like. See scripts/site-templates.mjs.
-  .map((p) => TEMPLATE_OUTPUTS[p] ?? p);
+  .flatMap((p) => TEMPLATE_OUTPUTS[p] ?? p);
 
 const actual = walk(DIST).filter((p) => !isExcluded(p));
 
