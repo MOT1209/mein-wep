@@ -24,7 +24,7 @@ It is updated phase-by-phase as work lands and is verified.
 | World container with cross-chunk access | done |
 | Face-culled chunk mesher with AO + light | in progress (culling + light done; AO pending) |
 | Texture atlas (procedural, original) | done |
-| Collision + raycast targeting | not started |
+| Collision + raycast targeting | done |
 | Block break / place with validation | not started |
 | Chunk load/unload streaming | partial (load/unload primitives exist; no radius streaming yet) |
 | in-memory lighting (sky + block light flood fill) | done |
@@ -45,11 +45,11 @@ It is updated phase-by-phase as work lands and is verified.
 
 | Item | Status |
 | ---- | ------ |
-| Item model + stack semantics | not started |
-| Inventory + hotbar with validated operations | not started |
+| Item model + stack semantics | partial (defs + canonical ItemStack done; dedicated item tests pending) |
+| Inventory + hotbar with validated operations | done |
 | Item drops with physics + pickup | not started |
 | Tools, tiers, durability, mining speed/tier gates | not started |
-| Crafting (2×2 + 3×3 shaped/shapeless), recipe registry | not started |
+| Crafting (2×2 + 3×3 shaped/shapeless), recipe registry | partial (matcher + registry done and tested; UI integration pending) |
 | Furnace processing with fuel + progress | not started |
 | Chest storage with per-block state persistence | not started |
 
@@ -122,7 +122,7 @@ It is updated phase-by-phase as work lands and is verified.
 
 | Item | Status |
 | ---- | ------ |
-| Automated test suite | in progress (world generation suite landed; suites grow per phase) |
-| Production build (`npm run build`) | not started |
+| Automated test suite | in progress (voxel, render, gameplay and physics suites green; grows per phase) |
+| Production build (`npm run build`) | done |
 | Acceptance checklist (`docs/TESTING.md`) | not started |
 | Native packaging (desktop/mobile stores) | blocked — requires native toolchains not present in this environment |

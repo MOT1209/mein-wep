@@ -32,6 +32,12 @@ export interface ItemDef {
   projectile?: { damage: number; speed: number };
 }
 
+export interface ItemStack {
+  item: string;
+  count: number;
+  durability?: number;
+}
+
 const items = new Map<string, ItemDef>();
 
 function item(id: string, kind: ItemKind, extra: Partial<ItemDef> = {}): ItemDef {
