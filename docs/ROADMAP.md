@@ -123,6 +123,6 @@ It is updated phase-by-phase as work lands and is verified.
 | Item | Status |
 | ---- | ------ |
 | Automated test suite | in progress (voxel, render, gameplay and physics suites green; grows per phase) |
-| Production build (`npm run build`) | not started |
+| Production build (`npm run build`) | done |
 | Acceptance checklist (`docs/TESTING.md`) | not started |
 | Native packaging (desktop/mobile stores) | blocked — requires native toolchains not present in this environment |
