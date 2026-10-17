@@ -160,6 +160,13 @@ Each step: Goal / Context / Owned files / Tasks / Acceptance / Verify / Depends 
      "cross" blocks return their `all` tile; missing name → console-free fallback tile 0).
   4. `export function buildAtlasTexture(): THREE.CanvasTexture` with `magFilter: NearestFilter`,
      `minFilter: NearestFilter` (no mip bleed).
+- **Frozen interface (S3 codes against this; do not deviate)**: `TILE_INDEX: Record<string, number>`;
+  `paintAtlas(ctx: AtlasCtx): void` where `AtlasCtx` is a structural subset of
+  `CanvasRenderingContext2D` (fillStyle + fillRect + clearRect); `buildAtlasCanvas(): HTMLCanvasElement`;
+  `atlasTileOf(blockId: number, face: number): number` (face values are mesher `FACE_*`; PY→top,
+  NY→bottom, NZ→front when defined else side; unknown name → tile 0);
+  `buildAtlasTexture(): THREE.CanvasTexture`. Module top level must not reference `document`
+  (node-import safe); canvases are created lazily inside the `build*` functions only.
 - **Acceptance tests** (`tests/textures.test.ts`, headless: use a canvas stub or pure data test):
   1. Every tile name referenced by any `BlockDef` exists in `TILE_INDEX` (iterate all blocks).
   2. `TILE_INDEX` values are unique, `0 <= index < 256`.
@@ -170,8 +177,9 @@ Each step: Goal / Context / Owned files / Tasks / Acceptance / Verify / Depends 
 ### S3 — Chunk renderer: THREE meshes + terrain shader (3 h)
 
 - **Goal**: turn `ChunkMeshData` into three.js meshes with correct lighting and shading.
-- **Context**: mesher API and attribute layout in section 2. Use `src/render/textures.ts`
-  (S2) for the atlas. This step owns the shader; **strongest available agent** recommended.
+- **Context**: mesher API and attribute layout in section 2. Codes only against S2's frozen
+  interface — never edit `src/render/textures.ts` (S2 owns it, possibly in flight). This step
+  owns the shader; **strongest available agent** recommended.
 - **Owned files**: `src/render/materials.ts`, `src/render/chunkRenderer.ts`, `tests/chunkRenderer.test.ts`.
 - **Tasks**:
   1. `materials.ts`: three `ShaderMaterial`s (terrain / water / plants) sharing one vertex
@@ -585,23 +593,23 @@ After both finish, the human/orchestrator runs once: `npm run check` (typecheck 
 ```
 You are a coding agent working in C:\Users\aihmo\Downloads\kingcraft1 (Windows, PowerShell 5.1). The repo is a TypeScript voxel game (Block World) built with Vite + Three.js + Vitest.
 
-Read plan.md at the project root first; its sections 1 and 2 are binding. Then execute these two steps in order, exactly as written there:
+Read plan.md at the project root first; its sections 1 and 2 are binding. Then execute this step exactly as written there:
 
-STEP S1 — Verify mesher tests and commit the voxels milestone
 STEP S2 — Procedural texture atlas + tile registry
+(S1 is already done and committed as 309b765; skip it.)
 
 Hard rules that apply to everything:
 - No code comments anywhere. TypeScript strict. No any, no @ts-ignore.
 - Never copy Minecraft code/assets/names. All pixel art must be original.
-- Only edit files owned by these steps: tests/mesher.test.ts and docs/ROADMAP.md (S1); src/render/textures.ts and tests/textures.test.ts (S2). If S2 truly needs a new constant, src/config.ts is append-only. Do not touch any other file, especially src/game.ts, src/main.ts, src/voxels/*.
+- Only edit files owned by this step: src/render/textures.ts and tests/textures.test.ts, plus the single ROADMAP row for the atlas. If the step truly needs a new constant, src/config.ts is append-only. Do not touch any other file, especially src/game.ts, src/main.ts, src/voxels/*.
 - If a test fails, fix the real cause; never weaken assertions to force green.
 - Use a 600000 ms timeout for npm/npx commands. Vitest on this machine is slow (~60 s per file); be patient, do not add fake timeouts.
-- Commits: one per step — "feat(voxels): chunk mesher with per-face light and water/plant batches", then "feat(render): procedural texture atlas and tile registry". No git push. If git reports index.lock, wait 5 s and retry.
-- Update docs/ROADMAP.md only for work whose verification actually passed: set "Texture atlas (procedural, original)" to done only after S2 tests pass; "Face-culled chunk mesher with AO + light" stays in progress (AO not done).
+- Commit: "feat(render): procedural texture atlas and tile registry". No git push. If git reports index.lock, wait 5 s and retry.
+- Update docs/ROADMAP.md only for work whose verification actually passed: set "Texture atlas (procedural, original)" to done only after S2 tests pass.
 
 S2 critical details: follow the atlas row-flip rule exactly (draw tile index i at canvas x=(i%16)*16, y=(15-((i/16)|0))*16, because the mesher emits v=(row+lv)/16 and three.js flipY is default). Enumerate EVERY tile name referenced by src/content/blocks.ts and register a painter for each; the acceptance test must iterate all BlockDefs and fail on any unregistered name.
 
-Verification per step: `npm run typecheck`, then `npx vitest run tests/mesher.test.ts` (S1) and `npx vitest run tests/textures.test.ts` (S2).
+Verification: `npm run typecheck`, then `npx vitest run tests/textures.test.ts`.
 
 Final report: files changed, exact commands run, observed results, blockers, and any plan.md corrections you made.
 ```
@@ -634,3 +642,75 @@ Coordination notes:
 - Both agents may commit to the same repo; commits are small and local. The lock-retry rule above handles overlap.
 - Do not run the full `npx vitest run` inside the agents; run `npm run check` once after both complete and hand any fallout back to the owning agent.
 - If an agent discovers a wrong premise (missing API, different schema), it must fix plan.md in the same commit — plans that lie are worse than no plan.
+
+## 10. Render-lane pair (S2 + S3), ready to paste
+
+Both can start now **in parallel** because S2's frozen interface (section 4, "### S2") is
+published above. If S3 reaches verification before `src/render/textures.ts` exists, its prompt
+tells it to wait (bounded) for the S2 agent instead of guessing.
+
+### Agent S2 prompt
+
+```
+You are a coding agent working in C:\Users\aihmo\Downloads\kingcraft1 (Windows, PowerShell 5.1). The repo is a TypeScript voxel game (Block World) built with Vite + Three.js + Vitest.
+
+Read plan.md at the project root first; its sections 1 and 2 are binding. Then execute STEP S2 exactly as written in plan.md (the "### S2 — Procedural texture atlas + tile registry" block).
+
+Hard rules:
+- No code comments anywhere. TypeScript strict. No any, no @ts-ignore.
+- Never copy Minecraft code/assets/names. Pixel art must be original and deterministic.
+- Only edit: src/render/textures.ts and tests/textures.test.ts, plus the single ROADMAP row for the atlas. Do NOT touch src/game.ts, src/main.ts, src/voxels/*, src/render/materials.ts, src/render/chunkRenderer.ts — another agent is creating those in parallel.
+- If a test fails, fix the real cause; never weaken assertions to force green.
+- Use a 600000 ms timeout for npm/npx commands. Vitest on this machine is slow; be patient.
+- Commit: "feat(render): procedural texture atlas and tile registry". No git push. If git reports index.lock, wait 5 s and retry.
+
+Frozen interface (S3 is coded against this — do NOT deviate):
+- export const TILE_INDEX: Record<string, number>
+- export function paintAtlas(ctx: AtlasCtx): void   // AtlasCtx = structural subset of CanvasRenderingContext2D: fillStyle + fillRect + clearRect
+- export function buildAtlasCanvas(): HTMLCanvasElement
+- export function atlasTileOf(blockId: number, face: number): number   // face = mesher FACE_PX..FACE_NZ; PY→top, NY→bottom, NZ→front when defined else side; unknown name → tile 0
+- export function buildAtlasTexture(): THREE.CanvasTexture
+- Module top level must not touch `document` (importing must be safe in node tests); canvases are created lazily inside build* functions only.
+
+Critical drawing rule: draw tile index i at canvas pixel x=(i%16)*16, y=(15-((i/16)|0))*16 (row flip, because the mesher emits v=(row+lv)/16 and three.js flipY is default). Exactly 256x256 canvas, 16px tiles. Speckle via Rng from src/core/rng.ts (deterministic).
+
+Enumerate EVERY tile name referenced by BlockDef.tiles in src/content/blocks.ts (read the whole file) and register a painter for each. The acceptance test must iterate all BlockDefs and fail if any referenced tile name is unregistered.
+
+Tests (tests/textures.test.ts) are headless: never call buildAtlasCanvas/buildAtlasTexture in tests (no DOM in vitest node env). Test: TILE_INDEX completeness/uniqueness/range; atlasTileOf for known block+face pairs (e.g. GRASS top ≠ bottom); painter output through a stub AtlasCtx (record fillRect calls; assert each registered tile actually paints something).
+
+Verification: `npm run typecheck`, then `npx vitest run tests/textures.test.ts`. Update the "Texture atlas" ROADMAP row to done ONLY if tests pass.
+
+Final report: files changed, exact commands run, observed results, blockers, and any plan.md corrections you made.
+```
+
+### Agent S3 prompt
+
+```
+You are a coding agent working in C:\Users\aihmo\Downloads\kingcraft1 (Windows, PowerShell 5.1). The repo is a TypeScript voxel game (Block World) built with Vite + Three.js + Vitest.
+
+Read plan.md at the project root first; its sections 1 and 2 are binding. Then execute STEP S3 exactly as written in plan.md (the "### S3 — Chunk renderer: THREE meshes + terrain shader" block).
+
+Hard rules:
+- No code comments anywhere. TypeScript strict. No any, no @ts-ignore.
+- Only edit: src/render/materials.ts, src/render/chunkRenderer.ts, tests/chunkRenderer.test.ts, plus a clearly-matching ROADMAP row if one exists (if unsure, touch none and say so in your report). Do NOT edit src/render/textures.ts (another agent owns it), src/voxels/*, src/config.ts, src/game.ts, src/main.ts.
+- If a test fails, fix the real cause; never weaken assertions to force green.
+- Use a 600000 ms timeout for npm/npx commands. Vitest is slow on this machine; be patient.
+- Commit: "feat(render): chunk meshes with terrain, water and plant materials". No git push. If git reports index.lock, wait 5 s and retry.
+
+Frozen interface consumed from src/render/textures.ts (owned by the S2 agent):
+- atlasTileOf(blockId: number, face: number): number
+- buildAtlasTexture(): THREE.CanvasTexture
+- TILE_INDEX: Record<string, number>
+Code against these names/signatures exactly. If the file does not exist yet, S2 is still running: write ALL your code first against the interface, and only when you need to run typecheck/tests, wait for the file with this bounded loop:
+  $deadline = (Get-Date).AddMinutes(30); while (-not (Test-Path "src/render/textures.ts") -and (Get-Date) -lt $deadline) { Start-Sleep -Seconds 20 }
+If it still does not exist after 30 minutes, stop and report the blocker instead of guessing.
+
+Implementation requirements (full details in plan.md S3):
+- materials.ts: three ShaderMaterials (terrain/water/plants) sharing one vertex shader. Vertex attributes `sky` and `block` (floats from MeshArrays); shade from normal: n.y>0.5→1.0, n.y<-0.5→0.5, abs(n.z)>0.5→0.8 else 0.6. Fragment: tex color * max(uDay*vSky, vBlock) * vShade with floor uMinLight, distance fog to uFogColor driven by QUALITY_PRESETS[*].fogDensity and FOG_START_FACTOR from src/config.ts. Water: transparent true, depthWrite false, uWaterAlpha ~0.75. Plants: DoubleSide, alphaTest ~0.5.
+- chunkRenderer.ts: class ChunkRenderer { constructor(scene, world); update(cx, cz); markDirty(cx, cz); rebuildBudgeted(budgetMs); dispose(cx, cz); } using buildChunkMesh(world, chunk, atlasTileOf) from src/voxels/mesher.ts; positions are chunk-local so set mesh.position.set(cx*16, 0, cz*16). Dispose old geometry on rebuild; process dirty queue nearest-first; per-frame time budget via an injectable clock (default performance.now).
+- Tests headless: real THREE.BufferGeometry/ShaderMaterial/Mesh work in node; use a mock scene counting children on add/remove; a real World or small fake MeshSource; no WebGLRenderer anywhere. Cover: attribute counts match MeshArrays lengths; near-before-far dirty order; dispose removes meshes; budget stops after first over-budget chunk.
+
+Verification: `npm run typecheck`, then `npx vitest run tests/chunkRenderer.test.ts`.
+
+Final report: files changed, exact commands run, observed results, blockers, and any plan.md corrections you made.
+```
