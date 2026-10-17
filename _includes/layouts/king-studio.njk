@@ -1,0 +1,101 @@
+{#
+  King Studio page shell. Used by every page under /king-studio/.
+
+  Required front matter: title, metaDescription, urlPath (site-root-relative
+  URL of the page, e.g. "king-studio/games/"), root (relative path back to the
+  site root, e.g. "../../"), active ("home" | "games" | "apps" | "labs").
+  Optional: crumbs (BreadcrumbList items after "King Studio"), ogImage.
+  Detail pages instead set `project`, and the section/project crumbs are derived.
+
+  Paths are relative on purpose, matching the rest of the site; canonical and
+  Open Graph URLs are absolute from site.siteUrl (production is Vercel).
+  CSP is delivered as an HTTP header from vercel.json — no meta CSP here.
+#}<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ metaDescription }}">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="Rashid (MOT1209)">
+    <link rel="canonical" href="{{ site.siteUrl }}/{{ urlPath }}">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="King Studio">
+    <meta property="og:title" content="{{ title }}">
+    <meta property="og:description" content="{{ metaDescription }}">
+    <meta property="og:url" content="{{ site.siteUrl }}/{{ urlPath }}">
+    <meta property="og:image" content="{{ site.siteUrl }}/{{ ogImage or 'images/og-image.png' }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ title }}">
+    <meta name="twitter:description" content="{{ metaDescription }}">
+    <meta name="twitter:image" content="{{ site.siteUrl }}/{{ ogImage or 'images/og-image.png' }}">
+    <meta name="theme-color" content="#151515">
+
+{%- set crumbList = [
+      { "@type": "ListItem", "position": 1, "name": "Portfolio", "item": site.siteUrl + "/" },
+      { "@type": "ListItem", "position": 2, "name": "King Studio", "item": site.siteUrl + "/king-studio/" }
+    ] %}
+{%- if project %}{% set _ = crumbList.push({ "@type": "ListItem", "position": 3, "name": kingStudio.sections[project.section].label, "item": site.siteUrl + "/king-studio/" + project.section + "/" }) %}{% set _ = crumbList.push({ "@type": "ListItem", "position": 4, "name": project.title, "item": site.siteUrl + "/" + project.detailUrl }) %}{% endif %}
+{%- for c in crumbs %}{% set _ = crumbList.push({ "@type": "ListItem", "position": loop.index + 2, "name": c.name, "item": site.siteUrl + "/" + c.path }) %}{% endfor %}
+{%- set crumbLd = { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": crumbList } %}
+    <script type="application/ld+json">{{ crumbLd | dump | replace("<", "\\u003c") | safe }}</script>
+
+    <!-- Resolve the theme before first paint (same key and attribute as the
+         homepage). King Studio's brand is dark, so with no stored choice it
+         defaults to dark rather than following the OS. -->
+    <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        document.documentElement.setAttribute('data-theme', stored === 'light' ? 'light' : 'dark');
+      } catch (e) { document.documentElement.setAttribute('data-theme', 'dark'); }
+    })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ root }}css/tokens.css?v={{ site.cssVersion }}">
+    <link rel="stylesheet" href="{{ root }}css/king-studio.css?v=1.0">
+</head>
+<body class="ks">
+    <a href="#main" class="ks-skip">Skip to main content</a>
+
+    <header class="ks-header">
+        <div class="ks-wrap ks-header-row">
+            <a href="{{ root }}king-studio/" class="ks-wordmark" aria-label="King Studio home">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7z"/></svg><span>KING STUDIO</span>
+            </a>
+            <nav class="ks-nav" aria-label="King Studio">
+                <a href="{{ root }}king-studio/games/"{% if active == 'games' %} aria-current="page"{% endif %}>Games</a>
+                <a href="{{ root }}king-studio/apps/"{% if active == 'apps' %} aria-current="page"{% endif %}>Apps</a>
+                <a href="{{ root }}king-studio/labs/"{% if active == 'labs' %} aria-current="page"{% endif %}>Labs</a>
+                <a href="{{ root }}" class="ks-nav-parent">Portfolio<span class="ks-visually-hidden"> (Rashid, main site)</span></a>
+            </nav>
+            <button type="button" class="ks-theme" id="ks-theme" aria-label="Switch to light theme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+            </button>
+        </div>
+    </header>
+
+    <main id="main" class="ks-main">
+{{ content | safe }}
+    </main>
+
+    <footer class="ks-footer">
+        <div class="ks-wrap ks-footer-row">
+            <p>&copy; <span id="ks-year"></span> King Studio &middot; a project of <a href="{{ root }}">Rashid</a>. Built in the open.</p>
+            <nav aria-label="Footer">
+                <a href="{{ root }}">Portfolio</a>
+                <a href="{{ root }}downloads.html">Downloads</a>
+                <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>
+                <a href="{{ root }}privacy.html">Privacy</a>
+                <a href="{{ root }}terms.html">Terms</a>
+            </nav>
+        </div>
+    </footer>
+
+    <script src="{{ root }}js/king-studio.js?v=1.0" defer></script>
+</body>
+</html>

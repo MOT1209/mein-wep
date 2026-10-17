@@ -1,0 +1,30 @@
+---
+layout: layouts/king-studio.njk
+title: Labs & experiments — King Studio
+metaDescription: Early-stage projects and experiments from King Studio, each labelled with its real development status.
+permalink: king-studio/labs/index.html
+urlPath: king-studio/labs/
+root: ../../
+active: labs
+crumbs:
+  - name: Labs
+    path: king-studio/labs/
+---
+{%- set section = kingStudio.sections.labs %}
+<section class="ks-page-head">
+  <div class="ks-wrap">
+    <nav class="ks-crumbs" aria-label="Breadcrumb"><ol>
+      <li><a href="../../">Portfolio</a></li>
+      <li><a href="../">King Studio</a></li>
+      <li aria-current="page">Labs</li>
+    </ol></nav>
+    <h1>Labs & experiments</h1>
+    <p class="ks-lede">Early-stage work and experiments. Status labels say what to expect; nothing here is promised to be finished or stable.</p>
+  </div>
+</section>
+<section class="ks-section">
+  <div class="ks-wrap">
+{%- set items = section.projects %}{% set facets = section.facets %}{% set showSearch = section.showSearch %}{% set cardHeading = "h2" %}{% set gridId = "ks-labs" %}{% set emptyText = "No experiments match this filter." %}
+{% include "king-studio/grid.njk" %}
+  </div>
+</section>

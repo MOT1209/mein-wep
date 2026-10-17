@@ -18,6 +18,7 @@
     { "label": "Contact", "href": "#contact" }
   ],
   "navExternal": [
+    { "label": "King Studio", "href": "king-studio/", "internal": true },
     { "label": "Downloads", "href": "downloads.html" },
     { "label": "Blog", "href": "blog/" }
   ]
