@@ -167,29 +167,12 @@ function renderProjects(projects) {
 
     const lang = getCurrentLanguage();
 
-    const featured = projects.slice(0, 3);
-    const regular = projects.slice(3);
+    // One grid for everything. A separate "featured" block used to be
+    // prepended here with no styles behind it on the redesigned homepage, so
+    // the first three projects rendered as full-width slabs.
+    qs('.featured-projects')?.remove();
 
-    const oldFeatured = qs('.featured-projects');
-    if (oldFeatured) oldFeatured.remove();
-
-    if (featured.length > 0) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'featured-projects';
-        featured.forEach(project => {
-            wrapper.insertAdjacentHTML('beforeend', createProjectCard(project, lang));
-        });
-        wrapper.querySelectorAll('.project-card').forEach(card => {
-            const badge = document.createElement('div');
-            badge.className = 'featured-badge';
-            badge.textContent = 'Featured \u2B50';
-            card.querySelector('.project-info')?.prepend(badge);
-        });
-        const ref = qs('.filter-bar') || qs('.filter-group') || gamingGrid?.parentNode;
-        if (ref) ref.after(wrapper);
-    }
-
-    regular.forEach(project => {
+    projects.forEach(project => {
         const category = String(project.category || '').toLowerCase();
         const targetGrid = category.includes('game') || category.includes('model') || category.includes('tool') ? gamingGrid : (appsGrid || gamingGrid);
         targetGrid?.insertAdjacentHTML('beforeend', createProjectCard(project, lang));

@@ -21,8 +21,6 @@ import {
   initTypewriter,
   initTechStackMarquee,
   initLiveStats,
-  initTestimonials,
-  initProjectModal,
   initCustomPwaInstall,
   initScrollProgress,
 } from './modules/enhancements.js';
@@ -101,8 +99,6 @@ const boot = async () => {
   initTypewriter();
   initTechStackMarquee();
   initLiveStats();
-  initTestimonials();
-  initProjectModal();
   initCustomPwaInstall();
   initScrollProgress();
   initLatestUpdates();

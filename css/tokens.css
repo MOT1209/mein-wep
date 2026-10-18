@@ -63,6 +63,11 @@
   --radius-sm: 6px;
   --rail-width: 264px;
   --measure: 68ch;         /* running text stays readable */
+  --tap: 44px;             /* minimum touch target (WCAG 2.5.5) */
+  --header-h: 60px;        /* shared sticky site header */
+  /* Breakpoints (media queries cannot read custom properties, so these are
+     documentation): 640px phone -> tablet, 1024px tablet -> desktop,
+     1280px wide desktop. Use only these. */
 
   /* Shadows stay nearly invisible: on light ground, hairlines do the work
      that heavy shadows did on the dark glass design. */

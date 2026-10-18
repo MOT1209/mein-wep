@@ -1,3 +1,6 @@
+---
+permalink: blog/supabase-backend-for-static-sites.html
+---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,12 +30,10 @@
       "keywords": ["Supabase","Postgres","RLS","Backend","Web Dev"]
     }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css?v=9.2">
-    <link rel="stylesheet" href="../css/blog-post.css?v=1.0">
+    {% set root = "../" %}
+{% include "partials/site-head.njk" %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="../css/blog-post.css?v={{ site.cssVersion }}">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -60,23 +61,11 @@
 }
 </script>
 </head>
-<body class="dark-mode">
-    <nav class="navbar" role="navigation">
-        <div class="nav-inner">
-            <a href="../index.html" class="nav-logo">Rashid<span>.</span></a>
-            <div class="nav-links">
-                <a href="../index.html">Home</a>
-                <a href="index.html">Blog</a>
-                <a href="../index.html#projects">Projects</a>
-                <a href="../index.html#contact">Contact</a>
-            </div>
-            <div class="nav-actions">
-                <button class="nav-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-sun"></i></button>
-            </div>
-        </div>
-    </nav>
+<body class="site">
+{% set activeNav = "blog" %}
+{% include "partials/site-header.njk" %}
 
-    <main class="blog-post">
+    <main class="blog-post site-main" id="main">
         <a href="index.html" class="back-link"><i aria-hidden="true" class="fas fa-arrow-left"></i> Back to Blog</a>
 
         <div class="post-meta">
@@ -173,7 +162,6 @@ create policy "owner can write"
         </div>
     </main>
     <div id="reading-progress"></div>
-    <script src="../src/js/main.js" type="module"></script>
     <script>
     (function() {
         var bar = document.getElementById('reading-progress');
@@ -214,7 +202,7 @@ create policy "owner can write"
                 if (!main || related.length === 0) return;
                 var section = document.createElement('div');
                 section.className = 'related-posts';
-                section.innerHTML = '<h2><i class="fas fa-link" style="color:var(--accent);"></i> Related Articles</h2><div class="related-grid">' +
+                section.innerHTML = '<h2><i class="fas fa-link" ></i> Related Articles</h2><div class="related-grid">' +
                     related.map(function(p) {
                         var d = new Date(p.date + 'T00:00:00Z');
                         var ds = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -226,5 +214,7 @@ create policy "owner can write"
     })();
     </script>
 
+{% include "partials/site-footer.njk" %}
+    <script src="../js/site-nav.js?v={{ site.cssVersion }}" defer></script>
 </body>
 </html>
