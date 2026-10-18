@@ -286,7 +286,14 @@ jobs:
       - name: Copy APK to site folder
         id: apk
         run: |
-          APK_FILE=$(find ${{ matrix.project }}/android/app/build/outputs/apk -name "*.apk" -type f 2>/dev/null | head -1)
+          OUT="${{ matrix.project }}/android/app/build/outputs/apk"
+          echo "APK files produced:"; find "$OUT" -name "*.apk" -type f -exec ls -l {} \;
+          # The build leaves both an unsigned intermediate and the signed APK in
+          # this tree, and `find | head -1` returns whichever the filesystem lists
+          # first. Prefer the signed artifact explicitly.
+          APK_FILE=$(find "$OUT" -name "*signed*.apk" ! -name "*unsigned*" -type f 2>/dev/null | head -1)
+          [ -n "$APK_FILE" ] || APK_FILE=$(find "$OUT" -name "*.apk" -type f 2>/dev/null | head -1)
+          echo "Selected: $APK_FILE"
           if [ -n "$APK_FILE" ]; then
             FOLDER="${{ steps.info.outputs.folder }}"
             VERSION="${{ steps.version.outputs.version }}"
@@ -303,8 +310,10 @@ jobs:
       - name: Verify APK is signed
         if: steps.apk.outputs.path != ''
         run: |
-          if jarsigner -verify "${{ steps.apk.outputs.path }}" 2>&1 | grep -q "jar is unsigned"; then
-            echo "::error::${{ steps.apk.outputs.path }} is UNSIGNED — refusing to publish it. Check the 'Build APK' step log for a signing failure (e.g. apksigner not found)."
+          # apksigner is the authoritative check. jarsigner only understands the
+          # legacy v1 (JAR) signature, so it calls a v2/v3-signed APK "unsigned".
+          if ! apksigner verify --verbose "${{ steps.apk.outputs.path }}"; then
+            echo "::error::${{ steps.apk.outputs.path }} failed apksigner verification — refusing to publish it. Check the 'Build APK' step log for a signing failure."
             exit 1
           fi
 
