@@ -189,14 +189,14 @@ jobs:
             games/rust-game)     ADMOB_APP_ID="ca-app-pub-6142754371257083~4464642549" ;;
             *) ADMOB_APP_ID="" ;;
           esac
-          if [ -n "$ADMOB_APP_ID" ]; then
+          if [ -n "$ADMOB_APP_ID" ] && [[ "$ADMOB_APP_ID" != *"XXXXXXXXXX"* ]]; then
             STRINGS_FILE="android/app/src/main/res/values/strings.xml"
             MANIFEST="android/app/src/main/AndroidManifest.xml"
             sed -i "s#</resources>#    <string name=\"admob_app_id\">${ADMOB_APP_ID}</string>\n</resources>#" "$STRINGS_FILE"
             sed -i "s#</application>#    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"@string/admob_app_id\"/>\n    </application>#" "$MANIFEST"
             echo "AdMob App ID configured: $ADMOB_APP_ID"
           else
-            echo "No AdMob App ID for this project — skipping (ad-free app/game)"
+            echo "No real AdMob App ID for this project — skipping injection (ad-free or placeholder)"
           fi
 
       - name: Get current version
@@ -234,6 +234,7 @@ jobs:
               --androidreleasetype APK \
               --signing-type apksigner 2>&1 | tee build.log | tail -40
           else
+            echo "::warning::KEYSTORE_BASE64/KEYSTORE_PASSWORD secrets not set — signing with a throwaway key. Any future update signed with a DIFFERENT key will be REJECTED by Android (signature mismatch). Configure the release-keystore secrets for publishable builds."
             keytool -genkey -v \
               -keystore temp-key.jks \
               -storepass "TempPass123" \
@@ -316,6 +317,7 @@ jobs:
             echo "::error::${{ steps.apk.outputs.path }} failed apksigner verification — refusing to publish it. Check the 'Build APK' step log for a signing failure."
             exit 1
           fi
+          echo "APK signature verified: ${{ steps.apk.outputs.path }}"
 
       - name: Publish APK to GitHub Release
         id: publish
