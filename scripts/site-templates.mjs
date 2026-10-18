@@ -45,6 +45,8 @@ export const TEMPLATE_OUTPUTS = {
   'about.njk': 'about.html',
   'contact.njk': 'contact.html',
   'privacy.njk': 'privacy.html',
+  'downloads.njk': 'downloads.html',
+  '404.njk': '404.html',
   ...blogPages,
   'king-studio/index.njk': 'king-studio/index.html',
   'king-studio/games.njk': 'king-studio/games/index.html',

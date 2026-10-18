@@ -1,0 +1,175 @@
+---
+permalink: downloads.html
+---
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Download APK files for Rashid's apps and games — Quran App, Calculator Vault, Quiz App, KingCraft, Rust Survival, Farm Empire">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://rashid-wep.vercel.app/downloads.html">
+    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/downloads.html">
+    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/downloads.html">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Downloads — Rashid Apps & Games APK">
+    <meta property="og:description" content="Download Android APK files for all Rashid apps and games.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/downloads.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Downloads — Rashid Apps & Games APK">
+    <title>Downloads — Rashid Apps & Games APK</title>
+{% set root = "" %}
+{% include "partials/site-head.njk" %}
+    <link rel="stylesheet" href="css/downloads.css?v={{ site.cssVersion }}">
+    <link rel="icon" type="image/png" href="images/logo.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Downloads",
+      "item": "https://rashid-wep.vercel.app/downloads.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="site">
+{% set activeNav = "downloads" %}
+{% include "partials/site-header.njk" %}
+
+    <main id="main" class="site-main">
+        <div class="page page-wide">
+            <span class="eyebrow">Android · APK</span>
+            <h1 class="page-title">Downloads</h1>
+            <p class="page-lede">Install the apps and games directly on your Android device. Every file below is the current release; its SHA-256 is computed from the file itself.</p>
+            <div class="dl-toolbar">
+                <button class="btn btn-secondary" id="open-guide-btn" type="button">How to install an APK</button>
+                <span class="dl-updated">Last release: <time datetime="{{ downloads.updatedAt }}">{{ downloads.updatedAt }}</time></span>
+            </div>
+
+            <ul class="dl-grid">
+{%- for d in downloads.items %}
+                <li class="dl-card">
+                    <div class="dl-card-head">
+                        <span class="tag{% if d.type == 'Game' %} tag-ok{% endif %}">{{ d.type }}</span>
+                        <span class="dl-version">v{{ d.version }} · {{ d.date }}</span>
+                    </div>
+                    <h2 class="dl-name">{{ d.name }}</h2>
+                    {%- if d.description %}<p class="dl-desc">{{ d.description }}</p>{% endif %}
+                    <div class="dl-actions">
+                        <a class="btn btn-primary" href="{{ d.file }}" download>Download APK <span class="dl-size">{{ d.sizeMb }} MB</span></a>
+                        {%- if d.detailUrl %}<a class="btn btn-secondary" href="{{ d.detailUrl }}">Details<span class="visually-hidden"> about {{ d.name }}</span></a>{% endif %}
+                    </div>
+                    <div class="dl-sha">
+                        <span class="dl-sha-label">SHA-256</span>
+                        <code title="{{ d.sha256 }}">{{ d.sha256 | truncate(16, true, "") }}…{{ d.sha256 | reverse | truncate(8, true, "") | reverse }}</code>
+                        <button type="button" class="dl-copy" data-copy="{{ d.sha256 }}">Copy<span class="visually-hidden"> SHA-256 of {{ d.name }}</span></button>
+                    </div>
+                </li>
+{%- endfor %}
+            </ul>
+
+            <section class="phone-preview" aria-labelledby="preview-title">
+                <h2 id="preview-title">Try it in the browser</h2>
+                <p class="page-lede">Run an app or game inside a phone frame — no install needed.</p>
+                <div class="preview-apps" role="group" aria-label="Choose an app to preview">
+                    <button class="preview-app" type="button" aria-pressed="true" data-src="quran.html">Quran</button>
+                    <button class="preview-app" type="button" aria-pressed="false" data-src="apps/calculator-app/index.html">Calculator</button>
+                    <button class="preview-app" type="button" aria-pressed="false" data-src="apps/quiz-app/index.html">Quiz</button>
+                    <button class="preview-app" type="button" aria-pressed="false" data-src="games/kingcraft-game/index.html">KingCraft</button>
+                    <button class="preview-app" type="button" aria-pressed="false" data-src="games/rust-game/index.html">Rust</button>
+                    <button class="preview-app" type="button" aria-pressed="false" data-src="games/farm-game/index.html">Farm</button>
+                </div>
+                <div class="phone-frame" id="phone-frame">
+                    <div class="phone-screen">
+                        <div class="phone-loader" id="phone-loader"><span class="phone-spinner"></span></div>
+                        <iframe id="preview-iframe" title="App live preview" loading="lazy"
+                            data-src="quran.html"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+                            allow="fullscreen; autoplay; gyroscope"></iframe>
+                    </div>
+                </div>
+                <p class="preview-actions"><a class="btn btn-secondary" id="preview-open" href="quran.html" target="_blank" rel="noopener">Open full screen</a></p>
+            </section>
+
+            <section class="how-it-works" aria-labelledby="how-title">
+                <h2 id="how-title">How updates work</h2>
+                <ol class="steps">
+                    <li><h3>Install the APK</h3><p>Download the file and install it on your Android device.</p></li>
+                    <li><h3>Verify the file</h3><p>Compare the APK's SHA-256 with the value on its card using a hash checker app.</p></li>
+                    <li><h3>Open the app</h3><p>It checks for updates automatically.</p></li>
+                    <li><h3>Update when ready</h3><p>When a new version ships, a banner offers the new APK.</p></li>
+                </ol>
+            </section>
+        </div>
+    </main>
+
+    <!-- Installation Guide Modal -->
+    <div class="guide-overlay" id="guide-overlay" role="dialog" aria-modal="true" aria-labelledby="guide-title" hidden>
+        <div class="guide-modal">
+            <div class="guide-head">
+                <h2 id="guide-title">How to install</h2>
+                <button class="guide-close" id="guide-close" aria-label="Close guide" type="button"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            </div>
+            <p class="guide-intro">Since these apps are distributed directly (not via Google Play), Android shows a one-time security prompt. Just follow these simple steps:</p>
+
+            <ol class="guide-steps">
+                <li class="guide-step">
+                    <span class="num">1</span>
+                    <div class="body">
+                        <h4>Download the APK</h4>
+                        <p>Tap <strong>Download APK</strong> on any app above. The file saves to your device.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">2</span>
+                    <div class="body">
+                        <h4>Verify the file (optional but recommended)</h4>
+                        <p>Each card shows the file's <strong>SHA-256 fingerprint</strong>; tap <strong>Copy</strong> to copy the full hash. Use a hash checker app like <strong>Hash Droid</strong> to confirm the file matches — this guarantees the file hasn't been tampered with.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">3</span>
+                    <div class="body">
+                        <h4>Open the file</h4>
+                        <p>Tap the download notification, or find the file in your <strong>Downloads</strong> / Files app and open it.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">4</span>
+                    <div class="body">
+                        <h4>Allow "Unknown Sources"</h4>
+                        <p>Android may warn that installing is blocked. Tap <strong>Settings</strong>, then enable <strong>Allow from this source</strong> (also called "Install unknown apps") for your browser or file manager.</p>
+                    </div>
+                </li>
+                <li class="guide-step">
+                    <span class="num">5</span>
+                    <div class="body">
+                        <h4>Tap Install</h4>
+                        <p>Go back and press <strong>Install</strong>. Once it finishes, open the app and you're ready to go!</p>
+                    </div>
+                </li>
+            </ol>
+
+            <div class="guide-note">
+                                <span>The "Unknown Sources" warning is standard for any app installed outside Google Play — it does not mean the app is unsafe. You can turn the permission back off after installing.</span>
+            </div>
+        </div>
+    </div>
+
+{% include "partials/site-footer.njk" %}
+    <script src="js/downloads.js?v={{ site.cssVersion }}" defer></script>
+    <script src="js/site-nav.js?v={{ site.cssVersion }}" defer></script>
+</body>
+</html>

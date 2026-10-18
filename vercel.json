@@ -46,7 +46,10 @@
     }
   ],
   "redirects": [
-    { "source": "/quran-app", "destination": "/quran-app/", "permanent": true }
+    { "source": "/quran-app", "destination": "/quran-app/", "permanent": true },
+    { "source": "/games", "destination": "/king-studio/games/", "permanent": true },
+    { "source": "/games/", "destination": "/king-studio/games/", "permanent": true },
+    { "source": "/games/index.html", "destination": "/king-studio/games/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/king2", "destination": "https://king2-platform.vercel.app/king2" },
@@ -78,7 +81,6 @@
     { "source": "/blog/posts", "destination": "/blog/" },
     { "source": "/blog/feed", "destination": "/blog/rss.xml" },
     { "source": "/blog/index", "destination": "/blog/" },
-    { "source": "/games", "destination": "/games/" },
     { "source": "/games/farm-empire", "destination": "/games/farm-game" },
     { "source": "/games/farm-empire/", "destination": "/games/farm-game/" },
     { "source": "/games/farm-empire/:path*", "destination": "/games/farm-game/:path*" },

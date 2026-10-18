@@ -61,12 +61,6 @@
         <priority>0.5</priority>
     </url>
     <url>
-        <loc>https://rashid-wep.vercel.app/games/</loc>
-        <lastmod>2026-07-01</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.7</priority>
-    </url>
-    <url>
         <loc>https://rashid-wep.vercel.app/games/farm-game/</loc>
         <lastmod>2026-07-01</lastmod>
         <changefreq>monthly</changefreq>
