@@ -13,13 +13,64 @@
     "monoFont": "JetBrains Mono"
   },
   "nav": [
-    { "label": "Projects", "href": "#projects" },
-    { "label": "About", "href": "#about" },
-    { "label": "Contact", "href": "#contact" }
+    {
+      "label": "Projects",
+      "href": "#projects"
+    },
+    {
+      "label": "About",
+      "href": "#about"
+    },
+    {
+      "label": "Contact",
+      "href": "#contact"
+    }
   ],
   "navExternal": [
-    { "label": "King Studio", "href": "king-studio/", "internal": true },
-    { "label": "Downloads", "href": "downloads.html" },
-    { "label": "Blog", "href": "blog/" }
+    {
+      "label": "King Studio",
+      "href": "king-studio/",
+      "internal": true
+    },
+    {
+      "label": "Downloads",
+      "href": "downloads.html"
+    },
+    {
+      "label": "Blog",
+      "href": "blog/"
+    }
+  ],
+  "siteNav": [
+    {
+      "key": "home",
+      "label": "Home",
+      "href": ""
+    },
+    {
+      "key": "studio",
+      "label": "King Studio",
+      "href": "king-studio/"
+    },
+    {
+      "key": "blog",
+      "label": "Blog",
+      "href": "blog/"
+    },
+    {
+      "key": "downloads",
+      "label": "Downloads",
+      "href": "downloads.html"
+    },
+    {
+      "key": "about",
+      "label": "About",
+      "href": "about.html"
+    },
+    {
+      "key": "contact",
+      "label": "Contact",
+      "href": "contact.html"
+    }
   ]
 }

@@ -128,12 +128,12 @@ layout: layouts/base.njk
         <div class="topbar-actions">
             <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button>
             <button class="icon-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders"></i></button>
-            <button class="icon-btn" id="hamburger" aria-label="Open menu" aria-expanded="false"><i class="fas fa-bars"></i></button>
+            <button class="icon-btn" id="hamburger" data-menu-open aria-controls="mobile-menu" aria-label="Open menu" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
         </div>
     </div>
 
-    <div class="mobile-menu" id="mobile-menu" role="dialog" aria-modal="true" aria-label="Navigation menu">
-        <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu"><i class="fas fa-times"></i></button>
+    <div class="mobile-menu" id="mobile-menu" data-menu role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <button class="mobile-menu-close" id="mobile-menu-close" data-menu-close aria-label="Close menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
         {% include "partials/nav-links.njk" %}
     </div>
 
@@ -291,7 +291,7 @@ layout: layouts/base.njk
     <div class="settings-modal" id="settings-modal" role="dialog" aria-label="Settings">
         <div class="settings-header">
             <h3>Settings</h3>
-            <button class="close-settings" id="close-settings" aria-label="Close settings"><i class="fas fa-times"></i></button>
+            <button class="close-settings" id="close-settings" aria-label="Close settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
         </div>
         <div class="settings-body">
             <div class="setting-section">
@@ -366,6 +366,7 @@ layout: layouts/base.njk
     <!-- Scripts -->
     <script type="module" src="src/js/main.js?v=11.0"></script>
     <script src="js/cookie-consent.js?v=1.0" defer></script>
+    <script src="js/site-nav.js?v={{ site.cssVersion }}" defer></script>
     <script src="js/gemini-config.js?v=1.0" defer></script>
     <script src="js/rashid-ai-v2.js?v=3.0" defer></script>
 

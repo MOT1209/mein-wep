@@ -1,0 +1,32 @@
+{#- Shared header + mobile menu. Expects `root` and optional `activeNav`
+    (a key from site.siteNav). Behaviour lives in js/site-nav.js. -#}
+    <a href="#main" class="skip-link">Skip to main content</a>
+    <header class="site-header">
+        <div class="wrap site-header-row">
+            <a href="{{ root or './' }}" class="brand">Rashid<span class="dot">.</span></a>
+            <nav class="site-nav" aria-label="Main">
+{%- for item in site.siteNav %}
+                <a href="{{ root }}{{ item.href or ('./' if not root) }}"{% if activeNav == item.key %} aria-current="page"{% endif %}>{{ item.label }}</a>
+{%- endfor %}
+            </nav>
+            <button type="button" class="icon-button" data-theme-toggle aria-label="Toggle theme">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+            </button>
+            <button type="button" class="icon-button menu-button" data-menu-open aria-controls="site-menu" aria-expanded="false" aria-label="Open menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </div>
+    </header>
+    <div class="menu-sheet" id="site-menu" data-menu role="dialog" aria-modal="true" aria-label="Menu">
+        <div class="menu-sheet-top">
+            <a href="{{ root or './' }}" class="brand">Rashid<span class="dot">.</span></a>
+            <button type="button" class="icon-button" data-menu-close aria-label="Close menu">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            </button>
+        </div>
+        <nav aria-label="Mobile">
+{%- for item in site.siteNav %}
+            <a href="{{ root }}{{ item.href or ('./' if not root) }}"{% if activeNav == item.key %} aria-current="page"{% endif %}>{{ item.label }}</a>
+{%- endfor %}
+        </nav>
+    </div>

@@ -27,6 +27,14 @@ const studioProjects = JSON.parse(
   fs.readFileSync(new URL('../_data/studioCatalog.json', import.meta.url), 'utf8'),
 ).projects;
 
+// Blog index and posts are templates (shared header/footer) that keep their
+// original .html URLs via explicit permalinks.
+const blogPages = Object.fromEntries(
+  fs.readdirSync(new URL('../blog/', import.meta.url))
+    .filter((f) => f.endsWith('.njk'))
+    .map((f) => [`blog/${f}`, `blog/${f.replace(/\.njk$/, '.html')}`]),
+);
+
 /**
  * Value is one output path, or an array when a single template renders
  * several pages (pagination).
@@ -37,6 +45,10 @@ export const TEMPLATE_OUTPUTS = {
   'about.njk': 'about.html',
   'contact.njk': 'contact.html',
   'privacy.njk': 'privacy.html',
+  'downloads.njk': 'downloads.html',
+  '404.njk': '404.html',
+  'learning.njk': 'learning.html',
+  ...blogPages,
   'king-studio/index.njk': 'king-studio/index.html',
   'king-studio/games.njk': 'king-studio/games/index.html',
   'king-studio/apps.njk': 'king-studio/apps/index.html',

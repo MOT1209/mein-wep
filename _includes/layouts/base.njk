@@ -2,24 +2,17 @@
   Base page shell.
 
   Two modes, selected by the `legacyShell` front-matter flag:
-   - Unset/false (index.njk): inert passthrough, byte-identical to before —
-     index.njk owns its entire HTML document and must not get anything
-     injected around it.
-   - `legacyShell: true` (about/contact/privacy/terms.njk): renders the
-     shared head/nav/footer shell for the legacy static pages. See
-     partials/legacy-nav.njk and partials/legacy-footer.njk. Do not confuse
-     these with partials/nav-links.njk, which is a different design used
-     only by index.njk.
+   - Unset/false (index.njk): inert passthrough — index.njk owns its entire
+     HTML document.
+   - `legacyShell: true` (about/contact/privacy/terms.njk): the shared site
+     shell on css/tokens.css + css/site.css, with the same header, mobile
+     menu and footer as every other secondary page
+     (partials/site-header.njk, partials/site-footer.njk, js/site-nav.js).
 
-  No trailing newline after the final tag in either branch — it would
-  append a byte to every rendered page and break byte-for-byte comparison
-  against the pre-migration output.
-
-  The legacyShell branch emits a leading UTF-8 BOM: all 4 source pages
-  (about/contact/privacy/terms) had one in their original raw HTML files.
-  Front-matter parsing strips a file-level BOM on read, so it's re-emitted
-  here via a Nunjucks string escape rather than relying on file bytes.
-#}{%- if legacyShell -%}{{ "﻿" | safe }}<!DOCTYPE html>
+  Front matter: title, metaDescription, canonical, ogDescription,
+  metaKeywords, activeNav, headTop/headExtra (page <head> partials),
+  showAdUnit, showCookieConsent, extraBodyScript, trailingJsonLd.
+#}{%- if legacyShell -%}{% set root = "" %}<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -44,25 +37,20 @@
 {%- if headTop %}
 {% include headTop %}
 {%- endif %}
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <!-- Font Awesome -->
+{% include "partials/site-head.njk" %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css?v=10.2">
-    <!-- Google AdSense -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsClient }}" crossorigin="anonymous"></script>
+{%- if headExtra %}
 {% include headExtra %}
+{%- endif %}
 </head>
-<body class="dark-mode">
-    <div class="bg-mesh"></div>
-{% include "partials/legacy-nav.njk" %}
+<body class="site">
+{% include "partials/site-header.njk" %}
+    <main id="main" class="site-main">
 {{ content | safe }}
+    </main>
 {%- if showAdUnit %}
-    <!-- AdSense Ad Unit -->
-    <div class="container" style="padding: 20px;">
+    <div class="ad-slot">
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="{{ site.adsClient }}"
@@ -73,20 +61,18 @@
              (adsbygoogle = window.adsbygoogle || []).push({});
         </script>
     </div>
-{% endif %}
-{% include "partials/legacy-footer.njk" %}
+{%- endif %}
+{% include "partials/site-footer.njk" %}
 {%- if extraBodyScript %}
 {% include extraBodyScript %}{% endif %}{% if showCookieConsent %}
-<!-- Cookie Consent Banner -->
-<div id="cookie-consent" class="cookie-banner" role="alert" aria-label="Cookie Consent">
+<div id="cookie-consent" class="cookie-banner" role="region" aria-label="Cookie consent">
   <div class="cookie-content">
     <div class="cookie-text">
-      <i class="fas fa-cookie-bite" style="color: var(--accent, #38bdf8); margin-right: 12px;"></i>
       <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
     </div>
     <div class="cookie-actions">
       <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
-      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept All</button>
+      <button id="cookie-accept" class="cookie-btn cookie-accept">Accept all</button>
     </div>
   </div>
 </div>
@@ -96,7 +82,7 @@
 {%- if trailingJsonLd %}
 {% include trailingJsonLd %}
 {%- endif %}
-{{ copyrightScriptIndent }}<script>document.querySelectorAll('.copyright-year').forEach(function(el) { el.textContent = new Date().getFullYear(); });</script>
+<script src="js/site-nav.js?v={{ site.cssVersion }}" defer></script>
 </body>
 </html>
 {% else %}{{ content | safe }}{%- endif -%}

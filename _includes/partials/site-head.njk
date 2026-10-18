@@ -1,0 +1,19 @@
+{#- Shared <head> tail for pages on css/site.css. Expects `root` (relative
+    path to the site root, "" at the top level). Resolves the theme before
+    first paint with the same rule and storage key as the homepage. -#}
+    <meta name="theme-color" content="{{ site.fonts.themeColorDark }}" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="{{ site.fonts.themeColorLight }}" media="(prefers-color-scheme: light)">
+    <script>
+    (function () {
+      try {
+        var stored = localStorage.getItem('theme');
+        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      } catch (e) { /* private mode: CSS default */ }
+    })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ root }}css/tokens.css?v={{ site.cssVersion }}">
+    <link rel="stylesheet" href="{{ root }}css/site.css?v={{ site.cssVersion }}">
