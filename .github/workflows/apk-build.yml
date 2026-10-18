@@ -16,6 +16,9 @@ on:
       - 'games/kingcraft-game/src/**'
       - 'games/kingcraft-game/js/**'
       - 'scripts/**'
+      # Site build tooling: does not affect APK contents.
+      - '!scripts/check-url-surface.mjs'
+      - '!scripts/site-templates.mjs'
   workflow_dispatch:
     inputs:
       forceAll:
@@ -91,8 +94,20 @@ jobs:
         with:
           node-version: '22'
 
+      # android-actions/setup-android@v3 runs `sdkmanager tools`, a package that
+      # no longer exists ("Failed to find package 'tools'"), so every build
+      # died here before touching project code. ubuntu-latest already ships
+      # the Android SDK, so point the environment at it instead.
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        run: |
+          SDK="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-/usr/local/lib/android/sdk}}"
+          test -d "$SDK" || { echo "Android SDK not found at $SDK"; exit 1; }
+          echo "ANDROID_HOME=$SDK" >> "$GITHUB_ENV"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          # cmdline-tools may be installed as "latest" or by version (e.g. 16.0)
+          for d in "$SDK"/cmdline-tools/*/bin; do echo "$d" >> "$GITHUB_PATH"; done
+          echo "$SDK/platform-tools" >> "$GITHUB_PATH"
+          ls "$SDK"
 
       - name: Accept Android SDK licenses
         run: |
