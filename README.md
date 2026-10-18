@@ -22,171 +22,117 @@
 
 ## Overview
 
-A comprehensive personal platform built with vanilla HTML/CSS/JS, featuring:
+Rashid's personal site: a developer portfolio, a games & apps catalogue (**King Studio**), a blog, and a downloads page for the Android builds. It is a static site built with [Eleventy](https://www.11ty.dev/) on top of plain HTML, CSS and JavaScript. There is no framework and no backend of its own; a few serverless functions in `api/` handle the contact form and AI requests.
 
-- **3D Browser Games** — Three.js sandbox worlds (KingCraft, Rust Construction, Farm Empire)
-- **AI Assistant** — Rashid AI, powered by Google Gemini API
-- **PWA Applications** — Quran, Calculator Vault, Quiz Master
-- **Knowledge Vault** — Prompts, code, docs, media, archives, API references
-- **Admin Dashboard** — Login-secured management interface
-- **AdSense Monetization** — across 21 pages with full SEO optimization
+| Area | URL | What it is |
+|---|---|---|
+| Portfolio | `/` | Projects, about, contact |
+| **King Studio** | `/king-studio/` | Games, apps and labs catalogue with a detail page per project |
+| Blog | `/blog/` | 8 articles |
+| Downloads | `/downloads.html` | Android APKs with SHA-256 computed at build time |
+| Games | `/games/…` | KingCraft, Rust Construction, Farm Empire (`/games/` redirects to King Studio) |
+| Apps | `/apps/…`, `/quran.html` | Calculator Vault, Quiz Master, Quran Pro |
+| AI | `/models/Rashid-Model/` | Rashid AI chat (Gemini / OpenRouter) |
+| Knowledge vault | `/vault/…` | Prompts, code, docs, media, archive, API reference |
+| Admin | `/admin/` | Login-protected dashboard |
 
-All games and apps are **Progressive Web Apps** — installable, offline-capable, with Service Workers.
+---
+
+## King Studio
+
+The catalogue is driven by data, not hand-written pages:
+
+- `_data/studioCatalog.json` holds one record per project (title, description, platforms, status, image, launch URL, APK id…).
+- `_data/kingStudio.js` validates it **at build time**: a launch URL, image or APK that does not exist fails the build instead of publishing a dead link. APK versions come from `apks/updates.json`.
+- `king-studio/*.njk` render the landing page, the Games / Apps / Labs catalogues and one detail page per record (`king-studio/project.njk`, paginated).
+
+To add a project, add a record to `studioCatalog.json` and run `npm run build`.
 
 ---
 
 ## Projects
 
 ### Games
+| Game | Tech |
+|---|---|
+| [KingCraft](games/kingcraft-game/) | Three.js voxel sandbox: mine, craft, build, fight mobs |
+| [Rust Construction](games/rust-game/) | Three.js physics building game |
+| [Farm Empire](games/farm-game/) | WebGL farming simulation |
 
-| Game | Tech | Type |
-|---|---|---|
-| [KingCraft](games/kingcraft-game/) | Three.js, Voxel | 3D Sandbox Survival — mine, craft, fight mobs, build |
-| [Rust Construction](games/rust-game/) | Three.js, WASM | 3D Physics Sandbox — resource management, building |
-| [Farm Empire](games/farm-game/) | WebGL | Farming Simulation — crops, animals, economy |
+Each has a web manifest and service worker, plus an Android build (Capacitor). `games/kingcraft1/` (Block World) is an early-development Vite/TypeScript voxel game and is **not** published yet.
 
 ### Apps
+- **Quran Pro** (`quran.html`): tafsir, 40+ reciters, search, bookmarks
+- **Calculator Vault** (`apps/calculator-app/`): a calculator that hides a private vault
+- **Quiz Master** (`apps/quiz-app/`): multi-category quiz with progress tracking
 
-- **Quran Pro** — Full Quran with 40+ reciters, tafsir, bookmarks, offline
-- **Calculator Vault** — Privacy-first calculator that hides a secret vault
-- **Quiz Master** — Multi-category quiz platform with progress tracking
-
-### AI Models
-
-- **Rashid AI v2.0** — Conversational AI with Gemini API, multilingual, voice
-
-### Knowledge Vault
-
-- Prompts | Code Library | Documentation | Media | Archive | API Reference
+### Rashid AI
+Conversational assistant in `models/Rashid-Model/`; server calls go through `api/gemini.js`.
 
 ---
 
-## Architecture
+## Repository layout
 
 ```
-root/
-├── index.html              # Homepage — hero, models, vault, projects, contact
-├── about.html / contact.html
-├── privacy.html / terms.html  # Legal pages
-├── offline.html               # PWA offline fallback
-
-├── games/                     # Browser games (each with manifest.json + sw.js)
-│   ├── kingcraft-game/        # 3D voxel sandbox (Three.js)
-│   ├── rust-game/             # 3D physics sandbox (Three.js WASM)
-│   ├── farm-game/             # Farming simulation (WebGL)
-│   └── index.html             # Arcade hub
-
-├── apps/                      # PWA applications
-│   ├── quran-app/             # Quran with offline recitation
-│   ├── calculator-vault/      # Hidden vault behind calculator
-│   └── quiz-app/              # Interactive quiz platform
-
-├── models/Rashid-Model/       # AI chat interface (Gemini API)
-
-├── vault/                     # Knowledge vault (6 categories)
-├── admin/                     # Admin login + dashboard
-├── src/                       # Modular source code
-│   ├── css/                   # variables, responsive, design-system, components
-│   └── js/modules/            # 12 feature modules (projects, vault, theme, etc.)
-│
-├── game-hoster/               # Next.js 16 sub-project (game hosting platform)
-├── game-vault/                # Static export of game-hoster
-│
-├── css/                       # Root stylesheets
-├── js/                        # Root scripts
-└── images/                    # Logo, avatar, profile
+.
+├── index.njk                  # Homepage
+├── about / contact / privacy / terms .njk
+├── 404.njk, downloads.njk, learning.njk
+├── blog/*.njk                 # Index + posts (keep their .html URLs via permalinks)
+├── king-studio/*.njk          # King Studio pages
+├── _includes/                 # Layouts and partials (shared header/footer, King Studio)
+├── _data/                     # site.json, studioCatalog.json, kingStudio.js, downloads.js, releases.js
+├── css/                       # tokens.css (design tokens), site.css, home.css, king-studio.css, …
+├── js/                        # site-nav.js (mobile menu, theme), downloads.js, king-studio.js, …
+├── src/js/                    # Homepage modules (projects, theme, vault, …)
+├── games/  apps/              # Standalone PWAs, copied verbatim to dist/
+├── apks/                      # Android builds + updates.json (release manifest)
+├── api/                       # Vercel serverless functions
+├── vault/ models/ admin/      # Vault, AI chat, admin
+├── scripts/                   # Build tooling and URL-surface gate
+├── tests/                     # node:test suites
+└── vercel.json                # Headers (CSP), rewrites, redirects
 ```
 
----
+### How the build works
 
-## Tech Stack
+- Only `.njk` files are templates. Everything else is **copied file by file** from `git ls-files`, so `dist/` can only contain tracked, intended files.
+- Anything that must not be served (docs, tooling, other sub-projects, secrets) is listed in `eleventy.config.mjs` and mirrored in `scripts/check-url-surface.mjs`. **New files must be `git add`-ed before they appear in `dist/`.**
+- A template that renders to a fixed `.html` URL needs an explicit `permalink`, and must be registered in `scripts/site-templates.mjs` so the URL gate knows about it.
 
-### Main Site (Vanilla)
-- **HTML5** — Semantic markup, ARIA, JSON-LD structured data
-- **CSS3** — Custom properties, glassmorphism, dark/light mode, animations
-- **JavaScript** — ES6+ modular architecture (12 modules)
-- **Fonts** — Google Fonts (Bricolage Grotesque, Space Grotesk, JetBrains Mono)
-- **Icons** — Font Awesome 6.4
+### Design system
 
-### Backend & AI
-- **Supabase** — Real-time database, authentication, CDN client
-- **Google Gemini API** — AI assistant (gemini-1.5-flash)
-
-### PWA
-- Service Worker with offline caching
-- Web App Manifest for installability
-- All games/apps individually installable
-
-### Sub-project: game-hoster
-- **Next.js 16** + **React 19** + **TypeScript**
-- **Tailwind CSS v4** + **Framer Motion**
-- Static export (`output: 'export'`) served under `/game-vault/`
-
-### Project Screenshots
-Each project features a custom SVG illustration:
-- **KingCraft** — 3D voxel world with player, trees, isometric blocks, HUD
-- **Rust Construction** — Industrial construction site with crane, scaffold, building
-- **Farm Empire** — Rural farm with barn, silo, windmill, animals, crops
-- **Rashid AI** — Chat interface with AI features panel and stats
-
-### Deployment
-- **Vercel** (primary) — auto-deploys from `main` branch
-- **GitHub Pages** (secondary) — via `.nojekyll`
+All secondary pages use `css/tokens.css` (colours, spacing, type, a `--tap: 44px` touch target) with `css/site.css` on top; the homepage adds `css/home.css` and King Studio adds `css/king-studio.css`. Light/dark follows the visitor's choice (`localStorage` key `theme`, attribute `data-theme` on `<html>`). Breakpoints: 640px, 1024px, 1280px. The legacy `css/style.css` is still used by `devos.html`, `vault/*` and a few other pages that have not been migrated.
 
 ---
 
 ## Development
 
-This is a **static site** — no build step required for the main platform:
+Requires Node 20 or newer.
 
 ```bash
-# Clone
 git clone https://github.com/MOT1209/mein-wep.git
+cd mein-wep
+npm ci
 
-# Serve locally (any static server)
-python -m http.server 8080
-# or
-npx serve .
+npm start          # Eleventy dev server with live reload
+npm run build      # build to dist/
+npm run verify     # URL-surface gate: dist/ must equal the tracked, servable files
+npm test           # node:test suites (run `npm run build` first for the dist checks)
 ```
 
-To build the Next.js sub-project:
-
-```bash
-cd game-hoster
-npm install
-npm run build   # outputs to out/ → game-vault/
-```
+The `dist/` tests check, among other things, that every King Studio link and image resolves, that every shell page wires its mobile menu, and that no internal file is published.
 
 ---
 
 ## Deployment
 
-The platform auto-deploys via **Vercel** on every push to `main`:
+- **Vercel** project `rashid-wep` deploys `main` to https://rashid-wep.vercel.app using `npm run build` (output `dist/`). Pull requests get preview deployments.
+- GitHub Actions: `CI` runs the secret scan, build, verify and tests; `Build APKs` builds the Android apps with Capacitor and publishes them to a GitHub Release (see `docs/APK_HOSTING.md`).
+- GitHub Pages is **not** used any more (`deploy.yml` is manual-only, kept for reference).
+- Environment variables for `api/*` (Supabase, Gemini, …) are set in the Vercel project settings, never in the repository.
 
-```
-git add .
-git commit -m "..."
-git push origin main
-# → Vercel deploys to https://rashid-wep.vercel.app
-```
-
-GitHub Pages is also configured: `https://mot1209.github.io/mein-wep/`
-
----
-
-## Game Development Notes
-
-### KingCraft (active development)
-- **Phase 1+2**: World generation, player movement, health/hunger, crafting, furnaces
-- **Phase 3** (current): Mobs (zombie, skeleton, creeper, spider, cow, sheep, chicken, pig), combat, armor system
-- Phase 4 planned: Caves, biomes, redstone, enchantments
-
-### Rust Construction
-- Three.js physics engine, WASM compilation
-- Resource mining, structural integrity simulation
-
-### Farm Empire
-- WebGL rendering, crop growth simulation, animal management
+> The repository root is the deploy root. Never run `git add .` or `git add -A` blindly: stage files by explicit path and check `git status` first, so internal folders and secrets cannot reach the public site.
 
 ---
 
@@ -194,8 +140,8 @@ GitHub Pages is also configured: `https://mot1209.github.io/mein-wep/`
 
 - **Email**: zwnt45602@gmail.com
 - **GitHub**: [MOT1209](https://github.com/MOT1209)
-- **Platform**: [rashid-wep.vercel.app](https://rashid-wep.vercel.app)
+- **Site**: [rashid-wep.vercel.app](https://rashid-wep.vercel.app)
 
 ---
 
-*Built with ❤️ by Rashid.*
+*Built in the open by Rashid.*

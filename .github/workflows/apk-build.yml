@@ -25,6 +25,17 @@ on:
         description: 'Build APKs for ALL projects'
         type: boolean
         default: false
+      project:
+        description: 'Build only this project (ignored when forceAll is set)'
+        type: choice
+        default: ''
+        options:
+          - ''
+          - apps/calculator-app
+          - apps/quiz-app
+          - games/kingcraft-game
+          - games/rust-game
+          - games/farm-game
 
 permissions:
   contents: write
@@ -47,6 +58,11 @@ jobs:
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" && "${{ inputs.forceAll }}" == "true" ]]; then
             echo "projects=$ALL" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ inputs.project }}" ]]; then
+            echo "projects=[\"${{ inputs.project }}\"]" >> $GITHUB_OUTPUT
             exit 0
           fi
 
