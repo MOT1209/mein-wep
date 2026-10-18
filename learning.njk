@@ -1,0 +1,92 @@
+---
+permalink: learning.html
+---
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Center | Rashid</title>
+    <link rel="canonical" href="https://rashid-wep.vercel.app/learning.html">
+    <meta name="description" content="Rashid Learning Center — Tutorials, resources, and guides on Next.js, Python, Supabase, Three.js, and modern web development.">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Learning Center | Rashid">
+    <meta property="og:description" content="Rashid Learning Center — Tutorials, resources, and guides on Next.js, Python, Supabase, Three.js, and modern web development.">
+    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
+    <meta property="og:url" content="https://rashid-wep.vercel.app/learning.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Learning Center | Rashid">
+    <meta name="twitter:description" content="Rashid Learning Center — Tutorials, resources, and guides on Next.js, Python, Supabase, Three.js, and modern web development.">
+    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.png">
+{% set root = "" %}
+{% include "partials/site-head.njk" %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsClient }}" crossorigin="anonymous"></script>
+    <style>
+        .course-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-4); margin-top: var(--s-6); }
+        @media (min-width: 640px) { .course-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+        @media (min-width: 1024px) { .course-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+        .course-card { display: flex; flex-direction: column; gap: var(--s-3); background: var(--card); border: 1px solid var(--rule); border-radius: 14px; padding: var(--s-5); box-shadow: var(--lift); }
+        .course-icon { font-size: 1.75rem; color: var(--signal); }
+        .course-title { font-size: 1.25rem; }
+        .course-desc { color: var(--ink-muted); margin: 0; }
+        .course-progress { background: var(--card-sunk); height: 6px; border-radius: 3px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--signal); }
+        .course-card .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+        .course-card .tags span { font-size: 0.75rem; padding: 1px 8px; border-radius: 999px; background: var(--card-sunk); border: 1px solid var(--rule); color: var(--ink-muted); }
+        .course-card .btn { margin-top: auto; align-self: flex-start; }
+        .lessons-state { grid-column: 1 / -1; text-align: center; color: var(--ink-muted); padding: var(--s-7) 0; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://rashid-wep.vercel.app/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Learning",
+      "item": "https://rashid-wep.vercel.app/learning.html"
+    }
+  ]
+}
+</script>
+</head>
+<body class="site">
+{% include "partials/site-header.njk" %}
+    <main id="main" class="site-main">
+        <div class="page page-wide">
+            <span class="eyebrow">Knowledge hub</span>
+            <h1 class="page-title">Learning Center</h1>
+            <p class="page-lede">Tutorials, resources and guides on the technologies I work with.</p>
+            <div class="course-grid" id="lessons-container">
+                <p class="lessons-state">Loading lessons…</p>
+            </div>
+        </div>
+    </main>
+{% include "partials/site-footer.njk" %}
+    <div id="cookie-consent" class="cookie-banner" role="region" aria-label="Cookie consent">
+      <div class="cookie-content">
+        <div class="cookie-text">
+          <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+        </div>
+        <div class="cookie-actions">
+          <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
+          <button id="cookie-accept" class="cookie-btn cookie-accept">Accept all</button>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4" defer></script>
+    <script src="js/supabase-config.js" defer></script>
+    <script src="js/learning.js" defer></script>
+    <script src="js/cookie-consent.js?v=1.0"></script>
+    <script>CookieConsent.init();</script>
+    <script src="js/site-nav.js?v={{ site.cssVersion }}" defer></script>
+</body>
+</html>
