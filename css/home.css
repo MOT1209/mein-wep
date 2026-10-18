@@ -428,11 +428,12 @@ img { max-width: 100%; height: auto; }
 .field input,
 .field textarea {
   font-family: var(--font-body);
-  font-size: 0.9375rem;
+  font-size: 1rem;             /* 16px: below this iOS Safari zooms on focus */
   color: var(--ink);
   background: var(--card);
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius-sm);
+  min-height: var(--tap);
   padding: 10px var(--s-3);
   width: 100%;
 }
@@ -486,11 +487,12 @@ img { max-width: 100%; height: auto; }
   border-radius: var(--radius);
   box-shadow: 0 24px 60px rgba(18, 22, 28, 0.18);
   opacity: 0;
+  visibility: hidden;          /* closed dialog must leave the tab order */
   pointer-events: none;
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0s linear 0.2s;
   z-index: 80;
 }
-.settings-modal.active { opacity: 1; pointer-events: auto; transform: translate(-50%, -50%); }
+.settings-modal.active { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, -50%); transition-delay: 0s; }
 
 .settings-header {
   display: flex;
@@ -500,7 +502,7 @@ img { max-width: 100%; height: auto; }
   border-bottom: 1px solid var(--rule);
 }
 .settings-header h3 { font-size: 1rem; }
-.close-settings { background: none; border: 0; color: var(--ink-muted); cursor: pointer; font-size: 1rem; }
+.close-settings { display: grid; place-items: center; width: var(--tap); height: var(--tap); background: none; border: 0; color: var(--ink-muted); cursor: pointer; font-size: 1rem; }
 
 .settings-body { padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-5); }
 .setting-section h4 { font-size: 0.8125rem; color: var(--ink-muted); font-family: var(--font-body); font-weight: 500; margin-bottom: var(--s-3); }
