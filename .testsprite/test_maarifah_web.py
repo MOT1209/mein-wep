@@ -19,9 +19,9 @@ async def run_test():
     passed = 0
     failed = 0
 
-    # Test 1: Maarifah Web loads
-    print("\n[Maarifah Web Page]")
-    status = await http_status(f"{VERCEL_URL}/apps/maarifah-web/")
+    # Test 1: Maarifah surface (OKF doc — no web app build is committed; /apps/maarifah-web/ never existed)
+    print("\n[Maarifah OKF Doc]")
+    status = await http_status(f"{VERCEL_URL}/okf/maarifah-web.md")
     if status == 200:
         print(f"  ✅ PASS: {status}")
         passed += 1
@@ -39,9 +39,9 @@ async def run_test():
         print(f"  ❌ FAIL: expected 200, got {status}")
         failed += 1
 
-    # Test 3: Quran App loads
+    # Test 3: Quran App loads (canonical rewrite -> /quran.html)
     print("\n[Quran App]")
-    status = await http_status(f"{VERCEL_URL}/apps/quran-app/")
+    status = await http_status(f"{VERCEL_URL}/quran-app/")
     if status == 200:
         print(f"  ✅ PASS: {status}")
         passed += 1
