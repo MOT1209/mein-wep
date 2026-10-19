@@ -1,7 +1,7 @@
 import { TICK_MS } from "./config";
 import { Game } from "./game";
 import { attachDesktop } from "./input/desktop";
-import { consumeLook, createInputState, toMoveInput } from "./input/inputState";
+import { consumeLook, consumeUses, createInputState, toMoveInput } from "./input/inputState";
 import { GameLoop } from "./render/loop";
 import { World } from "./voxels/world";
 
@@ -30,7 +30,7 @@ function createHint(uiRoot: HTMLElement): HTMLElement {
   hint.style.cssText =
     "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);padding:16px 22px;font:15px/1.7 var(--ui-font);text-align:center;pointer-events:none;";
   hint.textContent =
-    "Click to play\nWASD move · Space jump · Shift sneak · Ctrl or double-W sprint\nF fly · 1-9 hotbar · F3 debug · Esc release mouse";
+    "Click to play\nLeft mouse break · Right mouse place or use · Wheel or 1-9 hotbar\nWASD move · Space jump · Shift sneak · Ctrl or double-W sprint\nF fly (creative) · F3 debug · Esc release mouse";
   hint.style.whiteSpace = "pre";
   uiRoot.append(hint);
   return hint;
@@ -52,8 +52,9 @@ function boot(): void {
     throw new Error("Block World requires #game-canvas and #ui-root in index.html");
   }
 
+  const params = new URLSearchParams(window.location.search);
   const world = new World(parseSeed(window.location.search));
-  const game = new Game(canvas, world);
+  const game = new Game(canvas, world, { mode: params.get("mode") === "creative" ? "creative" : "survival" });
   const overlay = createOverlay(uiRoot);
   const hint = createHint(uiRoot);
   const crosshair = createCrosshair(uiRoot);
@@ -81,7 +82,15 @@ function boot(): void {
     },
     render: () => {
       const look = consumeLook(input);
-      game.update(toMoveInput(input), look.dyaw, look.dpitch, input.locked);
+      game.update({
+        move: toMoveInput(input),
+        dyaw: look.dyaw,
+        dpitch: look.dpitch,
+        attack: input.attack,
+        uses: consumeUses(input),
+        hotbarSlot: input.hotbarSlot,
+        active: input.locked
+      });
       game.render();
       const now = performance.now();
       if (now - overlayStamped >= OVERLAY_INTERVAL_MS) {

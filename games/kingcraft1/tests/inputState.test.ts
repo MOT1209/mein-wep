@@ -132,3 +132,25 @@ describe("input state", () => {
     expect(pauses).toEqual([false, true]);
   });
 });
+
+describe("mouse buttons and hotbar wheel", () => {
+  it("holds attack on the left button and counts right clicks while locked", async () => {
+    const { handleMouseButton, consumeUses, selectHotbar } = await import("../src/input/inputState");
+    const state = createInputState();
+    expect(handleMouseButton(state, 0, true)).toBe(false);
+    expect(state.attack).toBe(false);
+    setLocked(state, true, {});
+    handleMouseButton(state, 0, true);
+    expect(state.attack).toBe(true);
+    handleMouseButton(state, 0, false);
+    expect(state.attack).toBe(false);
+    handleMouseButton(state, 2, true);
+    handleMouseButton(state, 2, true);
+    expect(consumeUses(state)).toBe(2);
+    expect(consumeUses(state)).toBe(0);
+    const picked: number[] = [];
+    selectHotbar(state, -1, { onHotbarSelect: (slot) => picked.push(slot) });
+    selectHotbar(state, 9, { onHotbarSelect: (slot) => picked.push(slot) });
+    expect(picked).toEqual([8, 0]);
+  });
+});

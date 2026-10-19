@@ -21,6 +21,8 @@ export interface InputState {
   lookYaw: number;
   lookPitch: number;
   hotbarSlot: number;
+  attack: boolean;
+  usePresses: number;
 }
 
 export interface KeyOptions {
@@ -52,7 +54,9 @@ export function createInputState(): InputState {
     lastForwardTapMs: Number.NEGATIVE_INFINITY,
     lookYaw: 0,
     lookPitch: 0,
-    hotbarSlot: 0
+    hotbarSlot: 0,
+    attack: false,
+    usePresses: 0
   };
 }
 
@@ -92,6 +96,33 @@ export function consumeLook(state: InputState): { dyaw: number; dpitch: number }
 export function clearHeld(state: InputState): void {
   state.held.clear();
   state.sprintLatched = false;
+  state.attack = false;
+  state.usePresses = 0;
+}
+
+export function handleMouseButton(state: InputState, button: number, down: boolean): boolean {
+  if (button === 0) {
+    state.attack = down && state.locked;
+    return state.locked;
+  }
+  if (button === 2) {
+    if (down && state.locked) state.usePresses++;
+    return state.locked;
+  }
+  return false;
+}
+
+export function consumeUses(state: InputState): number {
+  const uses = state.usePresses;
+  state.usePresses = 0;
+  return uses;
+}
+
+export function selectHotbar(state: InputState, slot: number, events: HudEvents): void {
+  const next = ((Math.floor(slot) % HOTBAR_SIZE) + HOTBAR_SIZE) % HOTBAR_SIZE;
+  if (next === state.hotbarSlot) return;
+  state.hotbarSlot = next;
+  events.onHotbarSelect?.(next);
 }
 
 export function setLocked(state: InputState, locked: boolean, events: HudEvents): void {
