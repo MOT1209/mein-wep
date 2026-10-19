@@ -11,10 +11,10 @@ It is updated phase-by-phase as work lands and is verified.
 | ---- | ------ |
 | Repository audit, engine decision (`docs/BASELINE_AUDIT.md`) | done |
 | Vite + TypeScript strict + Vitest scaffold | done |
-| Renderer, camera, sky, day/night baseline | not started |
+| Renderer, camera, sky, day/night baseline | partial (renderer, sky colours, fog and day-night loop done; camera is a fixed view at spawn, no player camera yet) |
 | Desktop controls (pointer lock, WASD, jump) | not started |
 | Touch controls (joystick, look pad, buttons) | not started |
-| Debug overlay (FPS, position, chunk stats) | not started |
+| Debug overlay (FPS, position, chunk stats) | partial (FPS, position and loaded-chunk count; no mesh stats) |
 
 ## Phase 2 — Voxel engine
 
@@ -113,7 +113,7 @@ It is updated phase-by-phase as work lands and is verified.
 | Item | Status |
 | ---- | ------ |
 | Synthesized SFX (dig/place/step/hurt/craft/eat) | not started |
-| Particles (block break), clouds, fog | not started |
+| Particles (block break), clouds, fog | partial (distance fog in the terrain shader; no particles or clouds) |
 | Localization EN + AR with RTL layout | not started |
 | Encyclopedia (searchable, data-driven) | not started |
 | Performance instrumentation + presets | not started |
