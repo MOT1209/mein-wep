@@ -1,7 +1,7 @@
 import { HOTBAR_SIZE } from "../config";
 import type { ItemStack } from "../content/items";
 import type { Inventory } from "../gameplay/inventory";
-import { el, injectUiStyles, renderSlot } from "./hud";
+import { el, injectUiStyles, renderSlot, stackKey } from "./hud";
 import type { IconFactory } from "./icons";
 import { clickSlot, craftAllInto, craftPreview, insertInto, quickMove, takeCraft, type MouseButtonKind } from "./slotLogic";
 
@@ -78,19 +78,26 @@ export class InventoryScreen {
     this.extra = undefined;
     this.root.classList.add("hidden");
     this.cursorEl.classList.add("hidden");
+    this.cursorEl.dataset.stack = "-";
   }
 
   refresh(): void {
     const inventory = this.inventory;
     if (!inventory) return;
     for (const [key, node] of this.elements) {
-      const ref = this.parseKey(key);
-      renderSlot(node, this.stackAt(ref), this.icons);
+      const stack = this.stackAt(this.parseKey(key));
+      const signature = stackKey(stack);
+      if (node.dataset.stack === signature) continue;
+      node.dataset.stack = signature;
+      renderSlot(node, stack, this.icons);
     }
     if (this.statusEl && this.extra?.render) this.statusEl.textContent = this.extra.render();
-    this.cursorEl.replaceChildren();
-    this.cursorEl.classList.toggle("hidden", !this.cursor);
-    if (this.cursor) renderSlot(this.cursorEl, this.cursor, this.icons);
+    const cursorKey = stackKey(this.cursor);
+    if (this.cursorEl.dataset.stack !== cursorKey) {
+      this.cursorEl.dataset.stack = cursorKey;
+      this.cursorEl.classList.toggle("hidden", !this.cursor);
+      renderSlot(this.cursorEl, this.cursor, this.icons);
+    }
   }
 
   private build(title: string): void {

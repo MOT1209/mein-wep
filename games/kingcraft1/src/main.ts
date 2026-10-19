@@ -1,11 +1,14 @@
 import { TICK_MS } from "./config";
+import { blockById } from "./content/blocks";
 import { Game } from "./game";
 import { attachDesktop } from "./input/desktop";
 import { consumeLook, consumeUses, createInputState, toMoveInput } from "./input/inputState";
 import { GameLoop } from "./render/loop";
+import { createPaletteSection } from "./ui/creativePalette";
 import { Hud } from "./ui/hud";
 import { IconFactory } from "./ui/icons";
-import { InventoryScreen } from "./ui/inventoryScreen";
+import { furnaceAccepts, furnaceStatus } from "./gameplay/furnace";
+import { InventoryScreen, type ExtraSection } from "./ui/inventoryScreen";
 import { PauseMenu } from "./ui/pauseMenu";
 import { BIOMES } from "./voxels/biomes";
 import { World } from "./voxels/world";
@@ -65,9 +68,9 @@ function boot(): void {
     game.drops.spawn(stack, x, y + 1.2, z);
   };
 
-  const openInventory = (craftSize: 2 | 3, title: string): void => {
+  const openInventory = (craftSize: 2 | 3, title: string, extra?: ExtraSection): void => {
     mode = "inventory";
-    inventoryScreen.open(game.inventory, { craftSize, title }, dropLeftover);
+    inventoryScreen.open(game.inventory, { craftSize, title, extra }, dropLeftover);
     hud.setPlaying(false);
     if (document.pointerLockElement === canvas) document.exitPointerLock();
   };
@@ -81,6 +84,21 @@ function boot(): void {
   game.events.onMining = (event) => {
     if (event.kind === "blocked") hud.toast("This needs a stronger tool");
   };
+  game.events.onInteract = (result) => {
+    if (result.kind === "crafting") openInventory(3, "Crafting table");
+    else if (result.kind === "bed") hud.toast(result.slept ? "You slept through the night. Spawn point set." : "Spawn point set. You can only sleep at night.");
+    else if (result.kind === "container" && result.state.kind === "chest") {
+      openInventory(2, "Chest", { title: "Chest", slots: result.state.slots });
+    } else if (result.kind === "container" && result.state.kind === "furnace") {
+      const furnace = result.state;
+      openInventory(2, "Furnace", {
+        title: "Input · Fuel · Output",
+        slots: furnace.slots,
+        accepts: furnaceAccepts,
+        render: () => furnaceStatus(furnace)
+      });
+    }
+  };
   game.events.onPlaceFailed = (reason) => {
     if (reason === "no-support") hud.toast("Needs a solid block below");
     else if (reason === "wrong-soil") hud.toast("Cannot be planted here");
@@ -93,7 +111,7 @@ function boot(): void {
       onToggleDebug: () => hud.toggleDebug(),
       onToggleInventory: () => {
         if (inventoryScreen.isOpen) closeInventory();
-        else if (mode === "playing") openInventory(2, "Inventory");
+        else if (mode === "playing") openInventory(2, "Inventory", game.creative ? createPaletteSection() : undefined);
       },
       onPauseChange: (paused) => {
         if (!paused) {
@@ -149,7 +167,9 @@ function boot(): void {
         const bz = Math.floor(pos.z);
         const stream = game.streamStats;
         const movement = state.flying ? "fly" : state.inWater ? "swim" : state.onGround ? "ground" : "air";
-        const target = game.target ? `${game.target.x} ${game.target.y} ${game.target.z}` : "none";
+        const target = game.target
+          ? `${game.target.x} ${game.target.y} ${game.target.z} ${blockById(world.getBlock(game.target.x, game.target.y, game.target.z)).name}`
+          : "none";
         hud.setDebug([
           `FPS ${loop.fps.toFixed(0)}  ${game.mode}`,
           `XYZ ${pos.x.toFixed(2)} ${pos.y.toFixed(2)} ${pos.z.toFixed(2)}  ${movement}`,

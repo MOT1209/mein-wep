@@ -1,7 +1,13 @@
 import * as THREE from "three";
-import { CHUNK_SX, CHUNK_SZ, CREATIVE_REACH, PLAYER_REACH, QUALITY_PRESETS, type QualityLevel } from "./config";
+import { CHUNK_SX, CHUNK_SY, CHUNK_SZ, CREATIVE_REACH, PLAYER_REACH, QUALITY_PRESETS, TICK_MS, type QualityLevel } from "./config";
+import { B } from "./content/blocks";
+import { itemById } from "./content/items";
 import { Rng } from "./core/rng";
+import { ContainerStore } from "./gameplay/containers";
 import { DropManager, rollDrops } from "./gameplay/drops";
+import { applyGrowthBoost, randomTick } from "./gameplay/farming";
+import { furnaceTick } from "./gameplay/furnace";
+import { breakUnsupported, interact, type InteractResult, type Position } from "./gameplay/interactive";
 import { Inventory } from "./gameplay/inventory";
 import { MiningState, type MiningEvent } from "./gameplay/mining";
 import { tryPlace, tryUseItem, type PlaceFailure } from "./gameplay/place";
@@ -20,6 +26,7 @@ const NEAR_PLANE = 0.1;
 const REBUILD_BUDGET_MS = 4;
 const SPAWN_RADIUS = 1;
 const MAX_FRAME_SECONDS = 0.25;
+const RANDOM_TICKS_PER_CHUNK = 6;
 
 export type GameMode = "survival" | "creative";
 
@@ -43,6 +50,7 @@ export interface FrameInput {
 export interface GameEvents {
   onMining?(event: MiningEvent): void;
   onPlaceFailed?(reason: PlaceFailure): void;
+  onInteract?(result: InteractResult): void;
 }
 
 export class Game {
@@ -59,6 +67,8 @@ export class Game {
   readonly inventory = new Inventory();
   readonly mining = new MiningState();
   readonly drops = new DropManager();
+  containers = new ContainerStore();
+  respawnPoint: Position | null = null;
   readonly events: GameEvents = {};
   target: RayHit | null = null;
   private dropRenderer: DropRenderer | null = null;
@@ -175,24 +185,42 @@ export class Game {
     } else {
       this.mining.reset();
     }
-    for (let i = 0; i < input.uses && this.target; i++) this.use(this.target);
+    for (let i = 0; i < input.uses && this.target; i++) this.use(this.target, input.move.sneak);
   }
 
   private onMiningEvent(event: MiningEvent): void {
     this.events.onMining?.(event);
     if (event.kind !== "broken") return;
-    if (event.harvest) {
-      for (const stack of rollDrops(event.id, this.rng)) {
-        this.drops.spawn(stack, event.x + 0.5, event.y + 0.5, event.z + 0.5);
-      }
+    if (event.harvest) this.dropBlock(event.id, event);
+    for (const stack of this.containers.remove(event.x, event.y, event.z)) {
+      this.drops.spawn(stack, event.x + 0.5, event.y + 0.5, event.z + 0.5);
+    }
+    for (const fallen of breakUnsupported(this.world, event.x, event.y, event.z)) {
+      if (!this.creative) this.dropBlock(fallen.id, fallen);
     }
     if (event.wear > 0) this.inventory.damage(this.inventory.selectedIndex, event.wear);
   }
 
-  private use(hit: RayHit): void {
+  private dropBlock(id: number, at: Position): void {
+    for (const stack of rollDrops(id, this.rng)) this.drops.spawn(stack, at.x + 0.5, at.y + 0.5, at.z + 0.5);
+  }
+
+  private use(hit: RayHit, sneaking: boolean): void {
+    if (!sneaking) {
+      const result = interact(this.world, this.containers, hit);
+      if (result) {
+        if (result.kind === "bed") this.respawnPoint = result.spawn;
+        this.events.onInteract?.(result);
+        return;
+      }
+    }
     const slot = this.inventory.selectedIndex;
     const held = this.inventory.selected;
     if (!held) return;
+    if (itemById(held.item)?.useAction === "bone_meal") {
+      if (applyGrowthBoost(this.world, hit.x, hit.y, hit.z, this.rng) && !this.creative) this.inventory.removeAt(slot, 1);
+      return;
+    }
     const used = tryUseItem(this.world, hit, held.item);
     if (used.ok) {
       if (used.wear > 0 && !this.creative) this.inventory.damage(slot, used.wear);
@@ -220,6 +248,21 @@ export class Game {
 
   tick(): void {
     this.world.advanceTime(1);
+    const dt = TICK_MS / 1000;
+    for (const [x, y, z, furnace] of this.containers.furnaces()) {
+      const result = furnaceTick(furnace, dt);
+      if (!result.changed) continue;
+      const id = this.world.getBlock(x, y, z);
+      if (id === B.FURNACE || id === B.FURNACE_LIT) this.world.setBlock(x, y, z, result.lit ? B.FURNACE_LIT : B.FURNACE);
+    }
+    for (const chunk of this.world.chunks.values()) {
+      for (let i = 0; i < RANDOM_TICKS_PER_CHUNK; i++) {
+        const x = chunk.cx * CHUNK_SX + this.rng.nextInt(CHUNK_SX);
+        const z = chunk.cz * CHUNK_SZ + this.rng.nextInt(CHUNK_SZ);
+        const y = 1 + this.rng.nextInt(CHUNK_SY - 2);
+        randomTick(this.world, x, y, z, this.rng);
+      }
+    }
   }
 
   render(): void {
