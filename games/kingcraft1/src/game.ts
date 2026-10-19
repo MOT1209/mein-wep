@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { CHUNK_SX, CHUNK_SY, CHUNK_SZ, CREATIVE_REACH, PLAYER_REACH, QUALITY_PRESETS, TICK_MS, type QualityLevel } from "./config";
-import { B } from "./content/blocks";
-import { itemById, toolStats } from "./content/items";
+import { B, isLiquid } from "./content/blocks";
+import { foodValue, itemById, toolStats } from "./content/items";
 import { EntityManager } from "./entities/manager";
 import type { Entity } from "./entities/types";
 import { Rng } from "./core/rng";
@@ -15,6 +15,7 @@ import { MiningState, type MiningEvent } from "./gameplay/mining";
 import { tryPlace, tryUseItem, type PlaceFailure } from "./gameplay/place";
 import { raycastVoxel, type RayHit } from "./physics/raycast";
 import { PlayerController, type MoveInput } from "./player/controller";
+import { PlayerStats, takeAllItems, type DamageSource } from "./player/stats";
 import { ChunkRenderer } from "./render/chunkRenderer";
 import { DropRenderer, type IconSource } from "./render/dropRenderer";
 import { EntityRenderer } from "./render/entityRenderer";
@@ -57,7 +58,8 @@ export interface GameEvents {
   onMining?(event: MiningEvent): void;
   onPlaceFailed?(reason: PlaceFailure): void;
   onInteract?(result: InteractResult): void;
-  onPlayerDamaged?(amount: number, source: Entity): void;
+  onPlayerDamaged?(amount: number, source: DamageSource, attacker: Entity | null): void;
+  onDeath?(source: DamageSource | null): void;
 }
 
 export class Game {
@@ -76,7 +78,7 @@ export class Game {
   readonly drops = new DropManager();
   containers = new ContainerStore();
   readonly entities: EntityManager;
-  playerAlive = true;
+  stats = new PlayerStats();
   private readonly entityRenderer: EntityRenderer;
   private attackCooldown = 0;
   respawnPoint: Position | null = null;
@@ -168,7 +170,7 @@ export class Game {
     const dt = Math.min(Math.max((now - this.lastFrame) / 1000, 0), MAX_FRAME_SECONDS);
     this.lastFrame = now;
     this.inventory.selectedIndex = input.hotbarSlot;
-    if (input.active) {
+    if (input.active && this.playerAlive) {
       this.player.look(input.dyaw, input.dpitch);
       this.player.move(input.move, dt);
     }
@@ -176,9 +178,10 @@ export class Game {
     this.streamer.update(x, z);
     this.syncCamera();
     this.updateTarget();
-    if (input.active) {
+    if (input.active && this.playerAlive) {
+      this.tickStats(dt, input.move);
       this.tickEntities(dt);
-      this.interact(input, dt);
+      if (this.playerAlive) this.interact(input, dt);
     } else {
       this.mining.reset();
     }
@@ -206,11 +209,59 @@ export class Game {
           velocity.x += knockX * PLAYER_KNOCKBACK;
           velocity.z += knockZ * PLAYER_KNOCKBACK;
           velocity.y = Math.max(velocity.y, 4);
-          this.events.onPlayerDamaged?.(amount, source);
+          this.hurtPlayer(amount, "mob", source);
         },
         dropLoot: (stack, lx, ly, lz) => this.drops.spawn(stack, lx, ly, lz)
       }
     );
+  }
+
+  get playerAlive(): boolean {
+    return !this.stats.dead;
+  }
+
+  hurtPlayer(amount: number, source: DamageSource, attacker: Entity | null = null): void {
+    if (this.creative || this.stats.dead) return;
+    const event = this.stats.damage(amount, source);
+    if (event.amount <= 0) return;
+    this.events.onPlayerDamaged?.(event.amount, source, attacker);
+    if (event.died) this.die();
+  }
+
+  private die(): void {
+    const { x, y, z } = this.player.state.position;
+    for (const stack of takeAllItems(this.inventory)) {
+      this.drops.spawn(stack, x + this.rng.range(-0.6, 0.6), y + 1, z + this.rng.range(-0.6, 0.6), this.rng.range(2, 5), 1.5);
+    }
+    this.mining.reset();
+    this.events.onDeath?.(this.stats.lastDamage);
+  }
+
+  respawn(): void {
+    const point = this.respawnPoint ?? this.world.findSpawn();
+    this.player.spawnAt(point);
+    this.stats.respawn();
+    this.streamer.loadAllNow(point.x, point.z, 1);
+    this.syncCamera();
+  }
+
+  private tickStats(dt: number, move: MoveInput): void {
+    if (this.creative || this.stats.dead) return;
+    const state = this.player.state;
+    const eye = this.player.eyePosition();
+    const events = this.stats.tick(dt, {
+      y: state.position.y,
+      onGround: state.onGround,
+      inWater: state.inWater,
+      headInWater: isLiquid(this.world.getBlock(Math.floor(eye.x), Math.floor(eye.y), Math.floor(eye.z))),
+      flying: state.flying,
+      moving: move.forward !== 0 || move.strafe !== 0,
+      sprinting: state.sprinting
+    });
+    for (const event of events) {
+      this.events.onPlayerDamaged?.(event.amount, event.source, null);
+      if (event.died) this.die();
+    }
   }
 
   private hitEntity(): boolean {
@@ -273,6 +324,10 @@ export class Game {
     const slot = this.inventory.selectedIndex;
     const held = this.inventory.selected;
     if (!held) return;
+    if (foodValue(held.item)) {
+      if (!this.creative && this.stats.eat(held.item)) this.inventory.removeAt(slot, 1);
+      return;
+    }
     if (itemById(held.item)?.useAction === "bone_meal") {
       if (applyGrowthBoost(this.world, hit.x, hit.y, hit.z, this.rng) && !this.creative) this.inventory.removeAt(slot, 1);
       return;

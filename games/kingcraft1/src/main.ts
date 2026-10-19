@@ -1,10 +1,11 @@
-import { TICK_MS } from "./config";
+import { MAX_AIR, MAX_HEALTH, MAX_HUNGER, TICK_MS } from "./config";
 import { blockById } from "./content/blocks";
 import { Game } from "./game";
 import { attachDesktop } from "./input/desktop";
 import { consumeLook, consumeUses, createInputState, toMoveInput } from "./input/inputState";
 import { GameLoop } from "./render/loop";
 import { createPaletteSection } from "./ui/creativePalette";
+import { DeathScreen } from "./ui/deathScreen";
 import { Hud } from "./ui/hud";
 import { IconFactory } from "./ui/icons";
 import { furnaceAccepts, furnaceStatus } from "./gameplay/furnace";
@@ -101,8 +102,22 @@ function boot(): void {
       });
     }
   };
-  game.events.onPlayerDamaged = (amount, source) => {
-    hud.toast(`Hit by ${source.def.id.replace(/_/g, " ")} (${amount})`);
+  const death = new DeathScreen(uiRoot, () => {
+    death.hide();
+    game.respawn();
+    lockPointer();
+  });
+  game.events.onPlayerDamaged = (amount, source, attacker) => {
+    if (attacker) hud.toast(`Hit by ${attacker.def.id.replace(/_/g, " ")} (-${amount})`);
+    else if (source === "drown") hud.toast("You are drowning");
+    else if (source === "starve") hud.toast("You are starving");
+  };
+  game.events.onDeath = (source) => {
+    if (inventoryScreen.isOpen) inventoryScreen.close();
+    mode = "paused";
+    death.show(source);
+    pause.hide();
+    if (document.pointerLockElement === canvas) document.exitPointerLock();
   };
   game.events.onPlaceFailed = (reason) => {
     if (reason === "no-support") hud.toast("Needs a solid block below");
@@ -127,7 +142,7 @@ function boot(): void {
           return;
         }
         hud.setPlaying(false);
-        if (mode === "inventory") return;
+        if (mode === "inventory" || death.isVisible) return;
         mode = "paused";
         pause.show();
       }
@@ -160,7 +175,19 @@ function boot(): void {
       game.render();
       hud.setHotbar(game.inventory.slots, game.inventory.selectedIndex);
       hud.setMiningProgress(game.mining.progress);
-      hud.setVitals(null);
+      hud.setVitals(
+        game.creative
+          ? null
+          : {
+              health: game.stats.health,
+              maxHealth: MAX_HEALTH,
+              hunger: game.stats.hunger,
+              maxHunger: MAX_HUNGER,
+              air: game.stats.air,
+              maxAir: MAX_AIR,
+              showAir: game.stats.air < MAX_AIR
+            }
+      );
       if (inventoryScreen.isOpen) inventoryScreen.refresh();
       const now = performance.now();
       if (hud.debugVisible && now - debugStamped >= DEBUG_INTERVAL_MS) {
