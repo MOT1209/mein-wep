@@ -23,6 +23,9 @@ export interface InputState {
   hotbarSlot: number;
   attack: boolean;
   usePresses: number;
+  analogForward: number;
+  analogStrafe: number;
+  lookScale: number;
 }
 
 export interface KeyOptions {
@@ -56,7 +59,10 @@ export function createInputState(): InputState {
     lookPitch: 0,
     hotbarSlot: 0,
     attack: false,
-    usePresses: 0
+    usePresses: 0,
+    analogForward: 0,
+    analogStrafe: 0,
+    lookScale: 1
   };
 }
 
@@ -66,9 +72,13 @@ function axis(state: InputState, positive: readonly string[], negative: readonly
   return pos - neg;
 }
 
+function clampUnit(value: number): number {
+  return Math.max(-1, Math.min(1, value));
+}
+
 export function toMoveInput(state: InputState): MoveInput {
-  const forward = axis(state, ["KeyW", "ArrowUp"], ["KeyS", "ArrowDown"]);
-  const strafe = axis(state, ["KeyD", "ArrowRight"], ["KeyA", "ArrowLeft"]);
+  const forward = clampUnit(axis(state, ["KeyW", "ArrowUp"], ["KeyS", "ArrowDown"]) + state.analogForward);
+  const strafe = clampUnit(axis(state, ["KeyD", "ArrowRight"], ["KeyA", "ArrowLeft"]) + state.analogStrafe);
   const sprintHeld = state.held.has("ControlLeft") || state.held.has("ControlRight");
   return {
     forward,
@@ -82,8 +92,8 @@ export function toMoveInput(state: InputState): MoveInput {
 
 export function addLook(state: InputState, movementX: number, movementY: number, sensitivity: number): void {
   if (!state.locked) return;
-  state.lookYaw -= movementX * sensitivity;
-  state.lookPitch -= movementY * sensitivity;
+  state.lookYaw -= movementX * sensitivity * state.lookScale;
+  state.lookPitch -= movementY * sensitivity * state.lookScale;
 }
 
 export function consumeLook(state: InputState): { dyaw: number; dpitch: number } {
@@ -98,6 +108,8 @@ export function clearHeld(state: InputState): void {
   state.sprintLatched = false;
   state.attack = false;
   state.usePresses = 0;
+  state.analogForward = 0;
+  state.analogStrafe = 0;
 }
 
 export function handleMouseButton(state: InputState, button: number, down: boolean): boolean {

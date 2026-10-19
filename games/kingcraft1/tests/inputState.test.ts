@@ -154,3 +154,19 @@ describe("mouse buttons and hotbar wheel", () => {
     expect(picked).toEqual([8, 0]);
   });
 });
+
+describe("analog input and look scale", () => {
+  it("adds joystick axes to keys, clamps them and scales look", () => {
+    const state = locked();
+    state.analogForward = 0.6;
+    state.analogStrafe = -0.3;
+    expect(toMoveInput(state)).toMatchObject({ forward: 0.6, strafe: -0.3 });
+    press(state, "KeyW");
+    expect(toMoveInput(state).forward).toBe(1);
+    state.lookScale = 2;
+    addLook(state, 10, 0, 0.01);
+    expect(consumeLook(state).dyaw).toBeCloseTo(-0.2, 9);
+    setLocked(state, false, {});
+    expect(state.analogForward).toBe(0);
+  });
+});

@@ -37,6 +37,7 @@ export class InventoryScreen {
   private dragStart = { x: 0, y: 0 };
   private readonly elements = new Map<string, HTMLElement>();
   private statusEl: HTMLElement | null = null;
+  private closeHandler: () => void = () => undefined;
 
   constructor(parent: HTMLElement, private readonly icons: IconFactory) {
     injectUiStyles();
@@ -46,6 +47,10 @@ export class InventoryScreen {
     this.root.addEventListener("pointerup", this.onPointerUp);
     this.root.addEventListener("pointermove", this.onPointerMove);
     this.root.addEventListener("contextmenu", (event) => event.preventDefault());
+  }
+
+  setCloseHandler(handler: () => void): void {
+    this.closeHandler = handler;
   }
 
   get isOpen(): boolean {
@@ -104,7 +109,14 @@ export class InventoryScreen {
     this.root.replaceChildren();
     this.elements.clear();
     const win = el("div", "bw-panel bw-window", this.root);
-    el("h2", "", win).textContent = title;
+    const header = el("div", "bw-row", win);
+    header.style.justifyContent = "space-between";
+    header.style.marginBottom = "6px";
+    el("h2", "", header).textContent = title;
+    const close = el("button", "bw-btn", header);
+    close.type = "button";
+    close.textContent = "Close";
+    close.addEventListener("click", () => this.closeHandler());
     if (this.extra) {
       const row = el("div", "bw-row", win);
       el("strong", "", row).textContent = this.extra.title;

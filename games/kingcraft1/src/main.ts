@@ -1,8 +1,9 @@
-import { MAX_AIR, MAX_HEALTH, MAX_HUNGER, TICK_MS } from "./config";
+import { MAX_AIR, MAX_HEALTH, MAX_HUNGER, QUALITY_PRESETS, TICK_MS } from "./config";
 import { blockById } from "./content/blocks";
 import { Game } from "./game";
 import { attachDesktop } from "./input/desktop";
-import { consumeLook, consumeUses, createInputState, toMoveInput } from "./input/inputState";
+import { consumeLook, consumeUses, createInputState, selectHotbar, setLocked, toMoveInput, type HudEvents } from "./input/inputState";
+import { attachTouch } from "./input/touch";
 import { GameLoop } from "./render/loop";
 import { createPaletteSection } from "./ui/creativePalette";
 import { DeathScreen } from "./ui/deathScreen";
@@ -11,6 +12,9 @@ import { IconFactory } from "./ui/icons";
 import { furnaceAccepts, furnaceStatus } from "./gameplay/furnace";
 import { InventoryScreen, type ExtraSection } from "./ui/inventoryScreen";
 import { PauseMenu } from "./ui/pauseMenu";
+import { applyHudScale, browserStore, readDevice } from "./ui/responsive";
+import { loadSettings, saveSettings, touchEnabled, type Settings } from "./ui/settings";
+import { SettingsPanel } from "./ui/settingsPanel";
 import { BIOMES } from "./voxels/biomes";
 import { World } from "./voxels/world";
 
@@ -46,18 +50,37 @@ function boot(): void {
   const world = new World(parseSeed(window.location.search));
   const startTime = Number(params.get("time"));
   if (params.has("time") && Number.isFinite(startTime) && startTime >= 0 && startTime < 1) world.setTimeOfDay(startTime);
-  const game = new Game(canvas, world, { mode: params.get("mode") === "creative" ? "creative" : "survival" });
+  const device = readDevice();
+  const store = browserStore();
+  let settings: Settings = loadSettings(store, device);
+  let touchOn = touchEnabled(settings, device);
+  const game = new Game(canvas, world, {
+    mode: params.get("mode") === "creative" ? "creative" : "survival",
+    quality: settings.quality,
+    renderDistance: settings.renderDistance
+  });
   const icons = new IconFactory(game.atlasCanvas);
   game.attachIcons(icons);
   const hud = new Hud(uiRoot, icons);
   const inventoryScreen = new InventoryScreen(uiRoot, icons);
   const input = createInputState();
+  input.lookScale = settings.sensitivity;
+  applyHudScale(hud.root, settings.hudScale);
   let mode: UiMode = "paused";
+  const hudEvents: HudEvents = {};
   let debugStamped = 0;
 
   const lockPointer = (): void => {
+    if (touchOn) {
+      setLocked(input, true, hudEvents);
+      return;
+    }
     const request = canvas.requestPointerLock() as unknown;
     if (request instanceof Promise) request.catch(() => undefined);
+  };
+  const releasePointer = (): void => {
+    if (touchOn) setLocked(input, false, hudEvents);
+    else if (document.pointerLockElement === canvas) document.exitPointerLock();
   };
   const pause = new PauseMenu(uiRoot, {
     title: "Block World",
@@ -75,7 +98,7 @@ function boot(): void {
     mode = "inventory";
     inventoryScreen.open(game.inventory, { craftSize, title, extra }, dropLeftover);
     hud.setPlaying(false);
-    if (document.pointerLockElement === canvas) document.exitPointerLock();
+    releasePointer();
   };
 
   const closeInventory = (): void => {
@@ -117,38 +140,63 @@ function boot(): void {
     mode = "paused";
     death.show(source);
     pause.hide();
-    if (document.pointerLockElement === canvas) document.exitPointerLock();
+    releasePointer();
   };
   game.events.onPlaceFailed = (reason) => {
     if (reason === "no-support") hud.toast("Needs a solid block below");
     else if (reason === "wrong-soil") hud.toast("Cannot be planted here");
   };
 
-  const detachDesktop = attachDesktop(
-    canvas,
-    input,
-    {
-      onToggleDebug: () => hud.toggleDebug(),
-      onToggleInventory: () => {
-        if (inventoryScreen.isOpen) closeInventory();
-        else if (mode === "playing") openInventory(2, "Inventory", game.creative ? createPaletteSection() : undefined);
-      },
-      onPauseChange: (paused) => {
-        if (!paused) {
-          if (inventoryScreen.isOpen) inventoryScreen.close();
-          mode = "playing";
-          pause.hide();
-          hud.setPlaying(true);
-          return;
-        }
-        hud.setPlaying(false);
-        if (mode === "inventory" || death.isVisible) return;
-        mode = "paused";
-        pause.show();
-      }
+  const touch = attachTouch(uiRoot, input, hudEvents, { canFly: game.player.canFly, onPause: releasePointer });
+  const settingsPanel = new SettingsPanel(
+    uiRoot,
+    settings,
+    (next) => {
+      settings = next;
+      saveSettings(store, settings);
+      game.setRenderDistance(settings.renderDistance);
+      game.setPixelRatioCap(QUALITY_PRESETS[settings.quality].pixelRatioCap);
+      input.lookScale = settings.sensitivity;
+      applyHudScale(hud.root, settings.hudScale);
+      touchOn = touchEnabled(settings, device);
     },
-    { canFly: game.player.canFly }
+    () => {
+      settingsPanel.hide();
+      pause.show();
+    }
   );
+  pause.setButtons([
+    {
+      label: "Settings",
+      onClick: () => {
+        pause.hide();
+        settingsPanel.show(settings);
+      }
+    }
+  ]);
+  inventoryScreen.setCloseHandler(() => closeInventory());
+  hud.enableHotbarTaps((slot) => selectHotbar(input, slot, hudEvents));
+
+  hudEvents.onToggleDebug = () => hud.toggleDebug();
+  hudEvents.onToggleInventory = () => {
+    if (inventoryScreen.isOpen) closeInventory();
+    else if (mode === "playing") openInventory(2, "Inventory", game.creative ? createPaletteSection() : undefined);
+  };
+  hudEvents.onPauseChange = (paused) => {
+    touch.setVisible(touchOn && !paused);
+    if (!paused) {
+      if (inventoryScreen.isOpen) inventoryScreen.close();
+      mode = "playing";
+      pause.hide();
+      hud.setPlaying(true);
+      return;
+    }
+    hud.setPlaying(false);
+    if (mode === "inventory" || death.isVisible) return;
+    mode = "paused";
+    pause.show();
+  };
+  const detachDesktop = attachDesktop(canvas, input, hudEvents, { canFly: game.player.canFly });
 
   const onEscape = (event: KeyboardEvent): void => {
     if (event.code === "Escape" && inventoryScreen.isOpen) {
@@ -218,10 +266,12 @@ function boot(): void {
 
   const onResize = (): void => {
     game.resize(Math.max(1, window.innerWidth), Math.max(1, window.innerHeight));
+    applyHudScale(hud.root, settings.hudScale);
   };
   const onPageHide = (): void => {
     loop.stop();
     detachDesktop();
+    touch.detach();
     game.dispose();
   };
 

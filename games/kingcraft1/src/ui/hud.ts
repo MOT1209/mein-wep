@@ -36,7 +36,7 @@ const CSS = `
 .bw-debug{position:absolute;left:calc(10px + env(safe-area-inset-left));top:calc(10px + env(safe-area-inset-top));padding:8px 12px;white-space:pre;font:12px/1.5 ui-monospace,Consolas,monospace}
 .bw-toast{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:6px 14px;border-radius:8px;background:rgba(12,16,22,.85);opacity:0;transition:opacity .2s}
 .bw-toast.show{opacity:1}
-.bw-screen{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(5,8,12,.55);pointer-events:auto;touch-action:none}
+.bw-screen{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(5,8,12,.55);pointer-events:auto;touch-action:none}
 .bw-window{padding:16px 18px;max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box}
 .bw-window h2{margin:0 0 10px;font-size:16px;font-weight:600}
 .bw-grid{display:grid;gap:4px;grid-template-columns:repeat(var(--cols),44px)}
@@ -46,10 +46,17 @@ const CSS = `
 .bw-cursor{position:fixed;width:32px;height:32px;pointer-events:none;z-index:10;transform:translate(-16px,-16px)}
 .bw-cursor img{width:32px;height:32px;image-rendering:pixelated}
 .bw-cursor .n{position:absolute;right:-4px;bottom:-4px;font-size:12px;font-weight:600;text-shadow:0 1px 2px #000}
-.bw-menu{display:flex;flex-direction:column;gap:10px;min-width:260px;padding:20px 24px;text-align:center}
+.bw-menu{display:flex;flex-direction:column;gap:10px;min-width:min(260px,calc(100vw - 32px));max-width:calc(100vw - 32px);max-height:calc(100vh - 32px);overflow:auto;box-sizing:border-box;padding:20px 24px;text-align:center}
 .bw-menu h1{margin:0 0 4px;font-size:22px}
 .bw-menu p{margin:0;font-size:13px;opacity:.8;white-space:pre-line}
 .bw-menu .bw-btn{min-height:44px}
+@media (max-width:520px){
+.bw-window{padding:10px;max-width:calc(100vw - 16px)}
+.bw-window .bw-grid{grid-template-columns:repeat(var(--cols),32px);gap:2px}
+.bw-window .bw-slot{width:32px;height:32px}
+.bw-window .bw-slot img{left:2px;top:2px;width:24px;height:24px}
+.bw-row{gap:10px}
+}
 `;
 
 export function injectUiStyles(): void {
@@ -128,6 +135,15 @@ export class Hud {
     }
     this.debug = el("div", "bw-panel bw-debug hidden", this.root);
     this.toastEl = el("div", "bw-toast", this.root);
+  }
+
+  enableHotbarTaps(onTap: (slot: number) => void): void {
+    this.slots.forEach((slot, index) => {
+      slot.addEventListener("pointerdown", (event) => {
+        event.preventDefault();
+        onTap(index);
+      });
+    });
   }
 
   setPlaying(playing: boolean): void {

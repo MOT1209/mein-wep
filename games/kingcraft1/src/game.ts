@@ -70,7 +70,7 @@ export class Game {
   readonly materials: ChunkMaterials;
   readonly chunkRenderer: ChunkRenderer;
   readonly player: PlayerController;
-  readonly streamer: ChunkStreamer;
+  streamer: ChunkStreamer;
   readonly playerPosition = new THREE.Vector3();
   readonly mode: GameMode;
   readonly inventory = new Inventory();
@@ -159,6 +159,21 @@ export class Game {
   attachIcons(icons: IconSource): void {
     this.dropRenderer?.dispose();
     this.dropRenderer = new DropRenderer(this.scene, icons);
+  }
+
+  setRenderDistance(distance: number): void {
+    if (distance === this.streamer.renderDistance) return;
+    this.streamer = new ChunkStreamer(this.world, this.chunkRenderer, { renderDistance: distance });
+    this.camera.far = (distance + 2) * 16;
+    this.camera.updateProjectionMatrix();
+    for (const material of [this.materials.terrain, this.materials.water, this.materials.plants]) {
+      material.uniforms.uFogDistance.value = distance * 16;
+    }
+  }
+
+  setPixelRatioCap(cap: number): void {
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
+    this.renderer.setSize(window.innerWidth, window.innerHeight, false);
   }
 
   get creative(): boolean {
