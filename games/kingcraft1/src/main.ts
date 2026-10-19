@@ -4,7 +4,9 @@ import { Game } from "./game";
 import { attachDesktop } from "./input/desktop";
 import { consumeLook, consumeUses, createInputState, selectHotbar, setLocked, toMoveInput, type HudEvents } from "./input/inputState";
 import { attachTouch } from "./input/touch";
+import { Sfx } from "./audio/sfx";
 import { GameLoop } from "./render/loop";
+import { FrameTimer, perfLines } from "./render/perfPanel";
 import { openBackend } from "./save/db";
 import { Autosaver, buildSave, decodeChunks, loadWorld, saveWorld, slotKey, type SaveFile } from "./save/saveLoad";
 import { createPaletteSection } from "./ui/creativePalette";
@@ -82,6 +84,10 @@ async function boot(): Promise<void> {
   const inventoryScreen = new InventoryScreen(uiRoot, icons);
   const input = createInputState();
   input.lookScale = settings.sensitivity;
+  const sfx = new Sfx();
+  sfx.setVolume(settings.volume);
+  game.events.onSound = (kind, material) => sfx.play(kind, material);
+  const frames = new FrameTimer();
   applyHudScale(hud.root, settings.hudScale);
   let mode: UiMode = "paused";
   const hudEvents: HudEvents = {};
@@ -89,6 +95,7 @@ async function boot(): Promise<void> {
   let lastFrame = performance.now();
 
   const lockPointer = (): void => {
+    sfx.unlock();
     if (touchOn) {
       setLocked(input, true, hudEvents);
       return;
@@ -176,6 +183,8 @@ async function boot(): Promise<void> {
       saveSettings(store, settings);
       game.setRenderDistance(settings.renderDistance);
       game.setPixelRatioCap(QUALITY_PRESETS[settings.quality].pixelRatioCap);
+      game.setQuality(settings.quality);
+      sfx.setVolume(settings.volume);
       input.lookScale = settings.sensitivity;
       applyHudScale(hud.root, settings.hudScale);
       touchOn = touchEnabled(settings, device);
@@ -214,6 +223,7 @@ async function boot(): Promise<void> {
   ]);
   if (loadProblem) hud.toast("The saved world could not be loaded. Starting fresh.");
   inventoryScreen.setCloseHandler(() => closeInventory());
+  inventoryScreen.setCraftHandler(() => sfx.play("craft", "wood"));
   hud.enableHotbarTaps((slot) => selectHotbar(input, slot, hudEvents));
 
   hudEvents.onToggleDebug = () => hud.toggleDebug();
@@ -250,6 +260,7 @@ async function boot(): Promise<void> {
     },
     render: () => {
       const frameNow = performance.now();
+      frames.add(frameNow - lastFrame);
       if (input.locked) autosaver.tick((frameNow - lastFrame) / 1000);
       lastFrame = frameNow;
       const look = consumeLook(input);
@@ -300,7 +311,20 @@ async function boot(): Promise<void> {
           `Time ${clockText(world.dayFraction)}  day ${(world.dayFactor * 100).toFixed(0)}%`,
           `Chunks ${stream.loaded} loaded  ${stream.pending} pending`,
           `Creatures ${game.entities.entities.length}  night ${world.isNight ? "yes" : "no"}`,
-          `Facing yaw ${((state.yaw * 180) / Math.PI).toFixed(0)} pitch ${((state.pitch * 180) / Math.PI).toFixed(0)}  target ${target}`
+          `Facing yaw ${((state.yaw * 180) / Math.PI).toFixed(0)} pitch ${((state.pitch * 180) / Math.PI).toFixed(0)}  target ${target}`,
+          ...perfLines(
+            frames,
+            {
+              calls: game.renderer.info.render.calls,
+              triangles: game.renderer.info.render.triangles,
+              geometries: game.renderer.info.memory.geometries,
+              textures: game.renderer.info.memory.textures
+            },
+            stream,
+            game.entities.entities.length,
+            game.particles.particles.length
+          ),
+          `Sound ${sfx.muted ? "off" : "on"}  quality ${game.quality}`
         ]);
       }
     }

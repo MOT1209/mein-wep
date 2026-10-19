@@ -8,6 +8,7 @@ export interface Settings {
   sensitivity: number;
   hudScale: number;
   touch: TouchMode;
+  volume: number;
 }
 
 export interface DeviceInfo {
@@ -53,7 +54,8 @@ export function defaultSettings(device: DeviceInfo): Settings {
     renderDistance: QUALITY_PRESETS[quality].renderDistance,
     sensitivity: 1,
     hudScale: 1,
-    touch: "auto"
+    touch: "auto",
+    volume: 0.7
   };
 }
 
@@ -67,7 +69,8 @@ export function clampSettings(raw: unknown, device: DeviceInfo): Settings {
     renderDistance: Math.round(clamp(num(value.renderDistance, QUALITY_PRESETS[quality].renderDistance), MIN_RENDER_DISTANCE, MAX_RENDER_DISTANCE)),
     sensitivity: clamp(num(value.sensitivity, base.sensitivity), MIN_SENSITIVITY, MAX_SENSITIVITY),
     hudScale: clamp(num(value.hudScale, base.hudScale), MIN_HUD_SCALE, MAX_HUD_SCALE),
-    touch: TOUCH_MODES.includes(value.touch as TouchMode) ? (value.touch as TouchMode) : base.touch
+    touch: TOUCH_MODES.includes(value.touch as TouchMode) ? (value.touch as TouchMode) : base.touch,
+    volume: clamp(num(value.volume, base.volume), 0, 1)
   };
 }
 

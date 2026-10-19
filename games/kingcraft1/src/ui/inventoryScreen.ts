@@ -38,6 +38,7 @@ export class InventoryScreen {
   private readonly elements = new Map<string, HTMLElement>();
   private statusEl: HTMLElement | null = null;
   private closeHandler: () => void = () => undefined;
+  private craftHandler: () => void = () => undefined;
 
   constructor(parent: HTMLElement, private readonly icons: IconFactory) {
     injectUiStyles();
@@ -47,6 +48,10 @@ export class InventoryScreen {
     this.root.addEventListener("pointerup", this.onPointerUp);
     this.root.addEventListener("pointermove", this.onPointerMove);
     this.root.addEventListener("contextmenu", (event) => event.preventDefault());
+  }
+
+  setCraftHandler(handler: () => void): void {
+    this.craftHandler = handler;
   }
 
   setCloseHandler(handler: () => void): void {
@@ -194,11 +199,13 @@ export class InventoryScreen {
       if (shift) {
         const result = craftAllInto(this.grid, this.craftSize, inventory.slots);
         this.grid = result.grid;
+        if (result.crafted > 0) this.craftHandler();
       } else {
         const result = takeCraft(this.grid, this.craftSize, this.cursor);
         if (result) {
           this.grid = result.grid;
           this.cursor = result.cursor;
+          this.craftHandler();
         }
       }
       return;

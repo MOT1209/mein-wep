@@ -87,6 +87,7 @@ export class SettingsPanel {
     slider("View distance", s.renderDistance, MIN_RENDER_DISTANCE, MAX_RENDER_DISTANCE, 1, (v) => `${v}`, (v) => ({ ...s, renderDistance: v }));
     slider("Look speed", s.sensitivity, MIN_SENSITIVITY, MAX_SENSITIVITY, 0.1, (v) => `${v.toFixed(1)}x`, (v) => ({ ...s, sensitivity: v }));
     slider("HUD size", s.hudScale, MIN_HUD_SCALE, MAX_HUD_SCALE, 0.05, (v) => `${Math.round(v * 100)}%`, (v) => ({ ...s, hudScale: v }));
+    slider("Sound", s.volume, 0, 1, 0.05, (v) => (v <= 0 ? "Off" : `${Math.round(v * 100)}%`), (v) => ({ ...s, volume: v }));
     select<TouchMode>("Touch controls", s.touch, [["auto", "Auto"], ["on", "On"], ["off", "Off"]], (t) => ({ ...s, touch: t }));
     const note = el("small", "", this.body);
     note.textContent = "Quality sets the default view distance and pixel density. Settings are saved in this browser.";

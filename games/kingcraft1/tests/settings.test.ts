@@ -61,6 +61,9 @@ describe("clamping", () => {
     expect(s.hudScale).toBeGreaterThan(0);
     expect(s.touch).toBe("auto");
     expect(clampSettings({ renderDistance: -5 }, DESKTOP).renderDistance).toBe(MIN_RENDER_DISTANCE);
+    expect(clampSettings({ volume: 4 }, DESKTOP).volume).toBe(1);
+    expect(clampSettings({ volume: -1 }, DESKTOP).volume).toBe(0);
+    expect(clampSettings({}, DESKTOP).volume).toBe(0.7);
     expect(clampSettings("nonsense", PHONE)).toEqual(defaultSettings(PHONE));
   });
 });

@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { CHUNK_SX, CHUNK_SY, CHUNK_SZ, CREATIVE_REACH, PLAYER_REACH, QUALITY_PRESETS, TICK_MS, type QualityLevel } from "./config";
-import { B, isLiquid } from "./content/blocks";
+import { B, blockById, isLiquid, type MaterialKind } from "./content/blocks";
+import type { SfxKind } from "./audio/sfx";
 import { foodValue, itemById, toolStats } from "./content/items";
 import { EntityManager } from "./entities/manager";
 import type { Entity } from "./entities/types";
@@ -20,6 +21,9 @@ import type { SaveFile, SaveInput } from "./save/saveLoad";
 import { ChunkRenderer } from "./render/chunkRenderer";
 import { DropRenderer, type IconSource } from "./render/dropRenderer";
 import { EntityRenderer } from "./render/entityRenderer";
+import { CloudLayer } from "./render/clouds";
+import { BlockColors, ParticleRenderer } from "./render/particleRenderer";
+import { ParticleSystem } from "./render/particles";
 import { createChunkMaterials, type ChunkMaterials } from "./render/materials";
 import { buildAtlasTexture } from "./render/textures";
 import { MIN_DAY_FACTOR, skyColors } from "./render/sky";
@@ -35,6 +39,9 @@ const RANDOM_TICKS_PER_CHUNK = 6;
 const PLAYER_ATTACK_COOLDOWN = 0.45;
 const HAND_DAMAGE = 1;
 const PLAYER_KNOCKBACK = 7;
+const STEP_DISTANCE = 1.7;
+const DIG_SOUND_SECONDS = 0.24;
+const MAX_PARTICLES = 400;
 
 export type GameMode = "survival" | "creative";
 
@@ -61,6 +68,7 @@ export interface GameEvents {
   onInteract?(result: InteractResult): void;
   onPlayerDamaged?(amount: number, source: DamageSource, attacker: Entity | null): void;
   onDeath?(source: DamageSource | null): void;
+  onSound?(kind: SfxKind, material: MaterialKind): void;
 }
 
 export class Game {
@@ -82,6 +90,13 @@ export class Game {
   stats = new PlayerStats();
   private readonly entityRenderer: EntityRenderer;
   private attackCooldown = 0;
+  readonly particles = new ParticleSystem(0);
+  private particleRenderer: ParticleRenderer | null = null;
+  private blockColors: BlockColors | null = null;
+  private clouds: CloudLayer | null = null;
+  private stepDistance = 0;
+  private digSoundTimer = 0;
+  quality: QualityLevel;
   respawnPoint: Position | null = null;
   readonly events: GameEvents = {};
   target: RayHit | null = null;
@@ -95,6 +110,7 @@ export class Game {
 
   constructor(canvas: HTMLCanvasElement, world: World, options: GameOptions = {}) {
     const quality = options.quality ?? "medium";
+    this.quality = quality;
     const preset = QUALITY_PRESETS[quality];
     const renderDistance = options.renderDistance ?? preset.renderDistance;
     const spawn = world.findSpawn();
@@ -132,6 +148,10 @@ export class Game {
     this.selection.visible = false;
     this.scene.add(this.selection);
     this.entityRenderer = new EntityRenderer(this.scene, world);
+    this.particles.setCap(preset.particles);
+    this.particleRenderer = new ParticleRenderer(this.scene, MAX_PARTICLES);
+    this.clouds = new CloudLayer(this.scene, world.seedInt, renderDistance * 16);
+    this.clouds.setVisible(preset.clouds);
 
     this.atlas = buildAtlasTexture();
     this.materials = createChunkMaterials(this.atlas, quality);
@@ -158,6 +178,7 @@ export class Game {
   }
 
   attachIcons(icons: IconSource): void {
+    this.blockColors = new BlockColors(this.atlasCanvas);
     this.dropRenderer?.dispose();
     this.dropRenderer = new DropRenderer(this.scene, icons);
   }
@@ -232,7 +253,42 @@ export class Game {
     } else {
       this.mining.reset();
     }
-    this.drops.tick(this.world, dt, { x, y, z }, (stack) => this.inventory.add(stack));
+    this.drops.tick(this.world, dt, { x, y, z }, (stack) => {
+      const leftover = this.inventory.add(stack);
+      if (!leftover || leftover.count < stack.count) this.sound("pickup", "plant");
+      return leftover;
+    });
+    this.particles.step(dt, this.world);
+    if (input.active) this.footsteps(dt);
+  }
+
+  private sound(kind: SfxKind, material: MaterialKind): void {
+    this.events.onSound?.(kind, material);
+  }
+
+  private materialOf(id: number): MaterialKind {
+    return blockById(id).material;
+  }
+
+  private footsteps(dt: number): void {
+    const state = this.player.state;
+    if (!state.onGround || state.flying) {
+      this.stepDistance = 0;
+      return;
+    }
+    this.stepDistance += Math.hypot(state.velocity.x, state.velocity.z) * dt;
+    if (this.stepDistance < STEP_DISTANCE) return;
+    this.stepDistance = 0;
+    const { x, y, z } = state.position;
+    const below = this.world.getBlock(Math.floor(x), Math.floor(y) - 1, Math.floor(z));
+    if (below !== B.AIR) this.sound("step", this.materialOf(below));
+  }
+
+  setQuality(quality: QualityLevel): void {
+    this.quality = quality;
+    const preset = QUALITY_PRESETS[quality];
+    this.particles.setCap(preset.particles);
+    this.clouds?.setVisible(preset.clouds);
   }
 
   private updateTarget(): void {
@@ -272,6 +328,7 @@ export class Game {
     const event = this.stats.damage(amount, source);
     if (event.amount <= 0) return;
     this.events.onPlayerDamaged?.(event.amount, source, attacker);
+    this.sound("hurt", "wool");
     if (event.died) this.die();
   }
 
@@ -307,6 +364,7 @@ export class Game {
     });
     for (const event of events) {
       this.events.onPlayerDamaged?.(event.amount, event.source, null);
+      this.sound("hurt", "wool");
       if (event.died) this.die();
     }
   }
@@ -336,6 +394,11 @@ export class Game {
     } else if (input.attack) {
       const event = this.mining.tick(this.world, this.target, held, dt, this.creative);
       if (event) this.onMiningEvent(event);
+      this.digSoundTimer -= dt;
+      if (!event && this.target && this.mining.progress > 0 && this.digSoundTimer <= 0) {
+        this.digSoundTimer = DIG_SOUND_SECONDS;
+        this.sound("dig", this.materialOf(this.target.id));
+      }
     } else {
       this.mining.reset();
     }
@@ -345,6 +408,8 @@ export class Game {
   private onMiningEvent(event: MiningEvent): void {
     this.events.onMining?.(event);
     if (event.kind !== "broken") return;
+    this.sound("break", this.materialOf(event.id));
+    if (this.blockColors) this.particles.burst(event.x + 0.5, event.y + 0.5, event.z + 0.5, this.blockColors.colorsFor(event.id), this.rng);
     if (event.harvest) this.dropBlock(event.id, event);
     for (const stack of this.containers.remove(event.x, event.y, event.z)) {
       this.drops.spawn(stack, event.x + 0.5, event.y + 0.5, event.z + 0.5);
@@ -372,7 +437,10 @@ export class Game {
     const held = this.inventory.selected;
     if (!held) return;
     if (foodValue(held.item)) {
-      if (!this.creative && this.stats.eat(held.item)) this.inventory.removeAt(slot, 1);
+      if (!this.creative && this.stats.eat(held.item)) {
+        this.inventory.removeAt(slot, 1);
+        this.sound("eat", "plant");
+      }
       return;
     }
     if (itemById(held.item)?.useAction === "bone_meal") {
@@ -391,6 +459,7 @@ export class Game {
       this.events.onPlaceFailed?.(placed.reason);
       return;
     }
+    this.sound("place", this.materialOf(placed.blockId));
     if (!this.creative) {
       this.inventory.removeAt(slot, 1);
       if (placed.give) this.giveOrDrop(placed.give);
@@ -435,6 +504,9 @@ export class Game {
       Math.max(this.world.dayFactor, MIN_DAY_FACTOR),
       this.clock() / 1000
     );
+    const brightness = Math.max(this.world.dayFactor, MIN_DAY_FACTOR);
+    this.particleRenderer?.sync(this.particles.particles, 0.35 + 0.65 * brightness);
+    this.clouds?.update(this.camera.position.x, this.camera.position.z, this.clock() / 1000, brightness);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -446,6 +518,8 @@ export class Game {
 
   dispose(): void {
     this.dropRenderer?.dispose();
+    this.particleRenderer?.dispose();
+    this.clouds?.dispose(this.scene);
     this.entityRenderer.dispose();
     for (const chunk of this.world.chunks.values()) {
       this.chunkRenderer.dispose(chunk.cx, chunk.cz);
