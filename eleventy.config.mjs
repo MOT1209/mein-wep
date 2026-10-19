@@ -33,6 +33,7 @@ const NOT_SERVED = [
   /^tests\//,
   /^scripts\/check-url-surface\.mjs$/,
   /^scripts\/site-templates\.mjs$/,
+  /^scripts\/apk-release-policy\.mjs$/,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.

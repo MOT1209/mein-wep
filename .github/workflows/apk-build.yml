@@ -215,6 +215,19 @@ jobs:
             echo "build=1" >> $GITHUB_OUTPUT
           fi
 
+      # Decides (via tested logic in scripts/apk-release-policy.mjs, covered by
+      # tests/apk-signing-policy.test.mjs) whether this build may be published:
+      # `release` = keystore secrets present, `test` = labelled artifact that
+      # can never reach the apks-latest release or version.json.
+      - name: Signing policy (release vs test build)
+        id: policy
+        env:
+          KS_B64: ${{ secrets.KEYSTORE_BASE64 }}
+          KS_PASS: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          set -o pipefail
+          node scripts/apk-release-policy.mjs mode >> "$GITHUB_OUTPUT"
+
       - name: Build APK
         working-directory: ${{ matrix.project }}
         env:
@@ -224,7 +237,13 @@ jobs:
           KS_KEY_PASS: ${{ secrets.KEY_PASSWORD }}
         run: |
           set -o pipefail
-          if [ -n "$KS_B64" ] && [ -n "$KS_PASS" ]; then
+          MODE="${{ steps.policy.outputs.mode }}"
+          if [ "$MODE" = "release" ]; then
+            # Belt and braces: policy only reports `release` when both exist.
+            if [ -z "$KS_B64" ] || [ -z "$KS_PASS" ]; then
+              echo "::error::policy reported release mode but keystore secrets are empty — refusing to build"
+              exit 1
+            fi
             echo "$KS_B64" | base64 -d > release-key.jks
             npx cap build android \
               --keystorepath "$PWD/release-key.jks" \
@@ -234,20 +253,25 @@ jobs:
               --androidreleasetype APK \
               --signing-type apksigner 2>&1 | tee build.log | tail -40
           else
-            echo "::warning::KEYSTORE_BASE64/KEYSTORE_PASSWORD secrets not set — signing with a throwaway key. Any future update signed with a DIFFERENT key will be REJECTED by Android (signature mismatch). Configure the release-keystore secrets for publishable builds."
+            # TEST build: ephemeral key with a random, masked password — never a
+            # hardcoded one. This artifact is uploaded as a labelled TEST
+            # artifact only (see the gate step) and is never published.
+            echo "::notice::TEST BUILD — signing with an ephemeral key; this artifact will NOT be published to the apks-latest release. Configure KEYSTORE_BASE64/KEYSTORE_PASSWORD for publishable builds."
+            TMP_PASS=$(openssl rand -hex 16)
+            echo "::add-mask::$TMP_PASS"
             keytool -genkey -v \
               -keystore temp-key.jks \
-              -storepass "TempPass123" \
-              -alias "rashid-temp" \
-              -keypass "TempPass123" \
+              -storepass "$TMP_PASS" \
+              -alias "rashid-test" \
+              -keypass "$TMP_PASS" \
               -keyalg RSA -keysize 2048 -validity 365 \
-              -dname "CN=Rashid, OU=Dev, O=RashidApps, L=City, ST=State, C=SA" \
+              -dname "CN=Rashid Test Build, OU=Dev, O=RashidApps, L=City, ST=State, C=SA" \
               -noprompt 2>&1
             npx cap build android \
               --keystorepath "$PWD/temp-key.jks" \
-              --keystorepass "TempPass123" \
-              --keystorealias "rashid-temp" \
-              --keystorealiaspass "TempPass123" \
+              --keystorepass "$TMP_PASS" \
+              --keystorealias "rashid-test" \
+              --keystorealiaspass "$TMP_PASS" \
               --androidreleasetype APK \
               --signing-type apksigner 2>&1 | tee build.log | tail -40
           fi
@@ -287,41 +311,107 @@ jobs:
       - name: Copy APK to site folder
         id: apk
         run: |
+          set -o pipefail
           OUT="${{ matrix.project }}/android/app/build/outputs/apk"
-          echo "APK files produced:"; find "$OUT" -name "*.apk" -type f -exec ls -l {} \;
-          # The build leaves both an unsigned intermediate and the signed APK in
-          # this tree, and `find | head -1` returns whichever the filesystem lists
-          # first. Prefer the signed artifact explicitly.
-          APK_FILE=$(find "$OUT" -name "*signed*.apk" ! -name "*unsigned*" -type f 2>/dev/null | head -1)
-          [ -n "$APK_FILE" ] || APK_FILE=$(find "$OUT" -name "*.apk" -type f 2>/dev/null | head -1)
-          echo "Selected: $APK_FILE"
-          if [ -n "$APK_FILE" ]; then
-            FOLDER="${{ steps.info.outputs.folder }}"
-            VERSION="${{ steps.version.outputs.version }}"
-            DEST="apks/${FOLDER}-v${VERSION}.apk"
-            cp "$APK_FILE" "$DEST"
-            echo "path=$DEST" >> $GITHUB_OUTPUT
-            echo "APK copied to $DEST"
-          else
-            echo "path=" >> $GITHUB_OUTPUT
-            echo "::error::No APK produced for ${{ matrix.project }} — Capacitor/Gradle build failed"
+          echo "APK files produced:"; find "$OUT" -name "*.apk" -type f -exec ls -l {} \; 2>/dev/null || true
+          # Tested selection logic (tests/apk-signing-policy.test.mjs): only a
+          # signed, non-unsigned APK from a release/ output dir is eligible.
+          # No eligible APK fails the job instead of falling back to whatever
+          # the filesystem listed first.
+          if ! APK_FILE=$(node scripts/apk-release-policy.mjs select "$OUT"); then
+            echo "::error::No publishable (signed, release) APK for ${{ matrix.project }} under $OUT"
             exit 1
           fi
+          FOLDER="${{ steps.info.outputs.folder }}"
+          VERSION="${{ steps.version.outputs.version }}"
+          DEST="apks/${FOLDER}-v${VERSION}.apk"
+          cp "$APK_FILE" "$DEST"
+          echo "path=$DEST" >> $GITHUB_OUTPUT
+          echo "APK copied to $DEST"
 
       - name: Verify APK is signed
+        id: verify
         if: steps.apk.outputs.path != ''
         run: |
+          set -o pipefail
           # apksigner is the authoritative check. jarsigner only understands the
           # legacy v1 (JAR) signature, so it calls a v2/v3-signed APK "unsigned".
-          if ! apksigner verify --verbose "${{ steps.apk.outputs.path }}"; then
-            echo "::error::${{ steps.apk.outputs.path }} failed apksigner verification — refusing to publish it. Check the 'Build APK' step log for a signing failure."
+          APK="${{ steps.apk.outputs.path }}"
+          if ! CERT_OUT=$(apksigner verify --verbose --print-certs "$APK" 2>&1); then
+            echo "$CERT_OUT"
+            echo "::error::$APK failed apksigner verification — refusing to publish it. Check the 'Build APK' step log for a signing failure."
             exit 1
           fi
-          echo "APK signature verified: ${{ steps.apk.outputs.path }}"
+          echo "$CERT_OUT"
+          SHA=$(echo "$CERT_OUT" | sed -n 's/.*certificate SHA-256 digest: \([0-9a-fA-F]*\).*/\1/p' | head -1)
+          echo "signer_sha256=$SHA" >> "$GITHUB_OUTPUT"
+          echo "verify_passed=true" >> "$GITHUB_OUTPUT"
+          {
+            echo "### APK signature — ${{ steps.info.outputs.folder }} v${{ steps.version.outputs.version }} (mode: ${{ steps.policy.outputs.mode }})"
+            echo "- signer certificate SHA-256: \`$SHA\`"
+            echo "- apksigner verification: passed"
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "${{ steps.policy.outputs.mode }}" = "test" ] && [ -n "$SHA" ]; then
+            echo "::notice::signer fingerprint of this TEST build: $SHA (not pinned — record it if this key is ever adopted)"
+          fi
+
+      # Signer continuity: release builds are compared against the historical
+      # release-key baseline that signed all 6 shipped apks/*.apk — a mismatch
+      # is a loud warning (Android refuses in-place updates), never a failure.
+      # Set the optional EXPECTED_SIGNER_SHA256 secret to turn a mismatch into
+      # a hard failure. TEST builds are skipped (ephemeral key by design).
+      - name: Check signer continuity (historical release key)
+        id: continuity
+        if: steps.verify.outputs.verify_passed == 'true'
+        env:
+          EXPECTED_SIGNER_SHA256: ${{ secrets.EXPECTED_SIGNER_SHA256 }}
+        run: |
+          set -o pipefail
+          node scripts/apk-release-policy.mjs continuity \
+            --mode "${{ steps.policy.outputs.mode }}" \
+            --signer "${{ steps.verify.outputs.signer_sha256 }}" >> "$GITHUB_OUTPUT"
+
+      # Hard-fails on package-name mismatch (wrong app on people's devices);
+      # versionName differences only warn — see scripts/apk-release-policy.mjs.
+      - name: Verify APK identity (package vs capacitor config)
+        id: meta
+        if: steps.apk.outputs.path != ''
+        run: |
+          set -o pipefail
+          command -v aapt >/dev/null 2>&1 || { echo "::error::aapt not on PATH — check the build-tools setup step"; exit 1; }
+          aapt dump badging "${{ steps.apk.outputs.path }}" > apk-badging.txt
+          node scripts/apk-release-policy.mjs verify-meta \
+            --project "${{ matrix.project }}" \
+            --badging apk-badging.txt \
+            --version "${{ steps.version.outputs.version }}" >> "$GITHUB_OUTPUT"
+
+      # Single decision point (always exits 0): publish_ok=true only when the
+      # build is a release-mode build with a selected, apksigner-verified APK
+      # whose package identity matches capacitor.config.json. Test builds get
+      # publish_ok=false and a labelled TEST artifact instead of a release.
+      - name: Release gate (publish only fully qualified builds)
+        id: gate
+        if: steps.apk.outputs.path != ''
+        run: |
+          set -o pipefail
+          node scripts/apk-release-policy.mjs can-publish \
+            --mode "${{ steps.policy.outputs.mode }}" \
+            --path "${{ steps.apk.outputs.path }}" \
+            --verify "${{ steps.verify.outputs.verify_passed }}" \
+            --meta "${{ steps.meta.outputs.meta_ok }}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload TEST build artifact (never published as a release)
+        if: steps.gate.outputs.publish_ok == 'false' && steps.apk.outputs.path != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: TEST-BUILD-${{ steps.info.outputs.folder }}-v${{ steps.version.outputs.version }}-b${{ steps.version.outputs.build }}
+          path: ${{ steps.apk.outputs.path }}
+          retention-days: 7
+          if-no-files-found: error
 
       - name: Publish APK to GitHub Release
         id: publish
-        if: steps.apk.outputs.path != ''
+        if: steps.gate.outputs.publish_ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -362,7 +452,7 @@ jobs:
           echo "url=https://github.com/${{ github.repository }}/releases/download/$TAG/$ASSET_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Update version.json with Release URL
-        if: steps.apk.outputs.path != ''
+        if: steps.gate.outputs.publish_ok == 'true'
         run: |
           VER_FILE="${{ matrix.project }}/version.json"
           BUILD="${{ steps.version.outputs.build }}"
@@ -377,7 +467,7 @@ jobs:
           fi
 
       - name: Commit version.json
-        if: steps.apk.outputs.path != ''
+        if: steps.gate.outputs.publish_ok == 'true'
         run: |
           git config user.name "APK Bot"
           git config user.email "bot@rashid.app"
