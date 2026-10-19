@@ -1,4 +1,5 @@
 import { el, injectUiStyles } from "./hud";
+import { tr } from "./i18n";
 
 export interface PauseMenuOptions {
   title: string;
@@ -27,7 +28,7 @@ export class PauseMenu {
     this.heading.textContent = options.title;
     this.resume = el("button", "bw-btn primary", this.menu);
     this.resume.type = "button";
-    this.resume.textContent = "Play";
+    this.resume.textContent = tr("ui.play");
     this.resume.addEventListener("click", () => options.onResume());
     this.extras = el("div", "bw-menu", this.menu);
     this.extras.style.padding = "0";
@@ -40,7 +41,7 @@ export class PauseMenu {
     return !this.root.classList.contains("hidden");
   }
 
-  show(resumeLabel = "Resume"): void {
+  show(resumeLabel = tr("ui.resume")): void {
     this.resume.textContent = resumeLabel;
     this.root.classList.remove("hidden");
   }

@@ -1,12 +1,13 @@
 import type { DamageSource } from "../player/stats";
 import { el, injectUiStyles } from "./hud";
+import { tr } from "./i18n";
 
 const CAUSES: Readonly<Record<DamageSource, string>> = {
-  mob: "You were defeated by a creature.",
-  fall: "You fell from a high place.",
-  drown: "You ran out of air.",
-  starve: "You starved.",
-  void: "You fell out of the world."
+  mob: "game.death_mob",
+  fall: "game.death_fall",
+  drown: "game.death_drown",
+  starve: "game.death_starve",
+  void: "game.death_void"
 };
 
 export class DeathScreen {
@@ -18,12 +19,12 @@ export class DeathScreen {
     this.root = el("div", "bw-screen hidden", parent);
     this.root.style.background = "rgba(90,10,10,.55)";
     const menu = el("div", "bw-panel bw-menu", this.root);
-    el("h1", "", menu).textContent = "You died";
+    el("h1", "", menu).textContent = tr("ui.death_title");
     this.cause = el("p", "", menu);
-    el("p", "", menu).textContent = "Your items were dropped where you fell.";
+    el("p", "", menu).textContent = tr("game.death_items");
     const button = el("button", "bw-btn primary", menu);
     button.type = "button";
-    button.textContent = "Respawn";
+    button.textContent = tr("ui.respawn");
     button.addEventListener("click", onRespawn);
   }
 
@@ -32,7 +33,7 @@ export class DeathScreen {
   }
 
   show(source: DamageSource | null): void {
-    this.cause.textContent = source ? CAUSES[source] : "";
+    this.cause.textContent = source ? tr(CAUSES[source]) : "";
     this.root.classList.remove("hidden");
   }
 

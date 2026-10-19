@@ -1,4 +1,6 @@
 import { MAX_RENDER_DISTANCE, MIN_RENDER_DISTANCE, QUALITY_PRESETS, type QualityLevel } from "../config";
+import type { Locale } from "../content/locales";
+import { detectLocale, isLocale } from "./i18n";
 
 export type TouchMode = "auto" | "on" | "off";
 
@@ -9,12 +11,14 @@ export interface Settings {
   hudScale: number;
   touch: TouchMode;
   volume: number;
+  language: Locale;
 }
 
 export interface DeviceInfo {
   cores?: number;
   memoryGb?: number;
   coarsePointer: boolean;
+  languages?: readonly string[];
 }
 
 export interface KeyValueStore {
@@ -55,7 +59,8 @@ export function defaultSettings(device: DeviceInfo): Settings {
     sensitivity: 1,
     hudScale: 1,
     touch: "auto",
-    volume: 0.7
+    volume: 0.7,
+    language: detectLocale(device.languages ?? [])
   };
 }
 
@@ -70,7 +75,8 @@ export function clampSettings(raw: unknown, device: DeviceInfo): Settings {
     sensitivity: clamp(num(value.sensitivity, base.sensitivity), MIN_SENSITIVITY, MAX_SENSITIVITY),
     hudScale: clamp(num(value.hudScale, base.hudScale), MIN_HUD_SCALE, MAX_HUD_SCALE),
     touch: TOUCH_MODES.includes(value.touch as TouchMode) ? (value.touch as TouchMode) : base.touch,
-    volume: clamp(num(value.volume, base.volume), 0, 1)
+    volume: clamp(num(value.volume, base.volume), 0, 1),
+    language: isLocale(value.language) ? value.language : base.language
   };
 }
 

@@ -1,5 +1,6 @@
 import { HOTBAR_SIZE } from "../config";
 import { maxDurability, type ItemStack } from "../content/items";
+import { tr, trItem } from "./i18n";
 import type { IconFactory } from "./icons";
 
 export interface Vitals {
@@ -33,6 +34,7 @@ const CSS = `
 .bw-slot .d{position:absolute;left:5px;right:5px;bottom:3px;height:3px;background:#222}
 .bw-slot .d>i{display:block;height:100%}
 .bw-slot .k{position:absolute;left:3px;top:1px;font-size:10px;opacity:.55}
+[dir=rtl] .bw-hotbar,[dir=rtl] .bw-grid,[dir=rtl] .bw-debug{direction:ltr}
 .bw-debug{position:absolute;left:calc(10px + env(safe-area-inset-left));top:calc(10px + env(safe-area-inset-top));padding:8px 12px;white-space:pre;font:12px/1.5 ui-monospace,Consolas,monospace}
 .bw-toast{position:absolute;left:50%;bottom:calc(120px + env(safe-area-inset-bottom));transform:translateX(-50%);padding:6px 14px;border-radius:8px;background:rgba(12,16,22,.85);opacity:0;transition:opacity .2s}
 .bw-toast.show{opacity:1}
@@ -81,7 +83,7 @@ export function renderSlot(slot: HTMLElement, stack: ItemStack | null, icons: Ic
   img.src = icons.urlFor(stack.item);
   img.alt = stack.item;
   img.draggable = false;
-  slot.title = stack.item.replace(/_/g, " ");
+  slot.title = trItem(stack.item);
   if (stack.count > 1) el("span", "n", slot).textContent = String(stack.count);
   const max = maxDurability(stack.item);
   if (max > 0 && stack.durability !== undefined && stack.durability < max) {
@@ -124,9 +126,9 @@ export class Hud {
       fill.style.background = color;
       return { row, fill };
     };
-    const health = bar("Health", "#d8443a");
-    const hunger = bar("Food", "#c98a3a");
-    const air = bar("Air", "#5aa8e0");
+    const health = bar(tr("ui.health"), "#d8443a");
+    const hunger = bar(tr("game.food"), "#c98a3a");
+    const air = bar(tr("game.air"), "#5aa8e0");
     this.bars = { health: health.fill, hunger: hunger.fill, air: air.fill, airRow: air.row };
     const hotbar = el("div", "bw-hotbar", bottom);
     for (let i = 0; i < HOTBAR_SIZE; i++) {

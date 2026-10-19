@@ -13,23 +13,21 @@ import { createPaletteSection } from "./ui/creativePalette";
 import { DeathScreen } from "./ui/deathScreen";
 import { Hud } from "./ui/hud";
 import { IconFactory } from "./ui/icons";
-import { furnaceAccepts, furnaceStatus } from "./gameplay/furnace";
+import { furnaceAccepts, furnaceProgress } from "./gameplay/furnace";
 import { InventoryScreen, type ExtraSection } from "./ui/inventoryScreen";
 import { PauseMenu } from "./ui/pauseMenu";
 import { applyHudScale, browserStore, readDevice } from "./ui/responsive";
 import { loadSettings, saveSettings, touchEnabled, type Settings } from "./ui/settings";
 import { SettingsPanel } from "./ui/settingsPanel";
+import { EncyclopediaScreen } from "./ui/encyclopedia";
+import { setLocale, tr, trCreature } from "./ui/i18n";
 import { BIOMES } from "./voxels/biomes";
 import { World } from "./voxels/world";
 
 const DEFAULT_SEED = 271828;
 const DEBUG_INTERVAL_MS = 250;
-const CONTROLS_TEXT =
-  "Left mouse break · Right mouse place or use · Wheel or 1-9 hotbar\n" +
-  "WASD move · Space jump · Shift sneak · Ctrl or double-W sprint\n" +
-  "E inventory · F fly (creative) · F3 debug · Esc pause";
 
-type UiMode = "paused" | "playing" | "inventory";
+type UiMode = "paused" | "playing" | "inventory" | "book";
 
 function parseSeed(search: string): number {
   const raw = new URLSearchParams(search).get("seed");
@@ -69,6 +67,7 @@ async function boot(): Promise<void> {
   const device = readDevice();
   const store = browserStore();
   let settings: Settings = loadSettings(store, device);
+  setLocale(settings.language);
   let touchOn = touchEnabled(settings, device);
   const game = new Game(canvas, world, {
     mode: requestedMode,
@@ -108,13 +107,13 @@ async function boot(): Promise<void> {
     else if (document.pointerLockElement === canvas) document.exitPointerLock();
   };
   const pause = new PauseMenu(uiRoot, {
-    title: "Block World",
+    title: tr("game.title"),
     info:
-      `${game.mode === "creative" ? "Creative" : "Survival"} · seed ${world.seedInt}` +
-      `${backend.persistent ? (saved ? " · save loaded" : " · new world") : " · saving unavailable in this browser"}\n\n${CONTROLS_TEXT}`,
+      `${tr(game.mode === "creative" ? "ui.creative" : "ui.survival")} · ${tr("ui.seed")} ${world.seedInt} · ` +
+      `${tr(backend.persistent ? (saved ? "game.info_save_loaded" : "game.info_new_world") : "game.info_no_saving")}\n\n${tr("game.controls_desktop")}`,
     onResume: lockPointer
   });
-  pause.show("Play");
+  pause.show(tr("ui.play"));
 
   const dropLeftover = (stack: { item: string; count: number }): void => {
     const { x, y, z } = game.player.state.position;
@@ -135,20 +134,23 @@ async function boot(): Promise<void> {
   };
 
   game.events.onMining = (event) => {
-    if (event.kind === "blocked") hud.toast("This needs a stronger tool");
+    if (event.kind === "blocked") hud.toast(tr("game.toast_stronger_tool"));
   };
   game.events.onInteract = (result) => {
-    if (result.kind === "crafting") openInventory(3, "Crafting table");
-    else if (result.kind === "bed") hud.toast(result.slept ? "You slept through the night. Spawn point set." : "Spawn point set. You can only sleep at night.");
+    if (result.kind === "crafting") openInventory(3, tr("game.crafting_table"));
+    else if (result.kind === "bed") hud.toast(tr(result.slept ? "game.toast_slept" : "game.toast_bed_day"));
     else if (result.kind === "container" && result.state.kind === "chest") {
-      openInventory(2, "Chest", { title: "Chest", slots: result.state.slots });
+      openInventory(2, tr("game.chest"), { title: tr("game.chest"), slots: result.state.slots });
     } else if (result.kind === "container" && result.state.kind === "furnace") {
       const furnace = result.state;
-      openInventory(2, "Furnace", {
-        title: "Input · Fuel · Output",
+      openInventory(2, tr("game.furnace"), {
+        title: tr("game.furnace_slots"),
         slots: furnace.slots,
         accepts: furnaceAccepts,
-        render: () => furnaceStatus(furnace)
+        render: () => {
+          const progress = furnaceProgress(furnace);
+          return progress.lit ? tr("game.furnace_burning", { fuel: progress.fuel, smelt: progress.smelt }) : tr("game.furnace_idle");
+        }
       });
     }
   };
@@ -158,9 +160,9 @@ async function boot(): Promise<void> {
     lockPointer();
   });
   game.events.onPlayerDamaged = (amount, source, attacker) => {
-    if (attacker) hud.toast(`Hit by ${attacker.def.id.replace(/_/g, " ")} (-${amount})`);
-    else if (source === "drown") hud.toast("You are drowning");
-    else if (source === "starve") hud.toast("You are starving");
+    if (attacker) hud.toast(tr("game.toast_hit_by", { name: trCreature(attacker.def.id), amount }));
+    else if (source === "drown") hud.toast(tr("game.toast_drowning"));
+    else if (source === "starve") hud.toast(tr("game.toast_starving"));
   };
   game.events.onDeath = (source) => {
     if (inventoryScreen.isOpen) inventoryScreen.close();
@@ -170,8 +172,8 @@ async function boot(): Promise<void> {
     releasePointer();
   };
   game.events.onPlaceFailed = (reason) => {
-    if (reason === "no-support") hud.toast("Needs a solid block below");
-    else if (reason === "wrong-soil") hud.toast("Cannot be planted here");
+    if (reason === "no-support") hud.toast(tr("game.toast_no_support"));
+    else if (reason === "wrong-soil") hud.toast(tr("game.toast_wrong_soil"));
   };
 
   const touch = attachTouch(uiRoot, input, hudEvents, { canFly: game.player.canFly, onPause: releasePointer });
@@ -179,8 +181,14 @@ async function boot(): Promise<void> {
     uiRoot,
     settings,
     (next) => {
+      const languageChanged = next.language !== settings.language;
       settings = next;
       saveSettings(store, settings);
+      if (languageChanged) {
+        loop.stop();
+        void autosaver.now().finally(() => window.location.reload());
+        return;
+      }
       game.setRenderDistance(settings.renderDistance);
       game.setPixelRatioCap(QUALITY_PRESETS[settings.quality].pixelRatioCap);
       game.setQuality(settings.quality);
@@ -195,33 +203,53 @@ async function boot(): Promise<void> {
     }
   );
   const autosaver = new Autosaver(AUTOSAVE_INTERVAL_SECONDS, () => saveWorld(backend, saveKey, buildSave(game.snapshot())));
+  let bookFromPause = false;
+  const encyclopedia = new EncyclopediaScreen(uiRoot, icons, settings.language, () => closeBook());
+  const openBook = (fromPause: boolean): void => {
+    bookFromPause = fromPause;
+    mode = "book";
+    pause.hide();
+    hud.setPlaying(false);
+    encyclopedia.open();
+    releasePointer();
+  };
+  const closeBook = (): void => {
+    encyclopedia.close();
+    mode = "paused";
+    if (bookFromPause) pause.show();
+    else lockPointer();
+  };
   pause.setButtons([
     {
-      label: "Settings",
+      label: tr("ui.encyclopedia"),
+      onClick: () => openBook(true)
+    },
+    {
+      label: tr("ui.settings"),
       onClick: () => {
         pause.hide();
         settingsPanel.show(settings);
       }
     },
     {
-      label: "Save now",
+      label: tr("game.save_now"),
       onClick: () => {
         autosaver.now().then(
-          () => hud.toast(backend.persistent ? "World saved" : "Saved for this session only"),
-          () => hud.toast("Saving failed")
+          () => hud.toast(tr(backend.persistent ? "game.toast_saved" : "game.toast_saved_session")),
+          () => hud.toast(tr("game.toast_save_failed"))
         );
       }
     },
     {
-      label: "New world",
+      label: tr("ui.new_world"),
       onClick: () => {
-        if (!window.confirm("Delete this saved world and start again?")) return;
+        if (!window.confirm(tr("game.new_world_confirm"))) return;
         loop.stop();
         void backend.delete(saveKey).finally(() => window.location.reload());
       }
     }
   ]);
-  if (loadProblem) hud.toast("The saved world could not be loaded. Starting fresh.");
+  if (loadProblem) hud.toast(tr("game.toast_load_failed"));
   inventoryScreen.setCloseHandler(() => closeInventory());
   inventoryScreen.setCraftHandler(() => sfx.play("craft", "wood"));
   hud.enableHotbarTaps((slot) => selectHotbar(input, slot, hudEvents));
@@ -229,28 +257,36 @@ async function boot(): Promise<void> {
   hudEvents.onToggleDebug = () => hud.toggleDebug();
   hudEvents.onToggleInventory = () => {
     if (inventoryScreen.isOpen) closeInventory();
-    else if (mode === "playing") openInventory(2, "Inventory", game.creative ? createPaletteSection() : undefined);
+    else if (mode === "playing") openInventory(2, tr("ui.inventory"), game.creative ? createPaletteSection() : undefined);
   };
   hudEvents.onPauseChange = (paused) => {
     touch.setVisible(touchOn && !paused);
     if (!paused) {
       if (inventoryScreen.isOpen) inventoryScreen.close();
+      if (encyclopedia.isOpen) encyclopedia.close();
       mode = "playing";
       pause.hide();
       hud.setPlaying(true);
       return;
     }
     hud.setPlaying(false);
-    if (mode === "inventory" || death.isVisible) return;
+    if (mode === "inventory" || mode === "book" || death.isVisible) return;
     mode = "paused";
     pause.show();
   };
   const detachDesktop = attachDesktop(canvas, input, hudEvents, { canFly: game.player.canFly });
 
   const onEscape = (event: KeyboardEvent): void => {
+    if (event.code !== "Escape" && event.target instanceof HTMLInputElement) return;
     if (event.code === "Escape" && inventoryScreen.isOpen) {
       event.preventDefault();
       closeInventory();
+    } else if (event.code === "Escape" && encyclopedia.isOpen) {
+      event.preventDefault();
+      closeBook();
+    } else if (event.code === "KeyJ" && mode === "playing" && !event.repeat) {
+      event.preventDefault();
+      openBook(false);
     }
   };
 

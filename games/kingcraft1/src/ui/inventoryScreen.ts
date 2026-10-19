@@ -2,6 +2,7 @@ import { HOTBAR_SIZE } from "../config";
 import type { ItemStack } from "../content/items";
 import type { Inventory } from "../gameplay/inventory";
 import { el, injectUiStyles, renderSlot, stackKey } from "./hud";
+import { tr } from "./i18n";
 import type { IconFactory } from "./icons";
 import { clickSlot, craftAllInto, craftPreview, insertInto, quickMove, takeCraft, type MouseButtonKind } from "./slotLogic";
 
@@ -120,7 +121,7 @@ export class InventoryScreen {
     el("h2", "", header).textContent = title;
     const close = el("button", "bw-btn", header);
     close.type = "button";
-    close.textContent = "Close";
+    close.textContent = tr("game.close");
     close.addEventListener("click", () => this.closeHandler());
     if (this.extra) {
       const row = el("div", "bw-row", win);
@@ -134,7 +135,7 @@ export class InventoryScreen {
       this.statusEl = null;
     }
     const craftRow = el("div", "bw-row", win);
-    el("strong", "", craftRow).textContent = "Crafting";
+    el("strong", "", craftRow).textContent = tr("ui.crafting");
     const craftGrid = el("div", "bw-grid", craftRow);
     craftGrid.style.setProperty("--cols", String(this.craftSize));
     this.grid.forEach((_, index) => this.slotEl(craftGrid, { kind: "grid", index }));

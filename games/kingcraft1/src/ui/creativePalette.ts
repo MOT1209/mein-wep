@@ -1,5 +1,6 @@
 import { blockById } from "../content/blocks";
 import { allItems, stackSizeOf, type ItemStack } from "../content/items";
+import { tr } from "./i18n";
 import type { ExtraSection } from "./inventoryScreen";
 
 export function paletteItems(): string[] {
@@ -12,7 +13,7 @@ export function createPaletteSection(): ExtraSection {
   const items = paletteItems();
   const fill = (): ItemStack[] => items.map((item) => ({ item, count: stackSizeOf(item) }));
   const section: ExtraSection = {
-    title: "All items",
+    title: tr("game.all_items"),
     slots: fill(),
     accepts: () => false,
     onChange: () => {

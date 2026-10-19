@@ -36,6 +36,8 @@ export function attachDesktop(
     setLocked(state, document.pointerLockElement === canvas, events);
   };
   const onKey = (event: KeyboardEvent): void => {
+    const target = event.target;
+    if (target instanceof HTMLElement && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName))) return;
     const handled = handleKey(state, event.code, event.type === "keydown", event.repeat, now(), events, keyOptions);
     if (handled) event.preventDefault();
   };

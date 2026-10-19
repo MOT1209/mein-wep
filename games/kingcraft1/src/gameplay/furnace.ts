@@ -93,9 +93,9 @@ export function furnaceAccepts(index: number, stack: ItemStack): boolean {
   return smeltingFor(stack.item) !== undefined;
 }
 
-export function furnaceStatus(state: FurnaceState): string {
-  const burn = state.burnTotal > 0 ? Math.round((state.burnLeft / state.burnTotal) * 100) : 0;
+export function furnaceProgress(state: FurnaceState): { lit: boolean; fuel: number; smelt: number } {
+  const fuel = state.burnTotal > 0 ? Math.round((state.burnLeft / state.burnTotal) * 100) : 0;
   const total = smeltSeconds(state);
   const smelt = total > 0 ? Math.round((state.progress / total) * 100) : 0;
-  return isLit(state) ? `Fuel ${burn}% · Smelting ${smelt}%` : "Not burning";
+  return { lit: isLit(state), fuel, smelt };
 }

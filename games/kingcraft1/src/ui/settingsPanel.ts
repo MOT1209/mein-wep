@@ -1,5 +1,7 @@
 import { MAX_RENDER_DISTANCE, MIN_RENDER_DISTANCE, type QualityLevel } from "../config";
+import { SUPPORTED_LOCALES, type Locale } from "../content/locales";
 import { el, injectUiStyles } from "./hud";
+import { tr } from "./i18n";
 import { MAX_HUD_SCALE, MAX_SENSITIVITY, MIN_HUD_SCALE, MIN_SENSITIVITY, withQuality, type Settings, type TouchMode } from "./settings";
 
 const PANEL_CSS = `
@@ -25,11 +27,11 @@ export class SettingsPanel {
     this.settings = initial;
     this.root = el("div", "bw-screen hidden", parent);
     const menu = el("div", "bw-panel bw-menu bw-settings", this.root);
-    el("h1", "", menu).textContent = "Settings";
+    el("h1", "", menu).textContent = tr("ui.settings");
     this.body = el("div", "", menu);
     const back = el("button", "bw-btn primary", menu);
     back.type = "button";
-    back.textContent = "Back";
+    back.textContent = tr("ui.back");
     back.addEventListener("click", onBack);
   }
 
@@ -83,13 +85,32 @@ export class SettingsPanel {
       input.addEventListener("input", () => (out.textContent = format(Number(input.value))));
       input.addEventListener("change", () => this.commit(apply(Number(input.value))));
     };
-    select<QualityLevel>("Quality", s.quality, [["low", "Low"], ["medium", "Medium"], ["high", "High"]], (q) => withQuality(s, q));
-    slider("View distance", s.renderDistance, MIN_RENDER_DISTANCE, MAX_RENDER_DISTANCE, 1, (v) => `${v}`, (v) => ({ ...s, renderDistance: v }));
-    slider("Look speed", s.sensitivity, MIN_SENSITIVITY, MAX_SENSITIVITY, 0.1, (v) => `${v.toFixed(1)}x`, (v) => ({ ...s, sensitivity: v }));
-    slider("HUD size", s.hudScale, MIN_HUD_SCALE, MAX_HUD_SCALE, 0.05, (v) => `${Math.round(v * 100)}%`, (v) => ({ ...s, hudScale: v }));
-    slider("Sound", s.volume, 0, 1, 0.05, (v) => (v <= 0 ? "Off" : `${Math.round(v * 100)}%`), (v) => ({ ...s, volume: v }));
-    select<TouchMode>("Touch controls", s.touch, [["auto", "Auto"], ["on", "On"], ["off", "Off"]], (t) => ({ ...s, touch: t }));
+    select<Locale>(tr("ui.language"), s.language, SUPPORTED_LOCALES.map((l) => [l.id, l.label] as [Locale, string]), (language) => ({ ...s, language }));
+    select<QualityLevel>(
+      tr("ui.quality"),
+      s.quality,
+      [
+        ["low", tr("ui.quality_low")],
+        ["medium", tr("ui.quality_medium")],
+        ["high", tr("ui.quality_high")]
+      ],
+      (q) => withQuality(s, q)
+    );
+    slider(tr("game.view_distance"), s.renderDistance, MIN_RENDER_DISTANCE, MAX_RENDER_DISTANCE, 1, (v) => `${v}`, (v) => ({ ...s, renderDistance: v }));
+    slider(tr("game.look_speed"), s.sensitivity, MIN_SENSITIVITY, MAX_SENSITIVITY, 0.1, (v) => `${v.toFixed(1)}x`, (v) => ({ ...s, sensitivity: v }));
+    slider(tr("game.hud_size"), s.hudScale, MIN_HUD_SCALE, MAX_HUD_SCALE, 0.05, (v) => `${Math.round(v * 100)}%`, (v) => ({ ...s, hudScale: v }));
+    slider(tr("game.sound"), s.volume, 0, 1, 0.05, (v) => (v <= 0 ? tr("ui.off") : `${Math.round(v * 100)}%`), (v) => ({ ...s, volume: v }));
+    select<TouchMode>(
+      tr("game.touch_controls"),
+      s.touch,
+      [
+        ["auto", tr("game.auto")],
+        ["on", tr("ui.on")],
+        ["off", tr("ui.off")]
+      ],
+      (t) => ({ ...s, touch: t })
+    );
     const note = el("small", "", this.body);
-    note.textContent = "Quality sets the default view distance and pixel density. Settings are saved in this browser.";
+    note.textContent = `${tr("game.settings_note")} ${tr("game.language_note")}`;
   }
 }

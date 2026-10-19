@@ -6,7 +6,8 @@ export function readDevice(): DeviceInfo {
   return {
     cores: typeof nav.hardwareConcurrency === "number" ? nav.hardwareConcurrency : undefined,
     memoryGb: typeof nav.deviceMemory === "number" ? nav.deviceMemory : undefined,
-    coarsePointer: coarse || "ontouchstart" in window
+    coarsePointer: coarse || "ontouchstart" in window,
+    languages: navigator.languages?.length ? navigator.languages : [navigator.language]
   };
 }
 

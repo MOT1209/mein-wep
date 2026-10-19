@@ -1,3 +1,4 @@
+import { tr } from "../ui/i18n";
 import { handleKey, addLook, type HudEvents, type InputState } from "./inputState";
 
 export const TOUCH_LOOK_SENSITIVITY = 0.006;
@@ -157,29 +158,29 @@ export function attachTouch(parent: HTMLElement, state: InputState, events: HudE
   };
   const hold = (code: string): [() => void, () => void] => [() => state.held.add(code), () => state.held.delete(code)];
 
-  button(top, "Bag", () => events.onToggleInventory?.());
-  button(top, "Pause", () => options.onPause());
+  button(top, tr("game.touch_bag"), () => events.onToggleInventory?.());
+  button(top, tr("game.touch_pause"), () => options.onPause());
   const [jumpDown, jumpUp] = hold("Space");
-  const sneakBtn = button(pad, "Sneak", () => {
+  const sneakBtn = button(pad, tr("game.touch_sneak"), () => {
     const active = !state.held.has("ShiftLeft");
     if (active) state.held.add("ShiftLeft");
     else state.held.delete("ShiftLeft");
     sneakBtn.classList.toggle("on", active);
   });
-  button(pad, "Break", () => (state.attack = state.locked), () => (state.attack = false));
-  button(pad, "Place", () => {
+  button(pad, tr("game.touch_break"), () => (state.attack = state.locked), () => (state.attack = false));
+  button(pad, tr("game.touch_place"), () => {
     if (state.locked) state.usePresses++;
   });
   if (options.canFly) {
-    const flyBtn = button(pad, "Fly", () => {
+    const flyBtn = button(pad, tr("game.touch_fly"), () => {
       handleKey(state, "KeyF", true, false, performance.now(), events, { canFly: true });
       flyBtn.classList.toggle("on", state.flying);
     });
   } else {
     node("span", "", pad);
   }
-  button(pad, "Down", ...hold("ShiftRight"));
-  button(pad, "Jump", jumpDown, jumpUp);
+  button(pad, tr("game.touch_down"), ...hold("ShiftRight"));
+  button(pad, tr("game.touch_jump"), jumpDown, jumpUp);
 
   return {
     root,
