@@ -44,26 +44,26 @@ npm run build                     # vite build (wave ends only)
 ## 2. Verified current state (trust this, verify with the commands)
 
 Verified on 2026-10-19 in the `mein-wep` copy: `npx tsc --noEmit` clean, `npx vitest run`
-119/119 across 11 files, `npm run build` succeeds. In headless Chromium the built page
-renders with no console errors; click locks the pointer, W walks, Space jumps, F + Space
-flies, mouse movement turns the player, and chunks stream in and out around the player.
+249/249 across 21 files, `npm run build` succeeds. Headless Chromium checks on the built page
+(desktop 1280×720 and touch emulation 375×667) are listed in each step's commit body.
 
-- **Done: S1–S10.** Scaffold, content data, voxels, worldgen, lighting, mesher
-  (`tests/mesher.test.ts` green), procedural atlas (`src/render/textures.ts`), chunk renderer
-  and materials, collision + raycast (`src/physics/*`), inventory and crafting matcher
-  (`src/gameplay/*`), game bootstrap with sky, fog, day-night loop and overlay
-  (`src/game.ts`, `src/main.ts`, `src/render/{sky,loop}.ts`), chunk streaming
-  (`src/render/streaming.ts`), player controller (`src/player/controller.ts`) and desktop
-  input (`src/input/{inputState,desktop}.ts`).
-- **Gaps inside done steps**: mesher AO is still pending. Chunk generation runs on the main
-  thread (2 chunks per frame); a worker is deferred until real-browser profiling says so.
-  Flight is allowed by default (`GameOptions.canFly`) until game modes exist.
-- **API drift from the original step text**: `ChunkStreamer.update(px, pz)` has no `nowMs`
-  (the budget is a chunk count); `loadAllNow(px, pz, radius?)` fills spawn synchronously.
-  `MoveInput` uses booleans for `jump/sneak/sprint/fly`. Pure key handling lives in
-  `src/input/inputState.ts` with `tests/inputState.test.ts`; `desktop.ts` is DOM glue only.
-  `Game.update(input, dyaw, dpitch, active)` runs player physics per frame with real dt.
-- **Not started: S11–S21.** Next in dependency order: S11 (mining/placing), then S12.
+- **Done: S1–S17.** Engine (S1–S10), mining/placing/drops (S11), HUD, inventory, pause (S12),
+  furnace, chest, doors, bed, farming (S13), creatures (S14), survival stats and respawn (S15),
+  touch controls and settings (S16), IndexedDB saves (S17).
+- **Not started: S18–S21** (audio/particles/clouds, EN/AR localization, hardening, docs).
+- **Gaps inside done steps** (also in `docs/ROADMAP.md`): mesher AO; chunk generation on the main
+  thread; doors have no orientation; fume vent and lantern have no interaction; ranged creatures
+  hit instantly (no projectile); no difficulty settings; no touch shift-click; real phones and
+  multi-touch not tested; fall damage, drowning, eating, crop growth and beds verified by unit
+  tests only, not in the browser.
+- **API drift from the original step text**: `ChunkStreamer.update(px, pz)` (no `nowMs`);
+  `loadAllNow(px, pz, radius?)`. `MoveInput` uses booleans for `jump/sneak/sprint/fly`. Pure
+  logic lives next to DOM glue: `src/input/inputState.ts`, `src/ui/slotLogic.ts`,
+  `src/ui/settings.ts`. `Game.update(FrameInput)` runs player physics per frame with real dt;
+  `Game.tick()` runs world time, furnaces and random ticks at 20 Hz. `World` keeps edited
+  chunks in `storedChunks` on unload and re-applies them on load (S17 found that edits were
+  lost on unload). Saves use slot `world:<seed>:<mode>`. Creative mode has an all-items palette
+  (not in the original plan; creative had nothing to place). `?time=0..1` sets the start time.
 - **Mesher API (unchanged)**: `buildChunkMesh(source, chunk, tileOf)` returns
   `{ opaque, water, plants }` with chunk-local positions, UVs in tile units over 16, and
   `sky`/`block` vertex attributes as `light/15` of the adjacent cell (plants: own cell).
