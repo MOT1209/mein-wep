@@ -14,12 +14,13 @@ const MUST_NOT_SERVE = [
   'skills-lock.json', 'package.json', 'eleventy.config.mjs', 'tests',
   'apps/chat-app', 'king-colab-MCP', 'linguaverse', 'denkmalen',
   'روابط-الإدارة.txt', 'تقرير-مراجعة-المشروع.html',
+  'api', 'scripts', 'vercel.json', 'games/kingcraft1',
 ];
 
 const MUST_SERVE = [
   'index.html', 'about.html', 'contact.html', 'privacy.html', 'terms.html',
   '404.html', 'sitemap.xml', 'robots.txt', 'llms.txt', 'okf/index.md',
-  'blog/posts.json', 'src/js/main.js',
+  'blog/posts.json', 'src/js/main.js', 'js/vendor/supabase-2.117.2.js',
 ];
 
 test('dist/ contains no internal files', { skip: !built && 'run npm run build first' }, () => {
