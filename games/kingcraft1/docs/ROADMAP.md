@@ -112,17 +112,17 @@ It is updated phase-by-phase as work lands and is verified.
 
 | Item | Status |
 | ---- | ------ |
-| Synthesized SFX (dig/place/step/hurt/craft/eat) | not started |
-| Particles (block break), clouds, fog | partial (distance fog in the terrain shader; no particles or clouds) |
-| Localization EN + AR with RTL layout | not started |
-| Encyclopedia (searchable, data-driven) | not started |
-| Performance instrumentation + presets | not started |
+| Synthesized SFX (dig/place/step/hurt/craft/eat) | done (sounds are scheduled, verified by instrumenting WebAudio; not yet listened to on real speakers) |
+| Particles (block break), clouds, fog | done |
+| Localization EN + AR with RTL layout | done (Arabic hand-written, not yet reviewed by a native editor; F3 debug panel stays English) |
+| Encyclopedia (searchable, data-driven) | done (facts generated from defs; no lore text) |
+| Performance instrumentation + presets | done (F3 frame/draw-call panel; low/medium/high presets) |
 
 ## Phase 12 — Release preparation
 
 | Item | Status |
 | ---- | ------ |
-| Automated test suite | in progress (21 files, 249 tests green; grows per phase) |
+| Automated test suite | in progress (23 files, 268 tests green; grows per phase) |
 | Production build (`npm run build`) | done |
 | Acceptance checklist (`docs/TESTING.md`) | not started |
 | Native packaging (desktop/mobile stores) | blocked — requires native toolchains not present in this environment |

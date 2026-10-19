@@ -44,18 +44,20 @@ npm run build                     # vite build (wave ends only)
 ## 2. Verified current state (trust this, verify with the commands)
 
 Verified on 2026-10-19 in the `mein-wep` copy: `npx tsc --noEmit` clean, `npx vitest run`
-249/249 across 21 files, `npm run build` succeeds. Headless Chromium checks on the built page
+268/268 across 23 files, `npm run build` succeeds. Headless Chromium checks on the built page
 (desktop 1280×720 and touch emulation 375×667) are listed in each step's commit body.
 
-- **Done: S1–S17.** Engine (S1–S10), mining/placing/drops (S11), HUD, inventory, pause (S12),
+- **Done: S1–S19.** Engine (S1–S10), mining/placing/drops (S11), HUD, inventory, pause (S12),
   furnace, chest, doors, bed, farming (S13), creatures (S14), survival stats and respawn (S15),
-  touch controls and settings (S16), IndexedDB saves (S17).
-- **Not started: S18–S21** (audio/particles/clouds, EN/AR localization, hardening, docs).
+  touch controls and settings (S16), IndexedDB saves (S17), synthesized audio, particles,
+  clouds and perf panel (S18), English/Arabic with RTL and the encyclopedia (S19).
+- **Not started: S20–S21** (integration hardening and acceptance pass, documentation).
 - **Gaps inside done steps** (also in `docs/ROADMAP.md`): mesher AO; chunk generation on the main
   thread; doors have no orientation; fume vent and lantern have no interaction; ranged creatures
   hit instantly (no projectile); no difficulty settings; no touch shift-click; real phones and
   multi-touch not tested; fall damage, drowning, eating, crop growth and beds verified by unit
-  tests only, not in the browser.
+  tests only, not in the browser; audio not listened to on speakers; Arabic not reviewed by a
+  native editor. Language changes reload the page (UI is built once per load).
 - **API drift from the original step text**: `ChunkStreamer.update(px, pz)` (no `nowMs`);
   `loadAllNow(px, pz, radius?)`. `MoveInput` uses booleans for `jump/sneak/sprint/fly`. Pure
   logic lives next to DOM glue: `src/input/inputState.ts`, `src/ui/slotLogic.ts`,
