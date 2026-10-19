@@ -1,4 +1,12 @@
-import { GRAVITY, ITEM_DROP_DESPAWN_SECONDS, ITEM_PICKUP_RADIUS, PLAYER_HEIGHT, TERMINAL_VELOCITY } from "../config";
+import {
+  DROP_MAGNET_RADIUS,
+  DROP_MAGNET_SPEED,
+  GRAVITY,
+  ITEM_DROP_DESPAWN_SECONDS,
+  ITEM_PICKUP_RADIUS,
+  PLAYER_HEIGHT,
+  TERMINAL_VELOCITY
+} from "../config";
 import { blockById, isSolidBlock } from "../content/blocks";
 import { itemById, itemForBlock, maxDurability, stackSizeOf, type ItemStack } from "../content/items";
 import type { Rng } from "../core/rng";
@@ -59,6 +67,7 @@ export class DropManager {
     for (const drop of this.drops) {
       drop.age += dt;
       drop.pickupDelay = Math.max(0, drop.pickupDelay - dt);
+      if (player && drop.pickupDelay <= 0 && this.attract(drop, player, dt)) continue;
       this.fall(world, drop, dt);
     }
     this.merge();
@@ -83,6 +92,20 @@ export class DropManager {
 
   clear(): void {
     this.drops.length = 0;
+  }
+
+  private attract(drop: ItemDrop, player: Collector, dt: number): boolean {
+    const dx = player.x - drop.x;
+    const dy = player.y + PLAYER_HEIGHT / 2 - drop.y;
+    const dz = player.z - drop.z;
+    const dist = Math.hypot(dx, dy, dz);
+    if (dist > DROP_MAGNET_RADIUS || dist < 1e-6) return false;
+    const step = Math.min(dist, DROP_MAGNET_SPEED * dt) / dist;
+    drop.x += dx * step;
+    drop.y += dy * step;
+    drop.z += dz * step;
+    drop.vy = 0;
+    return true;
   }
 
   private fall(world: DropWorld, drop: ItemDrop, dt: number): void {

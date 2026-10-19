@@ -152,3 +152,27 @@ describe("drops", () => {
     expect(drops.drops).toHaveLength(0);
   });
 });
+
+describe("drop magnet", () => {
+  it("pulls nearby drops to the player and collects them", () => {
+    const world = new MapWorld(0);
+    const drops = new DropManager();
+    drops.spawn({ item: "dirt", count: 1 }, 0.5, 1.2, 3.2, 0, 0);
+    const got: number[] = [];
+    for (let i = 0; i < 60 && drops.drops.length > 0; i++) {
+      drops.tick(world, 1 / 30, { x: 0.5, y: 1, z: 0.5 }, (stack) => {
+        got.push(stack.count);
+        return null;
+      });
+    }
+    expect(got).toEqual([1]);
+  });
+
+  it("leaves drops outside the magnet radius alone", () => {
+    const world = new MapWorld(0);
+    const drops = new DropManager();
+    drops.spawn({ item: "dirt", count: 1 }, 0.5, 1.125, 8.5, 0, 0);
+    for (let i = 0; i < 30; i++) drops.tick(world, 1 / 30, { x: 0.5, y: 1, z: 0.5 }, () => null);
+    expect(drops.drops[0].z).toBeCloseTo(8.5, 9);
+  });
+});

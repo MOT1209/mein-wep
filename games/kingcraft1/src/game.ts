@@ -8,6 +8,7 @@ import { tryPlace, tryUseItem, type PlaceFailure } from "./gameplay/place";
 import { raycastVoxel, type RayHit } from "./physics/raycast";
 import { PlayerController, type MoveInput } from "./player/controller";
 import { ChunkRenderer } from "./render/chunkRenderer";
+import { DropRenderer, type IconSource } from "./render/dropRenderer";
 import { createChunkMaterials, type ChunkMaterials } from "./render/materials";
 import { buildAtlasTexture } from "./render/textures";
 import { MIN_DAY_FACTOR, skyColors } from "./render/sky";
@@ -60,6 +61,7 @@ export class Game {
   readonly drops = new DropManager();
   readonly events: GameEvents = {};
   target: RayHit | null = null;
+  private dropRenderer: DropRenderer | null = null;
   private readonly rng: Rng;
   private readonly selection: THREE.LineSegments;
   private readonly atlas: THREE.Texture;
@@ -123,6 +125,15 @@ export class Game {
 
   get streamStats(): Readonly<StreamStats> {
     return this.streamer.stats;
+  }
+
+  get atlasCanvas(): HTMLCanvasElement {
+    return this.atlas.image as HTMLCanvasElement;
+  }
+
+  attachIcons(icons: IconSource): void {
+    this.dropRenderer?.dispose();
+    this.dropRenderer = new DropRenderer(this.scene, icons);
   }
 
   get creative(): boolean {
@@ -215,6 +226,7 @@ export class Game {
     this.applySky();
     this.chunkRenderer.update(this.chunkX, this.chunkZ);
     this.chunkRenderer.rebuildBudgeted(REBUILD_BUDGET_MS);
+    this.dropRenderer?.sync(this.drops.drops, this.clock() / 1000);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -225,6 +237,7 @@ export class Game {
   }
 
   dispose(): void {
+    this.dropRenderer?.dispose();
     for (const chunk of this.world.chunks.values()) {
       this.chunkRenderer.dispose(chunk.cx, chunk.cz);
     }
