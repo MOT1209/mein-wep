@@ -97,15 +97,16 @@ export class ChunkStreamer {
     return this.counters;
   }
 
-  loadAllNow(px: number, pz: number): number {
+  loadAllNow(px: number, pz: number, radius = this.renderDistance): number {
     const cx = chunkCoord(px, CHUNK_SX);
     const cz = chunkCoord(pz, CHUNK_SZ);
+    const offsets = radius === this.renderDistance ? this.offsets : spiralOffsets(Math.min(radius, this.renderDistance));
     let loads = 0;
-    for (const [dx, dz] of this.offsets) {
+    for (const [dx, dz] of offsets) {
       if (this.load(cx + dx, cz + dz)) loads++;
     }
     this.counters.loaded = this.countLoaded();
-    this.counters.pending = 0;
+    this.counters.pending = this.countPending(cx, cz);
     return loads;
   }
 

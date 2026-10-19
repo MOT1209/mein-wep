@@ -44,17 +44,26 @@ npm run build                     # vite build (wave ends only)
 ## 2. Verified current state (trust this, verify with the commands)
 
 Verified on 2026-10-19 in the `mein-wep` copy: `npx tsc --noEmit` clean, `npx vitest run`
-90/90 across 8 files, `npm run build` succeeds, and the built page renders terrain, trees,
-plants, sky and the F3 overlay in Chromium with no console errors.
+119/119 across 11 files, `npm run build` succeeds. In headless Chromium the built page
+renders with no console errors; click locks the pointer, W walks, Space jumps, F + Space
+flies, mouse movement turns the player, and chunks stream in and out around the player.
 
-- **Done: S1–S7.** Scaffold, content data, voxels, worldgen, lighting, mesher
+- **Done: S1–S10.** Scaffold, content data, voxels, worldgen, lighting, mesher
   (`tests/mesher.test.ts` green), procedural atlas (`src/render/textures.ts`), chunk renderer
   and materials, collision + raycast (`src/physics/*`), inventory and crafting matcher
   (`src/gameplay/*`), game bootstrap with sky, fog, day-night loop and overlay
-  (`src/game.ts`, `src/main.ts`, `src/render/{sky,loop}.ts`).
-- **Gaps inside done steps**: mesher AO is still pending; the camera is a fixed view at spawn
-  (player camera arrives with S9/S10); chunks are a fixed 3×3 around spawn (S8 adds streaming).
-- **Not started: S8–S21.** Next in dependency order: S8 (after S7), S9, then S10 and S11.
+  (`src/game.ts`, `src/main.ts`, `src/render/{sky,loop}.ts`), chunk streaming
+  (`src/render/streaming.ts`), player controller (`src/player/controller.ts`) and desktop
+  input (`src/input/{inputState,desktop}.ts`).
+- **Gaps inside done steps**: mesher AO is still pending. Chunk generation runs on the main
+  thread (2 chunks per frame); a worker is deferred until real-browser profiling says so.
+  Flight is allowed by default (`GameOptions.canFly`) until game modes exist.
+- **API drift from the original step text**: `ChunkStreamer.update(px, pz)` has no `nowMs`
+  (the budget is a chunk count); `loadAllNow(px, pz, radius?)` fills spawn synchronously.
+  `MoveInput` uses booleans for `jump/sneak/sprint/fly`. Pure key handling lives in
+  `src/input/inputState.ts` with `tests/inputState.test.ts`; `desktop.ts` is DOM glue only.
+  `Game.update(input, dyaw, dpitch, active)` runs player physics per frame with real dt.
+- **Not started: S11–S21.** Next in dependency order: S11 (mining/placing), then S12.
 - **Mesher API (unchanged)**: `buildChunkMesh(source, chunk, tileOf)` returns
   `{ opaque, water, plants }` with chunk-local positions, UVs in tile units over 16, and
   `sky`/`block` vertex attributes as `light/15` of the adjacent cell (plants: own cell).

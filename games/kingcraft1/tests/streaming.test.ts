@@ -127,3 +127,13 @@ describe("ChunkStreamer", () => {
     expect(stats.loadedTotal - stats.unloadedTotal).toBe(stats.loaded);
   });
 });
+
+describe("ChunkStreamer.loadAllNow", () => {
+  it("fills a smaller radius synchronously and leaves the rest pending", () => {
+    const world = new World(9);
+    const streamer = new ChunkStreamer(world, new StubRenderer(), { renderDistance: 2 });
+    expect(streamer.loadAllNow(0, 0, 1)).toBe(9);
+    expect(streamer.stats.loaded).toBe(9);
+    expect(streamer.stats.pending).toBe(16);
+  });
+});

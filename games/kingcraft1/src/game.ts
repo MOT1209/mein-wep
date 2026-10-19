@@ -1,18 +1,24 @@
 import * as THREE from "three";
-import { CHUNK_SX, CHUNK_SZ, PLAYER_EYE_HEIGHT, QUALITY_PRESETS, type QualityLevel } from "./config";
+import { CHUNK_SX, CHUNK_SZ, QUALITY_PRESETS, type QualityLevel } from "./config";
+import { PlayerController, type MoveInput } from "./player/controller";
 import { ChunkRenderer } from "./render/chunkRenderer";
 import { createChunkMaterials, type ChunkMaterials } from "./render/materials";
 import { buildAtlasTexture } from "./render/textures";
 import { MIN_DAY_FACTOR, skyColors } from "./render/sky";
+import { ChunkStreamer, type StreamStats } from "./render/streaming";
 import { World } from "./voxels/world";
 
 const CAMERA_FOV = 70;
 const NEAR_PLANE = 0.1;
 const REBUILD_BUDGET_MS = 4;
+const SPAWN_RADIUS = 1;
+const MAX_FRAME_SECONDS = 0.25;
 
 export interface GameOptions {
   quality?: QualityLevel;
   renderDistance?: number;
+  canFly?: boolean;
+  clock?: () => number;
 }
 
 export class Game {
@@ -22,11 +28,13 @@ export class Game {
   readonly camera: THREE.PerspectiveCamera;
   readonly materials: ChunkMaterials;
   readonly chunkRenderer: ChunkRenderer;
-  readonly playerPosition: THREE.Vector3;
+  readonly player: PlayerController;
+  readonly streamer: ChunkStreamer;
+  readonly playerPosition = new THREE.Vector3();
   private readonly atlas: THREE.Texture;
   private readonly background = new THREE.Color();
-  private readonly centerCx: number;
-  private readonly centerCz: number;
+  private readonly clock: () => number;
+  private lastFrame: number;
 
   constructor(canvas: HTMLCanvasElement, world: World, options: GameOptions = {}) {
     const quality = options.quality ?? "medium";
@@ -34,9 +42,9 @@ export class Game {
     const renderDistance = options.renderDistance ?? preset.renderDistance;
     const spawn = world.findSpawn();
     this.world = world;
-    this.playerPosition = new THREE.Vector3(spawn.x, spawn.y, spawn.z);
-    this.centerCx = Math.floor(spawn.x / CHUNK_SX);
-    this.centerCz = Math.floor(spawn.z / CHUNK_SZ);
+    this.clock = options.clock ?? (() => performance.now());
+    this.lastFrame = this.clock();
+    this.player = new PlayerController(world, spawn, { canFly: options.canFly ?? true });
 
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -56,8 +64,7 @@ export class Game {
       NEAR_PLANE,
       (renderDistance + 2) * 16
     );
-    this.camera.position.set(spawn.x, spawn.y + PLAYER_EYE_HEIGHT - 0.02, spawn.z);
-    this.camera.lookAt(spawn.x + 24, spawn.y - 8, spawn.z + 24);
+    this.camera.rotation.order = "YXZ";
 
     this.atlas = buildAtlasTexture();
     this.materials = createChunkMaterials(this.atlas, quality);
@@ -68,8 +75,28 @@ export class Game {
       atlas: this.atlas,
       materials: this.materials
     });
-    this.chunkRenderer.update(this.centerCx, this.centerCz);
+    this.streamer = new ChunkStreamer(world, this.chunkRenderer, { renderDistance });
+    this.streamer.loadAllNow(spawn.x, spawn.z, SPAWN_RADIUS);
+    this.syncCamera();
+    this.chunkRenderer.update(this.chunkX, this.chunkZ);
     this.applySky();
+  }
+
+  get streamStats(): Readonly<StreamStats> {
+    return this.streamer.stats;
+  }
+
+  update(input: MoveInput, dyaw: number, dpitch: number, active: boolean): void {
+    const now = this.clock();
+    const dt = Math.min(Math.max((now - this.lastFrame) / 1000, 0), MAX_FRAME_SECONDS);
+    this.lastFrame = now;
+    if (active) {
+      this.player.look(dyaw, dpitch);
+      this.player.move(input, dt);
+    }
+    const { x, z } = this.player.state.position;
+    this.streamer.update(x, z);
+    this.syncCamera();
   }
 
   tick(): void {
@@ -78,7 +105,7 @@ export class Game {
 
   render(): void {
     this.applySky();
-    this.chunkRenderer.update(this.centerCx, this.centerCz);
+    this.chunkRenderer.update(this.chunkX, this.chunkZ);
     this.chunkRenderer.rebuildBudgeted(REBUILD_BUDGET_MS);
     this.renderer.render(this.scene, this.camera);
   }
@@ -98,6 +125,22 @@ export class Game {
     this.materials.plants.dispose();
     this.atlas.dispose();
     this.renderer.dispose();
+  }
+
+  private get chunkX(): number {
+    return Math.floor(this.player.state.position.x / CHUNK_SX);
+  }
+
+  private get chunkZ(): number {
+    return Math.floor(this.player.state.position.z / CHUNK_SZ);
+  }
+
+  private syncCamera(): void {
+    const { position, yaw, pitch } = this.player.state;
+    const eye = this.player.eyePosition();
+    this.playerPosition.set(position.x, position.y, position.z);
+    this.camera.position.set(eye.x, eye.y, eye.z);
+    this.camera.rotation.set(pitch, yaw, 0);
   }
 
   private applySky(): void {

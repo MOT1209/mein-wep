@@ -11,10 +11,10 @@ It is updated phase-by-phase as work lands and is verified.
 | ---- | ------ |
 | Repository audit, engine decision (`docs/BASELINE_AUDIT.md`) | done |
 | Vite + TypeScript strict + Vitest scaffold | done |
-| Renderer, camera, sky, day/night baseline | partial (renderer, sky colours, fog and day-night loop done; camera is a fixed view at spawn, no player camera yet) |
-| Desktop controls (pointer lock, WASD, jump) | not started |
+| Renderer, camera, sky, day/night baseline | done (first-person camera follows the player controller) |
+| Desktop controls (pointer lock, WASD, jump) | done (pointer lock, WASD/arrows, jump, sneak, sprint, fly, hotbar keys, mouse look; Esc release is native and not verifiable headless) |
 | Touch controls (joystick, look pad, buttons) | not started |
-| Debug overlay (FPS, position, chunk stats) | partial (FPS, position and loaded-chunk count; no mesh stats) |
+| Debug overlay (FPS, position, chunk stats) | done (FPS, position, movement mode, loaded/pending chunks, hotbar slot) |
 
 ## Phase 2 — Voxel engine
 
@@ -26,7 +26,7 @@ It is updated phase-by-phase as work lands and is verified.
 | Texture atlas (procedural, original) | done |
 | Collision + raycast targeting | done |
 | Block break / place with validation | not started |
-| Chunk load/unload streaming | partial (load/unload primitives exist; no radius streaming yet) |
+| Chunk load/unload streaming | done (spiral radius streaming, neighbour remesh, unload past margin) |
 | in-memory lighting (sky + block light flood fill) | done |
 
 ## Phase 3 — World generation
