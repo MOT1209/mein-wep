@@ -1,7 +1,9 @@
 import * as THREE from "three";
 import { CHUNK_SX, CHUNK_SY, CHUNK_SZ, CREATIVE_REACH, PLAYER_REACH, QUALITY_PRESETS, TICK_MS, type QualityLevel } from "./config";
 import { B } from "./content/blocks";
-import { itemById } from "./content/items";
+import { itemById, toolStats } from "./content/items";
+import { EntityManager } from "./entities/manager";
+import type { Entity } from "./entities/types";
 import { Rng } from "./core/rng";
 import { ContainerStore } from "./gameplay/containers";
 import { DropManager, rollDrops } from "./gameplay/drops";
@@ -15,6 +17,7 @@ import { raycastVoxel, type RayHit } from "./physics/raycast";
 import { PlayerController, type MoveInput } from "./player/controller";
 import { ChunkRenderer } from "./render/chunkRenderer";
 import { DropRenderer, type IconSource } from "./render/dropRenderer";
+import { EntityRenderer } from "./render/entityRenderer";
 import { createChunkMaterials, type ChunkMaterials } from "./render/materials";
 import { buildAtlasTexture } from "./render/textures";
 import { MIN_DAY_FACTOR, skyColors } from "./render/sky";
@@ -27,6 +30,9 @@ const REBUILD_BUDGET_MS = 4;
 const SPAWN_RADIUS = 1;
 const MAX_FRAME_SECONDS = 0.25;
 const RANDOM_TICKS_PER_CHUNK = 6;
+const PLAYER_ATTACK_COOLDOWN = 0.45;
+const HAND_DAMAGE = 1;
+const PLAYER_KNOCKBACK = 7;
 
 export type GameMode = "survival" | "creative";
 
@@ -51,6 +57,7 @@ export interface GameEvents {
   onMining?(event: MiningEvent): void;
   onPlaceFailed?(reason: PlaceFailure): void;
   onInteract?(result: InteractResult): void;
+  onPlayerDamaged?(amount: number, source: Entity): void;
 }
 
 export class Game {
@@ -68,6 +75,10 @@ export class Game {
   readonly mining = new MiningState();
   readonly drops = new DropManager();
   containers = new ContainerStore();
+  readonly entities: EntityManager;
+  playerAlive = true;
+  private readonly entityRenderer: EntityRenderer;
+  private attackCooldown = 0;
   respawnPoint: Position | null = null;
   readonly events: GameEvents = {};
   target: RayHit | null = null;
@@ -90,6 +101,7 @@ export class Game {
     this.mode = options.mode ?? "survival";
     this.rng = new Rng(world.seedInt ^ 0x5eed);
     this.player = new PlayerController(world, spawn, { canFly: this.mode === "creative" });
+    this.entities = new EntityManager(new Rng(world.seedInt ^ 0xc0ffee));
 
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -116,6 +128,7 @@ export class Game {
     );
     this.selection.visible = false;
     this.scene.add(this.selection);
+    this.entityRenderer = new EntityRenderer(this.scene, world);
 
     this.atlas = buildAtlasTexture();
     this.materials = createChunkMaterials(this.atlas, quality);
@@ -163,8 +176,12 @@ export class Game {
     this.streamer.update(x, z);
     this.syncCamera();
     this.updateTarget();
-    if (input.active) this.interact(input, dt);
-    else this.mining.reset();
+    if (input.active) {
+      this.tickEntities(dt);
+      this.interact(input, dt);
+    } else {
+      this.mining.reset();
+    }
     this.drops.tick(this.world, dt, { x, y, z }, (stack) => this.inventory.add(stack));
   }
 
@@ -177,9 +194,48 @@ export class Game {
     if (this.target) this.selection.position.set(this.target.x + 0.5, this.target.y + 0.5, this.target.z + 0.5);
   }
 
+  private tickEntities(dt: number): void {
+    const { x, y, z } = this.player.state.position;
+    this.entities.tick(
+      this.world,
+      { x, y, z, alive: this.playerAlive && !this.creative, eyeHeight: this.player.eyePosition().y - y },
+      dt,
+      {
+        damagePlayer: (amount, source, knockX, knockZ) => {
+          const velocity = this.player.state.velocity;
+          velocity.x += knockX * PLAYER_KNOCKBACK;
+          velocity.z += knockZ * PLAYER_KNOCKBACK;
+          velocity.y = Math.max(velocity.y, 4);
+          this.events.onPlayerDamaged?.(amount, source);
+        },
+        dropLoot: (stack, lx, ly, lz) => this.drops.spawn(stack, lx, ly, lz)
+      }
+    );
+  }
+
+  private hitEntity(): boolean {
+    const eye = this.player.eyePosition();
+    const dir = this.player.lookDirection();
+    const reach = this.creative ? CREATIVE_REACH : PLAYER_REACH;
+    const blockDistance = this.target ? this.target.distance : reach;
+    const hit = this.entities.raycast(eye, dir, Math.min(reach, blockDistance + 0.01));
+    if (!hit) return false;
+    if (this.attackCooldown > 0) return true;
+    this.attackCooldown = PLAYER_ATTACK_COOLDOWN;
+    const held = this.inventory.selected;
+    const tool = held ? toolStats(held.item) : undefined;
+    const { x, z } = this.player.state.position;
+    this.entities.damage(hit.entity, tool ? tool.damage : HAND_DAMAGE, x, z);
+    if (tool && !this.creative) this.inventory.damage(this.inventory.selectedIndex, 1);
+    return true;
+  }
+
   private interact(input: FrameInput, dt: number): void {
     const held = this.inventory.selected?.item ?? null;
-    if (input.attack) {
+    this.attackCooldown = Math.max(0, this.attackCooldown - dt);
+    if (input.attack && this.hitEntity()) {
+      this.mining.reset();
+    } else if (input.attack) {
       const event = this.mining.tick(this.world, this.target, held, dt, this.creative);
       if (event) this.onMiningEvent(event);
     } else {
@@ -270,6 +326,13 @@ export class Game {
     this.chunkRenderer.update(this.chunkX, this.chunkZ);
     this.chunkRenderer.rebuildBudgeted(REBUILD_BUDGET_MS);
     this.dropRenderer?.sync(this.drops.drops, this.clock() / 1000);
+    this.entityRenderer.sync(
+      this.entities.entities,
+      this.camera.position,
+      this.camera.far,
+      Math.max(this.world.dayFactor, MIN_DAY_FACTOR),
+      this.clock() / 1000
+    );
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -281,6 +344,7 @@ export class Game {
 
   dispose(): void {
     this.dropRenderer?.dispose();
+    this.entityRenderer.dispose();
     for (const chunk of this.world.chunks.values()) {
       this.chunkRenderer.dispose(chunk.cx, chunk.cz);
     }

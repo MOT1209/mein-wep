@@ -43,6 +43,8 @@ function boot(): void {
 
   const params = new URLSearchParams(window.location.search);
   const world = new World(parseSeed(window.location.search));
+  const startTime = Number(params.get("time"));
+  if (params.has("time") && Number.isFinite(startTime) && startTime >= 0 && startTime < 1) world.setTimeOfDay(startTime);
   const game = new Game(canvas, world, { mode: params.get("mode") === "creative" ? "creative" : "survival" });
   const icons = new IconFactory(game.atlasCanvas);
   game.attachIcons(icons);
@@ -98,6 +100,9 @@ function boot(): void {
         render: () => furnaceStatus(furnace)
       });
     }
+  };
+  game.events.onPlayerDamaged = (amount, source) => {
+    hud.toast(`Hit by ${source.def.id.replace(/_/g, " ")} (${amount})`);
   };
   game.events.onPlaceFailed = (reason) => {
     if (reason === "no-support") hud.toast("Needs a solid block below");
@@ -177,6 +182,7 @@ function boot(): void {
           `Light sky ${world.getSkyLight(bx, by, bz)} block ${world.getBlockLight(bx, by, bz)}`,
           `Time ${clockText(world.dayFraction)}  day ${(world.dayFactor * 100).toFixed(0)}%`,
           `Chunks ${stream.loaded} loaded  ${stream.pending} pending`,
+          `Creatures ${game.entities.entities.length}  night ${world.isNight ? "yes" : "no"}`,
           `Facing yaw ${((state.yaw * 180) / Math.PI).toFixed(0)} pitch ${((state.pitch * 180) / Math.PI).toFixed(0)}  target ${target}`
         ]);
       }
