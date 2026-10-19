@@ -79,9 +79,9 @@ async def run_test():
         ("/blog/rss.xml", "Blog RSS XML", 200, 50),
         ("/api/rss", "API RSS Feed", 200, 50),
         ("/admin/login.html", "Admin Login", 200, 100),
-        ("/games/", "Games Page", 200, 100),
+        ("/king-studio/games/", "Games Page", 200, 100),  # /games/ is a permanent redirect to here
         ("/apps/calculator-app/", "Calculator App", 200, 50),
-        ("/apps/quran-app/", "Quran App", 200, 50),
+        ("/quran-app/", "Quran App", 200, 50),  # canonical: rewrite -> /quran.html (apps/quran-app deleted in 195f98a6)
         ("/apps/quiz-app/", "Quiz App", 200, 50),
         ("/models/Rashid-Model/", "Rashid Model", 200, 50),
         ("/vault/prompts/", "Vault Prompts", 200, 50),

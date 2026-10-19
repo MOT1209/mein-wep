@@ -21,7 +21,7 @@ async def run_test():
 
     # Test 1: Games page loads
     print("\n[Games Page]")
-    status = await http_status(f"{VERCEL_URL}/games/")
+    status = await http_status(f"{VERCEL_URL}/king-studio/games/")  # /games/ permanently redirects here
     if status == 200:
         print(f"  ✅ PASS: {status}")
         passed += 1
