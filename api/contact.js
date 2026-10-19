@@ -31,12 +31,6 @@ function isRateLimited(ip) {
 }
 
 export default async (req, res) => {
-  // Rate limiting
-  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-  if (isRateLimited(clientIp)) {
-    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
-  }
-
   // CORS
   const origin = req.headers.origin;
   const allowedOrigins = [
@@ -59,7 +53,13 @@ export default async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { name, email, subject, message, website } = req.body || {};
+  // Rate limiting — after the method check so CORS preflights don't use up the quota
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+  if (isRateLimited(clientIp)) {
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' });
+  }
+
+  const { name, email, message, website } = req.body || {};
 
   // Honeypot check — إذا ملأ الحقل المخفي فالبوت مكتشف
   if (website && website.length > 0) {
@@ -71,7 +71,7 @@ export default async (req, res) => {
   if (!name || typeof name !== 'string' || name.trim().length < 2 || name.trim().length > 100) {
     return res.status(400).json({ error: 'Name is required (2-100 characters)' });
   }
-  if (!email || typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!email || typeof email !== 'string' || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return res.status(400).json({ error: 'A valid email is required' });
   }
   if (!message || typeof message !== 'string' || message.trim().length < 10) {
