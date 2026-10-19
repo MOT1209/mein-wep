@@ -10,12 +10,13 @@ import { DropManager, rollDrops } from "./gameplay/drops";
 import { applyGrowthBoost, randomTick } from "./gameplay/farming";
 import { furnaceTick } from "./gameplay/furnace";
 import { breakUnsupported, interact, type InteractResult, type Position } from "./gameplay/interactive";
-import { Inventory } from "./gameplay/inventory";
+import { Inventory, type InventorySave } from "./gameplay/inventory";
 import { MiningState, type MiningEvent } from "./gameplay/mining";
 import { tryPlace, tryUseItem, type PlaceFailure } from "./gameplay/place";
 import { raycastVoxel, type RayHit } from "./physics/raycast";
 import { PlayerController, type MoveInput } from "./player/controller";
 import { PlayerStats, takeAllItems, type DamageSource } from "./player/stats";
+import type { SaveFile, SaveInput } from "./save/saveLoad";
 import { ChunkRenderer } from "./render/chunkRenderer";
 import { DropRenderer, type IconSource } from "./render/dropRenderer";
 import { EntityRenderer } from "./render/entityRenderer";
@@ -73,7 +74,7 @@ export class Game {
   streamer: ChunkStreamer;
   readonly playerPosition = new THREE.Vector3();
   readonly mode: GameMode;
-  readonly inventory = new Inventory();
+  inventory = new Inventory();
   readonly mining = new MiningState();
   readonly drops = new DropManager();
   containers = new ContainerStore();
@@ -159,6 +160,37 @@ export class Game {
   attachIcons(icons: IconSource): void {
     this.dropRenderer?.dispose();
     this.dropRenderer = new DropRenderer(this.scene, icons);
+  }
+
+  snapshot(): SaveInput {
+    const { position, yaw, pitch } = this.player.state;
+    return {
+      seed: this.world.seedInt,
+      mode: this.mode,
+      time: this.world.time,
+      player: { x: position.x, y: position.y, z: position.z, yaw, pitch, respawn: this.respawnPoint },
+      stats: this.stats.toJSON(),
+      inventory: this.inventory.toJSON(),
+      containers: this.containers.toJSON(),
+      entities: this.entities.toJSON(),
+      chunks: this.world.modifiedChunkData()
+    };
+  }
+
+  restore(save: SaveFile): void {
+    this.world.time = save.time;
+    this.inventory = Inventory.fromJSON(save.inventory as InventorySave);
+    this.stats = PlayerStats.fromJSON(save.stats);
+    this.containers = ContainerStore.fromJSON(save.containers);
+    this.entities.load(save.entities);
+    this.respawnPoint = save.player.respawn;
+    this.drops.clear();
+    this.mining.reset();
+    this.player.spawnAt(save.player);
+    this.player.state.yaw = save.player.yaw;
+    this.player.state.pitch = save.player.pitch;
+    this.streamer.loadAllNow(save.player.x, save.player.z, 1);
+    this.syncCamera();
   }
 
   setRenderDistance(distance: number): void {

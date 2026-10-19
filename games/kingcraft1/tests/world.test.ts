@@ -155,3 +155,26 @@ describe("world generation", () => {
     expect(world.getModifiedChunks().length).toBe(1);
   });
 });
+
+describe("edited chunks across unload", () => {
+  it("keeps player edits when a chunk is unloaded and loaded again", () => {
+    const world = new World(1234);
+    world.ensureChunk(0, 0);
+    world.setBlock(3, 70, 3, B.GLASS);
+    world.unloadChunk(0, 0);
+    expect(world.isChunkLoaded(0, 0)).toBe(false);
+    expect(world.storedChunks.has("0,0")).toBe(true);
+    world.ensureChunk(0, 0);
+    expect(world.getBlock(3, 70, 3)).toBe(B.GLASS);
+    expect(world.getChunkIfLoaded(0, 0)?.modified).toBe(true);
+    expect(world.modifiedChunkData().has("0,0")).toBe(true);
+  });
+
+  it("does not store untouched chunks", () => {
+    const world = new World(1234);
+    world.ensureChunk(1, 1);
+    world.unloadChunk(1, 1);
+    expect(world.storedChunks.size).toBe(0);
+    expect(world.modifiedChunkData().size).toBe(0);
+  });
+});

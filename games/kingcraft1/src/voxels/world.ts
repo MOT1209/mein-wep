@@ -18,6 +18,7 @@ export class World implements LightWorld {
   readonly seedInt: number;
   readonly generator: WorldGenerator;
   readonly chunks = new Map<string, Chunk>();
+  readonly storedChunks = new Map<string, Uint8Array>();
   time = 0;
 
   private readonly cacheKeys = new Float64Array(16).fill(Number.NaN);
@@ -61,6 +62,12 @@ export class World implements LightWorld {
     if (existing) return existing;
     const chunk = new Chunk(cx, cz);
     this.generator.generateChunk(chunk);
+    const stored = this.storedChunks.get(key);
+    if (stored && stored.length === chunk.blocks.length) {
+      chunk.blocks.set(stored);
+      chunk.modified = true;
+      chunk.recomputeAllHeights();
+    }
     this.chunks.set(key, chunk);
     this.invalidateChunkCache();
     initChunkLighting(this, chunk);
@@ -71,6 +78,7 @@ export class World implements LightWorld {
     const key = chunkKey(cx, cz);
     const chunk = this.chunks.get(key);
     if (chunk) {
+      if (chunk.modified) this.storedChunks.set(key, chunk.blocks.slice());
       this.chunks.delete(key);
       this.invalidateChunkCache();
     }
@@ -250,6 +258,12 @@ export class World implements LightWorld {
 
   skipToMorning(): void {
     this.time = (Math.floor(this.time / DAY_TICKS) + 1) * DAY_TICKS;
+  }
+
+  modifiedChunkData(): Map<string, Uint8Array> {
+    const out = new Map(this.storedChunks);
+    for (const chunk of this.getModifiedChunks()) out.set(chunkKey(chunk.cx, chunk.cz), chunk.blocks);
+    return out;
   }
 
   getModifiedChunks(): Chunk[] {

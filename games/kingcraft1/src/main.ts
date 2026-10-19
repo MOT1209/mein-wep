@@ -1,10 +1,12 @@
-import { MAX_AIR, MAX_HEALTH, MAX_HUNGER, QUALITY_PRESETS, TICK_MS } from "./config";
+import { AUTOSAVE_INTERVAL_SECONDS, MAX_AIR, MAX_HEALTH, MAX_HUNGER, QUALITY_PRESETS, TICK_MS } from "./config";
 import { blockById } from "./content/blocks";
 import { Game } from "./game";
 import { attachDesktop } from "./input/desktop";
 import { consumeLook, consumeUses, createInputState, selectHotbar, setLocked, toMoveInput, type HudEvents } from "./input/inputState";
 import { attachTouch } from "./input/touch";
 import { GameLoop } from "./render/loop";
+import { openBackend } from "./save/db";
+import { Autosaver, buildSave, decodeChunks, loadWorld, saveWorld, slotKey, type SaveFile } from "./save/saveLoad";
 import { createPaletteSection } from "./ui/creativePalette";
 import { DeathScreen } from "./ui/deathScreen";
 import { Hud } from "./ui/hud";
@@ -39,7 +41,7 @@ function clockText(dayFraction: number): string {
   return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
 }
 
-function boot(): void {
+async function boot(): Promise<void> {
   const canvas = document.querySelector<HTMLCanvasElement>("#game-canvas");
   const uiRoot = document.querySelector<HTMLDivElement>("#ui-root");
   if (!canvas || !uiRoot) {
@@ -48,17 +50,32 @@ function boot(): void {
 
   const params = new URLSearchParams(window.location.search);
   const world = new World(parseSeed(window.location.search));
-  const startTime = Number(params.get("time"));
-  if (params.has("time") && Number.isFinite(startTime) && startTime >= 0 && startTime < 1) world.setTimeOfDay(startTime);
+  const requestedMode = params.get("mode") === "creative" ? "creative" : "survival";
+  const backend = await openBackend(typeof indexedDB === "undefined" ? undefined : indexedDB);
+  const saveKey = slotKey(world.seedInt, requestedMode);
+  let saved: SaveFile | null = null;
+  let loadProblem = "";
+  try {
+    saved = await loadWorld(backend, saveKey);
+    if (saved) for (const [key, blocks] of decodeChunks(saved)) world.storedChunks.set(key, blocks);
+  } catch (error) {
+    saved = null;
+    world.storedChunks.clear();
+    loadProblem = error instanceof Error ? error.message : String(error);
+    console.warn("Save could not be loaded, starting a new world:", loadProblem);
+  }
   const device = readDevice();
   const store = browserStore();
   let settings: Settings = loadSettings(store, device);
   let touchOn = touchEnabled(settings, device);
   const game = new Game(canvas, world, {
-    mode: params.get("mode") === "creative" ? "creative" : "survival",
+    mode: requestedMode,
     quality: settings.quality,
     renderDistance: settings.renderDistance
   });
+  if (saved) game.restore(saved);
+  const startTime = Number(params.get("time"));
+  if (params.has("time") && Number.isFinite(startTime) && startTime >= 0 && startTime < 1) world.setTimeOfDay(startTime);
   const icons = new IconFactory(game.atlasCanvas);
   game.attachIcons(icons);
   const hud = new Hud(uiRoot, icons);
@@ -69,6 +86,7 @@ function boot(): void {
   let mode: UiMode = "paused";
   const hudEvents: HudEvents = {};
   let debugStamped = 0;
+  let lastFrame = performance.now();
 
   const lockPointer = (): void => {
     if (touchOn) {
@@ -84,7 +102,9 @@ function boot(): void {
   };
   const pause = new PauseMenu(uiRoot, {
     title: "Block World",
-    info: `${game.mode === "creative" ? "Creative" : "Survival"} · seed ${world.seedInt}\n\n${CONTROLS_TEXT}`,
+    info:
+      `${game.mode === "creative" ? "Creative" : "Survival"} · seed ${world.seedInt}` +
+      `${backend.persistent ? (saved ? " · save loaded" : " · new world") : " · saving unavailable in this browser"}\n\n${CONTROLS_TEXT}`,
     onResume: lockPointer
   });
   pause.show("Play");
@@ -165,6 +185,7 @@ function boot(): void {
       pause.show();
     }
   );
+  const autosaver = new Autosaver(AUTOSAVE_INTERVAL_SECONDS, () => saveWorld(backend, saveKey, buildSave(game.snapshot())));
   pause.setButtons([
     {
       label: "Settings",
@@ -172,8 +193,26 @@ function boot(): void {
         pause.hide();
         settingsPanel.show(settings);
       }
+    },
+    {
+      label: "Save now",
+      onClick: () => {
+        autosaver.now().then(
+          () => hud.toast(backend.persistent ? "World saved" : "Saved for this session only"),
+          () => hud.toast("Saving failed")
+        );
+      }
+    },
+    {
+      label: "New world",
+      onClick: () => {
+        if (!window.confirm("Delete this saved world and start again?")) return;
+        loop.stop();
+        void backend.delete(saveKey).finally(() => window.location.reload());
+      }
     }
   ]);
+  if (loadProblem) hud.toast("The saved world could not be loaded. Starting fresh.");
   inventoryScreen.setCloseHandler(() => closeInventory());
   hud.enableHotbarTaps((slot) => selectHotbar(input, slot, hudEvents));
 
@@ -210,6 +249,9 @@ function boot(): void {
       game.tick();
     },
     render: () => {
+      const frameNow = performance.now();
+      if (input.locked) autosaver.tick((frameNow - lastFrame) / 1000);
+      lastFrame = frameNow;
       const look = consumeLook(input);
       game.update({
         move: toMoveInput(input),
@@ -268,7 +310,11 @@ function boot(): void {
     game.resize(Math.max(1, window.innerWidth), Math.max(1, window.innerHeight));
     applyHudScale(hud.root, settings.hudScale);
   };
+  const onHidden = (): void => {
+    if (document.visibilityState === "hidden") void autosaver.now();
+  };
   const onPageHide = (): void => {
+    void autosaver.now();
     loop.stop();
     detachDesktop();
     touch.detach();
@@ -278,12 +324,19 @@ function boot(): void {
   window.addEventListener("resize", onResize);
   window.addEventListener("keydown", onEscape);
   window.addEventListener("pagehide", onPageHide, { once: true });
+  document.addEventListener("visibilitychange", onHidden);
   onResize();
   loop.start();
 }
 
+function start(): void {
+  boot().catch((error: unknown) => {
+    console.error("Block World failed to start:", error);
+  });
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", boot, { once: true });
+  document.addEventListener("DOMContentLoaded", start, { once: true });
 } else {
-  boot();
+  start();
 }
