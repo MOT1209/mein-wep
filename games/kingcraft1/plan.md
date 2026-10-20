@@ -47,13 +47,16 @@ Verified on 2026-10-19 in the `mein-wep` copy: `npx tsc --noEmit` clean, `npx vi
 269/269 across 24 files (including `tests/integration.test.ts`), `npm run build` succeeds. Headless Chromium checks on the built page
 (desktop 1280×720 and touch emulation 375×667) are listed in each step's commit body.
 
-- **Done: S1–S20.** Engine (S1–S10), mining/placing/drops (S11), HUD, inventory, pause (S12),
+- **Done: S1–S21.** The plan's step list is complete. Engine (S1–S10), mining/placing/drops (S11), HUD, inventory, pause (S12),
   furnace, chest, doors, bed, farming (S13), creatures (S14), survival stats and respawn (S15),
   touch controls and settings (S16), IndexedDB saves (S17), synthesized audio, particles,
   clouds and perf panel (S18), English/Arabic with RTL and the encyclopedia (S19).
 - **S20**: end-to-end integration test, `npm run check` green, `docs/TESTING.md` acceptance
   checklist (automated / headless-verified / manual-pending), ROADMAP truth pass.
-- **Not started: S21** (documentation set and CHANGELOG).
+- **S21**: `README.md`, `CHANGELOG.md` and `docs/` (ARCHITECTURE, GAMEPLAY_GUIDE, CONTROLS,
+  BLOCKS_AND_ITEMS and CRAFTING_RECIPES generated from the data, WORLD_GENERATION,
+  SAVE_SYSTEM, PERFORMANCE). Next work comes from `docs/ROADMAP.md` partial rows and the
+  manual checks in `docs/TESTING.md`.
 - **Gaps inside done steps** (also in `docs/ROADMAP.md`): mesher AO; chunk generation on the main
   thread; doors have no orientation; fume vent and lantern have no interaction; ranged creatures
   hit instantly (no projectile); no difficulty settings; no touch shift-click; real phones and

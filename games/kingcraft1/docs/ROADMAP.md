@@ -3,6 +3,7 @@
 Status legend: **done** · **partial** · **planned** · **blocked** · **not started**
 
 Statuses in this file reflect verified, implemented, test-covered work only.
+Last full truth pass: 2026-10-20 (after S21). Documentation index: `README.md`.
 It is updated phase-by-phase as work lands and is verified.
 
 ## Phase 1 — Foundation
