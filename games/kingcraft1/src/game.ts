@@ -1,18 +1,74 @@
 import * as THREE from "three";
-import { CHUNK_SX, CHUNK_SZ, PLAYER_EYE_HEIGHT, QUALITY_PRESETS, type QualityLevel } from "./config";
+import { CHUNK_SX, CHUNK_SY, CHUNK_SZ, CREATIVE_REACH, PLAYER_REACH, QUALITY_PRESETS, TICK_MS, type QualityLevel } from "./config";
+import { B, blockById, isLiquid, type MaterialKind } from "./content/blocks";
+import type { SfxKind } from "./audio/sfx";
+import { foodValue, itemById, toolStats } from "./content/items";
+import { EntityManager } from "./entities/manager";
+import type { Entity } from "./entities/types";
+import { Rng } from "./core/rng";
+import { ContainerStore } from "./gameplay/containers";
+import { DropManager, rollDrops } from "./gameplay/drops";
+import { applyGrowthBoost, randomTick } from "./gameplay/farming";
+import { furnaceTick } from "./gameplay/furnace";
+import { breakUnsupported, interact, type InteractResult, type Position } from "./gameplay/interactive";
+import { Inventory, type InventorySave } from "./gameplay/inventory";
+import { MiningState, type MiningEvent } from "./gameplay/mining";
+import { tryPlace, tryUseItem, type PlaceFailure } from "./gameplay/place";
+import { raycastVoxel, type RayHit } from "./physics/raycast";
+import { PlayerController, type MoveInput } from "./player/controller";
+import { PlayerStats, takeAllItems, type DamageSource } from "./player/stats";
+import type { SaveFile, SaveInput } from "./save/saveLoad";
 import { ChunkRenderer } from "./render/chunkRenderer";
+import { DropRenderer, type IconSource } from "./render/dropRenderer";
+import { EntityRenderer } from "./render/entityRenderer";
+import { CloudLayer } from "./render/clouds";
+import { BlockColors, ParticleRenderer } from "./render/particleRenderer";
+import { ParticleSystem } from "./render/particles";
 import { createChunkMaterials, type ChunkMaterials } from "./render/materials";
 import { buildAtlasTexture } from "./render/textures";
 import { MIN_DAY_FACTOR, skyColors } from "./render/sky";
+import { ChunkStreamer, type StreamStats } from "./render/streaming";
 import { World } from "./voxels/world";
 
 const CAMERA_FOV = 70;
 const NEAR_PLANE = 0.1;
 const REBUILD_BUDGET_MS = 4;
+const SPAWN_RADIUS = 1;
+const MAX_FRAME_SECONDS = 0.25;
+const RANDOM_TICKS_PER_CHUNK = 6;
+const PLAYER_ATTACK_COOLDOWN = 0.45;
+const HAND_DAMAGE = 1;
+const PLAYER_KNOCKBACK = 7;
+const STEP_DISTANCE = 1.7;
+const DIG_SOUND_SECONDS = 0.24;
+const MAX_PARTICLES = 400;
+
+export type GameMode = "survival" | "creative";
 
 export interface GameOptions {
   quality?: QualityLevel;
   renderDistance?: number;
+  mode?: GameMode;
+  clock?: () => number;
+}
+
+export interface FrameInput {
+  move: MoveInput;
+  dyaw: number;
+  dpitch: number;
+  attack: boolean;
+  uses: number;
+  hotbarSlot: number;
+  active: boolean;
+}
+
+export interface GameEvents {
+  onMining?(event: MiningEvent): void;
+  onPlaceFailed?(reason: PlaceFailure): void;
+  onInteract?(result: InteractResult): void;
+  onPlayerDamaged?(amount: number, source: DamageSource, attacker: Entity | null): void;
+  onDeath?(source: DamageSource | null): void;
+  onSound?(kind: SfxKind, material: MaterialKind): void;
 }
 
 export class Game {
@@ -22,21 +78,49 @@ export class Game {
   readonly camera: THREE.PerspectiveCamera;
   readonly materials: ChunkMaterials;
   readonly chunkRenderer: ChunkRenderer;
-  readonly playerPosition: THREE.Vector3;
+  readonly player: PlayerController;
+  streamer: ChunkStreamer;
+  readonly playerPosition = new THREE.Vector3();
+  readonly mode: GameMode;
+  inventory = new Inventory();
+  readonly mining = new MiningState();
+  readonly drops = new DropManager();
+  containers = new ContainerStore();
+  readonly entities: EntityManager;
+  stats = new PlayerStats();
+  private readonly entityRenderer: EntityRenderer;
+  private attackCooldown = 0;
+  readonly particles = new ParticleSystem(0);
+  private particleRenderer: ParticleRenderer | null = null;
+  private blockColors: BlockColors | null = null;
+  private clouds: CloudLayer | null = null;
+  private stepDistance = 0;
+  private digSoundTimer = 0;
+  quality: QualityLevel;
+  respawnPoint: Position | null = null;
+  readonly events: GameEvents = {};
+  target: RayHit | null = null;
+  private dropRenderer: DropRenderer | null = null;
+  private readonly rng: Rng;
+  private readonly selection: THREE.LineSegments;
   private readonly atlas: THREE.Texture;
   private readonly background = new THREE.Color();
-  private readonly centerCx: number;
-  private readonly centerCz: number;
+  private readonly clock: () => number;
+  private lastFrame: number;
 
   constructor(canvas: HTMLCanvasElement, world: World, options: GameOptions = {}) {
     const quality = options.quality ?? "medium";
+    this.quality = quality;
     const preset = QUALITY_PRESETS[quality];
     const renderDistance = options.renderDistance ?? preset.renderDistance;
     const spawn = world.findSpawn();
     this.world = world;
-    this.playerPosition = new THREE.Vector3(spawn.x, spawn.y, spawn.z);
-    this.centerCx = Math.floor(spawn.x / CHUNK_SX);
-    this.centerCz = Math.floor(spawn.z / CHUNK_SZ);
+    this.clock = options.clock ?? (() => performance.now());
+    this.lastFrame = this.clock();
+    this.mode = options.mode ?? "survival";
+    this.rng = new Rng(world.seedInt ^ 0x5eed);
+    this.player = new PlayerController(world, spawn, { canFly: this.mode === "creative" });
+    this.entities = new EntityManager(new Rng(world.seedInt ^ 0xc0ffee));
 
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -56,8 +140,18 @@ export class Game {
       NEAR_PLANE,
       (renderDistance + 2) * 16
     );
-    this.camera.position.set(spawn.x, spawn.y + PLAYER_EYE_HEIGHT - 0.02, spawn.z);
-    this.camera.lookAt(spawn.x + 24, spawn.y - 8, spawn.z + 24);
+    this.camera.rotation.order = "YXZ";
+    this.selection = new THREE.LineSegments(
+      new THREE.EdgesGeometry(new THREE.BoxGeometry(1.004, 1.004, 1.004)),
+      new THREE.LineBasicMaterial({ color: 0x101418, transparent: true, opacity: 0.7 })
+    );
+    this.selection.visible = false;
+    this.scene.add(this.selection);
+    this.entityRenderer = new EntityRenderer(this.scene, world);
+    this.particles.setCap(preset.particles);
+    this.particleRenderer = new ParticleRenderer(this.scene, MAX_PARTICLES);
+    this.clouds = new CloudLayer(this.scene, world.seedInt, renderDistance * 16);
+    this.clouds.setVisible(preset.clouds);
 
     this.atlas = buildAtlasTexture();
     this.materials = createChunkMaterials(this.atlas, quality);
@@ -68,18 +162,351 @@ export class Game {
       atlas: this.atlas,
       materials: this.materials
     });
-    this.chunkRenderer.update(this.centerCx, this.centerCz);
+    this.streamer = new ChunkStreamer(world, this.chunkRenderer, { renderDistance });
+    this.streamer.loadAllNow(spawn.x, spawn.z, SPAWN_RADIUS);
+    this.syncCamera();
+    this.chunkRenderer.update(this.chunkX, this.chunkZ);
     this.applySky();
+  }
+
+  get streamStats(): Readonly<StreamStats> {
+    return this.streamer.stats;
+  }
+
+  get atlasCanvas(): HTMLCanvasElement {
+    return this.atlas.image as HTMLCanvasElement;
+  }
+
+  attachIcons(icons: IconSource): void {
+    this.blockColors = new BlockColors(this.atlasCanvas);
+    this.dropRenderer?.dispose();
+    this.dropRenderer = new DropRenderer(this.scene, icons);
+  }
+
+  snapshot(): SaveInput {
+    const { position, yaw, pitch } = this.player.state;
+    return {
+      seed: this.world.seedInt,
+      mode: this.mode,
+      time: this.world.time,
+      player: { x: position.x, y: position.y, z: position.z, yaw, pitch, respawn: this.respawnPoint },
+      stats: this.stats.toJSON(),
+      inventory: this.inventory.toJSON(),
+      containers: this.containers.toJSON(),
+      entities: this.entities.toJSON(),
+      chunks: this.world.modifiedChunkData()
+    };
+  }
+
+  restore(save: SaveFile): void {
+    this.world.time = save.time;
+    this.inventory = Inventory.fromJSON(save.inventory as InventorySave);
+    this.stats = PlayerStats.fromJSON(save.stats);
+    this.containers = ContainerStore.fromJSON(save.containers);
+    this.entities.load(save.entities);
+    this.respawnPoint = save.player.respawn;
+    this.drops.clear();
+    this.mining.reset();
+    this.player.spawnAt(save.player);
+    this.player.state.yaw = save.player.yaw;
+    this.player.state.pitch = save.player.pitch;
+    this.streamer.loadAllNow(save.player.x, save.player.z, 1);
+    this.syncCamera();
+  }
+
+  setRenderDistance(distance: number): void {
+    if (distance === this.streamer.renderDistance) return;
+    this.streamer = new ChunkStreamer(this.world, this.chunkRenderer, { renderDistance: distance });
+    this.camera.far = (distance + 2) * 16;
+    this.camera.updateProjectionMatrix();
+    for (const material of [this.materials.terrain, this.materials.water, this.materials.plants]) {
+      material.uniforms.uFogDistance.value = distance * 16;
+    }
+  }
+
+  setPixelRatioCap(cap: number): void {
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, cap));
+    this.renderer.setSize(window.innerWidth, window.innerHeight, false);
+  }
+
+  get creative(): boolean {
+    return this.mode === "creative";
+  }
+
+  update(input: FrameInput): void {
+    const now = this.clock();
+    const dt = Math.min(Math.max((now - this.lastFrame) / 1000, 0), MAX_FRAME_SECONDS);
+    this.lastFrame = now;
+    this.inventory.selectedIndex = input.hotbarSlot;
+    if (input.active && this.playerAlive) {
+      this.player.look(input.dyaw, input.dpitch);
+      this.player.move(input.move, dt);
+    }
+    const { x, y, z } = this.player.state.position;
+    this.streamer.update(x, z);
+    this.syncCamera();
+    this.updateTarget();
+    if (input.active && this.playerAlive) {
+      this.tickStats(dt, input.move);
+      this.tickEntities(dt);
+      if (this.playerAlive) this.interact(input, dt);
+    } else {
+      this.mining.reset();
+    }
+    this.drops.tick(this.world, dt, { x, y, z }, (stack) => {
+      const leftover = this.inventory.add(stack);
+      if (!leftover || leftover.count < stack.count) this.sound("pickup", "plant");
+      return leftover;
+    });
+    this.particles.step(dt, this.world);
+    if (input.active) this.footsteps(dt);
+  }
+
+  private sound(kind: SfxKind, material: MaterialKind): void {
+    this.events.onSound?.(kind, material);
+  }
+
+  private materialOf(id: number): MaterialKind {
+    return blockById(id).material;
+  }
+
+  private footsteps(dt: number): void {
+    const state = this.player.state;
+    if (!state.onGround || state.flying) {
+      this.stepDistance = 0;
+      return;
+    }
+    this.stepDistance += Math.hypot(state.velocity.x, state.velocity.z) * dt;
+    if (this.stepDistance < STEP_DISTANCE) return;
+    this.stepDistance = 0;
+    const { x, y, z } = state.position;
+    const below = this.world.getBlock(Math.floor(x), Math.floor(y) - 1, Math.floor(z));
+    if (below !== B.AIR) this.sound("step", this.materialOf(below));
+  }
+
+  setQuality(quality: QualityLevel): void {
+    this.quality = quality;
+    const preset = QUALITY_PRESETS[quality];
+    this.particles.setCap(preset.particles);
+    this.clouds?.setVisible(preset.clouds);
+  }
+
+  private updateTarget(): void {
+    const eye = this.player.eyePosition();
+    const dir = this.player.lookDirection();
+    const reach = this.creative ? CREATIVE_REACH : PLAYER_REACH;
+    this.target = raycastVoxel(this.world, eye.x, eye.y, eye.z, dir.x, dir.y, dir.z, reach);
+    this.selection.visible = this.target !== null;
+    if (this.target) this.selection.position.set(this.target.x + 0.5, this.target.y + 0.5, this.target.z + 0.5);
+  }
+
+  private tickEntities(dt: number): void {
+    const { x, y, z } = this.player.state.position;
+    this.entities.tick(
+      this.world,
+      { x, y, z, alive: this.playerAlive && !this.creative, eyeHeight: this.player.eyePosition().y - y },
+      dt,
+      {
+        damagePlayer: (amount, source, knockX, knockZ) => {
+          const velocity = this.player.state.velocity;
+          velocity.x += knockX * PLAYER_KNOCKBACK;
+          velocity.z += knockZ * PLAYER_KNOCKBACK;
+          velocity.y = Math.max(velocity.y, 4);
+          this.hurtPlayer(amount, "mob", source);
+        },
+        dropLoot: (stack, lx, ly, lz) => this.drops.spawn(stack, lx, ly, lz)
+      }
+    );
+  }
+
+  get playerAlive(): boolean {
+    return !this.stats.dead;
+  }
+
+  hurtPlayer(amount: number, source: DamageSource, attacker: Entity | null = null): void {
+    if (this.creative || this.stats.dead) return;
+    const event = this.stats.damage(amount, source);
+    if (event.amount <= 0) return;
+    this.events.onPlayerDamaged?.(event.amount, source, attacker);
+    this.sound("hurt", "wool");
+    if (event.died) this.die();
+  }
+
+  private die(): void {
+    const { x, y, z } = this.player.state.position;
+    for (const stack of takeAllItems(this.inventory)) {
+      this.drops.spawn(stack, x + this.rng.range(-0.6, 0.6), y + 1, z + this.rng.range(-0.6, 0.6), this.rng.range(2, 5), 1.5);
+    }
+    this.mining.reset();
+    this.events.onDeath?.(this.stats.lastDamage);
+  }
+
+  respawn(): void {
+    const point = this.respawnPoint ?? this.world.findSpawn();
+    this.player.spawnAt(point);
+    this.stats.respawn();
+    this.streamer.loadAllNow(point.x, point.z, 1);
+    this.syncCamera();
+  }
+
+  private tickStats(dt: number, move: MoveInput): void {
+    if (this.creative || this.stats.dead) return;
+    const state = this.player.state;
+    const eye = this.player.eyePosition();
+    const events = this.stats.tick(dt, {
+      y: state.position.y,
+      onGround: state.onGround,
+      inWater: state.inWater,
+      headInWater: isLiquid(this.world.getBlock(Math.floor(eye.x), Math.floor(eye.y), Math.floor(eye.z))),
+      flying: state.flying,
+      moving: move.forward !== 0 || move.strafe !== 0,
+      sprinting: state.sprinting
+    });
+    for (const event of events) {
+      this.events.onPlayerDamaged?.(event.amount, event.source, null);
+      this.sound("hurt", "wool");
+      if (event.died) this.die();
+    }
+  }
+
+  private hitEntity(): boolean {
+    const eye = this.player.eyePosition();
+    const dir = this.player.lookDirection();
+    const reach = this.creative ? CREATIVE_REACH : PLAYER_REACH;
+    const blockDistance = this.target ? this.target.distance : reach;
+    const hit = this.entities.raycast(eye, dir, Math.min(reach, blockDistance + 0.01));
+    if (!hit) return false;
+    if (this.attackCooldown > 0) return true;
+    this.attackCooldown = PLAYER_ATTACK_COOLDOWN;
+    const held = this.inventory.selected;
+    const tool = held ? toolStats(held.item) : undefined;
+    const { x, z } = this.player.state.position;
+    this.entities.damage(hit.entity, tool ? tool.damage : HAND_DAMAGE, x, z);
+    if (tool && !this.creative) this.inventory.damage(this.inventory.selectedIndex, 1);
+    return true;
+  }
+
+  private interact(input: FrameInput, dt: number): void {
+    const held = this.inventory.selected?.item ?? null;
+    this.attackCooldown = Math.max(0, this.attackCooldown - dt);
+    if (input.attack && this.hitEntity()) {
+      this.mining.reset();
+    } else if (input.attack) {
+      const event = this.mining.tick(this.world, this.target, held, dt, this.creative);
+      if (event) this.onMiningEvent(event);
+      this.digSoundTimer -= dt;
+      if (!event && this.target && this.mining.progress > 0 && this.digSoundTimer <= 0) {
+        this.digSoundTimer = DIG_SOUND_SECONDS;
+        this.sound("dig", this.materialOf(this.target.id));
+      }
+    } else {
+      this.mining.reset();
+    }
+    for (let i = 0; i < input.uses && this.target; i++) this.use(this.target, input.move.sneak);
+  }
+
+  private onMiningEvent(event: MiningEvent): void {
+    this.events.onMining?.(event);
+    if (event.kind !== "broken") return;
+    this.sound("break", this.materialOf(event.id));
+    if (this.blockColors) this.particles.burst(event.x + 0.5, event.y + 0.5, event.z + 0.5, this.blockColors.colorsFor(event.id), this.rng);
+    if (event.harvest) this.dropBlock(event.id, event);
+    for (const stack of this.containers.remove(event.x, event.y, event.z)) {
+      this.drops.spawn(stack, event.x + 0.5, event.y + 0.5, event.z + 0.5);
+    }
+    for (const fallen of breakUnsupported(this.world, event.x, event.y, event.z)) {
+      if (!this.creative) this.dropBlock(fallen.id, fallen);
+    }
+    if (event.wear > 0) this.inventory.damage(this.inventory.selectedIndex, event.wear);
+  }
+
+  private dropBlock(id: number, at: Position): void {
+    for (const stack of rollDrops(id, this.rng)) this.drops.spawn(stack, at.x + 0.5, at.y + 0.5, at.z + 0.5);
+  }
+
+  private use(hit: RayHit, sneaking: boolean): void {
+    if (!sneaking) {
+      const result = interact(this.world, this.containers, hit);
+      if (result) {
+        if (result.kind === "bed") this.respawnPoint = result.spawn;
+        this.events.onInteract?.(result);
+        return;
+      }
+    }
+    const slot = this.inventory.selectedIndex;
+    const held = this.inventory.selected;
+    if (!held) return;
+    if (foodValue(held.item)) {
+      if (!this.creative && this.stats.eat(held.item)) {
+        this.inventory.removeAt(slot, 1);
+        this.sound("eat", "plant");
+      }
+      return;
+    }
+    if (itemById(held.item)?.useAction === "bone_meal") {
+      if (applyGrowthBoost(this.world, hit.x, hit.y, hit.z, this.rng) && !this.creative) this.inventory.removeAt(slot, 1);
+      return;
+    }
+    const used = tryUseItem(this.world, hit, held.item);
+    if (used.ok) {
+      if (used.wear > 0 && !this.creative) this.inventory.damage(slot, used.wear);
+      if (used.consume && !this.creative) this.inventory.removeAt(slot, 1);
+      if (used.give) this.giveOrDrop(used.give);
+      return;
+    }
+    const placed = tryPlace(this.world, hit, held.item, this.player.state.position);
+    if (!placed.ok) {
+      this.events.onPlaceFailed?.(placed.reason);
+      return;
+    }
+    this.sound("place", this.materialOf(placed.blockId));
+    if (!this.creative) {
+      this.inventory.removeAt(slot, 1);
+      if (placed.give) this.giveOrDrop(placed.give);
+    }
+  }
+
+  private giveOrDrop(stack: { item: string; count: number }): void {
+    const leftover = this.inventory.add(stack);
+    if (!leftover) return;
+    const { x, y, z } = this.player.state.position;
+    this.drops.spawn(leftover, x, y + 1, z);
   }
 
   tick(): void {
     this.world.advanceTime(1);
+    const dt = TICK_MS / 1000;
+    for (const [x, y, z, furnace] of this.containers.furnaces()) {
+      const result = furnaceTick(furnace, dt);
+      if (!result.changed) continue;
+      const id = this.world.getBlock(x, y, z);
+      if (id === B.FURNACE || id === B.FURNACE_LIT) this.world.setBlock(x, y, z, result.lit ? B.FURNACE_LIT : B.FURNACE);
+    }
+    for (const chunk of this.world.chunks.values()) {
+      for (let i = 0; i < RANDOM_TICKS_PER_CHUNK; i++) {
+        const x = chunk.cx * CHUNK_SX + this.rng.nextInt(CHUNK_SX);
+        const z = chunk.cz * CHUNK_SZ + this.rng.nextInt(CHUNK_SZ);
+        const y = 1 + this.rng.nextInt(CHUNK_SY - 2);
+        randomTick(this.world, x, y, z, this.rng);
+      }
+    }
   }
 
   render(): void {
     this.applySky();
-    this.chunkRenderer.update(this.centerCx, this.centerCz);
+    this.chunkRenderer.update(this.chunkX, this.chunkZ);
     this.chunkRenderer.rebuildBudgeted(REBUILD_BUDGET_MS);
+    this.dropRenderer?.sync(this.drops.drops, this.clock() / 1000);
+    this.entityRenderer.sync(
+      this.entities.entities,
+      this.camera.position,
+      this.camera.far,
+      Math.max(this.world.dayFactor, MIN_DAY_FACTOR),
+      this.clock() / 1000
+    );
+    const brightness = Math.max(this.world.dayFactor, MIN_DAY_FACTOR);
+    this.particleRenderer?.sync(this.particles.particles, 0.35 + 0.65 * brightness);
+    this.clouds?.update(this.camera.position.x, this.camera.position.z, this.clock() / 1000, brightness);
     this.renderer.render(this.scene, this.camera);
   }
 
@@ -90,6 +517,10 @@ export class Game {
   }
 
   dispose(): void {
+    this.dropRenderer?.dispose();
+    this.particleRenderer?.dispose();
+    this.clouds?.dispose(this.scene);
+    this.entityRenderer.dispose();
     for (const chunk of this.world.chunks.values()) {
       this.chunkRenderer.dispose(chunk.cx, chunk.cz);
     }
@@ -98,6 +529,22 @@ export class Game {
     this.materials.plants.dispose();
     this.atlas.dispose();
     this.renderer.dispose();
+  }
+
+  private get chunkX(): number {
+    return Math.floor(this.player.state.position.x / CHUNK_SX);
+  }
+
+  private get chunkZ(): number {
+    return Math.floor(this.player.state.position.z / CHUNK_SZ);
+  }
+
+  private syncCamera(): void {
+    const { position, yaw, pitch } = this.player.state;
+    const eye = this.player.eyePosition();
+    this.playerPosition.set(position.x, position.y, position.z);
+    this.camera.position.set(eye.x, eye.y, eye.z);
+    this.camera.rotation.set(pitch, yaw, 0);
   }
 
   private applySky(): void {

@@ -5,6 +5,8 @@ the remaining work **cold**, one step at a time, in parallel where safe.
 Read the whole header once. Then execute only the assigned step.
 
 Project root: `C:\Users\aihmo\Downloads\kingcraft1` (Windows / PowerShell 5.1).
+A synced copy lives in the `mein-wep` repo at `games/kingcraft1/`. It is excluded from the
+portfolio deploy until a `vite build` output is published instead of the raw source.
 Docs of record: `docs/MASTER_PROMPT.md`, `docs/BASELINE_AUDIT.md`, `docs/ROADMAP.md`.
 
 ---
@@ -41,35 +43,38 @@ npm run build                     # vite build (wave ends only)
 
 ## 2. Verified current state (trust this, verify with the commands)
 
-Working on `main`. Commits: `e1f862d` scaffold+docs, `ec610ca` voxels+worldgen+lighting.
+Verified on 2026-10-19 in the `mein-wep` copy: `npx tsc --noEmit` clean, `npx vitest run`
+269/269 across 24 files (including `tests/integration.test.ts`), `npm run build` succeeds. Headless Chromium checks on the built page
+(desktop 1280×720 and touch emulation 375×667) are listed in each step's commit body.
 
-- **Scaffold**: Vite 5 + TS 5.6 strict + Vitest 2.1 + Three.js 0.168. Scripts: `dev`, `build`,
-  `preview`, `typecheck`, `test`, `check`.
-- **Core**: `src/core/rng.ts`, `src/core/noise.ts` (Perlin, fbm, ridged, seeded RNG).
-- **Content (done, data-driven)**: `src/content/blocks.ts` (IDs 0–83+, `BlockDef` with
-  `tiles {all|top|bottom|side|front}`, `render: "cube"|"cross"|"liquid"`, light/hardness/tool
-  fields, `lightFilterOf`), `items.ts`, `recipes.ts`, `creatures.ts`, `locales.ts`.
-- **Voxels**: `chunk.ts` (16×96×16, index `(y*16+z)*16+x`), `biomes.ts` (7 biomes),
-  `worldgen.ts` (continents, mountains, ores, caves, trees, decor, camps — camp water bug fixed),
-  `lighting.ts` (sky+block BFS flood fill, border seeding), `world.ts` (World class:
-  `ensureChunk/unloadChunk/getChunkIfLoaded/getBlock/setBlock` with relight on edit,
-  `getSkyLight/getBlockLight`, `findSpawn`, `advanceTime/setTimeOfDay/skipToMorning`,
-  `getModifiedChunks/applySavedBlocks`, direct-mapped chunk cache).
-- **Mesher (written, UNCOMMITTED, tests need one more run)**: `src/voxels/mesher.ts`.
-  - API: `buildChunkMesh(source: MeshSource, chunk: Chunk, tileOf: TileOf): ChunkMeshData`.
-  - `TileOf = (blockId: number, face: number) => number` (atlas tile index, 0..255).
-  - Returns `{ opaque, water, plants }`, each `MeshArrays { positions, normals, uvs, sky,
-    block, indices }` as `Float32Array`/`Uint32Array`.
-  - Positions are **chunk-local** (renderer puts the mesh at `cx*16, 0, cz*16`).
-  - UVs are in **tile units over 16** (u = (tileX + cornerU)/16). Faces order:
-    `FACE_PX=0, FACE_NX=1, FACE_PY=2, FACE_NY=3, FACE_PZ=4, FACE_NZ=5`.
-  - `sky`/`block` vertex attrs are `light/15` floats of the **adjacent cell** (plants: own cell).
-  - Culling: opaque vs opaque; liquid vs liquid/opaque/cross; non-opaque cubes cull only
-    same-block faces (glass/glass); cross never culls. Water is a full cube (v1), static (no flow).
-  - `src/config.ts` gained `ATLAS_TILES_PER_ROW=16`, `ATLAS_TILE_PIXELS=16`, `ATLAS_TILE_COUNT=256`.
-  - Tests: `tests/mesher.test.ts` (14 cases). 4 failed on first run because the test's
-    `FakeSource` ignored chunk-local neighbors; **fix already applied** (chunk-aware FakeSource).
-- **Tests passing (verified)**: `tests/world.test.ts` (9/9). `npm run typecheck` clean at last check.
+- **Done: S1–S21.** The plan's step list is complete. Engine (S1–S10), mining/placing/drops (S11), HUD, inventory, pause (S12),
+  furnace, chest, doors, bed, farming (S13), creatures (S14), survival stats and respawn (S15),
+  touch controls and settings (S16), IndexedDB saves (S17), synthesized audio, particles,
+  clouds and perf panel (S18), English/Arabic with RTL and the encyclopedia (S19).
+- **S20**: end-to-end integration test, `npm run check` green, `docs/TESTING.md` acceptance
+  checklist (automated / headless-verified / manual-pending), ROADMAP truth pass.
+- **S21**: `README.md`, `CHANGELOG.md` and `docs/` (ARCHITECTURE, GAMEPLAY_GUIDE, CONTROLS,
+  BLOCKS_AND_ITEMS and CRAFTING_RECIPES generated from the data, WORLD_GENERATION,
+  SAVE_SYSTEM, PERFORMANCE). Next work comes from `docs/ROADMAP.md` partial rows and the
+  manual checks in `docs/TESTING.md`.
+- **Gaps inside done steps** (also in `docs/ROADMAP.md`): mesher AO; chunk generation on the main
+  thread; doors have no orientation; fume vent and lantern have no interaction; ranged creatures
+  hit instantly (no projectile); no difficulty settings; no touch shift-click; real phones and
+  multi-touch not tested; fall damage, drowning, eating, crop growth and beds verified by unit
+  tests only, not in the browser; audio not listened to on speakers; Arabic not reviewed by a
+  native editor. Language changes reload the page (UI is built once per load).
+- **API drift from the original step text**: `ChunkStreamer.update(px, pz)` (no `nowMs`);
+  `loadAllNow(px, pz, radius?)`. `MoveInput` uses booleans for `jump/sneak/sprint/fly`. Pure
+  logic lives next to DOM glue: `src/input/inputState.ts`, `src/ui/slotLogic.ts`,
+  `src/ui/settings.ts`. `Game.update(FrameInput)` runs player physics per frame with real dt;
+  `Game.tick()` runs world time, furnaces and random ticks at 20 Hz. `World` keeps edited
+  chunks in `storedChunks` on unload and re-applies them on load (S17 found that edits were
+  lost on unload). Saves use slot `world:<seed>:<mode>`. Creative mode has an all-items palette
+  (not in the original plan; creative had nothing to place). `?time=0..1` sets the start time.
+- **Mesher API (unchanged)**: `buildChunkMesh(source, chunk, tileOf)` returns
+  `{ opaque, water, plants }` with chunk-local positions, UVs in tile units over 16, and
+  `sky`/`block` vertex attributes as `light/15` of the adjacent cell (plants: own cell).
+  Face order `FACE_PX=0, FACE_NX=1, FACE_PY=2, FACE_NY=3, FACE_PZ=4, FACE_NZ=5`.
 - **Atlas convention (critical)**: mesher computes `v = (row + lv)/16` with row = `(tile/16)|0`.
   `src/render/textures.ts` MUST draw tile index `i` into the canvas row-flipped:
   `x = (i % 16) * 16`, `y = (15 - ((i/16)|0)) * 16` (canvas is y-down, three.js flipY default).

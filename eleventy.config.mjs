@@ -13,7 +13,7 @@ import { TEMPLATE_SOURCES } from './scripts/site-templates.mjs';
  *     .eleventyignore so templates never come from excluded dirs
  *
  * Hard rules:
- *  - Sub-projects (games/, apps/, models/, admin/, vault/, okf/, api/) are
+ *  - Sub-projects (games/, apps/, models/, admin/, vault/, okf/) are
  *    NEVER templates — copied verbatim at identical relative paths.
  *  - The deployed URL surface must stay identical to today's (see
  *    scripts/check-url-surface.mjs which enforces it).
@@ -27,12 +27,19 @@ const NOT_SERVED = [
   /^package(?:-lock)?\.json$/,
   /^eleventy\.config\.mjs$/,
   /^\.eleventyignore$/,
-  /^\.eleventyignore$/,
   /^_data\//,
   /^_includes\//,
   /^tests\//,
   /^scripts\/check-url-surface\.mjs$/,
   /^scripts\/site-templates\.mjs$/,
+  // Function sources, deploy config and build tooling: Vercel reads them from
+  // the repo, nobody needs them over HTTP.
+  /^api\//,
+  /^vercel\.json$/,
+  /^scripts\//,
+  // Raw Vite/TypeScript source with no build step: the page loads /src/main.ts
+  // and cannot run. Serve it again only as `vite build` output.
+  /^games\/kingcraft1\//,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.

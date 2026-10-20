@@ -30,6 +30,14 @@ const NOT_SERVED = [
   /^tests\//,
   /^scripts\/check-url-surface\.mjs$/,
   /^scripts\/site-templates\.mjs$/,
+  // Function sources, deploy config and build tooling: Vercel reads them from
+  // the repo, nobody needs them over HTTP.
+  /^api\//,
+  /^vercel\.json$/,
+  /^scripts\//,
+  // Raw Vite/TypeScript source with no build step: the page loads /src/main.ts
+  // and cannot run. Serve it again only as `vite build` output.
+  /^games\/kingcraft1\//,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.

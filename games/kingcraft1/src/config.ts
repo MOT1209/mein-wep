@@ -96,3 +96,10 @@ export const QUALITY_PRESETS = {
 } as const;
 
 export type QualityLevel = keyof typeof QUALITY_PRESETS;
+
+export const SNEAK_SPEED_FACTOR = 0.3;
+export const AIR_CONTROL = 0.9;
+export const WATER_GRAVITY_FACTOR = 0.2;
+export const MAX_PLAYER_STEP_SECONDS = 0.1;
+export const DROP_MAGNET_RADIUS = 3.2;
+export const DROP_MAGNET_SPEED = 7;
