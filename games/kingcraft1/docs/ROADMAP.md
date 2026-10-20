@@ -77,9 +77,9 @@ It is updated phase-by-phase as work lands and is verified.
 
 | Item | Status |
 | ---- | ------ |
-| Ruins, camps, buried loot chests | not started |
-| Rare ores + gems by depth | not started |
-| Exploration rewards + encyclopedia entries | not started |
+| Ruins, camps, buried loot chests | partial (worldgen camps place a chest, but it opens empty; no ruins or loot tables) |
+| Rare ores + gems by depth | done (worldgen veins: aurum y 2–24, aetherite gem y 2–15, ember y 4–30) |
+| Exploration rewards + encyclopedia entries | partial (encyclopedia done; no exploration rewards or discovery tracking) |
 
 ## Phase 8 — Persistence
 
@@ -122,7 +122,7 @@ It is updated phase-by-phase as work lands and is verified.
 
 | Item | Status |
 | ---- | ------ |
-| Automated test suite | in progress (23 files, 268 tests green; grows per phase) |
+| Automated test suite | done (24 files, 269 tests incl. an end-to-end integration test; `npm run check` green) |
 | Production build (`npm run build`) | done |
-| Acceptance checklist (`docs/TESTING.md`) | not started |
+| Acceptance checklist (`docs/TESTING.md`) | done (each check marked automated, headless-verified or manual-pending) |
 | Native packaging (desktop/mobile stores) | blocked — requires native toolchains not present in this environment |
