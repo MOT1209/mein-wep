@@ -16,6 +16,16 @@
 .home-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); flex: none; }
 .home-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-block-start: var(--s-5); }
 @media (min-width: 640px) { .home-hero { padding: var(--s-9) 0 var(--s-8); } }
+.home-hero-grid { display: grid; gap: var(--s-5); align-items: center; }
+.home-avatar {
+  width: 120px; height: 120px; border-radius: 50%; object-fit: cover;
+  border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--rule-strong), var(--lift);
+  background: var(--signal-wash);
+}
+@media (min-width: 1024px) {
+  .home-hero-grid { grid-template-columns: 1fr auto; gap: var(--s-8); }
+  .home-avatar { order: 2; width: 168px; height: 168px; }
+}
 
 /* ------------------------------ Sections ------------------------------ */
 .home-section { padding: var(--s-7) 0; }
@@ -79,6 +89,7 @@
 .home-facts dt { font-size: 0.75rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; }
 :lang(ar) .home-facts dt { letter-spacing: normal; }
 .home-facts dd { margin: var(--s-1) 0 0; font-family: var(--font-display); font-weight: 800; font-size: 1.375rem; color: var(--ink); }
+.home-facts dd.home-fact-text { font-size: 1rem; font-weight: 700; line-height: 1.4; }
 @media (min-width: 1024px) { .home-about { grid-template-columns: 3fr 2fr; gap: var(--s-8); } }
 
 /* ------------------------------ Settings dialog ------------------------------ */

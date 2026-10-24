@@ -247,6 +247,19 @@ body.site.menu-open { overflow: hidden; }
 .policy-container a { text-decoration: underline; text-underline-offset: 3px; }
 
 .about-section { margin-bottom: var(--s-7); }
+.about-intro { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-4) var(--s-5); margin-bottom: var(--s-7); }
+.about-intro .subtitle { margin-bottom: 0; }
+.about-avatar {
+  width: 120px; height: 120px; border-radius: 50%; object-fit: cover; flex: none;
+  border: 3px solid var(--card); box-shadow: 0 0 0 1px var(--rule-strong), var(--lift);
+  background: var(--signal-wash);
+}
+.about-langs { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--s-2); }
+.about-langs li {
+  display: flex; justify-content: space-between; gap: var(--s-4); padding: var(--s-3) var(--s-4);
+  background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); color: var(--ink);
+}
+.about-langs span { color: var(--ink-muted); }
 .about-section h2 { font-size: 1.375rem; display: flex; align-items: center; gap: var(--s-2); margin-bottom: var(--s-3); }
 .about-section h2 i, .skill-item i, .contact-method-item i { color: var(--signal); }
 .skills-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); margin-top: var(--s-4); }

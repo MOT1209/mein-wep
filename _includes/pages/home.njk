@@ -8,7 +8,9 @@
 {%- set enOnly = (' lang="en"' ~ (' dir="ltr"' if i18n[L].dir == "rtl" else "")) if L != "en" else "" %}
 {%- set work = kingStudio.featured.games.concat(kingStudio.featured.apps) %}
 <section class="home-hero" aria-labelledby="home-title">
-    <div class="wrap">
+    <div class="wrap home-hero-grid">
+        <img class="home-avatar" src="{{ root }}images/rashid-ali.webp" alt="{{ T.photoAlt }}" width="168" height="168" fetchpriority="high">
+        <div>
         <span class="eyebrow">{{ T.eyebrow }}</span>
         <h1 id="home-title" class="home-title">{{ T.headline }}</h1>
         <p class="home-lede">{{ T.ledeBefore }} <a href="{{ root }}king-studio/">King Studio</a>: {{ kingStudio.projects | length }} {{ T.ledeProjects }} {{ releases.items | length }} {{ T.ledeAndroid }}</p>
@@ -16,6 +18,7 @@
         <div class="home-actions">
             <a href="#contact" class="btn btn-primary">{{ T.ctaWork }}</a>
             <a href="{{ root }}king-studio/" class="btn btn-secondary">{{ T.ctaStudio }}</a>
+        </div>
         </div>
     </div>
 </section>
@@ -67,9 +70,10 @@
             <p>{{ T.aboutText }}</p>
             <p>{{ T.aboutSourceBefore }} <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>{{ T.aboutSourceAfter }}</p>
             <ul class="home-stack" aria-label="{{ T.stackLabel }}">
-{%- for tool in ["JavaScript", "Python", "Node.js", "Three.js", "Supabase", "Eleventy", "Capacitor", "Vercel"] %}
+{%- for tool in ["HTML", "CSS", "JavaScript", "Python", "Supabase", "Godot", "Unity"] %}
                 <li class="tag">{{ tool }}</li>
 {%- endfor %}
+                <li class="tag">{{ T.stackAi }}</li>
             </ul>
             <a class="home-more" href="{{ root }}{{ site.translations.about[L] }}">{{ T.aboutMore }}<span aria-hidden="true"> &rarr;</span></a>
         </div>
@@ -77,7 +81,7 @@
             <div><dt>{{ T.factProjects }}</dt><dd>{{ kingStudio.projects | length }}</dd></div>
             <div><dt>{{ T.factAndroid }}</dt><dd>{{ releases.items | length }}</dd></div>
             <div><dt>{{ T.factRelease }}</dt><dd>{{ releases.updatedAt }}</dd></div>
-            <div><dt>{{ T.factBased }}</dt><dd>{{ T.factCountry }}</dd></div>
+            <div><dt>{{ T.factLanguages }}</dt><dd class="home-fact-text">{{ T.factLanguagesValue }}</dd></div>
         </dl>
     </div>
 </section>

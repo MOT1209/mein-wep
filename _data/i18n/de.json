@@ -22,56 +22,58 @@
     "language": "Sprache"
   },
   "footer": {
-    "builtInTheOpen": "Rashid. Offen entwickelt.",
+    "builtInTheOpen": "Rashid Ali. Offen entwickelt.",
     "label": "Fußzeile",
     "portfolio": "Portfolio",
     "privacy": "Datenschutz (EN)",
     "terms": "Nutzungsbedingungen (EN)"
   },
   "home": {
-    "title": "Rashid — Full-Stack-Entwickler & KI-Engineer",
-    "metaDescription": "Rashid (MOT1209) — Full-Stack-Entwickler und KI-Engineer in Deutschland und Macher hinter King Studio. Webplattformen, KI-Tools und Browserspiele, verfügbar für Freelance-Projekte und Festanstellungen.",
-    "ogDescription": "Webplattformen, KI-Tools und Browserspiele — und King Studio, wo die Spiele und Apps zu Hause sind.",
-    "eyebrow": "Rashid · MOT1209 · Deutschland",
-    "headline": "Ich baue Web-Apps, Browserspiele und KI-Tools — und bringe sie live.",
-    "ledeBefore": "Full-Stack-Entwickler und KI-Engineer. Meine Spiele und Apps findest du bei",
+    "title": "Rashid Ali — Full-Stack-Entwickler & KI-Engineer",
+    "metaDescription": "Rashid Ali (MOT1209) — Full-Stack-Entwickler und KI-Engineer und Macher hinter King Studio. Websites, KI-Tools und Spiele mit Godot und Unity. Verfügbar für Jobs und Freelance-Projekte.",
+    "ogDescription": "Websites, KI-Tools und Spiele mit Godot und Unity — und King Studio, wo die Apps zu Hause sind.",
+    "eyebrow": "Rashid Ali · MOT1209",
+    "photoAlt": "Porträt von Rashid Ali",
+    "headline": "Ich baue Web-Apps, Spiele und KI-Tools — und bringe sie live.",
+    "ledeBefore": "Full-Stack-Entwickler und KI-Engineer, noch in der Schule und schon mit veröffentlichten Projekten. Meine Apps findest du bei",
     "ledeProjects": "Projekte,",
     "ledeAndroid": "davon mit Android-Version.",
-    "availability": "Verfügbar für Freelance-Projekte und Festanstellungen",
+    "availability": "Verfügbar für Jobs und Freelance-Projekte",
     "ctaWork": "Zusammenarbeiten",
     "ctaStudio": "King Studio ansehen",
     "workEyebrow": "Ausgewählte Arbeiten",
-    "workTitle": "Spiele und Apps, die du heute nutzen kannst",
+    "workTitle": "Apps, die du heute nutzen kannst",
     "workMore": "Alle Projekte bei King Studio",
     "workNote": "Die Projektbeschreibungen sind auf Englisch.",
     "servicesEyebrow": "Was ich mache",
     "servicesTitle": "Wobei ich helfen kann",
     "services": [
       {
-        "title": "Webplattformen",
-        "text": "Schnelle statische und Full-Stack-Websites mit Eleventy, Supabase und Serverless-Funktionen, so wie diese hier."
+        "title": "Websites und Web-Apps",
+        "text": "Schnelle Websites und installierbare Web-Apps mit HTML, CSS, JavaScript und Supabase, so wie diese hier."
       },
       {
         "title": "KI-Integration",
         "text": "Assistenten und Automatisierungen mit Gemini und OpenRouter, vom Prototyp bis zu etwas, das Menschen wirklich nutzen."
       },
       {
-        "title": "Browser- und Mobile-Spiele",
-        "text": "Three.js-Spiele als installierbare PWAs und als Android-Apps, gebaut mit Capacitor."
+        "title": "Spiele",
+        "text": "Spiele mit den Engines Godot und Unity."
       }
     ],
     "aboutEyebrow": "Über mich",
     "aboutTitle": "Offen entwickelt",
-    "aboutText": "Ich bin Rashid. Angefangen hat es damit, CSS zu ändern, um zu sehen, was kaputtgeht, und JavaScript kaputtzumachen, um zu verstehen, warum. Daraus wurde echte Software: Browserspiele auf eigenen Three.js-Engines, offlinefähige Apps, die Menschen auf ihrem Handy installieren, und KI-Tools, die an Gemini angebunden sind.",
+    "aboutText": "Ich bin Rashid Ali, Schüler, und ich baue Software. Angefangen hat es damit, CSS zu ändern, um zu sehen, was kaputtgeht, und JavaScript kaputtzumachen, um zu verstehen, warum. Heute baue ich Websites und installierbare Apps mit JavaScript und Supabase, schreibe Python, arbeite mit KI-Tools und entwickle Spiele in Godot und Unity.",
     "aboutSourceBefore": "Den Quellcode für das meiste davon findest du auf",
     "aboutSourceAfter": ".",
     "stackLabel": "Werkzeuge, die ich nutze",
+    "stackAi": "KI-Tools",
     "aboutMore": "Mehr über mich",
     "factProjects": "Projekte bei King Studio",
     "factAndroid": "Android-Builds",
     "factRelease": "Letztes Release",
-    "factBased": "Standort",
-    "factCountry": "Deutschland",
+    "factLanguages": "Sprachen",
+    "factLanguagesValue": "Arabisch, Deutsch, Englisch",
     "writingEyebrow": "Artikel",
     "writingTitle": "Neu im Blog",
     "writingMore": "Alle Artikel",

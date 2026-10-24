@@ -96,3 +96,18 @@ test('relative links on translated pages resolve to built files', { skip }, () =
     }
   }
 });
+
+// The owner's real profile: his name and photo on the homepage and About
+// page in every language, and none of the skills he does not use.
+test('homepage and About show Rashid Ali with his photo and real skills', { skip }, () => {
+  assert.ok(existsSync('dist/images/rashid-ali.webp'), 'photo is served');
+  for (const key of ['home', 'about']) {
+    for (const p of Object.values(site.translations[key])) {
+      const html = read(p);
+      assert.match(html, /<img[^>]+images\/rashid-ali\.webp"[^>]+alt="[^"]+"/, `${p}: photo with alt`);
+      assert.match(html, /<title>[^<]*(Rashid Ali|راشد علي)/, `${p}: title names Rashid Ali`);
+      assert.doesNotMatch(html, /Next\.js|Three\.js|TypeScript/, `${p}: lists a skill he does not use`);
+      assert.match(html, /Godot/, `${p}: Godot`);
+    }
+  }
+});
