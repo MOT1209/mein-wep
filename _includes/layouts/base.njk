@@ -12,23 +12,35 @@
   Front matter: title, metaDescription, canonical, ogDescription,
   metaKeywords, activeNav, headTop/headExtra (page <head> partials),
   showAdUnit, showCookieConsent, extraBodyScript, trailingJsonLd,
-  noAds (skip the AdSense loader), showSettings (settings button in the header).
-#}{%- if legacyShell -%}{% set root = "" %}<!DOCTYPE html>
-<html lang="en" dir="ltr">
+  noAds (skip the AdSense loader), showSettings (settings button in the header),
+  root (relative path to the site root, "" by default; "../" for pages under
+  /de/), locale ("en" by default) and translationKey (a key of
+  site.translations: adds hreflang alternates and the language switcher).
+#}{%- if legacyShell -%}{% set root = root or "" %}{% set L = locale or "en" %}<!DOCTYPE html>
+<html lang="{{ L }}" dir="{{ i18n[L].dir }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="{{ metaDescription }}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ canonical }}">
+{%- set alternates = site.translations[translationKey] if translationKey else null %}
+{%- if alternates %}
+{%- for loc in site.locales %}{% if alternates[loc.code] is defined %}
+    <link rel="alternate" hreflang="{{ loc.code }}" href="{{ site.siteUrl }}/{{ alternates[loc.code] }}">
+{%- endif %}{% endfor %}
+    <link rel="alternate" hreflang="x-default" href="{{ site.siteUrl }}/{{ alternates.en }}">
+{%- else %}
     <link rel="alternate" hreflang="en" href="{{ canonical }}">
     <link rel="alternate" hreflang="x-default" href="{{ canonical }}">
+{%- endif %}
     <meta property="og:type" content="website">
     <meta property="og:title" content="{{ title }}">
     <meta property="og:description" content="{{ ogDescription or metaDescription }}">
     <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta property="og:url" content="{{ canonical }}">
     <meta property="og:site_name" content="Rashid Portfolio">
+    <meta property="og:locale" content="{{ i18n[L].ogLocale }}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ title }}">
     <meta name="twitter:description" content="{{ ogDescription or metaDescription }}">
@@ -39,6 +51,9 @@
 {% include headTop %}
 {%- endif %}
 {% include "partials/site-head.njk" %}
+{%- if L == "ar" %}
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+{%- endif %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 {%- if not noAds %}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsClient }}" crossorigin="anonymous"></script>
@@ -71,7 +86,7 @@
 <div id="cookie-consent" class="cookie-banner" role="region" aria-label="Cookie consent">
   <div class="cookie-content">
     <div class="cookie-text">
-      <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="privacy.html">Privacy Policy</a> and <a href="terms.html">Terms of Service</a>.</span>
+      <span>This site uses cookies for Google AdSense and analytics. By continuing, you accept our <a href="{{ root }}privacy.html">Privacy Policy</a> and <a href="{{ root }}terms.html">Terms of Service</a>.</span>
     </div>
     <div class="cookie-actions">
       <button id="cookie-decline" class="cookie-btn cookie-decline">Decline</button>
@@ -79,13 +94,13 @@
     </div>
   </div>
 </div>
-<script src="js/cookie-consent.js?v=1.0"></script>
+<script src="{{ root }}js/cookie-consent.js?v=1.0"></script>
 <script>CookieConsent.init();</script>
 {%- endif %}
 {%- if trailingJsonLd %}
 {% include trailingJsonLd %}
 {%- endif %}
-<script src="js/site-nav.js?v={{ site.cssVersion }}" defer></script>
+<script src="{{ root }}js/site-nav.js?v={{ site.cssVersion }}" defer></script>
 </body>
 </html>
 {% else %}{{ content | safe }}{%- endif -%}

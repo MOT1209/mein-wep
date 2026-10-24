@@ -12,6 +12,8 @@ const skip = !built && 'run npm run build first';
 const SHELL_PAGES = [
   'index.html', 'about.html', 'contact.html', 'privacy.html', 'terms.html',
   '404.html', 'downloads.html', 'learning.html',
+  'de/index.html', 'de/about.html', 'de/contact.html',
+  'ar/index.html', 'ar/about.html', 'ar/contact.html',
   ...(built ? readdirSync('dist/blog').filter((f) => f.endsWith('.html')).map((f) => `blog/${f}`) : []),
 ];
 
@@ -42,8 +44,10 @@ test('homepage carries no fabricated testimonials', { skip }, () => {
 test('downloads show build-time SHA-256 for every release', { skip }, () => {
   const html = read('downloads.html');
   const manifest = JSON.parse(readFileSync('apks/updates.json', 'utf8'));
+  const hidden = new Set(JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects
+    .filter((p) => p.hidden && p.apkId).map((p) => p.apkId));
   const count = (html.match(/data-copy="[0-9a-f]{64}"/g) || []).length;
-  assert.equal(count, Object.keys(manifest.apps).length);
+  assert.equal(count, Object.keys(manifest.apps).filter((id) => !hidden.has(id)).length);
   assert.doesNotMatch(html, /Building\.\.\.|Pending first build/);
 });
 
@@ -54,7 +58,7 @@ test('downloads show build-time SHA-256 for every release', { skip }, () => {
 test('homepage renders its projects and posts from build-time data', { skip }, () => {
   const html = read('index.html');
   const catalog = JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects;
-  const featured = catalog.filter((p) => p.featured && (p.section === 'games' || p.section === 'apps'));
+  const featured = catalog.filter((p) => p.featured && !p.hidden && (p.section === 'games' || p.section === 'apps'));
   assert.ok(featured.length > 0);
   for (const p of featured) {
     assert.match(html, new RegExp(`href="king-studio/${p.section}/${p.id}/"`), `${p.id} missing from homepage`);
@@ -75,4 +79,14 @@ test('homepage ships no AI widget, ads, Supabase or admin shortcut', { skip }, (
   assert.doesNotMatch(html, /src="[^"]*supabase[^"]*\.js/i);
   assert.doesNotMatch(html, /admin\/login/);
   assert.doesNotMatch(html, /src\/js\/main\.js/);
+});
+
+// About and Contact are where people who want to hire Rashid end up: no ads
+// there, and so no cookie banner either (nothing on them sets a cookie).
+test('About and Contact carry no ads or cookie banner', { skip }, () => {
+  for (const page of ['about.html', 'contact.html']) {
+    const html = read(page);
+    assert.doesNotMatch(html, /adsbygoogle|googlesyndication/, `${page}: ads`);
+    assert.doesNotMatch(html, /id="cookie-consent"/, `${page}: cookie banner`);
+  }
 });

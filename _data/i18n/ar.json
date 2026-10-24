@@ -1,0 +1,106 @@
+{
+  "langName": "العربية",
+  "dir": "rtl",
+  "ogLocale": "ar_AR",
+  "nav": {
+    "home": "الرئيسية",
+    "studio": "King Studio",
+    "blog": "المدونة",
+    "downloads": "التنزيلات",
+    "about": "عنّي",
+    "contact": "تواصل"
+  },
+  "header": {
+    "skip": "انتقل إلى المحتوى",
+    "mainNav": "التنقل الرئيسي",
+    "mobileNav": "تنقل الجوال",
+    "menu": "القائمة",
+    "openMenu": "افتح القائمة",
+    "closeMenu": "أغلق القائمة",
+    "theme": "بدّل المظهر",
+    "settings": "الإعدادات",
+    "language": "اللغة"
+  },
+  "footer": {
+    "builtInTheOpen": "راشد علي. يُبنى بشكل مفتوح.",
+    "label": "التذييل",
+    "portfolio": "معرض الأعمال",
+    "privacy": "الخصوصية (بالإنجليزية)",
+    "terms": "الشروط (بالإنجليزية)"
+  },
+  "home": {
+    "title": "راشد علي — مطوّر Full-Stack ومهندس ذكاء اصطناعي",
+    "metaDescription": "راشد علي (MOT1209) — مطوّر Full-Stack ومهندس ذكاء اصطناعي، وصاحب King Studio. مواقع ويب وأدوات ذكاء اصطناعي وألعاب بمحرّكَي Godot وUnity. متاح للوظائف ومشاريع العمل الحر.",
+    "ogDescription": "مواقع ويب وأدوات ذكاء اصطناعي وألعاب بـ Godot وUnity — وKing Studio حيث تعيش التطبيقات.",
+    "eyebrow": "راشد علي · MOT1209",
+    "photoAlt": "صورة راشد علي",
+    "headline": "أبني تطبيقات ويب وألعاباً وأدوات ذكاء اصطناعي — وأطلقها فعلاً.",
+    "ledeBefore": "مطوّر Full-Stack ومهندس ذكاء اصطناعي، ما زلت في المدرسة ولي مشاريع منشورة. تطبيقاتي موجودة في",
+    "ledeProjects": "من المشاريع،",
+    "ledeAndroid": "منها بنسخة أندرويد.",
+    "availability": "متاح للوظائف ومشاريع العمل الحر",
+    "ctaWork": "لنعمل معاً",
+    "ctaStudio": "استكشف King Studio",
+    "workEyebrow": "أعمال مختارة",
+    "workTitle": "تطبيقات تستطيع استخدامها اليوم",
+    "workMore": "كل المشاريع في King Studio",
+    "workNote": "أوصاف المشاريع بالإنجليزية.",
+    "servicesEyebrow": "ماذا أقدّم",
+    "servicesTitle": "كيف أستطيع المساعدة",
+    "services": [
+      {
+        "title": "مواقع وتطبيقات ويب",
+        "text": "مواقع سريعة وتطبيقات ويب قابلة للتثبيت باستخدام HTML وCSS وJavaScript وSupabase، مثل هذا الموقع."
+      },
+      {
+        "title": "دمج الذكاء الاصطناعي",
+        "text": "مساعدات وأتمتة مبنية على Gemini وOpenRouter، من النموذج الأولي إلى منتج يستخدمه الناس."
+      },
+      {
+        "title": "الألعاب",
+        "text": "ألعاب مصنوعة بمحرّكَي Godot وUnity."
+      }
+    ],
+    "aboutEyebrow": "عنّي",
+    "aboutTitle": "أبني بشكل مفتوح",
+    "aboutText": "أنا راشد علي، طالب في المدرسة وأبني البرمجيات. بدأت بتعديل CSS لأرى ما الذي ينكسر، وبكسر JavaScript لأفهم السبب. اليوم أبني مواقع وتطبيقات قابلة للتثبيت بـ JavaScript وSupabase، وأكتب Python، وأعمل بأدوات الذكاء الاصطناعي، وأصنع ألعاباً في Godot وUnity.",
+    "aboutSourceBefore": "الشيفرة المصدرية لمعظمها موجودة على",
+    "aboutSourceAfter": ".",
+    "stackLabel": "الأدوات التي أستخدمها",
+    "stackAi": "أدوات الذكاء الاصطناعي",
+    "aboutMore": "المزيد عنّي",
+    "factProjects": "مشاريع في King Studio",
+    "factAndroid": "نسخ أندرويد",
+    "factRelease": "آخر إصدار",
+    "factLanguages": "اللغات",
+    "factLanguagesValue": "العربية، الألمانية، الإنجليزية",
+    "writingEyebrow": "كتابات",
+    "writingTitle": "أحدث ما في المدونة",
+    "writingMore": "كل المقالات",
+    "writingNote": "المقالات بالإنجليزية.",
+    "minRead": "دقائق قراءة",
+    "contactEyebrow": "تواصل",
+    "contactTitle": "تواصل معي",
+    "contactNote": "مشروع عمل حر، أو وظيفة بدوام كامل، أو تعاون، أو خلل في شيء بنيته: كلها مرحّب بها.",
+    "channelEmail": "البريد الإلكتروني",
+    "contactCta": "أرسل رسالة"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "close": "أغلق الإعدادات",
+    "theme": "المظهر",
+    "light": "فاتح",
+    "dark": "داكن",
+    "accent": "لون التمييز",
+    "accentSuffix": "كلون تمييز",
+    "accents": [
+      "جمري",
+      "أزرق حبري",
+      "صنوبري",
+      "بنفسجي",
+      "طوبي",
+      "فيروزي"
+    ],
+    "reduceMotion": "تقليل الحركة"
+  }
+}

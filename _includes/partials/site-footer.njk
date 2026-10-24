@@ -1,15 +1,18 @@
-{#- Shared footer. Expects `root`. -#}
+{#- Shared footer. Expects `root`; optional `locale` (default "en"). -#}
+{%- set L = locale or "en" %}
+{%- set T = i18n[L].footer %}
+{%- set N = i18n[L].nav %}
     <footer class="site-footer">
         <div class="wrap site-footer-row">
-            <p>&copy; <span class="copyright-year"></span> Rashid. Built in the open.</p>
-            <nav aria-label="Footer">
-                <a href="{{ root or './' }}">Portfolio</a>
-                <a href="{{ root }}king-studio/">King Studio</a>
-                <a href="{{ root }}blog/">Blog</a>
-                <a href="{{ root }}downloads.html">Downloads</a>
+            <p>&copy; <span class="copyright-year"></span> {{ T.builtInTheOpen }}</p>
+            <nav aria-label="{{ T.label }}">
+                <a href="{{ (root ~ site.translations.home[L]) or './' }}">{{ T.portfolio }}</a>
+                <a href="{{ root }}king-studio/">{{ N.studio }}</a>
+                <a href="{{ root }}blog/">{{ N.blog }}</a>
+                <a href="{{ root }}downloads.html">{{ N.downloads }}</a>
                 <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>
-                <a href="{{ root }}privacy.html">Privacy</a>
-                <a href="{{ root }}terms.html">Terms</a>
+                <a href="{{ root }}privacy.html"{% if L != "en" %} hreflang="en"{% endif %}>{{ T.privacy }}</a>
+                <a href="{{ root }}terms.html"{% if L != "en" %} hreflang="en"{% endif %}>{{ T.terms }}</a>
             </nav>
         </div>
     </footer>

@@ -65,6 +65,12 @@ Scale in use: page title `clamp(1.875rem, 6vw, 2.75rem)` weight 800; section hea
 - Elevation: `--lift` at rest, `--lift-hover` on hover. Hairlines (`--rule`) do most of the work.
 - Layout: content max-width 1200px (`.wrap`), reading pages 820px (`.page`), blog posts 760px. Side padding 16px on phones, 24px from 640px.
 
+## Languages
+
+Pages that exist in more than one language show a language switcher in the header: one link per other language (`.lang-switch`, 44px, label `EN`, `DE` or `ع`) to the same page in that language, never a dropdown or a script. Below 640px the header has no room for them, so the languages are listed in the mobile menu instead. Content that is only available in English keeps `lang="en"` on its container so screen readers switch voice.
+
+**Arabic (right-to-left).** `/ar/` pages set `dir="rtl"`; the layout mirrors through logical properties, and arrows in links flip with `[dir="rtl"]`. Neither Bricolage Grotesque nor IBM Plex Sans has Arabic glyphs, so `:lang(ar)` in `tokens.css` puts **IBM Plex Sans Arabic** first in both `--font-display` and `--font-body` (loaded only on Arabic pages). Never letter-space Arabic text (it breaks the joining) and never set it in the mono face: Arabic eyebrows use the body face without tracking.
+
 ## Breakpoints
 
 Media queries cannot read custom properties, so use these three literally and only these:
@@ -124,5 +130,5 @@ State feedback only: roughly 150ms on hover and focus, 200ms card lift. No entra
 
 ## Known debt
 
+- There is no Impressum (legal notice) page yet. A German-facing site offering services probably needs one; it needs the owner's name and postal address, which are not in the repository.
 - `css/style.css` (legacy, minified, conflicting `:root` blocks) is still used by `devos.html`, `vault/*`, `quran.html`-style standalone pages and a few others. Those pages are not yet on this system. Migrate them to `tokens.css` + `site.css` rather than adding to `style.css`.
-- `apps/calculator-app/icons/*.png` and `apps/quiz-app/icons/*.png` are corrupt (the IHDR chunk length is 17, not 13), so browsers cannot decode them. The King Studio catalogue uses each app's valid `icon.svg` instead. The PNGs, which those apps' manifests may still reference, need regenerating as part of work on those apps.

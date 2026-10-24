@@ -1,37 +1,59 @@
 {#- Shared header + mobile menu. Expects `root` and optional `activeNav`
-    (a key from site.siteNav). Behaviour lives in js/site-nav.js. -#}
-    <a href="#main" class="skip-link">Skip to main content</a>
+    (a key from site.siteNav). Behaviour lives in js/site-nav.js.
+    Optional `locale` (default "en") picks the labels from _data/i18n and
+    sends nav items that have a translation (site.translations) to that
+    language's page; `translationKey` adds the language switcher. -#}
+{%- set L = locale or "en" %}
+{%- set T = i18n[L] %}
+{%- macro navHref(item, L, root) -%}
+{%- set tr = site.translations[item.key] -%}
+{%- set path = tr[L] if (tr and tr[L] is defined) else item.href -%}
+{{ (root ~ path) or './' }}
+{%- endmacro %}
+{%- set homeHref = (root ~ site.translations.home[L]) or './' %}
+{%- set alternates = site.translations[translationKey] if translationKey else null %}
+    <a href="#main" class="skip-link">{{ T.header.skip }}</a>
     <header class="site-header">
         <div class="wrap site-header-row">
-            <a href="{{ root or './' }}" class="brand">Rashid<span class="dot">.</span></a>
-            <nav class="site-nav" aria-label="Main">
+            <a href="{{ homeHref }}" class="brand" dir="ltr">Rashid<span class="dot">.</span></a>
+            <nav class="site-nav" aria-label="{{ T.header.mainNav }}">
 {%- for item in site.siteNav %}
-                <a href="{{ root }}{{ item.href or ('./' if not root) }}"{% if activeNav == item.key %} aria-current="page"{% endif %}>{{ item.label }}</a>
+                <a href="{{ navHref(item, L, root) }}"{% if activeNav == item.key %} aria-current="page"{% endif %}>{{ T.nav[item.key] or item.label }}</a>
 {%- endfor %}
             </nav>
-            <button type="button" class="icon-button" data-theme-toggle aria-label="Toggle theme">
+{%- if alternates %}
+{%- for loc in site.locales %}{% if loc.code != L and alternates[loc.code] is defined %}
+            <a class="lang-switch" href="{{ (root ~ alternates[loc.code]) or './' }}" hreflang="{{ loc.code }}" lang="{{ loc.code }}" aria-label="{{ i18n[loc.code].langName }}">{{ loc.short }}</a>
+{%- endif %}{% endfor %}
+{%- endif %}
+            <button type="button" class="icon-button" data-theme-toggle aria-label="{{ T.header.theme }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
             </button>
 {%- if showSettings %}
-            <button type="button" class="icon-button" id="settings-btn" aria-haspopup="dialog" aria-controls="settings-modal" aria-label="Settings">
+            <button type="button" class="icon-button" id="settings-btn" aria-haspopup="dialog" aria-controls="settings-modal" aria-label="{{ T.header.settings }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0"/><circle cx="16" cy="6" r="2"/><circle cx="10" cy="12" r="2"/><circle cx="18" cy="18" r="2"/></svg>
             </button>
 {%- endif %}
-            <button type="button" class="icon-button menu-button" data-menu-open aria-controls="site-menu" aria-expanded="false" aria-label="Open menu">
+            <button type="button" class="icon-button menu-button" data-menu-open aria-controls="site-menu" aria-expanded="false" aria-label="{{ T.header.openMenu }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
             </button>
         </div>
     </header>
-    <div class="menu-sheet" id="site-menu" data-menu role="dialog" aria-modal="true" aria-label="Menu">
+    <div class="menu-sheet" id="site-menu" data-menu role="dialog" aria-modal="true" aria-label="{{ T.header.menu }}">
         <div class="menu-sheet-top">
-            <a href="{{ root or './' }}" class="brand">Rashid<span class="dot">.</span></a>
-            <button type="button" class="icon-button" data-menu-close aria-label="Close menu">
+            <a href="{{ homeHref }}" class="brand" dir="ltr">Rashid<span class="dot">.</span></a>
+            <button type="button" class="icon-button" data-menu-close aria-label="{{ T.header.closeMenu }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>
         </div>
-        <nav aria-label="Mobile">
+        <nav aria-label="{{ T.header.mobileNav }}">
 {%- for item in site.siteNav %}
-            <a href="{{ root }}{{ item.href or ('./' if not root) }}"{% if activeNav == item.key %} aria-current="page"{% endif %}>{{ item.label }}</a>
+            <a href="{{ navHref(item, L, root) }}"{% if activeNav == item.key %} aria-current="page"{% endif %}>{{ T.nav[item.key] or item.label }}</a>
 {%- endfor %}
+{%- if alternates %}
+{%- for loc in site.locales %}{% if loc.code != L and alternates[loc.code] is defined %}
+            <a href="{{ (root ~ alternates[loc.code]) or './' }}" hreflang="{{ loc.code }}" lang="{{ loc.code }}">{{ i18n[loc.code].langName }}</a>
+{%- endif %}{% endfor %}
+{%- endif %}
         </nav>
     </div>

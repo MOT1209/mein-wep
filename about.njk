@@ -2,101 +2,95 @@
 layout: layouts/base.njk
 legacyShell: true
 permalink: /about.html
-title: "About | Rashid"
-metaDescription: "About Rashid (MOT1209) — Full-Stack Developer passionate about JavaScript, Python, Supabase, and Three.js. Building interactive 3D experiences and open-source tools."
-ogDescription: "About Rashid (MOT1209) — Full-Stack Developer passionate about JavaScript, Python, Supabase, and Three.js."
-metaKeywords: "Rashid, Full-Stack Developer, AI Engineer, JavaScript, Three.js, Supabase, Portfolio, About"
+title: "About | Rashid Ali"
+metaDescription: "About Rashid Ali (MOT1209) — full-stack developer and AI engineer and school student. Websites with HTML, CSS, JavaScript and Supabase, Python, AI tools, and games with Godot and Unity."
+ogDescription: "About Rashid Ali (MOT1209) — full-stack developer and AI engineer: websites, AI tools and games."
+metaKeywords: "Rashid Ali, MOT1209, Full-Stack Developer, AI Engineer, JavaScript, Python, Supabase, Godot, Unity, About"
 canonical: "https://rashid-wep.vercel.app/about.html"
 activeNav: about
-showAdUnit: true
-showCookieConsent: true
+locale: en
+translationKey: about
+noAds: true
 headTop: "partials/legacy-pages/about-head-top.njk"
 headExtra: "partials/legacy-pages/about-head-extra.njk"
 trailingJsonLd: "partials/legacy-pages/about-trailing-jsonld.njk"
 ---
     <div class="about-page">
-        <h1>About Rashid</h1>
-        <p class="subtitle">Full-Stack Developer | AI Enthusiast | 3D World Builder</p>
-
-        <div class="about-section">
-            <h2><i class="fas fa-user"></i> Who I Am</h2>
-            <p>I am <strong>Rashid</strong> (MOT1209), a Full-Stack Developer specialized in building dynamic and immersive modern web platforms. I combine cutting-edge frameworks with creative design to build applications that are both functional and beautiful.</p>
+        <div class="about-intro">
+            <img class="about-avatar" src="{{ root }}images/rashid-ali.webp" alt="Portrait of Rashid Ali" width="120" height="120">
+            <div>
+                <h1>About Rashid Ali</h1>
+                <p class="subtitle">Full-Stack Developer &amp; AI Engineer</p>
+            </div>
         </div>
 
         <div class="about-section">
-            <h2><i class="fas fa-code"></i> What I Build</h2>
-            <p>I build robust, full-stack applications with <strong>JavaScript</strong>, <strong>Python</strong>, and <strong>Supabase</strong>, and construct immersive 3D simulation worlds utilizing <strong>Three.js</strong>. I specialize in full-stack development, open-source tools, and interactive 3D experiences.</p>
+            <h2><i class="fas fa-user" aria-hidden="true"></i> Who I am</h2>
+            <p>I am <strong>Rashid Ali</strong> (MOT1209), a school student who builds software. I make websites and installable web apps, work with AI tools, and make games.</p>
         </div>
 
         <div class="about-section">
-            <h2><i class="fas fa-cog"></i> Skills & Technologies</h2>
+            <h2><i class="fas fa-code" aria-hidden="true"></i> What I build</h2>
+            <p>Websites and web apps with <strong>HTML</strong>, <strong>CSS</strong>, <strong>JavaScript</strong> and <strong>Supabase</strong>, scripts and tools in <strong>Python</strong>, assistants and automations with AI tools, and games with <strong>Godot</strong> and <strong>Unity</strong>. Two of my apps, Calculator Vault and Quiz Master, are published on this site.</p>
+        </div>
+
+        <div class="about-section">
+            <h2><i class="fas fa-cog" aria-hidden="true"></i> Skills</h2>
             <div class="skills-grid">
                 <div class="skill-item">
-                    <i class="fab fa-js"></i>
+                    <i class="fab fa-html5" aria-hidden="true"></i>
+                    <h3>HTML & CSS</h3>
+                    <p>Layout, responsive design</p>
+                </div>
+                <div class="skill-item">
+                    <i class="fab fa-js" aria-hidden="true"></i>
                     <h3>JavaScript</h3>
-                    <p>ES6+, TypeScript</p>
+                    <p>Interactive pages, PWAs</p>
                 </div>
                 <div class="skill-item">
-                    <i class="fab fa-react"></i>
-                    <h3>Next.js</h3>
-                    <p>React, SSR, App Router</p>
-                </div>
-                <div class="skill-item">
-                    <i class="fab fa-python"></i>
+                    <i class="fab fa-python" aria-hidden="true"></i>
                     <h3>Python</h3>
-                    <p>Automation, Scripts</p>
+                    <p>Scripts, automation</p>
                 </div>
                 <div class="skill-item">
-                    <i class="fas fa-database"></i>
+                    <i class="fas fa-database" aria-hidden="true"></i>
                     <h3>Supabase</h3>
-                    <p>Auth, Realtime, DB</p>
+                    <p>Database, sign-in</p>
                 </div>
                 <div class="skill-item">
-                    <i class="fas fa-cube"></i>
-                    <h3>Three.js</h3>
-                    <p>3D, WebGL, Physics</p>
-                </div>
-                <div class="skill-item">
-                    <i class="fas fa-mobile-alt"></i>
-                    <h3>PWA</h3>
-                    <p>Offline, Service Workers</p>
-                </div>
-                <div class="skill-item">
-                    <i class="fab fa-github"></i>
-                    <h3>Git & CI/CD</h3>
-                    <p>Version Control, Vercel</p>
-                </div>
-                <div class="skill-item">
-                    <i class="fas fa-robot"></i>
-                    <h3>AI Integration</h3>
+                    <i class="fas fa-robot" aria-hidden="true"></i>
+                    <h3>AI tools</h3>
                     <p>Gemini, OpenRouter</p>
                 </div>
-            </div>
-        </div>
-
-        <div class="about-section">
-            <h2><i class="fas fa-history"></i> My Journey</h2>
-            <div class="timeline-about">
-                <div class="timeline-about-item">
-                    <span class="year">2024 — Present</span>
-                    <h3>Next-Gen Frameworks & Three.js</h3>
-                    <p>Developing premium full-stack portals using Next.js and Supabase, alongside interactive 3D simulations with Three.js.</p>
+                <div class="skill-item">
+                    <i class="fas fa-gamepad" aria-hidden="true"></i>
+                    <h3>Godot</h3>
+                    <p>Game engine</p>
                 </div>
-                <div class="timeline-about-item">
-                    <span class="year">2023 — 2024</span>
-                    <h3>Full-Stack & Backend Integration</h3>
-                    <p>Leveraging Supabase for real-time databases and authentication, building responsive PWAs, and developing automation tools.</p>
-                </div>
-                <div class="timeline-about-item">
-                    <span class="year">2022 — 2023</span>
-                    <h3>GitHub Launch & Open Source</h3>
-                    <p>Established the main MOT1209 GitHub workspace, publishing original utilities and web projects.</p>
+                <div class="skill-item">
+                    <i class="fas fa-cube" aria-hidden="true"></i>
+                    <h3>Unity</h3>
+                    <p>Game engine</p>
                 </div>
             </div>
         </div>
 
         <div class="about-section">
-            <h2><i class="fas fa-globe"></i> This Platform</h2>
-            <p>This is my digital command center representing <strong>FromLiten</strong>, showcasing my live development projects, experiments, and technical archives directly integrated from GitHub. It serves as both a portfolio and a workspace for continuous innovation.</p>
+            <h2><i class="fas fa-language" aria-hidden="true"></i> Languages</h2>
+            <ul class="about-langs">
+                <li><strong>Arabic</strong> <span>native</span></li>
+                <li><strong>German</strong> <span>advanced</span></li>
+                <li><strong>English</strong> <span>good</span></li>
+            </ul>
+        </div>
+
+        <div class="about-section">
+            <h2><i class="fas fa-graduation-cap" aria-hidden="true"></i> Education</h2>
+            <p>I am a school student and learn alongside school, mostly by building real projects.</p>
+        </div>
+
+        <div class="about-section">
+            <h2><i class="fas fa-globe" aria-hidden="true"></i> This site</h2>
+            <p>This site is my portfolio and workspace: my published apps, my blog, and King Studio, where my projects live. Most of the source is on <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
         </div>
     </div>

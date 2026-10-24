@@ -1,7 +1,7 @@
 ---
 layout: layouts/king-studio.njk
-title: King Studio — Games, Apps & Digital Experiences
-metaDescription: Discover games, applications, and digital tools built by King Studio — an independent digital product studio. Build. Create. Innovate.
+title: King Studio — Apps & Digital Experiences
+metaDescription: Applications and digital tools built by King Studio — an independent digital product studio. Build. Create. Innovate.
 permalink: king-studio/index.html
 urlPath: king-studio/
 root: ../
@@ -10,22 +10,27 @@ active: home
 <section class="ks-hero">
   <div class="ks-wrap">
     <p class="ks-eyebrow">Independent digital product studio</p>
-    <h1>Games, Apps &amp; Digital Experiences.</h1>
+    <h1>Apps &amp; Digital Experiences.</h1>
     <p class="ks-tagline">Build. Create. Innovate.</p>
-    <p class="ks-lede">Discover games, applications, and digital tools built by King Studio — browser games, installable apps and early experiments, each labelled with exactly where it stands.</p>
+    <p class="ks-lede">Applications and digital tools built by King Studio, each labelled with exactly where it stands. Games made with Godot and Unity are planned.</p>
     <div class="ks-hero-actions">
+{%- if kingStudio.sections.games.projects | length %}
       <a class="ks-btn ks-btn-gold" href="games/">Explore games</a>
       <a class="ks-btn ks-btn-outline" href="apps/">Browse apps</a>
+{%- else %}
+      <a class="ks-btn ks-btn-gold" href="apps/">Browse apps</a>
+{%- endif %}
       <a class="ks-link-quiet" href="../">&larr; Back to the portfolio</a>
     </div>
     <dl class="ks-hero-facts">
-      <div><dt>Games</dt><dd>{{ kingStudio.sections.games.projects | length }}</dd></div>
-      <div><dt>Apps</dt><dd>{{ kingStudio.sections.apps.projects | length }}</dd></div>
-      <div><dt>In the lab</dt><dd>{{ kingStudio.sections.labs.projects | length }}</dd></div>
+{%- for key, label in [["games", "Games"], ["apps", "Apps"], ["labs", "In the lab"]] %}{% if kingStudio.sections[key].projects | length %}
+      <div><dt>{{ label }}</dt><dd>{{ kingStudio.sections[key].projects | length }}</dd></div>
+{%- endif %}{% endfor %}
     </dl>
   </div>
 </section>
 
+{%- if kingStudio.featured.games | length %}
 <section class="ks-section" aria-labelledby="ks-games-h">
   <div class="ks-wrap">
     <div class="ks-section-head">
@@ -39,6 +44,8 @@ active: home
     </ul>
   </div>
 </section>
+
+{%- endif %}
 
 <section class="ks-section ks-section-alt" aria-labelledby="ks-apps-h">
   <div class="ks-wrap">
@@ -54,6 +61,7 @@ active: home
   </div>
 </section>
 
+{%- if kingStudio.featured.labs | length %}
 <section class="ks-section" aria-labelledby="ks-labs-h">
   <div class="ks-wrap">
     <div class="ks-section-head">
@@ -69,10 +77,12 @@ active: home
   </div>
 </section>
 
+{%- endif %}
+
 <section class="ks-section ks-cta" aria-labelledby="ks-cta-h">
   <div class="ks-wrap">
     <h2 id="ks-cta-h">Want to build something together?</h2>
-    <p>King Studio is part of Rashid's portfolio. For collaborations, freelance work or bug reports, get in touch.</p>
+    <p>King Studio is part of Rashid Ali's portfolio. For collaborations, freelance work or bug reports, get in touch.</p>
     <div class="ks-hero-actions">
       <a class="ks-btn ks-btn-gold" href="../#contact">Contact</a>
       <a class="ks-btn ks-btn-outline" href="../">Visit the portfolio</a>

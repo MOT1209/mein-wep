@@ -1,0 +1,106 @@
+{
+  "langName": "English",
+  "dir": "ltr",
+  "ogLocale": "en_US",
+  "nav": {
+    "home": "Home",
+    "studio": "King Studio",
+    "blog": "Blog",
+    "downloads": "Downloads",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "header": {
+    "skip": "Skip to main content",
+    "mainNav": "Main",
+    "mobileNav": "Mobile",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "theme": "Toggle theme",
+    "settings": "Settings",
+    "language": "Language"
+  },
+  "footer": {
+    "builtInTheOpen": "Rashid Ali. Built in the open.",
+    "label": "Footer",
+    "portfolio": "Portfolio",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "home": {
+    "title": "Rashid Ali — Full-Stack Developer & AI Engineer",
+    "metaDescription": "Rashid Ali (MOT1209) — full-stack developer and AI engineer, and the maker behind King Studio. Websites, AI tools and games made with Godot and Unity. Available for jobs and freelance projects.",
+    "ogDescription": "Websites, AI tools and games made with Godot and Unity — and King Studio, where the apps live.",
+    "eyebrow": "Rashid Ali · MOT1209",
+    "photoAlt": "Portrait of Rashid Ali",
+    "headline": "I build web apps, games and AI tools — and ship them.",
+    "ledeBefore": "Full-stack developer and AI engineer, still at school and already shipping. My apps live under",
+    "ledeProjects": "projects,",
+    "ledeAndroid": "of them with Android builds.",
+    "availability": "Available for jobs and freelance projects",
+    "ctaWork": "Work with me",
+    "ctaStudio": "Explore King Studio",
+    "workEyebrow": "Selected work",
+    "workTitle": "Apps you can use today",
+    "workMore": "All projects in King Studio",
+    "workNote": "",
+    "servicesEyebrow": "What I do",
+    "servicesTitle": "Where I can help",
+    "services": [
+      {
+        "title": "Websites and web apps",
+        "text": "Fast sites and installable web apps with HTML, CSS, JavaScript and Supabase, like this one."
+      },
+      {
+        "title": "AI integration",
+        "text": "Assistants and automations on Gemini and OpenRouter, from a prototype to something people use."
+      },
+      {
+        "title": "Games",
+        "text": "Games made with the Godot and Unity engines."
+      }
+    ],
+    "aboutEyebrow": "About",
+    "aboutTitle": "Built in the open",
+    "aboutText": "I'm Rashid Ali, a school student who builds software. It started with changing CSS to see what broke and breaking JavaScript to see why. Today I build websites and installable apps with JavaScript and Supabase, write Python, work with AI tools, and make games in Godot and Unity.",
+    "aboutSourceBefore": "The source for most of it is on",
+    "aboutSourceAfter": ".",
+    "stackLabel": "Tools I use",
+    "stackAi": "AI tools",
+    "aboutMore": "More about me",
+    "factProjects": "Projects in King Studio",
+    "factAndroid": "Android builds",
+    "factRelease": "Latest release",
+    "factLanguages": "Languages",
+    "factLanguagesValue": "Arabic, German, English",
+    "writingEyebrow": "Writing",
+    "writingTitle": "Latest from the blog",
+    "writingMore": "All posts",
+    "writingNote": "",
+    "minRead": "min read",
+    "contactEyebrow": "Contact",
+    "contactTitle": "Get in touch",
+    "contactNote": "A freelance project, a full-time role, a collaboration, or a bug in something I built: all welcome.",
+    "channelEmail": "Email",
+    "contactCta": "Send a message"
+  },
+  "settings": {
+    "title": "Settings",
+    "close": "Close settings",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "accent": "Accent",
+    "accentSuffix": "accent",
+    "accents": [
+      "Ember",
+      "Ink blue",
+      "Pine",
+      "Violet",
+      "Brick",
+      "Teal"
+    ],
+    "reduceMotion": "Reduce motion"
+  }
+}

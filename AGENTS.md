@@ -55,6 +55,16 @@ Before saying a change is done, run `npm run build && npm run verify && npm test
 
 Add or edit a record in `_data/studioCatalog.json`. `_data/kingStudio.js` validates it at build time and **fails the build** on an unknown status, a missing image, launch URL or APK, or an image without `imageAlt`. APK version and file come from `apks/updates.json`. Do not hand-write catalogue pages.
 
+## Languages
+
+English is the default and keeps its URLs. German and Arabic versions of the core pages live under `/de/` and `/ar/` (`index.njk`, `about.njk`, `contact.njk` in each folder).
+
+- `_data/site.json` → `translations` maps a page key to its path per language; `locales` lists the languages. A page opts in with `locale`, `translationKey` and, in a language folder, `root: "../"` in its front matter. That gives it `<html lang dir>` (the direction comes from the locale's `dir` string), `hreflang` alternates and the language switcher in the header.
+- UI strings (header, footer, homepage, settings) are in `_data/i18n/<code>.json`. Every file must have exactly the keys of `en.json`; `tests/i18n.test.mjs` fails otherwise. The homepage body is one partial (`_includes/pages/home.njk`) shared by all languages; About and Contact are written per language.
+- King Studio, the blog, downloads and the legal pages are English only. Translated pages mark English-only blocks `lang="en"` (plus `dir="ltr"` on Arabic pages).
+- Arabic is right-to-left: use logical CSS properties (`margin-inline-start`, `inset-inline`, `border-block`) rather than `left`/`right`, and give Latin-only snippets inside Arabic text (handles, emails, the brand) `dir="ltr"`.
+- A new translated page needs: the template with an explicit `permalink`, an entry in `scripts/site-templates.mjs`, an entry in `site.translations`, and a `sitemap.xml` line.
+
 ## Gotchas that have already cost time
 
 - Nunjucks `{% set %}` inside a `for` loop does not leak out of the loop (arrays and `.push()` do). Compute counts in a `_data/*.js` module instead.

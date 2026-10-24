@@ -18,7 +18,7 @@
     <title>{{ title }}</title>
     <meta name="description" content="{{ metaDescription }}">
     <meta name="robots" content="index, follow">
-    <meta name="author" content="Rashid (MOT1209)">
+    <meta name="author" content="Rashid Ali (MOT1209)">
     <link rel="canonical" href="{{ site.siteUrl }}/{{ urlPath }}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="King Studio">
@@ -68,10 +68,14 @@
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7z"/></svg><span>KING STUDIO</span>
             </a>
             <nav class="ks-nav" aria-label="King Studio">
+{%- if kingStudio.sections.games.projects | length or active == 'games' %}
                 <a href="{{ root }}king-studio/games/"{% if active == 'games' %} aria-current="page"{% endif %}>Games</a>
+{%- endif %}
                 <a href="{{ root }}king-studio/apps/"{% if active == 'apps' %} aria-current="page"{% endif %}>Apps</a>
+{%- if kingStudio.sections.labs.projects | length or active == 'labs' %}
                 <a href="{{ root }}king-studio/labs/"{% if active == 'labs' %} aria-current="page"{% endif %}>Labs</a>
-                <a href="{{ root }}" class="ks-nav-parent">Portfolio<span class="ks-visually-hidden"> (Rashid, main site)</span></a>
+{%- endif %}
+                <a href="{{ root }}" class="ks-nav-parent">Portfolio<span class="ks-visually-hidden"> (Rashid Ali, main site)</span></a>
             </nav>
             <button type="button" class="ks-theme" id="ks-theme" aria-label="Switch to light theme">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
@@ -85,7 +89,7 @@
 
     <footer class="ks-footer">
         <div class="ks-wrap ks-footer-row">
-            <p>&copy; <span id="ks-year"></span> King Studio &middot; a project of <a href="{{ root }}">Rashid</a>. Built in the open.</p>
+            <p>&copy; <span id="ks-year"></span> King Studio &middot; a project of <a href="{{ root }}">Rashid Ali</a>. Built in the open.</p>
             <nav aria-label="Footer">
                 <a href="{{ root }}">Portfolio</a>
                 <a href="{{ root }}downloads.html">Downloads</a>

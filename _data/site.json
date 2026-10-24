@@ -1,6 +1,6 @@
 {
   "siteUrl": "https://rashid-wep.vercel.app",
-  "cssVersion": "11.2",
+  "cssVersion": "11.3",
   "swVersion": "v18",
   "gaId": "G-W139X3X20X",
   "adsClient": "ca-pub-4804302403615958",
@@ -72,5 +72,36 @@
       "label": "Contact",
       "href": "contact.html"
     }
-  ]
+  ],
+  "locales": [
+    {
+      "code": "en",
+      "short": "EN"
+    },
+    {
+      "code": "de",
+      "short": "DE"
+    },
+    {
+      "code": "ar",
+      "short": "ع"
+    }
+  ],
+  "translations": {
+    "home": {
+      "en": "",
+      "de": "de/",
+      "ar": "ar/"
+    },
+    "about": {
+      "en": "about.html",
+      "de": "de/about.html",
+      "ar": "ar/about.html"
+    },
+    "contact": {
+      "en": "contact.html",
+      "de": "de/contact.html",
+      "ar": "ar/contact.html"
+    }
+  }
 }

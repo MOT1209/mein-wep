@@ -1,8 +1,8 @@
     <meta name="author" content="Rashid (MOT1209)">
     <meta name="twitter:creator" content="@MOT1209">
-    <link rel="stylesheet" href="css/king-studio.css?v={{ site.cssVersion }}">
-    <link rel="stylesheet" href="css/home.css?v={{ site.cssVersion }}">
-    <link rel="manifest" href="manifest.json?v=2">
+    <link rel="stylesheet" href="{{ root }}css/king-studio.css?v={{ site.cssVersion }}">
+    <link rel="stylesheet" href="{{ root }}css/home.css?v={{ site.cssVersion }}">
+    <link rel="manifest" href="{{ root }}manifest.json?v=2">
 
     <!-- GA4 (consent-aware: analytics stays denied until the visitor accepts) -->
     <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied'});</script>
@@ -13,18 +13,19 @@
     {
       "@context": "https://schema.org",
       "@type": "Person",
-      "name": "Rashid",
+      "name": "Rashid Ali",
       "alternateName": "MOT1209",
       "url": "https://rashid-wep.vercel.app",
-      "image": "https://rashid-wep.vercel.app/images/og-image.png",
+      "image": "https://rashid-wep.vercel.app/images/rashid-ali.webp",
       "jobTitle": "Full-Stack Developer & AI Engineer",
-      "description": "Builds web platforms, AI tools and browser games, and runs King Studio.",
-      "knowsAbout": ["JavaScript","Python","Three.js","Supabase","Node.js","AI","PWA","Eleventy","Capacitor"],
+      "description": "Builds websites, AI tools and games, and runs King Studio.",
+      "knowsAbout": ["HTML","CSS","JavaScript","Python","Supabase","Godot","Unity","AI"],
+      "knowsLanguage": ["ar","de","en"],
       "sameAs": ["https://github.com/MOT1209"],
       "makesOffer": [
-        {"@type":"Offer","itemOffered":{"@type":"Service","name":"Web Development","description":"Static and full-stack web platforms"}},
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"Web Development","description":"Websites and web apps with HTML, CSS, JavaScript and Supabase"}},
         {"@type":"Offer","itemOffered":{"@type":"Service","name":"AI Integration","description":"Assistants and automation on Gemini and OpenRouter"}},
-        {"@type":"Offer","itemOffered":{"@type":"Service","name":"Game Development","description":"Browser games with Three.js, shipped as PWAs and Android apps"}}
+        {"@type":"Offer","itemOffered":{"@type":"Service","name":"Game Development","description":"Games made with Godot and Unity"}}
       ]
     }
     </script>
@@ -32,9 +33,9 @@
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "Rashid — Full-Stack Developer & AI Engineer",
+      "name": "Rashid Ali — Full-Stack Developer & AI Engineer",
       "url": "https://rashid-wep.vercel.app",
-      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209"},
-      "inLanguage": "en"
+      "author": {"@type":"Person","name":"Rashid Ali","alternateName":"MOT1209"},
+      "inLanguage": "{{ locale or 'en' }}"
     }
     </script>

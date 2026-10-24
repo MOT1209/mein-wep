@@ -18,8 +18,10 @@ export default function () {
   const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'apks', 'updates.json'), 'utf8'));
   const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, '_data', 'studioCatalog.json'), 'utf8')).projects;
   const byApk = Object.fromEntries(catalog.filter((p) => p.apkId).map((p) => [p.apkId, p]));
+  // APKs of hidden catalogue projects stay served at their URLs but are not listed.
+  const hidden = new Set(catalog.filter((p) => p.hidden && p.apkId).map((p) => p.apkId));
 
-  const items = Object.entries(manifest.apps ?? {}).map(([id, app]) => {
+  const items = Object.entries(manifest.apps ?? {}).filter(([id]) => !hidden.has(id)).map(([id, app]) => {
     const file = app.url.replace(/^\//, '');
     const abs = path.join(ROOT, file);
     if (!fs.existsSync(abs)) throw new Error(`[downloads] ${id}: APK missing: ${file}`);

@@ -25,7 +25,7 @@ import fs from 'node:fs';
 // URL-surface gate and the build can never disagree about which pages exist.
 const studioProjects = JSON.parse(
   fs.readFileSync(new URL('../_data/studioCatalog.json', import.meta.url), 'utf8'),
-).projects;
+).projects.filter((p) => !p.hidden);
 
 // Blog index and posts are templates (shared header/footer) that keep their
 // original .html URLs via explicit permalinks.
@@ -48,6 +48,13 @@ export const TEMPLATE_OUTPUTS = {
   'downloads.njk': 'downloads.html',
   '404.njk': '404.html',
   'learning.njk': 'learning.html',
+  // Translated versions of the core pages (see _data/i18n and site.translations).
+  'de/index.njk': 'de/index.html',
+  'de/about.njk': 'de/about.html',
+  'de/contact.njk': 'de/contact.html',
+  'ar/index.njk': 'ar/index.html',
+  'ar/about.njk': 'ar/about.html',
+  'ar/contact.njk': 'ar/contact.html',
   ...blogPages,
   'king-studio/index.njk': 'king-studio/index.html',
   'king-studio/games.njk': 'king-studio/games/index.html',

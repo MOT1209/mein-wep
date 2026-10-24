@@ -11,6 +11,9 @@ import path from 'node:path';
  *
  * APK links and versions come from apks/updates.json, the same manifest the
  * release bot maintains and the homepage reads.
+ *
+ * A record with "hidden": true is kept in the data but not shown anywhere:
+ * no card, no detail page, no download (see downloads.js and releases.js).
  */
 const ROOT = process.cwd();
 const STATUSES = ['Available', 'In Development', 'Experimental', 'Coming Soon'];
@@ -57,7 +60,7 @@ export default function () {
   const releases = JSON.parse(fs.readFileSync(path.join(ROOT, 'apks', 'updates.json'), 'utf8')).apps ?? {};
   const seen = new Set();
 
-  const projects = raw.projects.map((p) => {
+  const projects = raw.projects.filter((p) => !p.hidden).map((p) => {
     for (const k of ['id', 'section', 'title', 'description', 'type', 'status']) {
       if (!p[k]) fail(p.id ?? '?', `missing required field "${k}"`);
     }
