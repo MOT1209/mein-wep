@@ -129,4 +129,3 @@ State feedback only: roughly 150ms on hover and focus, 200ms card lift. No entra
 ## Known debt
 
 - `css/style.css` (legacy, minified, conflicting `:root` blocks) is still used by `devos.html`, `vault/*`, `quran.html`-style standalone pages and a few others. Those pages are not yet on this system. Migrate them to `tokens.css` + `site.css` rather than adding to `style.css`.
-- `apps/calculator-app/icons/*.png` and `apps/quiz-app/icons/*.png` are corrupt (the IHDR chunk length is 17, not 13), so browsers cannot decode them. The King Studio catalogue uses each app's valid `icon.svg` instead. The PNGs, which those apps' manifests may still reference, need regenerating as part of work on those apps.
