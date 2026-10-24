@@ -1,0 +1,20 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: ar
+root: "../"
+translationKey: home
+permalink: /ar/index.html
+eleventyComputed:
+  title: "{{ i18n.ar.home.title | safe }}"
+  metaDescription: "{{ i18n.ar.home.metaDescription | safe }}"
+  ogDescription: "{{ i18n.ar.home.ogDescription | safe }}"
+metaKeywords: "راشد, MOT1209, مطور Full-Stack, مهندس ذكاء اصطناعي, King Studio, JavaScript, Three.js, Supabase, عمل حر, معرض أعمال"
+canonical: "https://rashid-wep.vercel.app/ar/"
+activeNav: home
+noAds: true
+showSettings: true
+headExtra: "partials/home/head-extra.njk"
+extraBodyScript: "partials/home/body-script.njk"
+---
+{% include "pages/home.njk" %}

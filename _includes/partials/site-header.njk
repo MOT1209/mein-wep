@@ -15,7 +15,7 @@
     <a href="#main" class="skip-link">{{ T.header.skip }}</a>
     <header class="site-header">
         <div class="wrap site-header-row">
-            <a href="{{ homeHref }}" class="brand">Rashid<span class="dot">.</span></a>
+            <a href="{{ homeHref }}" class="brand" dir="ltr">Rashid<span class="dot">.</span></a>
             <nav class="site-nav" aria-label="{{ T.header.mainNav }}">
 {%- for item in site.siteNav %}
                 <a href="{{ navHref(item, L, root) }}"{% if activeNav == item.key %} aria-current="page"{% endif %}>{{ T.nav[item.key] or item.label }}</a>
@@ -41,7 +41,7 @@
     </header>
     <div class="menu-sheet" id="site-menu" data-menu role="dialog" aria-modal="true" aria-label="{{ T.header.menu }}">
         <div class="menu-sheet-top">
-            <a href="{{ homeHref }}" class="brand">Rashid<span class="dot">.</span></a>
+            <a href="{{ homeHref }}" class="brand" dir="ltr">Rashid<span class="dot">.</span></a>
             <button type="button" class="icon-button" data-menu-close aria-label="{{ T.header.closeMenu }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg>
             </button>

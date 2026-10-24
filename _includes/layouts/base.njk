@@ -17,7 +17,7 @@
   /de/), locale ("en" by default) and translationKey (a key of
   site.translations: adds hreflang alternates and the language switcher).
 #}{%- if legacyShell -%}{% set root = root or "" %}{% set L = locale or "en" %}<!DOCTYPE html>
-<html lang="{{ L }}" dir="ltr">
+<html lang="{{ L }}" dir="{{ i18n[L].dir }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -51,6 +51,9 @@
 {% include headTop %}
 {%- endif %}
 {% include "partials/site-head.njk" %}
+{%- if L == "ar" %}
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+{%- endif %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
 {%- if not noAds %}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsClient }}" crossorigin="anonymous"></script>

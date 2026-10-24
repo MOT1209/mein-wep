@@ -65,12 +65,18 @@ test('each language version declares its language and links the others', { skip 
   }
 });
 
-test('German pages are German and carry no ads', { skip }, () => {
-  for (const p of Object.values(site.translations).map((v) => v.de)) {
-    const html = read(p);
-    assert.match(html, />Über mich</, `${p}: navigation not translated`);
-    assert.doesNotMatch(html, /adsbygoogle|googlesyndication/, `${p}: ads`);
-    assert.doesNotMatch(html, />Skip to main content</, `${p}: English skip link`);
+test('translated pages are translated, set their direction and carry no ads', { skip }, () => {
+  for (const { code } of site.locales.filter((l) => l.code !== 'en')) {
+    const t = strings[code];
+    for (const versions of Object.values(site.translations)) {
+      const p = versions[code];
+      if (p === undefined) continue;
+      const html = read(p);
+      assert.match(html, new RegExp(`<html lang="${code}" dir="${t.dir}"`), `${p}: lang/dir`);
+      assert.ok(html.includes(`>${t.nav.about}</a>`), `${p}: navigation not translated`);
+      assert.ok(html.includes(`>${t.header.skip}</a>`), `${p}: skip link not translated`);
+      assert.doesNotMatch(html, /adsbygoogle|googlesyndication/, `${p}: ads`);
+    }
   }
 });
 

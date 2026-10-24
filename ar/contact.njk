@@ -1,0 +1,67 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: ar
+root: "../"
+translationKey: contact
+permalink: /ar/contact.html
+title: "تواصل | راشد"
+metaDescription: "تواصل مع راشد — للتعاون أو الاستفسار عن مشروع أو لمجرد التحية."
+metaKeywords: "تواصل مع راشد, توظيف مطور, تطوير ويب, دمج الذكاء الاصطناعي, تطوير ألعاب, عمل حر, معرض أعمال"
+canonical: "https://rashid-wep.vercel.app/ar/contact.html"
+activeNav: contact
+noAds: true
+extraBodyScript: "partials/legacy-pages/contact-body-script.njk"
+---
+    <div class="contact-page">
+        <h1>تواصل معي</h1>
+        <p class="subtitle">لديك فكرة مشروع، أو اقتراح تعاون، أو تريد أن تقول مرحباً؟ راسلني!</p>
+
+        <div id="form-feedback" role="status" aria-live="polite"></div>
+
+        <div class="contact-card">
+            <form id="contact-form" action="https://formsubmit.co/zwnt45602@gmail.com" method="POST"
+                data-msg-wait="انتظر 30 ثانية قبل إرسال رسالة أخرى."
+                data-msg-sending="جارٍ الإرسال…"
+                data-msg-required="املأ كل الحقول المطلوبة."
+                data-msg-send="أرسل الرسالة"
+                data-msg-success="وصلت رسالتك! سأرد عليك قريباً."
+                data-msg-failed="تعذّر إرسال الرسالة. راسلني مباشرة على zwnt45602@gmail.com.">
+                <input type="hidden" name="_captcha" value="true">
+                <input type="hidden" name="_template" value="box">
+                <input type="hidden" name="_next" value="https://rashid-wep.vercel.app/ar/contact.html?success=true">
+                <input type="text" id="hp_website" name="_hp_website" style="position:absolute;left:-9999px;top:-9999px" tabindex="-1" autocomplete="off" aria-hidden="true">
+                <div class="form-group">
+                    <label for="name">الاسم</label>
+                    <input type="text" id="name" name="name" placeholder="اسمك" required minlength="2" autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" id="email" name="email" placeholder="name@example.com" required autocomplete="email" dir="ltr">
+                </div>
+                <div class="form-group">
+                    <label for="subject">الموضوع</label>
+                    <input type="text" id="subject" name="subject" placeholder="عن ماذا تريد أن تكتب؟" required minlength="3">
+                </div>
+                <div class="form-group">
+                    <label for="message">الرسالة</label>
+                    <textarea id="message" name="message" placeholder="أخبرني عن مشروعك أو استفسارك…" required minlength="10" dir="auto"></textarea>
+                </div>
+                <button type="submit" class="btn-submit"><i class="fas fa-paper-plane" aria-hidden="true"></i> أرسل الرسالة</button>
+            </form>
+            <p class="form-note">بياناتك محمية. التفاصيل في <a href="../privacy.html" hreflang="en">سياسة الخصوصية (بالإنجليزية)</a>.</p>
+        </div>
+
+        <div class="contact-methods">
+            <div class="contact-method-item">
+                <i class="fas fa-envelope" aria-hidden="true"></i>
+                <h3>البريد الإلكتروني</h3>
+                <p><a href="mailto:zwnt45602@gmail.com" dir="ltr">zwnt45602@gmail.com</a></p>
+            </div>
+            <div class="contact-method-item">
+                <i class="fab fa-github" aria-hidden="true"></i>
+                <h3>GitHub</h3>
+                <p><a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer" dir="ltr">MOT1209</a></p>
+            </div>
+        </div>
+    </div>

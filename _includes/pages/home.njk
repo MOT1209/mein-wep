@@ -1,11 +1,11 @@
 {#- Homepage body, shared by every language version (index.njk, de/index.njk).
     Expects `root` and `locale`; strings come from _data/i18n/<locale>.json.
     Project cards and blog posts stay in English, so non-English pages mark
-    those blocks lang="en". -#}
+    those blocks lang="en" (and dir="ltr" on right-to-left pages). -#}
 {%- set L = locale or "en" %}
 {%- set T = i18n[L].home %}
 {%- set S = i18n[L].settings %}
-{%- set enOnly = ' lang="en"' if L != "en" else "" %}
+{%- set enOnly = (' lang="en"' ~ (' dir="ltr"' if i18n[L].dir == "rtl" else "")) if L != "en" else "" %}
 {%- set work = kingStudio.featured.games.concat(kingStudio.featured.apps) %}
 <section class="home-hero" aria-labelledby="home-title">
     <div class="wrap">
@@ -116,10 +116,10 @@
             </div>
         </div>
         <ul class="home-channels">
-            <li><a href="mailto:zwnt45602@gmail.com" class="card home-channel"><i class="fas fa-envelope" aria-hidden="true"></i><span>{{ T.channelEmail }}</span><small>zwnt45602@gmail.com</small></a></li>
-            <li><a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-github" aria-hidden="true"></i><span>GitHub</span><small>@MOT1209</small></a></li>
+            <li><a href="mailto:zwnt45602@gmail.com" class="card home-channel"><i class="fas fa-envelope" aria-hidden="true"></i><span>{{ T.channelEmail }}</span><small dir="ltr">zwnt45602@gmail.com</small></a></li>
+            <li><a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-github" aria-hidden="true"></i><span>GitHub</span><small dir="ltr">@MOT1209</small></a></li>
             <li><a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-youtube" aria-hidden="true"></i><span>YouTube</span><small dir="auto">مختبر البرمجه</small></a></li>
-            <li><a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-tiktok" aria-hidden="true"></i><span>TikTok</span><small>@programmierlabor</small></a></li>
+            <li><a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-tiktok" aria-hidden="true"></i><span>TikTok</span><small dir="ltr">@programmierlabor</small></a></li>
         </ul>
         <div class="home-actions">
             <a href="{{ root }}{{ site.translations.contact[L] }}" class="btn btn-primary">{{ T.contactCta }}</a>

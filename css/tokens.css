@@ -128,3 +128,11 @@
     --lift-hover: 0 4px 14px rgba(0, 0, 0, 0.5);
   }
 }
+
+/* Arabic pages: neither display face has Arabic glyphs, so both roles start
+   with IBM Plex Sans Arabic (loaded by base.njk only on lang="ar" pages).
+   Latin words inside Arabic text still use the regular faces next in line. */
+:lang(ar) {
+  --font-display: "IBM Plex Sans Arabic", "Bricolage Grotesque", Tahoma, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", "IBM Plex Sans", Tahoma, -apple-system, "Segoe UI", sans-serif;
+}

@@ -33,6 +33,8 @@
   font-weight: 600; text-decoration: none;
 }
 .home-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* The arrow points in the reading direction. */
+[dir="rtl"] .home-more span { display: inline-block; transform: scaleX(-1); }
 
 /* The card grid reuses the King Studio catalogue card; .ks on the section
    brings its tokens. Keep the section on the page ground, not studio paper. */
@@ -66,7 +68,7 @@
 .home-channel:hover { border-color: var(--rule-strong); box-shadow: var(--lift-hover); }
 .home-channel i { grid-row: span 2; font-size: 1.25rem; color: var(--signal); width: 1.5rem; text-align: center; }
 .home-channel span { font-weight: 600; }
-.home-channel small { color: var(--ink-muted); font-size: 0.8125rem; overflow-wrap: anywhere; }
+.home-channel small { color: var(--ink-muted); font-size: 0.8125rem; overflow-wrap: anywhere; justify-self: start; }
 
 /* ------------------------------ About ------------------------------ */
 .home-about { display: grid; grid-template-columns: 1fr; gap: var(--s-6); }
@@ -75,6 +77,7 @@
 .home-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3); margin: 0; align-content: start; }
 .home-facts div { background: var(--card); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4); }
 .home-facts dt { font-size: 0.75rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+:lang(ar) .home-facts dt { letter-spacing: normal; }
 .home-facts dd { margin: var(--s-1) 0 0; font-family: var(--font-display); font-weight: 800; font-size: 1.375rem; color: var(--ink); }
 @media (min-width: 1024px) { .home-about { grid-template-columns: 3fr 2fr; gap: var(--s-8); } }
 

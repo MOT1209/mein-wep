@@ -40,7 +40,7 @@ body.site.menu-open { overflow: hidden; }
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 .skip-link {
-  position: absolute; left: var(--s-3); top: -80px; z-index: 100;
+  position: absolute; inset-inline-start: var(--s-3); top: -80px; z-index: 100;
   background: var(--ink); color: var(--paper) !important; padding: var(--s-2) var(--s-4);
   border-radius: var(--radius-sm); text-decoration: none; font-weight: 600;
 }
@@ -84,14 +84,17 @@ body.site.menu-open { overflow: hidden; }
 .icon-button svg { width: 20px; height: 20px; }
 
 /* Language switcher: a plain link to the same page in another language. */
+/* Below 640px the header has no room for several languages; the mobile menu
+   lists them instead. */
 .lang-switch {
-  display: inline-grid; place-items: center; flex: none;
+  display: none; place-items: center; flex: none;
   min-width: var(--tap); height: var(--tap); padding: 0 var(--s-2);
   border: 1px solid var(--rule); border-radius: var(--radius-sm);
   background: var(--card); color: var(--ink) !important; text-decoration: none;
   font: 600 0.8125rem/1 var(--font-mono); letter-spacing: 0.04em;
 }
 .lang-switch:hover { border-color: var(--rule-strong); background: var(--card-sunk); }
+@media (min-width: 640px) { .lang-switch { display: inline-grid; } }
 
 @media (min-width: 1024px) {
   .site-nav { display: flex; gap: 2px; }
@@ -128,6 +131,9 @@ body.site.menu-open { overflow: hidden; }
   display: inline-block; font-family: var(--font-mono); font-size: 0.75rem;
   letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: var(--s-3);
 }
+/* Arabic eyebrows: letter-spacing pulls the letters apart and the mono face
+   has no Arabic glyphs, so use the body face without tracking. */
+:lang(ar) .eyebrow { letter-spacing: normal; font-family: var(--font-body); font-size: 0.8125rem; }
 .page-title { font-size: clamp(1.875rem, 6vw, 2.75rem); font-weight: 800; }
 .page-lede { color: var(--ink-muted); font-size: 1.0625rem; margin: var(--s-3) 0 0; max-width: var(--measure); }
 

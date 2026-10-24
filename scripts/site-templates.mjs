@@ -48,10 +48,13 @@ export const TEMPLATE_OUTPUTS = {
   'downloads.njk': 'downloads.html',
   '404.njk': '404.html',
   'learning.njk': 'learning.html',
-  // German versions of the core pages (see _data/i18n and site.translations).
+  // Translated versions of the core pages (see _data/i18n and site.translations).
   'de/index.njk': 'de/index.html',
   'de/about.njk': 'de/about.html',
   'de/contact.njk': 'de/contact.html',
+  'ar/index.njk': 'ar/index.html',
+  'ar/about.njk': 'ar/about.html',
+  'ar/contact.njk': 'ar/contact.html',
   ...blogPages,
   'king-studio/index.njk': 'king-studio/index.html',
   'king-studio/games.njk': 'king-studio/games/index.html',

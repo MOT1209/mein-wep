@@ -1,5 +1,6 @@
 {
   "langName": "English",
+  "dir": "ltr",
   "ogLocale": "en_US",
   "nav": {
     "home": "Home",
