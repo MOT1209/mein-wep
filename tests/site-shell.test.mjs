@@ -44,8 +44,10 @@ test('homepage carries no fabricated testimonials', { skip }, () => {
 test('downloads show build-time SHA-256 for every release', { skip }, () => {
   const html = read('downloads.html');
   const manifest = JSON.parse(readFileSync('apks/updates.json', 'utf8'));
+  const hidden = new Set(JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects
+    .filter((p) => p.hidden && p.apkId).map((p) => p.apkId));
   const count = (html.match(/data-copy="[0-9a-f]{64}"/g) || []).length;
-  assert.equal(count, Object.keys(manifest.apps).length);
+  assert.equal(count, Object.keys(manifest.apps).filter((id) => !hidden.has(id)).length);
   assert.doesNotMatch(html, /Building\.\.\.|Pending first build/);
 });
 
@@ -56,7 +58,7 @@ test('downloads show build-time SHA-256 for every release', { skip }, () => {
 test('homepage renders its projects and posts from build-time data', { skip }, () => {
   const html = read('index.html');
   const catalog = JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects;
-  const featured = catalog.filter((p) => p.featured && (p.section === 'games' || p.section === 'apps'));
+  const featured = catalog.filter((p) => p.featured && !p.hidden && (p.section === 'games' || p.section === 'apps'));
   assert.ok(featured.length > 0);
   for (const p of featured) {
     assert.match(html, new RegExp(`href="king-studio/${p.section}/${p.id}/"`), `${p.id} missing from homepage`);

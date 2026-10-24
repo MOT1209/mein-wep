@@ -25,7 +25,7 @@ import fs from 'node:fs';
 // URL-surface gate and the build can never disagree about which pages exist.
 const studioProjects = JSON.parse(
   fs.readFileSync(new URL('../_data/studioCatalog.json', import.meta.url), 'utf8'),
-).projects;
+).projects.filter((p) => !p.hidden);
 
 // Blog index and posts are templates (shared header/footer) that keep their
 // original .html URLs via explicit permalinks.

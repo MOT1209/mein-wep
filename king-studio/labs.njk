@@ -25,6 +25,10 @@ crumbs:
 <section class="ks-section">
   <div class="ks-wrap">
 {%- set items = section.projects %}{% set facets = section.facets %}{% set showSearch = section.showSearch %}{% set cardHeading = "h2" %}{% set gridId = "ks-labs" %}{% set emptyText = "No experiments match this filter." %}
+{%- if items | length %}
 {% include "king-studio/grid.njk" %}
+{%- else %}
+<p class="ks-empty">No experiments are published right now. Meanwhile, <a class="ks-link" href="../apps/">browse the apps</a>.</p>
+{%- endif %}
   </div>
 </section>

@@ -2,6 +2,7 @@
   "projects": [
     {
       "id": "kingcraft",
+      "hidden": true,
       "section": "games",
       "title": "KingCraft",
       "description": "3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive.",
@@ -19,6 +20,7 @@
     },
     {
       "id": "rust-construction",
+      "hidden": true,
       "section": "games",
       "title": "Rust Construction",
       "description": "3D building game with physics and resource management. Build structures, manage resources, survive.",
@@ -36,6 +38,7 @@
     },
     {
       "id": "farm-empire",
+      "hidden": true,
       "section": "games",
       "title": "Farm Empire",
       "description": "Immersive farming simulation with crops, animals, and an economy. Grow your farm empire.",
@@ -53,6 +56,7 @@
     },
     {
       "id": "quran-pro",
+      "hidden": true,
       "section": "apps",
       "title": "Quran Pro",
       "description": "Complete Quran with tafsir, 40+ reciters, search, and bookmarks.",
@@ -102,6 +106,7 @@
     },
     {
       "id": "block-world",
+      "hidden": true,
       "section": "labs",
       "title": "Block World",
       "description": "An original 3D voxel sandbox for survival, building, exploration and crafting. Early development: no playable build is published yet.",
@@ -115,6 +120,7 @@
     },
     {
       "id": "rashid-ai",
+      "hidden": true,
       "section": "labs",
       "title": "Rashid AI",
       "description": "Conversational AI assistant powered by Gemini and OpenRouter, with multilingual support.",

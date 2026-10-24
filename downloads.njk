@@ -6,19 +6,19 @@ permalink: downloads.html
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Download APK files for Rashid's apps and games — Quran App, Calculator Vault, Quiz App, KingCraft, Rust Survival, Farm Empire">
+    <meta name="description" content="Download Android APK files for Rashid Ali's apps — Calculator Vault and Quiz Master.">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://rashid-wep.vercel.app/downloads.html">
     <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/downloads.html">
     <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/downloads.html">
     <meta property="og:type" content="website">
-    <meta property="og:title" content="Downloads — Rashid Apps & Games APK">
-    <meta property="og:description" content="Download Android APK files for all Rashid apps and games.">
+    <meta property="og:title" content="Downloads — Rashid Ali Apps APK">
+    <meta property="og:description" content="Download Android APK files for Rashid Ali's apps.">
     <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
     <meta property="og:url" content="https://rashid-wep.vercel.app/downloads.html">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Downloads — Rashid Apps & Games APK">
-    <title>Downloads — Rashid Apps & Games APK</title>
+    <meta name="twitter:title" content="Downloads — Rashid Ali Apps APK">
+    <title>Downloads — Rashid Ali Apps APK</title>
 {% set root = "" %}
 {% include "partials/site-head.njk" %}
     <link rel="stylesheet" href="css/downloads.css?v={{ site.cssVersion }}">
@@ -52,7 +52,7 @@ permalink: downloads.html
         <div class="page page-wide">
             <span class="eyebrow">Android · APK</span>
             <h1 class="page-title">Downloads</h1>
-            <p class="page-lede">Install the apps and games directly on your Android device. Every file below is the current release; its SHA-256 is computed from the file itself.</p>
+            <p class="page-lede">Install the apps directly on your Android device. Every file below is the current release; its SHA-256 is computed from the file itself.</p>
             <div class="dl-toolbar">
                 <button class="btn btn-secondary" id="open-guide-btn" type="button">How to install an APK</button>
                 <span class="dl-updated">Last release: <time datetime="{{ downloads.updatedAt }}">{{ downloads.updatedAt }}</time></span>
@@ -82,25 +82,21 @@ permalink: downloads.html
 
             <section class="phone-preview" aria-labelledby="preview-title">
                 <h2 id="preview-title">Try it in the browser</h2>
-                <p class="page-lede">Run an app or game inside a phone frame — no install needed.</p>
+                <p class="page-lede">Run an app inside a phone frame — no install needed.</p>
                 <div class="preview-apps" role="group" aria-label="Choose an app to preview">
-                    <button class="preview-app" type="button" aria-pressed="true" data-src="quran.html">Quran</button>
-                    <button class="preview-app" type="button" aria-pressed="false" data-src="apps/calculator-app/index.html">Calculator</button>
+                    <button class="preview-app" type="button" aria-pressed="true" data-src="apps/calculator-app/index.html">Calculator</button>
                     <button class="preview-app" type="button" aria-pressed="false" data-src="apps/quiz-app/index.html">Quiz</button>
-                    <button class="preview-app" type="button" aria-pressed="false" data-src="games/kingcraft-game/index.html">KingCraft</button>
-                    <button class="preview-app" type="button" aria-pressed="false" data-src="games/rust-game/index.html">Rust</button>
-                    <button class="preview-app" type="button" aria-pressed="false" data-src="games/farm-game/index.html">Farm</button>
                 </div>
                 <div class="phone-frame" id="phone-frame">
                     <div class="phone-screen">
                         <div class="phone-loader" id="phone-loader"><span class="phone-spinner"></span></div>
                         <iframe id="preview-iframe" title="App live preview" loading="lazy"
-                            data-src="quran.html"
+                            data-src="apps/calculator-app/index.html"
                             sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                             allow="fullscreen; autoplay; gyroscope"></iframe>
                     </div>
                 </div>
-                <p class="preview-actions"><a class="btn btn-secondary" id="preview-open" href="quran.html" target="_blank" rel="noopener">Open full screen</a></p>
+                <p class="preview-actions"><a class="btn btn-secondary" id="preview-open" href="apps/calculator-app/index.html" target="_blank" rel="noopener">Open full screen</a></p>
             </section>
 
             <section class="how-it-works" aria-labelledby="how-title">

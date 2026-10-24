@@ -68,9 +68,13 @@
                 <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7z"/></svg><span>KING STUDIO</span>
             </a>
             <nav class="ks-nav" aria-label="King Studio">
+{%- if kingStudio.sections.games.projects | length or active == 'games' %}
                 <a href="{{ root }}king-studio/games/"{% if active == 'games' %} aria-current="page"{% endif %}>Games</a>
+{%- endif %}
                 <a href="{{ root }}king-studio/apps/"{% if active == 'apps' %} aria-current="page"{% endif %}>Apps</a>
+{%- if kingStudio.sections.labs.projects | length or active == 'labs' %}
                 <a href="{{ root }}king-studio/labs/"{% if active == 'labs' %} aria-current="page"{% endif %}>Labs</a>
+{%- endif %}
                 <a href="{{ root }}" class="ks-nav-parent">Portfolio<span class="ks-visually-hidden"> (Rashid, main site)</span></a>
             </nav>
             <button type="button" class="ks-theme" id="ks-theme" aria-label="Switch to light theme">

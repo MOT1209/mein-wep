@@ -25,8 +25,11 @@ const PAGE_LINKS = {
 
 export default function () {
   const raw = JSON.parse(fs.readFileSync(SOURCE, 'utf8'));
+  // Releases of hidden catalogue projects are not counted or shown.
+  const catalog = JSON.parse(fs.readFileSync(path.join(process.cwd(), '_data', 'studioCatalog.json'), 'utf8')).projects;
+  const hidden = new Set(catalog.filter((p) => p.hidden && p.apkId).map((p) => p.apkId));
 
-  const items = Object.entries(raw.apps ?? {}).map(([id, app]) => ({
+  const items = Object.entries(raw.apps ?? {}).filter(([id]) => !hidden.has(id)).map(([id, app]) => ({
     id,
     name: app.name,
     version: app.version,
@@ -38,5 +41,6 @@ export default function () {
   // Newest first; ties broken by name so the order is stable between builds.
   items.sort((a, b) => (a.date === b.date ? a.name.localeCompare(b.name) : b.date.localeCompare(a.date)));
 
-  return { updatedAt: raw.updatedAt, items };
+  // The newest shown release, not the manifest's own date, which may belong to a hidden one.
+  return { updatedAt: items[0]?.date ?? raw.updatedAt, items };
 }

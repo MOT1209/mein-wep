@@ -9,7 +9,9 @@ import path from 'node:path';
 
 const built = existsSync('dist/king-studio/index.html');
 const skip = !built && 'run npm run build first';
-const catalog = JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects;
+// Hidden records stay in the data but get no page (see _data/kingStudio.js).
+const allProjects = JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects;
+const catalog = allProjects.filter((p) => !p.hidden);
 
 const PAGES = [
   'king-studio/index.html',
@@ -105,4 +107,21 @@ test('homepage links to King Studio and keeps its canonical', { skip }, () => {
   const html = read('index.html');
   assert.match(html, /href="king-studio\/"/);
   assert.ok(html.includes('<link rel="canonical" href="https://rashid-wep.vercel.app/">'));
+});
+
+test('hidden projects have no page and appear on no listing', { skip }, () => {
+  const hidden = allProjects.filter((p) => p.hidden);
+  assert.ok(hidden.length > 0);
+  const listings = ['index.html', 'king-studio/index.html', 'king-studio/games/index.html',
+    'king-studio/apps/index.html', 'king-studio/labs/index.html', 'downloads.html'];
+  for (const p of hidden) {
+    assert.equal(existsSync(`dist/king-studio/${p.section}/${p.id}/index.html`), false, `${p.id}: page`);
+    for (const page of listings) {
+      assert.ok(!read(page).includes(`>${p.title}<`), `${p.id} listed on ${page}`);
+    }
+  }
+  const redirects = JSON.parse(readFileSync('vercel.json', 'utf8')).redirects.map((r) => r.source);
+  for (const p of hidden) {
+    assert.ok(redirects.includes(`/king-studio/${p.section}/${p.id}/`), `${p.id}: redirect`);
+  }
 });
