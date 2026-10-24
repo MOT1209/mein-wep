@@ -1,0 +1,157 @@
+{#- Homepage body, shared by every language version (index.njk, de/index.njk).
+    Expects `root` and `locale`; strings come from _data/i18n/<locale>.json.
+    Project cards and blog posts stay in English, so non-English pages mark
+    those blocks lang="en". -#}
+{%- set L = locale or "en" %}
+{%- set T = i18n[L].home %}
+{%- set S = i18n[L].settings %}
+{%- set enOnly = ' lang="en"' if L != "en" else "" %}
+{%- set work = kingStudio.featured.games.concat(kingStudio.featured.apps) %}
+<section class="home-hero" aria-labelledby="home-title">
+    <div class="wrap">
+        <span class="eyebrow">{{ T.eyebrow }}</span>
+        <h1 id="home-title" class="home-title">{{ T.headline }}</h1>
+        <p class="home-lede">{{ T.ledeBefore }} <a href="{{ root }}king-studio/">King Studio</a>: {{ kingStudio.projects | length }} {{ T.ledeProjects }} {{ releases.items | length }} {{ T.ledeAndroid }}</p>
+        <p class="home-availability"><span class="home-dot" aria-hidden="true"></span>{{ T.availability }}</p>
+        <div class="home-actions">
+            <a href="#contact" class="btn btn-primary">{{ T.ctaWork }}</a>
+            <a href="{{ root }}king-studio/" class="btn btn-secondary">{{ T.ctaStudio }}</a>
+        </div>
+    </div>
+</section>
+
+<section id="projects" class="home-section ks" aria-labelledby="work-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">{{ T.workEyebrow }}</span>
+                <h2 id="work-title">{{ T.workTitle }}</h2>
+{%- if T.workNote %}
+                <p class="home-section-note">{{ T.workNote }}</p>
+{%- endif %}
+            </div>
+            <a class="home-more" href="{{ root }}king-studio/">{{ T.workMore }}<span aria-hidden="true"> &rarr;</span></a>
+        </div>
+        <ul class="ks-grid"{{ enOnly | safe }}>
+{%- for project in work %}
+{% include "king-studio/card.njk" %}
+{%- endfor %}
+        </ul>
+    </div>
+</section>
+
+<section id="services" class="home-section home-section-alt" aria-labelledby="services-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">{{ T.servicesEyebrow }}</span>
+                <h2 id="services-title">{{ T.servicesTitle }}</h2>
+            </div>
+        </div>
+        <ul class="home-services">
+{%- for service in T.services %}
+            <li class="card">
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.text }}</p>
+            </li>
+{%- endfor %}
+        </ul>
+    </div>
+</section>
+
+<section id="about" class="home-section" aria-labelledby="about-title">
+    <div class="wrap home-about">
+        <div>
+            <span class="eyebrow">{{ T.aboutEyebrow }}</span>
+            <h2 id="about-title">{{ T.aboutTitle }}</h2>
+            <p>{{ T.aboutText }}</p>
+            <p>{{ T.aboutSourceBefore }} <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>{{ T.aboutSourceAfter }}</p>
+            <ul class="home-stack" aria-label="{{ T.stackLabel }}">
+{%- for tool in ["JavaScript", "Python", "Node.js", "Three.js", "Supabase", "Eleventy", "Capacitor", "Vercel"] %}
+                <li class="tag">{{ tool }}</li>
+{%- endfor %}
+            </ul>
+            <a class="home-more" href="{{ root }}{{ site.translations.about[L] }}">{{ T.aboutMore }}<span aria-hidden="true"> &rarr;</span></a>
+        </div>
+        <dl class="home-facts">
+            <div><dt>{{ T.factProjects }}</dt><dd>{{ kingStudio.projects | length }}</dd></div>
+            <div><dt>{{ T.factAndroid }}</dt><dd>{{ releases.items | length }}</dd></div>
+            <div><dt>{{ T.factRelease }}</dt><dd>{{ releases.updatedAt }}</dd></div>
+            <div><dt>{{ T.factBased }}</dt><dd>{{ T.factCountry }}</dd></div>
+        </dl>
+    </div>
+</section>
+
+<section id="writing" class="home-section home-section-alt" aria-labelledby="writing-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">{{ T.writingEyebrow }}</span>
+                <h2 id="writing-title">{{ T.writingTitle }}</h2>
+{%- if T.writingNote %}
+                <p class="home-section-note">{{ T.writingNote }}</p>
+{%- endif %}
+            </div>
+            <a class="home-more" href="{{ root }}blog/">{{ T.writingMore }}<span aria-hidden="true"> &rarr;</span></a>
+        </div>
+        <ul class="home-posts">
+{%- for post in blogPosts.slice(0, 3) %}
+            <li class="card">
+                <p class="home-post-meta"><time datetime="{{ post.date }}">{{ post.date }}</time> · {{ post.readTime }} {{ T.minRead }}</p>
+                <h3{{ enOnly | safe }}><a href="{{ root }}blog/{{ post.id }}.html">{{ post.title }}</a></h3>
+                <p{{ enOnly | safe }}>{{ post.description }}</p>
+            </li>
+{%- endfor %}
+        </ul>
+    </div>
+</section>
+
+<section id="contact" class="home-section" aria-labelledby="contact-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">{{ T.contactEyebrow }}</span>
+                <h2 id="contact-title">{{ T.contactTitle }}</h2>
+                <p class="home-section-note">{{ T.contactNote }}</p>
+            </div>
+        </div>
+        <ul class="home-channels">
+            <li><a href="mailto:zwnt45602@gmail.com" class="card home-channel"><i class="fas fa-envelope" aria-hidden="true"></i><span>{{ T.channelEmail }}</span><small>zwnt45602@gmail.com</small></a></li>
+            <li><a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-github" aria-hidden="true"></i><span>GitHub</span><small>@MOT1209</small></a></li>
+            <li><a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-youtube" aria-hidden="true"></i><span>YouTube</span><small dir="auto">مختبر البرمجه</small></a></li>
+            <li><a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-tiktok" aria-hidden="true"></i><span>TikTok</span><small>@programmierlabor</small></a></li>
+        </ul>
+        <div class="home-actions">
+            <a href="{{ root }}{{ site.translations.contact[L] }}" class="btn btn-primary">{{ T.contactCta }}</a>
+        </div>
+    </div>
+</section>
+
+<div class="settings-overlay" id="settings-overlay"></div>
+<div class="settings-modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="settings-header">
+        <h2 id="settings-title">{{ S.title }}</h2>
+        <button type="button" class="icon-button" id="close-settings" aria-label="{{ S.close }}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="settings-group">
+        <h3>{{ S.theme }}</h3>
+        <div class="settings-options">
+            <button type="button" class="settings-opt" data-theme-opt="light" aria-pressed="false">{{ S.light }}</button>
+            <button type="button" class="settings-opt" data-theme-opt="dark" aria-pressed="false">{{ S.dark }}</button>
+        </div>
+    </div>
+    <div class="settings-group">
+        <h3>{{ S.accent }}</h3>
+        <div class="settings-options">
+{%- for color in ["#c2410c", "#1d4ed8", "#15803d", "#7e22ce", "#b91c1c", "#0f766e"] %}
+            <button type="button" class="accent-dot" data-color="{{ color }}" style="--dot: {{ color }}" aria-pressed="false" aria-label="{{ S.accents[loop.index0] }} {{ S.accentSuffix }}"></button>
+{%- endfor %}
+        </div>
+    </div>
+    <div class="settings-group">
+        <label class="settings-toggle">
+            <span>{{ S.reduceMotion }}</span>
+            <input type="checkbox" id="reduce-motion">
+        </label>
+    </div>
+</div>

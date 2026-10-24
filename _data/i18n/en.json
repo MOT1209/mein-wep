@@ -1,0 +1,103 @@
+{
+  "langName": "English",
+  "ogLocale": "en_US",
+  "nav": {
+    "home": "Home",
+    "studio": "King Studio",
+    "blog": "Blog",
+    "downloads": "Downloads",
+    "about": "About",
+    "contact": "Contact"
+  },
+  "header": {
+    "skip": "Skip to main content",
+    "mainNav": "Main",
+    "mobileNav": "Mobile",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "theme": "Toggle theme",
+    "settings": "Settings",
+    "language": "Language"
+  },
+  "footer": {
+    "builtInTheOpen": "Rashid. Built in the open.",
+    "label": "Footer",
+    "portfolio": "Portfolio",
+    "privacy": "Privacy",
+    "terms": "Terms"
+  },
+  "home": {
+    "title": "Rashid — Full-Stack Developer & AI Engineer",
+    "metaDescription": "Rashid (MOT1209) — full-stack developer and AI engineer in Germany, and the maker behind King Studio. Web platforms, AI tools and browser games, available for freelance projects and full-time roles.",
+    "ogDescription": "Web platforms, AI tools and browser games — and King Studio, where the games and apps live.",
+    "eyebrow": "Rashid · MOT1209 · Germany",
+    "headline": "I build web apps, browser games and AI tools — and ship them.",
+    "ledeBefore": "Full-stack developer and AI engineer. My games and apps live under",
+    "ledeProjects": "projects,",
+    "ledeAndroid": "of them with Android builds.",
+    "availability": "Available for freelance projects and full-time roles",
+    "ctaWork": "Work with me",
+    "ctaStudio": "Explore King Studio",
+    "workEyebrow": "Selected work",
+    "workTitle": "Games and apps you can use today",
+    "workMore": "All projects in King Studio",
+    "workNote": "",
+    "servicesEyebrow": "What I do",
+    "servicesTitle": "Where I can help",
+    "services": [
+      {
+        "title": "Web platforms",
+        "text": "Fast static and full-stack sites with Eleventy, Supabase and serverless functions, like this one."
+      },
+      {
+        "title": "AI integration",
+        "text": "Assistants and automations on Gemini and OpenRouter, from a prototype to something people use."
+      },
+      {
+        "title": "Browser and mobile games",
+        "text": "Three.js games shipped as installable PWAs and as Android apps built with Capacitor."
+      }
+    ],
+    "aboutEyebrow": "About",
+    "aboutTitle": "Built in the open",
+    "aboutText": "I'm Rashid. It started with changing CSS to see what broke and breaking JavaScript to see why. It turned into shipping real software: browser games on custom Three.js engines, offline-capable apps people install on their phones, and AI tools wired into Gemini.",
+    "aboutSourceBefore": "The source for most of it is on",
+    "aboutSourceAfter": ".",
+    "stackLabel": "Tools I use",
+    "aboutMore": "More about me",
+    "factProjects": "Projects in King Studio",
+    "factAndroid": "Android builds",
+    "factRelease": "Latest release",
+    "factBased": "Based in",
+    "factCountry": "Germany",
+    "writingEyebrow": "Writing",
+    "writingTitle": "Latest from the blog",
+    "writingMore": "All posts",
+    "writingNote": "",
+    "minRead": "min read",
+    "contactEyebrow": "Contact",
+    "contactTitle": "Get in touch",
+    "contactNote": "A freelance project, a full-time role, a collaboration, or a bug in something I built: all welcome.",
+    "channelEmail": "Email",
+    "contactCta": "Send a message"
+  },
+  "settings": {
+    "title": "Settings",
+    "close": "Close settings",
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "accent": "Accent",
+    "accentSuffix": "accent",
+    "accents": [
+      "Ember",
+      "Ink blue",
+      "Pine",
+      "Violet",
+      "Brick",
+      "Teal"
+    ],
+    "reduceMotion": "Reduce motion"
+  }
+}

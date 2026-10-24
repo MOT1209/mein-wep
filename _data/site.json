@@ -72,5 +72,29 @@
       "label": "Contact",
       "href": "contact.html"
     }
-  ]
+  ],
+  "locales": [
+    {
+      "code": "en",
+      "short": "EN"
+    },
+    {
+      "code": "de",
+      "short": "DE"
+    }
+  ],
+  "translations": {
+    "home": {
+      "en": "",
+      "de": "de/"
+    },
+    "about": {
+      "en": "about.html",
+      "de": "de/about.html"
+    },
+    "contact": {
+      "en": "contact.html",
+      "de": "de/contact.html"
+    }
+  }
 }

@@ -12,6 +12,7 @@ const skip = !built && 'run npm run build first';
 const SHELL_PAGES = [
   'index.html', 'about.html', 'contact.html', 'privacy.html', 'terms.html',
   '404.html', 'downloads.html', 'learning.html',
+  'de/index.html', 'de/about.html', 'de/contact.html',
   ...(built ? readdirSync('dist/blog').filter((f) => f.endsWith('.html')).map((f) => `blog/${f}`) : []),
 ];
 

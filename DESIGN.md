@@ -65,6 +65,10 @@ Scale in use: page title `clamp(1.875rem, 6vw, 2.75rem)` weight 800; section hea
 - Elevation: `--lift` at rest, `--lift-hover` on hover. Hairlines (`--rule`) do most of the work.
 - Layout: content max-width 1200px (`.wrap`), reading pages 820px (`.page`), blog posts 760px. Side padding 16px on phones, 24px from 640px.
 
+## Languages
+
+Pages that exist in more than one language show a language switcher in the header: a link (`.lang-switch`, 44px, mono label such as `DE` or `EN`) to the same page in the other language, never a dropdown or a script. Content that is only available in English keeps `lang="en"` on its container so screen readers switch voice.
+
 ## Breakpoints
 
 Media queries cannot read custom properties, so use these three literally and only these:

@@ -1,0 +1,103 @@
+{
+  "langName": "Deutsch",
+  "ogLocale": "de_DE",
+  "nav": {
+    "home": "Start",
+    "studio": "King Studio",
+    "blog": "Blog",
+    "downloads": "Downloads",
+    "about": "Über mich",
+    "contact": "Kontakt"
+  },
+  "header": {
+    "skip": "Zum Inhalt springen",
+    "mainNav": "Hauptnavigation",
+    "mobileNav": "Mobile Navigation",
+    "menu": "Menü",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "theme": "Farbschema wechseln",
+    "settings": "Einstellungen",
+    "language": "Sprache"
+  },
+  "footer": {
+    "builtInTheOpen": "Rashid. Offen entwickelt.",
+    "label": "Fußzeile",
+    "portfolio": "Portfolio",
+    "privacy": "Datenschutz (EN)",
+    "terms": "Nutzungsbedingungen (EN)"
+  },
+  "home": {
+    "title": "Rashid — Full-Stack-Entwickler & KI-Engineer",
+    "metaDescription": "Rashid (MOT1209) — Full-Stack-Entwickler und KI-Engineer in Deutschland und Macher hinter King Studio. Webplattformen, KI-Tools und Browserspiele, verfügbar für Freelance-Projekte und Festanstellungen.",
+    "ogDescription": "Webplattformen, KI-Tools und Browserspiele — und King Studio, wo die Spiele und Apps zu Hause sind.",
+    "eyebrow": "Rashid · MOT1209 · Deutschland",
+    "headline": "Ich baue Web-Apps, Browserspiele und KI-Tools — und bringe sie live.",
+    "ledeBefore": "Full-Stack-Entwickler und KI-Engineer. Meine Spiele und Apps findest du bei",
+    "ledeProjects": "Projekte,",
+    "ledeAndroid": "davon mit Android-Version.",
+    "availability": "Verfügbar für Freelance-Projekte und Festanstellungen",
+    "ctaWork": "Zusammenarbeiten",
+    "ctaStudio": "King Studio ansehen",
+    "workEyebrow": "Ausgewählte Arbeiten",
+    "workTitle": "Spiele und Apps, die du heute nutzen kannst",
+    "workMore": "Alle Projekte bei King Studio",
+    "workNote": "Die Projektbeschreibungen sind auf Englisch.",
+    "servicesEyebrow": "Was ich mache",
+    "servicesTitle": "Wobei ich helfen kann",
+    "services": [
+      {
+        "title": "Webplattformen",
+        "text": "Schnelle statische und Full-Stack-Websites mit Eleventy, Supabase und Serverless-Funktionen, so wie diese hier."
+      },
+      {
+        "title": "KI-Integration",
+        "text": "Assistenten und Automatisierungen mit Gemini und OpenRouter, vom Prototyp bis zu etwas, das Menschen wirklich nutzen."
+      },
+      {
+        "title": "Browser- und Mobile-Spiele",
+        "text": "Three.js-Spiele als installierbare PWAs und als Android-Apps, gebaut mit Capacitor."
+      }
+    ],
+    "aboutEyebrow": "Über mich",
+    "aboutTitle": "Offen entwickelt",
+    "aboutText": "Ich bin Rashid. Angefangen hat es damit, CSS zu ändern, um zu sehen, was kaputtgeht, und JavaScript kaputtzumachen, um zu verstehen, warum. Daraus wurde echte Software: Browserspiele auf eigenen Three.js-Engines, offlinefähige Apps, die Menschen auf ihrem Handy installieren, und KI-Tools, die an Gemini angebunden sind.",
+    "aboutSourceBefore": "Den Quellcode für das meiste davon findest du auf",
+    "aboutSourceAfter": ".",
+    "stackLabel": "Werkzeuge, die ich nutze",
+    "aboutMore": "Mehr über mich",
+    "factProjects": "Projekte bei King Studio",
+    "factAndroid": "Android-Builds",
+    "factRelease": "Letztes Release",
+    "factBased": "Standort",
+    "factCountry": "Deutschland",
+    "writingEyebrow": "Artikel",
+    "writingTitle": "Neu im Blog",
+    "writingMore": "Alle Artikel",
+    "writingNote": "Die Artikel sind auf Englisch.",
+    "minRead": "Min. Lesezeit",
+    "contactEyebrow": "Kontakt",
+    "contactTitle": "Schreib mir",
+    "contactNote": "Ein Freelance-Projekt, eine Festanstellung, eine Zusammenarbeit oder ein Fehler in etwas, das ich gebaut habe: alles willkommen.",
+    "channelEmail": "E-Mail",
+    "contactCta": "Nachricht senden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "close": "Einstellungen schließen",
+    "theme": "Farbschema",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "accent": "Akzentfarbe",
+    "accentSuffix": "als Akzentfarbe",
+    "accents": [
+      "Glut",
+      "Tintenblau",
+      "Kiefer",
+      "Violett",
+      "Ziegel",
+      "Petrol"
+    ],
+    "reduceMotion": "Bewegung reduzieren"
+  }
+}

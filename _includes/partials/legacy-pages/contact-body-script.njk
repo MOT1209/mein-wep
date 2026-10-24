@@ -3,6 +3,16 @@
             var form = document.getElementById('contact-form');
             if (!form) return;
             var lastSubmit = 0;
+            // Messages come from data-msg-* attributes on the form, so each
+            // language version of the page supplies its own text.
+            function msg(name, fallback) { return form.getAttribute('data-msg-' + name) || fallback; }
+            function setButton(icon, label) {
+                submitBtn.textContent = ' ' + label;
+                var i = document.createElement('i');
+                i.className = icon;
+                submitBtn.insertBefore(i, submitBtn.firstChild);
+            }
+            var submitBtn = form.querySelector('.btn-submit');
             form.addEventListener('submit', function(e) {
                 if (!window.fetch) return;
                 e.preventDefault();
@@ -10,7 +20,7 @@
                 if (now - lastSubmit < 30000) {
                     var fb = document.getElementById('form-feedback');
                     fb.className = 'error';
-                    fb.textContent = 'Please wait 30 seconds before sending another message.';
+                    fb.textContent = msg('wait', 'Please wait 30 seconds before sending another message.');
                     fb.style.display = 'block';
                     setTimeout(function() { fb.className = ''; fb.textContent = ''; fb.style.display = 'none'; }, 4000);
                     return;
@@ -18,9 +28,8 @@
                 var honeypot = document.getElementById('hp_website');
                 if (honeypot && honeypot.value !== '') return;
                 var feedback = document.getElementById('form-feedback');
-                var submitBtn = form.querySelector('.btn-submit');
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                setButton('fas fa-spinner fa-spin', msg('sending', 'Sending...'));
                 var data = {
                     name: document.getElementById('name').value.trim(),
                     email: document.getElementById('email').value.trim(),
@@ -29,10 +38,10 @@
                 };
                 if (!data.name || !data.email || !data.message) {
                     feedback.className = 'error';
-                    feedback.textContent = 'Please fill in all required fields.';
+                    feedback.textContent = msg('required', 'Please fill in all required fields.');
                     feedback.style.display = 'block';
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                    setButton('fas fa-paper-plane', msg('send', 'Send Message'));
                     return;
                 }
                 lastSubmit = now;
@@ -46,7 +55,7 @@
                 .then(function(resp) {
                     if (resp.success) {
                         feedback.className = 'success';
-                        feedback.textContent = 'Message sent successfully! I will get back to you soon.';
+                        feedback.textContent = msg('success', 'Message sent successfully! I will get back to you soon.');
                         feedback.style.display = 'block';
                         form.reset();
                     } else {
@@ -64,7 +73,7 @@
                     .then(function(fsData) {
                         if (fsData.success) {
                             feedback.className = 'success';
-                            feedback.textContent = 'Message sent successfully! I will get back to you soon.';
+                            feedback.textContent = msg('success', 'Message sent successfully! I will get back to you soon.');
                             feedback.style.display = 'block';
                             form.reset();
                         } else {
@@ -73,13 +82,13 @@
                     })
                     .catch(function() {
                         feedback.className = 'error';
-                        feedback.textContent = 'Failed to send message. Please email me directly at zwnt45602@gmail.com.';
+                        feedback.textContent = msg('failed', 'Failed to send message. Please email me directly at zwnt45602@gmail.com.');
                         feedback.style.display = 'block';
                     });
                 })
                 .finally(function() {
                     submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                    setButton('fas fa-paper-plane', msg('send', 'Send Message'));
                     setTimeout(function() { feedback.className = ''; feedback.textContent = ''; feedback.style.display = 'none'; }, 5000);
                 });
             });

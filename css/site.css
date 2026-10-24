@@ -83,6 +83,16 @@ body.site.menu-open { overflow: hidden; }
 .icon-button:hover { border-color: var(--rule-strong); }
 .icon-button svg { width: 20px; height: 20px; }
 
+/* Language switcher: a plain link to the same page in another language. */
+.lang-switch {
+  display: inline-grid; place-items: center; flex: none;
+  min-width: var(--tap); height: var(--tap); padding: 0 var(--s-2);
+  border: 1px solid var(--rule); border-radius: var(--radius-sm);
+  background: var(--card); color: var(--ink) !important; text-decoration: none;
+  font: 600 0.8125rem/1 var(--font-mono); letter-spacing: 0.04em;
+}
+.lang-switch:hover { border-color: var(--rule-strong); background: var(--card-sunk); }
+
 @media (min-width: 1024px) {
   .site-nav { display: flex; gap: 2px; }
   .menu-button { display: none; }
