@@ -77,3 +77,13 @@ test('homepage ships no AI widget, ads, Supabase or admin shortcut', { skip }, (
   assert.doesNotMatch(html, /admin\/login/);
   assert.doesNotMatch(html, /src\/js\/main\.js/);
 });
+
+// About and Contact are where people who want to hire Rashid end up: no ads
+// there, and so no cookie banner either (nothing on them sets a cookie).
+test('About and Contact carry no ads or cookie banner', { skip }, () => {
+  for (const page of ['about.html', 'contact.html']) {
+    const html = read(page);
+    assert.doesNotMatch(html, /adsbygoogle|googlesyndication/, `${page}: ads`);
+    assert.doesNotMatch(html, /id="cookie-consent"/, `${page}: cookie banner`);
+  }
+});
