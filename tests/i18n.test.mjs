@@ -16,7 +16,7 @@ const strings = Object.fromEntries(
   site.locales.map((l) => [l.code, JSON.parse(readFileSync(`_data/i18n/${l.code}.json`, 'utf8'))]),
 );
 // English may leave these empty: they only explain that content is English.
-const OPTIONAL_IN_EN = new Set(['home.workNote', 'home.writingNote']);
+const OPTIONAL_IN_EN = new Set(['home.writingNote']);
 
 function shape(value, prefix = '') {
   if (Array.isArray(value)) return [[prefix, `array:${value.length}`], ...value.flatMap((v, i) => shape(v, `${prefix}[${i}]`))];

@@ -1,0 +1,20 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: de
+root: "../../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+translationKey: studioApps
+studioPage: section
+studioSection: apps
+permalink: /de/king-studio/apps/index.html
+canonical: "https://rashid-wep.vercel.app/de/king-studio/apps/"
+eleventyComputed:
+  title: "{{ i18n.de.studio.appsMetaTitle | safe }}"
+  metaDescription: "{{ i18n.de.studio.appsMeta | safe }}"
+metaKeywords: "King Studio, Rashid Ali, apps"
+---
+{% include "studio/section.njk" %}

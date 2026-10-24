@@ -1,0 +1,63 @@
+{#- King Studio project detail page. Expects `root`, `locale`, `project`. -#}
+{%- set L = locale or "en" %}
+{%- set S = i18n[L].studio %}
+{%- set P = project.text[L] %}
+{%- set sec = project.section %}
+<div class="ks">
+<section class="ks-page-head">
+  <div class="wrap">
+{% include "studio/crumbs.njk" %}
+  </div>
+</section>
+<article class="ks-section ks-detail">
+  <div class="wrap">
+    <header class="ks-detail-head">
+      <div class="ks-detail-icon">
+        {%- if project.image %}
+        <img src="{{ root }}{{ project.image }}" alt="{{ P.imageAlt }}" width="112" height="112" decoding="async">
+        {%- else %}
+        <span class="ks-monogram ks-monogram-lg" aria-hidden="true">{{ project.title | first }}</span>
+        {%- endif %}
+      </div>
+      <div>
+        <div class="ks-card-meta">
+          {% include "king-studio/status.njk" %}
+          {%- if P.category %}<span class="ks-category">{{ P.category }}</span>{% endif %}
+        </div>
+        <h1>{{ project.title }}</h1>
+        <p class="ks-lede">{{ P.description }}</p>
+      </div>
+    </header>
+
+    <div class="ks-card-actions ks-detail-actions">
+      {%- if project.launchUrl %}<a class="ks-btn ks-btn-primary" href="{{ root }}{{ project.launchUrl }}">{{ S.play if project.type == 'Game' else S.open }}</a>{% endif %}
+      {%- if project.downloadUrl %}<a class="ks-btn ks-btn-ghost" href="{{ root }}{{ project.downloadUrl }}" download>{{ S.download }} <span class="ks-version" dir="ltr">v{{ project.version }}</span></a>{% endif %}
+      <a class="ks-btn ks-btn-ghost" href="{{ root }}{{ site.translations.studio[L] }}{{ sec }}/">{{ S.backTo[sec] }}</a>
+    </div>
+    {%- if not project.launchUrl %}
+    <p class="ks-note">{{ S.noBuild }}</p>
+    {%- endif %}
+
+    <div class="ks-detail-grid">
+      {%- if P.features | length %}
+      <section>
+        <h2>{{ S.features }}</h2>
+        <ul class="ks-features">
+          {%- for f in P.features %}<li>{{ f }}</li>{% endfor %}
+        </ul>
+      </section>
+      {%- endif %}
+      <section>
+        <h2>{{ S.factsTitle }}</h2>
+        <dl class="ks-facts">
+          <div><dt>{{ S.factType }}</dt><dd>{{ S.types[project.type] }}</dd></div>
+          {%- if project.platforms | length %}<div><dt>{{ S.factPlatforms }}</dt><dd><span dir="ltr">{{ project.platforms | join(', ') }}</span></dd></div>{% endif %}
+          {%- if project.technologies | length %}<div><dt>{{ S.factTech }}</dt><dd><span dir="ltr">{{ project.technologies | join(', ') }}</span></dd></div>{% endif %}
+          <div><dt>{{ S.factStatus }}</dt><dd>{{ S.status[project.status] }}</dd></div>
+          {%- if project.version %}<div><dt>{{ S.factVersion }}</dt><dd><span dir="ltr">{{ project.version }}</span></dd></div>{% endif %}
+        </dl>
+      </section>
+    </div>
+  </div>
+</article>
+</div>

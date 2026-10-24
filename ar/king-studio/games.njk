@@ -1,0 +1,20 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: ar
+root: "../../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+translationKey: studioGames
+studioPage: section
+studioSection: games
+permalink: /ar/king-studio/games/index.html
+canonical: "https://rashid-wep.vercel.app/ar/king-studio/games/"
+eleventyComputed:
+  title: "{{ i18n.ar.studio.gamesMetaTitle | safe }}"
+  metaDescription: "{{ i18n.ar.studio.gamesMeta | safe }}"
+metaKeywords: "King Studio, Rashid Ali, games"
+---
+{% include "studio/section.njk" %}

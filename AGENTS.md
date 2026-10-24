@@ -34,7 +34,7 @@ Before saying a change is done, run `npm run build && npm run verify && npm test
 | Path | What |
 |---|---|
 | `*.njk`, `blog/*.njk`, `king-studio/*.njk` | Page templates |
-| `_includes/layouts`, `_includes/partials`, `_includes/king-studio` | Layouts and partials (shared header, footer, cards) |
+| `_includes/layouts`, `_includes/partials`, `_includes/king-studio`, `_includes/studio` | Layouts and partials (shared header, footer, cards) |
 | `_data/` | `site.json` (nav, ids), `studioCatalog.json` + `kingStudio.js` (catalogue), `downloads.js`, `releases.js` |
 | `css/` | `tokens.css`, `site.css`, `home.css`, `king-studio.css`, `downloads.css`, `blog-post.css` |
 | `js/`, `src/js/` | Page scripts; `src/js/home.js` drives the homepage settings dialog (`src/js/main.js` is legacy, still loaded by the KingCraft showcase) |
@@ -61,7 +61,7 @@ English is the default and keeps its URLs. German and Arabic versions of the cor
 
 - `_data/site.json` → `translations` maps a page key to its path per language; `locales` lists the languages. A page opts in with `locale`, `translationKey` and, in a language folder, `root: "../"` in its front matter. That gives it `<html lang dir>` (the direction comes from the locale's `dir` string), `hreflang` alternates and the language switcher in the header.
 - UI strings (header, footer, homepage, settings) are in `_data/i18n/<code>.json`. Every file must have exactly the keys of `en.json`; `tests/i18n.test.mjs` fails otherwise. The homepage body is one partial (`_includes/pages/home.njk`) shared by all languages; About and Contact are written per language.
-- King Studio, the blog, downloads and the legal pages are English only. Translated pages mark English-only blocks `lang="en"` (plus `dir="ltr"` on Arabic pages).
+- King Studio is translated: its pages live under `de/king-studio/` and `ar/king-studio/` and share the partials in `_includes/studio/`; per-project text comes from the `i18n.de` / `i18n.ar` fields of each record in `_data/studioCatalog.json` (English is the fallback). The blog, downloads and the legal pages are English only. Translated pages mark English-only blocks `lang="en"` (plus `dir="ltr"` on Arabic pages).
 - Arabic is right-to-left: use logical CSS properties (`margin-inline-start`, `inset-inline`, `border-block`) rather than `left`/`right`, and give Latin-only snippets inside Arabic text (handles, emails, the brand) `dir="ltr"`.
 - A new translated page needs: the template with an explicit `permalink`, an entry in `scripts/site-templates.mjs`, an entry in `site.translations`, and a `sitemap.xml` line.
 

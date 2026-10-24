@@ -8,15 +8,27 @@
       "description": "3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive.",
       "type": "Game",
       "category": "Sandbox survival",
-      "platforms": ["Browser", "Android"],
+      "platforms": [
+        "Browser",
+        "Android"
+      ],
       "status": "Available",
       "image": "images/screenshots/kingcraft.svg",
       "imageAlt": "KingCraft artwork: a voxel landscape",
       "launchUrl": "games/kingcraft-game/",
       "apkId": "com.rashid.kingcraft",
       "featured": true,
-      "technologies": ["Three.js", "Voxel", "PWA"],
-      "features": ["Mine and gather resources", "Craft items and tools", "Build structures", "Fight mobs and survive"]
+      "technologies": [
+        "Three.js",
+        "Voxel",
+        "PWA"
+      ],
+      "features": [
+        "Mine and gather resources",
+        "Craft items and tools",
+        "Build structures",
+        "Fight mobs and survive"
+      ]
     },
     {
       "id": "rust-construction",
@@ -26,15 +38,26 @@
       "description": "3D building game with physics and resource management. Build structures, manage resources, survive.",
       "type": "Game",
       "category": "Building & survival",
-      "platforms": ["Browser", "Android"],
+      "platforms": [
+        "Browser",
+        "Android"
+      ],
       "status": "Available",
       "image": "images/screenshots/rust-construction.svg",
       "imageAlt": "Rust Construction artwork: a built structure",
       "launchUrl": "games/rust-game/",
       "apkId": "com.rashid.rustsurvival",
       "featured": true,
-      "technologies": ["Three.js", "Physics", "PWA"],
-      "features": ["Physics-based building", "Resource management", "Building rotation and terrain improvements (v1.1.0)"]
+      "technologies": [
+        "Three.js",
+        "Physics",
+        "PWA"
+      ],
+      "features": [
+        "Physics-based building",
+        "Resource management",
+        "Building rotation and terrain improvements (v1.1.0)"
+      ]
     },
     {
       "id": "farm-empire",
@@ -44,15 +67,26 @@
       "description": "Immersive farming simulation with crops, animals, and an economy. Grow your farm empire.",
       "type": "Game",
       "category": "Farming simulation",
-      "platforms": ["Browser", "Android"],
+      "platforms": [
+        "Browser",
+        "Android"
+      ],
       "status": "Available",
       "image": "images/screenshots/farm-empire.svg",
       "imageAlt": "Farm Empire artwork: a farm landscape",
       "launchUrl": "games/farm-game/",
       "apkId": "com.rashid.farmempire",
       "featured": true,
-      "technologies": ["WebGL", "Simulation", "PWA"],
-      "features": ["Crops, animals and an in-game economy", "Day/night HUD theme, compass and weather icon (v2.5.0)", "In-game notifications (v2.5.0)"]
+      "technologies": [
+        "WebGL",
+        "Simulation",
+        "PWA"
+      ],
+      "features": [
+        "Crops, animals and an in-game economy",
+        "Day/night HUD theme, compass and weather icon (v2.5.0)",
+        "In-game notifications (v2.5.0)"
+      ]
     },
     {
       "id": "quran-pro",
@@ -62,13 +96,23 @@
       "description": "Complete Quran with tafsir, 40+ reciters, search, and bookmarks.",
       "type": "App",
       "category": "Religion & reference",
-      "platforms": ["Web", "Android"],
+      "platforms": [
+        "Web",
+        "Android"
+      ],
       "status": "Available",
       "launchUrl": "quran.html",
       "apkId": "com.rashid.quranpro",
       "featured": true,
-      "technologies": ["Audio", "JavaScript"],
-      "features": ["Tafsir", "40+ reciters", "Search and bookmarks"]
+      "technologies": [
+        "Audio",
+        "JavaScript"
+      ],
+      "features": [
+        "Tafsir",
+        "40+ reciters",
+        "Search and bookmarks"
+      ]
     },
     {
       "id": "calculator-vault",
@@ -77,15 +121,44 @@
       "description": "Privacy-focused calculator with a secret vault. Hide files behind a calculator interface.",
       "type": "App",
       "category": "Privacy & utilities",
-      "platforms": ["PWA", "Android"],
+      "platforms": [
+        "PWA",
+        "Android"
+      ],
       "status": "Available",
       "image": "apps/calculator-app/icons/icon.svg",
       "imageAlt": "Calculator Vault app icon",
       "launchUrl": "apps/calculator-app/",
       "apkId": "com.rashid.smartvault",
       "featured": true,
-      "technologies": ["PWA", "Security"],
-      "features": ["Works as a normal calculator", "Hidden vault for private files"]
+      "technologies": [
+        "PWA",
+        "Security"
+      ],
+      "features": [
+        "Works as a normal calculator",
+        "Hidden vault for private files"
+      ],
+      "i18n": {
+        "de": {
+          "description": "Datenschutzfreundlicher Taschenrechner mit geheimem Tresor. Verstecke Dateien hinter einer Taschenrechner-Oberfläche.",
+          "category": "Datenschutz & Werkzeuge",
+          "features": [
+            "Funktioniert wie ein normaler Taschenrechner",
+            "Versteckter Tresor für private Dateien"
+          ],
+          "imageAlt": "App-Icon von Calculator Vault"
+        },
+        "ar": {
+          "description": "آلة حاسبة تحمي خصوصيتك وفيها خزنة سرية. أخفِ ملفاتك خلف واجهة آلة حاسبة.",
+          "category": "الخصوصية والأدوات",
+          "features": [
+            "تعمل كآلة حاسبة عادية",
+            "خزنة مخفية للملفات الخاصة"
+          ],
+          "imageAlt": "أيقونة تطبيق Calculator Vault"
+        }
+      }
     },
     {
       "id": "quiz-master",
@@ -94,15 +167,47 @@
       "description": "Interactive quiz platform with multiple categories, scoring, and progress tracking.",
       "type": "App",
       "category": "Education",
-      "platforms": ["PWA", "Android"],
+      "platforms": [
+        "PWA",
+        "Android"
+      ],
       "status": "Available",
       "image": "apps/quiz-app/icons/icon.svg",
       "imageAlt": "Quiz Master app icon",
       "launchUrl": "apps/quiz-app/",
       "apkId": "com.rashid.quizmaster",
       "featured": true,
-      "technologies": ["PWA", "Gamification"],
-      "features": ["Multiple quiz categories", "Scoring", "Progress tracking"]
+      "technologies": [
+        "PWA",
+        "Gamification"
+      ],
+      "features": [
+        "Multiple quiz categories",
+        "Scoring",
+        "Progress tracking"
+      ],
+      "i18n": {
+        "de": {
+          "description": "Interaktive Quiz-Plattform mit mehreren Kategorien, Punktestand und Fortschrittsanzeige.",
+          "category": "Bildung",
+          "features": [
+            "Mehrere Quiz-Kategorien",
+            "Punktestand",
+            "Fortschrittsanzeige"
+          ],
+          "imageAlt": "App-Icon von Quiz Master"
+        },
+        "ar": {
+          "description": "منصة اختبارات تفاعلية بفئات متعددة وتسجيل للنقاط ومتابعة للتقدم.",
+          "category": "التعليم",
+          "features": [
+            "فئات اختبارات متعددة",
+            "تسجيل النقاط",
+            "متابعة التقدم"
+          ],
+          "imageAlt": "أيقونة تطبيق Quiz Master"
+        }
+      }
     },
     {
       "id": "block-world",
@@ -112,11 +217,21 @@
       "description": "An original 3D voxel sandbox for survival, building, exploration and crafting. Early development: no playable build is published yet.",
       "type": "Game",
       "category": "Voxel sandbox",
-      "platforms": ["Browser"],
+      "platforms": [
+        "Browser"
+      ],
       "status": "In Development",
       "featured": true,
-      "technologies": ["Three.js", "TypeScript", "Vite"],
-      "features": ["Voxel collision physics and raycasting", "Inventory, hotbar and crafting recipes", "Day/night cycle and orbit-camera viewer"]
+      "technologies": [
+        "Three.js",
+        "TypeScript",
+        "Vite"
+      ],
+      "features": [
+        "Voxel collision physics and raycasting",
+        "Inventory, hotbar and crafting recipes",
+        "Day/night cycle and orbit-camera viewer"
+      ]
     },
     {
       "id": "rashid-ai",
@@ -126,14 +241,23 @@
       "description": "Conversational AI assistant powered by Gemini and OpenRouter, with multilingual support.",
       "type": "AI",
       "category": "AI assistant",
-      "platforms": ["Browser"],
+      "platforms": [
+        "Browser"
+      ],
       "status": "Experimental",
       "image": "images/screenshots/rashid-ai.svg",
       "imageAlt": "Rashid AI artwork",
       "launchUrl": "models/Rashid-Model/",
       "featured": true,
-      "technologies": ["Gemini API", "OpenRouter", "JavaScript"],
-      "features": ["Chat assistant", "Multilingual"]
+      "technologies": [
+        "Gemini API",
+        "OpenRouter",
+        "JavaScript"
+      ],
+      "features": [
+        "Chat assistant",
+        "Multilingual"
+      ]
     }
   ]
 }

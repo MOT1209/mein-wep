@@ -13,13 +13,15 @@ const skip = !built && 'run npm run build first';
 const allProjects = JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects;
 const catalog = allProjects.filter((p) => !p.hidden);
 
-const PAGES = [
-  'king-studio/index.html',
-  'king-studio/games/index.html',
-  'king-studio/apps/index.html',
-  'king-studio/labs/index.html',
-  ...catalog.map((p) => `king-studio/${p.section}/${p.id}/index.html`),
-];
+// English at /king-studio/, translations under /de/ and /ar/.
+const PREFIXES = ['', 'de/', 'ar/'];
+const PAGES = PREFIXES.flatMap((pre) => [
+  `${pre}king-studio/index.html`,
+  `${pre}king-studio/games/index.html`,
+  `${pre}king-studio/apps/index.html`,
+  `${pre}king-studio/labs/index.html`,
+  ...catalog.map((p) => `${pre}king-studio/${p.section}/${p.id}/index.html`),
+]);
 
 const read = (rel) => readFileSync(path.join('dist', rel), 'utf8');
 
@@ -69,8 +71,10 @@ test('each page has a unique title, description and matching canonical', { skip 
     const html = read(page);
     const title = html.match(/<title>([^<]+)<\/title>/)?.[1];
     assert.ok(title, `${page} title`);
-    assert.equal(titles.has(title), false, `duplicate title: ${title}`);
-    titles.add(title);
+    // Unique per language (a project name can stay the same across languages).
+    const key = `${html.match(/<html lang="([a-z]+)"/)?.[1]}|${title}`;
+    assert.equal(titles.has(key), false, `duplicate title: ${title}`);
+    titles.add(key);
     assert.match(html, /<meta name="description" content="[^"]{20,}"/, page);
     const url = page.replace(/index\.html$/, '');
     assert.ok(html.includes(`<link rel="canonical" href="https://rashid-wep.vercel.app/${url}">`), `${page} canonical`);
@@ -123,5 +127,22 @@ test('hidden projects have no page and appear on no listing', { skip }, () => {
   const redirects = JSON.parse(readFileSync('vercel.json', 'utf8')).redirects.map((r) => r.source);
   for (const p of hidden) {
     assert.ok(redirects.includes(`/king-studio/${p.section}/${p.id}/`), `${p.id}: redirect`);
+  }
+});
+
+test('translated King Studio pages carry their language and link to each other', { skip }, () => {
+  for (const [pre, lang, dir] of [['de/', 'de', 'ltr'], ['ar/', 'ar', 'rtl']]) {
+    for (const page of PAGES.filter((p) => p.startsWith(pre))) {
+      const html = read(page);
+      assert.match(html, new RegExp(`<html lang="${lang}" dir="${dir}"`), page);
+      const en = page.slice(pre.length).replace(/index\.html$/, '');
+      assert.ok(html.includes(`hreflang="en" href="https://rashid-wep.vercel.app/${en}"`), `${page}: hreflang en`);
+      assert.match(html, /class="lang-switch"/, `${page}: language switcher`);
+    }
+  }
+  for (const p of allProjects.filter((c) => c.hidden)) {
+    for (const pre of ['de/', 'ar/']) {
+      assert.equal(existsSync(`dist/${pre}king-studio/${p.section}/${p.id}/index.html`), false, `${pre}${p.id}`);
+    }
   }
 });

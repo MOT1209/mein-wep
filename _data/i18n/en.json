@@ -44,7 +44,6 @@
     "workEyebrow": "Selected work",
     "workTitle": "Apps you can use today",
     "workMore": "All projects in King Studio",
-    "workNote": "",
     "servicesEyebrow": "What I do",
     "servicesTitle": "Where I can help",
     "services": [
@@ -102,5 +101,73 @@
       "Teal"
     ],
     "reduceMotion": "Reduce motion"
+  },
+  "studio": {
+    "title": "King Studio — Apps & Digital Experiences",
+    "metaDescription": "Applications and digital tools built by Rashid Ali under the King Studio name. Build. Create. Innovate.",
+    "eyebrow": "Independent digital product studio",
+    "headline": "Apps & digital experiences.",
+    "tagline": "Build. Create. Innovate.",
+    "lede": "Applications and digital tools built by Rashid Ali, each labelled with exactly where it stands.",
+    "factApps": "Apps",
+    "factAndroid": "Android builds",
+    "featuredTitle": "Featured applications",
+    "appsTitle": "Applications",
+    "appsMetaTitle": "Applications — King Studio",
+    "appsMeta": "Applications by King Studio: web apps, installable PWAs and Android builds, each labelled by platform.",
+    "appsLede": "Web apps, installable PWAs and Android builds. Platform labels show how each one runs; an APK download appears only where a release exists.",
+    "gamesTitle": "Games",
+    "gamesMetaTitle": "Games — King Studio",
+    "gamesMeta": "Games by King Studio. None are published right now; games made with Godot and Unity are planned.",
+    "gamesLede": "Games made by King Studio, with a playable build and an Android APK where one exists.",
+    "gamesEmpty": "No games are published right now. New games made with Godot and Unity are planned.",
+    "labsTitle": "Labs & experiments",
+    "labsMetaTitle": "Labs & experiments — King Studio",
+    "labsMeta": "Early-stage projects and experiments from King Studio, each labelled with its real development status.",
+    "labsLede": "Early-stage work and experiments. Status labels say what to expect; nothing here is promised to be finished.",
+    "labsEmpty": "No experiments are published right now.",
+    "comingTitle": "Games are on the way",
+    "comingText": "Rashid Ali is making games with Godot and Unity. They will appear here once they are ready.",
+    "ctaTitle": "Want to build something together?",
+    "ctaText": "King Studio is part of Rashid Ali's portfolio. For collaborations, freelance work or bug reports, get in touch.",
+    "ctaContact": "Contact",
+    "browseApps": "Browse the apps",
+    "backHome": "Back to the portfolio",
+    "sections": {
+      "games": "Games",
+      "apps": "Apps",
+      "labs": "Labs"
+    },
+    "status": {
+      "Available": "Available",
+      "In Development": "In development",
+      "Experimental": "Experimental",
+      "Coming Soon": "Coming soon"
+    },
+    "types": {
+      "App": "App",
+      "Game": "Game"
+    },
+    "open": "Open",
+    "play": "Play",
+    "details": "Details",
+    "detailsFor": "for",
+    "platforms": "Platforms",
+    "download": "Download APK",
+    "features": "Features",
+    "factsTitle": "Details",
+    "factType": "Type",
+    "factPlatforms": "Platforms",
+    "factTech": "Technologies",
+    "factStatus": "Status",
+    "factVersion": "Android version",
+    "noBuild": "No public build is available yet.",
+    "backTo": {
+      "games": "All games",
+      "apps": "All apps",
+      "labs": "All experiments"
+    },
+    "crumbsLabel": "Breadcrumb",
+    "portfolio": "Portfolio"
   }
 }

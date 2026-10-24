@@ -1,72 +1,26 @@
 ---
-layout: layouts/king-studio.njk
+layout: layouts/base.njk
+legacyShell: true
+locale: en
+root: "../../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+studioPage: project
 pagination:
   data: kingStudio.projects
   size: 1
   alias: project
-permalink: "king-studio/{{ project.section }}/{{ project.id }}/index.html"
+permalink: "/king-studio/{{ project.section }}/{{ project.id }}/index.html"
 eleventyComputed:
-  title: "{{ project.title }} — King Studio {{ kingStudio.sections[project.section].label }}"
-  metaDescription: "{{ project.description }}"
-  urlPath: "{{ project.detailUrl }}"
-  active: "{{ project.section }}"
-  ogImage: "{{ project.image if project.image and ('.png' in project.image) else '' }}"
-root: ../../../
+  title: "{{ project.title }} — {{ i18n.en.studio.sections[project.section] }} — King Studio"
+  metaDescription: "{{ project.text.en.description | safe }}"
+  canonical: "https://rashid-wep.vercel.app/{{ project.detailUrl }}"
+  pageAlternates:
+    en: "{{ project.detailUrl }}"
+    de: "de/{{ project.detailUrl }}"
+    ar: "ar/{{ project.detailUrl }}"
+metaKeywords: "King Studio, Rashid Ali, App, PWA, Android"
 ---
-{%- set section = kingStudio.sections[project.section] %}
-<section class="ks-page-head">
-  <div class="ks-wrap">
-    <nav class="ks-crumbs" aria-label="Breadcrumb"><ol>
-      <li><a href="{{ root }}">Portfolio</a></li>
-      <li><a href="{{ root }}king-studio/">King Studio</a></li>
-      <li><a href="{{ root }}king-studio/{{ project.section }}/">{{ section.label }}</a></li>
-      <li aria-current="page">{{ project.title }}</li>
-    </ol></nav>
-  </div>
-</section>
-
-<article class="ks-section ks-detail">
-  <div class="ks-wrap ks-detail-grid">
-    <div class="ks-detail-media">
-      {%- if project.image %}
-      <img src="{{ root }}{{ project.image }}" alt="{{ project.imageAlt }}" width="640" height="360" decoding="async" class="{{ 'is-icon' if 'icons/' in project.image }}">
-      {%- else %}
-      <span class="ks-monogram ks-monogram-lg" aria-hidden="true">{{ project.title | first }}</span>
-      {%- endif %}
-    </div>
-
-    <div class="ks-detail-body">
-      <div class="ks-card-meta">
-        {% include "king-studio/status.njk" %}
-        {%- if project.category %}<span class="ks-category">{{ project.category }}</span>{% endif %}
-      </div>
-      <h1>{{ project.title }}</h1>
-      <p class="ks-lede">{{ project.description }}</p>
-
-      <div class="ks-card-actions">
-        {%- if project.launchUrl %}<a class="ks-btn ks-btn-accent" href="{{ root }}{{ project.launchUrl }}">{{ 'Play now' if project.type == 'Game' else 'Open' }}</a>{% endif %}
-        {%- if project.downloadUrl %}<a class="ks-btn ks-btn-outline" href="{{ root }}{{ project.downloadUrl }}" download>Download APK <span class="ks-version">v{{ project.version }}</span></a>{% endif %}
-        <a class="ks-btn ks-btn-ghost" href="{{ root }}king-studio/{{ project.section }}/">&larr; All {{ section.label | lower }}</a>
-      </div>
-      {%- if not project.launchUrl %}
-      <p class="ks-note">No public build is available yet.</p>
-      {%- endif %}
-
-      {%- if project.features | length %}
-      <h2>Features</h2>
-      <ul class="ks-features">
-        {%- for f in project.features %}<li>{{ f }}</li>{% endfor %}
-      </ul>
-      {%- endif %}
-
-      <h2>Details</h2>
-      <dl class="ks-facts">
-        <div><dt>Type</dt><dd>{{ project.type }}</dd></div>
-        {%- if project.platforms | length %}<div><dt>Platforms</dt><dd>{{ project.platforms | join(', ') }}</dd></div>{% endif %}
-        {%- if project.technologies | length %}<div><dt>Technologies</dt><dd>{{ project.technologies | join(', ') }}</dd></div>{% endif %}
-        <div><dt>Status</dt><dd>{{ project.status }}</dd></div>
-        {%- if project.version %}<div><dt>Android version</dt><dd>{{ project.version }}</dd></div>{% endif %}
-      </dl>
-    </div>
-  </div>
-</article>
+{% include "studio/project.njk" %}
