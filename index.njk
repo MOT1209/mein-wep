@@ -1,414 +1,169 @@
 ---
 layout: layouts/base.njk
+legacyShell: true
+title: "Rashid — Full-Stack Developer & AI Engineer"
+metaDescription: "Rashid (MOT1209) — full-stack developer and AI engineer in Germany, and the maker behind King Studio. Web platforms, AI tools and browser games, available for freelance projects and full-time roles."
+ogDescription: "Web platforms, AI tools and browser games — and King Studio, where the games and apps live."
+metaKeywords: "Rashid, MOT1209, Full-Stack Developer, AI Engineer, King Studio, JavaScript, Three.js, Supabase, Portfolio"
+canonical: "https://rashid-wep.vercel.app/"
+activeNav: home
+noAds: true
+showSettings: true
+headExtra: "partials/home/head-extra.njk"
+extraBodyScript: "partials/home/body-script.njk"
 ---
-<!DOCTYPE html>
-<html lang="en" dir="ltr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Rashid (MOT1209) — Full-Stack Developer & AI Engineer in Germany, available for freelance projects and full-time roles. Building web platforms, AI tools, and 3D games with JavaScript, Supabase & Three.js.">
-    <meta name="robots" content="index, follow">
-    <meta name="author" content="Rashid (MOT1209)">
-    <link rel="canonical" href="https://rashid-wep.vercel.app/">
-    <link rel="alternate" hreflang="en" href="https://rashid-wep.vercel.app/">
-    <link rel="alternate" hreflang="x-default" href="https://rashid-wep.vercel.app/">
-    <!-- CSP is served as an HTTP header from vercel.json — do NOT add a meta CSP here (browsers apply the intersection of both, which breaks Quran/Audio features). -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Rashid — Full-Stack Developer & AI Engineer">
-    <meta property="og:description" content="Building AI-powered platforms, 3D games, and open-source tools. Creator of KingCraft, Alking, and Rashid AI.">
-    <meta property="og:image" content="https://rashid-wep.vercel.app/images/og-image.png">
-    <meta property="og:url" content="https://rashid-wep.vercel.app/">
-    <meta property="og:site_name" content="Rashid Portfolio">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Rashid — Full-Stack Developer & AI Engineer">
-    <meta name="twitter:description" content="Building AI-powered platforms, 3D games, and open-source tools.">
-    <meta name="twitter:image" content="https://rashid-wep.vercel.app/images/og-image.png">
-    <meta name="twitter:creator" content="@MOT1209">
-    <meta name="keywords" content="Rashid, MOT1209, Full-Stack Developer, AI Engineer, JavaScript, Three.js, Supabase, KingCraft, Portfolio, Web Development, Game Development">
-    <title>Rashid — Full-Stack Developer & AI Engineer</title>
-
-    <!-- JSON-LD -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Rashid",
-      "alternateName": "MOT1209",
-      "url": "https://rashid-wep.vercel.app",
-      "image": "https://rashid-wep.vercel.app/images/og-image.png",
-      "jobTitle": "Full-Stack Developer & AI Engineer",
-      "description": "Building AI-powered platforms, 3D games with Three.js, and open-source tools. Creator of KingCraft and Alking AI.",
-      "knowsAbout": ["JavaScript","TypeScript","Python","Next.js","Three.js","Supabase","React","Node.js","AI","PWA","PostgreSQL","Gemini"],
-      "sameAs": ["https://github.com/MOT1209"],
-      "makesOffer": [
-        {"@type":"Offer","itemOffered":{"@type":"Service","name":"Web Development","description":"Full-stack web platforms with Next.js & Supabase"}},
-        {"@type":"Offer","itemOffered":{"@type":"Service","name":"AI Integration","description":"AI assistants, chatbots, and automation powered by Gemini & OpenRouter"}},
-        {"@type":"Offer","itemOffered":{"@type":"Service","name":"3D Game Development","description":"Browser-based 3D games with Three.js and custom engines"}}
-      ]
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Rashid — Full-Stack Developer & AI Engineer",
-      "url": "https://rashid-wep.vercel.app",
-      "description": "Full-stack developer and AI engineer portfolio. Building AI-powered platforms, 3D games, and open-source tools.",
-      "author": {"@type":"Person","name":"Rashid","alternateName":"MOT1209"},
-      "inLanguage": "en",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://rashid-wep.vercel.app/?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
-    }
-    </script>
-
-    <!-- Fonts: Bricolage Grotesque (display) + IBM Plex Sans (body) + JetBrains Mono (data) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-
-    <!-- Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
-
-    <!-- Resolve the theme before first paint, so the page never renders in one
-         theme and then swaps. Runs ahead of the stylesheets on purpose. -->
-    <script>
-    (function () {
-      try {
-        var stored = localStorage.getItem('theme');
-        var dark = stored ? stored === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
-        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-      } catch (e) { /* private mode: fall through to the CSS default */ }
-    })();
-    </script>
-
-    <!-- CSS: tokens first, then the page. This page deliberately does NOT load
-         css/style.css — the redesign owns its own styles end to end. -->
-    <link rel="stylesheet" href="css/tokens.css?v={{ site.cssVersion }}">
-    <link rel="stylesheet" href="css/home.css?v={{ site.cssVersion }}">
-
-    <!-- Supabase -->
-    <script src="js/vendor/supabase-2.117.2.js" defer></script>
-    <script src="js/supabase-config.js?v=1.1" defer></script>
-
-    <!-- PWA -->
-    <link rel="manifest" href="manifest.json?v=2">
-    <meta name="theme-color" content="{{ site.fonts.themeColorDark }}" media="(prefers-color-scheme: dark)">
-    <meta name="theme-color" content="{{ site.fonts.themeColorLight }}" media="(prefers-color-scheme: light)">
-
-    <!-- GA4 (consent-aware) -->
-    <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied'});</script>
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ site.gaId }}"></script>
-    <script>gtag('js',new Date());gtag('config','{{ site.gaId }}',{'anonymize_ip':true});</script>
-
-    <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Home",
-      "item": "https://rashid-wep.vercel.app/"
-    }
-  ]
-}
-    </script>
-</head>
-<body>
-
-    <a href="#main" class="skip-link">Skip to main content</a>
-
-    <!-- Mobile bar — the rail collapses into this below 1024px -->
-    <div class="topbar">
-        <a href="#intro" class="rail-name">Rashid<span class="dot">.</span></a>
-        <div class="topbar-actions">
-            <button class="icon-btn" id="theme-toggle" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button>
-            <button class="icon-btn" id="settings-btn" aria-label="Settings"><i class="fas fa-sliders"></i></button>
-            <button class="icon-btn" id="hamburger" data-menu-open aria-controls="mobile-menu" aria-label="Open menu" aria-expanded="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+{%- set work = kingStudio.featured.games.concat(kingStudio.featured.apps) %}
+<section class="home-hero" aria-labelledby="home-title">
+    <div class="wrap">
+        <span class="eyebrow">Rashid · MOT1209 · Germany</span>
+        <h1 id="home-title" class="home-title">I build web apps, browser games and AI tools — and ship them.</h1>
+        <p class="home-lede">Full-stack developer and AI engineer. My games and apps live under <a href="king-studio/">King Studio</a>: {{ kingStudio.projects | length }} projects, {{ releases.items | length }} of them with Android builds.</p>
+        <p class="home-availability"><span class="home-dot" aria-hidden="true"></span>Available for freelance projects and full-time roles</p>
+        <div class="home-actions">
+            <a href="#contact" class="btn btn-primary">Work with me</a>
+            <a href="king-studio/" class="btn btn-secondary">Explore King Studio</a>
         </div>
     </div>
+</section>
 
-    <div class="mobile-menu" id="mobile-menu" data-menu role="dialog" aria-modal="true" aria-label="Navigation menu">
-        <button class="mobile-menu-close" id="mobile-menu-close" data-menu-close aria-label="Close menu"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-        {% include "partials/nav-links.njk" %}
-    </div>
-
-    <div class="shell">
-
-        <!-- Rail: identity, index, status -->
-        <aside class="rail">
-            <div class="rail-id">
-                <a href="#intro" class="rail-name">Rashid<span class="dot">.</span></a>
-                <span class="rail-role">Full-stack developer &amp; AI engineer</span>
+<section id="projects" class="home-section ks" aria-labelledby="work-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">Selected work</span>
+                <h2 id="work-title">Games and apps you can use today</h2>
             </div>
-
-            <nav class="rail-nav" aria-label="Sections">
-                {% include "partials/nav-links.njk" %}
-            </nav>
-
-            <div class="rail-foot">
-                <div class="rail-status">
-                    <span class="status-dot"></span>
-                    <span>Last build {{ releases.updatedAt }}</span>
-                </div>
-                <div class="rail-actions">
-                    <button class="icon-btn" id="theme-toggle-rail" aria-label="Toggle theme"><i class="fas fa-circle-half-stroke"></i></button>
-                    <button class="icon-btn" id="settings-btn-rail" aria-label="Settings"><i class="fas fa-sliders"></i></button>
-                </div>
-            </div>
-        </aside>
-
-        <main class="main" id="main">
-
-            <!-- ===== Intro ===== -->
-            <section id="intro" class="intro">
-                <span class="eyebrow">Rashid · MOT1209</span>
-                <h1>I build apps, 3D games and AI tools — and ship them.</h1>
-                <p>Full-stack developer and AI engineer. Six installable apps and browser games running in production, all open source.</p>
-                <p class="availability"><span class="status-dot" aria-hidden="true"></span>Available for freelance projects and full-time roles · Based in Germany</p>
-                <div class="intro-actions">
-                    <a href="#contact" class="btn btn-primary">Hire me</a>
-                    <a href="#projects" class="btn btn-secondary">See the projects</a>
-                </div>
-            </section>
-
-            <!-- AdSense slot (revealed after consent) -->
-            <div id="adsense-container" style="min-height:90px;display:none;"></div>
-
-            <!-- ===== Projects ===== -->
-            <section id="projects" class="section">
-                <div class="section-head">
-                    <span class="eyebrow">Built</span>
-                    <h2>Projects</h2>
-                    <p>Games, apps, AI models and tools. Every one is a PWA — installable, offline-ready, and running in production.</p>
-                </div>
-
-                <div class="filters">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="games">Games</button>
-                    <button class="filter-btn" data-filter="apps">Apps</button>
-                    <button class="filter-btn" data-filter="ai">AI Models</button>
-                    <button class="filter-btn" data-filter="tools">Tools</button>
-                </div>
-
-                <div class="grid" id="gaming-grid"></div>
-            </section>
-
-            <!-- ===== About ===== -->
-            <section id="about" class="section">
-                <div class="section-head">
-                    <span class="eyebrow">Who</span>
-                    <h2>About</h2>
-                </div>
-
-                <div class="about-grid">
-                    <div>
-                        <p class="about-lede">I'm Rashid — I build AI tools, 3D game engines, and full-stack platforms, and I publish them as open source.</p>
-                        <p>It started with curiosity: changing CSS to see what broke, breaking JavaScript to see why, then rebuilding it properly. It turned into shipping real software — browser games running custom Three.js engines, offline-capable apps people install on their phones, and an assistant wired into Gemini.</p>
-                        <p>Everything here is built in the open. If something looks useful, the source is on GitHub.</p>
-                        <div class="stack">
-                            <span class="tag">JavaScript</span>
-                            <span class="tag">React</span>
-                            <span class="tag">Python</span>
-                            <span class="tag">Node.js</span>
-                            <span class="tag">Supabase</span>
-                            <span class="tag">Three.js</span>
-                            <span class="tag">Vercel</span>
-                            <span class="tag">Git</span>
-                            <span class="tag">AI/ML</span>
-                            <span class="tag">PWA</span>
-                        </div>
-                    </div>
-                    <dl class="facts">
-                        <div class="fact"><dt>Public repositories</dt><dd data-fact="repos">15</dd></div>
-                        <div class="fact"><dt>Shipped projects</dt><dd data-fact="projects">13</dd></div>
-                        <div class="fact"><dt>Android builds</dt><dd>{{ releases.items | length }}</dd></div>
-                        <div class="fact"><dt>Latest release</dt><dd>{{ releases.updatedAt }}</dd></div>
-                        <div class="fact"><dt>Based</dt><dd>Germany</dd></div>
-                    </dl>
-                </div>
-            </section>
-
-            <!-- ===== Contact ===== -->
-            <section id="contact" class="section">
-                <div class="section-head">
-                    <span class="eyebrow">Reach me</span>
-                    <h2>Get in touch</h2>
-                    <p>A freelance project, a full-time role, a collaboration, or a bug in something I built — all welcome.</p>
-                </div>
-
-                <div class="contact-grid">
-                    <div class="channels">
-                        <a href="mailto:zwnt45602@gmail.com" class="channel ct-btn" aria-label="Send email to zwnt45602@gmail.com"><i class="fas fa-envelope"></i><span>Email</span><small class="handle">zwnt45602@gmail.com</small></a>
-                        <a href="https://github.com/MOT1209" target="_blank" rel="noopener" class="channel ct-btn" aria-label="GitHub profile MOT1209"><i class="fab fa-github"></i><span>GitHub</span><small class="handle">@MOT1209</small></a>
-                        <a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener" class="channel ct-btn" aria-label="YouTube channel"><i class="fab fa-youtube"></i><span>YouTube</span><small class="handle" dir="auto">مختبر البرمجه</small></a>
-                        <a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener" class="channel ct-btn" aria-label="TikTok profile"><i class="fab fa-tiktok"></i><span>TikTok</span><small class="handle">@programmierlabor</small></a>
-                    </div>
-
-                    <form class="ct-form">
-                        <!-- Honeypot: hidden from humans, bots tend to fill it. Submissions with a value are dropped. -->
-                        <div class="ct-hp hp" aria-hidden="true">
-                            <label for="ct-website">Website</label>
-                            <input type="text" id="ct-website" name="website" tabindex="-1" autocomplete="off">
-                        </div>
-                        <div class="field">
-                            <label for="ct-name">Name</label>
-                            <input type="text" id="ct-name" class="ct-input" placeholder="Your name" required>
-                        </div>
-                        <div class="field">
-                            <label for="ct-email">Email</label>
-                            <input type="email" id="ct-email" class="ct-input" placeholder="name@example.com" required>
-                        </div>
-                        <div class="field">
-                            <label for="ct-msg">Message</label>
-                            <textarea id="ct-msg" class="ct-input" rows="5" placeholder="What are you working on?" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Send message <i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            </section>
-
-            <footer class="site-footer">
-                <p style="margin:0;">&copy; <span class="copyright-year"></span> Rashid. Built in the open.</p>
-                <nav>
-                    <a href="https://github.com/MOT1209" target="_blank" rel="noopener">GitHub</a>
-                    <a href="blog/">Blog</a>
-                    <a href="downloads.html">Downloads</a>
-                    <a href="privacy.html">Privacy</a>
-                    <a href="terms.html">Terms</a>
-                </nav>
-            </footer>
-
-        </main>
-    </div>
-
-    <!-- Settings -->
-    <div class="settings-overlay" id="settings-overlay"></div>
-    <div class="settings-modal" id="settings-modal" role="dialog" aria-label="Settings">
-        <div class="settings-header">
-            <h3>Settings</h3>
-            <button class="close-settings" id="close-settings" aria-label="Close settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+            <a class="home-more" href="king-studio/">All projects in King Studio<span aria-hidden="true"> &rarr;</span></a>
         </div>
-        <div class="settings-body">
-            <div class="setting-section">
-                <h4>Theme</h4>
-                <div class="theme-selector">
-                    <button class="theme-opt" data-theme="light"><i class="fas fa-sun"></i> Light</button>
-                    <button class="theme-opt" data-theme="dark"><i class="fas fa-moon"></i> Dark</button>
-                </div>
-            </div>
-            <div class="setting-section">
-                <h4>Accent</h4>
-                <div class="accent-picker">
-                    <div class="accent-dot active" data-color="#c2410c" style="background:#c2410c;" title="Ember"></div>
-                    <div class="accent-dot" data-color="#1d4ed8" style="background:#1d4ed8;" title="Ink blue"></div>
-                    <div class="accent-dot" data-color="#15803d" style="background:#15803d;" title="Pine"></div>
-                    <div class="accent-dot" data-color="#7e22ce" style="background:#7e22ce;" title="Violet"></div>
-                    <div class="accent-dot" data-color="#b91c1c" style="background:#b91c1c;" title="Brick"></div>
-                    <div class="accent-dot" data-color="#0f766e" style="background:#0f766e;" title="Teal"></div>
-                </div>
-            </div>
-            <div class="setting-section">
-                <h4>Performance</h4>
-                <div class="toggle-row">
-                    <div>
-                        <span>Performance mode</span>
-                        <p class="desc">Turn off animations and 3D effects.</p>
-                    </div>
-                    <label class="switch"><input type="checkbox" id="perf-mode"><span class="slider"></span></label>
-                </div>
-                <div class="toggle-row">
-                    <div>
-                        <span>Reduce motion</span>
-                        <p class="desc">Minimise transitions.</p>
-                    </div>
-                    <label class="switch"><input type="checkbox" id="reduce-motion"><span class="slider"></span></label>
-                </div>
-            </div>
-            <div class="setting-section">
-                <p class="desc">Set in {{ site.fonts.displayFont }}, {{ site.fonts.bodyFont }} and {{ site.fonts.monoFont }}.</p>
+        <ul class="ks-grid">
+{%- set root = "" %}
+{%- for project in work %}
+{% include "king-studio/card.njk" %}
+{%- endfor %}
+        </ul>
+    </div>
+</section>
+
+<section id="services" class="home-section home-section-alt" aria-labelledby="services-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">What I do</span>
+                <h2 id="services-title">Where I can help</h2>
             </div>
         </div>
+        <ul class="home-services">
+            <li class="card">
+                <h3>Web platforms</h3>
+                <p>Fast static and full-stack sites with Eleventy, Supabase and serverless functions, like this one.</p>
+            </li>
+            <li class="card">
+                <h3>AI integration</h3>
+                <p>Assistants and automations on Gemini and OpenRouter, from a prototype to something people use.</p>
+            </li>
+            <li class="card">
+                <h3>Browser and mobile games</h3>
+                <p>Three.js games shipped as installable PWAs and as Android apps built with Capacitor.</p>
+            </li>
+        </ul>
     </div>
+</section>
 
-    <!-- Voice / AI widget -->
-    <div id="voice-widget">
-        <div class="voice-widget-toggle" role="button" tabindex="0" aria-label="Open Rashid AI"><i class="fas fa-microphone-alt"></i></div>
-        <div class="voice-glow-ring"></div>
-        <div class="voice-panel" id="voice-panel">
-            <div class="voice-header">
-                <h3><span class="voice-status-dot"></span> Rashid AI v3.0</h3>
-                <span class="voice-close" role="button" tabindex="0" aria-label="Close"><i class="fas fa-times"></i></span>
+<section id="about" class="home-section" aria-labelledby="about-title">
+    <div class="wrap home-about">
+        <div>
+            <span class="eyebrow">About</span>
+            <h2 id="about-title">Built in the open</h2>
+            <p>I'm Rashid. It started with changing CSS to see what broke and breaking JavaScript to see why. It turned into shipping real software: browser games on custom Three.js engines, offline-capable apps people install on their phones, and AI tools wired into Gemini.</p>
+            <p>The source for most of it is on <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>.</p>
+            <ul class="home-stack" aria-label="Tools I use">
+                <li class="tag">JavaScript</li>
+                <li class="tag">Python</li>
+                <li class="tag">Node.js</li>
+                <li class="tag">Three.js</li>
+                <li class="tag">Supabase</li>
+                <li class="tag">Eleventy</li>
+                <li class="tag">Capacitor</li>
+                <li class="tag">Vercel</li>
+            </ul>
+            <a class="home-more" href="about.html">More about me<span aria-hidden="true"> &rarr;</span></a>
+        </div>
+        <dl class="home-facts">
+            <div><dt>Projects in King Studio</dt><dd>{{ kingStudio.projects | length }}</dd></div>
+            <div><dt>Android builds</dt><dd>{{ releases.items | length }}</dd></div>
+            <div><dt>Latest release</dt><dd>{{ releases.updatedAt }}</dd></div>
+            <div><dt>Based in</dt><dd>Germany</dd></div>
+        </dl>
+    </div>
+</section>
+
+<section id="writing" class="home-section home-section-alt" aria-labelledby="writing-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">Writing</span>
+                <h2 id="writing-title">Latest from the blog</h2>
             </div>
-            <div class="visualizer-container" id="avatar-viewport">
-                <div id="voice-visualizer">
-                    <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
-                </div>
-            </div>
-            <div class="voice-chat-body" id="voice-chat-body">
-                <div class="chat-msg bot">Ask me about the code here, or anything you're building.</div>
-            </div>
-            <div class="voice-footer">
-                <button id="voice-speaker-toggle" class="footer-btn" aria-label="Toggle speech"><i class="fas fa-volume-up"></i></button>
-                <div class="voice-input-wrapper">
-                    <input type="text" id="voice-input" class="voice-input" placeholder="Ask a question…">
-                    <button id="voice-mic-btn" class="mic-btn" aria-label="Voice input"><i class="fas fa-microphone"></i></button>
-                </div>
-                <button id="voice-send-btn" class="footer-btn" aria-label="Send"><i class="fas fa-paper-plane"></i></button>
+            <a class="home-more" href="blog/">All posts<span aria-hidden="true"> &rarr;</span></a>
+        </div>
+        <ul class="home-posts">
+{%- for post in blogPosts.slice(0, 3) %}
+            <li class="card">
+                <p class="home-post-meta"><time datetime="{{ post.date }}">{{ post.date }}</time> · {{ post.readTime }} min read</p>
+                <h3><a href="blog/{{ post.id }}.html">{{ post.title }}</a></h3>
+                <p>{{ post.description }}</p>
+            </li>
+{%- endfor %}
+        </ul>
+    </div>
+</section>
+
+<section id="contact" class="home-section" aria-labelledby="contact-title">
+    <div class="wrap">
+        <div class="home-section-head">
+            <div>
+                <span class="eyebrow">Contact</span>
+                <h2 id="contact-title">Get in touch</h2>
+                <p class="home-section-note">A freelance project, a full-time role, a collaboration, or a bug in something I built: all welcome.</p>
             </div>
         </div>
+        <ul class="home-channels">
+            <li><a href="mailto:zwnt45602@gmail.com" class="card home-channel"><i class="fas fa-envelope" aria-hidden="true"></i><span>Email</span><small>zwnt45602@gmail.com</small></a></li>
+            <li><a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-github" aria-hidden="true"></i><span>GitHub</span><small>@MOT1209</small></a></li>
+            <li><a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-youtube" aria-hidden="true"></i><span>YouTube</span><small dir="auto">مختبر البرمجه</small></a></li>
+            <li><a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-tiktok" aria-hidden="true"></i><span>TikTok</span><small>@programmierlabor</small></a></li>
+        </ul>
+        <div class="home-actions">
+            <a href="contact.html" class="btn btn-primary">Send a message</a>
+        </div>
     </div>
+</section>
 
-    <!-- Scripts -->
-    <script type="module" src="src/js/main.js?v=11.0"></script>
-    <script src="js/cookie-consent.js?v=1.0" defer></script>
-    <script src="js/site-nav.js?v={{ site.cssVersion }}" defer></script>
-    <script src="js/gemini-config.js?v=1.0" defer></script>
-    <script src="js/rashid-ai-v2.js?v=3.0" defer></script>
-
-    <script>
-    // Footer year.
-    document.querySelectorAll('.copyright-year').forEach(function (el) {
-      el.textContent = new Date().getFullYear();
-    });
-
-    // The rail and the mobile bar each carry a theme and settings button;
-    // both drive the same handlers the modules bind to the primary ids.
-    ['theme-toggle', 'settings-btn'].forEach(function (id) {
-      var primary = document.getElementById(id);
-      var twin = document.getElementById(id + '-rail');
-      if (primary && twin) twin.addEventListener('click', function () { primary.click(); });
-    });
-
-    // Mark the rail link for the section currently in view.
-    (function () {
-      var links = Array.prototype.slice.call(document.querySelectorAll('.rail-nav a[href^="#"]'));
-      if (!links.length || !('IntersectionObserver' in window)) return;
-      var byId = {};
-      links.forEach(function (a) { byId[a.getAttribute('href').slice(1)] = a; });
-      var obs = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          links.forEach(function (a) { a.classList.remove('is-active'); });
-          var active = byId[entry.target.id];
-          if (active) active.classList.add('is-active');
-        });
-      }, { rootMargin: '-40% 0px -55% 0px' });
-      Object.keys(byId).forEach(function (id) {
-        var section = document.getElementById(id);
-        if (section) obs.observe(section);
-      });
-    })();
-
-    // Hidden admin access: Ctrl+Shift+A (not publicly documented)
-    document.addEventListener('keydown', function (e) {
-      if (e.ctrlKey && e.shiftKey && e.key === 'A') { e.preventDefault(); window.open('admin/login.html', '_blank'); }
-    });
-    </script>
-
-    </body>
-</html>
+<div class="settings-overlay" id="settings-overlay"></div>
+<div class="settings-modal" id="settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <div class="settings-header">
+        <h2 id="settings-title">Settings</h2>
+        <button type="button" class="icon-button" id="close-settings" aria-label="Close settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="settings-group">
+        <h3>Theme</h3>
+        <div class="settings-options">
+            <button type="button" class="settings-opt" data-theme-opt="light" aria-pressed="false">Light</button>
+            <button type="button" class="settings-opt" data-theme-opt="dark" aria-pressed="false">Dark</button>
+        </div>
+    </div>
+    <div class="settings-group">
+        <h3>Accent</h3>
+        <div class="settings-options">
+{%- for accent in [["#c2410c", "Ember"], ["#1d4ed8", "Ink blue"], ["#15803d", "Pine"], ["#7e22ce", "Violet"], ["#b91c1c", "Brick"], ["#0f766e", "Teal"]] %}
+            <button type="button" class="accent-dot" data-color="{{ accent[0] }}" style="--dot: {{ accent[0] }}" aria-pressed="false" aria-label="{{ accent[1] }} accent"></button>
+{%- endfor %}
+        </div>
+    </div>
+    <div class="settings-group">
+        <label class="settings-toggle">
+            <span>Reduce motion</span>
+            <input type="checkbox" id="reduce-motion">
+        </label>
+    </div>
+</div>

@@ -46,3 +46,33 @@ test('downloads show build-time SHA-256 for every release', { skip }, () => {
   assert.equal(count, Object.keys(manifest.apps).length);
   assert.doesNotMatch(html, /Building\.\.\.|Pending first build/);
 });
+
+// The homepage is static HTML rendered from the same data as King Studio and
+// the blog. It used to fetch projects from Supabase on top of a hand-written
+// fallback list that drifted from apks/updates.json, and it carried an AI
+// widget, an ad slot and a keyboard shortcut to the admin login.
+test('homepage renders its projects and posts from build-time data', { skip }, () => {
+  const html = read('index.html');
+  const catalog = JSON.parse(readFileSync('_data/studioCatalog.json', 'utf8')).projects;
+  const featured = catalog.filter((p) => p.featured && (p.section === 'games' || p.section === 'apps'));
+  assert.ok(featured.length > 0);
+  for (const p of featured) {
+    assert.match(html, new RegExp(`href="king-studio/${p.section}/${p.id}/"`), `${p.id} missing from homepage`);
+  }
+  const posts = JSON.parse(readFileSync('blog/posts.json', 'utf8'))
+    .sort((a, b) => b.date.localeCompare(a.date))
+    .slice(0, 3);
+  for (const post of posts) {
+    assert.match(html, new RegExp(`href="blog/${post.id}\\.html"`), `${post.id} missing from homepage`);
+  }
+  assert.doesNotMatch(html, /Offline Mode|id="gaming-grid"/);
+});
+
+test('homepage ships no AI widget, ads, Supabase or admin shortcut', { skip }, () => {
+  const html = read('index.html');
+  assert.doesNotMatch(html, /voice-widget|rashid-ai-v2|gemini-config/);
+  assert.doesNotMatch(html, /adsbygoogle|googlesyndication/);
+  assert.doesNotMatch(html, /src="[^"]*supabase[^"]*\.js/i);
+  assert.doesNotMatch(html, /admin\/login/);
+  assert.doesNotMatch(html, /src\/js\/main\.js/);
+});

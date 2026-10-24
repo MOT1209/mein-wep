@@ -37,7 +37,7 @@ Before saying a change is done, run `npm run build && npm run verify && npm test
 | `_includes/layouts`, `_includes/partials`, `_includes/king-studio` | Layouts and partials (shared header, footer, cards) |
 | `_data/` | `site.json` (nav, ids), `studioCatalog.json` + `kingStudio.js` (catalogue), `downloads.js`, `releases.js` |
 | `css/` | `tokens.css`, `site.css`, `home.css`, `king-studio.css`, `downloads.css`, `blog-post.css` |
-| `js/`, `src/js/` | Page scripts, homepage modules |
+| `js/`, `src/js/` | Page scripts; `src/js/home.js` drives the homepage settings dialog (`src/js/main.js` is legacy, still loaded by the KingCraft showcase) |
 | `apks/` | Android builds and `updates.json` (the release manifest) |
 | `scripts/` | Build tooling and the URL gate |
 | `tests/` | `node:test` suites |
