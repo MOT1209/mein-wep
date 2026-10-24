@@ -147,7 +147,7 @@
     <div class="settings-group">
         <h3>{{ S.accent }}</h3>
         <div class="settings-options">
-{%- for color in ["#c2410c", "#1d4ed8", "#15803d", "#7e22ce", "#b91c1c", "#0f766e"] %}
+{%- for color in ["#2563eb", "#c2410c", "#15803d", "#7e22ce", "#b91c1c", "#0f766e"] %}
             <button type="button" class="accent-dot" data-color="{{ color }}" style="--dot: {{ color }}" aria-pressed="false" aria-label="{{ S.accents[loop.index0] }} {{ S.accentSuffix }}"></button>
 {%- endfor %}
         </div>

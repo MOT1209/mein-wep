@@ -27,10 +27,19 @@ function syncThemeOptions() {
   });
 }
 
+const accents = qsa('.accent-dot').map((dot) => dot.dataset.color);
+
 function setAccent(color) {
-  // --signal is the one accent token in css/tokens.css.
-  root.style.setProperty('--signal', color);
-  root.style.setProperty('--signal-hover', color);
+  // --signal is the one accent token in css/tokens.css. The first dot is the
+  // theme's own accent: choosing it removes the override, so light and dark
+  // keep their separately tuned (contrast-checked) values.
+  if (color === accents[0]) {
+    root.style.removeProperty('--signal');
+    root.style.removeProperty('--signal-hover');
+  } else {
+    root.style.setProperty('--signal', color);
+    root.style.setProperty('--signal-hover', color);
+  }
   qsa('.accent-dot').forEach((dot) => {
     dot.setAttribute('aria-pressed', String(dot.dataset.color === color));
   });
@@ -57,9 +66,9 @@ qsa('[data-theme-opt]').forEach((btn) => {
 qsa('[data-theme-toggle]').forEach((btn) => on(btn, 'click', () => setTimeout(syncThemeOptions)));
 syncThemeOptions();
 
-const accents = qsa('.accent-dot').map((dot) => dot.dataset.color);
 const savedAccent = read('accentColor');
 if (savedAccent && accents.includes(savedAccent)) setAccent(savedAccent);
+else qsa('.accent-dot')[0]?.setAttribute('aria-pressed', 'true');
 qsa('.accent-dot').forEach((dot) => on(dot, 'click', () => setAccent(dot.dataset.color)));
 
 setReduceMotion(read('reduceMotion') === 'true');
