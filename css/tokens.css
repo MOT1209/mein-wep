@@ -14,29 +14,29 @@
 
 :root {
   /* ---- Surface ---- */
-  --paper: #fafafb;        /* page ground — cool off-white, not cream */
+  --paper: #f7f9fc;        /* page ground — cool off-white, not cream */
   --card: #ffffff;         /* raised surfaces read as lifted on the ground */
-  --card-sunk: #f4f5f7;    /* inset wells: code, manifest rows on hover */
-  --rule: #e4e7ec;         /* hairlines */
-  --rule-strong: #ced3da;  /* dividers that need to carry weight */
+  --card-sunk: #eef2f8;    /* inset wells: code, manifest rows on hover */
+  --rule: #e2e8f0;         /* hairlines */
+  --rule-strong: #cbd5e1;  /* dividers that need to carry weight */
 
   /* ---- Ink ---- */
-  --ink: #12161c;          /* near-black, cool slate bias */
-  --ink-soft: #384250;     /* secondary headings */
-  --ink-muted: #5a6472;    /* supporting copy, metadata */
-  --ink-faint: #68727f;    /* timestamps, eyebrows, metadata — 4.68:1 on
-                              --paper. The lighter grey this started as sat
+  --ink: #0f172a;          /* near-black, cool slate bias */
+  --ink-soft: #334155;     /* secondary headings */
+  --ink-muted: #475569;    /* supporting copy, metadata */
+  --ink-faint: #5b6779;    /* timestamps, eyebrows, metadata — 4.68:1 on
+                              --paper (now 5.44:1 on the blue-tinted ground). The lighter grey this started as sat
                               at 2.94:1 and failed AA on text that carries
                               real information (release dates, section
                               labels), so it was darkened rather than kept
                               decorative. */
 
-  /* ---- Signal: the one accent. Burnt orange = build/release vernacular. ---- */
-  --signal: #c2410c;
-  --signal-hover: #9a3412;
+  /* ---- Signal: the one accent. Tech blue, chosen by the owner. ---- */
+  --signal: #2563eb;
+  --signal-hover: #1d4ed8;
   --on-signal: #ffffff;
-  --signal-wash: #fff4ed;  /* version chips, active nav background */
-  --signal-edge: #fbd5bd;
+  --signal-wash: #eff4ff;  /* version chips, active nav background */
+  --signal-edge: #c7d7fe;
 
   /* ---- Semantic (status only — never decorative) ---- */
   --ok: #15803d;
@@ -76,22 +76,22 @@
 }
 
 :root[data-theme="dark"] {
-  --paper: #0c0e12;
-  --card: #14171d;
-  --card-sunk: #1a1e25;
-  --rule: #252a33;
-  --rule-strong: #333a45;
+  --paper: #0b1220;
+  --card: #111a2b;
+  --card-sunk: #16213a;
+  --rule: #1f2a40;
+  --rule-strong: #2c3a55;
 
-  --ink: #eef1f5;
-  --ink-soft: #c4ccd6;
-  --ink-muted: #929cab;
-  --ink-faint: #828c99;    /* 5.67:1 on the dark ground */
+  --ink: #e5ecf6;
+  --ink-soft: #c3cede;
+  --ink-muted: #93a1b8;
+  --ink-faint: #8593a9;    /* 6.01:1 on the dark ground */
 
-  --signal: #fb7a4a;
-  --signal-hover: #fd9a73;
-  --on-signal: #111111;
-  --signal-wash: #24160f;
-  --signal-edge: #4a2a1a;
+  --signal: #60a5fa;
+  --signal-hover: #93c5fd;
+  --on-signal: #0b1220;
+  --signal-wash: #0f1d3a;
+  --signal-edge: #1e3a6e;
 
   --ok: #4ade80;
   --ok-wash: #10231a;
@@ -104,22 +104,22 @@
    without overriding an explicit light choice. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #0c0e12;
-    --card: #14171d;
-    --card-sunk: #1a1e25;
-    --rule: #252a33;
-    --rule-strong: #333a45;
+    --paper: #0b1220;
+    --card: #111a2b;
+    --card-sunk: #16213a;
+    --rule: #1f2a40;
+    --rule-strong: #2c3a55;
 
-    --ink: #eef1f5;
-    --ink-soft: #c4ccd6;
-    --ink-muted: #929cab;
-    --ink-faint: #828c99;    /* 5.67:1 on the dark ground */
+    --ink: #e5ecf6;
+    --ink-soft: #c3cede;
+    --ink-muted: #93a1b8;
+    --ink-faint: #8593a9;    /* 6.01:1 on the dark ground */
 
-    --signal: #fb7a4a;
-    --signal-hover: #fd9a73;
-    --on-signal: #111111;
-    --signal-wash: #24160f;
-    --signal-edge: #4a2a1a;
+    --signal: #60a5fa;
+    --signal-hover: #93c5fd;
+    --on-signal: #0b1220;
+    --signal-wash: #0f1d3a;
+    --signal-edge: #1e3a6e;
 
     --ok: #4ade80;
     --ok-wash: #10231a;

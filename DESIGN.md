@@ -18,35 +18,35 @@ Light is the default; dark is `:root[data-theme="dark"]`. The pre-paint script i
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--paper` | `#fafafb` | `#0c0e12` | Page ground |
-| `--card` | `#ffffff` | `#14171d` | Raised surfaces |
-| `--card-sunk` | `#f4f5f7` | `#1a1e25` | Inset wells, code, hover rows |
-| `--rule` | `#e4e7ec` | `#252a33` | Hairlines |
-| `--rule-strong` | `#ced3da` | `#333a45` | Dividers that carry weight, input borders |
-| `--ink` | `#12161c` | `#eef1f5` | Headings, primary text |
-| `--ink-soft` | `#384250` | `#c4ccd6` | Body text on long pages |
-| `--ink-muted` | `#5a6472` | `#929cab` | Supporting copy |
-| `--ink-faint` | `#68727f` | `#828c99` | Metadata, eyebrows (4.68:1 light, 5.67:1 dark) |
-| `--signal` | `#c2410c` | `#fb7a4a` | The one accent: links, primary buttons, active states |
-| `--signal-hover` | `#9a3412` | `#fd9a73` | Accent hover |
-| `--on-signal` | `#ffffff` | `#111111` | Text on `--signal` |
-| `--signal-wash` / `--signal-edge` | `#fff4ed` / `#fbd5bd` | `#24160f` / `#4a2a1a` | Accent chips, active nav |
+| `--paper` | `#f7f9fc` | `#0b1220` | Page ground |
+| `--card` | `#ffffff` | `#111a2b` | Raised surfaces |
+| `--card-sunk` | `#eef2f8` | `#16213a` | Inset wells, code, hover rows |
+| `--rule` | `#e2e8f0` | `#1f2a40` | Hairlines |
+| `--rule-strong` | `#cbd5e1` | `#2c3a55` | Dividers that carry weight, input borders |
+| `--ink` | `#0f172a` | `#e5ecf6` | Headings, primary text |
+| `--ink-soft` | `#334155` | `#c3cede` | Body text on long pages |
+| `--ink-muted` | `#475569` | `#93a1b8` | Supporting copy |
+| `--ink-faint` | `#5b6779` | `#8593a9` | Metadata, eyebrows (5.44:1 light, 6.01:1 dark) |
+| `--signal` | `#2563eb` | `#60a5fa` | The one accent (tech blue): links, primary buttons, active states |
+| `--signal-hover` | `#1d4ed8` | `#93c5fd` | Accent hover |
+| `--on-signal` | `#ffffff` | `#0b1220` | Text on `--signal` |
+| `--signal-wash` / `--signal-edge` | `#eff4ff` / `#c7d7fe` | `#0f1d3a` / `#1e3a6e` | Accent chips, active nav |
 | `--ok` / `--ok-wash` | `#15803d` / `#eefbf2` | `#4ade80` / `#10231a` | Status only, never decoration |
 
 Rules: text on `--paper` must be `--ink`, `--ink-soft` or `--ink-muted`; use `--ink-faint` only for non-essential metadata. `--ok` encodes "available / success" and nothing else.
 
 ### King Studio brand layer (`css/king-studio.css`)
 
-King Studio keeps its own identity on top of the same tokens: a fixed charcoal frame (header and hero) with a restrained gold accent.
+King Studio uses the same blue as the rest of the site, framed in navy: a fixed navy header and hero with the blue accent.
 
 | Token | Value | Use |
 |---|---|---|
-| `--ks-charcoal` | `#151515` | Header, hero, active filter chip (both themes) |
-| `--ks-gold` | `#d9b56d` | Accent on charcoal; focus ring; primary hero button |
-| `--ks-gold-ink` | `#7a5a14` light, `#d9b56d` dark | Gold used as **text** on themed surfaces |
-| `--ks-gold-wash` / `--ks-gold-edge` | `#fbf3e2` / `#e7d3a4` light, `#221d11` / `#4a3d1c` dark | "In development" and "Experimental" chips |
+| `--ks-charcoal` | `#0b1220` | Header, hero, active filter chip (both themes) |
+| `--ks-accent` | `#60a5fa` | Accent on navy (7.36:1); focus ring; primary hero button |
+| `--ks-accent-ink` | `#1d4ed8` light, `#60a5fa` dark | The accent used as **text** on themed surfaces |
+| `--ks-accent-wash` / `--ks-accent-edge` | `#eff4ff` / `#c7d7fe` light, `#0f1d3a` / `#1e3a6e` dark | "In development" and "Experimental" chips |
 
-Gold text on a light surface fails contrast, so use `--ks-gold-ink` there. Wordmark: `KING STUDIO` in the display font, letter-spaced, with an inline SVG crown. Tagline: "Build. Create. Innovate."
+Wordmark: `KING STUDIO` in the display font, letter-spaced, with an inline SVG crown. Tagline: "Build. Create. Innovate."
 
 ## Typography
 
@@ -121,7 +121,7 @@ State feedback only: roughly 150ms on hover and focus, 200ms card lift. No entra
 | Build the phone layout first | Hide navigation below 1024px without a working menu |
 | Use real data and real screenshots | Invent counts, reviews or "coming soon" products |
 | Reuse `.btn`, `.card`, `.tag`, `.field` | Restyle the same control per page |
-| Keep one accent (`--signal`, or gold on King Studio) | Add a second accent colour |
+| Keep one accent (`--signal`, `--ks-accent` on King Studio) | Add a second accent colour |
 | Test at 320 and 1440px in a browser | Trust a green build for a layout change |
 
 ## Where it lives

@@ -44,7 +44,7 @@ root: ../../../
       <p class="ks-lede">{{ project.description }}</p>
 
       <div class="ks-card-actions">
-        {%- if project.launchUrl %}<a class="ks-btn ks-btn-gold" href="{{ root }}{{ project.launchUrl }}">{{ 'Play now' if project.type == 'Game' else 'Open' }}</a>{% endif %}
+        {%- if project.launchUrl %}<a class="ks-btn ks-btn-accent" href="{{ root }}{{ project.launchUrl }}">{{ 'Play now' if project.type == 'Game' else 'Open' }}</a>{% endif %}
         {%- if project.downloadUrl %}<a class="ks-btn ks-btn-outline" href="{{ root }}{{ project.downloadUrl }}" download>Download APK <span class="ks-version">v{{ project.version }}</span></a>{% endif %}
         <a class="ks-btn ks-btn-ghost" href="{{ root }}king-studio/{{ project.section }}/">&larr; All {{ section.label | lower }}</a>
       </div>
