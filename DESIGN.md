@@ -12,7 +12,7 @@ The visual rules for rashid-wep.vercel.app. The source of truth is the code: `cs
 
 ## Themes
 
-Light is the default; dark is `:root[data-theme="dark"]`. The pre-paint script in `_includes/partials/site-head.njk` (and the homepage head) sets `data-theme` from `localStorage.theme`, falling back to the OS setting. **King Studio** pages default to dark when nothing is stored. The toggle (`[data-theme-toggle]`, handled by `js/site-nav.js`) writes the same `theme` key, so the choice carries across pages.
+Light is the default; dark is `:root[data-theme="dark"]`. The pre-paint script in `_includes/partials/site-head.njk` sets `data-theme` from `localStorage.theme`, falling back to the OS setting. **King Studio** pages default to dark when nothing is stored. The toggle (`[data-theme-toggle]`, handled by `js/site-nav.js`) writes the same `theme` key, so the choice carries across pages.
 
 ## Colour tokens (`css/tokens.css`)
 
@@ -86,11 +86,11 @@ Verify every layout at 320, 375, 768, 1024 and 1440px. There must be no horizont
 - **Tags and chips**: pills; `.tag` accent, `.tag-ok` for success; King Studio status chips (`.ks-status-*`) pair a dot shape with text so colour is never the only signal.
 - **Forms** (`.field`): label above, 44px inputs, 2px `--signal` focus outline, errors in `--signal-wash` with text.
 - **Footer**: hairline top border, links with 40px tap height, copyright year filled by `js/site-nav.js`.
-- **Cookie banner**: a card pinned bottom with 12px margin, 44px buttons. On the homepage it must not sit on top of the voice-assistant button.
+- **Cookie banner**: a card pinned bottom with 12px margin, 44px buttons.
 
 ## Icons
 
-Prefer inline SVG (`aria-hidden="true"`, `focusable="false"`) for anything essential: menu, close, theme, crown. Font Awesome 6.4 is still loaded (non-blocking) by the homepage and a few pages; do not make meaning depend on it, and do not add another version.
+Prefer inline SVG (`aria-hidden="true"`, `focusable="false"`) for anything essential: menu, close, theme, crown. Font Awesome 6.4 is still loaded (non-blocking) by the shared shell (`base.njk`) and a few pages; do not make meaning depend on it, and do not add another version.
 
 ## Motion
 
@@ -120,9 +120,9 @@ State feedback only: roughly 150ms on hover and focus, 200ms card lift. No entra
 
 ## Where it lives
 
-`css/tokens.css` (values) · `css/site.css` (shared shell and components) · `css/home.css` (homepage) · `css/king-studio.css` (King Studio) · `css/downloads.css`, `css/blog-post.css` (page-specific) · `_includes/partials/site-head|header|footer.njk` (shared markup) · `js/site-nav.js` (menu, theme, year).
+`css/tokens.css` (values) · `css/site.css` (shared shell and components) · `css/home.css` (homepage sections and settings dialog; the project cards reuse `css/king-studio.css`) · `css/king-studio.css` (King Studio) · `css/downloads.css`, `css/blog-post.css` (page-specific) · `_includes/partials/site-head|header|footer.njk` (shared markup) · `js/site-nav.js` (menu, theme, year).
 
 ## Known debt
 
-- On the homepage the cookie banner can still cover the voice-assistant button on phones until dismissed (`css/home.css`: `#voice-widget` and `#cookie-banner` both sit bottom-right). Not fixed yet.
 - `css/style.css` (legacy, minified, conflicting `:root` blocks) is still used by `devos.html`, `vault/*`, `quran.html`-style standalone pages and a few others. Those pages are not yet on this system. Migrate them to `tokens.css` + `site.css` rather than adding to `style.css`.
+- `apps/calculator-app/icons/*.png` and `apps/quiz-app/icons/*.png` are corrupt (the IHDR chunk length is 17, not 13), so browsers cannot decode them. The King Studio catalogue uses each app's valid `icon.svg` instead. The PNGs, which those apps' manifests may still reference, need regenerating as part of work on those apps.

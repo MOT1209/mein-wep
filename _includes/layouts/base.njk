@@ -2,16 +2,17 @@
   Base page shell.
 
   Two modes, selected by the `legacyShell` front-matter flag:
-   - Unset/false (index.njk): inert passthrough — index.njk owns its entire
-     HTML document.
-   - `legacyShell: true` (about/contact/privacy/terms.njk): the shared site
+   - Unset/false: inert passthrough — the template owns its entire HTML
+     document.
+   - `legacyShell: true` (index/about/contact/privacy/terms.njk): the shared site
      shell on css/tokens.css + css/site.css, with the same header, mobile
      menu and footer as every other secondary page
      (partials/site-header.njk, partials/site-footer.njk, js/site-nav.js).
 
   Front matter: title, metaDescription, canonical, ogDescription,
   metaKeywords, activeNav, headTop/headExtra (page <head> partials),
-  showAdUnit, showCookieConsent, extraBodyScript, trailingJsonLd.
+  showAdUnit, showCookieConsent, extraBodyScript, trailingJsonLd,
+  noAds (skip the AdSense loader), showSettings (settings button in the header).
 #}{%- if legacyShell -%}{% set root = "" %}<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
@@ -39,7 +40,9 @@
 {%- endif %}
 {% include "partials/site-head.njk" %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" media="print" onload="this.media='all'">
+{%- if not noAds %}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ site.adsClient }}" crossorigin="anonymous"></script>
+{%- endif %}
 {%- if headExtra %}
 {% include headExtra %}
 {%- endif %}
