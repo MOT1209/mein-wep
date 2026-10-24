@@ -1,0 +1,29 @@
+{#- A King Studio catalogue page (apps, games, labs). Expects `root`,
+    `locale` and `studioSection`. -#}
+{%- set L = locale or "en" %}
+{%- set S = i18n[L].studio %}
+{%- set sec = studioSection %}
+{%- set section = kingStudio.sections[sec] %}
+<div class="ks">
+<section class="ks-page-head">
+  <div class="wrap">
+{% include "studio/crumbs.njk" %}
+    <h1>{{ S[sec ~ "Title"] }}</h1>
+    <p class="ks-lede">{{ S[sec ~ "Lede"] }}</p>
+  </div>
+</section>
+<section class="ks-section">
+  <div class="wrap">
+{%- set items = section.projects %}
+{%- if items | length %}
+{%- set facets = section.facets %}{% set showSearch = section.showSearch %}{% set cardHeading = "h2" %}{% set gridId = "ks-" ~ sec %}{% set emptyText = S[sec ~ "Empty"] or S.gamesEmpty %}
+{% include "king-studio/grid.njk" %}
+{%- else %}
+    <div class="ks-panel">
+      <p>{{ S[sec ~ "Empty"] }}</p>
+      <a class="btn btn-secondary" href="{{ root }}{{ site.translations.studio[L] }}apps/">{{ S.browseApps }}</a>
+    </div>
+{%- endif %}
+  </div>
+</section>
+</div>

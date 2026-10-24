@@ -57,6 +57,7 @@ function facetsFor(items) {
 
 export default function () {
   const raw = JSON.parse(fs.readFileSync(path.join(ROOT, '_data', 'studioCatalog.json'), 'utf8'));
+  const locales = JSON.parse(fs.readFileSync(path.join(ROOT, '_data', 'site.json'), 'utf8')).locales.map((l) => l.code);
   const releases = JSON.parse(fs.readFileSync(path.join(ROOT, 'apks', 'updates.json'), 'utf8')).apps ?? {};
   const seen = new Set();
 
@@ -94,6 +95,15 @@ export default function () {
       downloadUrl,
       version,
       tone: STATUS_TONE[p.status],
+      // Text per language: a record's "i18n" entry overrides the English
+      // fields; anything it leaves out falls back to English.
+      text: Object.fromEntries(locales.map((code) => [code, {
+        description: p.description,
+        category: p.category,
+        features: p.features ?? [],
+        imageAlt: p.imageAlt,
+        ...(code === 'en' ? {} : p.i18n?.[code]),
+      }])),
       detailUrl: `king-studio/${p.section}/${p.id}/`,
       searchText: [p.title, p.description, p.category, ...(p.platforms ?? []), ...(p.technologies ?? [])]
         .filter(Boolean)

@@ -1,6 +1,6 @@
 {
   "siteUrl": "https://rashid-wep.vercel.app",
-  "cssVersion": "11.4",
+  "cssVersion": "11.5",
   "swVersion": "v18",
   "gaId": "G-W139X3X20X",
   "adsClient": "ca-pub-4804302403615958",
@@ -102,6 +102,26 @@
       "en": "contact.html",
       "de": "de/contact.html",
       "ar": "ar/contact.html"
+    },
+    "studio": {
+      "en": "king-studio/",
+      "de": "de/king-studio/",
+      "ar": "ar/king-studio/"
+    },
+    "studioApps": {
+      "en": "king-studio/apps/",
+      "de": "de/king-studio/apps/",
+      "ar": "ar/king-studio/apps/"
+    },
+    "studioGames": {
+      "en": "king-studio/games/",
+      "de": "de/king-studio/games/",
+      "ar": "ar/king-studio/games/"
+    },
+    "studioLabs": {
+      "en": "king-studio/labs/",
+      "de": "de/king-studio/labs/",
+      "ar": "ar/king-studio/labs/"
     }
   }
 }

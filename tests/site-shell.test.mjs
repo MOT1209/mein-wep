@@ -14,6 +14,7 @@ const SHELL_PAGES = [
   '404.html', 'downloads.html', 'learning.html',
   'de/index.html', 'de/about.html', 'de/contact.html',
   'ar/index.html', 'ar/about.html', 'ar/contact.html',
+  ...['', 'de/', 'ar/'].flatMap((pre) => ['index', 'apps/index', 'games/index', 'labs/index'].map((f) => `${pre}king-studio/${f}.html`)),
   ...(built ? readdirSync('dist/blog').filter((f) => f.endsWith('.html')).map((f) => `blog/${f}`) : []),
 ];
 

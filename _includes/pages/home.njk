@@ -1,7 +1,7 @@
 {#- Homepage body, shared by every language version (index.njk, de/index.njk).
     Expects `root` and `locale`; strings come from _data/i18n/<locale>.json.
-    Project cards and blog posts stay in English, so non-English pages mark
-    those blocks lang="en" (and dir="ltr" on right-to-left pages). -#}
+    Blog posts stay in English, so non-English pages mark them lang="en"
+    (and dir="ltr" on right-to-left pages). -#}
 {%- set L = locale or "en" %}
 {%- set T = i18n[L].home %}
 {%- set S = i18n[L].settings %}
@@ -13,11 +13,11 @@
         <div>
         <span class="eyebrow">{{ T.eyebrow }}</span>
         <h1 id="home-title" class="home-title">{{ T.headline }}</h1>
-        <p class="home-lede">{{ T.ledeBefore }} <a href="{{ root }}king-studio/">King Studio</a>: {{ kingStudio.projects | length }} {{ T.ledeProjects }} {{ releases.items | length }} {{ T.ledeAndroid }}</p>
+        <p class="home-lede">{{ T.ledeBefore }} <a href="{{ root }}{{ site.translations.studio[L] }}">King Studio</a>: {{ kingStudio.projects | length }} {{ T.ledeProjects }} {{ releases.items | length }} {{ T.ledeAndroid }}</p>
         <p class="home-availability"><span class="home-dot" aria-hidden="true"></span>{{ T.availability }}</p>
         <div class="home-actions">
             <a href="#contact" class="btn btn-primary">{{ T.ctaWork }}</a>
-            <a href="{{ root }}king-studio/" class="btn btn-secondary">{{ T.ctaStudio }}</a>
+            <a href="{{ root }}{{ site.translations.studio[L] }}" class="btn btn-secondary">{{ T.ctaStudio }}</a>
         </div>
         </div>
     </div>
@@ -29,13 +29,10 @@
             <div>
                 <span class="eyebrow">{{ T.workEyebrow }}</span>
                 <h2 id="work-title">{{ T.workTitle }}</h2>
-{%- if T.workNote %}
-                <p class="home-section-note">{{ T.workNote }}</p>
-{%- endif %}
             </div>
-            <a class="home-more" href="{{ root }}king-studio/">{{ T.workMore }}<span aria-hidden="true"> &rarr;</span></a>
+            <a class="home-more" href="{{ root }}{{ site.translations.studio[L] }}">{{ T.workMore }}<span aria-hidden="true"> &rarr;</span></a>
         </div>
-        <ul class="ks-grid"{{ enOnly | safe }}>
+        <ul class="ks-grid">
 {%- for project in work %}
 {% include "king-studio/card.njk" %}
 {%- endfor %}

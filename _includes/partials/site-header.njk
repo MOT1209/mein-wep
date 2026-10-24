@@ -11,7 +11,7 @@
 {{ (root ~ path) or './' }}
 {%- endmacro %}
 {%- set homeHref = (root ~ site.translations.home[L]) or './' %}
-{%- set alternates = site.translations[translationKey] if translationKey else null %}
+{%- set alternates = pageAlternates or (site.translations[translationKey] if translationKey else null) %}
     <a href="#main" class="skip-link">{{ T.header.skip }}</a>
     <header class="site-header">
         <div class="wrap site-header-row">

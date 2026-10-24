@@ -12,7 +12,7 @@ The visual rules for rashid-wep.vercel.app. The source of truth is the code: `cs
 
 ## Themes
 
-Light is the default; dark is `:root[data-theme="dark"]`. The pre-paint script in `_includes/partials/site-head.njk` sets `data-theme` from `localStorage.theme`, falling back to the OS setting. **King Studio** pages default to dark when nothing is stored. The toggle (`[data-theme-toggle]`, handled by `js/site-nav.js`) writes the same `theme` key, so the choice carries across pages.
+Light is the default; dark is `:root[data-theme="dark"]`. The pre-paint script in `_includes/partials/site-head.njk` sets `data-theme` from `localStorage.theme`, falling back to the OS setting. The toggle (`[data-theme-toggle]`, handled by `js/site-nav.js`) writes the same `theme` key, so the choice carries across pages.
 
 ## Colour tokens (`css/tokens.css`)
 
@@ -35,18 +35,11 @@ Light is the default; dark is `:root[data-theme="dark"]`. The pre-paint script i
 
 Rules: text on `--paper` must be `--ink`, `--ink-soft` or `--ink-muted`; use `--ink-faint` only for non-essential metadata. `--ok` encodes "available / success" and nothing else.
 
-### King Studio brand layer (`css/king-studio.css`)
+### King Studio (`css/king-studio.css`)
 
-King Studio uses the same blue as the rest of the site, framed in navy: a fixed navy header and hero with the blue accent.
+King Studio sits on the shared site shell (header, footer, language switcher, theme) and uses the site tokens only: no navy frame and no separate accent. Everything it adds is scoped to `.ks`: a hero washed with `--signal-wash`, catalogue sections, horizontal project cards (72px icon + text), dashed `.ks-panel` empty states and the project detail page. Pages exist in English, German (`/de/king-studio/`) and Arabic (`/ar/king-studio/`, RTL); the layout uses logical properties only, so Arabic mirrors without overrides.
 
-| Token | Value | Use |
-|---|---|---|
-| `--ks-charcoal` | `#0b1220` | Header, hero, active filter chip (both themes) |
-| `--ks-accent` | `#60a5fa` | Accent on navy (7.36:1); focus ring; primary hero button |
-| `--ks-accent-ink` | `#1d4ed8` light, `#60a5fa` dark | The accent used as **text** on themed surfaces |
-| `--ks-accent-wash` / `--ks-accent-edge` | `#eff4ff` / `#c7d7fe` light, `#0f1d3a` / `#1e3a6e` dark | "In development" and "Experimental" chips |
-
-Wordmark: `KING STUDIO` in the display font, letter-spaced, with an inline SVG crown. Tagline: "Build. Create. Innovate."
+Wordmark: `KING STUDIO` in the display font, letter-spaced, with an inline SVG crown in `--signal`.
 
 ## Typography
 
@@ -121,7 +114,7 @@ State feedback only: roughly 150ms on hover and focus, 200ms card lift. No entra
 | Build the phone layout first | Hide navigation below 1024px without a working menu |
 | Use real data and real screenshots | Invent counts, reviews or "coming soon" products |
 | Reuse `.btn`, `.card`, `.tag`, `.field` | Restyle the same control per page |
-| Keep one accent (`--signal`, `--ks-accent` on King Studio) | Add a second accent colour |
+| Keep one accent (`--signal`) | Add a second accent colour |
 | Test at 320 and 1440px in a browser | Trust a green build for a layout change |
 
 ## Where it lives

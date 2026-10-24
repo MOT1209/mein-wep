@@ -1,30 +1,20 @@
 ---
-layout: layouts/king-studio.njk
-title: Applications — King Studio
-metaDescription: Applications by King Studio — web apps, installable PWAs and Android builds, each clearly labelled by platform.
-permalink: king-studio/apps/index.html
-urlPath: king-studio/apps/
-root: ../../
-active: apps
-crumbs:
-  - name: Apps
-    path: king-studio/apps/
+layout: layouts/base.njk
+legacyShell: true
+locale: en
+root: "../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+translationKey: studioApps
+studioPage: section
+studioSection: apps
+permalink: /king-studio/apps/index.html
+canonical: "https://rashid-wep.vercel.app/king-studio/apps/"
+eleventyComputed:
+  title: "{{ i18n.en.studio.appsMetaTitle | safe }}"
+  metaDescription: "{{ i18n.en.studio.appsMeta | safe }}"
+metaKeywords: "King Studio, Rashid Ali, apps"
 ---
-{%- set section = kingStudio.sections.apps %}
-<section class="ks-page-head">
-  <div class="ks-wrap">
-    <nav class="ks-crumbs" aria-label="Breadcrumb"><ol>
-      <li><a href="../../">Portfolio</a></li>
-      <li><a href="../">King Studio</a></li>
-      <li aria-current="page">Apps</li>
-    </ol></nav>
-    <h1>Applications</h1>
-    <p class="ks-lede">Web apps, installable PWAs and Android builds. Platform labels show how each one runs; an APK download appears only where a release exists.</p>
-  </div>
-</section>
-<section class="ks-section">
-  <div class="ks-wrap">
-{%- set items = section.projects %}{% set facets = section.facets %}{% set showSearch = section.showSearch %}{% set cardHeading = "h2" %}{% set gridId = "ks-apps" %}{% set emptyText = "No applications match this filter." %}
-{% include "king-studio/grid.njk" %}
-  </div>
-</section>
+{% include "studio/section.njk" %}

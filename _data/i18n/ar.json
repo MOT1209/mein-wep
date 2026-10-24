@@ -44,7 +44,6 @@
     "workEyebrow": "أعمال مختارة",
     "workTitle": "تطبيقات تستطيع استخدامها اليوم",
     "workMore": "كل المشاريع في King Studio",
-    "workNote": "أوصاف المشاريع بالإنجليزية.",
     "servicesEyebrow": "ماذا أقدّم",
     "servicesTitle": "كيف أستطيع المساعدة",
     "services": [
@@ -102,5 +101,73 @@
       "فيروزي"
     ],
     "reduceMotion": "تقليل الحركة"
+  },
+  "studio": {
+    "title": "King Studio — تطبيقات وتجارب رقمية",
+    "metaDescription": "تطبيقات وأدوات رقمية يبنيها راشد علي تحت اسم King Studio. Build. Create. Innovate.",
+    "eyebrow": "استوديو مستقل للمنتجات الرقمية",
+    "headline": "تطبيقات وتجارب رقمية.",
+    "tagline": "Build. Create. Innovate.",
+    "lede": "تطبيقات وأدوات رقمية يبنيها راشد علي، ولكل منها حالتها الحقيقية مكتوبة بوضوح.",
+    "factApps": "التطبيقات",
+    "factAndroid": "نسخ أندرويد",
+    "featuredTitle": "تطبيقات مختارة",
+    "appsTitle": "التطبيقات",
+    "appsMetaTitle": "التطبيقات — King Studio",
+    "appsMeta": "تطبيقات King Studio: تطبيقات ويب، وتطبيقات PWA قابلة للتثبيت، ونسخ أندرويد، مع ذكر المنصة لكل منها.",
+    "appsLede": "تطبيقات ويب، وتطبيقات PWA قابلة للتثبيت، ونسخ أندرويد. توضّح علامات المنصة كيف يعمل كل تطبيق، ولا يظهر رابط تنزيل APK إلا حيث يوجد إصدار فعلي.",
+    "gamesTitle": "الألعاب",
+    "gamesMetaTitle": "الألعاب — King Studio",
+    "gamesMeta": "ألعاب King Studio. لا توجد ألعاب منشورة حالياً، والألعاب المصنوعة بـ Godot وUnity قادمة.",
+    "gamesLede": "ألعاب من King Studio، مع نسخة قابلة للعب ونسخة APK لأندرويد حيث توجد.",
+    "gamesEmpty": "لا توجد ألعاب منشورة حالياً. ألعاب جديدة بمحرّكَي Godot وUnity قيد التخطيط.",
+    "labsTitle": "المختبر والتجارب",
+    "labsMetaTitle": "المختبر والتجارب — King Studio",
+    "labsMeta": "مشاريع وتجارب في مراحلها الأولى من King Studio، ولكل منها حالة تطويرها الحقيقية.",
+    "labsLede": "أعمال وتجارب في مراحلها الأولى. توضّح علامات الحالة ما يمكن توقعه، ولا شيء هنا مضمون الاكتمال.",
+    "labsEmpty": "لا توجد تجارب منشورة حالياً.",
+    "comingTitle": "الألعاب في الطريق",
+    "comingText": "يصنع راشد علي ألعاباً بمحرّكَي Godot وUnity، وستظهر هنا عندما تجهز.",
+    "ctaTitle": "تريد أن نبني شيئاً معاً؟",
+    "ctaText": "King Studio جزء من معرض أعمال راشد علي. للتعاون أو العمل الحر أو الإبلاغ عن خلل، تواصل معي.",
+    "ctaContact": "تواصل",
+    "browseApps": "تصفّح التطبيقات",
+    "backHome": "العودة إلى معرض الأعمال",
+    "sections": {
+      "games": "الألعاب",
+      "apps": "التطبيقات",
+      "labs": "المختبر"
+    },
+    "status": {
+      "Available": "متاح",
+      "In Development": "قيد التطوير",
+      "Experimental": "تجريبي",
+      "Coming Soon": "قريباً"
+    },
+    "types": {
+      "App": "تطبيق",
+      "Game": "لعبة"
+    },
+    "open": "افتح",
+    "play": "العب",
+    "details": "التفاصيل",
+    "detailsFor": "عن",
+    "platforms": "المنصات",
+    "download": "تنزيل APK",
+    "features": "المزايا",
+    "factsTitle": "التفاصيل",
+    "factType": "النوع",
+    "factPlatforms": "المنصات",
+    "factTech": "التقنيات",
+    "factStatus": "الحالة",
+    "factVersion": "إصدار أندرويد",
+    "noBuild": "لا توجد نسخة عامة بعد.",
+    "backTo": {
+      "games": "كل الألعاب",
+      "apps": "كل التطبيقات",
+      "labs": "كل التجارب"
+    },
+    "crumbsLabel": "مسار التنقل",
+    "portfolio": "معرض الأعمال"
   }
 }

@@ -56,11 +56,14 @@ export const TEMPLATE_OUTPUTS = {
   'ar/about.njk': 'ar/about.html',
   'ar/contact.njk': 'ar/contact.html',
   ...blogPages,
-  'king-studio/index.njk': 'king-studio/index.html',
-  'king-studio/games.njk': 'king-studio/games/index.html',
-  'king-studio/apps.njk': 'king-studio/apps/index.html',
-  'king-studio/labs.njk': 'king-studio/labs/index.html',
-  'king-studio/project.njk': studioProjects.map((p) => `king-studio/${p.section}/${p.id}/index.html`),
+  // King Studio in every language: '' (English), 'de/', 'ar/'.
+  ...Object.fromEntries(['', 'de/', 'ar/'].flatMap((prefix) => [
+    [`${prefix}king-studio/index.njk`, `${prefix}king-studio/index.html`],
+    [`${prefix}king-studio/games.njk`, `${prefix}king-studio/games/index.html`],
+    [`${prefix}king-studio/apps.njk`, `${prefix}king-studio/apps/index.html`],
+    [`${prefix}king-studio/labs.njk`, `${prefix}king-studio/labs/index.html`],
+    [`${prefix}king-studio/project.njk`, studioProjects.map((p) => `${prefix}king-studio/${p.section}/${p.id}/index.html`)],
+  ])),
 };
 
 export const TEMPLATE_SOURCES = new Set(Object.keys(TEMPLATE_OUTPUTS));

@@ -15,7 +15,8 @@
   noAds (skip the AdSense loader), showSettings (settings button in the header),
   root (relative path to the site root, "" by default; "../" for pages under
   /de/), locale ("en" by default) and translationKey (a key of
-  site.translations: adds hreflang alternates and the language switcher).
+  site.translations: adds hreflang alternates and the language switcher;
+  pages generated from data pass `pageAlternates` instead).
 #}{%- if legacyShell -%}{% set root = root or "" %}{% set L = locale or "en" %}<!DOCTYPE html>
 <html lang="{{ L }}" dir="{{ i18n[L].dir }}">
 <head>
@@ -24,7 +25,7 @@
     <meta name="description" content="{{ metaDescription }}">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="{{ canonical }}">
-{%- set alternates = site.translations[translationKey] if translationKey else null %}
+{%- set alternates = pageAlternates or (site.translations[translationKey] if translationKey else null) %}
 {%- if alternates %}
 {%- for loc in site.locales %}{% if alternates[loc.code] is defined %}
     <link rel="alternate" hreflang="{{ loc.code }}" href="{{ site.siteUrl }}/{{ alternates[loc.code] }}">

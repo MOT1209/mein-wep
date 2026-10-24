@@ -1,34 +1,20 @@
 ---
-layout: layouts/king-studio.njk
-title: Games — King Studio
-metaDescription: Games by King Studio. None are published right now; games made with Godot and Unity are planned.
-permalink: king-studio/games/index.html
-urlPath: king-studio/games/
-root: ../../
-active: games
-crumbs:
-  - name: Games
-    path: king-studio/games/
+layout: layouts/base.njk
+legacyShell: true
+locale: en
+root: "../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+translationKey: studioGames
+studioPage: section
+studioSection: games
+permalink: /king-studio/games/index.html
+canonical: "https://rashid-wep.vercel.app/king-studio/games/"
+eleventyComputed:
+  title: "{{ i18n.en.studio.gamesMetaTitle | safe }}"
+  metaDescription: "{{ i18n.en.studio.gamesMeta | safe }}"
+metaKeywords: "King Studio, Rashid Ali, games"
 ---
-{%- set section = kingStudio.sections.games %}
-<section class="ks-page-head">
-  <div class="ks-wrap">
-    <nav class="ks-crumbs" aria-label="Breadcrumb"><ol>
-      <li><a href="../../">Portfolio</a></li>
-      <li><a href="../">King Studio</a></li>
-      <li aria-current="page">Games</li>
-    </ol></nav>
-    <h1>Games</h1>
-    <p class="ks-lede">Games made by King Studio, with a playable build and an Android APK where one exists.</p>
-  </div>
-</section>
-<section class="ks-section">
-  <div class="ks-wrap">
-{%- set items = section.projects %}{% set facets = section.facets %}{% set showSearch = section.showSearch %}{% set cardHeading = "h2" %}{% set gridId = "ks-games" %}{% set emptyText = "No games match this filter." %}
-{%- if items | length %}
-{% include "king-studio/grid.njk" %}
-{%- else %}
-<p class="ks-empty">No games are published right now. New games made with Godot and Unity are planned. Meanwhile, <a class="ks-link" href="../apps/">browse the apps</a>.</p>
-{%- endif %}
-  </div>
-</section>
+{% include "studio/section.njk" %}
