@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Rashid</title>
+  <defs>
+    <radialGradient id="bg" cx="0.5" cy="0.32" r="0.85">
+      <stop offset="0" stop-color="#1c2f63"/><stop offset="0.6" stop-color="#0b1220"/><stop offset="1" stop-color="#05080f"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9ed8ff"/><stop offset="0.45" stop-color="#4f8ff7"/><stop offset="1" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="band" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#60a5fa"/><stop offset="1" stop-color="#1e40af"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="0.35" cy="0.3" r="0.75">
+      <stop offset="0" stop-color="#ffffff"/><stop offset="0.35" stop-color="#bfe6ff"/><stop offset="1" stop-color="#3b82f6"/>
+    </radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.12"/><stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="18" result="b"/>
+      <feColorMatrix in="b" values="0 0 0 0 0.2  0 0 0 0 0.5  0 0 0 0 1  0 0 0 0.55 0"/>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <rect x="4" y="4" width="504" height="504" rx="108" fill="url(#rim)" stroke="#9cc3ff" stroke-opacity="0.16" stroke-width="4"/>
+  <g filter="url(#glow)" transform="translate(0,-6)">
+    <!-- crown body with curved valleys -->
+    <path d="M112 346 L98 190 C142 228 170 258 190 262 C216 232 238 188 256 134 C274 188 296 232 322 262 C342 258 370 228 414 190 L400 346 Z" fill="url(#body)"/>
+    <!-- right facet in shadow -->
+    <path d="M256 134 C274 188 296 232 322 262 C342 258 370 228 414 190 L400 346 L256 346 Z" fill="#1e3a8a" opacity="0.42"/>
+    <!-- centre ridge highlight -->
+    <path d="M256 134 L256 346" stroke="#ffffff" stroke-opacity="0.25" stroke-width="4"/>
+    <!-- tip orbs -->
+    <circle cx="98" cy="184" r="22" fill="url(#orb)"/>
+    <circle cx="256" cy="124" r="26" fill="url(#orb)"/>
+    <circle cx="414" cy="184" r="22" fill="url(#orb)"/>
+    <!-- centre gem -->
+    <path d="M256 236 L288 280 L256 324 L224 280 Z" fill="#0b1220"/>
+    <path d="M256 248 L278 280 L256 312 L234 280 Z" fill="#9ed8ff"/>
+    <path d="M256 248 L278 280 L256 280 Z" fill="#ffffff" opacity="0.7"/>
+    <path d="M256 280 L278 280 L256 312 Z" fill="#3b82f6"/>
+    <!-- band with jewels -->
+    <rect x="108" y="362" width="296" height="50" rx="14" fill="url(#band)"/>
+    <rect x="108" y="362" width="296" height="10" rx="5" fill="#ffffff" opacity="0.22"/>
+    <circle cx="176" cy="387" r="9" fill="#bfe6ff"/>
+    <path d="M256 375 L268 387 L256 399 L244 387 Z" fill="#ffffff"/>
+    <circle cx="336" cy="387" r="9" fill="#bfe6ff"/>
+  </g>
+</svg>
