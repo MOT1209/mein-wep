@@ -1,21 +1,20 @@
 ---
 {
   "type": "Collection",
-  "title": "Games Collection",
-  "description": "3D browser-based games built with Three.js.",
-  "resource": "https://rashid-wep.vercel.app/games/",
+  "title": "Games",
+  "description": "King Studio games: none published yet.",
+  "resource": "https://rashid-wep.vercel.app/king-studio/games/",
   "tags": [
     "games",
-    "three.js",
-    "3d",
-    "webgl"
+    "godot",
+    "unity"
   ]
 }
 ---
 
-# Games Collection
+# Games
 
-Three 3D browser games: Farm Game (simulation), KingCraft (sandbox), Rust Construction (building).
+No games are published at the moment. Games made with Godot and Unity are planned.
 
 ## Related
 

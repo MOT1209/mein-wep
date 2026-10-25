@@ -1,22 +1,23 @@
 ---
 {
   "type": "WebSite",
-  "title": "Rashid - Full-Stack Developer & AI Engineer",
-  "description": "Portfolio and projects of Rashid (MOT1209) — full-stack developer and AI engineer.",
+  "title": "Rashid Ali — Full-Stack Developer & AI Engineer",
+  "description": "Portfolio of Rashid Ali (MOT1209) — full-stack developer and AI engineer.",
   "resource": "https://rashid-wep.vercel.app/",
   "tags": [
     "portfolio",
     "web development",
     "AI",
-    "three.js",
-    "supabase"
+    "supabase",
+    "godot",
+    "unity"
   ]
 }
 ---
 
-# Rashid - Full-Stack Developer & AI Engineer
+# Rashid Ali — Full-Stack Developer & AI Engineer
 
-Rashid is a full-stack developer and AI engineer building web platforms, AI tools, and 3D games. Includes apps (Smart Vault, Quran Reader, Quiz Master, Maarifah Web), games (Farm Game, KingCraft, Rust Construction), AI models, vault resources, and a technical blog.
+Rashid Ali (MOT1209) is a full-stack developer and AI engineer and a school student. He builds websites with HTML, CSS, JavaScript and Supabase, works with Python and AI tools, and makes games with Godot and Unity. His apps are published under King Studio: Calculator Vault and Quiz Master. He speaks Arabic (native), German (advanced) and English (good), and is available for jobs and freelance projects. The site is available in English, German (/de/) and Arabic (/ar/).
 
 ## Related
 

@@ -1,8 +1,8 @@
 ---
 {
   "type": "ContactPage",
-  "title": "Contact Rashid",
-  "description": "Get in touch for collaboration, project inquiries, or freelance work.",
+  "title": "Contact Rashid Ali",
+  "description": "Get in touch for a job, a freelance project, a collaboration or a bug report.",
   "resource": "https://rashid-wep.vercel.app/contact.html",
   "tags": [
     "contact",
@@ -12,9 +12,9 @@
 }
 ---
 
-# Contact Rashid
+# Contact Rashid Ali
 
-Contact for web development, AI integration, and 3D game dev projects. Email at zwnt45602@gmail.com.
+Contact Rashid Ali for jobs, freelance work (websites, web apps, AI integrations, games with Godot and Unity) or collaborations. Email: zwnt45602@gmail.com. Contact form: https://rashid-wep.vercel.app/contact.html
 
 ## Related
 

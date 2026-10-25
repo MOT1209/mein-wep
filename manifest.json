@@ -1,16 +1,23 @@
 {
-    "name": "Rashid - AI Workspace",
+    "name": "Rashid Ali — Portfolio",
     "short_name": "Rashid",
-    "description": "Rashid's AI workspace for models, vault resources, apps, and games.",
+    "description": "Rashid Ali — full-stack developer and AI engineer: portfolio, King Studio apps and blog.",
     "start_url": "./",
     "display": "standalone",
     "background_color": "#09090b",
     "theme_color": "#09090b",
     "orientation": "any",
-    "categories": ["developer-tools", "utilities", "productivity"],
+    "categories": [
+        "developer-tools",
+        "utilities",
+        "productivity"
+    ],
     "lang": "en",
     "dir": "ltr",
-    "display_override": ["window-controls-overlay", "standalone"],
+    "display_override": [
+        "window-controls-overlay",
+        "standalone"
+    ],
     "scope": "./",
     "edge_side_panel": {
         "preferred_width": 400
@@ -70,27 +77,21 @@
             "sizes": "512x512",
             "type": "image/webp",
             "form_factor": "wide",
-            "label": "Rashid AI Workspace - Main Interface"
+            "label": "Rashid Ali — portfolio"
         }
     ],
     "shortcuts": [
         {
-            "name": "Projects",
-            "short_name": "Projects",
-            "description": "View all projects",
-            "url": "./#projects"
+            "name": "King Studio",
+            "short_name": "Studio",
+            "description": "Apps by Rashid Ali",
+            "url": "./king-studio/"
         },
         {
-            "name": "The Vault",
-            "short_name": "Vault",
-            "description": "Knowledge repository",
-            "url": "./#vault"
-        },
-        {
-            "name": "Rashid AI",
-            "short_name": "AI",
-            "description": "Launch AI Assistant",
-            "url": "./models/Rashid-Model/index.html"
+            "name": "Blog",
+            "short_name": "Blog",
+            "description": "Articles",
+            "url": "./blog/"
         }
     ]
 }
