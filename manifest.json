@@ -7,61 +7,45 @@
     "background_color": "#09090b",
     "theme_color": "#09090b",
     "orientation": "any",
-    "categories": ["developer-tools", "utilities", "productivity"],
+    "categories": [
+        "developer-tools",
+        "utilities",
+        "productivity"
+    ],
     "lang": "en",
     "dir": "ltr",
-    "display_override": ["window-controls-overlay", "standalone"],
+    "display_override": [
+        "window-controls-overlay",
+        "standalone"
+    ],
     "scope": "./",
     "edge_side_panel": {
         "preferred_width": 400
     },
     "icons": [
         {
-            "src": "images/logo.webp",
-            "sizes": "48x48",
-            "type": "image/webp"
+            "src": "icons/icon.svg",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any"
         },
         {
-            "src": "images/logo.webp",
-            "sizes": "72x72",
-            "type": "image/webp"
-        },
-        {
-            "src": "images/logo.webp",
-            "sizes": "96x96",
-            "type": "image/webp"
-        },
-        {
-            "src": "images/logo.webp",
-            "sizes": "128x128",
-            "type": "image/webp"
-        },
-        {
-            "src": "images/logo.webp",
-            "sizes": "144x144",
-            "type": "image/webp"
-        },
-        {
-            "src": "images/logo.webp",
-            "sizes": "152x152",
-            "type": "image/webp"
-        },
-        {
-            "src": "images/logo.webp",
+            "src": "icons/icon-192.png",
             "sizes": "192x192",
-            "type": "image/webp",
-            "purpose": "any maskable"
+            "type": "image/png",
+            "purpose": "any"
         },
         {
-            "src": "images/logo.webp",
-            "sizes": "384x384",
-            "type": "image/webp"
-        },
-        {
-            "src": "images/logo.webp",
+            "src": "icons/icon-512.png",
             "sizes": "512x512",
-            "type": "image/webp",
-            "purpose": "any maskable"
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "icons/icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
         }
     ],
     "screenshots": [

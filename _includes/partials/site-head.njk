@@ -1,6 +1,9 @@
 {#- Shared <head> tail for pages on css/site.css. Expects `root` (relative
     path to the site root, "" at the top level). Resolves the theme before
     first paint with the same rule and storage key as the homepage. -#}
+    <link rel="icon" href="{{ root }}icons/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="{{ root }}favicon.ico" sizes="48x48">
+    <link rel="apple-touch-icon" href="{{ root }}icons/icon-180.png">
     <meta name="theme-color" content="{{ site.fonts.themeColorDark }}" media="(prefers-color-scheme: dark)">
     <meta name="theme-color" content="{{ site.fonts.themeColorLight }}" media="(prefers-color-scheme: light)">
     <script>
