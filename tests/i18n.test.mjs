@@ -111,3 +111,14 @@ test('homepage and About show Rashid Ali with his photo and real skills', { skip
     }
   }
 });
+
+test('Contact pages carry his real name and skills, including in structured data', { skip }, () => {
+  for (const p of Object.values(site.translations.contact)) {
+    const html = read(p);
+    assert.doesNotMatch(html, /Next\.js|Three\.js|TypeScript/, `${p}: lists a skill he does not use`);
+    for (const [, ld] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
+      const data = JSON.parse(ld);
+      if (data.author) assert.equal(data.author.name, 'Rashid Ali', `${p}: JSON-LD author`);
+    }
+  }
+});

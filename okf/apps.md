@@ -2,8 +2,8 @@
 {
   "type": "Collection",
   "title": "Apps Collection",
-  "description": "Web applications: Smart Vault, Quran Reader, Quiz Master, Maarifah Web.",
-  "resource": "https://rashid-wep.vercel.app/apps/",
+  "description": "King Studio apps: Calculator Vault and Quiz Master.",
+  "resource": "https://rashid-wep.vercel.app/king-studio/apps/",
   "tags": [
     "apps",
     "web applications",
@@ -14,7 +14,7 @@
 
 # Apps Collection
 
-Four web applications built with vanilla JavaScript, HTML, and CSS.
+Two published apps, both available as a PWA and an Android APK: Calculator Vault and Quiz Master.
 
 ## Related
 

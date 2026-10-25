@@ -1,8 +1,8 @@
 ---
 {
   "type": "Profile",
-  "title": "About Rashid",
-  "description": "About Rashid (MOT1209) — skills, expertise, and background in development and AI.",
+  "title": "About Rashid Ali",
+  "description": "About Rashid Ali (MOT1209) — skills, languages and education.",
   "resource": "https://rashid-wep.vercel.app/about.html",
   "tags": [
     "about",
@@ -12,9 +12,9 @@
 }
 ---
 
-# About Rashid
+# About Rashid Ali
 
-Full-stack developer and AI engineer skilled in JavaScript, TypeScript, Python, React, Next.js, Three.js, Supabase, PostgreSQL, and AI integration. Creator of multiple open-source projects.
+Rashid Ali is a full-stack developer and AI engineer and a school student. Skills: HTML, CSS, JavaScript, Python, Supabase, AI tools, Godot and Unity. Languages: Arabic (native), German (advanced), English (good).
 
 ## Related
 
