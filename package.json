@@ -18,6 +18,7 @@
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6",
     "@electric-sql/pglite": "0.5.10",
-    "clean-css": "^5.3.3"
+    "clean-css": "^5.3.3",
+    "markdown-it": "14.3.3"
   }
 }
