@@ -42,6 +42,9 @@ Before saying a change is done, run `npm run build && npm run verify && npm test
 | `scripts/` | Build tooling and the URL gate |
 | `tests/` | `node:test` suites |
 | `vercel.json` | Headers, redirects, rewrites |
+| `supabase/migrations`, `supabase/seed` | Versioned CMS schema with RLS, and the seed (`scripts/cms/gen-seed.mjs`); tested on PGlite in `tests/db.test.mjs` |
+| `scripts/fetch-cms.mjs`, `scripts/cms/source.mjs` | Prebuild: published CMS content → `.cms-cache/cms.json`; everything that renders content reads through `source.mjs` (git content when the CMS is not live) |
+| `admin/app.html`, `admin/app/` | Owner dashboard (AR/EN/DE); API in `api/admin/[resource].js` + `api/_lib/cms-*.js`. See `docs/ADMIN_SYSTEM.md` |
 
 ## Conventions
 

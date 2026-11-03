@@ -52,3 +52,46 @@ External fonts and Font Awesome were blocked in this environment, so typography 
 
 - **Against the live Supabase project or on Vercel.** The container's network proxy refuses both. Real sign-in, real cookie behaviour on `rashid-wep.vercel.app` and the reset email must be checked after a preview deploy.
 - Accessibility audit with a screen reader.
+
+## Phases 2–12: CMS, King Studio, GitHub, media, blog (2026-11-03, cloud dev container, Node 22)
+
+### Commands
+
+| Command | Result |
+|---|---|
+| `npm run build` | ✅ (without Supabase env: `[cms] Supabase not configured … using the content in git`) |
+| `npm run verify` | ✅ `URL-surface PARITY OK — 415 expected, 415 in dist/` |
+| `npm test` | ✅ **107 tests, 107 pass, 0 fail, 0 skipped** |
+| `npm audit` | 1 moderate (minimatch, build-time; see SECURITY_AUDIT R8). The high markdown-it advisory is fixed. |
+| Fallback parity | ✅ built without the CMS, every page is byte-identical to the pre-CMS build (`diff -r`), except the intended changes: `blog/index.html` (cards now built with `textContent`), the new empty `blog/cms-posts.json`, two stylesheets with added rules, and the admin files (`admin/app*`, `admin/js/login.js`) |
+
+### Per file
+
+| File | Tests | What it covers |
+|---|---|---|
+| `tests/db.test.mjs` | 12 | migration + seed apply and re-apply on PGlite; seed mirrors the catalogue; RLS as anon / signed-in non-admin / admin; soft delete and restore; unsafe links, missing alt text and bad slugs rejected by constraints; drafts and future posts not public; `github_sync_apply` access, review decisions never overridden, owner fields untouched, missing detection (public-only listings never mark private repos); repo metadata public only for public projects; media bucket rules; private schema unreachable |
+| `tests/admin-api.test.mjs` | 19 | session + CSRF on every resource, prototype keys rejected; admin JWT + publishable key only; create/validate/log; soft delete and purge-from-trash; GitHub is never written; KING matching (`booking` does not match); sync payload; approve → hidden project; scheduled-sync secret never returned; uploads typed by bytes (SVG/HTML refused, folder traversal refused, size cap); upload as admin; delete refused while referenced; settings/pages/nav validation; blog drafts, slug clash with file posts, scheduling; deploy hook validation; overview flags are booleans; `safeUrl`; cron auth and RPC payload |
+| `tests/cms-build.test.mjs` | 11 | full Eleventy build from a CMS fixture: pages in 3 languages; external image/demo/GitHub links; escaped DB text; categories per language; hidden CMS project has no page, card or download; URL gate matches the build; build fails on an unsafe link; menu/brand/home/footer from the CMS with `javascript:` links dropped; CMS blog post page with Markdown raw HTML and `javascript:` links removed; JSON-LD cannot be closed; posts in index list and homepage; a file-based post is never overwritten |
+| `tests/admin-app.test.mjs` | 8 | translations complete in ar/en/de; every used key exists; no HTML sinks; no inline script or third parties; strict CSP; dashboard page fields match what templates read; sign-in opens the dashboard |
+| `tests/admin-auth.test.mjs` | 19 | Phase 1 sessions (see above) |
+| existing suites | 38 | unchanged and passing |
+
+Mutation check: deliberately breaking four rules (purge outside the trash, approve publishing directly, loose KING matching, skipping the image type check) made the matching API tests fail, and they passed again once restored.
+
+### Browser checks (Playwright Chromium, `dist/` served locally, API mocked)
+
+| Check | Result |
+|---|---|
+| Dashboard: all 13 screens at 375 px (Arabic) and 1280 px (Arabic, English) render without errors and without horizontal scroll | ✅ |
+| Direction: `dir=rtl` in Arabic, `ltr` in English; layout mirrors | ✅ |
+| Mobile menu opens and closes (Escape) | ✅ |
+| Move to trash asks for confirmation (dialog names the project), then calls the API | ✅ |
+| Project editor saves the expected fields (HTML in text is sent as text) | ✅ |
+| Blog index after the `innerHTML` rewrite: 8 posts, 14 categories, no errors | ✅ |
+
+### Not tested
+
+- Against the live Supabase project: the migration has not been applied there yet, and the network to Supabase is blocked from this environment.
+- Real uploads to Supabase Storage, the real Vercel Deploy Hook and the real cron run.
+- Screen-reader pass and Lighthouse scores.
+- Fonts and Font Awesome icons (blocked in this environment, so screenshots use fallback fonts).
