@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { hiddenApkIds } from '../scripts/cms/source.mjs';
 
 /**
  * Release manifest, read at build time from the file the APK release bot
@@ -25,9 +26,8 @@ const PAGE_LINKS = {
 
 export default function () {
   const raw = JSON.parse(fs.readFileSync(SOURCE, 'utf8'));
-  // Releases of hidden catalogue projects are not counted or shown.
-  const catalog = JSON.parse(fs.readFileSync(path.join(process.cwd(), '_data', 'studioCatalog.json'), 'utf8')).projects;
-  const hidden = new Set(catalog.filter((p) => p.hidden && p.apkId).map((p) => p.apkId));
+  // Releases of non-public catalogue projects are not counted or shown.
+  const hidden = hiddenApkIds();
 
   const items = Object.entries(raw.apps ?? {}).filter(([id]) => !hidden.has(id)).map(([id, app]) => ({
     id,

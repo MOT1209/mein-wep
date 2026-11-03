@@ -121,11 +121,23 @@ function servedFiles() {
 export default function (eleventyConfig) {
   eleventyConfig.setTemplateFormats(['njk']);
 
+  // `{{ url | link(root) }}`: an https:// URL (CMS content on GitHub, a demo
+  // host or Supabase Storage) is used as is; a site path gets the page's
+  // relative root. Anything else renders as "#" so a bad value can never
+  // become a javascript: or data: link.
+  eleventyConfig.addFilter('link', (url, root = '') => {
+    const u = String(url ?? '');
+    if (/^https:\/\/[a-z0-9.-]+(:\d+)?(\/|$|\?|#)/i.test(u) && !/\s/.test(u)) return u;
+    if (u === '' || u.includes(':') || u.startsWith('//')) return '#';
+    return (root ?? '') + u.replace(/^\//, '');
+  });
+
   eleventyConfig.ignores.add('**/node_modules/**');
   eleventyConfig.ignores.add('dist/**');
   eleventyConfig.ignores.add('.git/**');
   eleventyConfig.ignores.add('_data/**');
   eleventyConfig.ignores.add('_includes/**');
+  eleventyConfig.ignores.add('.cms-cache/**');
 
   // Passthrough copy is registered per served FILE (not per top-level
   // directory). Directory-level passthrough (addPassthroughCopy('apps'))

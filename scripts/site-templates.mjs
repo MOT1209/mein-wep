@@ -18,14 +18,15 @@
  * `about/index.html`, which silently changes the deployed URL.
  */
 import fs from 'node:fs';
+import { studioRecords } from './cms/source.mjs';
 
 // King Studio detail pages come from one paginated template
 // (king-studio/project.njk), so that single source renders one output per
-// catalogue record. Derived from the same JSON the build reads, so the
+// catalogue record. Derived from the same records the build reads, so the
 // URL-surface gate and the build can never disagree about which pages exist.
-const studioProjects = JSON.parse(
-  fs.readFileSync(new URL('../_data/studioCatalog.json', import.meta.url), 'utf8'),
-).projects.filter((p) => !p.hidden);
+// Same records as _data/kingStudio.js: Supabase when the CMS cache exists,
+// otherwise studioCatalog.json (see scripts/cms/source.mjs).
+const studioProjects = studioRecords();
 
 // Blog index and posts are templates (shared header/footer) that keep their
 // original .html URLs via explicit permalinks.

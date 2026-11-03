@@ -146,7 +146,11 @@
     },
     "types": {
       "App": "App",
-      "Game": "Game"
+      "Game": "Game",
+      "AI": "AI",
+      "Tool": "Tool",
+      "Website": "Website",
+      "Library": "Library"
     },
     "open": "Open",
     "play": "Play",
@@ -168,6 +172,11 @@
       "labs": "All experiments"
     },
     "crumbsLabel": "Breadcrumb",
-    "portfolio": "Portfolio"
+    "portfolio": "Portfolio",
+    "demo": "Live demo",
+    "source": "Source on GitHub",
+    "archived": "This project is archived on GitHub and no longer developed.",
+    "gallery": "Screenshots",
+    "factLanguage": "Main language"
   }
 }
