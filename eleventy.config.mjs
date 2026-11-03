@@ -85,6 +85,7 @@ const VERCEL_IGNORE = [
   /^[^/]+\.md$/,
   /^apks\/[^/]+\.md$/,
   /^db\//,
+  /^supabase\//,
   /^render\.yaml$/,
   /^skills-lock\.json$/,
   /^king-colab-MCP\//,
