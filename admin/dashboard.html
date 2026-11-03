@@ -9,8 +9,6 @@
     <meta name="robots" content="noindex, nofollow">
     <link rel="canonical" href="https://rashid-wep.vercel.app/admin/dashboard.html">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google AdSense (deferred until consent) -->
-    <script>if (localStorage.getItem('cookieConsent') === 'accepted') { var s=document.createElement('script'); s.src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4804302403615958'; s.crossOrigin='anonymous'; document.head.appendChild(s); }</script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         body { opacity: 0; }
@@ -666,30 +664,9 @@
         </div>
     </div>
 
-    <!-- Supabase JS -->
-    <script src="../js/vendor/supabase-2.117.2.js"></script>
-    <script src="../js/supabase-config.js"></script>
-
-    <!-- 🔒 Protect dashboard: redirect if not authenticated -->
-    <script>
-    (async function() {
-      if (!window.supabaseClient) {
-        window.location.replace('login.html');
-        return;
-      }
-      const { data: { session } } = await window.supabaseClient.auth.getSession();
-      if (!session) {
-        window.location.replace('login.html');
-        return;
-      }
-      const { data: isAdmin, error: adminCheckError } = await window.supabaseClient.rpc('is_admin');
-      if (adminCheckError || !isAdmin) {
-        window.location.replace('login.html');
-        return;
-      }
-      document.body.classList.add('auth-ok');
-    })();
-    </script>
+    <!-- Session guard + data client: every call is authorised on the server
+         (/api/admin/*). No Supabase token is held in the browser. -->
+    <script src="/admin/js/admin-client.js"></script>
 
     <!-- Admin Logic -->
     <script src="../js/admin.js?v=4.0"></script>
@@ -761,7 +738,7 @@
                 div.innerHTML = `
                     <div>
                         <h3>${escapeHTML(item.title || item.name || 'Untitled')}</h3>
-                        <p style="color:var(--text-muted);font-size:0.8rem;">${item.language || ''} ${item.status ? '| ' + item.status : ''}</p>
+                        <p style="color:var(--text-muted);font-size:0.8rem;">${escapeHTML(item.language || '')} ${item.status ? '| ' + escapeHTML(item.status) : ''}</p>
                     </div>
                     <div style="display:flex;gap:10px;align-items:center;">
                         <button onclick="deleteVaultItem('${table}','${item.id}')" style="background:var(--danger);border:none;color:white;padding:5px 10px;border-radius:4px;cursor:pointer;"><i class="fas fa-trash"></i></button>
