@@ -28,15 +28,20 @@ const NOT_SERVED = [
   /^\.eleventyignore$/,
   /^_data\//,
   /^_includes\//,
+  /^\.claude\//,
+  /^\.pi\//,
   /^scripts\/check-url-surface\.mjs$/,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.
 // Mirrors VERCEL_IGNORE in scripts/check-url-surface.mjs.
+// NOTE: apks/*.apk are deliberately NOT excluded — /apks/*.apk is the
+// intentional OTA release channel; the in-app update checkers of all six
+// shipped apps download from it (updates.json -> /apks/*.apk). Build-generated
+// APKs live under android/ which is already excluded above.
 const VERCEL_IGNORE = [
   /\/android\//,
   /\/\.gradle\//,
-  /\.apk$/,
   /\.aab$/,
   /\.jks$/,
   /\.keystore$/,
@@ -48,11 +53,16 @@ const VERCEL_IGNORE = [
   /\.log$/,
   /^\.agents\//,
   /^\.opencode\//,
+  /^\.pi\//,
+  /^\.claude\//,
   /^\.testsprite\//,
 ];
 
 function servedFiles() {
-  const tracked = execSync('git ls-files', { encoding: 'utf8' })
+  // core.quotepath=false: git otherwise octal-escapes non-ASCII paths (Arabic
+  // filenames at the repo root) and those escaped names would never match the
+  // real NTFS paths — breaking passthrough copy + URL-surface parity on Windows.
+  const tracked = execSync('git -c core.quotepath=false ls-files', { encoding: 'utf8' })
     .split('\n')
     .map((l) => l.trim())
     .filter(Boolean)
@@ -74,13 +84,13 @@ export default function (eleventyConfig) {
   eleventyConfig.ignores.add('_includes/**');
 
   const served = servedFiles();
-  const topLevelDirs = [...new Set(served.map((p) => p.split('/')[0]))];
-  const rootFiles = served.filter((p) => !p.includes('/'));
 
-  for (const dir of topLevelDirs.sort()) {
-    eleventyConfig.addPassthroughCopy(dir);
-  }
-  for (const file of rootFiles.sort()) {
+  // Passthrough is per-FILE, driven by the served (git-tracked) list —
+  // never per-directory. A whole-dir addPassthroughCopy() would also copy
+  // untracked local state that happens to sit inside a served directory
+  // (nested .git repos, local DB dirs like .pgdata-test, lockfiles, WIP),
+  // silently breaking the "dist/ == git-tracked + served" contract.
+  for (const file of served.sort()) {
     eleventyConfig.addPassthroughCopy(file);
   }
 

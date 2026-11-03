@@ -18,21 +18,28 @@ const ROOT = process.cwd();
 const DIST = path.join(ROOT, 'dist');
 
 // Files that exist locally for the build but must never be served.
+// Mirrors NOT_SERVED in eleventy.config.mjs.
 const NOT_SERVED = [
   /^dist\//,
   /^node_modules\//,
   /^package(?:-lock)?\.json$/,
   /^eleventy\.config\.mjs$/,
+  /^\.eleventyignore$/,
   /^_data\//,
   /^_includes\//,
+  /^\.claude\//,
+  /^\.pi\//,
   /^scripts\/check-url-surface\.mjs$/,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.
+// NOTE: apks/*.apk are deliberately NOT excluded — /apks/*.apk is the
+// intentional OTA release channel; the in-app update checkers of all six
+// shipped apps download from it (updates.json -> /apks/*.apk). Build-generated
+// APKs live under android/ which is already excluded above.
 const VERCEL_IGNORE = [
   /\/android\//,
   /\/\.gradle\//,
-  /\.apk$/,
   /\.aab$/,
   /\.jks$/,
   /\.keystore$/,
@@ -44,6 +51,8 @@ const VERCEL_IGNORE = [
   /\.log$/,
   /^\.agents\//,
   /^\.opencode\//,
+  /^\.pi\//,
+  /^\.claude\//,
   /^\.testsprite\//,
 ];
 
@@ -70,7 +79,7 @@ function isExcluded(p) {
   return false;
 }
 
-const tracked = execSync('git ls-files', { cwd: ROOT, encoding: 'utf8' })
+const tracked = execSync('git -c core.quotepath=false ls-files', { cwd: ROOT, encoding: 'utf8' })
   .split('\n')
   .map((l) => l.trim())
   .filter(Boolean)

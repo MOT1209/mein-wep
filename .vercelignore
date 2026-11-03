@@ -10,9 +10,12 @@
 # https://rashid-wep.vercel.app/.../android/app/build.gradle
 
 # Android native projects — needed in git, never served over HTTP.
+# Build-generated APKs/AABs live under android/ (already excluded below).
+# apks/*.apk at the repo root are the intentional OTA release channel and
+# MUST stay served: the in-app update checkers of all six shipped apps
+# download from /apks/*.apk via updates.json.
 **/android/
 **/.gradle/
-**/*.apk
 **/*.aab
 **/*.jks
 **/*.keystore
@@ -27,5 +30,7 @@
 # Local tooling and notes.
 .agents/
 .opencode/
+.pi/
 .testsprite/
+.claude/
 **/*.log
