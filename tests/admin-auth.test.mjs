@@ -115,6 +115,22 @@ test('POST session needs an allowed Origin and the CSRF header', async () => {
   }
 });
 
+test('a Vercel preview deployment can sign in on its own origin, but not cross-origin', async () => {
+  const host = 'rashid-wep-git-some-branch-mot1209s-projects.vercel.app';
+  const t = freshToken();
+  users[t] = { id: 'admin-id', email: 'owner@example.com' };
+  const body = { access_token: t, refresh_token: 'refresh-token-123456' };
+  const ok = res();
+  await (await session())(req({ method: 'POST', headers: { host, origin: `https://${host}`, 'x-admin-csrf': '1' }, body }), ok);
+  assert.equal(ok.statusCode, 200);
+  const other = res();
+  await (await session())(req({ method: 'POST', headers: { host, origin: 'https://attacker.vercel.app', 'x-admin-csrf': '1' }, body }), other);
+  assert.equal(other.statusCode, 403);
+  const plainHttp = res();
+  await (await session())(req({ method: 'POST', headers: { host, origin: `http://${host}`, 'x-admin-csrf': '1' }, body }), plainHttp);
+  assert.equal(plainHttp.statusCode, 403);
+});
+
 test('POST session for a non-admin -> 403, Supabase session revoked, no cookies', async () => {
   const t = freshToken('someone');
   users[t] = { id: 'someone', email: 'x@example.com' };

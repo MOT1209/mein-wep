@@ -79,7 +79,15 @@ export function noStore(res) {
  */
 export function csrfOk(req) {
   const origin = req.headers.origin;
-  if (!origin || !ALLOWED_ORIGINS.includes(origin)) return false;
+  if (!origin) return false;
+  // Same-origin is always allowed: that is how Vercel preview deployments
+  // (rashid-wep-git-<branch>-….vercel.app) reach their own API. A page on
+  // another site cannot make the browser send this deployment's host as its
+  // Origin.
+  const host = req.headers.host;
+  const sameOrigin = typeof host === 'string' && /^[a-z0-9.-]+(:\d+)?$/i.test(host)
+    && (origin === `https://${host}` || (/^localhost(:\d+)?$/.test(host) && origin === `http://${host}`));
+  if (!sameOrigin && !ALLOWED_ORIGINS.includes(origin)) return false;
   return req.headers['x-admin-csrf'] === '1';
 }
 
