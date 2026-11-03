@@ -29,8 +29,34 @@ const row = (over = {}) => ({
   ...over,
 });
 
-function writeFixture(studio) {
-  fs.writeFileSync(CACHE, JSON.stringify({ fetchedAt: new Date().toISOString(), studio, categories: [], nav: [], settings: {}, pages: [], blog: [] }));
+const CONTENT = {
+  nav: [
+    { nav_key: 'home', label: 'Start here', label_de: null, label_ar: 'ابدأ', href: '' },
+    { nav_key: 'studio', label: 'King Studio', label_de: null, label_ar: null, href: 'king-studio/' },
+    { nav_key: 'evil', label: 'Evil', href: 'javascript:alert(1)' },
+    { nav_key: 'gh', label: 'Code', href: 'https://github.com/MOT1209' },
+  ],
+  settings: {
+    'site.name': { value: 'Rashid Ali' },
+    'contact.email': { value: 'hello@example.com' },
+    'social.links': { value: [{ label: 'LinkedIn', url: 'https://linkedin.com/in/x' }, { label: 'Bad', url: 'javascript:alert(1)' }] },
+  },
+  pages: [
+    { page_key: 'home', locale: 'en', content: { headline: 'CMS <b>headline</b>', ctaWork: 'Hire me' } },
+    { page_key: 'home', locale: 'ar', content: { headline: 'عنوان من لوحة التحكم' } },
+    { page_key: 'footer', locale: 'en', content: { text: 'Made by Rashid' } },
+  ],
+  blog: [{
+    slug: 'hello-cms', locale: 'en', title: 'Hello <script>alert(1)</script>', description: 'First CMS post',
+    body_md: '# Heading\n\nSome **bold** text.\n\n<script>alert(2)</script>\n\n[click](javascript:alert(3)) and [ok](https://example.com)',
+    cover_image: null, cover_alt: null, categories: ['News'], tags: ['cms'], published_at: '2026-11-01T10:00:00.000Z', updated_at: '2026-11-01T10:00:00.000Z',
+  }, {
+    slug: 'flutter-clean-architecture', locale: 'en', title: 'Clash', description: '', body_md: 'x', categories: [], tags: [], published_at: '2026-11-01T10:00:00.000Z',
+  }],
+};
+
+function writeFixture(studio, content = CONTENT) {
+  fs.writeFileSync(CACHE, JSON.stringify({ fetchedAt: new Date().toISOString(), studio, categories: [], ...content }));
 }
 
 function build() {
@@ -84,9 +110,11 @@ test('a project that is not public in the CMS has no page, card or download list
 
 test('the URL gate sees the same pages as the build', () => {
   const out = execFileSync(process.execPath, ['--input-type=module', '-e',
-    "import('./scripts/site-templates.mjs').then(m => console.log(JSON.stringify(m.TEMPLATE_OUTPUTS['king-studio/project.njk'])))"],
+    "import('./scripts/site-templates.mjs').then(m => console.log(JSON.stringify([m.TEMPLATE_OUTPUTS['king-studio/project.njk'], m.TEMPLATE_OUTPUTS['blog/cms-post.njk']])))"],
   { env: { ...process.env, CMS_CACHE_FILE: CACHE }, encoding: 'utf8' });
-  assert.deepEqual(JSON.parse(out).sort(), ['king-studio/apps/calculator-vault/index.html', 'king-studio/labs/king-agent/index.html']);
+  const [studio, blog] = JSON.parse(out);
+  assert.deepEqual(studio.sort(), ['king-studio/apps/calculator-vault/index.html', 'king-studio/labs/king-agent/index.html']);
+  assert.deepEqual(blog, ['blog/hello-cms.html']);
 });
 
 test('the build fails on an unsafe CMS link instead of publishing it', () => {
@@ -94,6 +122,42 @@ test('the build fails on an unsafe CMS link instead of publishing it', () => {
   const r = build();
   assert.notEqual(r.status, 0);
   assert.match(r.stderr + r.stdout, /demoUrl must be an https:\/\/ link/);
+});
+
+test('menu, brand, home texts and footer come from the CMS; unsafe links are dropped', () => {
+  const home = page('index.html');
+  assert.match(home, />Start here</);
+  assert.match(home, /href="https:\/\/github\.com\/MOT1209">Code</);
+  assert.ok(!home.includes('javascript:'), 'no javascript: link anywhere');
+  assert.match(home, />Rashid Ali<span class="dot">/);
+  assert.match(home, /CMS &lt;b&gt;headline&lt;\/b&gt;/);
+  assert.match(home, />Hire me</);
+  assert.match(home, /Made by Rashid/);
+  assert.match(home, /href="https:\/\/linkedin\.com\/in\/x"/);
+  assert.match(home, /mailto:hello@example\.com/);
+  assert.match(page('ar/index.html'), /عنوان من لوحة التحكم/);
+  assert.match(page('ar/index.html'), />ابدأ</);
+  // German has no CMS headline: the built-in text stays.
+  assert.ok(!page('de/index.html').includes('CMS &lt;b&gt;'));
+});
+
+test('a CMS blog post gets a page with escaped, sanitised Markdown', () => {
+  const html = page('blog/hello-cms.html');
+  assert.match(html, /<h1>Hello &lt;script&gt;alert\(1\)&lt;\/script&gt;<\/h1>/);
+  assert.match(html, /<strong>bold<\/strong>/);
+  assert.ok(!/<script>alert\(2\)/.test(html), 'raw HTML in Markdown is not rendered');
+  assert.ok(!/href="javascript:/i.test(html), 'javascript: links are dropped');
+  assert.match(html, /href="https:\/\/example\.com"/);
+  const ld = html.match(/<script type="application\/ld\+json">([^<]*)<\/script>/g).join('');
+  assert.ok(!ld.includes('</script><'), 'JSON-LD cannot be closed by post text');
+  assert.match(ld, /\\u003cscript/);
+});
+
+test('CMS posts join the index list and the homepage; a file-post slug is never overwritten', () => {
+  const list = JSON.parse(page('blog/cms-posts.json'));
+  assert.deepEqual(list.map((p) => p.id), ['hello-cms']);
+  assert.match(page('index.html'), /blog\/hello-cms\.html/);
+  assert.ok(!page('blog/flutter-clean-architecture.html').includes('Clash'));
 });
 
 test('mapDbProject falls back to the GitHub description and drops empty translations', () => {

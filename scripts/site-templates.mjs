@@ -18,7 +18,7 @@
  * `about/index.html`, which silently changes the deployed URL.
  */
 import fs from 'node:fs';
-import { studioRecords } from './cms/source.mjs';
+import { cmsBlogPosts, studioRecords } from './cms/source.mjs';
 
 // King Studio detail pages come from one paginated template
 // (king-studio/project.njk), so that single source renders one output per
@@ -30,9 +30,11 @@ const studioProjects = studioRecords();
 
 // Blog index and posts are templates (shared header/footer) that keep their
 // original .html URLs via explicit permalinks.
+// cms-post.njk and cms-posts.njk are listed separately below.
+const CMS_BLOG_TEMPLATES = new Set(['cms-post.njk', 'cms-posts.njk']);
 const blogPages = Object.fromEntries(
   fs.readdirSync(new URL('../blog/', import.meta.url))
-    .filter((f) => f.endsWith('.njk'))
+    .filter((f) => f.endsWith('.njk') && !CMS_BLOG_TEMPLATES.has(f))
     .map((f) => [`blog/${f}`, `blog/${f.replace(/\.njk$/, '.html')}`]),
 );
 
@@ -57,6 +59,10 @@ export const TEMPLATE_OUTPUTS = {
   'ar/about.njk': 'ar/about.html',
   'ar/contact.njk': 'ar/contact.html',
   ...blogPages,
+  // Blog posts published from the admin CMS: one page per post (none without
+  // the CMS), and the JSON list the blog index merges with posts.json.
+  'blog/cms-post.njk': cmsBlogPosts().map((p) => `blog/${p.id}.html`),
+  'blog/cms-posts.njk': 'blog/cms-posts.json',
   // King Studio in every language: '' (English), 'de/', 'ar/'.
   ...Object.fromEntries(['', 'de/', 'ar/'].flatMap((prefix) => [
     [`${prefix}king-studio/index.njk`, `${prefix}king-studio/index.html`],

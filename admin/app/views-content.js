@@ -8,8 +8,6 @@ import { pickImage } from './views-media.js';
 // one item per line.
 export const PAGE_FIELDS = {
   home: [['eyebrow', 'text'], ['headline', 'text'], ['lede', 'textarea'], ['availability', 'text'], ['ctaWork', 'text'], ['ctaStudio', 'text']],
-  about: [['intro', 'textarea'], ['skills', 'list']],
-  contact: [['intro', 'textarea']],
   studio: [['eyebrow', 'text'], ['headline', 'text'], ['tagline', 'text'], ['lede', 'textarea']],
   footer: [['text', 'text']],
 };
@@ -121,8 +119,6 @@ export async function settingsView() {
   const social = (get('social.links') ?? []).map((s) => `${s.label} | ${s.url}`).join('\n');
   const form = el('form', { class: 'card form', novalidate: true },
     field({ label: t('settings.siteName'), name: 'site.name', value: get('site.name') }),
-    field({ label: t('settings.tagline'), name: 'site.tagline', value: get('site.tagline') }),
-    field({ label: t('settings.seoDescription'), name: 'seo.default_description', value: get('seo.default_description'), type: 'textarea', rows: 3 }),
     field({ label: t('settings.contactEmail'), name: 'contact.email', value: get('contact.email'), type: 'email', dir: 'ltr' }),
     field({ label: t('settings.social'), name: 'social.links', value: social, type: 'textarea', rows: 5, hint: t('settings.socialHint'), dir: 'ltr' }),
     el('div', { class: 'form-actions' }, el('button', { type: 'submit', class: 'btn btn-primary' }, t('action.save'))));
@@ -138,8 +134,6 @@ export async function settingsView() {
     }
     const saves = [
       ['site.name', v['site.name'].trim()],
-      ['site.tagline', v['site.tagline'].trim()],
-      ['seo.default_description', v['seo.default_description'].trim()],
       ['contact.email', v['contact.email'].trim()],
       ['social.links', links],
     ];

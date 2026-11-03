@@ -1,0 +1,16 @@
+{#- <head> additions for CMS blog posts: stylesheet and BlogPosting JSON-LD
+    (serialised with dump and "<" escaped, so post text cannot close the
+    script element). -#}
+    <link rel="stylesheet" href="{{ root }}css/blog-post.css?v={{ site.cssVersion }}">
+    <script type="application/ld+json">{{ {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "description": post.description,
+      "datePublished": post.published_at,
+      "dateModified": post.updated_at or post.published_at,
+      "inLanguage": post.lang,
+      "author": { "@type": "Person", "name": "Rashid Ali", "alternateName": "MOT1209", "url": site.siteUrl },
+      "url": site.siteUrl ~ "/blog/" ~ post.id ~ ".html",
+      "keywords": post.tags
+    } | dump | replace("<", "\\u003c") | safe }}</script>

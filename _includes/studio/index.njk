@@ -6,10 +6,11 @@
 <section class="ks-hero" aria-labelledby="ks-title">
   <div class="wrap">
     <p class="ks-brand"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7z"/></svg><span dir="ltr">KING STUDIO</span></p>
-    <p class="eyebrow">{{ S.eyebrow }}</p>
-    <h1 id="ks-title" class="ks-title">{{ S.headline }}</h1>
-    <p class="ks-tagline"><span dir="ltr">{{ S.tagline }}</span></p>
-    <p class="ks-lede">{{ S.lede }}</p>
+{%- set C = cms.pages.studio[L] %}
+    <p class="eyebrow">{{ C.eyebrow or S.eyebrow }}</p>
+    <h1 id="ks-title" class="ks-title">{{ C.headline or S.headline }}</h1>
+    <p class="ks-tagline"><span dir="{{ 'auto' if C.tagline else 'ltr' }}">{{ C.tagline or S.tagline }}</span></p>
+    <p class="ks-lede">{{ C.lede or S.lede }}</p>
     <div class="ks-actions">
       <a class="btn btn-primary" href="{{ root }}{{ studio }}apps/">{{ S.browseApps }}</a>
       <a class="btn btn-secondary" href="{{ (root ~ site.translations.home[L]) or './' }}">{{ S.backHome }}</a>

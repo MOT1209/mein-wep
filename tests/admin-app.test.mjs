@@ -38,7 +38,7 @@ test('keys built at runtime exist too', () => {
     ...['All', 'Public', 'Hidden', 'Trash'].map((k) => `studio.filter${k}`),
     ...['Pending', 'Approved', 'Other', 'Ignored'].map((k) => `github.tab${k}`),
     ...['draft', 'published', 'scheduled', 'trash'].map((k) => `blog.${k}`),
-    ...['home', 'about', 'contact', 'studio', 'footer'].map((k) => `pages.${k}`),
+    ...['home', 'studio', 'footer'].map((k) => `pages.${k}`),
     ...['c1', 'c2', 'c3', 'c4'].map((k) => `security.${k}`),
     ...['when', 'who', 'what', 'item'].map((k) => `activity.${k}`),
     ...['configDeployHook', 'configGithubToken', 'configCron'].map((k) => `overview.${k}`),
@@ -69,6 +69,20 @@ test('vercel.json serves the dashboard with a strict CSP', () => {
   assert.match(csp, /script-src 'self';/);
   assert.match(csp, /frame-ancestors 'none'/);
   assert.ok(!/unsafe-inline|unsafe-eval|googlesyndication/.test(csp));
+});
+
+test('the dashboard edits exactly the page texts the templates read', async () => {
+  const cms = fs.readFileSync(new URL('../_data/cms.js', import.meta.url), 'utf8');
+  const pages = JSON.parse(cms.match(/const PAGES = (\[[^\]]+\])/)[1].replace(/'/g, '"'));
+  assert.deepEqual(Object.keys(PAGE_FIELDS).sort(), pages.sort());
+  const tpl = ['_includes/pages/home.njk', '_includes/studio/index.njk', '_includes/partials/site-footer.njk']
+    .map((f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
+  for (const [page, fields] of Object.entries(PAGE_FIELDS)) {
+    for (const [k] of fields) {
+      const used = page === 'footer' ? tpl.includes(`cms.pages.footer[L].${k}`) : tpl.includes(`C.${k}`);
+      assert.ok(used, `${page}.${k} is offered in the dashboard but no template reads it`);
+    }
+  }
 });
 
 test('sign-in leads to the new dashboard', () => {

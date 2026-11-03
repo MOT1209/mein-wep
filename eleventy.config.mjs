@@ -1,4 +1,5 @@
 import { execSync } from 'node:child_process';
+import MarkdownIt from 'markdown-it';
 import { TEMPLATE_SOURCES } from './scripts/site-templates.mjs';
 
 /**
@@ -120,6 +121,12 @@ function servedFiles() {
 
 export default function (eleventyConfig) {
   eleventyConfig.setTemplateFormats(['njk']);
+
+  // Blog posts from the admin CMS are Markdown. Raw HTML is switched off
+  // (it is escaped, never rendered) and markdown-it's link validation drops
+  // javascript:, vbscript:, file: and data: (except images) URLs.
+  const md = new MarkdownIt({ html: false, linkify: true, typographer: false });
+  eleventyConfig.addFilter('md', (text) => md.render(String(text ?? '')));
 
   // `{{ url | link(root) }}`: an https:// URL (CMS content on GitHub, a demo
   // host or Supabase Storage) is used as is; a site path gets the page's

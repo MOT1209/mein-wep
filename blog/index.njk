@@ -107,35 +107,53 @@ permalink: blog/index.html
             return m[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
         }
 
+        // Cards are built with textContent only: post data (including posts
+        // from the admin CMS) can never become markup.
+        function h(tag, cls, text) {
+            var n = document.createElement(tag);
+            if (cls) n.className = cls;
+            if (text !== undefined && text !== null) n.textContent = String(text);
+            return n;
+        }
+        function icon(name) {
+            return h('i', 'fas fa-' + String(name || 'pen').replace(/[^a-z0-9-]/g, ''));
+        }
         function langLabel(lang) {
-            if (lang === 'ar') return '<span class="card-lang ar">العربية</span>';
-            return '<span class="card-lang en">English</span>';
+            return lang === 'ar' ? h('span', 'card-lang ar', 'العربية') : h('span', 'card-lang en', 'English');
+        }
+        function safeColor(c, fallback) {
+            return /^(#[0-9a-f]{3,8}|rgba?\([0-9.,\s%]+\))$/i.test(String(c || '')) ? c : fallback;
         }
 
         function renderGrid(items) {
             var grid = document.getElementById('articles-grid');
+            grid.replaceChildren();
             if (items.length === 0) {
-                grid.innerHTML = '<div class="no-results"><i class="fas fa-search"></i><p>No articles match your criteria.</p></div>';
+                var none = h('div', 'no-results');
+                none.append(icon('search'), h('p', '', 'No articles match your criteria.'));
+                grid.append(none);
                 return;
             }
-            grid.innerHTML = items.map(function(p) {
-                var tags = p.categories.map(function(c) { return '<span class="card-tag">' + c + '</span>'; }).join('');
-                return '<a href="' + p.id + '.html" class="article-card">' +
-                    '<div class="card-top">' +
-                        '<div class="card-icon" style="background:' + p.iconBg + ';color:' + p.iconColor + ';"><i class="fas fa-' + p.icon + '"></i></div>' +
-                        '<div class="card-info">' +
-                            langLabel(p.lang) +
-                            '<h3>' + p.title + '</h3>' +
-                            '<p>' + p.description + '</p>' +
-                        '</div>' +
-                    '</div>' +
-                    '<div class="card-meta">' +
-                        '<span><i class="fas fa-calendar"></i> ' + formatDate(p.date) + '</span>' +
-                        '<span><i class="fas fa-clock"></i> ' + p.readTime + ' min</span>' +
-                        '<div class="card-tags">' + tags + '</div>' +
-                    '</div>' +
-                '</a>';
-            }).join('');
+            items.forEach(function(p) {
+                var card = h('a', 'article-card');
+                card.href = encodeURIComponent(p.id) + '.html';
+                var top = h('div', 'card-top');
+                var ic = h('div', 'card-icon');
+                ic.style.background = safeColor(p.iconBg, 'rgba(99,102,241,0.1)');
+                ic.style.color = safeColor(p.iconColor, '#818cf8');
+                ic.append(icon(p.icon));
+                var info = h('div', 'card-info');
+                info.append(langLabel(p.lang), h('h3', '', p.title), h('p', '', p.description));
+                top.append(ic, info);
+                var meta = h('div', 'card-meta');
+                var date = h('span'); date.append(icon('calendar'), ' ' + formatDate(p.date));
+                var time = h('span'); time.append(icon('clock'), ' ' + p.readTime + ' min');
+                var tags = h('div', 'card-tags');
+                (p.categories || []).forEach(function(c) { tags.append(h('span', 'card-tag', c)); });
+                meta.append(date, time, tags);
+                card.append(top, meta);
+                grid.append(card);
+            });
         }
 
         function applyFilters() {
@@ -156,21 +174,20 @@ permalink: blog/index.html
         function renderCategories() {
             var grid = document.getElementById('categories-grid');
             var keys = Object.keys(categories).sort();
+            grid.replaceChildren();
             if (keys.length === 0) {
-                grid.innerHTML = '<div class="categories-empty">No categories yet.</div>';
+                grid.append(h('div', 'categories-empty', 'No categories yet.'));
                 return;
             }
             var icons = {
                 'Game Dev':'gamepad','AI & ML':'microchip','Web Dev':'globe','Backend':'database','Mobile':'mobile-screen','Web Design':'paintbrush','CSS':'code','Game AI':'robot','Flutter':'layer-group','LoRA':'microchip','Supabase':'database','PWA':'mobile-screen','Three.js':'cube','SEO':'rocket'
             };
-            grid.innerHTML = keys.map(function(cat) {
-                var icon = icons[cat] || 'tag';
-                return '<div class="category-tag">' +
-                    '<i class="fas fa-' + icon + '"></i>' +
-                    '<h3>' + cat + '</h3>' +
-                    '<span>' + categories[cat] + ' article' + (categories[cat] !== 1 ? 's' : '') + '</span>' +
-                '</div>';
-            }).join('');
+            keys.forEach(function(cat) {
+                var tag = h('div', 'category-tag');
+                tag.append(icon(icons[cat] || 'tag'), h('h3', '', cat),
+                    h('span', '', categories[cat] + ' article' + (categories[cat] !== 1 ? 's' : '')));
+                grid.append(tag);
+            });
         }
 
         function updateStats() {
@@ -204,9 +221,15 @@ permalink: blog/index.html
             });
         }
 
-        fetch('posts.json?_=' + Date.now())
-            .then(function(r) { return r.json(); })
-            .then(function(data) {
+        // Posts written as files (posts.json) plus posts published from the
+        // admin CMS (cms-posts.json, generated at build time), newest first.
+        Promise.all([
+            fetch('posts.json?_=' + Date.now()).then(function(r) { return r.json(); }),
+            fetch('cms-posts.json?_=' + Date.now()).then(function(r) { return r.ok ? r.json() : []; }).catch(function() { return []; })
+        ])
+            .then(function(both) {
+                var data = both[0].concat(both[1]);
+                data.sort(function(a, b) { return a.date === b.date ? 0 : (a.date < b.date ? 1 : -1); });
                 posts = data;
                 categories = {};
                 posts.forEach(function(p) {
@@ -219,8 +242,10 @@ permalink: blog/index.html
                 applyFilters();
             })
             .catch(function() {
-                document.getElementById('articles-grid').innerHTML =
-                    '<div class="no-results"><i class="fas fa-exclamation-triangle" style="color:#ef4444;"></i><p>Failed to load articles. Please try again later.</p></div>';
+                var grid = document.getElementById('articles-grid');
+                var box = h('div', 'no-results');
+                box.append(icon('exclamation-triangle'), h('p', '', 'Failed to load articles. Please try again later.'));
+                grid.replaceChildren(box);
             });
 
         initFilterButtons();

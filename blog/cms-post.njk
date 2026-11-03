@@ -1,0 +1,37 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+root: "../"
+activeNav: blog
+noAds: true
+headExtra: "partials/blog-cms-head.njk"
+pagination:
+  data: cms.blog
+  size: 1
+  alias: post
+permalink: "/blog/{{ post.id }}.html"
+eleventyComputed:
+  locale: "{{ post.lang }}"
+  title: "{{ post.seo_title or post.title }} — Rashid Blog"
+  metaDescription: "{{ post.seo_description or post.description }}"
+  canonical: "https://rashid-wep.vercel.app/blog/{{ post.id }}.html"
+---
+{#- A blog post published from the admin CMS (see _data/cms.js). The body is
+    Markdown rendered with raw HTML disabled, so post text cannot add markup
+    or scripts. -#}
+<main id="main" class="page blog-post">
+    <article>
+        <p class="eyebrow"><a href="./">Blog</a> · <time datetime="{{ post.published_at }}">{{ post.date }}</time> · {{ post.readTime }} min</p>
+        <h1>{{ post.title }}</h1>
+        {%- if post.description %}<p class="lede">{{ post.description }}</p>{% endif %}
+        {%- if post.cover_image %}
+        <img class="post-cover" src="{{ post.cover_image | link(root) }}" alt="{{ post.cover_alt }}" decoding="async">
+        {%- endif %}
+        <div class="post-content">
+{{ post.body_md | md | safe }}
+        </div>
+        {%- if post.categories | length or post.tags | length %}
+        <p class="post-tags">{% for c in post.categories %}<span class="post-tag">{{ c }}</span> {% endfor %}{% for c in post.tags %}<span class="post-tag">#{{ c }}</span> {% endfor %}</p>
+        {%- endif %}
+    </article>
+</main>

@@ -11,13 +11,18 @@
     <div class="wrap home-hero-grid">
         <img class="home-avatar" src="{{ root }}images/rashid-ali.webp" alt="{{ T.photoAlt }}" width="168" height="168" fetchpriority="high">
         <div>
-        <span class="eyebrow">{{ T.eyebrow }}</span>
-        <h1 id="home-title" class="home-title">{{ T.headline }}</h1>
+{%- set C = cms.pages.home[L] %}
+        <span class="eyebrow">{{ C.eyebrow or T.eyebrow }}</span>
+        <h1 id="home-title" class="home-title">{{ C.headline or T.headline }}</h1>
+        {%- if C.lede %}
+        <p class="home-lede">{{ C.lede }}</p>
+        {%- else %}
         <p class="home-lede">{{ T.ledeBefore }} <a href="{{ root }}{{ site.translations.studio[L] }}">King Studio</a>: {{ kingStudio.projects | length }} {{ T.ledeProjects }} {{ releases.items | length }} {{ T.ledeAndroid }}</p>
-        <p class="home-availability"><span class="home-dot" aria-hidden="true"></span>{{ T.availability }}</p>
+        {%- endif %}
+        <p class="home-availability"><span class="home-dot" aria-hidden="true"></span>{{ C.availability or T.availability }}</p>
         <div class="home-actions">
-            <a href="#contact" class="btn btn-primary">{{ T.ctaWork }}</a>
-            <a href="{{ root }}{{ site.translations.studio[L] }}" class="btn btn-secondary">{{ T.ctaStudio }}</a>
+            <a href="#contact" class="btn btn-primary">{{ C.ctaWork or T.ctaWork }}</a>
+            <a href="{{ root }}{{ site.translations.studio[L] }}" class="btn btn-secondary">{{ C.ctaStudio or T.ctaStudio }}</a>
         </div>
         </div>
     </div>

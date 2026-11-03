@@ -100,3 +100,39 @@ export function hiddenApkIds() {
   const visible = new Set(studioRecords().map((p) => p.apkId).filter(Boolean));
   return new Set(raw.map((p) => p.apkId).filter((id) => id && !visible.has(id)));
 }
+
+/**
+ * Published CMS blog posts in the shape of blog/posts.json entries (id, title,
+ * description, date, readTime, lang, categories, icon), plus the fields the
+ * post page needs. A slug that a file-based post already uses is skipped.
+ */
+export function cmsBlogPosts() {
+  const c = cmsCache();
+  const fileIds = new Set(JSON.parse(fs.readFileSync(path.join(process.cwd(), 'blog', 'posts.json'), 'utf8')).map((p) => p.id));
+  return (c?.blog ?? [])
+    .filter((p) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(p.slug ?? '') && !fileIds.has(p.slug))
+    .map((p) => {
+      const words = String(p.body_md ?? '').split(/\s+/).filter(Boolean).length;
+      return {
+        id: p.slug,
+        title: p.title,
+        description: p.description ?? '',
+        date: String(p.published_at ?? '').slice(0, 10),
+        published_at: p.published_at,
+        updated_at: p.updated_at,
+        readTime: Math.max(1, Math.round(words / 200)),
+        lang: p.locale ?? 'en',
+        categories: p.categories ?? [],
+        tags: p.tags ?? [],
+        icon: 'pen',
+        iconColor: '#60a5fa',
+        iconBg: 'rgba(96,165,250,0.1)',
+        body_md: p.body_md ?? '',
+        cover_image: p.cover_image ?? null,
+        cover_alt: p.cover_alt ?? null,
+        seo_title: p.seo_title ?? null,
+        seo_description: p.seo_description ?? null,
+        fromCms: true,
+      };
+    });
+}
