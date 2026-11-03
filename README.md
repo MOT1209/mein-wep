@@ -81,7 +81,7 @@ root/
 │   ├── calculator-vault/      # Hidden vault behind calculator
 │   └── quiz-app/              # Interactive quiz platform
 
-├── models/Rashid-Model/       # AI chat interface (Gemini API)
+├── models/Rashid-Model/       # AI chat interface (via /api/gemini proxy)
 
 ├── vault/                     # Knowledge vault (6 categories)
 ├── admin/                     # Admin login + dashboard
@@ -89,9 +89,7 @@ root/
 │   ├── css/                   # variables, responsive, design-system, components
 │   └── js/modules/            # 12 feature modules (projects, vault, theme, etc.)
 │
-├── game-hoster/               # Next.js 16 sub-project (game hosting platform)
-├── game-vault/                # Static export of game-hoster
-│
+├── api/                       # Vercel serverless functions (contact, gemini, ...)
 ├── css/                       # Root stylesheets
 ├── js/                        # Root scripts
 └── images/                    # Logo, avatar, profile
@@ -110,17 +108,12 @@ root/
 
 ### Backend & AI
 - **Supabase** — Real-time database, authentication, CDN client
-- **Google Gemini API** — AI assistant (gemini-1.5-flash)
+- **Google Gemini API** — AI assistant, called through the `/api/gemini` Vercel proxy (API key stays server-side)
 
 ### PWA
 - Service Worker with offline caching
 - Web App Manifest for installability
 - All games/apps individually installable
-
-### Sub-project: game-hoster
-- **Next.js 16** + **React 19** + **TypeScript**
-- **Tailwind CSS v4** + **Framer Motion**
-- Static export (`output: 'export'`) served under `/game-vault/`
 
 ### Project Screenshots
 Each project features a custom SVG illustration:
@@ -143,18 +136,10 @@ This is a **static site** — no build step required for the main platform:
 # Clone
 git clone https://github.com/MOT1209/mein-wep.git
 
-# Serve locally (any static server)
-python -m http.server 8080
-# or
-npx serve .
-```
-
-To build the Next.js sub-project:
-
-```bash
-cd game-hoster
+# Build the static site (Eleventy)
 npm install
-npm run build   # outputs to out/ → game-vault/
+npm run build         # outputs to dist/
+npm start             # serve locally at http://localhost:8080
 ```
 
 ---
