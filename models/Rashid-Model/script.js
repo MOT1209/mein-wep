@@ -2,32 +2,9 @@
    RashidClaw - مساعد الذكاء الاصطناعي
    ============================================ */
 
-// تحميل المفاتيح من config.js
-const API_KEYS = typeof API_KEYS !== 'undefined' ? API_KEYS : {
-    gemini: 'YOUR_GEMINI_API_KEY_HERE',
-    openRouter: 'YOUR_OPENROUTER_API_KEY_HERE',
-    pexels: 'YOUR_PEXELS_API_KEY_HERE',
-    supabase: {
-        url: 'YOUR_SUPABASE_URL_HERE',
-        key: 'YOUR_SUPABASE_KEY_HERE'
-    }
-};
-
-const GEMINI_API_KEY = API_KEYS.gemini;
-const OPENROUTER_API_KEY = API_KEYS.openRouter;
-const PEXELS_API_KEY = API_KEYS.pexels;
-const SUPABASE_URL = API_KEYS.supabase.url;
-const SUPABASE_KEY = API_KEYS.supabase.key;
-
-// Get API key from localStorage or use the default
-function getGeminiAPIKey() {
-    return localStorage.getItem('gemini_api_key') || GEMINI_API_KEY;
-}
-
-// Validate API key
-function hasValidAPIKey() {
-    return getGeminiAPIKey() && getGeminiAPIKey().trim() !== '';
-}
+// Get chat configuration through the secure Vercel proxy - the API key never reaches the browser.
+// config.js provides GEMINI_PROXY_URL; provide a safe fallback as well.
+const GEMINI_PROXY = (typeof GEMINI_PROXY_URL !== 'undefined') ? GEMINI_PROXY_URL : '/api/gemini';
 
 /* ============================================
    Utility Functions
@@ -241,7 +218,7 @@ window.toggleSpeechToText = toggleSpeechToText;
 
 /* ============================================
     Chat Helper (Gemini API)
-    Get your free API key from: https://aistudio.google.com/app/apikey
+    Calls go through the secure /api/gemini Vercel proxy (key stays server-side).
     ============================================ */
 
 const questionInput = document.getElementById('chatInput');
@@ -261,38 +238,22 @@ async function sendQuestion() {
     addLoadingMessage();
     
     try {
-        // Check if we have a valid API key
-        if (!hasValidAPIKey()) {
-            throw new Error('لم يتم إعداد مفتاح API. الرجاء إضافة مفتاح Gemini في الكود.');
-        }
-        
-        const apiKey = getGeminiAPIKey();
         const prompt = `أنت مساعد RashidClaw ذكي ومتعدد المهارات. أجب على السؤال التالي بإجابة مفصلة ودقيقة باللغة العربية:\n\nالسؤال: ${question}`;
         
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`,
+            GEMINI_PROXY,
             {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    contents: [{
-                        parts: [{
-                            text: prompt
-                        }]
-                    }],
-                    generationConfig: {
-                        maxOutputTokens: 1000,
-                        temperature: 0.7
-                    }
-                })
+                body: JSON.stringify({ prompt })
             }
         );
         
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || `فشل الاتصال: ${response.status}`);
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error?.message || errorData.error || `فشل الاتصال: ${response.status}`);
         }
         
         const data = await response.json();
