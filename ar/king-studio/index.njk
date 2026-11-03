@@ -1,0 +1,19 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: ar
+root: "../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+translationKey: studio
+studioPage: index
+permalink: /ar/king-studio/index.html
+canonical: "https://rashid-wep.vercel.app/ar/king-studio/"
+eleventyComputed:
+  title: "{{ i18n.ar.studio.title | safe }}"
+  metaDescription: "{{ i18n.ar.studio.metaDescription | safe }}"
+metaKeywords: "King Studio, Rashid Ali, MOT1209, Apps, PWA, Android"
+---
+{% include "studio/index.njk" %}

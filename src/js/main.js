@@ -21,8 +21,6 @@ import {
   initTypewriter,
   initTechStackMarquee,
   initLiveStats,
-  initTestimonials,
-  initProjectModal,
   initCustomPwaInstall,
   initScrollProgress,
 } from './modules/enhancements.js';
@@ -101,8 +99,6 @@ const boot = async () => {
   initTypewriter();
   initTechStackMarquee();
   initLiveStats();
-  initTestimonials();
-  initProjectModal();
   initCustomPwaInstall();
   initScrollProgress();
   initLatestUpdates();
@@ -165,14 +161,11 @@ const boot = async () => {
         const planeIcon = document.createElement('i');
         planeIcon.className = 'fas fa-paper-plane';
         submitBtn.appendChild(planeIcon);
-        submitBtn.appendChild(document.createTextNode(' Send Message ')); }
+        submitBtn.prepend(document.createTextNode('Send message ')); }
       if (error && !emailed) {
-        showToast('Saved locally — will sync when available.', 'info');
-        const msgs = JSON.parse(localStorage.getItem('contactMessages') ?? '[]');
-        msgs.push({ name: nameVal, email: emailVal, message: msgVal, date: new Date().toLocaleString() });
-        localStorage.setItem('contactMessages', JSON.stringify(msgs));
-        trackContactFormSubmit();
-        contactForm.reset();
+        // Neither channel accepted it. Keep the form filled so nothing is lost
+        // and point to email instead of pretending it was queued.
+        showToast('Could not send right now — please email zwnt45602@gmail.com directly.', 'info');
       } else {
         showToast('Message sent! I\'ll get back to you soon.', 'success');
         trackContactFormSubmit();
@@ -184,8 +177,11 @@ const boot = async () => {
   // 9️⃣ Dynamic numbers — replace hardcoded stats
   (async () => {
     const { count } = await countProjects();
-    const repoCountEls = document.querySelectorAll('.hero-status-item:nth-child(3) span:last-child, .stat-box:nth-child(1) .stat-num');
-    const projectCountEls = document.querySelectorAll('.hero-status-item:nth-child(2) span:last-child, .stat-box:nth-child(2) .stat-num');
+    // The [data-fact] hooks are the redesigned homepage; the positional
+    // selectors are the pages still on the old markup. Both are queried so
+    // the counts stay live on either.
+    const repoCountEls = document.querySelectorAll('.hero-status-item:nth-child(3) span:last-child, .stat-box:nth-child(1) .stat-num, [data-fact="repos"]');
+    const projectCountEls = document.querySelectorAll('.hero-status-item:nth-child(2) span:last-child, .stat-box:nth-child(2) .stat-num, [data-fact="projects"]');
     if (count !== null && count > 0) {
       projectCountEls.forEach(el => el.textContent = count + '+');
     }

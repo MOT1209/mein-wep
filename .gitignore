@@ -24,6 +24,8 @@
 # Ignore temporary and workspace files
 temp_db_check.js
 package-lock.json
+# ...except the site root: CI runs `npm ci`, which requires it.
+!/package-lock.json
 *.code-workspace
 .vercel
 .playwright-mcp/

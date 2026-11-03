@@ -1,15 +1,11 @@
 package com.example.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,19 +13,21 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.ai.AiFailure
 import com.example.ai.WritingEvaluationResult
 import com.example.data.model.*
 import com.example.ui.components.AiErrorBanner
 import com.example.ui.components.AudioSpeedSelector
+import com.example.ui.components.buttons.ButtonSize
+import com.example.ui.components.buttons.LinguaPrimaryButton
+import com.example.ui.components.display.LinguaCard
+import com.example.ui.components.inputs.LinguaTextField
+import com.example.ui.components.navigation.LinguaTopBar
+import com.example.ui.theme.LinguaVerseDimens
 import com.example.ui.theme.extendedColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,23 +51,14 @@ fun SkillDetailScreen(
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = skillType.displayName,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
-                    }
-                },
+            LinguaTopBar(
+                title = skillType.displayName,
+                onBack = onBack,
                 actions = {
                     AudioSpeedSelector(
                         currentSpeed = audioSpeed,
                         onSpeedSelected = onSetAudioSpeed,
-                        modifier = Modifier.padding(end = 12.dp)
+                        modifier = Modifier.padding(end = LinguaVerseDimens.CompactSpacing)
                     )
                 }
             )
@@ -95,18 +84,22 @@ fun SkillDetailScreen(
                     onSpeakText = onSpeakText
                 )
                 SkillType.READING -> ReadingStoryView(
+                    targetLanguageCode = targetLanguageCode,
                     onSpeakText = onSpeakText
                 )
                 SkillType.WRITING -> WritingPracticeView(
+                    targetLanguageCode = targetLanguageCode,
                     evaluation = writingEvaluation,
                     error = writingEvaluationError,
                     isLoading = isEvaluatingWriting,
                     onEvaluateWriting = onEvaluateWriting
                 )
                 SkillType.SPEAKING -> SpeakingPracticeView(
+                    targetLanguageCode = targetLanguageCode,
                     onSpeakText = onSpeakText
                 )
                 SkillType.DAILY_PHRASES -> DailyPhrasesView(
+                    targetLanguageCode = targetLanguageCode,
                     onSpeakText = onSpeakText
                 )
                 else -> GenericSkillView(
@@ -120,7 +113,7 @@ fun SkillDetailScreen(
 }
 
 @Composable
-fun VocabularyView(
+private fun VocabularyView(
     vocabularies: List<Vocabulary>,
     onSpeakText: (String) -> Unit,
     onToggleFavorite: (Vocabulary) -> Unit
@@ -134,46 +127,51 @@ fun VocabularyView(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding)
     ) {
-        OutlinedTextField(
+        LinguaTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text(stringResource(R.string.search_vocabulary)) },
-            leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("vocab_search_field"),
-            shape = RoundedCornerShape(16.dp)
+            placeholder = "Search vocabulary...",
+            leadingIcon = Icons.Default.Search,
+            modifier = Modifier.testTag("vocab_search_field")
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            contentPadding = PaddingValues(bottom = 80.dp)
+            verticalArrangement = Arrangement.spacedBy(LinguaVerseDimens.CompactSpacing),
+            contentPadding = PaddingValues(bottom = LinguaVerseDimens.SectionSpacing)
         ) {
             items(filtered) { vocab ->
-                Surface(
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
+                LinguaCard(modifier = Modifier.fillMaxWidth()) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         IconButton(onClick = { onSpeakText(vocab.word) }) {
-                            Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.play), tint = MaterialTheme.colorScheme.primary)
+                            Icon(
+                                Icons.Default.VolumeUp,
+                                contentDescription = stringResource(R.string.play),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(LinguaVerseDimens.CompactSpacing))
 
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(text = vocab.word, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                            Text(text = vocab.translation, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(text = vocab.word, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = vocab.translation,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                             if (vocab.phonetic.isNotEmpty()) {
-                                Text(text = "[${vocab.phonetic}]", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                                Text(
+                                    text = "[${vocab.phonetic}]",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
 
@@ -192,45 +190,49 @@ fun VocabularyView(
 }
 
 @Composable
-fun GrammarView(
+private fun GrammarView(
     grammarRules: List<GrammarRule>,
     onSpeakText: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        contentPadding = PaddingValues(bottom = 80.dp)
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding),
+        verticalArrangement = Arrangement.spacedBy(LinguaVerseDimens.ComponentSpacing),
+        contentPadding = PaddingValues(bottom = LinguaVerseDimens.SectionSpacing)
     ) {
         items(grammarRules) { rule ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Text(text = rule.title, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(text = rule.summary, fontSize = 13.sp, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = rule.fullRuleText, fontSize = 14.sp)
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Surface(
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(12.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            IconButton(onClick = { onSpeakText(rule.exampleSentence) }) {
-                                Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.play), tint = MaterialTheme.colorScheme.primary)
-                            }
-                            Column {
-                                Text(text = rule.exampleSentence, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                                Text(text = rule.exampleTranslation, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            }
+            LinguaCard(modifier = Modifier.fillMaxWidth()) {
+                Text(text = rule.title, style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.InlineSpacing))
+                Text(
+                    text = rule.summary,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.CompactSpacing))
+                Text(text = rule.fullRuleText, style = MaterialTheme.typography.bodyMedium)
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
+
+                LinguaCard(
+                    backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(LinguaVerseDimens.FloatingElevation),
+                    borderColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(onClick = { onSpeakText(rule.exampleSentence) }) {
+                            Icon(
+                                Icons.Default.VolumeUp,
+                                contentDescription = stringResource(R.string.play),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                        Column {
+                            Text(text = rule.exampleSentence, style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                text = rule.exampleTranslation,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
@@ -240,80 +242,80 @@ fun GrammarView(
 }
 
 @Composable
-fun FlashcardsView(
+private fun FlashcardsView(
     flashcards: List<Flashcard>,
     onSpeakText: (String) -> Unit
 ) {
     if (flashcards.isEmpty()) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(stringResource(R.string.no_flashcards_available_yet))
+            Text(
+                stringResource(R.string.no_flashcards_available_yet),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
         return
     }
 
-    var currentIndex by remember { mutableStateOf(0) }
+    var currentIndex by remember { mutableIntStateOf(0) }
     var showBack by remember { mutableStateOf(false) }
     val currentCard = flashcards.getOrNull(currentIndex) ?: flashcards.first()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = "Card ${currentIndex + 1} of ${flashcards.size}",
-            fontSize = 14.sp,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
-        Card(
+        LinguaCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(260.dp)
                 .testTag("flashcard_flip_container")
                 .clickable { showBack = !showBack },
-            shape = RoundedCornerShape(24.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = if (showBack) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer
-            )
+            backgroundColor = if (showBack) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.primaryContainer,
+            borderColor = if (showBack) MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f) else MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+            shape = MaterialTheme.shapes.extraLarge
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
+                modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = if (showBack) currentCard.backTranslation else currentCard.frontWord,
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.ExtraBold,
+                        style = MaterialTheme.typography.headlineSmall,
                         color = if (showBack) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
                     )
 
                     if (!showBack && currentCard.phonetic.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(LinguaVerseDimens.CompactSpacing))
                         Text(
                             text = "[${currentCard.phonetic}]",
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
                         )
                     }
 
                     if (showBack) {
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
                         Text(
                             text = currentCard.exampleSentence,
-                            fontSize = 14.sp,
+                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.9f)
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
 
                     IconButton(onClick = { onSpeakText(currentCard.frontWord) }) {
                         Icon(
@@ -326,63 +328,79 @@ fun FlashcardsView(
             }
         }
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            Button(
-                onClick = {
-                    showBack = false
-                    currentIndex = (currentIndex + 1) % flashcards.size
-                },
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(14.dp)
-            ) {
-                Text(stringResource(R.string.next_card))
-            }
-        }
+        LinguaPrimaryButton(
+            text = stringResource(R.string.next_card),
+            onClick = {
+                showBack = false
+                currentIndex = (currentIndex + 1) % flashcards.size
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
 @Composable
-fun ReadingStoryView(onSpeakText: (String) -> Unit) {
+private fun ReadingStoryView(targetLanguageCode: String, onSpeakText: (String) -> Unit) {
     var selectedWord by remember { mutableStateOf<String?>(null) }
-    val storyTitle = "Un día en Madrid"
-    val storyContent = "Carlos camina por la Plaza Mayor. El sol brilla y hay muchas personas disfrutando de un café. Carlos compra un churro delicioso y sonríe."
+
+    val story = remember(targetLanguageCode) {
+        when (targetLanguageCode) {
+            "es" -> ReadingStoryData(
+                title = "Un día en Madrid",
+                content = "Carlos camina por la Plaza Mayor. El sol brilla y hay muchas personas disfrutando de un café. Carlos compra un churro delicioso y sonríe.",
+                words = mapOf("camina" to "walks", "Plaza" to "Town Square", "sol" to "Sun", "brilla" to "shines", "churro" to "Churro pastry", "delicioso" to "delicious")
+            )
+            "en" -> ReadingStoryData(
+                title = "A Day in London",
+                content = "Emma walks through Hyde Park. The sun shines and many people enjoy a cup of tea. Emma buys a delicious scone and smiles.",
+                words = mapOf("walks" to "يتمشى", "Park" to "حديقة", "sun" to "شمس", "shines" to "يتألق", "delicious" to "لذيذ", "scone" to "سكون")
+            )
+            "fr" -> ReadingStoryData(
+                title = "Une journée à Paris",
+                content = "Marie marche dans le Jardin du Luxembourg. Le soleil brille et beaucoup de personnes profitent d'un café. Marie achète un croissant délicieux et sourit.",
+                words = mapOf("marche" to "walks", "Jardin" to "Garden", "soleil" to "Sun", "brille" to "shines", "délicieux" to "delicious", "croissant" to "Croissant")
+            )
+            "de" -> ReadingStoryData(
+                title = "Ein Tag in Berlin",
+                content = "Max geht durch den Tiergarten. Die Sonne scheint und viele Leute genießen einen Kaffee. Max kauft ein leckeres Brötchen und lächelt.",
+                words = mapOf("geht" to "walks", "Sonne" to "Sun", "scheint" to "shines", "leckeres" to "delicious", "Brötchen" to "bread roll", "lächelt" to "smiles")
+            )
+            else -> ReadingStoryData(
+                title = "A Day in the City",
+                content = "Alex walks through the city park. The sun shines and many people enjoy a coffee. Alex buys something delicious and smiles.",
+                words = mapOf("walks" to "يتمشى", "sun" to "شمس", "shines" to "يتألق", "delicious" to "لذيذ", "coffee" to "قهوة", "smiles" to "يبتسم")
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding)
     ) {
-        Text(text = storyTitle, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(12.dp))
+        Text(text = story.title, style = MaterialTheme.typography.headlineSmall)
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-        ) {
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = storyContent, fontSize = 18.sp, lineHeight = 28.sp)
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row {
-                    Button(onClick = { onSpeakText(storyContent) }) {
-                        Icon(Icons.Default.VolumeUp, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Listen Full Story")
-                    }
-                }
-            }
+        LinguaCard(modifier = Modifier.fillMaxWidth()) {
+            Text(text = story.content, style = MaterialTheme.typography.bodyLarge, lineHeight = MaterialTheme.typography.bodyLarge.lineHeight)
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
+            LinguaPrimaryButton(
+                text = stringResource(R.string.listen_full_story),
+                onClick = { onSpeakText(story.content) },
+                icon = Icons.Default.VolumeUp
+            )
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
-        Text(text = "Tap any word to translate:", fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        val words = listOf("camina", "Plaza", "sol", "brilla", "churro", "delicioso")
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(words) { word ->
+        Text(
+            text = stringResource(R.string.tap_to_translate),
+            style = MaterialTheme.typography.titleMedium
+        )
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(LinguaVerseDimens.CompactSpacing)) {
+            items(story.words.keys.toList()) { word ->
                 AssistChip(
                     onClick = { selectedWord = word },
                     label = { Text(word) }
@@ -391,59 +409,64 @@ fun ReadingStoryView(onSpeakText: (String) -> Unit) {
         }
 
         selectedWord?.let { word ->
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
-                shape = RoundedCornerShape(16.dp)
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
+            LinguaCard(
+                backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             ) {
-                Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Translate, contentDescription = null)
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "'$word' -> Translation: ${wordTranslationMap[word] ?: "Meaning in context"}")
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Translate, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(modifier = Modifier.width(LinguaVerseDimens.ComponentSpacing))
+                    Text(
+                        text = stringResource(R.string.word_translation, word, story.words[word] ?: stringResource(R.string.meaning_in_context)),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
                 }
             }
         }
     }
 }
 
-private val wordTranslationMap = mapOf(
-    "camina" to "walks",
-    "Plaza" to "Town Square",
-    "sol" to "Sun",
-    "brilla" to "shines",
-    "churro" to "Churro pastry",
-    "delicioso" to "delicious"
+private data class ReadingStoryData(
+    val title: String,
+    val content: String,
+    val words: Map<String, String>
 )
 
 @Composable
-fun WritingPracticeView(
+private fun WritingPracticeView(
+    targetLanguageCode: String,
     evaluation: WritingEvaluationResult?,
     error: AiFailure?,
     isLoading: Boolean,
     onEvaluateWriting: (String, String) -> Unit
 ) {
     var textInput by remember { mutableStateOf("") }
-    val prompt = "Write 2-3 sentences describing your favorite daily hobby in Spanish."
+
+    val prompt = remember(targetLanguageCode) {
+        val langName = when (targetLanguageCode) {
+            "es" -> "Spanish"; "en" -> "English"; "fr" -> "French"; "de" -> "German"
+            "ar" -> "Arabic"; "tr" -> "Turkish"; "it" -> "Italian"; "pt" -> "Portuguese"
+            "ru" -> "Russian"; "ja" -> "Japanese"; "ko" -> "Korean"; "zh" -> "Chinese"
+            else -> targetLanguageCode
+        }
+        "Write 2-3 sentences describing your favorite daily hobby in $langName."
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp)
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding)
     ) {
-        Text(text = "AI Writing Lab", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = stringResource(R.string.ai_writing_lab), style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.CompactSpacing))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = stringResource(R.string.prompt), fontWeight = FontWeight.Bold)
-                Text(text = prompt, fontSize = 14.sp)
-            }
+        LinguaCard(modifier = Modifier.fillMaxWidth()) {
+            Text(text = stringResource(R.string.prompt), style = MaterialTheme.typography.titleMedium)
+            Text(text = prompt, style = MaterialTheme.typography.bodyMedium)
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
 
         OutlinedTextField(
             value = textInput,
@@ -453,144 +476,186 @@ fun WritingPracticeView(
                 .fillMaxWidth()
                 .height(140.dp)
                 .testTag("writing_lab_input"),
-            shape = RoundedCornerShape(16.dp)
+            shape = MaterialTheme.shapes.small
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
 
-        Button(
+        LinguaPrimaryButton(
+            text = stringResource(R.string.analyze_writing_with_ai),
             onClick = { onEvaluateWriting(textInput, prompt) },
             enabled = textInput.length >= 5 && !isLoading,
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            if (isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
-            } else {
-                Icon(Icons.Default.AutoAwesome, contentDescription = null)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Analyze Writing with AI")
-            }
-        }
+            loading = isLoading,
+            icon = Icons.Default.AutoAwesome,
+            modifier = Modifier.fillMaxWidth()
+        )
 
         if (error != null) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
             AiErrorBanner(failure = error)
         }
 
         evaluation?.let { eval ->
-            Spacer(modifier = Modifier.height(20.dp))
-            Card(
+            Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
+            LinguaCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-                shape = RoundedCornerShape(18.dp)
+                backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
+                borderColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)
             ) {
-                Column(modifier = Modifier.padding(18.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "Score: ${eval.score}/100", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Corrected Version:", fontWeight = FontWeight.Bold)
-                    Text(text = eval.correctedText, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = stringResource(R.string.ai_feedback), fontWeight = FontWeight.Bold)
-                    Text(text = eval.feedback, fontSize = 13.sp)
-                }
+                Text(text = "Score: ${eval.score}/100", style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.CompactSpacing))
+                Text(text = "Corrected Version:", style = MaterialTheme.typography.titleMedium)
+                Text(text = eval.correctedText, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.CompactSpacing))
+                Text(text = stringResource(R.string.ai_feedback), style = MaterialTheme.typography.titleMedium)
+                Text(text = eval.feedback, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
 }
 
-/**
- * Listen-and-repeat drill. There is deliberately no score here: the app has no
- * speech recognition, and the previous version faked a 92% pronunciation score
- * and 95% word accuracy from a button tap without ever recording audio.
- */
 @Composable
-fun SpeakingPracticeView(onSpeakText: (String) -> Unit) {
-    val targetSentence = "Me gusta aprender nuevos idiomas todos los días."
+private fun SpeakingPracticeView(targetLanguageCode: String, onSpeakText: (String) -> Unit) {
+    val targetSentence = remember(targetLanguageCode) {
+        when (targetLanguageCode) {
+            "es" -> "Me gusta aprender nuevos idiomas todos los días."
+            "en" -> "I like to learn new languages every day."
+            "fr" -> "J'aime apprendre de nouvelles langues tous les jours."
+            "de" -> "Ich lerne gerne jeden Tag neue Sprachen."
+            "ar" -> "أحب تعلم لغات جديدة كل يوم."
+            "tr" -> "Her gün yeni dil öğrenmeyi seviyorum."
+            "it" -> "Mi piace imparare nuove lingue ogni giorno."
+            "pt" -> "Gosto de aprender novas línguas todos os dias."
+            "ru" -> "Мне нравится изучать новые языки каждый день."
+            "ja" -> "毎日新しい言語を学ぶのが好きです."
+            "ko" -> "매일 새로운 언어를 배우는 것을 좋아합니다."
+            "zh" -> "我喜欢每天学习新的语言."
+            else -> "I like to learn new languages every day."
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Speaking Practice", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(20.dp))
+        Text(text = stringResource(R.string.speaking_practice), style = MaterialTheme.typography.titleLarge)
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp)
-        ) {
+        LinguaCard(modifier = Modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text(text = targetSentence, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(12.dp))
+                Text(text = targetSentence, style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
                 IconButton(onClick = { onSpeakText(targetSentence) }) {
-                    Icon(Icons.Default.VolumeUp, contentDescription = "Listen", tint = MaterialTheme.colorScheme.primary)
+                    Icon(
+                        Icons.Default.VolumeUp,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(LinguaVerseDimens.IconLarge)
+                    )
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
-        Button(
+        LinguaPrimaryButton(
+            text = stringResource(R.string.play_again),
             onClick = { onSpeakText(targetSentence) },
-            modifier = Modifier
-                .fillMaxWidth()
-                .testTag("speaking_replay_button"),
-            shape = RoundedCornerShape(14.dp)
-        ) {
-            Icon(Icons.Default.VolumeUp, contentDescription = null)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text("Play again")
-        }
+            icon = Icons.Default.VolumeUp,
+            modifier = Modifier.fillMaxWidth().testTag("speaking_replay_button")
+        )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
         Text(
-            text = "Listen, then repeat the sentence out loud at your own pace.",
-            fontSize = 13.sp,
+            text = stringResource(R.string.speaking_instruction),
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
 
 @Composable
-fun DailyPhrasesView(onSpeakText: (String) -> Unit) {
-    val phrases = listOf(
-        "¿Dónde está el baño?" to "Where is the bathroom?",
-        "¿Cuánto cuesta esto?" to "How much does this cost?",
-        "No entiendo, ¿puede repetir?" to "I don't understand, can you repeat?",
-        "Un café con leche, por favor." to "A coffee with milk, please.",
-        "¡Mucho gusto en conocerte!" to "Nice to meet you!"
-    )
+private fun DailyPhrasesView(targetLanguageCode: String, onSpeakText: (String) -> Unit) {
+    val phrases = remember(targetLanguageCode) {
+        when (targetLanguageCode) {
+            "es" -> listOf(
+                "¿Dónde está el baño?" to "Where is the bathroom?",
+                "¿Cuánto cuesta esto?" to "How much does this cost?",
+                "No entiendo, ¿puede repetir?" to "I don't understand, can you repeat?",
+                "Un café con leche, por favor." to "A coffee with milk, please.",
+                "¡Mucho gusto en conocerte!" to "Nice to meet you!"
+            )
+            "en" -> listOf(
+                "Where is the bathroom?" to "أين الحمام؟",
+                "How much does this cost?" to "كم يكلف هذا؟",
+                "I don't understand, can you repeat?" to "لا أفهم، هل يمكنك التكرار؟",
+                "A coffee with milk, please." to "قهوة مع حليب، من فضلك.",
+                "Nice to meet you!" to "تشرفت بمعرفتك!"
+            )
+            "fr" -> listOf(
+                "Où sont les toilettes ?" to "Where is the bathroom?",
+                "Combien ça coûte ?" to "How much does this cost?",
+                "Je ne comprends pas, pouvez-vous répéter ?" to "I don't understand, can you repeat?",
+                "Un café avec du lait, s'il vous plaît." to "A coffee with milk, please.",
+                "Enchanté de vous rencontrer !" to "Nice to meet you!"
+            )
+            "de" -> listOf(
+                "Wo ist die Toilette?" to "Where is the bathroom?",
+                "Wie viel kostet das?" to "How much does this cost?",
+                "Ich verstehe nicht, können Sie wiederholen?" to "I don't understand, can you repeat?",
+                "Einen Kaffee mit Milch, bitte." to "A coffee with milk, please.",
+                "Freut mich, Sie kennenzulernen!" to "Nice to meet you!"
+            )
+            "ar" -> listOf(
+                "أين الحمام؟" to "Where is the bathroom?",
+                "كم يكلف هذا؟" to "How much does this cost?",
+                "لا أفهم، هل يمكنك التكرار؟" to "I don't understand, can you repeat?",
+                "قهوة مع حليب، من فضلك." to "A coffee with milk, please.",
+                "تشرفت بمعرفتك!" to "Nice to meet you!"
+            )
+            else -> listOf(
+                "Hello, how are you?" to "مرحباً، كيف حالك؟",
+                "Thank you very much" to "شكراً جزيلاً",
+                "Excuse me" to "عفواً",
+                "Please" to "من فضلك",
+                "Goodbye" to "مع السلامة"
+            )
+        }
+    }
 
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding),
+        verticalArrangement = Arrangement.spacedBy(LinguaVerseDimens.CompactSpacing),
+        contentPadding = PaddingValues(bottom = LinguaVerseDimens.SectionSpacing)
     ) {
-        items(phrases) { (spanish, english) ->
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
+        items(phrases) { (phrase, translation) ->
+            LinguaCard(modifier = Modifier.fillMaxWidth()) {
                 Row(
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { onSpeakText(spanish) }) {
-                        Icon(Icons.Default.VolumeUp, contentDescription = stringResource(R.string.play), tint = MaterialTheme.colorScheme.primary)
+                    IconButton(onClick = { onSpeakText(phrase) }) {
+                        Icon(
+                            Icons.Default.VolumeUp,
+                            contentDescription = stringResource(R.string.play),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(LinguaVerseDimens.ComponentSpacing))
                     Column {
-                        Text(text = spanish, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                        Text(text = english, fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(text = phrase, style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = translation,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
                     }
                 }
             }
@@ -599,7 +664,7 @@ fun DailyPhrasesView(onSpeakText: (String) -> Unit) {
 }
 
 @Composable
-fun GenericSkillView(
+private fun GenericSkillView(
     skillType: SkillType,
     vocabularies: List<Vocabulary>,
     onSpeakText: (String) -> Unit
@@ -607,13 +672,25 @@ fun GenericSkillView(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(20.dp),
+            .padding(LinguaVerseDimens.ScreenHorizontalPadding),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(Icons.Default.School, contentDescription = null, modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "${skillType.displayName} Practice", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Text(text = "Interactive modules ready for practice.", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(
+            Icons.Default.School,
+            contentDescription = null,
+            modifier = Modifier.size(64.dp),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
+        Text(
+            text = "${skillType.displayName} Practice",
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            text = "Interactive modules ready for practice.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

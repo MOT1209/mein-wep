@@ -2,10 +2,14 @@ package com.example.data.repository
 
 import com.example.ai.AiTeacherReply
 import com.example.data.db.LinguaVerseDao
+import com.example.data.remote.SupabaseContentDataSource
 import com.example.data.model.*
 import kotlinx.coroutines.flow.Flow
 
-class LinguaVerseRepository(private val dao: LinguaVerseDao) {
+class LinguaVerseRepository(
+    private val dao: LinguaVerseDao,
+    private val remoteContent: SupabaseContentDataSource = SupabaseContentDataSource()
+) {
 
     private companion object {
         const val SEED_LANGUAGE_CODE = "es"
@@ -32,6 +36,9 @@ class LinguaVerseRepository(private val dao: LinguaVerseDao) {
      * OnConflictStrategy.REPLACE and reset the user's progress.
      */
     suspend fun initializeSeedData() {
+        // Remote content is optional: Room remains the offline fallback.
+        if (remoteContent.syncPublicContent(dao)) return
+
         // Seed languages if empty
         if (dao.countLanguages() == 0) {
             val defaultLanguages = listOf(

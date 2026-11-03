@@ -1,43 +1,160 @@
 <resources>
+    <!-- App -->
     <string name="app_name">LinguaVerse</string>
-    <string name="s_3_days_left">3 Days Left</string>
-    <string name="add_vocabulary_word">Add Vocabulary Word</string>
-    <string name="add_word_to_vocabulary">Add Word to Vocabulary</string>
-    <string name="ai_feedback">AI Feedback:</string>
-    <string name="ai_server_uptime_99_98">AI Server Uptime: 99.98%</string>
+
+    <!-- Home Screen -->
+    <string name="continue_learning">CONTINUE LEARNING</string>
+    <string name="skill_practice_15_modules">Skill Practice (15 Modules)</string>
+    <string name="view_all">View All</string>
+    <string name="course_curriculum">Course Curriculum</string>
+    <string name="ai_tutor">AI Tutor</string>
     <string name="ai_teacher">AI Teacher</string>
     <string name="ai_teacher_tutor">AI Teacher Tutor</string>
-    <string name="ai_tutor">AI Tutor</string>
-    <string name="avatar">Avatar</string>
-    <string name="back">Back</string>
-    <string name="category_e_g_travel_food">Category (e.g., Travel, Food)</string>
-    <string name="cefr_certificate_ready">CEFR Certificate Ready</string>
-    <string name="close">Close</string>
-    <string name="continue_learning">CONTINUE LEARNING</string>
-    <string name="course_curriculum">Course Curriculum</string>
+    <string name="ai_chat_feedback">Practice conversation with AI feedback</string>
+    <string name="start_lesson_xp">Start Lesson (+%1$d XP)</string>
+    <string name="xp_reward">+%1$d XP</string>
     <string name="daily_goal">Daily Goal</string>
-    <string name="dark_mode">Dark Mode</string>
-    <string name="default_audio_speed">Default Audio Speed</string>
-    <string name="escribe_aqu_tu_respuesta">Escribe aquí tu respuesta...</string>
-    <string name="favorite">Favorite</string>
-    <string name="flag_emoji_e_g">Flag Emoji (for example 🇳🇱)</string>
-    <string name="level">Level: </string>
-    <string name="next_card">Next Card</string>
-    <string name="no_flashcards_available_yet">No flashcards available yet.</string>
-    <string name="play">Play</string>
+    <string name="s_3_days_left">3 Days Left</string>
+
+    <!-- Lesson Screen -->
+    <string name="close">Close</string>
+    <string name="question_of_exercises">Question %1$d of %2$d</string>
+    <string name="check_answer">Check Answer</string>
+    <string name="continue_action">Continue</string>
+    <string name="practiced_this">I practiced this</string>
+    <string name="excellent">Excellent!</string>
+    <string name="not_quite_right">Not quite right</string>
+    <string name="correct_answer">Correct answer!</string>
+    <string name="nice_practice">Nice practice!</string>
+    <string name="keep_going">Keep going.</string>
+    <string name="correct_answer_feedback">Correct: %1$s</string>
     <string name="practice_out_loud">Practice out loud</string>
-    <string name="prompt">Prompt:</string>
-    <string name="search_vocabulary">Search vocabulary...</string>
-    <string name="skill_practice_15_modules">Skill Practice (15 Modules)</string>
-    <string name="speak">Speak</string>
     <string name="speak_text">Speak Text</string>
+    <string name="type_answer_in_language">Type your answer in %1$s</string>
+
+    <!-- Lesson Completion -->
+    <string name="lesson_completed">Lesson Completed!</string>
+    <string name="you_completed_title">You completed '%1$s'</string>
+    <string name="coins_reward">+%1$d Coins</string>
+    <string name="return_to_dashboard">Return to Dashboard</string>
+
+    <!-- AI Chat Screen -->
+    <string name="ai_chat_input_placeholder">Ask or reply in target language...</string>
+    <string name="start_conversation">Start Conversation with AI Tutor</string>
+    <string name="ai_chat_desc">Ask questions, practice dialogue, or request grammar feedback in real time!</string>
+    <string name="ai_correction">💡 Correction: %1$s</string>
+    <string name="ai_suggestion">✨ Better phrasing: %1$s</string>
+    <string name="send_message">Send</string>
+
+    <!-- Writing Evaluation -->
+    <string name="ai_writing_lab">AI Writing Lab</string>
+    <string name="score_out_of_100">Score: %1$d/100</string>
+    <string name="corrected_version">Corrected Version:</string>
+    <string name="ai_feedback">AI Feedback:</string>
+    <string name="analyze_writing_with_ai">Analyze Writing with AI</string>
+    <string name="prompt">Prompt</string>
+    <string name="escribe_aqu_tu_respuesta">Escribe aquí tu respuesta...</string>
+
+    <!-- Speaking Practice -->
+    <string name="speaking_practice">Speaking Practice</string>
+    <string name="play_again">Play again</string>
+    <string name="speaking_instruction">Listen, then repeat the sentence out loud at your own pace.</string>
+
+    <!-- Reading Story -->
+    <string name="listen_full_story">Listen Full Story</string>
+    <string name="tap_to_translate">Tap any word to translate:</string>
+    <string name="meaning_in_context">Meaning in context</string>
+    <string name="word_translation">'%1$s' -> Translation: %2$s</string>
+
+    <!-- Flashcards -->
+    <string name="no_flashcards_available_yet">No flashcards available yet.</string>
+    <string name="card_of_total">Card %1$d of %2$d</string>
+    <string name="next_card">Next Card</string>
+
+    <!-- Generic Skill View -->
+    <string name="generic_skill_practice">%1$s Practice</string>
+    <string name="interactive_modules_ready">Interactive modules ready for practice.</string>
+
+    <!-- Skills Hub -->
+    <string name="skill_hub_title">Language Skill Hub</string>
+    <string name="skill_hub_subtitle">Master all 15 core linguistic competencies with AI assistance</string>
+
+    <!-- Profile Screen -->
+    <string name="learning_profile">Your learning profile</string>
+    <string name="current_level">Current Level: </string>
+    <string name="competency_breakdown">Competency Breakdown</string>
+    <string name="cefr_certificate_ready">CEFR Certificate Ready</string>
+    <string name="certificate_text">Congratulations! You have completed Level %1$s (%2$s) requirement in %3$s.</string>
+    <string name="view_official_certificate">View Official Certificate</string>
+    <string name="achievements_title">Achievements</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Preferences &amp; Settings</string>
+    <string name="appearance">Appearance</string>
+    <string name="dark_mode">Dark Mode</string>
+    <string name="audio_pronunciation">Audio &amp; Pronunciation</string>
+    <string name="default_audio_speed">Default Audio Speed</string>
+    <string name="offline_content">Offline Content</string>
+    <string name="offline_mode_packs">Offline Mode Packs</string>
+    <string name="offline_description">Lessons &amp; audio saved locally</string>
+    <string name="admin_panel">Admin Content Studio</string>
+    <string name="admin_description">Manage languages, lessons, vocabulary &amp; analytics</string>
+
+    <!-- Leaderboard -->
+    <string name="weekly_league">Weekly League</string>
+    <string name="league_promote_text">Gold League • Top 3 promote to Diamond</string>
+    <string name="league_simulated_note">Simulated rankings based on XP</string>
+    <string name="badge_league">%1$s League</string>
+
+    <!-- Admin Panel -->
+    <string name="admin_panel_title">Admin Panel &amp; Content Studio</string>
+    <string name="tab_analytics">Analytics</string>
+    <string name="tab_languages">Languages</string>
+    <string name="tab_lessons">Lessons</string>
+    <string name="tab_vocabulary">Vocabulary</string>
+    <string name="add_new_language">Add New Language</string>
+    <string name="lang_code_hint">Language Code (e.g., 'nl', 'hi', 'sv')</string>
+    <string name="lang_name_hint">Language Name (e.g., 'Dutch')</string>
+    <string name="native_name_hint">Native Name (e.g., 'Nederlands')</string>
+    <string name="description_hint">Description</string>
+    <string name="add_language_btn">Add Language to Catalog</string>
+    <string name="language_added">Language successfully added!</string>
+    <string name="create_lesson">Create Custom Lesson</string>
+    <string name="lesson_title_hint">Lesson Title</string>
+    <string name="exercise_question_hint">Sample Exercise Question</string>
+    <string name="correct_answer_hint">Correct Answer</string>
+    <string name="save_lesson_btn">Save Custom Lesson</string>
+    <string name="lesson_published">Lesson successfully published!</string>
+    <string name="target_word_hint">Target Language Word</string>
+    <string name="translation_hint">Translation</string>
+    <string name="example_sentence_hint">Example Sentence</string>
+    <string name="add_vocabulary_word">Add Vocabulary Word</string>
+    <string name="vocabulary_word_added">Vocabulary word added!</string>
+    <string name="category_e_g_travel_food">Category (e.g., Travel, Food)</string>
+    <string name="flag_emoji_e_g">Flag Emoji (for example 🇳🇱)</string>
+    <string name="system_overview">System Overview</string>
+    <string name="active_learners_count">Active Learners: 12,450</string>
+    <string name="supported_languages_text">Supported Languages: Unlimited (12 Defaults Enabled)</string>
+    <string name="total_exercises_completed_148_920">Total Exercises Completed: 148,920</string>
+    <string name="ai_server_uptime_99_98">AI Server Uptime: 99.98%</string>
+
+    <!-- Misc existing -->
+    <string name="add_word_to_vocabulary">Add Word to Vocabulary</string>
+    <string name="favorite">Favorite</string>
+    <string name="play">Play</string>
+    <string name="listen">Listen</string>
+    <string name="speak">Speak</string>
     <string name="streak">Streak</string>
     <string name="success">Success</string>
-    <string name="system_overview">System Overview</string>
-    <string name="total_exercises_completed_148_920">Total Exercises Completed: 148,920</string>
-    <string name="view_all">View All</string>
-    <string name="view_official_certificate">View Official Certificate</string>
+    <string name="xp_points">XP points</string>
+    <string name="avatar">Avatar</string>
+    <string name="back">Back</string>
+    <string name="level">Level: </string>
+    <string name="select_language">Select Language</string>
+    <string name="hero_banner_desc">Hero Banner</string>
+    <string name="open_settings">Open settings</string>
+    <string name="admin">Admin</string>
     <string name="vocabulary">Vocabulary</string>
-    <string name="vocabulary_word_added">Vocabulary word added!</string>
-    <string name="weekly_league">Weekly League</string>
+    <string name="no_items_yet">No items yet</string>
+    <string name="no_data_available">No data available</string>
 </resources>

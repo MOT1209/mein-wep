@@ -1,0 +1,29 @@
+{#- A card grid with progressive-enhancement filtering.
+    Expects `items`, `facets`, `showSearch`, `root`, `gridId`, `emptyText`.
+    Facets and showSearch come from _data/kingStudio.js, which only emits
+    controls that can change the result. -#}
+{%- if facets | length or showSearch %}
+<div class="ks-controls" data-ks-controls="{{ gridId }}">
+  {%- if showSearch %}
+  <label class="ks-search"><span class="ks-visually-hidden">Search projects</span>
+    <input type="search" data-ks-search placeholder="Search projects" autocomplete="off">
+  </label>
+  {%- endif %}
+  {%- if facets | length %}
+  <div class="ks-chips" role="group" aria-label="Filter projects">
+    <button type="button" class="ks-chip" data-ks-filter="" aria-pressed="true">All</button>
+    {%- for f in facets %}
+    <button type="button" class="ks-chip" data-ks-filter="{{ f.kind }}:{{ f.value }}" aria-pressed="false">{{ f.value }}</button>
+    {%- endfor %}
+  </div>
+  {%- endif %}
+  <p class="ks-visually-hidden" role="status" aria-live="polite" data-ks-count></p>
+</div>
+{%- endif %}
+
+<ul class="ks-grid" id="{{ gridId }}" data-ks-grid>
+{%- for project in items %}
+{% include "king-studio/card.njk" %}
+{%- endfor %}
+</ul>
+<p class="ks-empty" data-ks-empty hidden>{{ emptyText or 'No projects match this filter.' }}</p>

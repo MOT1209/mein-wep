@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.example.data.model.*
 import kotlinx.coroutines.flow.Flow
@@ -48,6 +49,9 @@ interface LinguaVerseDao {
     @Query("SELECT COUNT(*) FROM lessons WHERE languageCode = :langCode")
     suspend fun countLessons(langCode: String): Int
 
+    @Query("SELECT * FROM lessons")
+    suspend fun getAllLessonsOnce(): List<Lesson>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertLessons(lessons: List<Lesson>)
 
@@ -74,6 +78,9 @@ interface LinguaVerseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVocabularies(vocabularies: List<Vocabulary>)
 
+    @Query("SELECT * FROM vocabularies")
+    suspend fun getAllVocabulariesOnce(): List<Vocabulary>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertVocabulary(vocabulary: Vocabulary)
 
@@ -97,6 +104,9 @@ interface LinguaVerseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFlashcards(flashcards: List<Flashcard>)
 
+    @Query("SELECT * FROM flashcards")
+    suspend fun getAllFlashcardsOnce(): List<Flashcard>
+
     @Update
     suspend fun updateFlashcard(flashcard: Flashcard)
 
@@ -109,6 +119,28 @@ interface LinguaVerseDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAchievements(achievements: List<Achievement>)
+
+    @Query("SELECT * FROM achievements")
+    suspend fun getAllAchievementsOnce(): List<Achievement>
+
+    @Transaction
+    suspend fun mergePublicContent(
+        languages: List<Language>,
+        lessons: List<Lesson>,
+        exercises: List<Exercise>,
+        vocabularies: List<Vocabulary>,
+        grammarRules: List<GrammarRule>,
+        flashcards: List<Flashcard>,
+        achievements: List<Achievement>
+    ) {
+        insertLanguages(languages)
+        insertLessons(lessons)
+        insertExercises(exercises)
+        insertVocabularies(vocabularies)
+        insertGrammarRules(grammarRules)
+        insertFlashcards(flashcards)
+        insertAchievements(achievements)
+    }
 
     @Update
     suspend fun updateAchievement(achievement: Achievement)

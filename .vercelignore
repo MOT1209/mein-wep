@@ -16,6 +16,11 @@
 # download from /apks/*.apk via updates.json.
 **/android/
 **/.gradle/
+**/*.apk
+# ...except apks/ — the intentional public release folder linked from
+# downloads.html. Every tracked .apk lives there; stray android build
+# output is already caught by **/android/ and **/.gradle/ above.
+!/apks/*.apk
 **/*.aab
 **/*.jks
 **/*.keystore
@@ -34,3 +39,33 @@
 .testsprite/
 .claude/
 **/*.log
+
+# Unrelated sub-projects and internal tooling — not linked from any page,
+# not part of the served site. See eleventy.config.mjs VERCEL_IGNORE for
+# the matching build-time exclusion.
+/linguaverse/
+/denkmalen/
+/mcp/
+/notebooks/
+/tools/
+/agents/
+/docs/
+/.pi/
+**/__pycache__/
+**/*.pyc
+
+# Internal docs, tooling config, DB schema and unrelated backends.
+# Mirrors VERCEL_IGNORE in eleventy.config.mjs (dist/ is what is served).
+/.claude/
+/.github/
+/.vscode/
+/*.md
+/apks/*.md
+/db/
+/render.yaml
+/skills-lock.json
+/king-colab-MCP/
+/apps/chat-app/
+/tests/
+/روابط-الإدارة.txt
+/تقرير-مراجعة-المشروع.html

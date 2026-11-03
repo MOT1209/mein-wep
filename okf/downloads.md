@@ -2,7 +2,7 @@
 {
   "type": "Collection",
   "title": "Downloads",
-  "description": "APK downloads and resources for Rashid projects.",
+  "description": "Android APK downloads for King Studio apps.",
   "resource": "https://rashid-wep.vercel.app/downloads.html",
   "tags": [
     "downloads",
@@ -14,7 +14,7 @@
 
 # Downloads
 
-Downloadable APKs and resources for Rashid projects including KingCraft.
+Signed Android APKs for Calculator Vault and Quiz Master, with SHA-256 checksums.
 
 ## Related
 

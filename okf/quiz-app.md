@@ -2,7 +2,7 @@
 {
   "type": "WebApplication",
   "title": "Quiz Master",
-  "description": "Interactive quiz creation and taking platform.",
+  "description": "Interactive quiz platform with multiple categories, scoring, and progress tracking.",
   "resource": "https://rashid-wep.vercel.app/apps/quiz-app/",
   "tags": [
     "app",
@@ -15,7 +15,7 @@
 
 # Quiz Master
 
-Interactive quiz creation and taking platform.
+Interactive quiz platform with multiple categories, scoring, and progress tracking. Available as a PWA and an Android APK. Details: https://rashid-wep.vercel.app/king-studio/apps/quiz-master/
 
 ## Related
 

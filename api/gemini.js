@@ -36,16 +36,15 @@ function isRateLimited(ip) {
   return entry.count > RATE_LIMIT;
 }
 
-module.exports = async (req, res) => {
-  // تحقق من Origin: نحظر فقط إذا كان موجوداً وغير مدرج في القائمة البيضاء
+export default async (req, res) => {
+  // Browsers always send Origin on POST (same-origin included), so a missing
+  // Origin means a non-browser client — reject it to keep the paid key private.
   const origin = req.headers.origin;
-  if (origin) {
-    if (!ALLOWED_ORIGINS.includes(origin)) {
-      return res.status(403).json({ error: 'Origin not allowed' });
-    }
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Vary', 'Origin');
+  if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+    return res.status(403).json({ error: 'Origin not allowed' });
   }
+  res.setHeader('Access-Control-Allow-Origin', origin);
+  res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
@@ -81,10 +80,10 @@ module.exports = async (req, res) => {
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
       {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
         body: JSON.stringify({
           contents: [{ parts: [{ text: prompt }] }],
           safetySettings: [
@@ -96,10 +95,15 @@ module.exports = async (req, res) => {
       }
     );
 
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      console.error('Gemini upstream error:', response.status, detail.slice(0, 300));
+      return res.status(502).json({ error: 'AI service unavailable' });
+    }
     const data = await response.json();
     return res.status(200).json(data);
   } catch (err) {
     console.error('Gemini proxy error:', err.message);
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: 'AI service unavailable' });
   }
 };

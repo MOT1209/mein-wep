@@ -57,7 +57,7 @@ function injectAdminBar() {
    Security fix: removed self-registration of admin users.
    Only the database owner (Supabase Dashboard) can add admins.
    The old add_admin_user() RPC was revoked from authenticated users.
-   See SUPABASE_SECURITY_FIX.sql for details.
+   See db/SUPABASE_SECURITY_FIX.sql for details.
 */
 function injectRegisterPrompt() {
   // No-op: admin registration is now manual via Supabase Dashboard only

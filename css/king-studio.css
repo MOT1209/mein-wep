@@ -1,0 +1,168 @@
+/* =========================================================================
+   King Studio — the catalogue pages and the project card.
+
+   The pages sit on the shared site shell (css/site.css: header, footer,
+   language switcher, theme), so this file only styles what lives inside
+   `.ks`: the studio hero, catalogue sections, cards, empty states and the
+   project detail page. The card is also used on the homepage.
+   Colours, type and spacing come from css/tokens.css. Mobile-first;
+   logical properties only, so Arabic (RTL) mirrors without overrides.
+   ========================================================================= */
+
+.ks h1, .ks h2, .ks h3 { font-family: var(--font-display); line-height: 1.15; letter-spacing: -0.01em; margin: 0; color: var(--ink); }
+:where(.ks) p { margin: 0; }
+:where(.ks) :is(ul, ol) { margin: 0; padding: 0; list-style: none; }
+
+/* ---------- Hero ---------- */
+.ks-hero {
+  padding: var(--s-7) 0 var(--s-6);
+  border-block-end: 1px solid var(--rule);
+  background: linear-gradient(180deg, var(--signal-wash), var(--paper) 85%);
+}
+@media (min-width: 640px) { .ks-hero { padding: var(--s-8) 0 var(--s-7); } }
+.ks-brand {
+  display: flex; width: fit-content; align-items: center; gap: var(--s-2); margin-block-end: var(--s-4);
+  font-family: var(--font-display); font-weight: 800; letter-spacing: 0.14em; font-size: 0.9375rem; color: var(--ink);
+}
+.ks-brand svg { width: 20px; height: 20px; color: var(--signal); flex: none; }
+.ks-title { font-size: clamp(2rem, 7vw, 3.25rem); font-weight: 800; max-width: 18ch; }
+.ks-tagline { margin-block-start: var(--s-2); font-family: var(--font-display); font-weight: 700; font-size: 1.125rem; color: var(--signal); }
+.ks-lede { margin-block-start: var(--s-3); color: var(--ink-soft); font-size: 1.0625rem; max-width: var(--measure); }
+.ks-actions { display: flex; flex-wrap: wrap; gap: var(--s-3); margin-block-start: var(--s-5); }
+.ks-hero-facts { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-7); margin: var(--s-6) 0 0; }
+.ks-hero-facts dt { font-size: 0.75rem; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.08em; }
+:lang(ar) .ks-hero-facts dt { letter-spacing: normal; }
+.ks-hero-facts dd { margin: var(--s-1) 0 0; font-family: var(--font-display); font-weight: 800; font-size: 1.75rem; color: var(--ink); }
+
+/* ---------- Sections ---------- */
+.ks-section { padding: var(--s-7) 0; }
+.ks-section-head {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+  gap: var(--s-1) var(--s-4); margin-block-end: var(--s-5);
+}
+.ks-section-head h2, .ks-cta h2, .ks-panel h2 { font-size: clamp(1.375rem, 4vw, 1.75rem); }
+.ks-more { display: inline-flex; align-items: center; gap: 4px; min-height: var(--tap); font-weight: 600; text-decoration: none; }
+.ks-more:hover { text-decoration: underline; text-underline-offset: 3px; }
+[dir="rtl"] .ks-more span { display: inline-block; transform: scaleX(-1); }
+
+.ks-page-head { padding: var(--s-5) 0 0; }
+.ks-page-head h1 { font-size: clamp(1.75rem, 6vw, 2.5rem); margin-block-start: var(--s-3); }
+.ks-page-head + .ks-section { padding-block-start: var(--s-5); }
+
+.ks-crumbs ol { display: flex; flex-wrap: wrap; gap: 0 var(--s-2); font-size: 0.875rem; color: var(--ink-muted); }
+.ks-crumbs li + li::before { content: "/"; margin-inline-end: var(--s-2); color: var(--rule-strong); }
+.ks-crumbs a, .ks-crumbs span { display: inline-flex; align-items: center; min-height: 32px; }
+.ks-crumbs a { color: var(--ink-muted); text-decoration: none; }
+.ks-crumbs a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.ks-crumbs [aria-current] { color: var(--ink); }
+
+/* Empty states and the "games are on the way" note */
+.ks-panel {
+  display: grid; gap: var(--s-3); justify-items: start;
+  padding: var(--s-6); border: 1px dashed var(--rule-strong); border-radius: 14px; background: var(--card-sunk);
+}
+.ks-panel p { color: var(--ink-soft); max-width: var(--measure); }
+
+.ks-cta { border-block-start: 1px solid var(--rule); }
+.ks-cta p { color: var(--ink-muted); margin-block-start: var(--s-2); max-width: 56ch; }
+
+/* ---------- Buttons, status, small parts ---------- */
+.ks-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2);
+  min-height: var(--tap); padding: 0 var(--s-4); border-radius: var(--radius); border: 1px solid transparent;
+  font: 600 0.9375rem/1 var(--font-body); text-decoration: none; cursor: pointer; text-align: center;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+.site .ks-btn-primary { background: var(--signal); color: var(--on-signal); }
+.site .ks-btn-primary:hover { background: var(--signal-hover); color: var(--on-signal); }
+.site .ks-btn-ghost { background: var(--card); color: var(--ink); border-color: var(--rule-strong); }
+.site .ks-btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+.ks-version { font-weight: 500; opacity: .8; }
+
+.ks-status {
+  display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px;
+  font-size: .75rem; font-weight: 600; border: 1px solid var(--rule-strong); color: var(--ink-soft); background: var(--card-sunk);
+}
+.ks-status::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.ks-status-ok { color: var(--ok); background: var(--ok-wash); border-color: transparent; }
+.ks-status-dev, .ks-status-exp { color: var(--signal); background: var(--signal-wash); border-color: var(--signal-edge); }
+.ks-status-exp::before { border-radius: 2px; transform: rotate(45deg); }
+.ks-status-soon { color: var(--ink-muted); }
+.ks-category { font-size: .8125rem; color: var(--ink-muted); }
+
+.ks-monogram {
+  display: grid; place-items: center; width: 100%; height: 100%;
+  color: var(--signal); font-family: var(--font-display); font-weight: 800; font-size: 1.75rem;
+}
+.ks-monogram-lg { font-size: 3rem; }
+
+/* ---------- Card ---------- */
+.ks-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-4); list-style: none; margin: 0; padding: 0; }
+@media (min-width: 1024px) { .ks-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-5); } }
+
+.ks-card {
+  display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: var(--s-4); align-items: start;
+  padding: var(--s-5); background: var(--card); border: 1px solid var(--rule); border-radius: 14px;
+  box-shadow: var(--lift); transition: box-shadow .2s ease, border-color .2s ease;
+}
+.ks-card:hover { box-shadow: var(--lift-hover); border-color: var(--signal-edge); }
+.ks-card[hidden] { display: none; }
+.ks-card-icon {
+  display: block; width: 72px; height: 72px; border-radius: 18px; overflow: hidden;
+  background: var(--card-sunk); border: 1px solid var(--rule);
+}
+.ks-card-icon img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ks-card-body { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; }
+.ks-card-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.ks-card-title { font-size: 1.25rem; }
+.site .ks-card-title a { color: var(--ink); text-decoration: none; }
+.site .ks-card-title a:hover { color: var(--signal); text-decoration: underline; text-underline-offset: 3px; }
+.ks-card-desc { color: var(--ink-muted); font-size: .9375rem; margin: 0; }
+.ks-platforms { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+.ks-platforms li { font-family: var(--font-mono); font-size: .75rem; padding: 2px 8px; border: 1px solid var(--rule); border-radius: 6px; color: var(--ink-soft); }
+.ks-card-actions { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-block-start: var(--s-2); }
+
+/* Filters (rendered only when they can change the result) */
+.ks-controls { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-3); margin-block-end: var(--s-5); }
+.ks-search input {
+  min-height: var(--tap); width: min(100%, 320px); padding: 0 14px; border-radius: var(--radius);
+  border: 1px solid var(--rule-strong); background: var(--card); color: var(--ink); font: inherit; font-size: 1rem;
+}
+.ks-chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.ks-chip {
+  min-height: var(--tap); padding: 0 var(--s-4); border-radius: 999px; border: 1px solid var(--rule-strong);
+  background: var(--card); color: var(--ink-soft); font: 500 .875rem var(--font-body); cursor: pointer;
+}
+.ks-chip:hover { border-color: var(--ink); }
+.ks-chip[aria-pressed="true"] { background: var(--signal); color: var(--on-signal); border-color: var(--signal); }
+.ks-empty { padding: var(--s-6) 0; color: var(--ink-muted); text-align: center; }
+
+/* ---------- Detail page ---------- */
+.ks-detail { padding-block-start: var(--s-5); }
+.ks-detail-head { display: grid; grid-template-columns: 1fr; gap: var(--s-5); align-items: center; }
+@media (min-width: 640px) { .ks-detail-head { grid-template-columns: 112px minmax(0, 1fr); } }
+.ks-detail-icon {
+  width: 112px; height: 112px; border-radius: 26px; overflow: hidden;
+  background: var(--card-sunk); border: 1px solid var(--rule); box-shadow: var(--lift);
+}
+.ks-detail-icon img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.ks-detail-head h1 { font-size: clamp(1.75rem, 6vw, 2.5rem); margin-block-start: var(--s-2); }
+.ks-detail-actions { margin-block-start: var(--s-5); }
+.ks-note { color: var(--ink-muted); font-size: .9375rem; margin-block-start: var(--s-3); }
+.ks-detail-grid { display: grid; grid-template-columns: 1fr; gap: var(--s-6); margin-block-start: var(--s-7); }
+@media (min-width: 1024px) { .ks-detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-8); } }
+.ks-detail-grid h2 { font-size: 1.125rem; margin-block-end: var(--s-3); }
+.ks-features { display: grid; gap: var(--s-2); }
+.ks-features li { position: relative; padding-inline-start: 22px; color: var(--ink-soft); }
+.ks-features li::before {
+  content: ""; position: absolute; inset-inline-start: 4px; top: .65em;
+  width: 8px; height: 8px; border-radius: 2px; background: var(--signal); transform: rotate(45deg);
+}
+.ks-facts { display: grid; margin: 0; border-block-start: 1px solid var(--rule); }
+.ks-facts div { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: var(--s-3); padding: 10px 0; border-block-end: 1px solid var(--rule); }
+.ks-facts dt { color: var(--ink-muted); font-size: .875rem; }
+.ks-facts dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ks-card, .ks-btn { transition: none; }
+}

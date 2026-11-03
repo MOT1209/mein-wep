@@ -1,4 +1,4 @@
-# Rashid — Full-Stack Developer & AI Engineer
+# Rashid Ali — Full-Stack Developer & AI Engineer
 > Building the future with code & AI.
 
 ## Docs
@@ -8,18 +8,9 @@
 
 ## Projects
 
-### Games
-- Farm Game (3D farming simulation): https://rashid-wep.vercel.app/games/farm-game/
-- Kingcraft Game: https://rashid-wep.vercel.app/games/kingcraft-game/
-- Rust Construction (3D building): https://rashid-wep.vercel.app/games/rust-game/
-
 ### Apps
-- Calculator App: https://rashid-wep.vercel.app/apps/calculator-app/
-- Quran App (digital Quran reader): https://rashid-wep.vercel.app/quran-app/
-- Quiz App (interactive quizzes): https://rashid-wep.vercel.app/apps/quiz-app/
-
-### AI Models
-- Rashid Model: https://rashid-wep.vercel.app/models/Rashid-Model/
+- Calculator Vault: https://rashid-wep.vercel.app/apps/calculator-app/
+- Quiz Master (interactive quizzes): https://rashid-wep.vercel.app/apps/quiz-app/
 
 ### Vault (Knowledge Repository)
 - Prompts: https://rashid-wep.vercel.app/vault/prompts/

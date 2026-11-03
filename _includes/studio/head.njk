@@ -1,0 +1,16 @@
+{#- <head> additions for King Studio pages: stylesheet and breadcrumb JSON-LD.
+    Expects `locale`, `studioPage` ("index" | "section" | "project"), and
+    `studioSection` (section pages) or `project` (detail pages). -#}
+{%- set L = locale or "en" %}
+{%- set S = i18n[L].studio %}
+{%- set home = site.siteUrl ~ "/" ~ site.translations.home[L] %}
+{%- set studioUrl = site.siteUrl ~ "/" ~ site.translations.studio[L] %}
+{%- set sec = studioSection or (project.section if project else null) %}
+    <link rel="stylesheet" href="{{ root }}css/king-studio.css?v={{ site.cssVersion }}">
+{%- set crumbList = [
+      { "@type": "ListItem", "position": 1, "name": S.portfolio, "item": home },
+      { "@type": "ListItem", "position": 2, "name": "King Studio", "item": studioUrl }
+    ] %}
+{%- if sec %}{% set _ = crumbList.push({ "@type": "ListItem", "position": 3, "name": S.sections[sec], "item": studioUrl ~ sec ~ "/" }) %}{% endif %}
+{%- if project %}{% set _ = crumbList.push({ "@type": "ListItem", "position": 4, "name": project.title, "item": studioUrl ~ sec ~ "/" ~ project.id ~ "/" }) %}{% endif %}
+    <script type="application/ld+json">{{ { "@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": crumbList } | dump | replace("<", "\\u003c") | safe }}</script>

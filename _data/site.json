@@ -1,14 +1,127 @@
 {
   "siteUrl": "https://rashid-wep.vercel.app",
-  "cssVersion": "10.2",
+  "cssVersion": "11.5",
   "swVersion": "v18",
   "gaId": "G-W139X3X20X",
   "adsClient": "ca-pub-4804302403615958",
   "adsSlot": "5604153803",
   "fonts": {
-    "themeColorDark": "#0a0a0b",
-    "themeColorLight": "#fafafa",
-    "bodyFont": "Inter",
+    "themeColorDark": "#0b1220",
+    "themeColorLight": "#f7f9fc",
+    "displayFont": "Bricolage Grotesque",
+    "bodyFont": "IBM Plex Sans",
     "monoFont": "JetBrains Mono"
+  },
+  "nav": [
+    {
+      "label": "Projects",
+      "href": "#projects"
+    },
+    {
+      "label": "About",
+      "href": "#about"
+    },
+    {
+      "label": "Contact",
+      "href": "#contact"
+    }
+  ],
+  "navExternal": [
+    {
+      "label": "King Studio",
+      "href": "king-studio/",
+      "internal": true
+    },
+    {
+      "label": "Downloads",
+      "href": "downloads.html"
+    },
+    {
+      "label": "Blog",
+      "href": "blog/"
+    }
+  ],
+  "siteNav": [
+    {
+      "key": "home",
+      "label": "Home",
+      "href": ""
+    },
+    {
+      "key": "studio",
+      "label": "King Studio",
+      "href": "king-studio/"
+    },
+    {
+      "key": "blog",
+      "label": "Blog",
+      "href": "blog/"
+    },
+    {
+      "key": "downloads",
+      "label": "Downloads",
+      "href": "downloads.html"
+    },
+    {
+      "key": "about",
+      "label": "About",
+      "href": "about.html"
+    },
+    {
+      "key": "contact",
+      "label": "Contact",
+      "href": "contact.html"
+    }
+  ],
+  "locales": [
+    {
+      "code": "en",
+      "short": "EN"
+    },
+    {
+      "code": "de",
+      "short": "DE"
+    },
+    {
+      "code": "ar",
+      "short": "ع"
+    }
+  ],
+  "translations": {
+    "home": {
+      "en": "",
+      "de": "de/",
+      "ar": "ar/"
+    },
+    "about": {
+      "en": "about.html",
+      "de": "de/about.html",
+      "ar": "ar/about.html"
+    },
+    "contact": {
+      "en": "contact.html",
+      "de": "de/contact.html",
+      "ar": "ar/contact.html"
+    },
+    "studio": {
+      "en": "king-studio/",
+      "de": "de/king-studio/",
+      "ar": "ar/king-studio/"
+    },
+    "studioApps": {
+      "en": "king-studio/apps/",
+      "de": "de/king-studio/apps/",
+      "ar": "ar/king-studio/apps/"
+    },
+    "studioGames": {
+      "en": "king-studio/games/",
+      "de": "de/king-studio/games/",
+      "ar": "ar/king-studio/games/"
+    },
+    "studioLabs": {
+      "en": "king-studio/labs/",
+      "de": "de/king-studio/labs/",
+      "ar": "ar/king-studio/labs/"
+    }
   }
 }

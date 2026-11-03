@@ -23,7 +23,10 @@ async function fetchLessons() {
         container.textContent = '';
 
         if (!lessons || lessons.length === 0) {
-            container.textContent = 'No lessons found yet. Check back soon!';
+            const empty = document.createElement('p');
+            empty.className = 'lessons-state';
+            empty.textContent = 'No lessons yet. Check back soon!';
+            container.appendChild(empty);
             return;
         }
 
@@ -36,17 +39,10 @@ async function fetchLessons() {
     } catch (err) {
         console.error('Error fetching lessons:', err);
         container.textContent = '';
-        const errDiv = document.createElement('div');
-        errDiv.style.cssText = 'grid-column:1/-1;text-align:center;color:#ff4444';
-        const errIcon = document.createElement('i');
-        errIcon.className = 'fas fa-exclamation-circle';
-        errIcon.style.fontSize = '2rem';
-        errDiv.appendChild(errIcon);
         const errText = document.createElement('p');
-        errText.style.marginTop = '15px';
+        errText.className = 'lessons-state';
         errText.textContent = 'Failed to load lessons. Please try again later.';
-        errDiv.appendChild(errText);
-        container.appendChild(errDiv);
+        container.appendChild(errText);
     }
 }
 

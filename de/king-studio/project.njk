@@ -1,0 +1,26 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: de
+root: "../../../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+studioPage: project
+pagination:
+  data: kingStudio.projects
+  size: 1
+  alias: project
+permalink: "/de/king-studio/{{ project.section }}/{{ project.id }}/index.html"
+eleventyComputed:
+  title: "{{ project.title }} — {{ i18n.de.studio.sections[project.section] }} — King Studio"
+  metaDescription: "{{ project.text.de.description | safe }}"
+  canonical: "https://rashid-wep.vercel.app/de/{{ project.detailUrl }}"
+  pageAlternates:
+    en: "{{ project.detailUrl }}"
+    de: "de/{{ project.detailUrl }}"
+    ar: "ar/{{ project.detailUrl }}"
+metaKeywords: "King Studio, Rashid Ali, App, PWA, Android"
+---
+{% include "studio/project.njk" %}

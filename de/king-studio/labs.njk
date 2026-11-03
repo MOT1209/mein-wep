@@ -1,0 +1,20 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: de
+root: "../../../"
+activeNav: studio
+noAds: true
+headExtra: "studio/head.njk"
+extraBodyScript: "studio/script.njk"
+translationKey: studioLabs
+studioPage: section
+studioSection: labs
+permalink: /de/king-studio/labs/index.html
+canonical: "https://rashid-wep.vercel.app/de/king-studio/labs/"
+eleventyComputed:
+  title: "{{ i18n.de.studio.labsMetaTitle | safe }}"
+  metaDescription: "{{ i18n.de.studio.labsMeta | safe }}"
+metaKeywords: "King Studio, Rashid Ali, labs"
+---
+{% include "studio/section.njk" %}

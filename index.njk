@@ -1,0 +1,18 @@
+---
+layout: layouts/base.njk
+legacyShell: true
+locale: en
+translationKey: home
+eleventyComputed:
+  title: "{{ i18n.en.home.title | safe }}"
+  metaDescription: "{{ i18n.en.home.metaDescription | safe }}"
+  ogDescription: "{{ i18n.en.home.ogDescription | safe }}"
+metaKeywords: "Rashid Ali, MOT1209, Full-Stack Developer, AI Engineer, King Studio, JavaScript, Python, Godot, Unity, Supabase, Portfolio"
+canonical: "https://rashid-wep.vercel.app/"
+activeNav: home
+noAds: true
+showSettings: true
+headExtra: "partials/home/head-extra.njk"
+extraBodyScript: "partials/home/body-script.njk"
+---
+{% include "pages/home.njk" %}

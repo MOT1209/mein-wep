@@ -1,6 +1,7 @@
 import { execSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
+import { TEMPLATE_OUTPUTS } from './site-templates.mjs';
 
 /**
  * URL-surface parity gate.
@@ -29,17 +30,26 @@ const NOT_SERVED = [
   /^_includes\//,
   /^\.claude\//,
   /^\.pi\//,
+  /^tests\//,
   /^scripts\/check-url-surface\.mjs$/,
+  /^scripts\/site-templates\.mjs$/,
+  // Function sources, deploy config and build tooling: Vercel reads them from
+  // the repo, nobody needs them over HTTP.
+  /^api\//,
+  /^vercel\.json$/,
+  /^scripts\//,
+  // Raw Vite/TypeScript source with no build step: the page loads /src/main.ts
+  // and cannot run. Serve it again only as `vite build` output.
+  /^games\/kingcraft1\//,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.
-// NOTE: apks/*.apk are deliberately NOT excluded — /apks/*.apk is the
-// intentional OTA release channel; the in-app update checkers of all six
-// shipped apps download from it (updates.json -> /apks/*.apk). Build-generated
-// APKs live under android/ which is already excluded above.
+// Kept in sync with VERCEL_IGNORE in eleventy.config.mjs.
 const VERCEL_IGNORE = [
   /\/android\//,
   /\/\.gradle\//,
+  // See the matching comment in eleventy.config.mjs: apks/*.apk is the
+  // intentional public release folder, not stray android build output.
   /\.aab$/,
   /\.jks$/,
   /\.keystore$/,
@@ -54,6 +64,30 @@ const VERCEL_IGNORE = [
   /^\.pi\//,
   /^\.claude\//,
   /^\.testsprite\//,
+  /^linguaverse\//,
+  /^denkmalen\//,
+  /^mcp\//,
+  /^notebooks\//,
+  /^tools\//,
+  /^agents\//,
+  /^docs\//,
+  /^\.pi\//,
+  // Internal docs, tooling config, DB schema and unrelated backends — never
+  // linked from any page. Root-level *.md only: okf/*.md is served on purpose.
+  /^\.claude\//,
+  /^\.github\//,
+  /^\.vscode\//,
+  /^[^/]+\.md$/,
+  /^apks\/[^/]+\.md$/,
+  /^db\//,
+  /^render\.yaml$/,
+  /^skills-lock\.json$/,
+  /^king-colab-MCP\//,
+  /^apps\/chat-app\//,
+  /^روابط-الإدارة\.txt$/,
+  /^تقرير-مراجعة-المشروع\.html$/,
+  /__pycache__\//,
+  /\.pyc$/,
 ];
 
 function walk(dir, base = '', out = []) {
@@ -79,11 +113,17 @@ function isExcluded(p) {
   return false;
 }
 
-const tracked = execSync('git -c core.quotepath=false ls-files', { cwd: ROOT, encoding: 'utf8' })
-  .split('\n')
+// `-z` + null-byte splitting: see the matching comment in
+// eleventy.config.mjs — plain `git ls-files` octal-escapes non-ASCII
+// filenames, which breaks comparison against the real paths on disk.
+const tracked = execSync('git ls-files -z', { cwd: ROOT, encoding: 'utf8' })
+  .split('\0')
   .map((l) => l.trim())
   .filter(Boolean)
-  .filter((p) => !isExcluded(p));
+  .filter((p) => !isExcluded(p))
+  // git knows a page as `index.njk`; dist/ contains the rendered `index.html`.
+  // Compare like for like. See scripts/site-templates.mjs.
+  .flatMap((p) => TEMPLATE_OUTPUTS[p] ?? p);
 
 const actual = walk(DIST).filter((p) => !isExcluded(p));
 

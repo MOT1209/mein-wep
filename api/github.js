@@ -35,7 +35,7 @@ function isRateLimited(ip) {
   return entry.count > RATE_LIMIT;
 }
 
-module.exports = async (req, res) => {
+export default async (req, res) => {
   // تحقق من Origin: نحظر فقط إذا كان موجوداً وغير مدرج في القائمة البيضاء
   const origin = req.headers.origin;
   if (origin) {
@@ -72,6 +72,7 @@ module.exports = async (req, res) => {
     const data = await response.json();
     return res.status(200).json(data);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    console.error('GitHub proxy error:', err.message);
+    return res.status(500).json({ error: 'GitHub API unavailable' });
   }
 };

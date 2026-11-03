@@ -1,8 +1,8 @@
 ---
 {
   "type": "WebApplication",
-  "title": "Smart Vault",
-  "description": "Stealth calculator app with hidden vault for files, images, and data.",
+  "title": "Calculator Vault",
+  "description": "Privacy-focused calculator with a secret vault. Hide files behind a calculator interface.",
   "resource": "https://rashid-wep.vercel.app/apps/calculator-app/",
   "tags": [
     "app",
@@ -13,9 +13,9 @@
 }
 ---
 
-# Smart Vault
+# Calculator Vault
 
-Stealth calculator app with hidden vault for files, images, and data.
+Privacy-focused calculator with a secret vault. Hide files behind a calculator interface. Available as a PWA and an Android APK. Details: https://rashid-wep.vercel.app/king-studio/apps/calculator-vault/
 
 ## Related
 

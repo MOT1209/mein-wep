@@ -1,0 +1,60 @@
+{#- King Studio landing page body. Expects `root` and `locale`. -#}
+{%- set L = locale or "en" %}
+{%- set S = i18n[L].studio %}
+{%- set studio = site.translations.studio[L] %}
+<div class="ks">
+<section class="ks-hero" aria-labelledby="ks-title">
+  <div class="wrap">
+    <p class="ks-brand"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7z"/></svg><span dir="ltr">KING STUDIO</span></p>
+    <p class="eyebrow">{{ S.eyebrow }}</p>
+    <h1 id="ks-title" class="ks-title">{{ S.headline }}</h1>
+    <p class="ks-tagline"><span dir="ltr">{{ S.tagline }}</span></p>
+    <p class="ks-lede">{{ S.lede }}</p>
+    <div class="ks-actions">
+      <a class="btn btn-primary" href="{{ root }}{{ studio }}apps/">{{ S.browseApps }}</a>
+      <a class="btn btn-secondary" href="{{ (root ~ site.translations.home[L]) or './' }}">{{ S.backHome }}</a>
+    </div>
+    <dl class="ks-hero-facts">
+      <div><dt>{{ S.factApps }}</dt><dd>{{ kingStudio.sections.apps.projects | length }}</dd></div>
+      <div><dt>{{ S.factAndroid }}</dt><dd>{{ releases.items | length }}</dd></div>
+    </dl>
+  </div>
+</section>
+
+{%- for key in ["apps", "games", "labs"] %}{% if kingStudio.featured[key] | length %}
+<section class="ks-section" aria-labelledby="ks-{{ key }}-h">
+  <div class="wrap">
+    <div class="ks-section-head">
+      <h2 id="ks-{{ key }}-h">{{ S.featuredTitle if key == "apps" else S.sections[key] }}</h2>
+      <a class="ks-more" href="{{ root }}{{ studio }}{{ key }}/">{{ S.backTo[key] }}<span aria-hidden="true"> &rarr;</span></a>
+    </div>
+    <ul class="ks-grid">
+{%- for project in kingStudio.featured[key] %}
+{% include "king-studio/card.njk" %}
+{%- endfor %}
+    </ul>
+  </div>
+</section>
+{%- endif %}{% endfor %}
+
+{%- if not (kingStudio.sections.games.projects | length) %}
+<section class="ks-section" aria-labelledby="ks-coming-h">
+  <div class="wrap">
+    <div class="ks-panel">
+      <h2 id="ks-coming-h">{{ S.comingTitle }}</h2>
+      <p>{{ S.comingText }}</p>
+    </div>
+  </div>
+</section>
+{%- endif %}
+
+<section class="ks-section ks-cta" aria-labelledby="ks-cta-h">
+  <div class="wrap">
+    <h2 id="ks-cta-h">{{ S.ctaTitle }}</h2>
+    <p>{{ S.ctaText }}</p>
+    <div class="ks-actions">
+      <a class="btn btn-primary" href="{{ root }}{{ site.translations.contact[L] }}">{{ S.ctaContact }}</a>
+    </div>
+  </div>
+</section>
+</div>

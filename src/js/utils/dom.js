@@ -18,6 +18,10 @@ export function safeUrl(value, fallback = '#') {
     try {
         const parsed = new URL(url, window.location.href);
         if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return parsed.href;
+        // Parsed against the page URL, so any other scheme (javascript:,
+        // data:, vbscript:, …) was written explicitly — never let it through
+        // to the relative-path check below, whose charset includes ':'.
+        return fallback;
     } catch (err) {
         // Relative paths are validated below.
     }

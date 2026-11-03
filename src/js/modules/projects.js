@@ -20,13 +20,18 @@ const projectScreenshots = {
 };
 
 // Projects that have Android APK builds
+// Kept in step with apks/updates.json, which the release bot writes.
+// Farm Empire pointed at v2.0.0 — a file that does not exist — so its
+// Install APK button 404'd and verifyApkButtons() silently hid it, making
+// Farm Empire the one game you could not install. The other three were a
+// release behind.
 const apkProjects = {
     'KingCraft': { url: '/apks/kingcraft-game-v0.6.0.apk', version: '0.6.0' },
     'Rust Construction': { url: '/apks/rust-game-v1.1.0.apk', version: '1.1.0' },
-    'Farm Empire': { url: '/apks/farm-game-v2.0.0.apk', version: '2.0.0' },
-    'Quran Pro': { url: '/apks/quran-app-v1.0.0.apk', version: '1.0.0' },
-    'Calculator App': { url: '/apks/calculator-app-v1.0.0.apk', version: '1.0.0' },
-    'Quiz Master': { url: '/apks/quiz-app-v1.4.0.apk', version: '1.4.0' }
+    'Farm Empire': { url: '/apks/farm-game-v2.5.0.apk', version: '2.5.0' },
+    'Quran Pro': { url: '/apks/quran-app-v1.0.1.apk', version: '1.0.1' },
+    'Calculator App': { url: '/apks/calculator-app-v1.0.1.apk', version: '1.0.1' },
+    'Quiz Master': { url: '/apks/quiz-app-v1.4.1.apk', version: '1.4.1' }
 };
 
 const fallbackProjects = [
@@ -38,7 +43,6 @@ const fallbackProjects = [
     { title: 'KingCraft', category: 'Game', description: '3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive! Built with Three.js chunk-based rendering.', link: 'games/kingcraft-game/showcase.html', image_url: '../images/screenshots/kingcraft.svg', technologies: ['Three.js', '3D', 'Sandbox'] },
     { title: 'Rust Construction', category: 'Game', description: '3D building game with physics and resource management. Build structures, manage resources, survive!', link: 'games/rust-game/index.html', image_url: '../images/screenshots/rust-construction.svg', technologies: ['Three.js', '3D', 'Physics'] },
     { title: 'Farm Empire', category: 'Game', description: 'Immersive farming simulation with crops, animals, and economy. Grow your farm empire!', link: 'games/farm-game/index.html', image_url: '../images/screenshots/farm-empire.svg', technologies: ['WebGL', 'Simulation', 'Economy'] },
-    { title: 'Denkmalen', category: 'Game', description: 'Drawing battle game with AI judge. Draw words, vote for the best art, and compete with friends in offline and online modes!', link: '/denkmalen', image_url: '../images/screenshots/default.svg', technologies: ['React', 'Canvas', 'AI Judge'] },
     { title: 'Rashid AI', category: 'Model', description: 'Advanced conversational AI assistant powered by Gemini & OpenRouter. Multilingual support with 10+ languages.', link: 'models/Rashid-Model/index.html', image_url: '../images/screenshots/rashid-ai.svg', technologies: ['Gemini API', 'OpenRouter', 'AI'] },
     { title: 'KING2 AI v2.1', category: 'Model', description: 'منصة ذكاء اصطناعي متكاملة — محرك KING2 مع Next.js، FastAPI، QLoRA على Qwen2.5-3B، قاعدة معرفية إسلامية، توليد صور، ومزودين متعددين.', link: '/king2', image_url: '../images/screenshots/king2-ai.svg', technologies: ['Next.js', 'Qwen2.5-3B', 'QLoRA', 'FastAPI', 'Supabase'] },
     { title: 'Quran Pro', category: 'App', description: 'Complete Quran with tafsir, 40+ reciters, search, and bookmarks. Full offline support.', link: '/quran-app/', image_url: '../images/screenshots/default.svg', technologies: ['Audio', 'PWA', 'Offline'] },
@@ -162,29 +166,12 @@ function renderProjects(projects) {
 
     const lang = getCurrentLanguage();
 
-    const featured = projects.slice(0, 3);
-    const regular = projects.slice(3);
+    // One grid for everything. A separate "featured" block used to be
+    // prepended here with no styles behind it on the redesigned homepage, so
+    // the first three projects rendered as full-width slabs.
+    qs('.featured-projects')?.remove();
 
-    const oldFeatured = qs('.featured-projects');
-    if (oldFeatured) oldFeatured.remove();
-
-    if (featured.length > 0) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'featured-projects';
-        featured.forEach(project => {
-            wrapper.insertAdjacentHTML('beforeend', createProjectCard(project, lang));
-        });
-        wrapper.querySelectorAll('.project-card').forEach(card => {
-            const badge = document.createElement('div');
-            badge.className = 'featured-badge';
-            badge.textContent = 'Featured \u2B50';
-            card.querySelector('.project-info')?.prepend(badge);
-        });
-        const ref = qs('.filter-bar') || qs('.filter-group') || gamingGrid?.parentNode;
-        if (ref) ref.after(wrapper);
-    }
-
-    regular.forEach(project => {
+    projects.forEach(project => {
         const category = String(project.category || '').toLowerCase();
         const targetGrid = category.includes('game') || category.includes('model') || category.includes('tool') ? gamingGrid : (appsGrid || gamingGrid);
         targetGrid?.insertAdjacentHTML('beforeend', createProjectCard(project, lang));
@@ -258,11 +245,13 @@ function createProjectCard(project, lang) {
         : `<img src="../images/screenshots/default.svg" alt="${title}" loading="lazy" style="width:100%; height:100%; object-fit:cover; background: linear-gradient(135deg, #1e293b, #0f172a);">`;
     const isOpenSource = !!project.github_link;
     const isLocal = project.link && /^(games|apps|models)\//.test(project.link);
+    // Colours come from the stylesheet, not from inline styles: these were
+    // hardcoded dark-theme neons and washed out on a light background.
     const statusBadge = isOpenSource
-        ? '<div class="project-status-badge" style="background:rgba(56,189,248,0.15);color:#38bdf8;border-color:rgba(56,189,248,0.3);">\u25CF Open Source</div>'
+        ? '<div class="project-status-badge is-source">\u25CF Open Source</div>'
         : isLocal
-            ? '<div class="project-status-badge" style="background:rgba(251,191,36,0.15);color:#fbbf24;border-color:rgba(251,191,36,0.3);">\u25CF Live Demo</div>'
-            : '<div class="project-status-badge" style="background:rgba(52,211,153,0.15);color:#34d399;border-color:rgba(52,211,153,0.3);">\u25CF Active</div>';
+            ? '<div class="project-status-badge is-demo">\u25CF Live Demo</div>'
+            : '<div class="project-status-badge is-active">\u25CF Active</div>';
     const tagsHTML = techArray.filter(Boolean).map(tag => `<span class="tag">${escapeHTML(tag)}</span>`).join('');
     const apkTag = hasAPK ? '<span class="tag apk-tag"><i class="fas fa-android"></i> APK</span>' : '';
     // APK button is hidden by default and only revealed after verifyApkButtons()

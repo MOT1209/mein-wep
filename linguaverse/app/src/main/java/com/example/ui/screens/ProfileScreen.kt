@@ -1,115 +1,150 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.stringResource
 import com.example.R
 import com.example.data.model.Achievement
 import com.example.data.model.UserProfile
 import com.example.ui.components.LevelChip
+import com.example.ui.components.display.LinguaAvatar
+import com.example.ui.components.display.LinguaBadge
+import com.example.ui.components.display.LinguaCard
+import com.example.ui.components.display.LinguaDivider
+import com.example.ui.components.buttons.LinguaPrimaryButton
+import com.example.ui.theme.LinguaVerseDimens
 import com.example.ui.theme.extendedColors
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun ProfileScreen(
     userProfile: UserProfile,
     achievements: List<Achievement>,
+    targetLanguageName: String,
+    onOpenSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = LinguaVerseDimens.ScreenHorizontalPadding)
             .testTag("profile_screen"),
-        contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
+        contentPadding = PaddingValues(
+            top = LinguaVerseDimens.ScreenVerticalPadding,
+            bottom = LinguaVerseDimens.SectionSpacing
+        ),
+        verticalArrangement = Arrangement.spacedBy(LinguaVerseDimens.ComponentSpacing)
     ) {
-        // Avatar & Info
+        // ── Header ──────────────────────────────────────────────────────────
         item {
-            Card(
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.learning_profile),
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                IconButton(onClick = onOpenSettings) {
+                    Icon(
+                        imageVector = Icons.Default.Settings,
+                        contentDescription = stringResource(R.string.open_settings)
+                    )
+                }
+            }
+        }
+
+        // ── Avatar Card ─────────────────────────────────────────────────────
+        item {
+            LinguaCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = MaterialTheme.shapes.extraLarge
             ) {
                 Column(
-                    modifier = Modifier.padding(20.dp),
+                    modifier = Modifier.padding(LinguaVerseDimens.CardPadding),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = stringResource(R.string.avatar),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
+                    LinguaAvatar(
+                        initials = userProfile.username.take(2).uppercase(),
+                        size = LinguaVerseDimens.AvatarExtraLarge
+                    )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
 
                     Text(
                         text = userProfile.username,
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.ExtraBold
+                        style = MaterialTheme.typography.headlineSmall
                     )
 
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(LinguaVerseDimens.InlineSpacing))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "Current Level: ", fontSize = 13.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            text = stringResource(R.string.current_level),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(LinguaVerseDimens.InlineSpacing))
                         LevelChip(level = userProfile.currentLevel)
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(LinguaVerseDimens.SectionSpacing))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        ProfileStatItem(title = "Total XP", value = "${userProfile.xp}", icon = Icons.Default.Stars, color = MaterialTheme.extendedColors.xp)
-                        ProfileStatItem(title = "Streak", value = "${userProfile.streakCount} days", icon = Icons.Default.LocalFireDepartment, color = MaterialTheme.extendedColors.streak)
-                        ProfileStatItem(title = "Lessons", value = "${userProfile.totalCompletedLessons}", icon = Icons.Default.School, color = MaterialTheme.extendedColors.skillPalette[9])
+                        ProfileStatItem(
+                            title = "Total XP",
+                            value = "${userProfile.xp}",
+                            icon = Icons.Default.Stars,
+                            color = MaterialTheme.extendedColors.xp
+                        )
+                        ProfileStatItem(
+                            title = "Streak",
+                            value = "${userProfile.streakCount} days",
+                            icon = Icons.Default.LocalFireDepartment,
+                            color = MaterialTheme.extendedColors.streak
+                        )
+                        ProfileStatItem(
+                            title = "Lessons",
+                            value = "${userProfile.totalCompletedLessons}",
+                            icon = Icons.Default.School,
+                            color = MaterialTheme.extendedColors.skillPalette[9]
+                        )
                     }
                 }
             }
         }
 
-        // Skill Breakdown Scores
+        // ── Competency Breakdown ────────────────────────────────────────────
         item {
-            Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Competency Breakdown",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.ExtraBold
+                text = stringResource(R.string.competency_breakdown),
+                style = MaterialTheme.typography.titleLarge
             )
-            Spacer(modifier = Modifier.height(12.dp))
+        }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHigh)
-            ) {
-                Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        item {
+            LinguaCard(modifier = Modifier.fillMaxWidth()) {
+                Column(
+                    modifier = Modifier.padding(LinguaVerseDimens.CardPadding),
+                    verticalArrangement = Arrangement.spacedBy(LinguaVerseDimens.CompactSpacing)
+                ) {
                     SkillScoreBar("Vocabulary", userProfile.vocabularyScore, MaterialTheme.extendedColors.skillPalette[5])
                     SkillScoreBar("Reading", userProfile.readingScore, MaterialTheme.extendedColors.xp)
                     SkillScoreBar("Listening", userProfile.listeningScore, MaterialTheme.extendedColors.skillPalette[1])
@@ -120,99 +155,94 @@ fun ProfileScreen(
             }
         }
 
-        // CEFR Certificate Generator Card
+        // ── CEFR Certificate ────────────────────────────────────────────────
         item {
-            Spacer(modifier = Modifier.height(20.dp))
-            Card(
+            LinguaCard(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer)
+                backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                borderColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.WorkspacePremium, contentDescription = null, tint = MaterialTheme.colorScheme.onTertiaryContainer)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.cefr_certificate_ready),
-                            fontWeight = FontWeight.ExtraBold,
-                            fontSize = 16.sp,
-                            color = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    Text(
-                        text = "Congratulations! You have completed Level ${userProfile.currentLevel.code} (${userProfile.currentLevel.title}) requirement in Spanish.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.85f)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.WorkspacePremium,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer
                     )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Button(
-                        onClick = {},
-                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(Icons.Default.CardMembership, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.view_official_certificate))
-                    }
+                    Spacer(modifier = Modifier.width(LinguaVerseDimens.CompactSpacing))
+                    Text(
+                        text = stringResource(R.string.cefr_certificate_ready),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
                 }
+
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.CompactSpacing))
+
+                Text(
+                    text = stringResource(
+                        R.string.certificate_text,
+                        userProfile.currentLevel.code,
+                        userProfile.currentLevel.title,
+                        targetLanguageName
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.85f)
+                )
+
+                Spacer(modifier = Modifier.height(LinguaVerseDimens.ComponentSpacing))
+
+                LinguaPrimaryButton(
+                    text = stringResource(R.string.view_official_certificate),
+                    onClick = {},
+                    icon = Icons.Default.CardMembership,
+                    size = com.example.ui.components.buttons.ButtonSize.Small
+                )
             }
         }
 
-        // Achievements Title
+        // ── Achievements ────────────────────────────────────────────────────
         item {
-            Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "Achievements",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.ExtraBold
+                text = stringResource(R.string.achievements_title),
+                style = MaterialTheme.typography.titleLarge
             )
-            Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // Achievements List
         items(achievements) { ach ->
-            Surface(
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                shape = RoundedCornerShape(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+            LinguaCard(
+                modifier = Modifier.fillMaxWidth(),
+                backgroundColor = MaterialTheme.colorScheme.surfaceColorAtElevation(LinguaVerseDimens.CardElevation),
+                showBorder = false
             ) {
                 Row(
-                    modifier = Modifier.padding(14.dp),
+                    modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(CircleShape)
-                            .background(if (ach.isUnlocked) MaterialTheme.extendedColors.xpContainer else MaterialTheme.colorScheme.surfaceContainerHighest),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (ach.isUnlocked) Icons.Default.EmojiEvents else Icons.Default.Lock,
-                            contentDescription = null,
-                            tint = if (ach.isUnlocked) MaterialTheme.extendedColors.xp else MaterialTheme.colorScheme.onSurfaceVariant
+                    LinguaAvatar(
+                        initials = if (ach.isUnlocked) "\uD83C\uDFC6" else "\uD83D\uDD12",
+                        size = LinguaVerseDimens.AvatarMedium,
+                        backgroundColor = if (ach.isUnlocked) MaterialTheme.extendedColors.xpContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
+                        contentColor = if (ach.isUnlocked) MaterialTheme.extendedColors.xp else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Spacer(modifier = Modifier.width(LinguaVerseDimens.ComponentSpacing))
+
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = ach.title,
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = ach.description,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
 
-                    Spacer(modifier = Modifier.width(12.dp))
-
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(text = ach.title, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                        Text(text = ach.description, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-
-                    Text(
+                    LinguaBadge(
                         text = "+${ach.rewardXp} XP",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.extendedColors.xp
+                        containerColor = MaterialTheme.extendedColors.xpContainer,
+                        contentColor = MaterialTheme.extendedColors.onXpContainer
                     )
                 }
             }
@@ -220,29 +250,53 @@ fun ProfileScreen(
     }
 }
 
+// ── Reusable Helpers ────────────────────────────────────────────────────────────
+
 @Composable
-fun ProfileStatItem(title: String, value: String, icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color) {
+private fun ProfileStatItem(
+    title: String,
+    value: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color
+) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(imageVector = icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = value, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        Text(text = title, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = color,
+            modifier = Modifier.size(LinguaVerseDimens.IconMedium)
+        )
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.InlineSpacing))
+        Text(text = value, style = MaterialTheme.typography.titleMedium)
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }
 
 @Composable
-fun SkillScoreBar(label: String, score: Int, color: Color) {
+private fun SkillScoreBar(label: String, score: Int, color: Color) {
+    val animatedScore by animateFloatAsState(
+        targetValue = (score / 100f).coerceIn(0f, 1f),
+        label = "${label}_score"
+    )
     Column {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text(text = label, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
-            Text(text = "$score%", fontSize = 13.sp, fontWeight = FontWeight.Bold, color = color)
+            Text(text = label, style = MaterialTheme.typography.labelMedium)
+            Text(
+                text = "$score%",
+                style = MaterialTheme.typography.labelMedium,
+                color = color
+            )
         }
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(LinguaVerseDimens.InlineSpacing))
         LinearProgressIndicator(
-            progress = { score.toFloat() / 100f },
+            progress = { animatedScore },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(6.dp)

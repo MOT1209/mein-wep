@@ -1,16 +1,17 @@
 package com.example.ui
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -19,23 +20,35 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.example.BuildConfig
 import com.example.data.model.SkillType
+import com.example.ui.components.navigation.LinguaBottomBar
+import com.example.ui.components.navigation.NavigationItem
 import com.example.ui.screens.*
 import com.example.ui.viewmodel.MainViewModel
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.filled.GridView
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.filled.SmartToy
+import androidx.compose.material.icons.outlined.SmartToy
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.outlined.EmojiEvents
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Person
 
 /** Destinations shown in the bottom navigation bar. */
 enum class MainDestination(
     val route: String,
     val title: String,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector
+    val selectedIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    val unselectedIcon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
-    HOME("home", "Home", Icons.Filled.Home, Icons.Outlined.Home),
-    SKILLS("skills", "Skill Hub", Icons.Filled.GridView, Icons.Outlined.GridView),
-    AI_CHAT("ai_chat", "AI Tutor", Icons.Filled.SmartToy, Icons.Outlined.SmartToy),
-    LEADERBOARD("leaderboard", "Leagues", Icons.Filled.EmojiEvents, Icons.Outlined.EmojiEvents),
-    PROFILE("profile", "Profile", Icons.Filled.Person, Icons.Outlined.Person),
-    SETTINGS("settings", "Settings", Icons.Filled.Settings, Icons.Outlined.Settings)
+    HOME("home", "Home", androidx.compose.material.icons.Icons.Filled.Home, androidx.compose.material.icons.Icons.Outlined.Home),
+    SKILLS("skills", "Skill Hub", androidx.compose.material.icons.Icons.Filled.GridView, androidx.compose.material.icons.Icons.Outlined.GridView),
+    AI_CHAT("ai_chat", "AI Tutor", androidx.compose.material.icons.Icons.Filled.SmartToy, androidx.compose.material.icons.Icons.Outlined.SmartToy),
+    LEADERBOARD("leaderboard", "Leagues", androidx.compose.material.icons.Icons.Filled.EmojiEvents, androidx.compose.material.icons.Icons.Outlined.EmojiEvents),
+    PROFILE("profile", "Profile", androidx.compose.material.icons.Icons.Filled.Person, androidx.compose.material.icons.Icons.Outlined.Person)
 }
 
 /** Full-screen destinations pushed on top of the bottom-bar destinations. */
@@ -76,39 +89,26 @@ fun LinguaVerseApp(
         currentRoute?.hierarchy?.any { it.route == destination.route } == true
     }
 
+    val navigationItems = MainDestination.entries.map { dest ->
+        NavigationItem(
+            route = dest.route,
+            label = dest.title,
+            selectedIcon = dest.selectedIcon,
+            unselectedIcon = dest.unselectedIcon
+        )
+    }
+
     Scaffold(
         bottomBar = {
             if (showBottomBar) {
-                NavigationBar(
+                LinguaBottomBar(
+                    items = navigationItems,
+                    currentRoute = currentRoute?.route,
+                    onItemSelected = { route -> navController.navigateToTab(MainDestination.entries.first { it.route == route }) },
                     modifier = Modifier
                         .windowInsetsPadding(WindowInsets.navigationBars)
                         .testTag("main_navigation_bar")
-                ) {
-                    MainDestination.entries.forEach { destination ->
-                        val isSelected =
-                            currentRoute?.hierarchy?.any { it.route == destination.route } == true
-                        NavigationBarItem(
-                            selected = isSelected,
-                            onClick = { navController.navigateToTab(destination) },
-                            icon = {
-                                Icon(
-                                    imageVector = if (isSelected) {
-                                        destination.selectedIcon
-                                    } else {
-                                        destination.unselectedIcon
-                                    },
-                                    contentDescription = destination.title
-                                )
-                            },
-                            label = {
-                                Text(
-                                    text = destination.title,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                                )
-                            }
-                        )
-                    }
-                }
+                )
             }
         }
     ) { innerPadding ->
@@ -117,7 +117,19 @@ fun LinguaVerseApp(
             startDestination = MainDestination.HOME.route,
             modifier = modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(innerPadding),
+            enterTransition = {
+                slideInHorizontally(initialOffsetX = { it / 5 }) + fadeIn()
+            },
+            exitTransition = {
+                slideOutHorizontally(targetOffsetX = { -it / 5 }) + fadeOut()
+            },
+            popEnterTransition = {
+                slideInHorizontally(initialOffsetX = { -it / 5 }) + fadeIn()
+            },
+            popExitTransition = {
+                slideOutHorizontally(targetOffsetX = { it / 5 }) + fadeOut()
+            }
         ) {
             composable(MainDestination.HOME.route) {
                 HomeScreen(
@@ -166,11 +178,14 @@ fun LinguaVerseApp(
             composable(MainDestination.PROFILE.route) {
                 ProfileScreen(
                     userProfile = userProfile,
-                    achievements = achievements
+                    achievements = achievements,
+                    targetLanguageName = languages.find { it.code == userProfile.targetLanguageCode }?.name
+                        ?: userProfile.targetLanguageCode,
+                    onOpenSettings = { navController.navigate("settings") }
                 )
             }
 
-            composable(MainDestination.SETTINGS.route) {
+            composable("settings") {
                 SettingsScreen(
                     isDarkTheme = viewModel.isDarkTheme.collectAsStateWithLifecycle().value,
                     audioSpeed = audioSpeed,
@@ -189,7 +204,6 @@ fun LinguaVerseApp(
                     ?.let { name -> SkillType.entries.firstOrNull { it.name == name } }
 
                 if (skillType == null) {
-                    // Unknown skill in the route: go back rather than crash.
                     LaunchedEffect(Unit) { navController.popBackStack() }
                 } else {
                     SkillDetailScreen(
@@ -239,6 +253,8 @@ fun LinguaVerseApp(
                         currentIndex = currentExerciseIndex,
                         isCompleted = lessonCompleted,
                         audioSpeed = audioSpeed,
+                        targetLanguageName = languages.find { it.code == userProfile.targetLanguageCode }?.name
+                            ?: userProfile.targetLanguageCode,
                         onSpeakText = { viewModel.speakText(it) },
                         onSetAudioSpeed = { viewModel.setAudioSpeed(it) },
                         onSubmitAnswer = { viewModel.submitExerciseAnswer(it) },
@@ -249,27 +265,27 @@ fun LinguaVerseApp(
             }
 
             composable(Routes.ADMIN) {
-                AdminPanelScreen(
-                    onAddLanguage = { code, name, nativeName, flag, desc ->
-                        viewModel.addNewLanguage(code, name, nativeName, flag, desc)
-                    },
-                    onAddLesson = { title, cat, level, xp, prompt, ans ->
-                        viewModel.addNewLesson(title, cat, level, xp, prompt, ans)
-                    },
-                    onAddVocabulary = { word, trans, ex, cat ->
-                        viewModel.addNewVocabulary(word, trans, ex, cat)
-                    },
-                    onBack = { navController.popBackStack() }
-                )
+                if (BuildConfig.DEBUG) {
+                    AdminPanelScreen(
+                        onAddLanguage = { code, name, nativeName, flag, desc ->
+                            viewModel.addNewLanguage(code, name, nativeName, flag, desc)
+                        },
+                        onAddLesson = { title, cat, level, xp, prompt, ans ->
+                            viewModel.addNewLesson(title, cat, level, xp, prompt, ans)
+                        },
+                        onAddVocabulary = { word, trans, ex, cat ->
+                            viewModel.addNewVocabulary(word, trans, ex, cat)
+                        },
+                        onBack = { navController.popBackStack() }
+                    )
+                } else {
+                    LaunchedEffect(Unit) { navController.popBackStack() }
+                }
             }
         }
     }
 }
 
-/**
- * Standard bottom-bar behaviour: one entry per tab on the back stack, state kept
- * per tab, and system back returning to the start destination.
- */
 private fun NavHostController.navigateToTab(destination: MainDestination) {
     navigate(destination.route) {
         popUpTo(graph.findStartDestination().id) { saveState = true }

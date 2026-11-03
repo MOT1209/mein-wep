@@ -1,0 +1,173 @@
+{
+  "langName": "Deutsch",
+  "dir": "ltr",
+  "ogLocale": "de_DE",
+  "nav": {
+    "home": "Start",
+    "studio": "King Studio",
+    "blog": "Blog",
+    "downloads": "Downloads",
+    "about": "Über mich",
+    "contact": "Kontakt"
+  },
+  "header": {
+    "skip": "Zum Inhalt springen",
+    "mainNav": "Hauptnavigation",
+    "mobileNav": "Mobile Navigation",
+    "menu": "Menü",
+    "openMenu": "Menü öffnen",
+    "closeMenu": "Menü schließen",
+    "theme": "Farbschema wechseln",
+    "settings": "Einstellungen",
+    "language": "Sprache"
+  },
+  "footer": {
+    "builtInTheOpen": "Rashid Ali. Offen entwickelt.",
+    "label": "Fußzeile",
+    "portfolio": "Portfolio",
+    "privacy": "Datenschutz (EN)",
+    "terms": "Nutzungsbedingungen (EN)"
+  },
+  "home": {
+    "title": "Rashid Ali — Full-Stack-Entwickler & KI-Engineer",
+    "metaDescription": "Rashid Ali (MOT1209) — Full-Stack-Entwickler und KI-Engineer und Macher hinter King Studio. Websites, KI-Tools und Spiele mit Godot und Unity. Verfügbar für Jobs und Freelance-Projekte.",
+    "ogDescription": "Websites, KI-Tools und Spiele mit Godot und Unity — und King Studio, wo die Apps zu Hause sind.",
+    "eyebrow": "Rashid Ali · MOT1209",
+    "photoAlt": "Porträt von Rashid Ali",
+    "headline": "Ich baue Web-Apps, Spiele und KI-Tools — und bringe sie live.",
+    "ledeBefore": "Full-Stack-Entwickler und KI-Engineer, noch in der Schule und schon mit veröffentlichten Projekten. Meine Apps findest du bei",
+    "ledeProjects": "Projekte,",
+    "ledeAndroid": "davon mit Android-Version.",
+    "availability": "Verfügbar für Jobs und Freelance-Projekte",
+    "ctaWork": "Zusammenarbeiten",
+    "ctaStudio": "King Studio ansehen",
+    "workEyebrow": "Ausgewählte Arbeiten",
+    "workTitle": "Apps, die du heute nutzen kannst",
+    "workMore": "Alle Projekte bei King Studio",
+    "servicesEyebrow": "Was ich mache",
+    "servicesTitle": "Wobei ich helfen kann",
+    "services": [
+      {
+        "title": "Websites und Web-Apps",
+        "text": "Schnelle Websites und installierbare Web-Apps mit HTML, CSS, JavaScript und Supabase, so wie diese hier."
+      },
+      {
+        "title": "KI-Integration",
+        "text": "Assistenten und Automatisierungen mit Gemini und OpenRouter, vom Prototyp bis zu etwas, das Menschen wirklich nutzen."
+      },
+      {
+        "title": "Spiele",
+        "text": "Spiele mit den Engines Godot und Unity."
+      }
+    ],
+    "aboutEyebrow": "Über mich",
+    "aboutTitle": "Offen entwickelt",
+    "aboutText": "Ich bin Rashid Ali, Schüler, und ich baue Software. Angefangen hat es damit, CSS zu ändern, um zu sehen, was kaputtgeht, und JavaScript kaputtzumachen, um zu verstehen, warum. Heute baue ich Websites und installierbare Apps mit JavaScript und Supabase, schreibe Python, arbeite mit KI-Tools und entwickle Spiele in Godot und Unity.",
+    "aboutSourceBefore": "Den Quellcode für das meiste davon findest du auf",
+    "aboutSourceAfter": ".",
+    "stackLabel": "Werkzeuge, die ich nutze",
+    "stackAi": "KI-Tools",
+    "aboutMore": "Mehr über mich",
+    "factProjects": "Projekte bei King Studio",
+    "factAndroid": "Android-Builds",
+    "factRelease": "Letztes Release",
+    "factLanguages": "Sprachen",
+    "factLanguagesValue": "Arabisch, Deutsch, Englisch",
+    "writingEyebrow": "Artikel",
+    "writingTitle": "Neu im Blog",
+    "writingMore": "Alle Artikel",
+    "writingNote": "Die Artikel sind auf Englisch.",
+    "minRead": "Min. Lesezeit",
+    "contactEyebrow": "Kontakt",
+    "contactTitle": "Schreib mir",
+    "contactNote": "Ein Freelance-Projekt, eine Festanstellung, eine Zusammenarbeit oder ein Fehler in etwas, das ich gebaut habe: alles willkommen.",
+    "channelEmail": "E-Mail",
+    "contactCta": "Nachricht senden"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "close": "Einstellungen schließen",
+    "theme": "Farbschema",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "accent": "Akzentfarbe",
+    "accentSuffix": "als Akzentfarbe",
+    "accents": [
+      "Blau",
+      "Glut",
+      "Kiefer",
+      "Violett",
+      "Ziegel",
+      "Petrol"
+    ],
+    "reduceMotion": "Bewegung reduzieren"
+  },
+  "studio": {
+    "title": "King Studio — Apps & digitale Erlebnisse",
+    "metaDescription": "Apps und digitale Werkzeuge von Rashid Ali unter dem Namen King Studio. Build. Create. Innovate.",
+    "eyebrow": "Unabhängiges Studio für digitale Produkte",
+    "headline": "Apps & digitale Erlebnisse.",
+    "tagline": "Build. Create. Innovate.",
+    "lede": "Apps und digitale Werkzeuge von Rashid Ali, jeweils mit ihrem ehrlichen Entwicklungsstand.",
+    "factApps": "Apps",
+    "factAndroid": "Android-Builds",
+    "featuredTitle": "Ausgewählte Apps",
+    "appsTitle": "Apps",
+    "appsMetaTitle": "Apps — King Studio",
+    "appsMeta": "Apps von King Studio: Web-Apps, installierbare PWAs und Android-Builds, jeweils mit Plattform gekennzeichnet.",
+    "appsLede": "Web-Apps, installierbare PWAs und Android-Builds. Die Plattform-Labels zeigen, wie jede App läuft; einen APK-Download gibt es nur, wo ein Release existiert.",
+    "gamesTitle": "Spiele",
+    "gamesMetaTitle": "Spiele — King Studio",
+    "gamesMeta": "Spiele von King Studio. Derzeit ist keines veröffentlicht; Spiele mit Godot und Unity sind geplant.",
+    "gamesLede": "Spiele von King Studio, mit spielbarem Build und Android-APK, wo es eines gibt.",
+    "gamesEmpty": "Derzeit sind keine Spiele veröffentlicht. Neue Spiele mit Godot und Unity sind geplant.",
+    "labsTitle": "Labs & Experimente",
+    "labsMetaTitle": "Labs & Experimente — King Studio",
+    "labsMeta": "Frühe Projekte und Experimente von King Studio, jeweils mit ihrem echten Entwicklungsstand.",
+    "labsLede": "Frühe Arbeiten und Experimente. Die Status-Labels sagen, was zu erwarten ist; nichts hier ist garantiert fertig.",
+    "labsEmpty": "Derzeit sind keine Experimente veröffentlicht.",
+    "comingTitle": "Spiele sind unterwegs",
+    "comingText": "Rashid Ali entwickelt Spiele mit Godot und Unity. Sie erscheinen hier, sobald sie fertig sind.",
+    "ctaTitle": "Lust, gemeinsam etwas zu bauen?",
+    "ctaText": "King Studio gehört zu Rashid Alis Portfolio. Für Zusammenarbeit, Freelance-Aufträge oder Fehlermeldungen: schreib mir.",
+    "ctaContact": "Kontakt",
+    "browseApps": "Apps ansehen",
+    "backHome": "Zurück zum Portfolio",
+    "sections": {
+      "games": "Spiele",
+      "apps": "Apps",
+      "labs": "Labs"
+    },
+    "status": {
+      "Available": "Verfügbar",
+      "In Development": "In Entwicklung",
+      "Experimental": "Experimentell",
+      "Coming Soon": "Demnächst"
+    },
+    "types": {
+      "App": "App",
+      "Game": "Spiel"
+    },
+    "open": "Öffnen",
+    "play": "Spielen",
+    "details": "Details",
+    "detailsFor": "zu",
+    "platforms": "Plattformen",
+    "download": "APK herunterladen",
+    "features": "Funktionen",
+    "factsTitle": "Details",
+    "factType": "Typ",
+    "factPlatforms": "Plattformen",
+    "factTech": "Technologien",
+    "factStatus": "Status",
+    "factVersion": "Android-Version",
+    "noBuild": "Es gibt noch keinen öffentlichen Build.",
+    "backTo": {
+      "games": "Alle Spiele",
+      "apps": "Alle Apps",
+      "labs": "Alle Experimente"
+    },
+    "crumbsLabel": "Brotkrumen",
+    "portfolio": "Portfolio"
+  }
+}

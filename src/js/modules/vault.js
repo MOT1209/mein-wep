@@ -1,4 +1,4 @@
-import { qs, qsa, on, escapeHTML as escapeHtml } from '../utils/dom.js';
+import { qs, qsa, on, escapeHTML as escapeHtml, safeUrl } from '../utils/dom.js';
 import { fetchVaultItems, saveVaultItemToDB, deleteVaultItemFromDB } from '../services/supabase.js';
 
 /* ── Supabase field mapper ── */
@@ -189,14 +189,14 @@ function createCard(item) {
       break;
     case 'media':
       contentPreview = `<div class="vault-media-preview"><i class="fas fa-file-image"></i> <span>${escapeHtml(item.fileUrl || 'No file attached')}</span></div>`;
-      actionBtn = item.fileUrl ? `<a href="${escapeHtml(item.fileUrl)}" class="vault-action-btn vault-download-btn" download target="_blank" rel="noopener"><i class="fas fa-download"></i> Download</a>` : '';
+      actionBtn = item.fileUrl ? `<a href="${escapeHtml(safeUrl(item.fileUrl))}" class="vault-action-btn vault-download-btn" download target="_blank" rel="noopener"><i class="fas fa-download"></i> Download</a>` : '';
       break;
     case 'docs':
       contentPreview = `<div class="vault-content-preview">${escapeHtml(truncate(item.content, 150))}</div>`;
       actionBtn = item.content ? `<button class="vault-action-btn vault-copy-btn" data-copy="${escapeHtml(item.content)}"><i class="fas fa-copy"></i> Copy Content</button>` : '';
       break;
     case 'archives':
-      actionBtn = item.fileUrl ? `<a href="${escapeHtml(item.fileUrl)}" class="vault-action-btn vault-download-btn" download target="_blank" rel="noopener"><i class="fas fa-download"></i> Download Archive</a>` : '';
+      actionBtn = item.fileUrl ? `<a href="${escapeHtml(safeUrl(item.fileUrl))}" class="vault-action-btn vault-download-btn" download target="_blank" rel="noopener"><i class="fas fa-download"></i> Download Archive</a>` : '';
       break;
   }
 

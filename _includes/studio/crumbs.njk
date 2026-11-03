@@ -1,0 +1,9 @@
+{#- Visible breadcrumb. Expects S, L, root, and optionally sec / project. -#}
+<nav class="ks-crumbs" aria-label="{{ S.crumbsLabel }}"><ol>
+  <li><a href="{{ (root ~ site.translations.home[L]) or './' }}">{{ S.portfolio }}</a></li>
+  <li>{% if sec %}<a href="{{ root }}{{ site.translations.studio[L] }}">King Studio</a>{% else %}<span aria-current="page">King Studio</span>{% endif %}</li>
+  {%- if sec %}
+  <li>{% if project %}<a href="{{ root }}{{ site.translations.studio[L] }}{{ sec }}/">{{ S.sections[sec] }}</a>{% else %}<span aria-current="page">{{ S.sections[sec] }}</span>{% endif %}</li>
+  {%- endif %}
+  {%- if project %}<li><span aria-current="page">{{ project.title }}</span></li>{% endif %}
+</ol></nav>

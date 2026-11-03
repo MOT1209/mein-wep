@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#0b0f14" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>Block World</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --ui-font: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #0b0f14;
+        font-family: var(--ui-font);
+        -webkit-user-select: none;
+        user-select: none;
+        touch-action: none;
+      }
+      #app {
+        position: fixed;
+        inset: 0;
+      }
+      #game-canvas {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+      #ui-root {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      #ui-root .clickable {
+        pointer-events: auto;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .bw-panel {
+        background: rgba(12, 16, 22, 0.88);
+        border: 2px solid rgba(120, 140, 160, 0.35);
+        border-radius: 10px;
+        color: #e8eef4;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+      }
+      .bw-btn {
+        font: inherit;
+        font-size: 15px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        border: 2px solid rgba(140, 165, 190, 0.4);
+        background: linear-gradient(#2a3644, #1c2630);
+        color: #e8eef4;
+        cursor: pointer;
+      }
+      .bw-btn:hover {
+        background: linear-gradient(#33424f, #232f3a);
+      }
+      .bw-btn:active {
+        transform: translateY(1px);
+      }
+      .bw-btn.primary {
+        background: linear-gradient(#2f6d3a, #1e4a27);
+        border-color: rgba(120, 220, 140, 0.5);
+      }
+      .bw-btn.primary:hover {
+        background: linear-gradient(#3a8148, #245a2f);
+      }
+      .bw-btn.danger {
+        background: linear-gradient(#6d2f2f, #4a1e1e);
+        border-color: rgba(220, 120, 120, 0.5);
+      }
+      [dir="rtl"] .bw-panel {
+        text-align: right;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <canvas id="game-canvas"></canvas>
+      <div id="ui-root"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

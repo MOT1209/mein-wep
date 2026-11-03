@@ -5,8 +5,11 @@
  * Hit: GET https://rashid-wep.vercel.app/api/rss
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const API_DIR = path.dirname(fileURLToPath(import.meta.url));
 
 const SITE_URL = 'https://rashid-wep.vercel.app';
 const BLOG_URL = SITE_URL + '/blog';
@@ -53,9 +56,9 @@ function buildRss(posts) {
     '</rss>';
 }
 
-module.exports = function(req, res) {
+export default function(req, res) {
   try {
-    const postsPath = path.join(__dirname, '..', 'blog', 'posts.json');
+    const postsPath = path.join(API_DIR, '..', 'blog', 'posts.json');
     const raw = fs.readFileSync(postsPath, 'utf-8');
     const posts = JSON.parse(raw);
     posts.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });

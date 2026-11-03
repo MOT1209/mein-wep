@@ -1,6 +1,8 @@
 {
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
   "functions": {
-    "api/*.js": {
+    "api/**/*.js": {
       "maxDuration": 10
     }
   },
@@ -19,9 +21,51 @@
       ]
     },
     {
-      "source": "/(.*)\\.(css|js|webp|svg|woff2|ico|png|jpg|jpeg|gif|mp3|mp4|woff|ttf|eot)",
+      "source": "/(.*)\\.(css|js)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/(.*)\\.(webp|svg|woff2|ico|png|jpg|jpeg|gif|mp3|mp4|mpeg|woff|ttf|eot)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=604800" }
+      ]
+    },
+    {
+      "source": "/admin/(.*)",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "script-src 'self' 'unsafe-inline'; default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co; frame-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/admin",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/admin/",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
+      ]
+    },
+    {
+      "source": "/admin/(login|reset-password)\\.html",
+      "headers": [
+        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-src 'none'; frame-ancestors 'none'; form-action 'self'; base-uri 'none'; object-src 'none'" },
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" },
+        { "key": "Referrer-Policy", "value": "no-referrer" }
       ]
     },
     {
@@ -38,7 +82,22 @@
     }
   ],
   "redirects": [
-    { "source": "/quran-app", "destination": "/quran-app/", "permanent": true }
+    { "source": "/quran-app", "destination": "/quran-app/", "permanent": true },
+    { "source": "/king-studio/games/kingcraft/", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/games/kingcraft", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/games/rust-construction/", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/games/rust-construction", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/games/farm-empire/", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/games/farm-empire", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/apps/quran-pro/", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/apps/quran-pro", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/labs/block-world/", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/labs/block-world", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/labs/rashid-ai/", "destination": "/king-studio/", "permanent": false },
+    { "source": "/king-studio/labs/rashid-ai", "destination": "/king-studio/", "permanent": false },
+    { "source": "/games", "destination": "/king-studio/games/", "permanent": true },
+    { "source": "/games/", "destination": "/king-studio/games/", "permanent": true },
+    { "source": "/games/index.html", "destination": "/king-studio/games/", "permanent": true }
   ],
   "rewrites": [
     { "source": "/king2", "destination": "https://king2-platform.vercel.app/king2" },
@@ -48,7 +107,7 @@
     { "source": "/api/gemini", "destination": "/api/gemini" },
     { "source": "/api/rss", "destination": "/api/rss" },
     { "source": "/api/contact", "destination": "/api/contact" },
-    { "source": "/contact", "destination": "/api/contact" },
+    { "source": "/contact", "destination": "/contact.html" },
     { "source": "/apps/calculator-vault", "destination": "/apps/calculator-app" },
     { "source": "/apps/calculator-vault/", "destination": "/apps/calculator-app/" },
     { "source": "/apps/calculator-vault/:path*", "destination": "/apps/calculator-app/:path*" },
@@ -73,7 +132,6 @@
     { "source": "/blog/posts", "destination": "/blog/" },
     { "source": "/blog/feed", "destination": "/blog/rss.xml" },
     { "source": "/blog/index", "destination": "/blog/" },
-    { "source": "/games", "destination": "/games/" },
     { "source": "/games/farm-empire", "destination": "/games/farm-game" },
     { "source": "/games/farm-empire/", "destination": "/games/farm-game/" },
     { "source": "/games/farm-empire/:path*", "destination": "/games/farm-game/:path*" },

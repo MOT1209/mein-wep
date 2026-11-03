@@ -4,668 +4,467 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>تقرير المراجعة الشامل — Rashid Portfolio (mein-wep)</title>
+<title>تقرير المراجعة الشامل — Rashid Portfolio (mein-wep) v3.0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#0b0f17;--bg2:#111827;--card:#151c2c;--card2:#1a2337;
-  --border:#26304a;--text:#e7ecf5;--muted:#93a0b8;
-  --accent:#38bdf8;--accent2:#8b5cf6;
-  --ok:#34d399;--warn:#fbbf24;--high:#fb923c;--crit:#f87171;--info:#60a5fa;
+  --bg:#0c1015;--bg2:#11161d;--surface:#161c25;--surface2:#1b222c;
+  --border:#262f3b;--border-soft:#1e2530;
+  --text:#e8ecf1;--muted:#8d98a8;--muted-2:#5f6b7c;
+  --accent:#d98a3d;--accent-soft:#d98a3d1f;--accent-strong:#f0a758;
+  --teal:#3fa796;--teal-soft:#3fa79622;
+  --ok:#3ecf8e;--ok-soft:#3ecf8e1a;
+  --warn:#e8b339;--warn-soft:#e8b3391a;
+  --high:#e8853f;--high-soft:#e8853f1a;
+  --crit:#e35d5b;--crit-soft:#e35d5b1a;
+  --info:#4d9de0;--info-soft:#4d9de01a;
+  --font-head:"Cairo",system-ui,sans-serif;
+  --font-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  --font-mono:"JetBrains Mono",Consolas,monospace;
 }
-*{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:"Segoe UI",Tahoma,Arial,sans-serif;line-height:1.8;padding-bottom:60px}
-.wrap,.content{max-width:1100px;margin:0 auto;padding:24px}
-header.hero{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(139,92,246,.12));border-bottom:1px solid var(--border);padding:48px 0;text-align:center}
-header.hero h1{font-size:2rem;margin-bottom:8px}
-header.hero p{color:var(--muted);max-width:720px;margin:0 auto}
-.meta{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:18px;font-size:.85rem;color:var(--muted)}
-.meta span{background:var(--card);border:1px solid var(--border);padding:6px 14px;border-radius:100px}
-h2{font-size:1.45rem;margin:44px 0 16px;padding-bottom:10px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:10px}
-h2 .ico{width:36px;height:36px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--card2);font-size:1.1rem}
-h3{font-size:1.1rem;margin:22px 0 10px;color:var(--accent)}
-h4{font-size:1rem;margin-bottom:8px}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 22px;margin:14px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
-.badge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 10px;border-radius:100px;margin-inline-start:8px;vertical-align:middle}
-.b-ok{background:rgba(52,211,153,.15);color:var(--ok)}
-.b-warn{background:rgba(251,191,36,.15);color:var(--warn)}
-.b-high{background:rgba(251,146,60,.15);color:var(--high)}
-.b-crit{background:rgba(248,113,113,.15);color:var(--crit)}
-.b-info{background:rgba(96,165,250,.15);color:var(--info)}
-ul.clean{list-style:none;padding:0}
-ul.clean li{padding:8px 0;border-bottom:1px dashed var(--border);position:relative;padding-inline-start:26px}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-body);line-height:1.85;font-size:15.5px}
+h1,h2,h3,h4{font-family:var(--font-head);text-wrap:balance;color:var(--text)}
+::selection{background:var(--accent-soft);color:var(--accent-strong)}
+a{color:var(--accent-strong)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--accent-strong);outline-offset:2px}
+
+.wrap{max-width:920px;margin:0 auto;padding:0 24px}
+
+header.hero{border-bottom:1px solid var(--border);background:
+  radial-gradient(900px 260px at 15% -20%, var(--accent-soft), transparent 60%),
+  radial-gradient(700px 220px at 100% -10%, var(--teal-soft), transparent 60%),
+  var(--bg2);padding:52px 0 40px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--font-mono);font-size:.74rem;letter-spacing:.08em;color:var(--accent-strong);background:var(--accent-soft);border:1px solid #d98a3d3d;padding:5px 12px;border-radius:100px;margin-bottom:18px}
+header.hero h1{font-size:1.9rem;font-weight:800;margin:0 0 10px;line-height:1.35}
+header.hero p.lede{color:var(--muted);max-width:680px;margin:0 0 22px;font-size:1rem}
+.meta-row{display:flex;gap:10px;flex-wrap:wrap}
+.meta-row span{font-family:var(--font-mono);font-size:.76rem;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:6px 12px;border-radius:8px}
+.meta-row span b{color:var(--text);font-weight:600}
+
+main{padding:40px 0 80px}
+
+nav.toc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:44px}
+nav.toc strong{font-family:var(--font-head);font-size:.95rem;display:block;margin-bottom:10px;color:var(--muted)}
+nav.toc ol{margin:0;padding-inline-start:0;list-style:none;columns:2;gap:4px 24px}
+nav.toc li{margin-bottom:6px;break-inside:avoid}
+nav.toc a{text-decoration:none;font-size:.88rem;color:var(--text)}
+nav.toc a:hover{color:var(--accent-strong)}
+nav.toc a .num{font-family:var(--font-mono);color:var(--muted-2);margin-inline-end:6px}
+@media(max-width:560px){nav.toc ol{columns:1}}
+
+section{margin:56px 0}
+section h2{font-size:1.4rem;font-weight:800;margin:0 0 6px;padding-bottom:14px;border-bottom:1px solid var(--border);display:flex;align-items:baseline;gap:10px}
+section h2 .sec-num{font-family:var(--font-mono);color:var(--muted-2);font-weight:500;font-size:1rem}
+h3{font-size:1.08rem;margin:28px 0 12px;color:var(--accent-strong);font-weight:700}
+h4{font-size:.98rem;margin:0 0 10px;font-weight:700}
+p{margin:0 0 14px}
+.subhead{color:var(--muted);font-size:.95rem;margin:-2px 0 22px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin:14px 0}
+.card.finding{border-inline-start:3px solid var(--border)}
+.card.finding.sev-critical{border-inline-start-color:var(--crit)}
+.card.finding.sev-high{border-inline-start-color:var(--high)}
+.card.finding.sev-medium{border-inline-start-color:var(--warn)}
+.card.finding.sev-info{border-inline-start-color:var(--info)}
+.finding-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.finding-head h4{margin:0}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:.7rem;font-weight:600;letter-spacing:.02em;padding:3px 10px;border-radius:100px;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}
+.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-high{background:var(--high-soft);color:var(--high)}
+.b-crit{background:var(--crit-soft);color:var(--crit)}
+.b-info{background:var(--info-soft);color:var(--info)}
+.b-new{background:var(--teal-soft);color:var(--teal)}
+
+ul.clean{list-style:none;padding:0;margin:0}
+ul.clean li{padding:8px 0 8px 0;border-bottom:1px dashed var(--border-soft);position:relative;padding-inline-start:24px}
 ul.clean li:last-child{border-bottom:0}
-ul.clean li::before{content:"◂";position:absolute;inset-inline-start:0;color:var(--accent)}
+ul.clean li::before{position:absolute;inset-inline-start:0;top:9px;font-size:.8rem}
 ul.checks li::before{content:"✔";color:var(--ok)}
-ul.cross li::before{content:"✖";color:var(--crit)}
-ul.arrow li::before{content:"→";color:var(--info)}
-code,.mono{font-family:Consolas,"Courier New",monospace;background:#0d1420;border:1px solid var(--border);padding:2px 7px;border-radius:6px;font-size:.85em;color:#a5d8ff;direction:ltr;display:inline-block}
-blockquote{border-inline-start:4px solid var(--accent2);background:var(--card2);padding:14px 18px;border-radius:0 10px 10px 0;color:var(--muted);margin:12px 0;font-size:.92rem}
-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:.9rem}
-th{background:var(--card2);text-align:right;padding:11px 12px;border:1px solid var(--border);color:var(--accent);white-space:nowrap}
-td{padding:10px 12px;border:1px solid var(--border);vertical-align:top}
-tr:nth-child(even) td{background:rgba(255,255,255,.02)}
-.toc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-top:24px;max-width:1100px;margin:24px auto}
-.toc a{color:var(--accent);text-decoration:none}
-.toc a:hover{text-decoration:underline}
-.toc ol{padding-inline-start:22px}
-.score{display:flex;gap:14px;flex-wrap:wrap;margin:18px 0}
-.score .s{flex:1;min-width:150px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center}
-.score .s b{display:block;font-size:1.9rem}
-.score .s span{color:var(--muted);font-size:.82rem}
-.s-green b{color:var(--ok)}.s-yellow b{color:var(--warn)}.s-red b{color:var(--crit)}.s-blue b{color:var(--info)}
-.phase{border-inline-start:3px solid var(--accent);padding-inline-start:18px;margin:20px 0}
-.phase.p0{border-color:var(--crit)}.phase.p1{border-color:var(--high)}.phase.p2{border-color:var(--warn)}.phase.p3{border-color:var(--ok)}
-.phase .ph-head{font-weight:700;font-size:1.05rem;margin-bottom:8px}
-.progress-bar{height:8px;background:var(--card2);border-radius:4px;overflow:hidden;margin:8px 0}
-.progress-bar .fill{height:100%;border-radius:4px;transition:width .3s}
-.fill-green{background:var(--ok)}.fill-yellow{background:var(--warn)}.fill-red{background:var(--crit)}.fill-blue{background:var(--info)}
-footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:50px;padding-top:20px;border-top:1px solid var(--border)}
-@media(max-width:640px){header.hero h1{font-size:1.5rem}h2{font-size:1.2rem}table{font-size:.8rem}.score{flex-direction:column}}
+ul.cross li::before{content:"✕";color:var(--crit)}
+ul.arrow li::before{content:"←";color:var(--info)}
+
+code,.mono{font-family:var(--font-mono);background:#0a0d12;border:1px solid var(--border);padding:1px 7px;border-radius:5px;font-size:.85em;color:#e0a868;direction:ltr;display:inline-block}
+pre{font-family:var(--font-mono);background:#0a0d12;border:1px solid var(--border);border-radius:10px;padding:14px 16px;overflow-x:auto;direction:ltr;text-align:left;font-size:.82rem;color:#c9d1de;line-height:1.6;margin:10px 0}
+pre .c{color:var(--muted-2)}
+pre .k{color:var(--teal)}
+
+blockquote{border-inline-start:3px solid var(--teal);background:var(--teal-soft);padding:14px 18px;border-radius:0 10px 10px 0;color:var(--text);margin:16px 0;font-size:.93rem}
+
+.table-wrap{overflow-x:auto;margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:.87rem;min-width:520px}
+th{background:var(--surface2);text-align:right;padding:10px 12px;border:1px solid var(--border);color:var(--accent-strong);white-space:nowrap;font-weight:700}
+td{padding:9px 12px;border:1px solid var(--border);vertical-align:top}
+td.num,th.num{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+tr:nth-child(even) td{background:#ffffff03}
+
+.scoreboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.score-tile{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 14px;text-align:center;position:relative}
+.score-tile .delta{position:absolute;top:10px;left:10px;font-family:var(--font-mono);font-size:.68rem;padding:2px 7px;border-radius:100px}
+.delta-up{background:var(--ok-soft);color:var(--ok)}
+.delta-down{background:var(--crit-soft);color:var(--crit)}
+.delta-flat{background:var(--surface2);color:var(--muted)}
+.score-tile b{display:block;font-family:var(--font-mono);font-size:1.7rem;font-variant-numeric:tabular-nums;margin-bottom:4px}
+.score-tile span{color:var(--muted);font-size:.8rem}
+.s-green b{color:var(--ok)}.s-yellow b{color:var(--warn)}.s-red b{color:var(--crit)}.s-orange b{color:var(--high)}
+
+.meter{height:6px;background:var(--surface2);border-radius:4px;overflow:hidden;margin-top:8px}
+.meter i{display:block;height:100%;border-radius:4px}
+
+.phase{border-inline-start:3px solid var(--border);padding-inline-start:18px;margin:20px 0 20px 0}
+.phase.p0{border-color:var(--crit)}.phase.p1{border-color:var(--high)}.phase.p2{border-color:var(--warn)}.phase.p3{border-color:var(--teal)}
+.phase .ph-head{font-weight:700;font-size:1.02rem;margin-bottom:8px;font-family:var(--font-head)}
+
+.evidence-label{font-family:var(--font-mono);font-size:.72rem;color:var(--muted-2);letter-spacing:.04em;margin:2px 0 4px;text-transform:uppercase}
+
+footer{border-top:1px solid var(--border);background:var(--bg2);padding:32px 0;margin-top:20px}
+footer p{color:var(--muted-2);font-size:.8rem;margin:0;text-align:center;font-family:var(--font-mono)}
+
+@media(max-width:640px){
+  header.hero h1{font-size:1.5rem}
+  section h2{font-size:1.2rem}
+  .scoreboard{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
 
 <header class="hero">
   <div class="wrap">
-    <h1>تقرير المراجعة الشامل — موقع راشد الشخصي</h1>
-    <p>فحص دقيق واحترافي لمشروع <span class="mono">mein-wep</span> (Rashid Portfolio — AI Workspace &amp; Developer Portfolio) من جميع النواحي: البنية، الأمان، الأداء، SEO، جودة الكود، والجاهزية للتطوير.</p>
-    <div class="meta">
-      <span>التاريخ: 2026-09-04</span>
-      <span>الفرع: main</span>
-      <span>التقنية: Vanilla HTML/CSS/JS + Supabase + Three.js + Vercel</span>
-      <span>الإصدار: v2.0 (تحديث شامل)</span>
+    <span class="eyebrow">◆ تقرير تدقيق داخلي — نسخة 3.0</span>
+    <h1>فحص ومراجعة شاملة لمشروع Rashid Portfolio</h1>
+    <p class="lede">فحص فعلي (تنفيذ <code>npm run build</code>، تفتيش محتوى <code>dist/</code>، مسح أنماط الأسرار، مراجعة يدوية للكود) لمستودع <span class="mono">mein-wep</span>، مع مقارنة مباشرة بنتائج تدقيق 2026-09-04 لمعرفة ما تم إصلاحه فعلاً وما لا يزال قائماً — وثلاثة اكتشافات جديدة لم يغطها التقرير السابق.</p>
+    <div class="meta-row">
+      <span>التاريخ: <b>2026-09-06</b></span>
+      <span>التدقيق السابق: <b>2026-09-04</b></span>
+      <span>الفرع: <b class="mono">main</b></span>
+      <span>الملفات المتتبَّعة: <b>2,750</b></span>
+      <span>حجم .git: <b>105MB</b></span>
     </div>
   </div>
 </header>
 
-<div class="wrap">
+<main class="wrap">
 
-<div class="toc">
-  <strong>محتويات التقرير</strong>
+<nav class="toc">
+  <strong>المحتويات</strong>
   <ol>
-    <li><a href="#summary">الملخص التنفيذي والتقييم العام</a></li>
-    <li><a href="#scores">درجات الأداء حسب القسم</a></li>
-    <li><a href="#strengths">نقاط القوة</a></li>
-    <li><a href="#structure">تحليل البنية والكود</a></li>
-    <li><a href="#security">الأمان والحماية</a></li>
-    <li><a href="#seo">تحسين محركات البحث (SEO)</a></li>
-    <li><a href="#performance">الأداء والسرعة</a></li>
-    <li><a href="#fixes">الإصلاحات اللازمة</a></li>
-    <li><a href="#roadmap">خريطة العمل (Roadmap)</a></li>
+    <li><a href="#summary"><span class="num">01</span>الملخص التنفيذي ومقارنة الدرجات</a></li>
+    <li><a href="#new"><span class="num">02</span>اكتشافات جديدة (لم تكن في التقرير السابق)</a></li>
+    <li><a href="#status"><span class="num">03</span>حالة إصلاحات F1–F18 بعد التحقق الفعلي</a></li>
+    <li><a href="#security"><span class="num">04</span>الأمان — إعادة الفحص</a></li>
+    <li><a href="#hygiene"><span class="num">05</span>نظافة المستودع ونطاق الخدمة</a></li>
+    <li><a href="#performance"><span class="num">06</span>الأداء وحجم الحزم</a></li>
+    <li><a href="#fixes"><span class="num">07</span>خطة الإصلاح المرتّبة بالأولوية</a></li>
+    <li><a href="#roadmap"><span class="num">08</span>خريطة العمل</a></li>
   </ol>
-</div>
+</nav>
 
-<div class="content">
+<!-- ============ 1. SUMMARY ============ -->
+<section id="summary">
+  <h2><span class="sec-num">01</span> الملخص التنفيذي ومقارنة الدرجات</h2>
+  <p class="subhead">التغيير الصافي منذ 09-04: تحسّن حقيقي في SEO والأداء وتوحيد الكود، لكن بناء Eleventy الجديد (F13) فتح ثغرة نطاق نشر غير مقصودة، والمستودع يتضخم بسرعة بسبب ملفات APK الثنائية.</p>
 
-<!-- ============ 1. الملخص التنفيذي ============ -->
-<h2 id="summary"><span class="ico">🎯</span> 1. الملخص التنفيذي والتقييم العام</h2>
-
-<div class="score">
-  <div class="s s-green"><b>7.5/10</b><span>الأمان والحماية</span></div>
-  <div class="s s-yellow"><b>7/10</b><span>البنية وتنظيم الكود</span></div>
-  <div class="s s-yellow"><b>6.7/10</b><span>SEO (متوسط الموقع)</span></div>
-  <div class="s s-red"><b>5.8/10</b><span>الأداء والسرعة</span></div>
-</div>
-
-<div class="card">
-  <h4>الخلاصة</h4>
-  <p>الموقع <strong>مبني باحترافية عالية</strong> من ناحية المحتوى والأمان الأساسي والـ SEO للصفحات الرئيسية. لكنه يعاني من <strong>مشاكل هيكلية في الأداء</strong>: CSS غير مضغوط (142KB)، وسكربتات حجب العرض، وعدم وجود Cache-Control headers. كما توجد <strong>صفحات فرعية ضعيفة الـ SEO</strong> (quran, devos, learning) و<strong>ازدواجية في الأكواد</strong> (2 عميل Supabase، ملفات مكررة).</p>
-  <p>الأخبار الجيدة: <strong>كل هذه المشاكل قابلة للإصلاح</strong> خلال جلستين. الأساس التقني (ES Modules, PWA, Supabase, API endpoints) ممتاز.</p>
-  <blockquote>💡 التحسين في 3 إصلاحات فقط (defer لسكربتات + ضغط CSS + Cache-Control) سيرفع درجة الأداء من 58 إلى 80+.</blockquote>
-</div>
-
-<!-- ============ 2. درجات الأداء ============ -->
-<h2 id="scores"><span class="ico">📊</span> 2. درجات الأداء حسب القسم</h2>
-
-<table>
-  <tr><th>القسم</th><th>الدرجة</th><th>التقييم</th><th>ملاحظات</th></tr>
-  <tr><td>الأمان — الترويسات</td><td><strong>8/10</strong></td><td><span class="badge b-ok">ممتاز</span></td><td>HSTS, X-Frame-Options, Permissions-Policy ممتازة. تفتقر إلى COOP/COEP</td></tr>
-  <tr><td>الأمان — CSP</td><td><strong>7/10</strong></td><td><span class="badge b-warn">جيد</span></td><td>شاملة لكن تستخدم unsafe-inline في script-src</td></tr>
-  <tr><td>الأمان — إدارة المفاتيح</td><td><strong>9/10</strong></td><td><span class="badge b-ok">ممتاز</span></td><td>المفاتيح الحساسة على الخادم. Anon key علنية بالتصميم</td></tr>
-  <tr><td>الأمان — API</td><td><strong>7/10</strong></td><td><span class="badge b-warn">جيد</span></td><td>Gemini/GitHub ممتازة. contact.js بلا rate limiting</td></tr>
-  <tr><td>الأمان — Supabase RLS</td><td><strong>8/10</strong></td><td><span class="badge b-ok">ممتاز</span></td><td>كل الجداول بها RLS. مشكلة بسيطة في vault_items</td></tr>
-  <tr><td>الأمان — XSS</td><td><strong>6/10</strong></td><td><span class="badge b-high">يحتاج تحسين</span></td><td>100+ استخدام innerHTML. admin panel آمن بـ escapeHTML</td></tr>
-  <tr><td>SEO — الصفحة الرئيسية</td><td><strong>91%</strong></td><td><span class="badge b-ok">ممتاز</span></td><td>JSON-LD ثلاثي، OG، Twitter Cards، canonical، hreflang</td></tr>
-  <tr><td>SEO — الصفحات الفرعية</td><td><strong>67%</strong></td><td><span class="badge b-high">يحتاج عمل</span></td><td>quran (16%) و devos (17%) و learning (54%) ضعيفة جداً</td></tr>
-  <tr><td>الأداء — تحميل السكربتات</td><td><strong>4/10</strong></td><td><span class="badge b-crit">حرج</span></td><td>سكربتان حابسان للعرض (24KB) + admin على كل الصفحات</td></tr>
-  <tr><td>الأداء — التخزين المؤقت</td><td><strong>6/10</strong></td><td><span class="badge b-warn">جيد</span></td><td>SW ممتاز لكن يفتقر إلى Cache-Control headers</td></tr>
-  <tr><td>الأداء — حجم الحزم</td><td><strong>4/10</strong></td><td><span class="badge b-crit">حرج</span></td><td>CSS 142KB غير مضغوط، Font Awesome كامل (90KB)</td></tr>
-  <tr><td>الأداء — PWA</td><td><strong>7/10</strong></td><td><span class="badge b-ok">جيد</span></td><td>شاملة لكن أيقونات و manifest lang خاطئ</td></tr>
-  <tr><td>البنية — تنظيم الكود</td><td><strong>7/10</strong></td><td><span class="badge b-warn">جيد</span></td><td>ES Modules ممتازة. لكن كود مكرر + CSS ضخم</td></tr>
-  <tr><td>البنية — توحيد التصميم</td><td><strong>5/10</strong></td><td><span class="badge b-high">ضعيف</span></td><td>4 خطوط مختلفة + CSS inline في كل صفحة + cookie consent مكرر 5 مرات</td></tr>
-</table>
-
-<!-- ============ 3. نقاط القوة ============ -->
-<h2 id="strengths"><span class="ico">💪</span> 3. نقاط القوة</h2>
-
-<div class="grid">
-  <div class="card">
-    <h4>🛡️ أمان متقدم <span class="badge b-ok">نادر</span></h4>
-    <ul class="clean checks">
-      <li>ترويسات أمان كاملة: HSTS، X-Frame-Options، Referrer-Policy، Permissions-Policy، CSP.</li>
-      <li>بروكسي Gemini يُبقي المفتاح على الخادم + Rate-limit + قائمة origins بيضاء.</li>
-      <li>كل جداول Supabase بها RLS + سياسات admin-only للكتابة.</li>
-      <li>إصلاح أمني يُبطل <code>add_admin_user</code> من anon ( privilege escalation).</li>
-    </ul>
+  <div class="scoreboard">
+    <div class="score-tile s-yellow"><span class="delta delta-flat">=</span><b>7/10</b><span>الأمان</span><div class="meter"><i style="width:70%;background:var(--warn)"></i></div></div>
+    <div class="score-tile s-red"><span class="delta delta-down">جديد</span><b>4/10</b><span>نظافة المستودع والنشر</span><div class="meter"><i style="width:40%;background:var(--crit)"></i></div></div>
+    <div class="score-tile s-yellow"><span class="delta delta-up">↑ من 7</span><b>7.5/10</b><span>البنية والكود</span><div class="meter"><i style="width:75%;background:var(--warn)"></i></div></div>
+    <div class="score-tile s-green"><span class="delta delta-up">↑ من 6.7</span><b>8.2/10</b><span>SEO</span><div class="meter"><i style="width:82%;background:var(--ok)"></i></div></div>
+    <div class="score-tile s-orange"><span class="delta delta-up">↑ من 5.8</span><b>7/10</b><span>الأداء</span><div class="meter"><i style="width:70%;background:var(--high)"></i></div></div>
   </div>
-  <div class="card">
-    <h4>🔍 SEO ممتاز للصفحات الرئيسية <span class="badge b-ok">قوي</span></h4>
-    <ul class="clean checks">
-      <li>بيانات منظّمة <code>JSON-LD</code> ثلاثية (Person + WebSite + BreadcrumbList).</li>
-      <li><code>sitemap.xml</code> + <code>robots.txt</code> بسياسات ذكية لبوتات AI.</li>
-      <li>ملف <code>llms.txt</code> + OKF bundle لاكتشاف AI.</li>
-      <li>Open Graph + Twitter Cards + canonical + hreflang في الصفحات الرئيسية.</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h4>🧩 بنية ES Modules نظيفة <span class="badge b-ok">معمارية جيدة</span></h4>
-    <ul class="clean checks">
-      <li><code>src/js/main.js</code> يهيّئ النظام عبر 12 وحدة ES Modules.</li>
-      <li>فصل واضح: config / modules / services / utils.</li>
-      <li>API endpoints آمنة مع rate limiting و CORS.</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h4>📱 PWA متكاملة <span class="badge b-ok">متمكن</span></h4>
-    <ul class="clean checks">
-      <li>Service Worker بنظام تخزين ذكي (Promise.allSettled لمنع فشل كامل).</li>
-      <li>manifest.json مع shortcuts و display_override.</li>
-      <li>offline.html كخيار احتياطي + pwa-installer.js.</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h4>⚖️ امتثال GDPR <span class="badge b-ok">احترافي</span></h4>
-    <ul class="clean checks">
-      <li>GA4 وAdSense بنظام الموافقة (consent-aware).</li>
-      <li><code>anonymize_ip</code> مُفعّل + صفحات Privacy/Terms موجودة.</li>
-    </ul>
-  </div>
-  <div class="card">
-    <h4>📚 توثيق داخلي <span class="badge b-ok">ممتاز</span></h4>
-    <ul class="clean checks">
-      <li><code>CLAUDE.md</code> يوثّق 10 خطوات إجبارية وينبّه من خطر <code>git add .</code>.</li>
-      <li>ملفات SQL مهاجرة موثّقة + README شامل.</li>
-    </ul>
-  </div>
-</div>
 
-<!-- ============ 4. تحليل البنية ============ -->
-<h2 id="structure"><span class="ico">🏗️</span> 4. تحليل البنية والكود</h2>
+  <div class="card">
+    <h4>الخلاصة بصراحة</h4>
+    <p>معظم إصلاحات المرحلة 0 والمرحلة 1 من التقرير السابق (F1–F12) <strong>منفَّذة فعلاً</strong> وتم التحقق منها بالقراءة المباشرة للملفات — دفاع API، دمج cookie-consent، حذف الأكواد الميتة، SEO للصفحات الضعيفة، sitemap. هذا تقدّم حقيقي وليس ادّعاءً.</p>
+    <p>لكن أثناء إعادة الفحص ظهرت <strong>ثلاثة مشاكل جديدة لم تكن موجودة أو لم تُكتشف في 09-04</strong>، وأخطرها أن بناء Eleventy الذي أُضيف حديثاً (commit <code>9b06cc8</code>) ينشر فعلياً محتوى غير موثَّق وغير مرتبط بالموقع إطلاقاً — مشروع أندرويد كامل، سكربتات نشر داخلية، ونوت‌بوك تدريب — لأن نسخ Passthrough في Eleventy يعمل على مستوى المجلد الكامل ولا يحترم استثناءات <code>.vercelignore</code> على مستوى الملف الواحد. لا تسريب أسرار فعلي (تم فحص كل الملفات المرشحة يدوياً)، لكنه بالضبط نوع الانزلاق الذي حذّر منه <code>CLAUDE.md</code> نفسه.</p>
+    <p>أيضاً: <code>style.min.css</code> المُعلَن أنه "مضغوط" في تحديث 09-04 هو <strong>نسخة طبق الأصل بايتاً بايت</strong> من <code>style.css</code> غير المضغوط — الإصلاح لم يُنفَّذ فعلياً رغم توثيقه كمكتمل.</p>
+    <blockquote>💡 الأولوية الفورية ليست أداءً هذه المرة، بل نطاق النشر: امنع نشر <code>linguaverse/</code>، <code>denkmalen/</code>، <code>mcp/</code>، <code>notebooks/</code>، <code>tools/</code>، <code>agents/</code>، <code>docs/</code>، <code>.pi/</code> — لا شيء من هذه المجلدات مرتبط من أي صفحة في الموقع.</blockquote>
+  </div>
+</section>
 
-<h3>هيكل المشروع</h3>
-<div class="card">
+<!-- ============ 2. NEW FINDINGS ============ -->
+<section id="new">
+  <h2><span class="sec-num">02</span> اكتشافات جديدة</h2>
+  <p class="subhead">ثلاثة اكتشافات تم التحقق منها فعلياً بتنفيذ <code>npm run build</code> وفحص <code>dist/</code> الناتج — وليست تخميناً.</p>
+
+  <div class="card finding sev-critical">
+    <div class="finding-head">
+      <h4>🕳️ نسخ Passthrough في Eleventy ينشر مجلدات غير موثَّقة وغير مرتبطة بالموقع</h4>
+      <span class="badge b-crit">حرج</span>
+    </div>
+    <p><code>eleventy.config.mjs</code> يبني قائمة استثناءات (<code>VERCEL_IGNORE</code>) لحساب "ما يجب أن يُخدَّم"، لكنه بعدها ينفّذ <code>addPassthroughCopy(dir)</code> على <strong>كامل المجلد الجذري</strong> لكل اسم موجود في القائمة — وهذا لا يطبّق أي استثناء على الملفات الفرعية. النتيجة: أي مجلد جذري به ملف متتبَّع واحد فأكثر يُنسخ بالكامل إلى <code>dist/</code> ويُنشر، بصرف النظر عمّا تقوله قائمة الاستثناء.</p>
+    <div class="evidence-label">الدليل — تم تنفيذه فعلياً</div>
+    <pre>$ npm run build && find dist -maxdepth 1 -iname "linguaverse" -o -iname "denkmalen" -o -iname "mcp" -o -iname "notebooks"
+<span class="c">dist/linguaverse   (1.8MB — مشروع أندرويد كامل غير مرتبط بالمشروع)</span>
+<span class="c">dist/denkmalen     (2.0MB — أصول لعبة "Draw Battle" منفصلة تماماً)</span>
+<span class="c">dist/mcp           (160KB — يتضمن __pycache__/*.pyc مُترجَمة)</span>
+<span class="c">dist/notebooks     (16KB  — colab_train_king2_qwen25_3b.ipynb)</span>
+<span class="c">dist/.pi, dist/tools, dist/agents, dist/docs   (سكربتات ومحتوى داخلي)</span></pre>
+    <p>تم فحص كل هذه المجلدات يدوياً بحثاً عن أسرار (<code>grep</code> على أنماط API keys/tokens) — <strong>لم يُعثر على أي سرّ فعلي مسرّب</strong>. لكن المشكلة قائمة: كود مصدري كامل لتطبيق أندرويد آخر (linguaverse)، وسكربتات تشغيل داخلية (<code>tools/deploy_king2_platform.py</code>, <code>tools/point_king2_to_mein_wep_db.py</code>)، ونوت‌بوك تدريب موديل، تُنشر علناً على نطاق الموقع رغم أنها غير مذكورة في <code>README.md</code> وغير مرتبطة من أي صفحة HTML. هذا هو نفس نوع "الانزلاق غير المقصود" الذي دفع لإنشاء <code>.vercelignore</code> أصلاً (بحسب تعليقه الخاص عن حادثة <code>apps/quran-app/android/</code> السابقة) — والحماية التي بُنيت حينها لا تعمل مع أسلوب النسخ الحالي.</p>
+  </div>
+
+  <div class="card finding sev-high">
+    <div class="finding-head">
+      <h4>📦 50MB من ملفات APK ثنائية داخل Git — و.git بلغ 105MB</h4>
+      <span class="badge b-high">عالية</span>
+    </div>
+    <div class="grid">
+      <div>
+        <div class="evidence-label">الوضع الحالي</div>
+        <ul class="clean">
+          <li><code>apks/*.apk</code> — 9 ملفات، <strong>~50MB</strong> إجمالاً</li>
+          <li>إصداران محفوظان لكل تطبيق (مثال: calculator-app v1.0.0 <em>و</em> v1.0.1 = 13.2MB معاً)</li>
+          <li><code>.git/</code> الآن <strong>105MB</strong> — كل استنساخ مستقبلي يحمّل هذا الوزن كاملاً</li>
+        </ul>
+      </div>
+      <div>
+        <div class="evidence-label">لماذا يزداد سوءاً</div>
+        <ul class="clean cross">
+          <li>كل تحديث APK يضيف نسخة ثنائية جديدة إلى التاريخ — لا يُستبدل القديم أبداً</li>
+          <li>تنظيف التاريخ لاحقاً يتطلب <code>git filter-repo</code> أو BFG — عملية مزعجة وتؤثر على كل من استنسخ المستودع</li>
+        </ul>
+      </div>
+    </div>
+    <p>البديل الأنسب لملفات توزيع ثنائية متغيّرة الإصدار: <strong>Git LFS</strong>، أو استضافتها كـ GitHub Releases assets، أو تخزين كائنات (Supabase Storage / R2) مع رابط تنزيل مباشر — مع الإبقاء على <code>apks/updates.json</code> فقط داخل Git.</p>
+  </div>
+
+  <div class="card finding sev-medium">
+    <div class="finding-head">
+      <h4>🗜️ style.min.css ليس مضغوطاً فعلياً — رغم توثيقه كإصلاح مكتمل (F2)</h4>
+      <span class="badge b-warn">متوسطة</span>
+    </div>
+    <div class="evidence-label">الدليل</div>
+    <pre><span class="k">$</span> diff css/style.css css/style.min.css
+<span class="c">(بدون أي فرق — الملفان متطابقان بايتاً بايت، 109,249 بايت لكل منهما)</span></pre>
+    <p>تقرير 09-04 يذكر أن F2 نُفّذ ("ضُغط من 142KB إلى ~107KB مع نسخة <code>style.min.css</code> مطابقة") — لكن الملفين الحاليين متطابقان تماماً وغير مضغوطين (بلا إزالة تعليقات أو مسافات). أياً كانت الصفحة التي تشير إلى <code>style.min.css</code>، فهي تحصل على نفس الحجم الكامل. يحتاج تشغيل فعلي لأداة ضغط (esbuild / lightningcss / cssnano) ضمن <code>npm run build</code> بدلاً من نسخ يدوي.</p>
+  </div>
+</section>
+
+<!-- ============ 3. STATUS TABLE ============ -->
+<section id="status">
+  <h2><span class="sec-num">03</span> حالة إصلاحات F1–F18 بعد التحقق الفعلي</h2>
+  <p class="subhead">كل صف تم التحقق منه بقراءة الملف الفعلي وليس بالاعتماد على توثيق التقرير السابق فقط.</p>
+  <div class="table-wrap">
   <table>
-    <tr><th>المجلد/الملف</th><th>العدد</th><th>الحالة</th></tr>
-    <tr><td>صفحات HTML (جذر)</td><td>10 صفحات</td><td><span class="badge b-ok">موجودة</span></td></tr>
-    <tr><td>وحدات JS (src/js/)</td><td>16 وحدة</td><td><span class="badge b-ok">نظيفة</span></td></tr>
-    <tr><td>سكربتات قديمة (js/)</td><td>14 ملف</td><td><span class="badge b-high">متنوعة الحالة</span></td></tr>
-    <tr><td>ملفات CSS</td><td>5 ملفات</td><td><span class="badge b-warn">.style.css ضخم</span></td></tr>
-    <tr><td>API endpoints</td><td>5 endpoints</td><td><span class="badge b-ok">آمنة</span></td></tr>
-    <tr><td>ألعاب</td><td>3 ألعاب</td><td><span class="badge b-ok">تعمل</span></td></tr>
-    <tr><td>تطبيقات</td><td>2 تطبيقات</td><td><span class="badge b-ok">تعمل</span></td></tr>
-    <tr><td>مقالات مدونة</td><td>7 مقالات</td><td><span class="badge b-ok">موجودة</span></td></tr>
-    <tr><td>ملفات SQL</td><td>7 ملفات</td><td><span class="badge b-warn">في الجذر</span></td></tr>
+    <tr><th>#</th><th>الإصلاح</th><th>الحالة المُعلَنة (09-04)</th><th>الحالة الفعلية بعد التحقق</th></tr>
+    <tr><td class="mono">F1</td><td>defer لسكربتات حجب العرض</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span></td></tr>
+    <tr><td class="mono">F2</td><td>ضغط CSS</td><td>✅ تم</td><td><span class="badge b-crit">غير صحيح</span> — style.min.css مطابق حرفياً لغير المضغوط</td></tr>
+    <tr><td class="mono">F3</td><td>Cache-Control headers</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span> — موجود في vercel.json لكل الأصول الثابتة</td></tr>
+    <tr><td class="mono">F4</td><td>rate limiting لـ api/contact.js</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span> — 5/دقيقة لكل IP + honeypot + CORS allowlist</td></tr>
+    <tr><td class="mono">F5</td><td>OG Image إلى PNG</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span></td></tr>
+    <tr><td class="mono">F6</td><td>حذف الكود الميت</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span> — avatar.js/game-controls.js/script.js غير موجودة</td></tr>
+    <tr><td class="mono">F7</td><td>توحيد cookie consent</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span> — js/cookie-consent.js مستخدم في 6 صفحات</td></tr>
+    <tr><td class="mono">F8</td><td>SEO للصفحات الضعيفة</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد جزئياً</span></td></tr>
+    <tr><td class="mono">F9</td><td>توحيد الخطوط</td><td>✅ تم</td><td><span class="badge b-info">لم يُفحص بعمق هذه الجولة</span></td></tr>
+    <tr><td class="mono">F10</td><td>admin.js dynamic import</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span></td></tr>
+    <tr><td class="mono">F11</td><td>حل تهيئة Supabase المزدوجة</td><td>✅ تم</td><td><span class="badge b-info">لم يُعَد فحصه بعمق</span></td></tr>
+    <tr><td class="mono">F12</td><td>إصلاح sitemap.xml</td><td>✅ تم</td><td><span class="badge b-ok">مؤكَّد</span></td></tr>
+    <tr><td class="mono">F13</td><td>قوالب HTML مشتركة (11ty)</td><td>⬜ معلّق</td><td><span class="badge b-warn">نُفّذ جزئياً</span> — Eleventy مضاف لكنه لا يزال passthrough بحت (بدون قوالب nav/footer فعلية) وسبّب مشكلة النشر الجديدة أعلاه</td></tr>
+    <tr><td class="mono">F14</td><td>تقسيم style.css</td><td>⬜ معلّق</td><td><span class="badge b-crit">لا يزال معلّقاً</span> — ملف واحد 109KB</td></tr>
+    <tr><td class="mono">F15</td><td>تقليل Font Awesome</td><td>⬜ معلّق</td><td><span class="badge b-crit">لا يزال معلّقاً</span></td></tr>
+    <tr><td class="mono">F16</td><td>إصلاح manifest.json (lang/dir)</td><td>⬜ معلّق</td><td><span class="badge b-crit">لا يزال معلّقاً</span> — lang="ar" dir="rtl" كما هو</td></tr>
+    <tr><td class="mono">F17</td><td>COOP/COEP headers</td><td>⬜ معلّق</td><td><span class="badge b-warn">نُفّذ جزئياً</span> — COOP وCORP مضافان في vercel.json، COEP غير مضاف (ملاحظة أدناه)</td></tr>
+    <tr><td class="mono">F18</td><td>نقل ملفات SQL إلى db/</td><td>⬜ معلّق</td><td><span class="badge b-crit">لا يزال معلّقاً</span> — 7 ملفات SQL في الجذر</td></tr>
   </table>
-</div>
-
-<h3>مشاكل ازدواجية الكود</h3>
-<div class="card">
-  <h4>klejdl — تهيئة Supabase مزدوجة في index.html <span class="badge b-high">عالية</span></h4>
-  <p>يوجد عميلان متوازيان: <code>js/supabase-config.js</code> (ينشئ <code>window.supabaseClient</code>) و<code>src/js/main.js</code> (ينشئ singleton عبر ES Modules). النتيجة: أحداث auth مكررة وزيارات مضاعفة.</p>
-</div>
-<div class="card">
-  <h4>klejdl — ملفات مكررة/فارغة <span class="badge b-warn">متوسطة</span></h4>
-  <ul class="clean cross">
-    <li><code>js/avatar.js</code> (422 سطر) — نسخة مكررة من RobotAvatar في rashid-ai-v2.js. غير مستخدمة = كود ميت.</li>
-    <li><code>js/game-controls.js</code> (v2.1) — نسخة قديمة من unified-game-controls.js (v3.0). غير مستخدمة.</li>
-    <li><code>js/script.js</code> — ملف فارغ "Retained for legacy compatibility". يُحمَّل في 5 صفحات دون فائدة.</li>
-  </ul>
-</div>
-<div class="card">
-  <h4>klejdl — cookie consent مكرر 5 مرات <span class="badge b-high">عالية</span></h4>
-  <p>نفس كود الموافقة على ملفات تعريف الارتباط منسوخ في: <code>index.html</code>، <code>about.html</code>، <code>contact.html</code>، <code>privacy.html</code>، <code>learning.html</code>. كل نسخة بسيطة مختلفة قليلاً. يجب دمجها في ملف مشترك.</p>
-</div>
-<div class="card">
-  <h4>klejdl — عناصر HTML مكررة <span class="badge b-high">عالية</span></h4>
-  <ul class="clean cross">
-    <li>شريط التنقل (nav) منسوخ في 10+ صفحات — أي تغيير يتطلب تعديل كل صفحة.</li>
-    <li>التذييل (footer) منسوخ في كل صفحة.</li>
-    <li>метadata في <code>&lt;head&gt;</code> منسوخ — لا يوجد قالب مشترك.</li>
-  </ul>
-</div>
-
-<h3>تنافر الخطوط</h3>
-<div class="card">
-  <table>
-    <tr><th>الصفحة</th><th>الخطوط</th><th>الحالة</th></tr>
-    <tr><td>index.html</td><td>Inter + JetBrains Mono</td><td><span class="badge b-ok">المعيار</span></td></tr>
-    <tr><td>about.html</td><td>Outfit + Plus Jakarta Sans</td><td><span class="badge b-crit">مختلف</span></td></tr>
-    <tr><td>contact.html</td><td>Outfit + Plus Jakarta Sans</td><td><span class="badge b-crit">مختلف</span></td></tr>
-    <tr><td>privacy.html</td><td>Outfit + Plus Jakarta Sans</td><td><span class="badge b-crit">مختلف</span></td></tr>
-    <tr><td>learning.html</td><td>Inter ( فقط)</td><td><span class="badge b-warn">ناقص</span></td></tr>
-    <tr><td>quran.html</td><td>Amiri + Tajawal</td><td><span class="badge b-info">مستقل</span></td></tr>
-    <tr><td>downloads.html</td><td>Inter + JetBrains Mono</td><td><span class="badge b-ok">متوافق</span></td></tr>
-    <tr><td>devos.html</td><td>Bricolage Grotesque + Space Grotesk + JetBrains Mono</td><td><span class="badge b-crit">مختلف تماماً</span></td></tr>
-    <tr><td>404.html</td><td>Inter + JetBrains Mono</td><td><span class="badge b-ok">متوافق</span></td></tr>
-  </table>
-  <p style="margin-top:12px;color:var(--muted)">8+ خطوط مختلفة في الموقع. فقط index.html و 404.html متطابقان. هذا يُضعف الهوية البصرية ويزيد حجم التحميل.</p>
-</div>
-
-<!-- ============ 5. الأمان ============ -->
-<h2 id="security"><span class="ico">🔒</span> 5. الأمان والحماية</h2>
-
-<div class="score">
-  <div class="s s-green"><b>9/10</b><span>إدارة المفاتيح</span></div>
-  <div class="s s-green"><b>8/10</b><span>الترويسات + RLS</span></div>
-  <div class="s s-yellow"><b>7/10</b><span>CSP + API</span></div>
-  <div class="s s-yellow"><b>6/10</b><span>XSS + Contact API</span></div>
-</div>
-
-<h3>الترويسات الأمنية</h3>
-<div class="grid">
+  </div>
   <div class="card">
-    <h4>موجودة و ممتازة <span class="badge b-ok">✓</span></h4>
-    <ul class="clean checks">
-      <li><code>Strict-Transport-Security</code> مع preload</li>
-      <li><code>X-Frame-Options: DENY</code> (عدا الألعاب iframe)</li>
-      <li><code>X-Content-Type-Options: nosniff</code></li>
-      <li><code>Referrer-Policy: strict-origin-when-cross-origin</code></li>
-      <li><code>Permissions-Policy</code> يمنع كاميرا/ميكروفون/موقع</li>
+    <p style="margin:0"><strong>ملاحظة حول F17:</strong> عدم إضافة <code>Cross-Origin-Embedder-Policy</code> قد يكون قراراً صحيحاً وليس إغفالاً — الموقع يضمّن iframes من AdSense وYouTube وTikTok (انظر CSP <code>frame-src</code>)، وتفعيل COEP الصارم (<code>require-corp</code>) سيكسر هذه التضمينات ما لم تُضِف كل خدمة خارجية هذه الترويسة بنفسها، وهو خارج سيطرة المشروع. التوصية: إبقاؤه كما هو، أو استخدام <code>credentialless</code> بحذر مع اختبار فعلي لكل تضمين خارجي.</p>
+  </div>
+</section>
+
+<!-- ============ 4. SECURITY ============ -->
+<section id="security">
+  <h2><span class="sec-num">04</span> الأمان — إعادة الفحص</h2>
+
+  <h3>ما تم التحقق منه وهو جيد</h3>
+  <div class="grid">
+    <div class="card">
+      <h4>بوابة فحص أسرار في CI <span class="badge b-ok">ممتاز</span></h4>
+      <ul class="clean checks">
+        <li><code>.github/workflows/ci.yml</code> يفحص أنماط <code>AIza…</code>، <code>sk-proj/ant-…</code>، <code>AKIA…</code>، وتعيينات <code>SERVICE_ROLE/SECRET</code> في كل push</li>
+        <li>الفحص اليدوي بنفس الأنماط على كامل الشجرة الحالية لم يُظهر أي سرّ فعلي مسرّب</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>إدارة المفاتيح <span class="badge b-ok">جيد</span></h4>
+      <ul class="clean checks">
+        <li><code>GEMINI_API_KEY</code> و<code>GITHUB_TOKEN</code> في <code>process.env</code> فقط</li>
+        <li>لا <code>service_role</code> في أي ملف عميل — فقط إشارات نصية توضيحية في تعليقات/سكربتات أدوات</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>مشاكل لا تزال قائمة</h3>
+  <div class="card finding sev-medium">
+    <div class="finding-head"><h4>XSS محتمل عبر innerHTML + error.message</h4><span class="badge b-warn">متوسطة — لم تُصلَح منذ 09-04</span></div>
+    <div class="evidence-label">models/Rashid-Model/script.js</div>
+    <pre>L459:  imageResult.innerHTML = `...${error.message}...`;
+L1244: resultContainer.innerHTML = `...${error.message || '...'}...`;</pre>
+    <p>الملف نفسه يحتوي على دالة تنظيف جاهزة (سطر 37-39: <code>div.textContent = text; return div.innerHTML;</code>) لكنها غير مطبَّقة على مسارات الخطأ هذه. إن أعاد أي طرف علوي (خدمة ترجمة، توليد صورة) رسالة خطأ تحتوي HTML يتحكم به المستخدم، يُنفَّذ مباشرة. الإصلاح بسيط: مرّر <code>error.message</code> عبر نفس دالة التنظيف الموجودة بالفعل قبل الحقن.</p>
+    <p style="margin-top:8px;color:var(--muted);font-size:.88rem">للسياق: من أصل 129 استخدام <code>innerHTML</code> عبر 33 ملفاً، الغالبية العظمى قوالب ثابتة (أيقونات، spinners) منخفضة الخطورة — هذان الموقعان هما الاستثناء الفعلي الجدير بالإصلاح.</p>
+  </div>
+</section>
+
+<!-- ============ 5. HYGIENE ============ -->
+<section id="hygiene">
+  <h2><span class="sec-num">05</span> نظافة المستودع ونطاق الخدمة</h2>
+  <p class="subhead">قسم جديد — لم يكن موجوداً في تدقيق 09-04. يوثّق المجلدات التي تُنشر علناً دون أن تكون جزءاً موثَّقاً من الموقع.</p>
+
+  <div class="table-wrap">
+  <table>
+    <tr><th>المجلد</th><th class="num">الحجم</th><th>الطبيعة الفعلية</th><th>مرتبط من الموقع؟</th></tr>
+    <tr><td class="mono">linguaverse/</td><td class="num">1.8MB</td><td>مشروع تطبيق أندرويد منفصل (AI Studio)</td><td><span class="badge b-crit">لا</span></td></tr>
+    <tr><td class="mono">denkmalen/</td><td class="num">2.0MB</td><td>أصول لعبة "Draw Battle" منفصلة</td><td><span class="badge b-crit">لا</span></td></tr>
+    <tr><td class="mono">mcp/colab-mcp/</td><td class="num">160KB</td><td>خادم MCP + ملفات <code>.pyc</code> مترجَمة</td><td><span class="badge b-crit">لا</span></td></tr>
+    <tr><td class="mono">notebooks/</td><td class="num">16KB</td><td>نوت‌بوك تدريب Colab</td><td><span class="badge b-crit">لا</span></td></tr>
+    <tr><td class="mono">tools/</td><td class="num">60KB</td><td>سكربتات نشر/إدارة داخلية (Python)</td><td><span class="badge b-crit">لا</span></td></tr>
+    <tr><td class="mono">agents/, docs/, .pi/</td><td class="num">~150KB</td><td>محتوى تطوير داخلي</td><td><span class="badge b-crit">لا</span></td></tr>
+  </table>
+  </div>
+
+  <div class="card">
+    <p style="margin:0"><strong>الأثر:</strong> ~4.2MB من محتوى غير مرتبط يُنشر حالياً على نطاق الموقع الإنتاجي عبر مسارات عامة (<code>/linguaverse/…</code>، <code>/denkmalen/…</code> إلخ)، بما في ذلك كود مصدري كامل لتطبيق أندرويد آخر وسكربتات تشغيل داخلية تكشف عن أسماء وبنية أدوات الإدارة الداخلية (<code>point_king2_to_mein_wep_db.py</code>، <code>deploy_king2_platform.py</code>). لا يوجد تسريب أسرار مباشر، لكنه توسّع غير مقصود لسطح الهجوم ولنطاق الملفات العامة يستحق الإغلاق قبل أن يتراكم أكثر.</p>
+  </div>
+
+  <h3>الإصلاح المقترح</h3>
+  <p>أضف الأسماء التالية صراحة إلى <code>NOT_SERVED</code> في <code>eleventy.config.mjs</code> و<code>scripts/check-url-surface.mjs</code> معاً، <strong>وغيّر آلية النسخ من مستوى-المجلد إلى مستوى-الملف</strong> (استخدم <code>servedFiles()</code> نفسها لتوليد قائمة نسخ فردية لكل ملف بدل <code>addPassthroughCopy(topLevelDir)</code>) — هذا يغلق الثغرة بنيوياً بدل إضافة استثناءات يدوية متكررة كلما ظهر مجلد جديد:</p>
+  <pre>/^linguaverse\//,
+/^denkmalen\//,
+/^mcp\//,
+/^notebooks\//,
+/^tools\//,
+/^agents\//,
+/^docs\//,
+/^\.pi\//,
+/\.pyc$/,
+/__pycache__\//,</pre>
+</section>
+
+<!-- ============ 6. PERFORMANCE ============ -->
+<section id="performance">
+  <h2><span class="sec-num">06</span> الأداء وحجم الحزم</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h4>ما تحسّن فعلاً ✓</h4>
+      <ul class="clean checks">
+        <li>Cache-Control immutable مؤكَّد لكل الأصول الثابتة</li>
+        <li>CSP + COOP + CORP مضافة في vercel.json</li>
+        <li>og-image.png (بدل SVG) مؤكَّد</li>
+        <li>سكربتات index.html تستخدم defer</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>لا يزال معلّقاً ✕</h4>
+      <ul class="clean cross">
+        <li>style.min.css غير مضغوط فعلياً (109KB كما هو)</li>
+        <li>Font Awesome كامل (~90KB) لعدد قليل من الأيقونات</li>
+        <li>لا تقسيم لـ style.css (ملف وحيد ضخم)</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>توزيع حجم dist/ (بعد بناء فعلي)</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>المسار</th><th class="num">الحجم</th><th>ملاحظة</th></tr>
+    <tr><td class="mono">apks/</td><td class="num">50MB</td><td>الأثقل بفارق كبير — مرشّح أول لـ Git LFS / تخزين خارجي</td></tr>
+    <tr><td class="mono">audio/</td><td class="num">7.0MB</td><td>تلاوات قرآنية — متوقَّع ومبرَّر</td></tr>
+    <tr><td class="mono">games/</td><td class="num">3.1MB</td><td>ألعاب Three.js — متوقَّع</td></tr>
+    <tr><td class="mono">denkmalen/</td><td class="num">2.0MB</td><td>غير مرتبط بالموقع (انظر القسم 5)</td></tr>
+    <tr><td class="mono">linguaverse/</td><td class="num">1.8MB</td><td>غير مرتبط بالموقع (انظر القسم 5)</td></tr>
+    <tr><td><strong>الإجمالي</strong></td><td class="num"><strong>97MB</strong></td><td>—</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- ============ 7. FIXES ============ -->
+<section id="fixes">
+  <h2><span class="sec-num">07</span> خطة الإصلاح المرتّبة بالأولوية</h2>
+
+  <h3>🔴 P0 — هذا الأسبوع</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>الإصلاح</th><th>الخطوة</th><th>الجهد</th></tr>
+    <tr><td class="mono">G1</td><td>إغلاق نشر المجلدات غير المرتبطة</td><td>استثناءات صريحة + نسخ passthrough على مستوى الملف (انظر القسم 5)</td><td>ساعة</td></tr>
+    <tr><td class="mono">G2</td><td>إصلاح style.min.css فعلياً</td><td>أضف خطوة ضغط حقيقية (esbuild/lightningcss) في <code>npm run build</code></td><td>30 دقيقة</td></tr>
+    <tr><td class="mono">G3</td><td>تعقيم error.message قبل innerHTML</td><td>مرّر عبر دالة <code>escapeHTML</code> الموجودة سطر 37 في نفس الملف</td><td>10 دقائق</td></tr>
+  </table>
+  </div>
+
+  <h3>🟠 P1 — الأسبوعان القادمان</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>الإصلاح</th><th>الخطوة</th><th>الجهد</th></tr>
+    <tr><td class="mono">G4</td><td>نقل APKs خارج تاريخ Git</td><td>Git LFS أو GitHub Releases + الإبقاء على updates.json فقط</td><td>2-3 ساعات</td></tr>
+    <tr><td class="mono">F14</td><td>تقسيم style.css</td><td>base/components/layout/animations</td><td>2-3 ساعات</td></tr>
+    <tr><td class="mono">F16</td><td>مراجعة lang/dir في manifest.json</td><td>تأكيد أنه مقصود (الموقع عربي أساساً) أو تصحيحه</td><td>5 دقائق</td></tr>
+    <tr><td class="mono">F18</td><td>نقل ملفات SQL إلى db/</td><td>—</td><td>10 دقائق</td></tr>
+  </table>
+  </div>
+
+  <h3>🟡 P2 — هيكلي</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>#</th><th>الإصلاح</th><th>الخطوة</th><th>الجهد</th></tr>
+    <tr><td class="mono">F13+</td><td>قوالب nav/footer حقيقية في Eleventy</td><td>ليس passthrough بحت — استخدم layouts فعلية لإزالة تكرار nav/footer عبر الصفحات</td><td>1-2 يوم</td></tr>
+    <tr><td class="mono">F15</td><td>تقليل Font Awesome لأيقونات subset</td><td>—</td><td>30 دقيقة</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- ============ 8. ROADMAP ============ -->
+<section id="roadmap">
+  <h2><span class="sec-num">08</span> خريطة العمل</h2>
+
+  <div class="phase p0">
+    <div class="ph-head">المرحلة 0 — إغلاق ثغرة النشر (أيام)</div>
+    <ul class="clean">
+      <li><strong>G1</strong> استثناءات صريحة + تحويل النسخ إلى مستوى-الملف</li>
+      <li><strong>G2</strong> ضغط CSS حقيقي</li>
+      <li><strong>G3</strong> تعقيم error.message</li>
     </ul>
   </div>
-  <div class="card">
-    <h4>مفقودة <span class="badge b-high">يجب إضافتها</span></h4>
-    <ul class="clean cross">
-      <li><code>Cross-Origin-Opener-Policy</code></li>
-      <li><code>Cross-Origin-Embedder-Policy</code></li>
-      <li><code>Cross-Origin-Resource-Policy</code></li>
-      <li><code>X-XSS-Protection</code> (للدعم القديم)</li>
+  <div class="phase p1">
+    <div class="ph-head">المرحلة 1 — تخفيف وزن المستودع (أسبوع)</div>
+    <ul class="clean">
+      <li><strong>G4</strong> نقل APKs إلى Git LFS / تخزين خارجي</li>
+      <li><strong>F14</strong> تقسيم style.css</li>
+      <li><strong>F18</strong> نقل ملفات SQL</li>
     </ul>
   </div>
-</div>
-
-<h3>لكشف API Keys في الكود</h3>
-<div class="card">
-  <h4>المفاتيح الحساسة على الخادم فقط <span class="badge b-ok">آمن</span></h4>
-  <ul class="clean checks">
-    <li><code>GEMINI_API_KEY</code> في <code>process.env</code> فقط (api/gemini.js)</li>
-    <li><code>GITHUB_TOKEN</code> في <code>process.env</code> فقط (api/github.js)</li>
-    <li>لا يوجد <code>service_role</code> في أي ملف عميل</li>
-    <li><code>SUPABASE_ANON_KEY</code> علنية بالتصميم (5 ملفات) — آمن لأن RLS يحمي البيانات</li>
-  </ul>
-</div>
-
-<h3>أمان API Endpoints</h3>
-<div class="card">
-  <table>
-    <tr><th>النقطة</th><th>Rate Limit</th><th>CORS</th><th>التحقق</th><th>الحالة</th></tr>
-    <tr><td>api/gemini.js</td><td>10/دقيقة</td><td>قائمة بيضاء</td><td>POST فقط + 8000 حد أقصى</td><td><span class="badge b-ok">ممتاز</span></td></tr>
-    <tr><td>api/github.js</td><td>10/دقيقة</td><td>قائمة بيضاء</td><td>3 نقاط مسموحة فقط</td><td><span class="badge b-ok">ممتاز</span></td></tr>
-    <tr><td>api/evaluate.js</td><td>20/دقيقة</td><td>قائمة بيضاء</td><td>100 حرف + 4MB رسم</td><td><span class="badge b-ok">ممتاز</span></td></tr>
-    <tr><td>api/contact.js</td><td><strong>لا يوجد</strong></td><td>مصدر افتراضي</td><td>تحقق من الإدخال</td><td><span class="badge b-crit">يحتاج إصلاح</span></td></tr>
-    <tr><td>api/rss.js</td><td>—</td><td>—</td><td>ملف ثابت فقط</td><td><span class="badge b-ok">جيد</span></td></tr>
-  </table>
-</div>
-
-<h3>مشاكل XSS</h3>
-<div class="card">
-  <h4>innerHTML — 100+ استخدام <span class="badge b-high">يحتاج تحسين</span></h4>
-  <ul class="clean">
-    <li><code>admin/dashboard.html</code> — يستخدم <code>escapeHTML()</code> بشكل صحيح ✓</li>
-    <li><code>js/admin.js</code> — يستخدم <code>escapeHTML()</code> ✓</li>
-    <li><code>index.html</code> blog preview — يعرض static JSON عبر innerHTML (آمن حالياً لكن خطير)</li>
-    <li><code>models/Rashid-Model/script.js</code> — يعرض <code>error.message</code> عبر innerHTML بدون تنظيف <span class="badge b-crit">خطر</span></li>
-    <li>ألعاب Three.js — استخدامات داخلية (خطر منخفض)</li>
-  </ul>
-</div>
-
-<!-- ============ 6. SEO ============ -->
-<h2 id="seo"><span class="ico">🔍</span> 6. تحسين محركات البحث (SEO)</h2>
-
-<div class="score">
-  <div class="s s-green"><b>91%</b><span>index.html</span></div>
-  <div class="s s-green"><b>86-89%</b><span>about, contact, privacy, terms</span></div>
-  <div class="s s-yellow"><b>61-70%</b><span>downloads, blog</span></div>
-  <div class="s s-red"><b>16-17%</b><span>quran, devos</span></div>
-</div>
-
-<h3>درجات SEO حسب الصفحة</h3>
-<div class="card">
-  <table>
-    <tr><th>الصفحة</th><th>Meta</th><th>OG</th><th>JSON-LD</th><th>Canonical</th><th>Hreflang</th><th>المجموع</th></tr>
-    <tr><td>index.html</td><td>9</td><td>8</td><td>9</td><td>10</td><td>10</td><td><strong style="color:var(--ok)">91%</strong></td></tr>
-    <tr><td>about.html</td><td>9</td><td>8</td><td>8</td><td>10</td><td>10</td><td><strong style="color:var(--ok)">89%</strong></td></tr>
-    <tr><td>contact.html</td><td>9</td><td>8</td><td>7</td><td>10</td><td>10</td><td><strong style="color:var(--ok)">86%</strong></td></tr>
-    <tr><td>privacy.html</td><td>9</td><td>8</td><td>5</td><td>10</td><td>10</td><td><strong style="color:var(--ok)">84%</strong></td></tr>
-    <tr><td>terms.html</td><td>9</td><td>8</td><td>5</td><td>10</td><td>10</td><td><strong style="color:var(--ok)">84%</strong></td></tr>
-    <tr><td>downloads.html</td><td>7</td><td>5</td><td>3</td><td>10</td><td>10</td><td><strong style="color:var(--warn)">70%</strong></td></tr>
-    <tr><td>blog/index.html</td><td>5</td><td>7</td><td>3</td><td>10</td><td>2</td><td><strong style="color:var(--warn)">61%</strong></td></tr>
-    <tr><td>learning.html</td><td>5</td><td>4</td><td>3</td><td>10</td><td>2</td><td><strong style="color:var(--high)">54%</strong></td></tr>
-    <tr><td>devos.html</td><td>2</td><td>0</td><td>2</td><td>0</td><td>0</td><td><strong style="color:var(--crit)">17%</strong></td></tr>
-    <tr><td>quran.html</td><td>3</td><td>0</td><td>0</td><td>0</td><td>0</td><td><strong style="color:var(--crit)">16%</strong></td></tr>
-  </table>
-</div>
-
-<h3>مشاكل OG Criticism</h3>
-<div class="grid">
-  <div class="card">
-    <h4>🔴 صورة OG بصيغة SVG <span class="badge b-crit">حرج</span></h4>
-    <p>صورة <code>og-image.svg</code> لا تعمل على Facebook أو LinkedIn أو Twitter. يجب تحويلها إلى PNG (1200×630).</p>
-  </div>
-  <div class="card">
-    <h4>🔴 quran.html و devos.html بلا SEO <span class="badge b-crit">حرج</span></h4>
-    <p>لا توجد meta tags، لا OG، لا Twitter Cards، لا canonical، لا hreflang، لا JSON-LD. صفحات غير مرئية لمحركات البحث.</p>
-  </div>
-  <div class="card">
-    <h4>🟠 hreflang مفقود في 4 صفحات <span class="badge b-high">عالية</span></h4>
-    <p>learning.html، devos.html، blog/index.html، quran.html — لا يوجد hreflang. يكسر SEO الدولي.</p>
-  </div>
-  <div class="card">
-    <h4>🟠 OG Image نسبي في learning.html <span class="badge b-high">عالية</span></h4>
-    <p>يستخدم <code>images/og-image.svg</code> (نسبي) بدلاً من URL كامل. يكسر المشاركة على وسائل التواصل.</p>
-  </div>
-</div>
-
-<h3>تحليل sitemap.xml</h3>
-<div class="card">
-  <ul class="clean">
-    <li><strong>موجود:</strong> 38 رابط مع lastmod وchangefreq ✓</li>
-    <li><strong>مفقود:</strong> <code>quran.html</code> ليس في sitemap رغم أنه مربوط من الشريط العلوي</li>
-    <li><strong>خطأ:</strong> <code>404.html</code> موجود في sitemap (لا يجب فهرسته)</li>
-    <li><strong>تحديث:</strong> تواريخ lastmod ثابتة (2026-07-01) لا تعكس التعديلات الفعلية</li>
-  </ul>
-</div>
-
-<!-- ============ 7. الأداء ============ -->
-<h2 id="performance"><span class="ico">⚡</span> 7. الأداء والسرعة</h2>
-
-<div class="score">
-  <div class="s s-red"><b>58/100</b><span>Lighthouse (المقدر)</span></div>
-  <div class="s s-red"><b>3.0-4.5s</b><span>LCP (المقدر)</span></div>
-  <div class="s s-green"><b>&lt;100ms</b><span>FID</span></div>
-  <div class="s s-green"><b>0.02-0.05</b><span>CLS</span></div>
-</div>
-
-<h3>مشاكل حجب العرض (Render-Blocking)</h3>
-<div class="card">
-  <table>
-    <tr><th>الملف</th><th>الحجم</th><th>حاجب؟</th><th>المشكلة</th></tr>
-    <tr><td>js/gemini-config.js</td><td>0.5KB</td><td><span class="badge b-crit">نعم</span></td><td>بدون defer في <code>&lt;head&gt;</code></td></tr>
-    <tr><td>js/rashid-ai-v2.js</td><td><strong>24KB</strong></td><td><span class="badge b-crit">نعم</span></td><td>بدون defer + يحمل Three.js 130KB عند التهيئة</td></tr>
-    <tr><td>css/style.css</td><td><strong>142KB</strong></td><td><span class="badge b-crit">نعم</span></td><td>غير مضغوط — يجب ضغطه إلى ~30KB</td></tr>
-    <tr><td>farm-game: three.min.js</td><td><strong>619KB</strong></td><td><span class="badge b-crit">نعم</span></td><td>تحميل حجب كامل في صفحة اللعبة</td></tr>
-  </table>
-</div>
-
-<h3>مشاكل التخزين المؤقت</h3>
-<div class="grid">
-  <div class="card">
-    <h4>SW ممتاز ✓</h4>
-    <ul class="clean checks">
-      <li>Network-first للتنقل + stale-while-revalidate للأصول</li>
-      <li>ignoreSearch لـ <code>?v=</code> params</li>
-      <li>تنظيف تلقائي للكاش القديم + skipWaiting + clients.claim</li>
+  <div class="phase p2">
+    <div class="ph-head">المرحلة 2 — تثبيت F13 كقالب حقيقي (2-3 أيام)</div>
+    <ul class="clean">
+      <li>استبدال passthrough البحت بقوالب Nunjucks حقيقية لـ nav/footer/head</li>
+      <li>ربط <code>check-url-surface.mjs</code> بـ CI كبوابة إلزامية قبل كل نشر</li>
     </ul>
   </div>
-  <div class="card">
-    <h4>Cache-Control مفقود ✖ <span class="badge b-crit">حرج</span></h4>
-    <ul class="clean cross">
-      <li>لا توجد Cache-Control headers في vercel.json</li>
-      <li>المتصفح يعيد التحقق من كل ملف في كل زيارة</li>
-      <li>يجب إضافة: <code>Cache-Control: public, max-age=31536000, immutable</code></li>
+  <div class="phase p3">
+    <div class="ph-head">المرحلة 3 — تحسين مستمر</div>
+    <ul class="clean">
+      <li>F15 تقليل Font Awesome</li>
+      <li>مراقبة دورية لحجم .git وdist/ كمقياس CI (فشل إذا تجاوز حداً معيّناً)</li>
     </ul>
   </div>
-</div>
 
-<h3>الملفات الضخمة</h3>
-<div class="card">
-  <table>
-    <tr><th>الملف</th><th>الحجم</th><th>المشكلة</th></tr>
-    <tr><td>css/style.css</td><td><strong>142KB (5,234 سطر)</strong></td><td>غير مضغوط. الضغط يُخفيده إلى ~30KB</td></tr>
-    <tr><td>farm-game/three.min.js</td><td><strong>619KB</strong></td><td>يُحمَّل حجوزاً في صفحة اللعبة</td></tr>
-    <tr><td>Font Awesome CSS</td><td><strong>~90KB</strong></td><td>المكتبة الكاملة لـ 15 أيقونة فقط مستخدمة</td></tr>
-    <tr><td>js/rashid-ai-v2.js</td><td>24KB</td><td>يجب defer + lazy load Three.js</td></tr>
-    <tr><td>js/avatar.js</td><td>18.7KB</td><td>كود ميت — غير مستخدم</td></tr>
-    <tr><td>js/game-controls.js</td><td>10KB</td><td>كود ميت — نسخة قديمة</td></tr>
-    <tr><td>farm-game: 18 ملف CSS</td><td>متعددة</td><td>يجب دمجها في ملف واحد</td></tr>
-  </table>
-</div>
+  <div class="card">
+    <h4>ملاحظة ختامية</h4>
+    <p style="margin:0">الأساس المعماري لا يزال سليماً، وفريق العمل نفّذ فعلياً غالبية إصلاحات الجولة السابقة بدل الاكتفاء بتوثيقها — هذا نادر ويستحق الذكر. المخاطرة الحقيقية الآن ليست في جودة الكود بل في <strong>انضباط النشر</strong>: كل إضافة مجلد جديد للمستودع (مشروع أندرويد، نوت‌بوك، أداة داخلية) تُنشر تلقائياً ما لم تُستثنَ صراحة. إصلاح G1 وحده يزيل هذه الفئة الكاملة من المخاطر.</p>
+  </div>
+</section>
 
-<h3>مشاكل تحميل السكربتات</h3>
-<div class="card">
-  <h4>admin.js يُحمَّل على كل الصفحات <span class="badge b-high">عالية</span></h4>
-  <p><code>src/js/main.js</code> يستورد <code>initAdmin</code> و<code>initVaultLock</code> عبر import ثابت. هذا يعني أن كود الإدارة (فحص جلسة Supabase + isCurrentUserAdmin) يعمل على <strong>كل صفحة</strong> حتى للزوار العاديين.</p>
-  <p><strong>الحل:</strong> استيراد ديناميكي (<code>await import('./modules/admin.js')</code>) فقط عند الحاجة.</p>
-</div>
-
-<!-- ============ 8. الإصلاحات ============ -->
-<h2 id="fixes"><span class="ico">🔧</span> 8. الإصلاحات اللازمة</h2>
-
-<div class="card" style="border-color: #22c55e;">
-  <p><strong>✅ التحديث (2026-09-04):</strong> تم تنفيذ <strong>F1 – F12</strong> (التسعة الأولى + أعلى 3 من "عالية الأولوية"). الإصلاحات F13 – F18 لا تزال قيد الانتظار.</p>
-  <ul>
-    <li>F1: <code>defer</code> أُضيف لسكربتات <code>gemini-config.js</code> و <code>rashid-ai-v2.js</code>.</li>
-    <li>F2: <code>css/style.css</code> ضُغط من 142KB إلى ~107KB (نسخة <code>style.min.css</code> مطابقة).</li>
-    <li>F3: أُضيفت <code>Cache-Control: public, max-age=31536000, immutable</code> + COOP/CORP في <code>vercel.json</code>.</li>
-    <li>F4: أُضيف rate limiting (5/دقيقة لكل IP) + honeypot في <code>api/contact.js</code>.</li>
-    <li>F5: <code>og-image.svg</code> حوّل إلى <code>og-image.png</code> (1200×630، 89KB) وأُحدثت 16 صفحة.</li>
-    <li>F6: حُذفت الملفات الميتة <code>js/avatar.js</code> و <code>js/game-controls.js</code> و <code>js/script.js</code>.</li>
-    <li>F7: أُنشئ <code>js/cookie-consent.js</code> مشترك واستُخدم في 5 صفحات بدل 5 نسخ.</li>
-    <li>F8: أُضيفت meta/OG/Twitter/canonical لـ <code>quran.html</code> و <code>devos.html</code>.</li>
-    <li>F9: وُحدت الخطوط إلى Inter + JetBrains Mono في about/contact/privacy/terms.</li>
-    <li>F10: admin modules أُصبحت dynamic import في <code>src/js/main.js</code>.</li>
-    <li>F11: لا تغيير مطلوب — ES Module يعيد استخدام <code>window.supabaseClient</code> (عميل واحد فعلي).</li>
-    <li>F12: <code>sitemap.xml</code>: أُضيف <code>quran.html</code>، حُذف <code>404.html</code>، حُدّثت lastmod إلى 2026-09-04.</li>
-  </ul>
-</div>
-
-<h3>🔴 حرجة (إصلاح فوري)</h3>
-<div class="card">
-  <table>
-    <tr><th>#</th><th>الإصلاح</th><th>الخطوات</th><th>الجهد</th><th>الحالة</th></tr>
-    <tr>
-      <td><strong>F1</strong></td>
-      <td>إضافة defer لسكربتات حجب العرض</td>
-      <td>أضف <code>defer</code> إلى <code>gemini-config.js</code> و<code>rashid-ai-v2.js</code> في index.html</td>
-      <td>5 دقائق</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F2</strong></td>
-      <td>ضغط CSS</td>
-      <td>اضغط <code>css/style.css</code> (142KB → ~30KB) وأضف خطوة build أو استخدم أداة online</td>
-      <td>30 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F3</strong></td>
-      <td>إضافة Cache-Control headers</td>
-      <td>أضف في vercel.json: <code>"Cache-Control": "public, max-age=31536000, immutable"</code> للملفات الثابتة</td>
-      <td>10 دقائق</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F4</strong></td>
-      <td>إصلاح api/contact.js</td>
-      <td>أضف rate limiting + فحص honeypot خادم</td>
-      <td>20 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F5</strong></td>
-      <td>تحويل OG Image إلى PNG</td>
-      <td>حوّل <code>og-image.svg</code> إلى PNG بحجم 1200×630 وأحدث كل OG references</td>
-      <td>15 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-  </table>
-</div>
-
-<h3>🟠 عالية الأولوية</h3>
-<div class="card">
-  <table>
-    <tr><th>#</th><th>الإصلاح</th><th>الخطوات</th><th>الجهد</th><th>الحالة</th></tr>
-    <tr>
-      <td><strong>F6</strong></td>
-      <td>حذف الكود الميت</td>
-      <td>احذف <code>js/avatar.js</code>، <code>js/game-controls.js</code>، <code>js/script.js</code>. أزل مراجع script.js من 5 صفحات</td>
-      <td>20 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F7</strong></td>
-      <td>توحيد cookie consent</td>
-      <td>أنشئ <code>js/cookie-consent.js</code> مشتركاً واستورده من كل الصفحة بدلاً من 5 نسخ</td>
-      <td>45 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F8</strong></td>
-      <td>إصلاح SEO للصفحات الضعيفة</td>
-      <td>أضف meta tags + OG + Twitter + canonical + hreflang لـ quran.html و devos.html و learning.html و blog/index.html</td>
-      <td>ساعة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F9</strong></td>
-      <td>توحيد الخطوط</td>
-      <td>استخدم Inter + JetBrains Mono في كل الصفحات. احذف Outfit و Plus Jakarta Sans و Bricolage</td>
-      <td>30 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F10</strong></td>
-      <td>فصل admin.js عن الصفحات العامة</td>
-      <td>غيّر import في main.js إلى dynamic import لـ admin modules</td>
-      <td>15 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F11</strong></td>
-      <td>حل تهيئة Supabase المزدوجة</td>
-      <td>احذف <code>js/supabase-config.js</code> من index.html واستخدم ES Module فقط (أو العكس)</td>
-      <td>30 دقيقة</td>
-      <td>✅ تم</td>
-    </tr>
-    <tr>
-      <td><strong>F12</strong></td>
-      <td>إصلاح sitemap.xml</td>
-      <td>أضف quran.html + احذف 404.html + حدّث lastmod</td>
-      <td>10 دقائق</td>
-      <td>✅ تم</td>
-    </tr>
-  </table>
-</div>
-
-<h3>🟡 متوسطة الأولوية</h3>
-<div class="card">
-  <table>
-    <tr><th>#</th><th>الإصلاح</th><th>الخطوات</th><th>الجهد</th><th>الحالة</th></tr>
-    <tr>
-      <td><strong>F13</strong></td>
-      <td>إنشاء قوالب HTML مشتركة</td>
-      <td>استخدم 11ty أو Vite لدمج nav + footer + head metadata في قالب واحد</td>
-      <td>3-4 ساعات</td>
-      <td>⬜ معلّق</td>
-    </tr>
-    <tr>
-      <td><strong>F14</strong></td>
-      <td>تقسيم style.css</td>
-      <td>قسم إلى: base.css + components.css + layout.css + animations.css</td>
-      <td>2-3 ساعات</td>
-      <td>⬜ معلّق</td>
-    </tr>
-    <tr>
-      <td><strong>F15</strong></td>
-      <td>تقليل Font Awesome</td>
-      <td>استخدم subset للأيقونات الـ 15 المستخدمة فقط (~5KB بدل 90KB)</td>
-      <td>30 دقيقة</td>
-      <td>⬜ معلّق</td>
-    </tr>
-    <tr>
-      <td><strong>F16</strong></td>
-      <td>إصلاح manifest.json</td>
-      <td>غيّر lang إلى "en" و dir إلى "ltr" و orientation إلى "any"</td>
-      <td>5 دقائق</td>
-      <td>⬜ معلّق</td>
-    </tr>
-    <tr>
-      <td><strong>F17</strong></td>
-      <td>إضافة COOP/COEP headers</td>
-      <td>أضف في vercel.json headers</td>
-      <td>5 دقائق</td>
-      <td>⬜ معلّق</td>
-    </tr>
-    <tr>
-      <td><strong>F18</strong></td>
-      <td>تنظيف SQL files</td>
-      <td>انقل ملفات SQL إلى مجلد <code>db/</code></td>
-      <td>10 دقائق</td>
-      <td>⬜ معلّق</td>
-    </tr>
-  </table>
-</div>
-
-<!-- ============ 9. Roadmap ============ -->
-<h2 id="roadmap"><span class="ico">🗺️</span> 9. خريطة العمل (Roadmap)</h2>
-
-<div class="phase p0">
-  <div class="ph-head">المرحلة 0 — إصلاحات فورية (ساعات)</div>
-  <ul class="clean">
-    <li><strong>F1</strong> defer لسكربتات حجب العرض (+20 نقطة أداء)</li>
-    <li><strong>F2</strong> ضغط CSS (+15 نقطة أداء)</li>
-    <li><strong>F3</strong> Cache-Control headers (+10 نقاط أداء)</li>
-    <li><strong>F4</strong> rate limiting لـ api/contact.js</li>
-    <li><strong>F5</strong> تحويل OG Image إلى PNG</li>
-    <li><strong>النتيجة المتوقعة:</strong> Lighthouse Performance من 58 إلى <strong>80+</strong></li>
-  </ul>
-</div>
-
-<div class="phase p1">
-  <div class="ph-head">المرحلة 1 — تنظيف وتوحيد (يوم-يومان)</div>
-  <ul class="clean">
-    <li><strong>F6</strong> حذف الكود الميت (avatar.js, game-controls.js, script.js)</li>
-    <li><strong>F7</strong> توحيد cookie consent في ملف مشترك</li>
-    <li><strong>F10</strong> فصل admin.js عن الصفحات العامة</li>
-    <li><strong>F11</strong> حل تهيئة Supabase المزدوجة</li>
-    <li><strong>F12</strong> إصلاح sitemap.xml</li>
-    <li><strong>F16</strong> إصلاح manifest.json</li>
-  </ul>
-</div>
-
-<div class="phase p2">
-  <div class="ph-head">المرحلة 2 — SEO وتوحيد الهوية (3-5 أيام)</div>
-  <ul class="clean">
-    <li><strong>F8</strong> إصلاح SEO للصفحات الضعيفة (quran, devos, learning, blog)</li>
-    <li><strong>F9</strong> توحيد الخطوط في كل الصفحات</li>
-    <li><strong>F15</strong> تقليل Font Awesome</li>
-    <li><strong>F17</strong> إضافة COOP/COEP headers</li>
-    <li><strong>F18</strong> تنظيف ملفات SQL</li>
-  </ul>
-</div>
-
-<div class="phase p3">
-  <div class="ph-head">المرحلة 3 — تحسينات هيكلية (أسبوع+)</div>
-  <ul class="clean">
-    <li><strong>F13</strong> إنشاء قوالب HTML مشتركة (11ty أو Vite)</li>
-    <li><strong>F14</strong> تقسيم style.css إلى ملفات منطقية</li>
-    <li>إضافة ESLint + Prettier</li>
-    <li>ربط site_scan.py و testsprite بـ GitHub Actions</li>
-    <li>لوحة مراقبة (Sentry أو Vercel Log Drains)</li>
-    <li>تحديث Three.js إلى r160+</li>
-  </ul>
-</div>
-
-<div class="card">
-  <h4>ملاحظة ختامية</h4>
-  <p>المشروع <strong>ناجح معماريًا</strong> — الأساس (ES Modules + PWA + Supabase + API endpoints) ممتاز. المشاكل مركّزة في الأداء (CSS ضخم + سكربتات حجب + لا cache headers) والتساهل (كود مكرر + خطوط متعددة + صفحات فرعية بلا SEO). إصلاحات المرحلة 0 وحدها (5 مهام في ساعات) سترفع Lighthouse من 58 إلى 80+. هذا أول ما يجب فعله.</p>
-</div>
-
-</div><!-- /content -->
+</main>
 
 <footer>
-  تقرير المراجعة الشامل — أُعدّ آليًا بناءً على فحص فعلي لملفات المشروع · mein-wep (Rashid Portfolio) · 2026-09-04 · الإصدار 2.0
+  <p>تقرير تدقيق تقني — mein-wep (Rashid Portfolio) · نسخة 3.0 · 2026-09-06 · مبني على فحص فعلي: npm run build + فحص dist/ + مسح أنماط أسرار + مراجعة يدوية للكود المصدري · التقرير السابق: 2026-09-04</p>
 </footer>
 
 </body>

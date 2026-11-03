@@ -99,7 +99,7 @@
   <text x="815" y="210" font-family="Arial, sans-serif" font-size="11" fill="#64748b">4-bit quantized fine-tune</text>
 
   <text x="790" y="240" font-family="Arial, sans-serif" font-size="18" fill="#22c55e">✦</text>
-  <text x="815" y="240" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Code & Math Expert</text>
+  <text x="815" y="240" font-family="Arial, sans-serif" font-size="13" fill="#cbd5e1">Code &amp; Math Expert</text>
   <text x="815" y="255" font-family="Arial, sans-serif" font-size="11" fill="#64748b">TypeScript, Python, JS</text>
 
   <text x="790" y="285" font-family="Arial, sans-serif" font-size="18" fill="#f59e0b">✦</text>
