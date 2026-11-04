@@ -27,7 +27,11 @@ export const ABSOLUTE_MAX_S = 8 * 60 * 60;
 /** A session with no admin request for this long expires. */
 export const IDLE_MAX_S = 2 * 60 * 60;
 
+// Access tokens are JWTs (long). Supabase's refresh tokens are short opaque
+// strings (about 12 characters), so they get their own, shorter minimum: a
+// validator that required 16+ characters rejected every real sign-in.
 const TOKEN_RE = /^[A-Za-z0-9._~+/=-]{16,4096}$/;
+const REFRESH_TOKEN_RE = /^[A-Za-z0-9._~+/=-]{8,512}$/;
 
 export function supabaseEnv() {
   const url = process.env.SUPABASE_URL;
@@ -114,6 +118,10 @@ export function validToken(t) {
   return typeof t === 'string' && TOKEN_RE.test(t);
 }
 
+export function validRefreshToken(t) {
+  return typeof t === 'string' && REFRESH_TOKEN_RE.test(t);
+}
+
 /** Seconds left before the absolute cap, or null when the start is unknown. */
 function absoluteRemaining(claims, now) {
   const started = sessionStartedAt(claims);
@@ -182,7 +190,7 @@ export async function requireAdmin(req, res, { csrf = req.method !== 'GET' } = {
 
   const cookies = parseCookies(req.headers.cookie);
   let accessToken = validToken(cookies[ACCESS_COOKIE]) ? cookies[ACCESS_COOKIE] : null;
-  const refreshToken = validToken(cookies[REFRESH_COOKIE]) ? cookies[REFRESH_COOKIE] : null;
+  const refreshToken = validRefreshToken(cookies[REFRESH_COOKIE]) ? cookies[REFRESH_COOKIE] : null;
   let user = accessToken ? await getUser(env, accessToken) : null;
   let rotated = null;
 

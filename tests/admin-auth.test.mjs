@@ -155,6 +155,46 @@ test('POST session for a non-admin -> 403, Supabase session revoked, no cookies'
   assert.ok(cookies(r).every((c) => /Max-Age=0/.test(c)));
 });
 
+// Supabase's own refresh tokens are short (about 12 characters), unlike the
+// 20-character ones the other tests use. A validator written around the longer
+// shape rejected every real sign-in with "Missing session tokens".
+const REAL_REFRESH = 'zq4tm8vk2pxa';
+
+test('a real Supabase session (12-character refresh token) is accepted at sign-in and afterwards', async () => {
+  const t = freshToken();
+  users[t] = { id: 'admin-id', email: 'owner@example.com' };
+
+  const signIn = res();
+  await (await session())(req({ method: 'POST', headers: { ...writeHeaders, 'x-forwarded-for': '198.51.100.11' }, body: { access_token: t, refresh_token: REAL_REFRESH, expires_in: 3600 } }), signIn);
+  assert.equal(signIn.statusCode, 200, JSON.stringify(signIn.body));
+  assert.ok(cookies(signIn).some((c) => c.startsWith(`${RT}=${REAL_REFRESH}`)), 'refresh token is stored');
+
+  const later = res();
+  await (await session())(req({ headers: { cookie: `${AT}=${t}; ${RT}=${REAL_REFRESH}` } }), later);
+  assert.equal(later.statusCode, 200);
+  assert.ok(cookies(later).some((c) => c.startsWith(`${RT}=${REAL_REFRESH}`)), 'the idle window slides, so the refresh cookie was recognised');
+});
+
+test('an expired access token is renewed with a real (short) refresh token', async () => {
+  const fresh = freshToken('admin-id', 600);
+  users[fresh] = { id: 'admin-id', email: 'owner@example.com' };
+  refreshes[REAL_REFRESH] = { access_token: fresh, refresh_token: 'n7c2w9xb5hfe', expires_in: 3600, user: users[fresh] };
+  const r = res();
+  await (await session())(req({ headers: { cookie: `${AT}=expired.token.value-xyz; ${RT}=${REAL_REFRESH}` } }), r);
+  assert.equal(r.statusCode, 200);
+  assert.ok(cookies(r).some((c) => c.startsWith(`${RT}=n7c2w9xb5hfe`)), 'the rotated refresh token is stored');
+});
+
+test('garbage is still refused as a refresh token', async () => {
+  const t = freshToken();
+  users[t] = { id: 'admin-id', email: 'owner@example.com' };
+  for (const bad of ['', 'short', 'has space in it', 'a;b=c,d', 'x'.repeat(600), '<script>1</script>']) {
+    const r = res();
+    await (await session())(req({ method: 'POST', headers: { ...writeHeaders, 'x-forwarded-for': '198.51.100.12' }, body: { access_token: t, refresh_token: bad } }), r);
+    assert.equal(r.statusCode, 400, JSON.stringify(bad));
+  }
+});
+
 test('POST session for the admin sets HttpOnly, Secure, SameSite=Strict cookies on /api/admin only', async () => {
   const t = freshToken();
   users[t] = { id: 'admin-id', email: 'owner@example.com' };

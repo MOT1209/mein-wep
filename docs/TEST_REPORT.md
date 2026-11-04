@@ -118,3 +118,11 @@ Browser: the Messages and App updates screens at 375 and 1280 px (Arabic): no er
 Browser (Playwright Chromium, 375 px, dark mode, mocked Supabase): password hidden by default, the eye shows and hides it (44×44 px), refused reset shows the SMTP hint in the normal style, accepted reset shows the green message, the reset page's single eye controls both fields, no horizontal scroll.
 
 **Not tested:** a real reset email from the live Supabase project (it depends on the project's mail settings, see DEPLOYMENT_GUIDE §1).
+
+## Sign-in with a real Supabase session (2026-11-04)
+
+**Found by the owner on the live site:** after Supabase accepted the password, the page said "Sign-in failed". Cause: `api/admin/session` required refresh tokens of 16+ characters, but Supabase's real refresh tokens are about 12 characters, so every real sign-in got `400 Missing session tokens`. All earlier tests and mocks used 20-character refresh tokens, so none noticed. Fixed with a separate refresh-token check (8–512 characters, same safe character set).
+
+New tests use the real shape: sign-in and later requests with a 12-character refresh token, renewal of an expired access token with one, and garbage (too short, too long, spaces, separators, markup) still refused. They fail on the old code and pass on the fix.
+
+Also checked in Chromium with the **real Content-Security-Policy headers from `vercel.json`** applied by a small server (earlier browser checks used a server without them): all 15 dashboard screens, the publish dialog and both password pages: 0 policy violations, styles applied. A new static test keeps inline style attributes out of the dashboard code.
