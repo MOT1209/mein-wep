@@ -31,7 +31,7 @@ test('every literal t() key used by the dashboard exists', () => {
 
 test('keys built at runtime exist too', () => {
   const dynamic = [
-    ...['overview', 'studio', 'github', 'categories', 'media', 'pages', 'navigation', 'blog', 'settings', 'security', 'activity'].map((k) => `nav.${k}`),
+    ...['overview', 'studio', 'github', 'categories', 'media', 'pages', 'navigation', 'blog', 'messages', 'updates', 'settings', 'security', 'activity'].map((k) => `nav.${k}`),
     ...['games', 'apps', 'labs'].map((k) => `section.${k}`),
     ...['Available', 'In Development', 'Experimental', 'Coming Soon'].map((k) => `status.${k}`),
     ...['en', 'de', 'ar'].map((k) => `lang.${k}`),

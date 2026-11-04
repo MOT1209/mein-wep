@@ -7,6 +7,7 @@ import { projectsView, categoriesView } from './views-studio.js';
 import { githubView } from './views-github.js';
 import { mediaView } from './views-media.js';
 import { pagesView, navigationView, settingsView, blogView } from './views-content.js';
+import { messagesView, updatesView } from './views-inbox.js';
 
 const ROUTES = [
   ['overview', overviewView],
@@ -17,6 +18,8 @@ const ROUTES = [
   ['pages', pagesView],
   ['navigation', navigationView],
   ['blog', blogView],
+  ['messages', messagesView],
+  ['updates', updatesView],
   ['settings', settingsView],
   ['security', securityView],
   ['activity', activityView],

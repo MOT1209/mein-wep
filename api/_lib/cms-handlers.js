@@ -595,5 +595,48 @@ const publish = {
   },
 };
 
-export const HANDLERS = { overview, projects, categories, github, media, content, blog, activity, publish };
+// ---------------------------------------------------------------------------
+// Contact messages and app update notices (tables from db/SUPABASE_CONTACT_FIX.sql
+// and db/SUPABASE_APP_UPDATES.sql, moved here from the older dashboard)
+// ---------------------------------------------------------------------------
+const messages = {
+  async list({ db }) {
+    return db.select('contact_messages', 'select=id,name,email,message,created_at&order=created_at.desc&limit=200');
+  },
+  async delete({ db, log }, { id }) {
+    if (!Number.isSafeInteger(id) || id <= 0) throw new InputError('id must be a message id');
+    const [row] = await db.remove('contact_messages', `id=${eq(id)}`);
+    if (!row) throw Object.assign(new InputError('Message not found'), { status: 404 });
+    await log('delete_message', 'message', String(id), {});
+    return { id };
+  },
+};
+
+const APP_ID = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+){1,5}$/;
+const appUpdates = {
+  async list({ db }) {
+    return db.select('app_updates', 'select=*&order=app_id.asc');
+  },
+  /** Publishes the "new version available" notice the installed apps read. */
+  async save({ db, log }, { app_id, name, version, url, notes, release_date }) {
+    if (typeof app_id !== 'string' || !APP_ID.test(app_id)) throw new InputError('app_id must look like com.example.app');
+    const row = {
+      app_id,
+      name: T.optStr(80)(name ?? null, 'name'),
+      version: (() => {
+        const v = T.str(30, { min: 1 })(version, 'version');
+        if (!/^\d+(\.\d+){0,3}([-+][0-9A-Za-z.-]+)?$/.test(v)) throw new InputError('version must look like 1.2.3');
+        return v;
+      })(),
+      url: T.url(url ?? null, 'url'),
+      notes: T.optStr(2000)(notes ?? null, 'notes'),
+      release_date: release_date ? T.date(release_date, 'release_date').slice(0, 10) : null,
+    };
+    const [saved] = await db.upsert('app_updates', row, 'app_id');
+    await log('publish_app_update', 'app_update', app_id, { version: row.version });
+    return saved;
+  },
+};
+
+export const HANDLERS = { overview, projects, categories, github, media, content, blog, activity, publish, messages, updates: appUpdates };
 export { sniffImage };

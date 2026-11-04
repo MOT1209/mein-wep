@@ -2,6 +2,7 @@
 // is remembered per browser. tests/admin-app.test.mjs checks that every key
 // the code uses exists in all three languages.
 const en = {
+  'nav.messages': 'Messages', 'nav.updates': 'App updates', 'messages.title': 'Contact messages', 'messages.hint': 'Messages sent with the contact form on the site.', 'messages.none': 'No messages yet.', 'messages.reply': 'Reply by email', 'messages.confirmDelete': 'Delete the message from {name}?', 'messages.confirmDeleteBody': 'It is removed for good.', 'updates.title': 'App updates', 'updates.hint': 'Installed apps compare their version with the one published here and show an update notice.', 'updates.none': 'nothing published', 'updates.version': 'Version', 'updates.date': 'Release date', 'updates.url': 'Download link', 'updates.urlHint': 'A site path such as /apks/app-v1.2.0.apk or an https:// link.', 'updates.notes': 'What is new', 'updates.publish': 'Publish update', 'updates.saved': 'Update published',
   'pages.f.subtitle': 'Line under the heading', 'pages.f.who': '“Who I am” paragraph', 'pages.f.build': '“What I build” paragraph',
   'github.rName': 'the name contains KING', 'github.rDescription': 'the description mentions KING', 'github.rTopic': 'it has a KING topic',
   'app.brand': 'Rashid · Admin', 'app.skip': 'Skip to content', 'app.menu': 'Menu', 'app.language': 'Language',
@@ -104,6 +105,7 @@ const en = {
 };
 
 const ar = {
+  'nav.messages': 'الرسائل', 'nav.updates': 'تحديثات التطبيقات', 'messages.title': 'رسائل التواصل', 'messages.hint': 'الرسائل المرسلة من نموذج التواصل في الموقع.', 'messages.none': 'لا توجد رسائل بعد.', 'messages.reply': 'الرد بالبريد', 'messages.confirmDelete': 'حذف رسالة {name}؟', 'messages.confirmDeleteBody': 'تُحذف نهائياً.', 'updates.title': 'تحديثات التطبيقات', 'updates.hint': 'التطبيقات المثبّتة تقارن إصدارها بالإصدار المنشور هنا وتعرض إشعار التحديث.', 'updates.none': 'لا يوجد إصدار منشور', 'updates.version': 'الإصدار', 'updates.date': 'تاريخ الإصدار', 'updates.url': 'رابط التنزيل', 'updates.urlHint': 'مسار في الموقع مثل /apks/app-v1.2.0.apk أو رابط https://.', 'updates.notes': 'ما الجديد', 'updates.publish': 'نشر التحديث', 'updates.saved': 'نُشر التحديث',
   'pages.f.subtitle': 'السطر تحت العنوان', 'pages.f.who': 'فقرة «من أنا»', 'pages.f.build': 'فقرة «ماذا أبني»',
   'github.rName': 'الاسم يحتوي KING', 'github.rDescription': 'الوصف يذكر KING', 'github.rTopic': 'له موضوع KING',
   'app.brand': 'راشد · الإدارة', 'app.skip': 'انتقل إلى المحتوى', 'app.menu': 'القائمة', 'app.language': 'اللغة',
@@ -206,6 +208,7 @@ const ar = {
 };
 
 const de = {
+  'nav.messages': 'Nachrichten', 'nav.updates': 'App-Updates', 'messages.title': 'Kontaktnachrichten', 'messages.hint': 'Nachrichten aus dem Kontaktformular der Website.', 'messages.none': 'Noch keine Nachrichten.', 'messages.reply': 'Per E-Mail antworten', 'messages.confirmDelete': 'Nachricht von {name} löschen?', 'messages.confirmDeleteBody': 'Sie wird endgültig entfernt.', 'updates.title': 'App-Updates', 'updates.hint': 'Installierte Apps vergleichen ihre Version mit der hier veröffentlichten und zeigen einen Update-Hinweis.', 'updates.none': 'nichts veröffentlicht', 'updates.version': 'Version', 'updates.date': 'Veröffentlichungsdatum', 'updates.url': 'Download-Link', 'updates.urlHint': 'Ein Pfad wie /apks/app-v1.2.0.apk oder ein https://-Link.', 'updates.notes': 'Neuigkeiten', 'updates.publish': 'Update veröffentlichen', 'updates.saved': 'Update veröffentlicht',
   'pages.f.subtitle': 'Zeile unter der Überschrift', 'pages.f.who': 'Absatz „Wer ich bin“', 'pages.f.build': 'Absatz „Was ich baue“',
   'github.rName': 'der Name enthält KING', 'github.rDescription': 'die Beschreibung nennt KING', 'github.rTopic': 'es hat ein KING-Thema',
   'app.brand': 'Rashid · Admin', 'app.skip': 'Zum Inhalt springen', 'app.menu': 'Menü', 'app.language': 'Sprache',

@@ -300,6 +300,20 @@ test('publish, sync and uploads are also limited across instances (shared limit)
   assert.equal((await api('publish', { action: 'run' }, { headers })).statusCode, 200);
 });
 
+test('contact messages and app updates: validated, logged', async () => {
+  assert.equal((await api('messages', { action: 'list' })).statusCode, 200);
+  assert.equal((await api('messages', { action: 'delete', id: 'all' })).statusCode, 400);
+  assert.equal((await api('messages', { action: 'delete', id: 7 })).statusCode, 200);
+  assert.match(writes().find((c) => c.method === 'DELETE').url, /contact_messages\?id=eq\.7$/);
+  assert.equal((await api('updates', { action: 'save', app_id: 'com.rashid.quizmaster', version: 'x; drop' })).statusCode, 400);
+  assert.equal((await api('updates', { action: 'save', app_id: 'com.rashid.quizmaster', version: '1.5.0', url: 'javascript:alert(1)' })).statusCode, 400);
+  const ok = await api('updates', { action: 'save', app_id: 'com.rashid.quizmaster', version: '1.5.0', url: '/apks/quiz-app-v1.5.0.apk', release_date: '2026-11-04' });
+  assert.equal(ok.statusCode, 200);
+  const up = calls.find((c) => c.url.includes('/rest/v1/app_updates') && c.method === 'POST');
+  assert.match(up.url, /on_conflict=app_id/);
+  assert.equal(JSON.parse(up.body).release_date, '2026-11-04');
+});
+
 test('overview reports config as booleans only', async () => {
   process.env.VERCEL_DEPLOY_HOOK_URL = HOOK;
   process.env.GITHUB_TOKEN = 'github_pat_secretvalue';
