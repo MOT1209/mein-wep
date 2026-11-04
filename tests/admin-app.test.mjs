@@ -54,6 +54,12 @@ test('no HTML injection sinks in the dashboard code', () => {
   }
 });
 
+test('dashboard code sets no inline style attributes (the strict CSP would silently drop them)', () => {
+  for (const [f, code] of Object.entries(src)) {
+    assert.ok(!/\bstyle\s*:\s*['"`{]|setAttribute\(\s*['"]style['"]|\.style\.cssText|insertAdjacentHTML/.test(code), f);
+  }
+});
+
 test('dashboard page has no inline script, style or handlers and loads no third parties', () => {
   const html = fs.readFileSync(new URL('../admin/app.html', import.meta.url), 'utf8');
   assert.deepEqual(html.match(/<script(?![^>]*\bsrc=)[^>]*>/g) ?? [], []);
