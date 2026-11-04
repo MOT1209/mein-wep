@@ -12,6 +12,11 @@ import { InputError } from '../_lib/cms-validate.js';
 import { DbError, createDb } from '../_lib/supabase-rest.js';
 import { clientIp, createLimiter, noStore, sendError, sharedLimited } from '../_lib/http.js';
 
+const OWNER_ONLY = new Set([
+  'projects.purge', 'blog.purge', 'categories.delete', 'messages.delete',
+  'publish.run', 'github.schedule_enable',
+]);
+
 const limits = {
   default: createLimiter(180, 60 * 1000),
   'media.upload': createLimiter(30, 60 * 1000),
@@ -46,6 +51,17 @@ export default async function handler(req, res) {
   }
 
   const db = createDb(auth);
+
+  // Irreversible or site-wide actions need the 'owner' role (admin_users.role,
+  // default 'owner'); an 'admin' can edit content but not these.
+  if (OWNER_ONLY.has(key) || (key === 'media.delete' && args.force === true)) {
+    let role = null;
+    try {
+      [{ role } = {}] = await db.select('admin_users', `select=role&user_id=eq.${encodeURIComponent(auth.user.id)}`);
+    } catch { /* column missing before the migration: treated as no role */ }
+    if (role !== 'owner') return sendError(res, 403, 'Only the owner can do this');
+  }
+
   const log = async (act, entity, entityId, details) => {
     try {
       await db.insert('activity_logs', {

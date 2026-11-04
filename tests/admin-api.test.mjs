@@ -20,6 +20,7 @@ let calls;
 let tables;     // table -> rows returned for GET
 let githubRepos;
 let sharedLimitReached = false;
+let adminRole = 'owner';
 const realFetch = globalThis.fetch;
 
 function reply(status, body, headers = {}) {
@@ -47,6 +48,7 @@ function fakeFetch(url, init = {}) {
   if (u.pathname.startsWith('/rest/v1/rpc/')) return reply(200, { configured: true });
   if (u.pathname.startsWith('/storage/v1/')) return reply(200, { Key: 'ok' });
   const table = u.pathname.replace('/rest/v1/', '');
+  if (method === 'GET' && table === 'admin_users') return reply(200, [{ role: adminRole }]);
   if (method === 'GET') return reply(200, tables[table] ?? []);
   if (method === 'POST') {
     const body = JSON.parse(init.body);
@@ -68,6 +70,7 @@ beforeEach(() => {
   tables = {};
   githubRepos = [];
   sharedLimitReached = false;
+  adminRole = 'owner';
   globalThis.fetch = fakeFetch;
   console.error = () => {};
 });
@@ -312,6 +315,23 @@ test('contact messages and app updates: validated, logged', async () => {
   const up = calls.find((c) => c.url.includes('/rest/v1/app_updates') && c.method === 'POST');
   assert.match(up.url, /on_conflict=app_id/);
   assert.equal(JSON.parse(up.body).release_date, '2026-11-04');
+});
+
+test('irreversible actions need the owner role; an admin can still edit', async () => {
+  adminRole = 'admin';
+  process.env.VERCEL_DEPLOY_HOOK_URL = HOOK;
+  for (const [resource, body] of [
+    ['projects', { action: 'purge', id: '00000000-0000-4000-8000-000000000001' }],
+    ['blog', { action: 'purge', id: '00000000-0000-4000-8000-000000000001' }],
+    ['categories', { action: 'delete', id: '00000000-0000-4000-8000-000000000001' }],
+    ['publish', { action: 'run' }],
+    ['media', { action: 'delete', path: 'projects/logo-abc.png', force: true }],
+  ]) {
+    const r = await api(resource, body, { headers: { origin: ORIGIN, host: 'rashid-wep.vercel.app', 'x-admin-csrf': '1', cookie: `${AT}=${TOKEN}`, 'x-forwarded-for': '198.51.100.7' } });
+    assert.equal(r.statusCode, 403, `${resource}.${body.action}`);
+  }
+  assert.ok(!calls.some((c) => c.method === 'DELETE' || c.url === HOOK), 'nothing was deleted or rebuilt');
+  assert.equal((await api('projects', { action: 'update', id: '00000000-0000-4000-8000-000000000001', fields: { title: 'X' } })).statusCode, 200);
 });
 
 test('overview reports config as booleans only', async () => {
