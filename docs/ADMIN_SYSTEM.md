@@ -63,7 +63,9 @@ On each call it:
 
 ## 4. Password reset
 
-1. On the sign-in page, enter the email and choose **Forgot password?**. The page calls Supabase `/auth/v1/recover` with `redirect_to=/admin/reset-password.html`. The reply is the same whether or not the address exists, so the form cannot be used to probe for accounts.
+1. On the sign-in page, enter the email and choose **Forgot password?**. The page calls Supabase `/auth/v1/recover` with `redirect_to=/admin/reset-password.html`. When Supabase accepts the request the page shows a green message that is the same whether or not the address exists, so the form cannot be used to probe for accounts. When Supabase **refuses** (rate limit, an address the built-in mail service may not send to, a mail-sending failure) the page says so and why, in the normal style, never as success.
+   The reset email needs a working mail service: set up your own SMTP in Supabase (DEPLOYMENT_GUIDE §1). Sign-in errors are specific too: wrong credentials, an unconfirmed account, a disabled account, a rate limit and a service outage each say so.
+   Both password pages have a show/hide eye button (`admin/js/password-toggle.js`); the reset page's button controls both fields, and fields go back to hidden when the page is left.
 2. The emailed link opens `admin/reset-password.html` with a one-time recovery token in the URL fragment. The page removes the fragment from the address bar straight away, saves the new password (minimum 12 characters), then ends the recovery session and sends you back to the sign-in page.
 
 ## 5. Pages and headers

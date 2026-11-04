@@ -110,3 +110,11 @@ New or changed tests: RSS with CMS posts (static and live, Supabase down → fil
 Parity: without the CMS, `/api/rss` is byte-identical to before and `/blog/rss.xml` differs only by one whitespace-only line. About and Contact pages are byte-identical.
 
 Browser: the Messages and App updates screens at 375 and 1280 px (Arabic): no errors, no horizontal scroll, and HTML in a sender name is shown as text.
+
+## Sign-in page fixes: show-password eye, honest reset result (2026-11-04)
+
+`tests/admin-login-ui.test.mjs` (8 tests) runs the real `login.js` and `password-toggle.js` in a minimal fake browser against fake Supabase answers: reset success only on an accepted request; refusals (400 not authorised, 429, 500, 503, 422) shown with their reason and never green; unknown or missing email; sign-in errors for wrong credentials, unconfirmed, banned, rate limit, outage; successful sign-in clears the field and opens the dashboard; a non-admin is told so; the toggle switches one or two fields, labels and pressed state, and hides again on page hide; both pages carry the control with a 44 px target and no inline script or style. **Mutation check:** restoring the old "anything but 429 is success" behaviour made the refusal test fail.
+
+Browser (Playwright Chromium, 375 px, dark mode, mocked Supabase): password hidden by default, the eye shows and hides it (44×44 px), refused reset shows the SMTP hint in the normal style, accepted reset shows the green message, the reset page's single eye controls both fields, no horizontal scroll.
+
+**Not tested:** a real reset email from the live Supabase project (it depends on the project's mail settings, see DEPLOYMENT_GUIDE §1).
