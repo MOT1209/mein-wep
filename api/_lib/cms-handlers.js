@@ -411,7 +411,7 @@ const media = {
 // ---------------------------------------------------------------------------
 const SETTING_KEY = /^[a-z][a-z0-9_.]{1,60}$/;
 // Pages whose texts the templates read (_data/cms.js).
-const PAGE_KEYS = ['home', 'studio', 'footer'];
+const PAGE_KEYS = ['home', 'studio', 'about', 'contact', 'footer'];
 
 /** Page content: flat object of short texts or lists of texts. */
 function pageContent(v) {

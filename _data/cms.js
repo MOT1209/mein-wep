@@ -6,13 +6,13 @@ import { cmsBlogPosts, cmsCache } from '../scripts/cms/source.mjs';
  * the text built into the site (_data/i18n, site.json) otherwise, so a build
  * without the CMS renders exactly the old pages.
  *
- *   cms.pages.<page>.<locale>.<field>   page texts (home, studio, footer)
+ *   cms.pages.<page>.<locale>.<field>   page texts (home, studio, about, contact, footer)
  *   cms.nav                             menu items, or null -> site.siteNav
  *   cms.siteName, cms.contactEmail, cms.social
  *   cms.blog                            published database posts
  */
 const LOCALES = ['en', 'de', 'ar'];
-const PAGES = ['home', 'studio', 'footer'];
+const PAGES = ['home', 'studio', 'about', 'contact', 'footer'];
 const https = (u) => typeof u === 'string' && /^https:\/\/[a-z0-9.-]+(:\d+)?(\/|$|\?|#)/i.test(u) && !/\s/.test(u);
 const sitePath = (u) => u === '' || (typeof u === 'string' && !u.includes(':') && !u.startsWith('//') && !/\s/.test(u));
 

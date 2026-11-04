@@ -38,7 +38,7 @@ test('keys built at runtime exist too', () => {
     ...['All', 'Public', 'Hidden', 'Trash'].map((k) => `studio.filter${k}`),
     ...['Pending', 'Approved', 'Other', 'Ignored'].map((k) => `github.tab${k}`),
     ...['draft', 'published', 'scheduled', 'trash'].map((k) => `blog.${k}`),
-    ...['home', 'studio', 'footer'].map((k) => `pages.${k}`),
+    ...['home', 'studio', 'about', 'contact', 'footer'].map((k) => `pages.${k}`),
     ...['c1', 'c2', 'c3', 'c4'].map((k) => `security.${k}`),
     ...['when', 'who', 'what', 'item'].map((k) => `activity.${k}`),
     ...['configDeployHook', 'configGithubToken', 'configCron'].map((k) => `overview.${k}`),
@@ -75,11 +75,13 @@ test('the dashboard edits exactly the page texts the templates read', async () =
   const cms = fs.readFileSync(new URL('../_data/cms.js', import.meta.url), 'utf8');
   const pages = JSON.parse(cms.match(/const PAGES = (\[[^\]]+\])/)[1].replace(/'/g, '"'));
   assert.deepEqual(Object.keys(PAGE_FIELDS).sort(), pages.sort());
-  const tpl = ['_includes/pages/home.njk', '_includes/studio/index.njk', '_includes/partials/site-footer.njk']
+  const tpl = ['_includes/pages/home.njk', '_includes/studio/index.njk', '_includes/partials/site-footer.njk',
+    'about.njk', 'de/about.njk', 'ar/about.njk', 'contact.njk', 'de/contact.njk', 'ar/contact.njk']
     .map((f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
   for (const [page, fields] of Object.entries(PAGE_FIELDS)) {
     for (const [k] of fields) {
-      const used = page === 'footer' ? tpl.includes(`cms.pages.footer[L].${k}`) : tpl.includes(`C.${k}`);
+      const prefix = { footer: 'cms.pages.footer[L].', about: 'CA.', contact: 'CC.' }[page] ?? 'C.';
+      const used = tpl.includes(`${prefix}${k}`);
       assert.ok(used, `${page}.${k} is offered in the dashboard but no template reads it`);
     }
   }

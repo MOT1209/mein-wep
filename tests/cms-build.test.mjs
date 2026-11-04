@@ -45,6 +45,8 @@ const CONTENT = {
     { page_key: 'home', locale: 'en', content: { headline: 'CMS <b>headline</b>', ctaWork: 'Hire me' } },
     { page_key: 'home', locale: 'ar', content: { headline: 'عنوان من لوحة التحكم' } },
     { page_key: 'footer', locale: 'en', content: { text: 'Made by Rashid' } },
+    { page_key: 'about', locale: 'en', content: { who: 'I build <things>.', subtitle: 'Maker' } },
+    { page_key: 'contact', locale: 'ar', content: { subtitle: 'راسلني الآن' } },
   ],
   blog: [{
     slug: 'hello-cms', locale: 'en', title: 'Hello <script>alert(1)</script>', description: 'First CMS post',
@@ -139,6 +141,15 @@ test('menu, brand, home texts and footer come from the CMS; unsafe links are dro
   assert.match(page('ar/index.html'), />ابدأ</);
   // German has no CMS headline: the built-in text stays.
   assert.ok(!page('de/index.html').includes('CMS &lt;b&gt;'));
+});
+
+test('About and Contact texts come from the CMS per language, escaped, with fallbacks', () => {
+  const about = page('about.html');
+  assert.match(about, /<p>I build &lt;things&gt;\.<\/p>/);
+  assert.match(about, /<p class="subtitle">Maker<\/p>/);
+  assert.match(about, /Websites and web apps with <strong>HTML<\/strong>/, 'empty field keeps the built-in text');
+  assert.match(page('ar/contact.html'), /<p class="subtitle">راسلني الآن<\/p>/);
+  assert.ok(!page('de/about.html').includes('I build'));
 });
 
 test('a CMS blog post gets a page with escaped, sanitised Markdown', () => {

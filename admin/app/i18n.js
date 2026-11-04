@@ -2,6 +2,7 @@
 // is remembered per browser. tests/admin-app.test.mjs checks that every key
 // the code uses exists in all three languages.
 const en = {
+  'pages.f.subtitle': 'Line under the heading', 'pages.f.who': '“Who I am” paragraph', 'pages.f.build': '“What I build” paragraph',
   'github.rName': 'the name contains KING', 'github.rDescription': 'the description mentions KING', 'github.rTopic': 'it has a KING topic',
   'app.brand': 'Rashid · Admin', 'app.skip': 'Skip to content', 'app.menu': 'Menu', 'app.language': 'Language',
   'app.theme': 'Switch theme', 'app.signOut': 'Sign out', 'app.signedInAs': 'Signed in as', 'app.viewSite': 'View site',
@@ -103,6 +104,7 @@ const en = {
 };
 
 const ar = {
+  'pages.f.subtitle': 'السطر تحت العنوان', 'pages.f.who': 'فقرة «من أنا»', 'pages.f.build': 'فقرة «ماذا أبني»',
   'github.rName': 'الاسم يحتوي KING', 'github.rDescription': 'الوصف يذكر KING', 'github.rTopic': 'له موضوع KING',
   'app.brand': 'راشد · الإدارة', 'app.skip': 'انتقل إلى المحتوى', 'app.menu': 'القائمة', 'app.language': 'اللغة',
   'app.theme': 'تبديل المظهر', 'app.signOut': 'تسجيل الخروج', 'app.signedInAs': 'مسجّل باسم', 'app.viewSite': 'عرض الموقع',
@@ -204,6 +206,7 @@ const ar = {
 };
 
 const de = {
+  'pages.f.subtitle': 'Zeile unter der Überschrift', 'pages.f.who': 'Absatz „Wer ich bin“', 'pages.f.build': 'Absatz „Was ich baue“',
   'github.rName': 'der Name enthält KING', 'github.rDescription': 'die Beschreibung nennt KING', 'github.rTopic': 'es hat ein KING-Thema',
   'app.brand': 'Rashid · Admin', 'app.skip': 'Zum Inhalt springen', 'app.menu': 'Menü', 'app.language': 'Sprache',
   'app.theme': 'Design wechseln', 'app.signOut': 'Abmelden', 'app.signedInAs': 'Angemeldet als', 'app.viewSite': 'Website ansehen',

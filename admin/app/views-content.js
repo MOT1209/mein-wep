@@ -9,6 +9,8 @@ import { pickImage } from './views-media.js';
 export const PAGE_FIELDS = {
   home: [['eyebrow', 'text'], ['headline', 'text'], ['lede', 'textarea'], ['availability', 'text'], ['ctaWork', 'text'], ['ctaStudio', 'text']],
   studio: [['eyebrow', 'text'], ['headline', 'text'], ['tagline', 'text'], ['lede', 'textarea']],
+  about: [['subtitle', 'text'], ['who', 'textarea'], ['build', 'textarea']],
+  contact: [['subtitle', 'textarea']],
   footer: [['text', 'text']],
 };
 const LOCALES = ['ar', 'en', 'de'];

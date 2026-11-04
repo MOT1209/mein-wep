@@ -15,23 +15,23 @@ headTop: "partials/legacy-pages/about-head-top.njk"
 headExtra: "partials/legacy-pages/about-head-extra.njk"
 trailingJsonLd: "partials/legacy-pages/about-trailing-jsonld.njk"
 ---
-    <div class="about-page">
+{% set CA = cms.pages.about[locale or "en"] %}    <div class="about-page">
         <div class="about-intro">
             <img class="about-avatar" src="{{ root }}images/rashid-ali.webp" alt="Portrait of Rashid Ali" width="120" height="120">
             <div>
                 <h1>About Rashid Ali</h1>
-                <p class="subtitle">Full-Stack Developer &amp; AI Engineer</p>
+                {% if CA.subtitle %}<p class="subtitle">{{ CA.subtitle }}</p>{% else %}<p class="subtitle">Full-Stack Developer &amp; AI Engineer</p>{% endif %}
             </div>
         </div>
 
         <div class="about-section">
             <h2><i class="fas fa-user" aria-hidden="true"></i> Who I am</h2>
-            <p>I am <strong>Rashid Ali</strong> (MOT1209), a school student who builds software. I make websites and installable web apps, work with AI tools, and make games.</p>
+            {% if CA.who %}<p>{{ CA.who }}</p>{% else %}<p>I am <strong>Rashid Ali</strong> (MOT1209), a school student who builds software. I make websites and installable web apps, work with AI tools, and make games.</p>{% endif %}
         </div>
 
         <div class="about-section">
             <h2><i class="fas fa-code" aria-hidden="true"></i> What I build</h2>
-            <p>Websites and web apps with <strong>HTML</strong>, <strong>CSS</strong>, <strong>JavaScript</strong> and <strong>Supabase</strong>, scripts and tools in <strong>Python</strong>, assistants and automations with AI tools, and games with <strong>Godot</strong> and <strong>Unity</strong>. Two of my apps, Calculator Vault and Quiz Master, are published on this site.</p>
+            {% if CA.build %}<p>{{ CA.build }}</p>{% else %}<p>Websites and web apps with <strong>HTML</strong>, <strong>CSS</strong>, <strong>JavaScript</strong> and <strong>Supabase</strong>, scripts and tools in <strong>Python</strong>, assistants and automations with AI tools, and games with <strong>Godot</strong> and <strong>Unity</strong>. Two of my apps, Calculator Vault and Quiz Master, are published on this site.</p>{% endif %}
         </div>
 
         <div class="about-section">
