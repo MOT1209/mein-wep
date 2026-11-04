@@ -94,3 +94,31 @@ export function csrfOk(req) {
 export function sendError(res, status, error) {
   return res.status(status).json({ error });
 }
+
+/**
+ * Shared limit across all serverless instances (public.rate_limit_hit in
+ * supabase/migrations/20261104090000_rate_limits.sql). Resolves true when the
+ * request is over the limit. The IP is hashed with a server-side salt
+ * (RATE_LIMIT_SALT, else CRON_SECRET) so nobody can compute another person's
+ * bucket and lock them out. Fails open (false) if the database is not
+ * reachable or not migrated: the in-memory limiter still applies, and
+ * passwords are rate-limited by Supabase Auth itself.
+ */
+export async function sharedLimited(env, action, ip, limit, windowS) {
+  if (!env) return false;
+  const salt = process.env.RATE_LIMIT_SALT || process.env.CRON_SECRET || '';
+  const { createHash } = await import('node:crypto');
+  const bucket = `${action}:${createHash('sha256').update(`${salt}|${ip}`).digest('hex').slice(0, 32)}`;
+  try {
+    const r = await fetch(`${env.url}/rest/v1/rpc/rate_limit_hit`, {
+      method: 'POST',
+      headers: { apikey: env.anonKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_bucket: bucket, p_limit: limit, p_window_s: windowS }),
+      signal: AbortSignal.timeout(1500),
+    });
+    if (!r.ok) return false;
+    return (await r.json()) === false;
+  } catch {
+    return false;
+  }
+}

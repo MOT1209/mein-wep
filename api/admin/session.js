@@ -13,7 +13,7 @@ import {
   ABSOLUTE_MAX_S, ACCESS_COOKIE, sessionStartedAt, clearSessionCookies, requireAdmin, revoke, setSessionCookies,
   supabaseEnv, validToken, vetTokens,
 } from '../_lib/admin-auth.js';
-import { clientIp, createLimiter, csrfOk, noStore, parseCookies, sendError } from '../_lib/http.js';
+import { clientIp, createLimiter, csrfOk, noStore, parseCookies, sendError, sharedLimited } from '../_lib/http.js';
 
 const signInLimited = createLimiter(10, 60 * 1000);
 const readLimited = createLimiter(120, 60 * 1000);
@@ -41,6 +41,7 @@ export default async function handler(req, res) {
       console.error('SUPABASE_URL / SUPABASE_ANON_KEY not set');
       return sendError(res, 500, 'Server misconfigured');
     }
+    if (await sharedLimited(env, 'signin', ip, 20, 15 * 60)) return sendError(res, 429, 'Too many attempts, wait a few minutes');
     const { access_token: accessToken, refresh_token: refreshToken, expires_in: expiresIn } = req.body || {};
     if (!validToken(accessToken) || !validToken(refreshToken)) {
       return sendError(res, 400, 'Missing session tokens');

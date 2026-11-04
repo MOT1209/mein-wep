@@ -201,3 +201,15 @@ test('the private schema is unreachable for API roles', async () => {
   assert.equal(s.s.configured, true);
   assert.ok(!JSON.stringify(s).includes('hash'));
 });
+
+test('rate_limit_hit counts per bucket across callers and rejects bad input', async () => {
+  const hit = async () => (await anon("select public.rate_limit_hit('signin:abc', 3, 60) ok"))[0].ok;
+  assert.deepEqual([await hit(), await hit(), await hit(), await hit()], [true, true, true, false]);
+  assert.equal((await user("select public.rate_limit_hit('signin:other', 3, 60) ok"))[0].ok, true, 'buckets are separate');
+  await assert.rejects(anon("select public.rate_limit_hit('Bad Bucket!', 3, 60)"));
+  await assert.rejects(anon("select public.rate_limit_hit('x', 0, 60)"));
+  await assert.rejects(anon('select * from private.rate_limits'));
+  // An expired window starts again.
+  await db.exec("update private.rate_limits set reset_at = now() - interval '1 second' where bucket = 'signin:abc'");
+  assert.equal(await hit(), true);
+});

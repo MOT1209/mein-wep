@@ -19,6 +19,7 @@ const ANON = jwt({ role: 'anon' });
 let calls;
 let tables;     // table -> rows returned for GET
 let githubRepos;
+let sharedLimitReached = false;
 const realFetch = globalThis.fetch;
 
 function reply(status, body, headers = {}) {
@@ -42,6 +43,7 @@ function fakeFetch(url, init = {}) {
   if (u.pathname === '/rest/v1/rpc/github_sync_apply') {
     return reply(200, { status: 'success', repos_seen: JSON.parse(init.body).p_repos.length, new_candidates: 1, updated: 0, missing: 0 });
   }
+  if (u.pathname === '/rest/v1/rpc/rate_limit_hit') return reply(200, !sharedLimitReached);
   if (u.pathname.startsWith('/rest/v1/rpc/')) return reply(200, { configured: true });
   if (u.pathname.startsWith('/storage/v1/')) return reply(200, { Key: 'ok' });
   const table = u.pathname.replace('/rest/v1/', '');
@@ -65,6 +67,7 @@ beforeEach(() => {
   calls = [];
   tables = {};
   githubRepos = [];
+  sharedLimitReached = false;
   globalThis.fetch = fakeFetch;
   console.error = () => {};
 });
@@ -280,6 +283,21 @@ test('publish needs a real Vercel deploy hook and calls it', async () => {
   const r = await api('publish', { action: 'run' });
   assert.equal(r.statusCode, 200);
   assert.ok(calls.some((c) => c.url === HOOK && c.method === 'POST'));
+});
+
+test('publish, sync and uploads are also limited across instances (shared limit)', async () => {
+  process.env.VERCEL_DEPLOY_HOOK_URL = HOOK;
+  sharedLimitReached = true;
+  // Own IP, so the per-instance counter used by earlier tests does not interfere.
+  const headers = { origin: ORIGIN, host: 'rashid-wep.vercel.app', 'x-admin-csrf': '1', cookie: `${AT}=${TOKEN}`, 'x-forwarded-for': '203.0.113.9' };
+  const r = await api('publish', { action: 'run' }, { headers });
+  assert.equal(r.statusCode, 429);
+  assert.ok(!calls.some((c) => c.url === HOOK), 'the hook is not called when limited');
+  const rpc = calls.find((c) => c.url.endsWith('/rpc/rate_limit_hit'));
+  const body = JSON.parse(rpc.body);
+  assert.match(body.p_bucket, /^publish-run:[0-9a-f]{32}$/, 'IP is hashed, never stored raw');
+  sharedLimitReached = false;
+  assert.equal((await api('publish', { action: 'run' }, { headers })).statusCode, 200);
 });
 
 test('overview reports config as booleans only', async () => {

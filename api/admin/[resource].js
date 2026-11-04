@@ -10,7 +10,7 @@ import { requireAdmin } from '../_lib/admin-auth.js';
 import { HANDLERS } from '../_lib/cms-handlers.js';
 import { InputError } from '../_lib/cms-validate.js';
 import { DbError, createDb } from '../_lib/supabase-rest.js';
-import { clientIp, createLimiter, noStore, sendError } from '../_lib/http.js';
+import { clientIp, createLimiter, noStore, sendError, sharedLimited } from '../_lib/http.js';
 
 const limits = {
   default: createLimiter(180, 60 * 1000),
@@ -38,6 +38,12 @@ export default async function handler(req, res) {
 
   const auth = await requireAdmin(req, res, { csrf: true });
   if (!auth) return undefined;
+
+  // Expensive or outward actions are also limited across all instances.
+  const SHARED = { 'media.upload': [60, 600], 'github.sync': [12, 600], 'publish.run': [10, 600] };
+  if (SHARED[key] && await sharedLimited(auth.env, key.replace('.', '-'), ip, ...SHARED[key])) {
+    return sendError(res, 429, 'Too many requests, wait a few minutes');
+  }
 
   const db = createDb(auth);
   const log = async (act, entity, entityId, details) => {
