@@ -70,6 +70,30 @@ body {
 }
 .field-hint { font-size: 0.8125rem; color: var(--ink-faint); }
 
+/* Password field with a show/hide button inside it. */
+.pw-field { position: relative; }
+.pw-field input { inline-size: 100%; padding-inline-end: calc(var(--tap) + var(--s-1)); }
+.pw-toggle {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--tap);
+  block-size: var(--tap);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.pw-toggle:hover { color: var(--ink); }
+.pw-toggle .icon-eye-off { display: none; }
+.pw-toggle[aria-pressed="true"] .icon-eye { display: none; }
+.pw-toggle[aria-pressed="true"] .icon-eye-off { display: inline; }
+
+
 .btn {
   display: inline-flex;
   align-items: center;

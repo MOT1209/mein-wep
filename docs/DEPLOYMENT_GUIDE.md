@@ -17,7 +17,26 @@ How to take the admin CMS live. The site deploys from `main` on Vercel (project 
 2. **Authentication → URL Configuration → Redirect URLs**: add
    - `https://rashid-wep.vercel.app/admin/reset-password.html`
    - `https://rashid-wep-git-*-mot1209s-projects.vercel.app/**` (preview deployments)
-3. **SQL editor**: run the read-only checks in `docs/INFRASTRUCTURE_AUDIT.md`, Appendix A. `admin_users` must contain exactly your account.
+3. **Authentication → SMTP Settings**: set up your own mail service (for example Resend, Brevo or a Gmail app password). **Without it, password-reset emails may never arrive.** Supabase's built-in mail service is meant for testing: it may only deliver to members of your Supabase organisation and allows very few emails per hour. The sign-in page now shows the real reason when Supabase refuses to send, instead of a success message.
+4. **SQL editor**: run the read-only checks in `docs/INFRASTRUCTURE_AUDIT.md`, Appendix A. `admin_users` must contain exactly your account.
+
+### If you cannot sign in (forgotten password, or no reset email)
+
+The password is stored by Supabase Auth, hashed, in `auth.users`; our own tables never hold it. To set one without an email, in the SQL editor first check that the account exists and which exact address it uses:
+
+```sql
+select email, email_confirmed_at from auth.users;
+```
+
+Sign in with **that exact address**. If `email_confirmed_at` is empty, confirm the account in **Authentication → Users**. To set a new password directly (replace both placeholders; delete the query from the editor's history afterwards):
+
+```sql
+update auth.users
+set encrypted_password = extensions.crypt('NEW-PASSWORD-AT-LEAST-12-CHARS', extensions.gen_salt('bf'))
+where email = 'your-address@example.com';
+```
+
+Then make sure the account is an admin: `select email from public.admin_users;` must list it.
 
 ## 2. Apply the database migration and seed
 
