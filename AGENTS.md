@@ -9,7 +9,7 @@ Rashid's personal site, deployed to https://rashid-wep.vercel.app: a portfolio, 
 ## Commands
 
 ```bash
-npm ci            # Node 20 or newer
+npm ci            # Node 20–24
 npm start         # dev server with live reload
 npm run build     # eleventy build to dist/
 npm run verify    # URL-surface gate: dist/ must equal the tracked, servable files

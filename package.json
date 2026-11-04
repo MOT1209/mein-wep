@@ -5,7 +5,7 @@
   "description": "Rashid portfolio static site (Eleventy).",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <25"
   },
   "scripts": {
     "build:css": "node scripts/minify-css.mjs",
