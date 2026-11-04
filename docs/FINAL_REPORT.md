@@ -35,21 +35,29 @@ Date: 2026-11-03. Work delivered in two PRs: **#21** (audit + secure admin sign-
 These cannot be done from the development environment (no network access to Supabase; secrets must not pass through chat). Exact steps are in `DEPLOYMENT_GUIDE.md`:
 
 1. **Supabase:** turn public sign-up **off**, add the redirect URLs, and run the Appendix A checks.
-2. **Run the migration and the seed** in the Supabase SQL editor. Until then the new dashboard shows "tables missing" and the site uses the content in git.
+2. **Run the two migrations and the seed** in the Supabase SQL editor. Until then the new dashboard shows "tables missing" and the site uses the content in git.
 3. **Create a Vercel Deploy Hook** and add it as `VERCEL_DEPLOY_HOOK_URL` (this enables the Publish button).
 4. Optional: `CRON_SECRET` + **Enable daily sync**; `GITHUB_TOKEN` (read-only) for private repos.
-5. After the first successful CMS build: set `CMS_REQUIRED=1` in Production.
+5. (No longer needed: production builds protect themselves; see DEPLOYMENT_GUIDE §6.)
 6. Test on the preview of this PR, then approve the merge.
 
 ## Known limitations
 
-- RSS lists only the file-based posts.
-- About and Contact texts are not editable in the dashboard yet.
-- Rate limits on our endpoints are per instance. Passwords are protected by Supabase's own per-IP limit.
-- The site-wide CSP still allows inline scripts, because legacy pages and ads need them. The admin pages have strict CSPs.
-- The older dashboard for the legacy tables still exists under "Older tools".
-- One moderate dev-dependency advisory is left (build-time only), because the fix was released one day ago.
-- A single admin role: `role` exists, but owner and admin have the same rights.
+- The site-wide CSP still allows inline scripts: AdSense and the older pages need them. The admin pages have strict CSPs. Tightening it means rewriting each legacy page's inline scripts.
+- The older dashboard is still needed for the legacy lessons, models, vault and bot tables.
+- One moderate dev-dependency advisory is left (build-time only), because the fix was released on 2026-11-02 and is younger than the two-week rule.
+- The About skills grid and the contact cards are not editable from the dashboard.
+
+### Fixed in the follow-up pass (2026-11-04)
+
+- **RSS:** CMS posts are in both feeds (`/blog/rss.xml` at build time, `/api/rss` live).
+- **About and Contact:** subtitle and intro paragraphs are editable per language.
+- **Rate limits:** shared across instances for sign-in, publish, sync and uploads.
+- **Production builds:** never silently fall back to git once the CMS is live (no setting needed).
+- **Roles:** an `owner` role is required for irreversible actions.
+- **Dashboard:** contact messages and app updates moved into the new dashboard.
+- **GitHub proxy:** only this site may use it, and its repo and activity stats work again (they had always failed).
+- **Node:** bounded to 20–24, so Vercel no longer auto-upgrades functions to Node 26.
 
 ## Security summary
 
@@ -57,7 +65,7 @@ No service-role key is used or needed anywhere. Every admin request is authorise
 
 ## Test results
 
-`npm run build` ✅ · `npm run verify` ✅ (415/415) · `npm test` ✅ **107/107** · browser checks ✅. Details and what was **not** tested: `TEST_REPORT.md`.
+`npm run build` ✅ · `npm run verify` ✅ (416/416) · `npm test` ✅ **118/118** · browser checks ✅. Details and what was **not** tested: `TEST_REPORT.md`.
 
 ## Deployment status
 
@@ -66,4 +74,4 @@ No service-role key is used or needed anywhere. Every admin request is authorise
 
 ## Environment variables (names only)
 
-`SUPABASE_URL`, `SUPABASE_ANON_KEY` (set) · `VERCEL_DEPLOY_HOOK_URL`, `CRON_SECRET`, `GITHUB_TOKEN`, `CMS_REQUIRED`, `CRON_REBUILD`, `CMS_DISABLE` (to add as needed) · `GEMINI_API_KEY` (existing, unchanged).
+`SUPABASE_URL`, `SUPABASE_ANON_KEY` (set) · `VERCEL_DEPLOY_HOOK_URL`, `CRON_SECRET`, `GITHUB_TOKEN` (to add) · `CMS_REQUIRED`, `CMS_DISABLE`, `CRON_REBUILD`, `RATE_LIMIT_SALT` (optional) · `GEMINI_API_KEY` (existing, unchanged).

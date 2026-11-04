@@ -95,3 +95,18 @@ Mutation check: deliberately breaking four rules (purge outside the trash, appro
 - Real uploads to Supabase Storage, the real Vercel Deploy Hook and the real cron run.
 - Screen-reader pass and Lighthouse scores.
 - Fonts and Font Awesome icons (blocked in this environment, so screenshots use fallback fonts).
+
+## Follow-up pass: remaining limitations (2026-11-04)
+
+| Command | Result |
+|---|---|
+| `npm run build` | ✅ |
+| `npm run verify` | ✅ `URL-surface PARITY OK — 416 expected, 416 in dist/` |
+| `npm test` | ✅ **118 tests, 118 pass, 0 fail, 0 skipped** |
+| `npm audit` | 1 moderate (minimatch via @11ty/recursive-copy; build-time; fix is under two weeks old) |
+
+New or changed tests: RSS with CMS posts (static and live, Supabase down → file posts only); About and Contact overrides; `rate_limit_hit` on PGlite (per bucket, window reset, bad input, private table); shared limit → 429 for sign-in and publish, with the IP hashed; owner-only actions refused for role `admin`; messages and app-update validation; GitHub proxy origin rules and query handling; fetch-cms production/preview fallback rules.
+
+Parity: without the CMS, `/api/rss` is byte-identical to before and `/blog/rss.xml` differs only by one whitespace-only line. About and Contact pages are byte-identical.
+
+Browser: the Messages and App updates screens at 375 and 1280 px (Arabic): no errors, no horizontal scroll, and HTML in a sender name is shown as text.

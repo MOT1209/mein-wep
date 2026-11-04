@@ -95,9 +95,9 @@ These cannot be done from the development environment:
 
 - **The live database is not migrated yet.** Until `supabase/migrations` and the seed are applied (DEPLOYMENT_GUIDE §2), the new dashboard shows a "tables missing" message and the site renders the content in git.
 - **The legacy inline admin bar no longer appears.** `src/js/modules/admin.js` (KingCraft showcase) depended on a browser session. Admin work happens in `/admin`.
-- **Roles:** `admin_users.role` exists (owner/admin), but every admin has the same rights today.
-- **RSS** (`blog/rss.xml`, `/api/rss`) lists the file-based posts only. CMS posts are on their own pages, in the blog index and on the homepage, but not yet in the feed.
-- **About and Contact** are written per language in the templates; their texts are not editable in the dashboard yet. Editable: homepage hero, King Studio intro, footer text, menu, brand name, social links, contact email.
+- **Roles:** `owner` can do everything. `admin` can edit content but cannot delete permanently, delete categories or messages, force-delete a used image, publish the site or enable the daily sync. Existing accounts are `owner`.
+- **About and Contact:** the subtitle and the two intro paragraphs are editable. The skills grid and contact cards stay as written in the templates.
+- **Older dashboard:** still needed for the legacy lessons, models, vault and bot tables. Contact messages and app updates moved to the new dashboard.
 - **Not tested against the live Supabase project.** Unit tests use a fake Supabase, the SQL is tested on PGlite, and the dashboard was checked in Chromium with a mocked API (see `TEST_REPORT.md`).
 
 ## 9. Dashboard (`/admin/app.html`)
@@ -112,9 +112,11 @@ Arabic by default (RTL), English and German. Built from the site tokens, mobile 
 | GitHub | sync now; To review / In King Studio / Other / Ignored; add a repo to a section (creates a hidden project), ignore, re-review; daily sync status and enable; private-repo token status; sync history |
 | Categories | add, rename (en/de/ar), reorder, delete (projects keep existing without a category) |
 | Media library | upload (large images shrunk to WebP in the browser), folders, copy link, replace in place, delete (warns while still used) |
-| Pages | homepage hero, King Studio intro, footer text, per language |
+| Pages | homepage hero, King Studio intro, About subtitle and intro paragraphs, Contact subtitle, footer text, per language |
 | Navigation | add, edit labels (en/de/ar) and links, show/hide, reorder, remove |
 | Blog | drafts, publish now, schedule, back to draft, trash, restore, delete permanently; Markdown body, cover, categories, tags, SEO fields |
+| Messages | contact form inbox: read, reply by email, delete |
+| App updates | the "new version" notice the installed apps read: version, date, link, notes |
 | Website settings | brand name, contact email, social links |
 | Security | signed-in account, session end, password reset email, checklist |
 | Activity log | every change with time, who, what and item |
@@ -136,3 +138,5 @@ Arabic by default (RTL), English and German. Built from the site tokens, mobile 
 | `blog` | `list`, `get`, `create`, `update`, `publish`, `unpublish`, `delete`, `restore`, `purge` |
 | `activity` | `list` |
 | `publish` | `run` |
+| `messages` | `list`, `delete` |
+| `updates` | `list`, `save` |

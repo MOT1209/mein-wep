@@ -24,7 +24,8 @@ How to take the admin CMS live. The site deploys from `main` on Vercel (project 
 In **Supabase → SQL editor**, paste and run these files from the repository, **in this order**:
 
 1. `supabase/migrations/20261103120000_admin_cms.sql`: tables, RLS policies, sync functions and the media bucket.
-2. `supabase/seed/20261103120100_seed_cms.sql`: copies today's catalogue, categories, navigation and site name.
+2. `supabase/migrations/20261104090000_rate_limits.sql`: shared rate limits.
+3. `supabase/seed/20261103120100_seed_cms.sql`: copies today's catalogue, categories, navigation and site name.
 
 Both files are **additive and safe to re-run**. They never drop or overwrite a table, and the seed skips rows that already exist. The legacy tables (`projects`, `lessons`, …) are untouched.
 
@@ -58,9 +59,11 @@ Without a token the sync sees public repositories only (20 of 24 today). To incl
 
 The existing `api/github.js` proxy also uses `GITHUB_TOKEN` if present, for higher rate limits.
 
-## 6. Lock the build to the CMS
+## 6. Production builds and the CMS (automatic)
 
-After step 2 has worked once, add **`CMS_REQUIRED=1`** (Production). If Supabase is unreachable during a production build, the build then fails and the previous deployment stays live. Without it, the build would fall back to the content in git, which could re-show a project you hid in the CMS.
+Nothing to set. On a Vercel **production** build, any CMS failure other than "tables not created yet" stops the build, and the previous deployment stays live, so a project hidden in the CMS can never reappear. Previews and local builds fall back to git with a warning.
+
+`CMS_REQUIRED=1` makes every failure fatal, including missing tables. `CMS_REQUIRED=0` always allows the fallback, for example during a Supabase outage when you must deploy a code fix.
 
 Leave it unset for Preview if you want previews to build without Supabase.
 
@@ -73,7 +76,8 @@ Leave it unset for Preview if you want previews to build without Supabase.
 | `VERCEL_DEPLOY_HOOK_URL` | Publish button, rebuild after the daily sync | Production |
 | `CRON_SECRET` | daily GitHub sync | Production |
 | `GITHUB_TOKEN` | private repos in the sync (optional) | Production |
-| `CMS_REQUIRED` | fail production builds without the CMS (recommended after step 2) | Production |
+| `CMS_REQUIRED` | optional: `1` = every CMS failure is fatal, `0` = always fall back (production default: stop on failures, see §6) | Production |
+| `RATE_LIMIT_SALT` | optional: salt for the shared rate-limit buckets (falls back to `CRON_SECRET`) | Production |
 | `CRON_REBUILD` | `0` = no rebuild after the daily sync (optional) | Production |
 | `GEMINI_API_KEY` | existing AI proxy, unchanged | Production |
 
@@ -91,4 +95,4 @@ Leave it unset for Preview if you want previews to build without Supabase.
 
 - **Content:** hidden or trashed items can be restored in the dashboard, and every change is in the activity log.
 - **Code:** Vercel → Deployments → promote the previous deployment (instant), or revert the merge commit.
-- **Database:** the migration only adds objects. To stop the CMS from feeding the site without touching data, remove `CMS_REQUIRED` and set **`CMS_DISABLE=1`**; the build then uses the content in git.
+- **Database:** the migration only adds objects. To stop the CMS from feeding the site without touching data, set **`CMS_DISABLE=1`** (and remove `CMS_REQUIRED` if set); the build then uses the content in git.
