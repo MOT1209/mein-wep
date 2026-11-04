@@ -18,20 +18,23 @@
  * `about/index.html`, which silently changes the deployed URL.
  */
 import fs from 'node:fs';
+import { cmsBlogPosts, studioRecords } from './cms/source.mjs';
 
 // King Studio detail pages come from one paginated template
 // (king-studio/project.njk), so that single source renders one output per
-// catalogue record. Derived from the same JSON the build reads, so the
+// catalogue record. Derived from the same records the build reads, so the
 // URL-surface gate and the build can never disagree about which pages exist.
-const studioProjects = JSON.parse(
-  fs.readFileSync(new URL('../_data/studioCatalog.json', import.meta.url), 'utf8'),
-).projects.filter((p) => !p.hidden);
+// Same records as _data/kingStudio.js: Supabase when the CMS cache exists,
+// otherwise studioCatalog.json (see scripts/cms/source.mjs).
+const studioProjects = studioRecords();
 
 // Blog index and posts are templates (shared header/footer) that keep their
 // original .html URLs via explicit permalinks.
+// cms-post.njk, cms-posts.njk and rss.njk are listed separately below.
+const CMS_BLOG_TEMPLATES = new Set(['cms-post.njk', 'cms-posts.njk', 'rss.njk']);
 const blogPages = Object.fromEntries(
   fs.readdirSync(new URL('../blog/', import.meta.url))
-    .filter((f) => f.endsWith('.njk'))
+    .filter((f) => f.endsWith('.njk') && !CMS_BLOG_TEMPLATES.has(f))
     .map((f) => [`blog/${f}`, `blog/${f.replace(/\.njk$/, '.html')}`]),
 );
 
@@ -56,6 +59,12 @@ export const TEMPLATE_OUTPUTS = {
   'ar/about.njk': 'ar/about.html',
   'ar/contact.njk': 'ar/contact.html',
   ...blogPages,
+  // Blog posts published from the admin CMS: one page per post (none without
+  // the CMS), and the JSON list the blog index merges with posts.json.
+  'blog/cms-post.njk': cmsBlogPosts().map((p) => `blog/${p.id}.html`),
+  'blog/cms-posts.njk': 'blog/cms-posts.json',
+  // The feed is generated (file posts + CMS posts) at its old URL.
+  'blog/rss.njk': 'blog/rss.xml',
   // King Studio in every language: '' (English), 'de/', 'ar/'.
   ...Object.fromEntries(['', 'de/', 'ar/'].flatMap((prefix) => [
     [`${prefix}king-studio/index.njk`, `${prefix}king-studio/index.html`],

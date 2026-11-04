@@ -1,69 +1,48 @@
 /**
  * RSS Feed Generator — Vercel Serverless Function
  *
- * Reads blog/posts.json and generates a valid RSS 2.0 feed automatically.
+ * Reads blog/posts.json plus the posts published from the admin CMS and
+ * generates a valid RSS 2.0 feed (format shared with /blog/rss.xml).
  * Hit: GET https://rashid-wep.vercel.app/api/rss
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { SITE_URL, buildRss, mergePosts } from './_lib/rss.js';
+import { supabaseEnv } from './_lib/admin-auth.js';
 
 const API_DIR = path.dirname(fileURLToPath(import.meta.url));
 
-const SITE_URL = 'https://rashid-wep.vercel.app';
-const BLOG_URL = SITE_URL + '/blog';
-
-function escapeXml(text) {
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+// Posts published from the admin CMS are added at request time: published,
+// not deleted, publish date passed (Row Level Security + filters, publishable
+// key only). If Supabase is slow or not set up, the feed lists the file
+// posts as before.
+async function cmsPosts() {
+  const env = supabaseEnv();
+  if (!env) return [];
+  try {
+    const now = encodeURIComponent(new Date().toISOString());
+    const r = await fetch(`${env.url}/rest/v1/blog_posts?select=slug,title,description,published_at,categories&status=eq.published&deleted_at=is.null&published_at=lte.${now}&order=published_at.desc&limit=50`, {
+      headers: { apikey: env.anonKey, Accept: 'application/json' },
+      signal: AbortSignal.timeout(2500),
+    });
+    if (!r.ok) return [];
+    const rows = await r.json();
+    return rows
+      .filter((p) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(p.slug ?? ''))
+      .map((p) => ({ id: p.slug, title: p.title, description: p.description ?? '', published_at: p.published_at, date: String(p.published_at).slice(0, 10), categories: p.categories ?? [] }));
+  } catch {
+    return [];
+  }
 }
 
-function buildRss(posts) {
-  const items = posts.map(function(p) {
-    const pubDate = new Date(p.date + 'T00:00:00Z').toUTCString();
-    const url = BLOG_URL + '/' + p.id + '.html';
-    const cats = p.categories.map(function(c) { return '      <category>' + escapeXml(c) + '</category>'; }).join('\n');
-    return '    <item>\n' +
-      '      <title>' + escapeXml(p.title) + '</title>\n' +
-      '      <link>' + escapeXml(url) + '</link>\n' +
-      '      <description>' + escapeXml(p.description) + '</description>\n' +
-      '      <pubDate>' + pubDate + '</pubDate>\n' +
-      '      <guid>' + escapeXml(url) + '</guid>\n' +
-      cats + '\n' +
-      '    </item>';
-  }).join('\n\n');
-
-  const lastBuild = posts.length > 0
-    ? new Date(posts[0].date + 'T00:00:00Z').toUTCString()
-    : new Date().toUTCString();
-
-  return '<?xml version="1.0" encoding="UTF-8"?>\n' +
-    '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">\n' +
-    '  <channel>\n' +
-    '    <title>Rashid Blog</title>\n' +
-    '    <link>' + BLOG_URL + '/</link>\n' +
-    '    <description>Articles on web development, game dev with Three.js, AI integration, and open-source projects.</description>\n' +
-    '    <language>en</language>\n' +
-    '    <lastBuildDate>' + lastBuild + '</lastBuildDate>\n' +
-    '    <atom:link href="' + SITE_URL + '/api/rss" rel="self" type="application/rss+xml"/>\n\n' +
-    items + '\n' +
-    '  </channel>\n' +
-    '</rss>';
-}
-
-export default function(req, res) {
+export default async function(req, res) {
   try {
     const postsPath = path.join(API_DIR, '..', 'blog', 'posts.json');
-    const raw = fs.readFileSync(postsPath, 'utf-8');
-    const posts = JSON.parse(raw);
-    posts.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+    const posts = JSON.parse(fs.readFileSync(postsPath, 'utf-8'));
+    const xml = buildRss(mergePosts(posts, await cmsPosts()), { self: SITE_URL + '/api/rss', zone: 'GMT' });
 
-    const xml = buildRss(posts);
     res.setHeader('Content-Type', 'application/rss+xml; charset=utf-8');
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     res.status(200).send(xml);

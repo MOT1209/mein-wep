@@ -9,7 +9,7 @@
 <li class="ks-card" data-ks-item data-search="{{ project.searchText }}" data-platforms="{{ project.platforms | join('|') }}" data-status="{{ project.status }}">
   <a class="ks-card-icon" href="{{ detail }}" tabindex="-1" aria-hidden="true">
     {%- if project.image %}
-    <img src="{{ root }}{{ project.image }}" alt="" loading="lazy" decoding="async" width="72" height="72">
+    <img src="{{ project.image | link(root) }}" alt="" loading="lazy" decoding="async" width="72" height="72">
     {%- else %}
     <span class="ks-monogram">{{ project.title | first }}</span>
     {%- endif %}
@@ -27,7 +27,7 @@
     </ul>
     {%- endif %}
     <div class="ks-card-actions">
-      {%- if project.launchUrl %}<a class="ks-btn ks-btn-primary" href="{{ root }}{{ project.launchUrl }}">{{ S.play if project.type == 'Game' else S.open }}<span class="visually-hidden"> {{ project.title }}</span></a>{% endif %}
+      {%- if project.launchUrl %}<a class="ks-btn ks-btn-primary" href="{{ project.launchUrl | link(root) }}">{{ S.play if project.type == 'Game' else S.open }}<span class="visually-hidden"> {{ project.title }}</span></a>{% endif %}
       <a class="ks-btn ks-btn-ghost" href="{{ detail }}">{{ S.details }}<span class="visually-hidden"> {{ S.detailsFor }} {{ project.title }}</span></a>
     </div>
   </div>

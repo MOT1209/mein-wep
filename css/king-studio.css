@@ -163,6 +163,15 @@
 .ks-facts dt { color: var(--ink-muted); font-size: .875rem; }
 .ks-facts dd { margin: 0; color: var(--ink); overflow-wrap: anywhere; }
 
+/* Long description and screenshots (CMS content). */
+.ks-long { max-width: var(--measure); margin-block-start: var(--s-6); color: var(--ink-soft); }
+.ks-long p { margin: 0 0 var(--s-4); }
+.ks-gallery-wrap { margin-block-start: var(--s-7); }
+.ks-gallery-wrap h2 { font-size: 1.125rem; margin-block-end: var(--s-3); }
+.ks-gallery { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: var(--s-4); }
+@media (min-width: 640px) { .ks-gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ks-gallery img { display: block; inline-size: 100%; block-size: auto; border-radius: 14px; border: 1px solid var(--rule); background: var(--card-sunk); }
+
 @media (prefers-reduced-motion: reduce) {
   .ks-card, .ks-btn { transition: none; }
 }

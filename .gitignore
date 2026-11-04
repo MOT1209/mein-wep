@@ -85,3 +85,6 @@ build/
 
 # chat-app embedded PostgreSQL data directories
 apps/chat-app/.pgdata*/
+
+# Build-time copy of the published CMS content (scripts/fetch-cms.mjs)
+.cms-cache/

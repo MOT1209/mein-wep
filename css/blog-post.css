@@ -136,3 +136,7 @@ html[dir="rtl"] .blog-post .back-link i { transform: scaleX(-1); }
 .category-tag h3 { font-size: 0.875rem; margin: 0 0 2px; }
 .category-tag span { color: var(--ink-muted); font-size: 0.8125rem; }
 .categories-empty { grid-column: 1 / -1; text-align: center; color: var(--ink-muted); font-size: 0.875rem; }
+
+/* Posts published from the admin CMS (blog/cms-post.njk). */
+.blog-post .post-cover { display: block; inline-size: 100%; block-size: auto; border-radius: 14px; margin-block: var(--s-5, 24px); }
+.blog-post .post-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-block-start: var(--s-6, 32px); }

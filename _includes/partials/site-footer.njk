@@ -4,13 +4,19 @@
 {%- set N = i18n[L].nav %}
     <footer class="site-footer">
         <div class="wrap site-footer-row">
-            <p>&copy; <span class="copyright-year"></span> {{ T.builtInTheOpen }}</p>
+            <p>&copy; <span class="copyright-year"></span> {{ cms.pages.footer[L].text or T.builtInTheOpen }}</p>
             <nav aria-label="{{ T.label }}">
                 <a href="{{ (root ~ site.translations.home[L]) or './' }}">{{ T.portfolio }}</a>
                 <a href="{{ root }}{{ site.translations.studio[L] }}">{{ N.studio }}</a>
                 <a href="{{ root }}blog/">{{ N.blog }}</a>
                 <a href="{{ root }}downloads.html">{{ N.downloads }}</a>
                 <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>
+{%- for s in cms.social %}{% if s.url != 'https://github.com/MOT1209' %}
+                <a href="{{ s.url | link(root) }}" target="_blank" rel="noopener noreferrer" dir="auto">{{ s.label }}</a>
+{%- endif %}{% endfor %}
+{%- if cms.contactEmail %}
+                <a href="mailto:{{ cms.contactEmail }}" dir="ltr">{{ cms.contactEmail }}</a>
+{%- endif %}
                 <a href="{{ root }}privacy.html"{% if L != "en" %} hreflang="en"{% endif %}>{{ T.privacy }}</a>
                 <a href="{{ root }}terms.html"{% if L != "en" %} hreflang="en"{% endif %}>{{ T.terms }}</a>
             </nav>

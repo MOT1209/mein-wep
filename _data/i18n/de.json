@@ -146,7 +146,11 @@
     },
     "types": {
       "App": "App",
-      "Game": "Spiel"
+      "Game": "Spiel",
+      "AI": "KI",
+      "Tool": "Werkzeug",
+      "Website": "Website",
+      "Library": "Bibliothek"
     },
     "open": "Öffnen",
     "play": "Spielen",
@@ -168,6 +172,11 @@
       "labs": "Alle Experimente"
     },
     "crumbsLabel": "Brotkrumen",
-    "portfolio": "Portfolio"
+    "portfolio": "Portfolio",
+    "demo": "Live-Demo",
+    "source": "Quellcode auf GitHub",
+    "archived": "Dieses Projekt ist auf GitHub archiviert und wird nicht mehr weiterentwickelt.",
+    "gallery": "Screenshots",
+    "factLanguage": "Hauptsprache"
   }
 }

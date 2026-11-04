@@ -14,7 +14,7 @@ const MUST_NOT_SERVE = [
   'skills-lock.json', 'package.json', 'eleventy.config.mjs', 'tests',
   'apps/chat-app', 'king-colab-MCP', 'linguaverse', 'denkmalen',
   'روابط-الإدارة.txt', 'تقرير-مراجعة-المشروع.html',
-  'api', 'scripts', 'vercel.json', 'games/kingcraft1',
+  'api', 'scripts', 'vercel.json', 'games/kingcraft1', 'supabase',
 ];
 
 const MUST_SERVE = [

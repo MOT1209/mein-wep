@@ -15,9 +15,9 @@ headExtra: "partials/legacy-pages/contact-head-extra.njk"
 extraBodyScript: "partials/legacy-pages/contact-body-script.njk"
 trailingJsonLd: "partials/legacy-pages/contact-trailing-jsonld.njk"
 ---
-    <div class="contact-page">
+{% set CC = cms.pages.contact[locale or "en"] %}    <div class="contact-page">
         <h1>Contact Me</h1>
-        <p class="subtitle">Have a project idea, collaboration proposal, or just want to say hello? Reach out!</p>
+        {% if CC.subtitle %}<p class="subtitle">{{ CC.subtitle }}</p>{% else %}<p class="subtitle">Have a project idea, collaboration proposal, or just want to say hello? Reach out!</p>{% endif %}
 
         <div id="form-feedback"></div>
 

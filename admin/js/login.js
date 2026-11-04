@@ -15,7 +15,7 @@
   var submit = document.getElementById('login-submit');
   var notice = document.getElementById('login-notice');
   var forgot = document.getElementById('forgot-password');
-  var DASHBOARD = '/admin/dashboard.html';
+  var DASHBOARD = '/admin/app.html';
   var config = null;
 
   function say(text, ok) {
@@ -58,6 +58,44 @@
     if (r.status === 200) window.location.replace(DASHBOARD);
   }).catch(function () {});
 
+  // Supabase Auth error bodies: { error_code, msg } (older servers: { error, error_description }).
+  function errorBody(r) {
+    return r.json().catch(function () { return {}; });
+  }
+  function codeOf(body) {
+    return String((body && (body.error_code || body.code || body.error)) || '');
+  }
+  function textOf(body) {
+    return String((body && (body.msg || body.message || body.error_description)) || '');
+  }
+
+  // Say what actually went wrong. The password is checked before the account's
+  // confirmation state, so "not confirmed" is only ever shown to someone who
+  // knows the password; an unknown address and a wrong password look the same.
+  function signInProblem(r, body) {
+    var code = codeOf(body);
+    if (r.status === 429 || code === 'over_request_rate_limit') return 'Too many attempts. Wait a few minutes and try again.';
+    if (code === 'email_not_confirmed') return 'This account\u2019s email address is not confirmed yet. In Supabase open Authentication \u2192 Users and confirm it.';
+    if (code === 'user_banned') return 'This account is disabled.';
+    if (r.status >= 500) return 'The sign-in service had a problem. Try again in a minute.';
+    return 'Email or password is wrong.';
+  }
+
+  function resetProblem(r, body) {
+    var code = codeOf(body);
+    var text = textOf(body);
+    if (r.status === 429 || code === 'over_email_send_rate_limit' || code === 'over_request_rate_limit') {
+      return 'Too many reset emails were requested. Wait a while (the limit resets within the hour) and try again.';
+    }
+    if (code === 'email_address_not_authorized') {
+      return 'Supabase\u2019s built-in mail service does not send to this address. Set up your own mail service (SMTP) in Supabase \u2192 Authentication \u2192 SMTP Settings.';
+    }
+    if (r.status >= 500 || /sending .*email|smtp/i.test(text)) {
+      return 'Supabase could not send the email. Check Authentication \u2192 SMTP Settings and the Auth logs in Supabase.';
+    }
+    return 'The reset email was not sent (' + (code || r.status) + ').';
+  }
+
   function busy(on) {
     submit.disabled = on;
     submit.textContent = on ? 'Signing in…' : 'Sign in';
@@ -80,9 +118,8 @@
         body: JSON.stringify({ email: address, password: password.value }),
       });
     }).then(function (r) {
-      if (r.status === 429) throw new Error('Too many attempts. Wait a few minutes and try again.');
-      if (!r.ok) throw new Error('Email or password is wrong.');
-      return r.json();
+      if (r.ok) return r.json();
+      return errorBody(r).then(function (body) { throw new Error(signInProblem(r, body)); });
     }).then(function (s) {
       password.value = '';
       return api('/api/admin/session', 'POST', {
@@ -123,9 +160,14 @@
         body: JSON.stringify({ email: address }),
       });
     }).then(function (r) {
-      if (r.status === 429) throw new Error('Too many reset requests. Wait and try again later.');
-      // Same message whether or not the address exists: no account probing.
-      say('If an admin account uses that address, a reset link is on its way.', true);
+      if (r.ok) {
+        // Same message whether or not the address exists: no account probing.
+        say('If an admin account uses that address, a reset link is on its way. It can take a few minutes; check the spam folder too.', true);
+        return null;
+      }
+      // Anything else means Supabase did not accept the request: say so instead
+      // of pretending the email was sent.
+      return errorBody(r).then(function (body) { throw new Error(resetProblem(r, body)); });
     }).catch(function (err) {
       say(err && err.message && err.message !== 'config' ? err.message : 'The reset service is unavailable right now.');
     }).then(function () {

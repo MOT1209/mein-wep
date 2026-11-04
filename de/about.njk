@@ -13,23 +13,23 @@ canonical: "https://rashid-wep.vercel.app/de/about.html"
 activeNav: about
 noAds: true
 ---
-    <div class="about-page">
+{% set CA = cms.pages.about[locale or "en"] %}    <div class="about-page">
         <div class="about-intro">
             <img class="about-avatar" src="{{ root }}images/rashid-ali.webp" alt="Porträt von Rashid Ali" width="120" height="120">
             <div>
                 <h1>Über Rashid Ali</h1>
-                <p class="subtitle">Full-Stack-Entwickler &amp; KI-Engineer</p>
+                {% if CA.subtitle %}<p class="subtitle">{{ CA.subtitle }}</p>{% else %}<p class="subtitle">Full-Stack-Entwickler &amp; KI-Engineer</p>{% endif %}
             </div>
         </div>
 
         <div class="about-section">
             <h2><i class="fas fa-user" aria-hidden="true"></i> Wer ich bin</h2>
-            <p>Ich bin <strong>Rashid Ali</strong> (MOT1209), Schüler, und ich baue Software. Ich entwickle Websites und installierbare Web-Apps, arbeite mit KI-Tools und mache Spiele.</p>
+            {% if CA.who %}<p>{{ CA.who }}</p>{% else %}<p>Ich bin <strong>Rashid Ali</strong> (MOT1209), Schüler, und ich baue Software. Ich entwickle Websites und installierbare Web-Apps, arbeite mit KI-Tools und mache Spiele.</p>{% endif %}
         </div>
 
         <div class="about-section">
             <h2><i class="fas fa-code" aria-hidden="true"></i> Was ich baue</h2>
-            <p>Websites und Web-Apps mit <strong>HTML</strong>, <strong>CSS</strong>, <strong>JavaScript</strong> und <strong>Supabase</strong>, Skripte und Tools in <strong>Python</strong>, Assistenten und Automatisierungen mit KI-Tools sowie Spiele mit <strong>Godot</strong> und <strong>Unity</strong>. Zwei meiner Apps, Calculator Vault und Quiz Master, sind auf dieser Website veröffentlicht.</p>
+            {% if CA.build %}<p>{{ CA.build }}</p>{% else %}<p>Websites und Web-Apps mit <strong>HTML</strong>, <strong>CSS</strong>, <strong>JavaScript</strong> und <strong>Supabase</strong>, Skripte und Tools in <strong>Python</strong>, Assistenten und Automatisierungen mit KI-Tools sowie Spiele mit <strong>Godot</strong> und <strong>Unity</strong>. Zwei meiner Apps, Calculator Vault und Quiz Master, sind auf dieser Website veröffentlicht.</p>{% endif %}
         </div>
 
         <div class="about-section">

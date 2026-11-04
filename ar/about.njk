@@ -13,23 +13,23 @@ canonical: "https://rashid-wep.vercel.app/ar/about.html"
 activeNav: about
 noAds: true
 ---
-    <div class="about-page">
+{% set CA = cms.pages.about[locale or "en"] %}    <div class="about-page">
         <div class="about-intro">
             <img class="about-avatar" src="{{ root }}images/rashid-ali.webp" alt="صورة راشد علي" width="120" height="120">
             <div>
                 <h1>عن راشد علي</h1>
-                <p class="subtitle">مطوّر Full-Stack ومهندس ذكاء اصطناعي</p>
+                {% if CA.subtitle %}<p class="subtitle">{{ CA.subtitle }}</p>{% else %}<p class="subtitle">مطوّر Full-Stack ومهندس ذكاء اصطناعي</p>{% endif %}
             </div>
         </div>
 
         <div class="about-section">
             <h2><i class="fas fa-user" aria-hidden="true"></i> من أنا</h2>
-            <p>أنا <strong>راشد علي</strong> (MOT1209)، طالب في المدرسة وأبني البرمجيات. أصنع مواقع وتطبيقات ويب قابلة للتثبيت، وأعمل بأدوات الذكاء الاصطناعي، وأصنع ألعاباً.</p>
+            {% if CA.who %}<p>{{ CA.who }}</p>{% else %}<p>أنا <strong>راشد علي</strong> (MOT1209)، طالب في المدرسة وأبني البرمجيات. أصنع مواقع وتطبيقات ويب قابلة للتثبيت، وأعمل بأدوات الذكاء الاصطناعي، وأصنع ألعاباً.</p>{% endif %}
         </div>
 
         <div class="about-section">
             <h2><i class="fas fa-code" aria-hidden="true"></i> ماذا أبني</h2>
-            <p>مواقع وتطبيقات ويب بـ <strong>HTML</strong> و<strong>CSS</strong> و<strong>JavaScript</strong> و<strong>Supabase</strong>، وسكربتات وأدوات بـ <strong>Python</strong>، ومساعدات وأتمتة بأدوات الذكاء الاصطناعي، وألعاباً بـ <strong>Godot</strong> و<strong>Unity</strong>. اثنان من تطبيقاتي، Calculator Vault وQuiz Master، منشوران على هذا الموقع.</p>
+            {% if CA.build %}<p>{{ CA.build }}</p>{% else %}<p>مواقع وتطبيقات ويب بـ <strong>HTML</strong> و<strong>CSS</strong> و<strong>JavaScript</strong> و<strong>Supabase</strong>، وسكربتات وأدوات بـ <strong>Python</strong>، ومساعدات وأتمتة بأدوات الذكاء الاصطناعي، وألعاباً بـ <strong>Godot</strong> و<strong>Unity</strong>. اثنان من تطبيقاتي، Calculator Vault وQuiz Master، منشوران على هذا الموقع.</p>{% endif %}
         </div>
 
         <div class="about-section">
