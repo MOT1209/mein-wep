@@ -7,7 +7,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { fetchCms } from '../scripts/fetch-cms.mjs';
+import { fetchCms, run as runFetch } from '../scripts/fetch-cms.mjs';
 import { mapDbProject } from '../scripts/cms/source.mjs';
 
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'cms-build-'));
@@ -209,4 +209,24 @@ test('fetchCms asks only for public, published rows and maps settings', async ()
   assert.match(blog, /published_at=lte\.2026-11-03T00:00:00\.000Z/);
   assert.match(seen.find((u) => u.includes('/navigation_items')), /visible=eq\.true/);
   assert.match(seen.find((u) => u.includes('/website_settings')), /is_public=eq\.true/);
+});
+
+test('fetch-cms: missing tables fall back; a network failure stops production builds only', async () => {
+  const realFetch = globalThis.fetch;
+  const realLog = console.log;
+  console.log = () => {};
+  const base = { SUPABASE_URL: 'https://x.supabase.co', SUPABASE_ANON_KEY: 'anon' };
+  try {
+    globalThis.fetch = async () => new Response(JSON.stringify({ code: 'PGRST205', message: 'not found' }), { status: 404 });
+    assert.equal(await runFetch({ ...base, VERCEL_ENV: 'production' }), 'git', 'before the migration production still builds');
+    globalThis.fetch = async () => { throw new Error('ECONNRESET'); };
+    await assert.rejects(runFetch({ ...base, VERCEL_ENV: 'production' }), /production build stopped/);
+    assert.equal(await runFetch({ ...base, VERCEL_ENV: 'preview' }), 'git');
+    assert.equal(await runFetch({ ...base, VERCEL_ENV: 'production', CMS_REQUIRED: '0' }), 'git');
+    await assert.rejects(runFetch({ ...base, CMS_REQUIRED: '1' }), /CMS fetch failed/);
+    assert.equal(await runFetch({}), 'git');
+  } finally {
+    globalThis.fetch = realFetch;
+    console.log = realLog;
+  }
 });

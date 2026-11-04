@@ -11,9 +11,9 @@
  *   - SUPABASE_URL / SUPABASE_ANON_KEY unset -> no cache, the build uses git
  *   - tables missing (migration not applied)  -> no cache, warning
  *   - database empty (seed not run)           -> no cache, warning
- *   - network or server error                 -> no cache, warning; with
- *     CMS_REQUIRED=1 the build fails instead, so production never silently
- *     falls back once the CMS is live.
+ *   - network or server error                 -> production build fails
+ *     (previous deployment stays live); elsewhere: no cache, warning.
+ *     See run() for CMS_REQUIRED.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -83,36 +83,54 @@ export async function fetchCms({ url, key, now = new Date() }) {
   };
 }
 
-async function main() {
-  const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_ANON_KEY;
-  const required = process.env.CMS_REQUIRED === '1';
+/**
+ * When may the build fall back to the content in git?
+ *  - always, if Supabase is not configured or the tables do not exist yet
+ *    (before the migration), or the CMS is empty (before the seed);
+ *  - for any other failure (network, server error) only outside production:
+ *    on a Vercel production build the build fails instead, so the live site
+ *    keeps its previous deployment and never re-shows content hidden in the
+ *    CMS. CMS_REQUIRED=1 makes every failure fatal; CMS_REQUIRED=0 always
+ *    allows the fallback.
+ */
+export async function run(env = process.env) {
+  const url = env.SUPABASE_URL;
+  const key = env.SUPABASE_ANON_KEY;
+  const required = env.CMS_REQUIRED === '1';
+  const strictOnFailure = required || (env.VERCEL_ENV === 'production' && env.CMS_REQUIRED !== '0');
   removeCache();
-  if (!url || !key || process.env.CMS_DISABLE === '1') {
+  if (!url || !key || env.CMS_DISABLE === '1') {
     log('Supabase not configured for this build: using the content in git.');
     if (required) throw new Error('CMS_REQUIRED=1 but SUPABASE_URL / SUPABASE_ANON_KEY are not set');
-    return;
+    return 'git';
   }
+  let data;
   try {
-    const data = await fetchCms({ url, key });
-    if (!data.categories.length && !data.studio.length) {
-      log('CMS tables are empty (seed not run): using the content in git.');
-      if (required) throw new Error('CMS_REQUIRED=1 but the CMS has no content');
-      return;
-    }
-    fs.mkdirSync(path.dirname(CACHE_FILE), { recursive: true });
-    fs.writeFileSync(CACHE_FILE, JSON.stringify(data));
-    log(`using Supabase: ${data.studio.length} public projects, ${data.nav.length} nav items, ${data.blog.length} posts.`);
+    data = await fetchCms({ url, key });
   } catch (err) {
     removeCache();
-    const reason = err instanceof Missing ? `table ${err.message} not found (migration not applied?)` : err.message;
-    if (required) throw new Error(`CMS fetch failed: ${reason}`);
-    log(`WARNING: CMS fetch failed (${reason}): using the content in git.`);
+    if (err instanceof Missing) {
+      if (required) throw new Error(`CMS fetch failed: table ${err.message} not found`);
+      log(`WARNING: table ${err.message} not found (migration not applied?): using the content in git.`);
+      return 'git';
+    }
+    if (strictOnFailure) throw new Error(`CMS fetch failed: ${err.message} (production build stopped; the live site stays on its previous deployment)`);
+    log(`WARNING: CMS fetch failed (${err.message}): using the content in git.`);
+    return 'git';
   }
+  if (!data.categories.length && !data.studio.length) {
+    log('CMS tables are empty (seed not run): using the content in git.');
+    if (required) throw new Error('CMS_REQUIRED=1 but the CMS has no content');
+    return 'git';
+  }
+  fs.mkdirSync(path.dirname(CACHE_FILE), { recursive: true });
+  fs.writeFileSync(CACHE_FILE, JSON.stringify(data));
+  log(`using Supabase: ${data.studio.length} public projects, ${data.nav.length} nav items, ${data.blog.length} posts.`);
+  return 'cms';
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  main().catch((err) => {
+  run().catch((err) => {
     console.error(`[cms] ${err.message}`);
     process.exit(1);
   });
