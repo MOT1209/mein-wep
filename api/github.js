@@ -37,13 +37,20 @@ function isRateLimited(ip) {
 
 export default async (req, res) => {
   // تحقق من Origin: نحظر فقط إذا كان موجوداً وغير مدرج في القائمة البيضاء
+  // Only this site may use the proxy (and its token's rate limit). Browsers
+  // send Origin on cross-origin requests and Sec-Fetch-Site on all fetches; a
+  // same-origin GET carries Sec-Fetch-Site: same-origin and often no Origin.
+  // A request with neither (curl, scripts) is refused.
   const origin = req.headers.origin;
+  const fetchSite = req.headers['sec-fetch-site'];
   if (origin) {
     if (!ALLOWED_ORIGINS.includes(origin)) {
       return res.status(403).json({ error: 'Origin not allowed' });
     }
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
+  } else if (fetchSite !== 'same-origin') {
+    return res.status(403).json({ error: 'Origin not allowed' });
   }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -58,10 +65,22 @@ export default async (req, res) => {
     return res.status(429).json({ error: 'Too many requests, slow down.' });
   }
 
-  const endpoint = req.query.endpoint;
-  if (!endpoint || !ALLOWED.includes(endpoint)) {
+  // The client sends ?endpoint=/users/MOT1209/repos?per_page=100&sort=updated
+  // unencoded, so the path's own query arrives split across `endpoint` and
+  // the top-level query. Only the path is matched against ALLOWED; per_page
+  // and sort are passed on when valid, everything else is dropped.
+  const raw = typeof req.query.endpoint === 'string' ? req.query.endpoint : '';
+  const [pathPart, inner = ''] = raw.split('?');
+  if (!pathPart || !ALLOWED.includes(pathPart)) {
     return res.status(400).json({ error: 'Invalid endpoint' });
   }
+  const params = new URLSearchParams(inner);
+  const perPage = Number(params.get('per_page') ?? req.query.per_page);
+  const sort = String(params.get('sort') ?? req.query.sort ?? '');
+  const out = new URLSearchParams();
+  if (Number.isInteger(perPage) && perPage >= 1 && perPage <= 100) out.set('per_page', String(perPage));
+  if (['updated', 'created', 'pushed', 'full_name'].includes(sort)) out.set('sort', sort);
+  const endpoint = out.toString() ? `${pathPart}?${out}` : pathPart;
 
   const token = process.env.GITHUB_TOKEN;
   const headers = { 'Accept': 'application/vnd.github.v3+json' };

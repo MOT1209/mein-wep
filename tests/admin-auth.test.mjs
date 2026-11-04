@@ -131,6 +131,20 @@ test('a Vercel preview deployment can sign in on its own origin, but not cross-o
   assert.equal(plainHttp.statusCode, 403);
 });
 
+test('sign-in is refused when the shared limit is reached', async () => {
+  const t = freshToken();
+  users[t] = { id: 'admin-id', email: 'owner@example.com' };
+  const inner = globalThis.fetch;
+  globalThis.fetch = (url, init) => (String(url).endsWith('/rpc/rate_limit_hit')
+    ? Promise.resolve(new Response('false', { status: 200 }))
+    : inner(url, init));
+  const r = res();
+  await (await session())(req({ method: 'POST', headers: writeHeaders, body: { access_token: t, refresh_token: 'refresh-token-123456' } }), r);
+  globalThis.fetch = inner;
+  assert.equal(r.statusCode, 429);
+  assert.equal(cookies(r).length, 0);
+});
+
 test('POST session for a non-admin -> 403, Supabase session revoked, no cookies', async () => {
   const t = freshToken('someone');
   users[t] = { id: 'someone', email: 'x@example.com' };

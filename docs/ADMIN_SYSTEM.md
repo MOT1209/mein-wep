@@ -1,6 +1,6 @@
 # Admin System
 
-Status: **Phase 1 (authentication) implemented.** Later phases (dashboard rebuild, King Studio management, CMS, media) extend this file.
+Status: **authentication (Phase 1) live; dashboard, King Studio, GitHub, media, content and blog management implemented** (see §9). Setup steps: `docs/DEPLOYMENT_GUIDE.md`.
 
 Architecture decision (owner, D1 in `INFRASTRUCTURE_AUDIT.md`): **Option A**. Supabase is the source of truth for editable content. The public site keeps being generated at build time; saving in the admin panel will trigger a Vercel rebuild (Phase 2+).
 
@@ -91,9 +91,52 @@ These cannot be done from the development environment:
 4. **Supabase SQL editor**: run the read-only queries in `INFRASTRUCTURE_AUDIT.md` Appendix A. Confirm that `admin_users` has exactly your account and that `add_admin_user()` is not executable by `authenticated`/`anon`. If the write policies still say `using (true)`, apply `db/SUPABASE_SETUP_FIXED.sql` and `db/SUPABASE_SECURITY_FIX.sql`. Both are safe to re-run.
 5. Recommended: **Supabase → Authentication → Rate Limits**: keep sign-in attempts low (for example 10 per 5 minutes per IP).
 
-## 8. Known limitations after Phase 1
+## 8. Known limitations
 
-- **The existing dashboard still edits legacy tables** that the public site does not read (audit A6). Phase 2 rebuilds the dashboard and connects it to the build.
-- **The legacy inline admin bar no longer appears.** `src/js/modules/admin.js` (loaded by the KingCraft showcase) only showed when a browser Supabase session existed. Admin work now happens in `/admin`.
-- **Roles:** one role (admin = row in `admin_users`). `admin_profiles` with explicit roles comes with the schema in Phase 8.
-- **Not tested against the live Supabase project.** The development environment cannot reach it. The flow is covered by unit tests with a fake Supabase and by a browser run with mocked endpoints (see `TEST_REPORT.md`).
+- **The live database is not migrated yet.** Until `supabase/migrations` and the seed are applied (DEPLOYMENT_GUIDE §2), the new dashboard shows a "tables missing" message and the site renders the content in git.
+- **The legacy inline admin bar no longer appears.** `src/js/modules/admin.js` (KingCraft showcase) depended on a browser session. Admin work happens in `/admin`.
+- **Roles:** `owner` can do everything. `admin` can edit content but cannot delete permanently, delete categories or messages, force-delete a used image, publish the site or enable the daily sync. Existing accounts are `owner`.
+- **About and Contact:** the subtitle and the two intro paragraphs are editable. The skills grid and contact cards stay as written in the templates.
+- **Older dashboard:** still needed for the legacy lessons, models, vault and bot tables. Contact messages and app updates moved to the new dashboard.
+- **Not tested against the live Supabase project.** Unit tests use a fake Supabase, the SQL is tested on PGlite, and the dashboard was checked in Chromium with a mocked API (see `TEST_REPORT.md`).
+
+## 9. Dashboard (`/admin/app.html`)
+
+Arabic by default (RTL), English and German. Built from the site tokens, mobile first. The page has no inline script and its own strict CSP. All text goes in through `textContent`.
+
+| Screen | What the owner can do |
+|---|---|
+| Overview | counts (projects total/published/hidden/in development/featured/trash, repos to review, posts), recent changes, latest activity, website reachability, last publish, last sync, server setup flags |
+| King Studio | filter (all/published/hidden/trash), search, section filter; publish/hide, feature, move up/down, move to trash, restore, delete permanently (the GitHub repo is never touched) |
+| Project editor | name, slug, section, status, type, category, visibility, featured, short and full description, platforms, technologies, features, cover image and alt text (pick from or upload to the media library), launch/demo/download links, APK id, gallery (add, reorder, remove), German and Arabic translations, linked repository (metadata, unlink) |
+| GitHub | sync now; To review / In King Studio / Other / Ignored; add a repo to a section (creates a hidden project), ignore, re-review; daily sync status and enable; private-repo token status; sync history |
+| Categories | add, rename (en/de/ar), reorder, delete (projects keep existing without a category) |
+| Media library | upload (large images shrunk to WebP in the browser), folders, copy link, replace in place, delete (warns while still used) |
+| Pages | homepage hero, King Studio intro, About subtitle and intro paragraphs, Contact subtitle, footer text, per language |
+| Navigation | add, edit labels (en/de/ar) and links, show/hide, reorder, remove |
+| Blog | drafts, publish now, schedule, back to draft, trash, restore, delete permanently; Markdown body, cover, categories, tags, SEO fields |
+| Messages | contact form inbox: read, reply by email, delete |
+| App updates | the "new version" notice the installed apps read: version, date, link, notes |
+| Website settings | brand name, contact email, social links |
+| Security | signed-in account, session end, password reset email, checklist |
+| Activity log | every change with time, who, what and item |
+
+**Publish site** (top bar) rebuilds the public site. Saved changes go live after it, in about a minute. The older dashboard for the legacy tables (lessons, models, vault, contact messages, app updates) stays under **Older tools**.
+
+## 10. CMS API
+
+`POST /api/admin/<resource> { action, ...args }` (`api/admin/[resource].js` → `api/_lib/cms-handlers.js`). Every call: `requireAdmin` → input allow-list (`cms-validate.js`) → Supabase as the admin → `activity_logs`.
+
+| Resource | Actions |
+|---|---|
+| `overview` | `get` |
+| `projects` | `list`, `get`, `create`, `update`, `set_visibility`, `set_featured`, `delete` (soft), `restore`, `purge` (trash only), `reorder`, `set_images` |
+| `categories` | `list`, `create`, `update`, `delete` |
+| `github` | `list`, `sync`, `logs`, `approve`, `ignore`, `unignore`, `link`, `unlink`, `schedule_status`, `schedule_enable` |
+| `media` | `list`, `upload`, `delete` |
+| `content` | `settings_list`, `settings_set`, `settings_delete`, `pages_get`, `pages_set`, `nav_list`, `nav_create`, `nav_update`, `nav_delete`, `nav_reorder` |
+| `blog` | `list`, `get`, `create`, `update`, `publish`, `unpublish`, `delete`, `restore`, `purge` |
+| `activity` | `list` |
+| `publish` | `run` |
+| `messages` | `list`, `delete` |
+| `updates` | `list`, `save` |

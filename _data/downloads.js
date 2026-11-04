@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
+import { hiddenApkIds } from '../scripts/cms/source.mjs';
 
 /**
  * Download cards for downloads.html, built from the release manifest the APK
@@ -19,7 +20,7 @@ export default function () {
   const catalog = JSON.parse(fs.readFileSync(path.join(ROOT, '_data', 'studioCatalog.json'), 'utf8')).projects;
   const byApk = Object.fromEntries(catalog.filter((p) => p.apkId).map((p) => [p.apkId, p]));
   // APKs of hidden catalogue projects stay served at their URLs but are not listed.
-  const hidden = new Set(catalog.filter((p) => p.hidden && p.apkId).map((p) => p.apkId));
+  const hidden = hiddenApkIds();
 
   const items = Object.entries(manifest.apps ?? {}).filter(([id]) => !hidden.has(id)).map(([id, app]) => {
     const file = app.url.replace(/^\//, '');
@@ -44,5 +45,7 @@ export default function () {
 
   // Games first, then apps; alphabetical within each, so the order is stable.
   items.sort((a, b) => (a.type === b.type ? a.name.localeCompare(b.name) : a.type === 'Game' ? -1 : 1));
-  return { updatedAt: manifest.updatedAt, items };
+  const names = items.map((i) => i.name);
+  const namesText = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : (names[0] ?? '');
+  return { updatedAt: manifest.updatedAt, items, namesText };
 }

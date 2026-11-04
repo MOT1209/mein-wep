@@ -1,0 +1,9 @@
+---
+permalink: /blog/cms-posts.json
+eleventyExcludeFromCollections: true
+---
+{#- Posts published from the admin CMS, in the shape of blog/posts.json, for
+    the blog index. An empty list when the CMS is not live. -#}
+{%- set out = [] %}
+{%- for p in cms.blog %}{% set _ = out.push({ id: p.id, title: p.title, description: p.description, date: p.date, readTime: p.readTime, lang: p.lang, categories: p.categories, icon: p.icon, iconColor: p.iconColor, iconBg: p.iconBg }) %}{% endfor -%}
+{{ out | dump | safe }}

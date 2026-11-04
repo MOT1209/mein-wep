@@ -13,9 +13,9 @@ activeNav: contact
 noAds: true
 extraBodyScript: "partials/legacy-pages/contact-body-script.njk"
 ---
-    <div class="contact-page">
+{% set CC = cms.pages.contact[locale or "en"] %}    <div class="contact-page">
         <h1>Kontakt</h1>
-        <p class="subtitle">Du hast eine Projektidee, einen Vorschlag zur Zusammenarbeit oder willst einfach Hallo sagen? Schreib mir!</p>
+        {% if CC.subtitle %}<p class="subtitle">{{ CC.subtitle }}</p>{% else %}<p class="subtitle">Du hast eine Projektidee, einen Vorschlag zur Zusammenarbeit oder willst einfach Hallo sagen? Schreib mir!</p>{% endif %}
 
         <div id="form-feedback" role="status" aria-live="polite"></div>
 

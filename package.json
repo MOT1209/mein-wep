@@ -5,17 +5,20 @@
   "description": "Rashid portfolio static site (Eleventy).",
   "type": "module",
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <25"
   },
   "scripts": {
     "build:css": "node scripts/minify-css.mjs",
-    "build": "npm run build:css && eleventy --config=eleventy.config.mjs",
+    "build:cms": "node scripts/fetch-cms.mjs",
+    "build": "npm run build:cms && npm run build:css && eleventy --config=eleventy.config.mjs",
     "verify": "node scripts/check-url-surface.mjs",
     "start": "eleventy --serve --config=eleventy.config.mjs",
     "test": "node --test tests/*.test.mjs"
   },
   "devDependencies": {
     "@11ty/eleventy": "^3.1.6",
-    "clean-css": "^5.3.3"
+    "@electric-sql/pglite": "0.5.10",
+    "clean-css": "^5.3.3",
+    "markdown-it": "14.3.3"
   }
 }

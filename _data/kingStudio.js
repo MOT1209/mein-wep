@@ -1,10 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { studioRecords } from '../scripts/cms/source.mjs';
 
 /**
  * King Studio catalogue.
  *
- * Raw records live in studioCatalog.json (data only). This module validates
+ * Raw records come from Supabase when the CMS is live (see
+ * scripts/cms/source.mjs), otherwise from studioCatalog.json. This module validates
  * them against the real repository and derives every URL, so a catalogue
  * entry can never publish a launch link, image or APK that does not exist:
  * the build fails instead.
@@ -29,7 +31,11 @@ const STATUS_TONE = {
   'Coming Soon': 'soon',
 };
 
-const exists = (rel) => fs.existsSync(path.join(ROOT, rel));
+const exists = (rel) => fs.existsSync(path.join(ROOT, rel.replace(/^\//, '')));
+// Links from the CMS may point off-site (GitHub, a demo host, Supabase
+// Storage). Only https:// is accepted; everything else must exist in the repo.
+const isExternal = (u) => /^https:\/\/[a-z0-9.-]+(:\d+)?(\/|$|\?|#)/i.test(u);
+const SAFE_EXTERNAL = (u) => isExternal(u) && !/\s/.test(u);
 // A directory URL ("games/x/") is valid when it has an index.html.
 const resolvesInRepo = (rel) => (rel.endsWith('/') ? exists(rel + 'index.html') : exists(rel));
 
@@ -56,12 +62,11 @@ function facetsFor(items) {
 }
 
 export default function () {
-  const raw = JSON.parse(fs.readFileSync(path.join(ROOT, '_data', 'studioCatalog.json'), 'utf8'));
   const locales = JSON.parse(fs.readFileSync(path.join(ROOT, '_data', 'site.json'), 'utf8')).locales.map((l) => l.code);
   const releases = JSON.parse(fs.readFileSync(path.join(ROOT, 'apks', 'updates.json'), 'utf8')).apps ?? {};
   const seen = new Set();
 
-  const projects = raw.projects.filter((p) => !p.hidden).map((p) => {
+  const projects = studioRecords().map((p) => {
     for (const k of ['id', 'section', 'title', 'description', 'type', 'status']) {
       if (!p[k]) fail(p.id ?? '?', `missing required field "${k}"`);
     }
@@ -69,9 +74,18 @@ export default function () {
     seen.add(p.id);
     if (!SECTIONS[p.section]) fail(p.id, `unknown section "${p.section}"`);
     if (!STATUSES.includes(p.status)) fail(p.id, `unknown status "${p.status}"`);
-    if (p.image && !exists(p.image)) fail(p.id, `image not found: ${p.image}`);
+    if (p.image && !(isExternal(p.image) ? SAFE_EXTERNAL(p.image) : exists(p.image))) fail(p.id, `image not found: ${p.image}`);
     if (p.image && !p.imageAlt) fail(p.id, 'image requires imageAlt');
-    if (p.launchUrl && !resolvesInRepo(p.launchUrl)) fail(p.id, `launchUrl does not resolve: ${p.launchUrl}`);
+    if (p.launchUrl && !(isExternal(p.launchUrl) ? SAFE_EXTERNAL(p.launchUrl) : resolvesInRepo(p.launchUrl.replace(/^\//, '')))) {
+      fail(p.id, `launchUrl does not resolve: ${p.launchUrl}`);
+    }
+    for (const k of ['demoUrl', 'githubUrl', 'externalDownloadUrl']) {
+      if (p[k] && !SAFE_EXTERNAL(p[k])) fail(p.id, `${k} must be an https:// link: ${p[k]}`);
+    }
+    for (const g of p.gallery ?? []) {
+      if (!(isExternal(g.url) ? SAFE_EXTERNAL(g.url) : exists(g.url))) fail(p.id, `gallery image not found: ${g.url}`);
+      if (!g.alt) fail(p.id, 'gallery image requires alt text');
+    }
     if (p.status === 'Coming Soon' && p.launchUrl) {
       fail(p.id, 'a "Coming Soon" project must not have a launchUrl');
     }
@@ -85,6 +99,8 @@ export default function () {
       if (!exists(file)) fail(p.id, `APK file missing: ${file}`);
       downloadUrl = file;
       version = rel.version;
+    } else if (p.externalDownloadUrl) {
+      downloadUrl = p.externalDownloadUrl;
     }
 
     return {
@@ -95,15 +111,22 @@ export default function () {
       downloadUrl,
       version,
       tone: STATUS_TONE[p.status],
+      gallery: p.gallery ?? [],
       // Text per language: a record's "i18n" entry overrides the English
-      // fields; anything it leaves out falls back to English.
-      text: Object.fromEntries(locales.map((code) => [code, {
-        description: p.description,
-        category: p.category,
-        features: p.features ?? [],
-        imageAlt: p.imageAlt,
-        ...(code === 'en' ? {} : p.i18n?.[code]),
-      }])),
+      // fields; anything it leaves out falls back to English. The long
+      // description becomes plain paragraphs (no HTML from the database).
+      text: Object.fromEntries(locales.map((code) => {
+        const t = {
+          description: p.description,
+          category: p.category,
+          features: p.features ?? [],
+          imageAlt: p.imageAlt,
+          longDescription: p.longDescription ?? '',
+          ...(code === 'en' ? {} : p.i18n?.[code]),
+        };
+        t.paragraphs = String(t.longDescription || '').split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean);
+        return [code, t];
+      })),
       detailUrl: `king-studio/${p.section}/${p.id}/`,
       searchText: [p.title, p.description, p.category, ...(p.platforms ?? []), ...(p.technologies ?? [])]
         .filter(Boolean)

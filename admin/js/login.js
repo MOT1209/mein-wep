@@ -15,7 +15,7 @@
   var submit = document.getElementById('login-submit');
   var notice = document.getElementById('login-notice');
   var forgot = document.getElementById('forgot-password');
-  var DASHBOARD = '/admin/dashboard.html';
+  var DASHBOARD = '/admin/app.html';
   var config = null;
 
   function say(text, ok) {
