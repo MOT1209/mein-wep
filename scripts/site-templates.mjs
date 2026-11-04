@@ -30,8 +30,8 @@ const studioProjects = studioRecords();
 
 // Blog index and posts are templates (shared header/footer) that keep their
 // original .html URLs via explicit permalinks.
-// cms-post.njk and cms-posts.njk are listed separately below.
-const CMS_BLOG_TEMPLATES = new Set(['cms-post.njk', 'cms-posts.njk']);
+// cms-post.njk, cms-posts.njk and rss.njk are listed separately below.
+const CMS_BLOG_TEMPLATES = new Set(['cms-post.njk', 'cms-posts.njk', 'rss.njk']);
 const blogPages = Object.fromEntries(
   fs.readdirSync(new URL('../blog/', import.meta.url))
     .filter((f) => f.endsWith('.njk') && !CMS_BLOG_TEMPLATES.has(f))
@@ -63,6 +63,8 @@ export const TEMPLATE_OUTPUTS = {
   // the CMS), and the JSON list the blog index merges with posts.json.
   'blog/cms-post.njk': cmsBlogPosts().map((p) => `blog/${p.id}.html`),
   'blog/cms-posts.njk': 'blog/cms-posts.json',
+  // The feed is generated (file posts + CMS posts) at its old URL.
+  'blog/rss.njk': 'blog/rss.xml',
   // King Studio in every language: '' (English), 'de/', 'ar/'.
   ...Object.fromEntries(['', 'de/', 'ar/'].flatMap((prefix) => [
     [`${prefix}king-studio/index.njk`, `${prefix}king-studio/index.html`],

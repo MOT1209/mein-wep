@@ -160,6 +160,15 @@ test('CMS posts join the index list and the homepage; a file-post slug is never 
   assert.ok(!page('blog/flutter-clean-architecture.html').includes('Clash'));
 });
 
+test('the static RSS feed lists CMS posts, escaped, next to the file posts', () => {
+  const rss = page('blog/rss.xml');
+  assert.match(rss, /<link>https:\/\/rashid-wep\.vercel\.app\/blog\/hello-cms\.html<\/link>/);
+  assert.match(rss, /<title>Hello &lt;script&gt;alert\(1\)&lt;\/script&gt;<\/title>/);
+  assert.match(rss, /flutter-clean-architecture\.html/);
+  assert.equal((rss.match(/flutter-clean-architecture\.html<\/link>/g) || []).length, 1, 'no duplicate for a clashing slug');
+  assert.ok(!rss.includes('<title>Clash</title>'));
+});
+
 test('mapDbProject falls back to the GitHub description and drops empty translations', () => {
   const p = mapDbProject(row({ short_description: '', i18n: {}, category: { slug: 'x', name: 'X', name_de: null, name_ar: null } }));
   assert.equal(p.description, 'From GitHub');

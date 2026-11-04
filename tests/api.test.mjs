@@ -76,9 +76,38 @@ test('github: same-origin GET (no Origin header) is allowed; unknown endpoint ->
   assert.equal(r.statusCode, 400);
 });
 
+test('rss: adds published CMS posts from Supabase and survives a Supabase failure', async () => {
+  const realFetch = globalThis.fetch;
+  process.env.SUPABASE_URL = 'https://x.supabase.co';
+  process.env.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYW5vbiJ9.c2ln';
+  let asked = '';
+  try {
+    globalThis.fetch = async (url) => {
+      asked = decodeURIComponent(String(url));
+      return new Response(JSON.stringify([{ slug: 'from-cms', title: 'From <CMS>', description: 'd', published_at: '2099-01-01T00:00:00Z', categories: [] }]), { status: 200 });
+    };
+    const r = res();
+    await (await load('rss'))(req({ method: 'GET' }), r);
+    assert.equal(r.statusCode, 200);
+    assert.match(r.body, /blog\/from-cms\.html/);
+    assert.match(r.body, /From &lt;CMS&gt;/);
+    assert.match(asked, /status=eq\.published/);
+    assert.match(asked, /deleted_at=is\.null/);
+    globalThis.fetch = async () => { throw new Error('down'); };
+    const r2 = res();
+    await (await load('rss'))(req({ method: 'GET' }), r2);
+    assert.equal(r2.statusCode, 200);
+    assert.ok(!r2.body.includes('from-cms'));
+  } finally {
+    globalThis.fetch = realFetch;
+    delete process.env.SUPABASE_URL;
+    delete process.env.SUPABASE_ANON_KEY;
+  }
+});
+
 test('rss: builds a feed from blog/posts.json', async () => {
   const r = res();
-  (await load('rss'))(req({ method: 'GET' }), r);
+  await (await load('rss'))(req({ method: 'GET' }), r);
   assert.equal(r.statusCode, 200);
   assert.match(String(r.body), /<rss version="2.0"/);
 });
