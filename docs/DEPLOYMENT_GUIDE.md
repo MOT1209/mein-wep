@@ -43,10 +43,11 @@ Then make sure the account is an admin: `select email from public.admin_users;` 
 In **Supabase → SQL editor**, paste and run these files from the repository, **in this order**:
 
 1. `supabase/migrations/20261103120000_admin_cms.sql`: tables, RLS policies, sync functions and the media bucket.
-2. `supabase/migrations/20261104090000_rate_limits.sql`: shared rate limits.
-3. `supabase/seed/20261103120100_seed_cms.sql`: copies today's catalogue, categories, navigation and site name.
+2. `supabase/migrations/20261104090000_rate_limits.sql`: shared rate limits (also used by `/api/gemini`, `/api/evaluate` and `/api/contact` since Phase 02).
+3. `supabase/migrations/20261113120000_legacy_rls_hardening.sql`: closes the open write policies on the legacy tables (`models` was writable by any signed-in user). See `docs/SECURITY.md`.
+4. `supabase/seed/20261103120100_seed_cms.sql`: copies today's catalogue, categories, navigation and site name.
 
-Both files are **additive and safe to re-run**. They never drop or overwrite a table, and the seed skips rows that already exist. The legacy tables (`projects`, `lessons`, …) are untouched.
+All of these files are **safe to re-run**. They never drop or overwrite a table, and the seed skips rows that already exist. The legacy tables (`projects`, `lessons`, …) are untouched.
 
 Check: open `/admin/app.html#/studio`. You should see the 8 catalogue projects (6 hidden, 2 published).
 
@@ -98,7 +99,8 @@ Leave it unset for Preview if you want previews to build without Supabase.
 | `CMS_REQUIRED` | optional: `1` = every CMS failure is fatal, `0` = always fall back (production default: stop on failures, see §6) | Production |
 | `RATE_LIMIT_SALT` | optional: salt for the shared rate-limit buckets (falls back to `CRON_SECRET`) | Production |
 | `CRON_REBUILD` | `0` = no rebuild after the daily sync (optional) | Production |
-| `GEMINI_API_KEY` | existing AI proxy, unchanged | Production |
+| `GEMINI_API_KEY` | `/api/gemini` and `/api/evaluate` (server only) | Production |
+| `GEMINI_DAILY_LIMIT` | optional: site-wide daily cap on Gemini calls, shared by both endpoints (default `500`) | Production |
 
 **Never** add a Supabase service-role key. Nothing in this system needs one.
 
