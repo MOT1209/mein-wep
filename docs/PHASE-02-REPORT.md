@@ -119,7 +119,7 @@ Not done in this phase (documented in `docs/audit/PHASE-02-REPAIR-PLAN.md`): ass
 | Command | Result |
 |---|---|
 | `npm ci` | OK |
-| `npm run lint` | `lint: 106 files OK` (a probe file with a syntax error made it fail as expected) |
+| `npm run lint` | `lint: 107 files OK` (a probe file with a syntax error made it fail as expected) |
 | `npm run build` | OK |
 | `npm run verify` | `URL-surface PARITY OK — 418 expected, 418 in dist/` (+1: the vendored Chart.js) |
 | `npm test` | **157 tests, 157 pass, 0 fail, 0 skipped** (130 before) |
