@@ -1,44 +1,29 @@
 /**
- * Denkmalen AI Judge — Vercel Serverless Function
+ * Denkmalen AI judge (Vercel serverless function).
  *
- * The game (games/denkmalen-game) is a Next.js *static export*, so the route at
- * its src/app/api/evaluate/route.ts is never deployed — nothing serves it. The
- * client (src/lib/gemini.ts) posts to the root-relative /api/evaluate, which
- * lands here, on the portfolio deployment. Without this file every request 404'd
- * and the client silently fell back to template scores, so the "AI judge" never
- * actually judged anything in production.
+ * POST /api/evaluate  { word, drawingData, category?, drawingTime?, locale? }
+ *   -> { score, accuracy, creativity, clarity, comment }
  *
- * Keep the response shape in sync with AIEvaluation in the game's gemini.ts.
- * Needs GEMINI_API_KEY in the Vercel environment (shared with api/gemini.js).
+ * The Denkmalen game is a Next.js static export whose client posts to the
+ * root-relative /api/evaluate. Its build is kept in denkmalen/ but excluded
+ * from this site's dist/ (eleventy.config.mjs), so it is served elsewhere;
+ * this endpoint stays because that client may run on this origin. Keep the
+ * response shape in sync with AIEvaluation in the game's gemini.ts.
+ *
+ * GEMINI_API_KEY is shared with api/gemini.js, and so is the site-wide daily
+ * cap GEMINI_DAILY_LIMIT. Per IP: 20/min and 200/day (api/_lib/public-api.js).
+ * Without a key, or when Gemini fails, it answers with a template score so a
+ * round never stalls.
  */
 
-const ALLOWED_ORIGINS = [
-  'https://rashid-wep.vercel.app',
-  'http://localhost:3000',
-  'http://localhost:5500',
-  'http://127.0.0.1:5500',
-];
-
-// Same in-memory limiter as api/gemini.js: per-instance and reset on cold
-// start, so it throttles casual abuse rather than enforcing a hard global cap.
-const RATE_LIMIT = 20;          // drawings per window (a round can judge several at once)
-const WINDOW_MS = 60 * 1000;
-const hits = new Map();
+import { allowOrigin, callGemini, checkLimits, jsonBody } from './_lib/public-api.js';
 
 // Vercel caps a serverless request body at ~4.5MB; a base64 PNG larger than
 // this is rejected here with a clear error rather than failing opaquely.
 const MAX_DRAWING_CHARS = 4_000_000;
-
-function isRateLimited(ip) {
-  const now = Date.now();
-  const entry = hits.get(ip);
-  if (!entry || now > entry.resetAt) {
-    hits.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return false;
-  }
-  entry.count++;
-  return entry.count > RATE_LIMIT;
-}
+const LOCALES = new Set(['en', 'de', 'ar']);
+const DATA_URL = /^data:image\/(png|jpeg|webp);base64,/;
+const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
 const MOCK_COMMENTS = {
   en: [
@@ -115,41 +100,49 @@ function parseGeminiResponse(text, locale) {
 }
 
 export default async (req, res) => {
-  // Browsers always send Origin on POST (same-origin included), so a missing
-  // Origin means a non-browser client — reject it to keep the paid key private.
-  const origin = req.headers.origin;
-  if (!origin || !ALLOWED_ORIGINS.includes(origin)) {
+  if (!allowOrigin(req, res)) {
     return res.status(403).json({ error: 'Origin not allowed' });
   }
-  res.setHeader('Access-Control-Allow-Origin', origin);
-  res.setHeader('Vary', 'Origin');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST, OPTIONS');
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
-  const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim()
-    || req.socket?.remoteAddress || 'unknown';
-  if (isRateLimited(ip)) {
-    return res.status(429).json({ error: 'Too many requests, slow down.' });
+  if (!jsonBody(req)) {
+    return res.status(415).json({ error: 'Send JSON' });
   }
 
-  const { word, drawingData, category, drawingTime, locale = 'en' } = req.body || {};
+  const { word, drawingData, category, drawingTime } = req.body;
+  const locale = LOCALES.has(req.body.locale) ? req.body.locale : 'en';
 
-  if (!word || typeof word !== 'string' || word.length > 100) {
+  if (typeof word !== 'string' || !word.trim() || word.length > 100) {
     return res.status(400).json({ error: 'Missing or invalid word' });
   }
-  if (!drawingData || typeof drawingData !== 'string') {
+  if (category !== undefined && (typeof category !== 'string' || category.length > 60)) {
+    return res.status(400).json({ error: 'Invalid category' });
+  }
+  if (drawingTime !== undefined && !(Number.isFinite(Number(drawingTime)) && Number(drawingTime) >= 0 && Number(drawingTime) <= 3600)) {
+    return res.status(400).json({ error: 'Invalid drawing time' });
+  }
+  if (typeof drawingData !== 'string' || !drawingData) {
     return res.status(400).json({ error: 'Missing drawing' });
   }
   if (drawingData.length > MAX_DRAWING_CHARS) {
     return res.status(400).json({ error: 'Drawing too large' });
+  }
+  const mime = (drawingData.match(DATA_URL) || [, 'png'])[1];
+  const base64 = drawingData.replace(DATA_URL, '');
+  if (!BASE64.test(base64)) {
+    return res.status(400).json({ error: 'Drawing is not a base64 image' });
+  }
+
+  // Over a limit: a plain 429/503. The game's client already falls back to
+  // its own template score on any non-OK answer, so a round still resolves.
+  const limited = await checkLimits(req, 'evaluate', {
+    perMinute: 20, perDay: 200, dailyEnv: 'GEMINI_DAILY_LIMIT', dailyDefault: 500,
+  });
+  if (limited) {
+    return res.status(limited.status).json({ error: limited.error });
   }
 
   const apiKey = process.env.GEMINI_API_KEY;
@@ -160,50 +153,28 @@ export default async (req, res) => {
     return res.status(200).json(mockEvaluation(locale));
   }
 
-  const base64 = drawingData.replace(/^data:image\/\w+;base64,/, '');
-
   try {
-    const response = await fetch(
-      'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: `${judgePrompt(locale)}\n\nWord: "${word}" | Category: ${category || 'general'} | Time: ${drawingTime || 60}s\n\nReturn JSON:` },
-              { inlineData: { mimeType: 'image/png', data: base64 } },
-            ],
-          }],
-          safetySettings: [
-            { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-            { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 800,
-            responseMimeType: 'application/json',
-            // gemini-2.5-flash reasons before answering and bills that against
-            // maxOutputTokens, so leaving it on can consume the whole budget and
-            // return empty text. The judge needs a verdict, not deliberation.
-            thinkingConfig: { thinkingBudget: 0 },
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const detail = await response.text().catch(() => '');
-      console.error('Gemini evaluate error:', response.status, detail.slice(0, 300));
-      return res.status(200).json(mockEvaluation(locale));
-    }
-
-    const data = await response.json();
-    const text = data?.candidates?.[0]?.content?.parts
-      ?.map((p) => p.text)
-      .filter(Boolean)
-      .join('') || '';
-
+    const text = await callGemini(apiKey, {
+      contents: [{
+        parts: [
+          { text: `${judgePrompt(locale)}\n\nWord: "${word.trim()}" | Category: ${category || 'general'} | Time: ${Number(drawingTime) || 60}s\n\nReturn JSON:` },
+          { inlineData: { mimeType: `image/${mime}`, data: base64 } },
+        ],
+      }],
+      safetySettings: [
+        { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+        { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 800,
+        responseMimeType: 'application/json',
+        // gemini-2.5-flash reasons before answering and bills that against
+        // maxOutputTokens, so leaving it on can consume the whole budget and
+        // return empty text. The judge needs a verdict, not deliberation.
+        thinkingConfig: { thinkingBudget: 0 },
+      },
+    });
     return res.status(200).json(parseGeminiResponse(text, locale) || mockEvaluation(locale));
   } catch (err) {
     console.error('Evaluate proxy error:', err.message);
