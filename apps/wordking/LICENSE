@@ -1,0 +1,281 @@
+WordKing Community License 1.0
+رخصة WordKing المجتمعية 1.0
+
+SPDX-License-Identifier: LicenseRef-WordKing-Community-1.0
+
+Copyright (c) 2026 Alking.ai and the WordKing contributors. All rights reserved.
+حقوق النشر (c) 2026 Alking.ai ومساهمو WordKing. جميع الحقوق محفوظة.
+
+In short, in plain words — this summary is for orientation only, and the numbered terms
+below govern: **anyone may use WordKing free of charge, exactly as it is. Nobody may change
+it, or share a changed version of it, without asking us first and getting our written
+permission.**
+
+باختصار وبكلمات واضحة — هذه الخلاصة للتوضيح فقط، والبنود المرقّمة أدناه هي الملزِمة:
+**لكل شخص أن يستخدم WordKing مجانًا كما هو. وليس لأحد أن يعدّله، ولا أن ينشر نسخة
+معدّلة منه، دون أن يسألنا أولًا ويحصل على إذن مكتوب منّا.**
+
+This license is written in English and in Arabic. Both texts are equally authentic; if they
+ever differ, the English text governs.
+كُتبت هذه الرخصة بالإنجليزية وبالعربية، والنصّان متساويان في الحجّية؛ وإذا اختلفا في أي
+حال، فالنص الإنجليزي هو المرجع.
+
+====================================================================
+PART ONE — ENGLISH
+====================================================================
+
+1. Definitions
+
+1.1 "The Software" means WordKing and everything distributed with it in this repository:
+    its source code, its binaries, its documentation, and the original assets, templates
+    and sample documents made for it, in source or compiled form and on any medium.
+
+1.2 "We", "us" and "our" mean Alking.ai, the copyright holder.
+
+1.3 "You" means the person or organisation exercising rights under this license.
+
+1.4 "Use" means to download, install, run and operate the Software.
+
+1.5 "Modify" means to change, alter, adapt, translate, port, patch, recompile from altered
+    source, extend, or in any other way create a work based on the Software or on any part
+    of it, including a derivative work in the sense of copyright law.
+
+2. Free use, for everyone
+
+2.1 We grant you a worldwide, royalty-free, non-exclusive license to Use the Software, for
+    any purpose and without payment: personal, educational, academic, charitable,
+    governmental and commercial use are all permitted.
+
+2.2 You may install and Use the Software on as many devices as you like, and let anyone in
+    your household or organisation Use it.
+
+2.3 Using the Software does not make you a licensee of anything else, and it costs nothing.
+
+2.4 The documents, files and data you create, edit or export with the Software are entirely
+    yours. This license does not apply to them, and we claim no rights in them.
+
+3. No modification without our written permission
+
+3.1 You may not Modify the Software, or any part of it, without our prior written
+    permission. This includes changing its behaviour, removing or adding features, rebranding
+    it, or preparing a modified version for any purpose, private or public.
+
+3.2 You may not distribute, publish, sublicense, sell, rent, lend or otherwise make
+    available a modified version of the Software, or any work derived from it, without our
+    prior written permission.
+
+3.3 To ask for permission, write to **wordking@alking.ai** and say what you want to change
+    and why. We are happy to hear from you, and permission, when we give it, is given in
+    writing and applies only to what it names.
+
+3.4 Nothing in this section limits rights the law gives you that cannot be excluded, such as
+    the right to make a copy for backup, to study the Software, or to correct an error for
+    your own use, where such rights exist and cannot be waived.
+
+4. Unmodified copies
+
+4.1 You may copy and redistribute complete, unmodified copies of the Software, free of
+    charge, provided that every copy keeps this license file, the NOTICE file and all
+    copyright, license and attribution notices intact, and that you do not present the copy
+    as something other than WordKing.
+
+4.2 You may not charge for an unmodified copy beyond the cost of the medium and of
+    delivering it.
+
+4.3 You may not take payment, advertising revenue or any other consideration in exchange for
+    distributing the Software, or place it behind a paywall, without our prior written
+    permission.
+
+5. Names, logos and branding
+
+5.1 This license grants no right to the name "WordKing", "Alking.ai", "ArtCraft", their
+    logos, wordmarks or icons ("the Marks"). The Marks are trademarks of Alking.ai.
+
+5.2 Unmodified copies may carry the Marks only as they appear in the Software itself, and
+    only to refer truthfully to the Software. The brand files in `docs/brand/` are governed
+    by `docs/brand/LICENSE-brand.txt`.
+
+5.3 A modified version, if we permit one, must remove the Marks unless the permission says
+    otherwise, and must not suggest that we made it, endorsed it or support it.
+
+6. Contributions
+
+6.1 We welcome bug reports, translations, documentation fixes and code contributions.
+
+6.2 By submitting a contribution to this repository you grant us a perpetual, worldwide,
+    royalty-free, irrevocable license to use, reproduce, modify, distribute, sublicense and
+    relicense your contribution as part of the Software, and you confirm that you hold the
+    rights needed to grant it. You keep the copyright in your contribution.
+
+6.3 A contribution you submit is covered by this license once it is part of the Software.
+
+7. No warranty
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, TITLE AND NON-INFRINGEMENT. YOU USE IT AT YOUR OWN RISK. KEEP YOUR OWN BACKUPS OF
+YOUR DOCUMENTS.
+
+8. Limitation of liability
+
+TO THE FULLEST EXTENT PERMITTED BY LAW, WE ARE NOT LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY OR CONSEQUENTIAL DAMAGES, NOR FOR ANY LOSS OF DATA, PROFITS
+OR GOODWILL, ARISING FROM THE SOFTWARE OR ITS USE, EVEN IF WE WERE ADVISED OF THE
+POSSIBILITY. WHERE LIABILITY CANNOT BE EXCLUDED, IT IS LIMITED TO THE AMOUNT YOU PAID FOR
+THE SOFTWARE, WHICH IS ZERO.
+
+9. Termination
+
+9.1 Your rights under this license end automatically if you breach any term of it.
+
+9.2 If we notify you of a breach and you stop it and remedy its effects within 30 days of
+    that notice, your rights are reinstated.
+
+9.3 On termination you must stop Using the Software and delete every copy of it you hold,
+    except copies you are required by law to keep.
+
+10. Earlier releases
+
+Versions of this software released before this license took effect were published under the
+MIT License or the Apache License, Version 2.0, at your option. Those releases, and copies
+already distributed under those licenses, keep those terms; this license applies to this
+version and to every later one.
+
+11. General
+
+11.1 If a provision of this license is held unenforceable, the rest stays in force and the
+     provision is applied as far as it can be.
+
+11.2 This license is the entire agreement between us about the Software. It may be replaced
+     only by a later version published by us in this repository.
+
+11.3 Nothing here transfers copyright: we keep all rights not expressly granted.
+
+====================================================================
+PART TWO — العربية
+====================================================================
+
+1. التعريفات
+
+1.1 «البرنامج» يعني WordKing وكل ما يُوزَّع معه في هذا المستودع: شيفرته المصدرية،
+    وملفّاته التنفيذية، ووثائقه، والأصول والقوالب والمستندات النموذجية التي صُنعت له،
+    في صورة مصدرية أو مُصرَّفة، وعلى أي وسيط.
+
+1.2 «نحن» و«لنا» تعني Alking.ai، صاحب حقوق النشر.
+
+1.3 «أنت» تعني الشخص أو الجهة التي تمارس حقوقًا بموجب هذه الرخصة.
+
+1.4 «الاستخدام» يعني تنزيل البرنامج وتثبيته وتشغيله والعمل به.
+
+1.5 «التعديل» يعني تغيير البرنامج أو تحويره أو تكييفه أو ترجمته أو نقله إلى بيئة أخرى
+    أو ترقيعه أو إعادة تصريفه من مصدر مُغيَّر أو توسيعه، أو إنشاء عمل مشتق منه أو من أي
+    جزء منه بأي طريقة أخرى، بما في ذلك «العمل المشتق» بالمعنى المعروف في قانون حقوق
+    النشر.
+
+2. استخدام مجاني للجميع
+
+2.1 نمنحك رخصة عالمية، مجانية، غير حصرية، لاستخدام البرنامج لأي غرض ودون مقابل: يجوز
+    الاستخدام الشخصي والتعليمي والأكاديمي والخيري والحكومي والتجاري.
+
+2.2 يجوز لك تثبيت البرنامج واستخدامه على ما تشاء من الأجهزة، وأن تتيحه لمن يعيش معك أو
+    يعمل في جهتك.
+
+2.3 استخدام البرنامج لا يجعلك مرخَّصًا لأي شيء آخر، ولا يترتّب عليه أي مقابل مالي.
+
+2.4 المستندات والملفات والبيانات التي تنشئها أو تحرّرها أو تصدّرها بالبرنامج ملكك وحدك.
+    لا تسري هذه الرخصة عليها، ولا نطالب بأي حق فيها.
+
+3. لا تعديل دون إذن مكتوب منّا
+
+3.1 ليس لك أن تعدّل البرنامج أو أي جزء منه دون إذن مكتوب مسبق منّا. يشمل ذلك تغيير
+    سلوكه، أو حذف ميزات أو إضافتها، أو تغيير هويته أو علامته، أو إعداد نسخة معدّلة لأي
+    غرض، خاصًّا كان أو عامًّا.
+
+3.2 ليس لك أن توزّع نسخة معدّلة من البرنامج أو من أي عمل مشتق منه، ولا أن تنشرها أو
+    ترخّصها للغير أو تبيعها أو تؤجّرها أو تُعيرها أو تتيحها بأي صورة، دون إذن مكتوب
+    مسبق منّا.
+
+3.3 لطلب الإذن اكتب إلى **wordking@alking.ai** وبيّن ما تريد تعديله ولماذا. يسعدنا أن
+    نسمع منك، والإذن — إذا منحناه — يُمنح كتابةً ولا يسري إلا على ما يسمّيه.
+
+3.4 لا يقيّد هذا البند الحقوق التي يمنحها لك القانون ولا يجوز استبعادها، مثل حقّك في أخذ
+    نسخة احتياطية، أو دراسة البرنامج، أو إصلاح خطأ لاستخدامك الخاص، حيث توجد هذه الحقوق
+    ولا يجوز التنازل عنها.
+
+4. النسخ غير المعدّلة
+
+4.1 يجوز لك نسخ نسخ كاملة غير معدّلة من البرنامج وإعادة توزيعها مجانًا، بشرط أن تحتفظ
+    كل نسخة بملف الرخصة هذا وملف NOTICE وبجميع إشعارات حقوق النشر والرخصة والنسبة
+    كما هي، وألّا تقدّم النسخة على أنها غير WordKing.
+
+4.2 ليس لك أن تتقاضى مقابلًا على نسخة غير معدّلة يتجاوز كلفة الوسيط وتوصيله.
+
+4.3 ليس لك أن تحصل على مال أو عائد إعلاني أو أي مقابل آخر مقابل توزيع البرنامج، ولا أن
+    تضع البرنامج خلف اشتراك مدفوع، دون إذن مكتوب مسبق منّا.
+
+5. الأسماء والشعارات والهوية
+
+5.1 لا تمنح هذه الرخصة أي حق في اسم «WordKing» أو «Alking.ai» أو «ArtCraft» أو شعاراتها
+    أو علاماتها أو أيقوناتها («العلامات»). العلامات مملوكة لـ Alking.ai.
+
+5.2 يجوز للنسخ غير المعدّلة أن تحمل العلامات كما تظهر في البرنامج نفسه فقط، وللإشارة
+    إليه إشارة صادقة. أما ملفات الهوية في `docs/brand/` فيحكمها
+    `docs/brand/LICENSE-brand.txt`.
+
+5.3 النسخة المعدّلة — إن أذنّا بها — يجب أن تحذف العلامات ما لم ينصّ الإذن على غير ذلك،
+    وألّا توحي بأنّا صنعناها أو أقررناها أو ندعمها.
+
+6. المساهمات
+
+6.1 نرحّب بتقارير الأخطاء والترجمات وتصحيحات الوثائق والمساهمات البرمجية.
+
+6.2 بإرسالك مساهمة إلى هذا المستودع فإنك تمنحنا رخصة دائمة وعالمية ومجانية وغير قابلة
+    للرجوع، لاستخدام مساهمتك واستنساخها وتعديلها وتوزيعها وترخيصها من الباطن وإعادة
+    ترخيصها كجزء من البرنامج، وتقرّ بأنك تملك الحقوق اللازمة لمنح ذلك. وتبقى حقوق النشر
+    في مساهمتك لك.
+
+6.3 المساهمة التي ترسلها تخضع لهذه الرخصة متى صارت جزءًا من البرنامج.
+
+7. إخلاء الضمان
+
+يُقدَّم البرنامج «كما هو»، دون أي ضمان، صريحًا كان أو ضمنيًّا، بما في ذلك — على سبيل
+المثال لا الحصر — ضمانات الصلاحية للتسويق والملاءمة لغرض معيّن وسلامة الملكية وعدم
+التعدّي على حقوق الغير. تستخدمه على مسؤوليتك، واحتفظ بنسخ احتياطية من مستنداتك.
+
+8. حدود المسؤولية
+
+إلى أقصى حدّ يسمح به القانون، لا نتحمّل أي مسؤولية عن أي أضرار مباشرة أو غير مباشرة أو
+عرضية أو خاصة أو تأديبية أو تبعية، ولا عن أي فقدان للبيانات أو للأرباح أو للسمعة،
+ناشئة عن البرنامج أو عن استخدامه، ولو أُخبرنا باحتمالها. وحيث لا يجوز استبعاد المسؤولية،
+فهي محدودة بما دفعتَه مقابل البرنامج، وهو صفر.
+
+9. انتهاء الرخصة
+
+9.1 تنتهي حقوقك بموجب هذه الرخصة تلقائيًّا إذا أخللت بأي بند منها.
+
+9.2 وإذا أبلغناك بالإخلال، فأوقفته وأزلت آثاره خلال ثلاثين يومًا من الإبلاغ، عادت
+    حقوقك إلى سابقها.
+
+9.3 وعند الانتهاء عليك التوقّف عن استخدام البرنامج وحذف كل نسخة لديك منه، ما عدا
+    النسخ التي يلزمك القانون بالاحتفاظ بها.
+
+10. الإصدارات السابقة
+
+الإصدارات التي نُشرت قبل نفاذ هذه الرخصة صدرت بموجب رخصة MIT أو رخصة Apache الإصدار
+2.0، على اختيارك. وتبقى تلك الإصدارات — والنسخ الموزّعة بالفعل بموجب تلك الرخص — على
+تلك الشروط؛ أما هذه الرخصة فتحكم هذا الإصدار وكل إصدار لاحق.
+
+11. أحكام عامة
+
+11.1 إذا حُكم بعدم نفاذ بند من هذه الرخصة، يبقى سائرها نافذًا، ويُطبَّق ذلك البند بأقصى
+     ما يمكن.
+
+11.2 هذه الرخصة هي كل اتفاقنا بشأن البرنامج، ولا يجوز استبدالها إلا بنسخة أحدث
+     ننشرها في هذا المستودع.
+
+11.3 لا ينقل شيء هنا حق النشر: تبقى لنا كل الحقوق التي لم تُمنح صراحةً.
+
+====================================================================
+Contact / للتواصل: wordking@alking.ai
+Repository / المستودع: https://github.com/storytold/wordcraft
+====================================================================
