@@ -99,6 +99,7 @@ const VERCEL_IGNORE = [
   /^skills-lock\.json$/,
   /^king-colab-MCP\//,
   /^apps\/chat-app\//,
+  /^apps\/wordking\//,
   /^روابط-الإدارة\.txt$/,
   /^تقرير-مراجعة-المشروع\.html$/,
   /__pycache__\//,

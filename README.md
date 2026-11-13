@@ -107,6 +107,7 @@ king-studio/*.njk          landing page, Games / Apps / Labs, one detail page pe
 ├── js/                       site-nav.js (menu, theme), downloads.js, king-studio.js, ...
 ├── src/js/                   homepage modules
 ├── games/  apps/             standalone PWAs, copied as they are
+├── apps/wordking/            WordKing word processor: Rust workspace, own README and licence
 ├── apks/                     Android builds and updates.json
 ├── api/                      Vercel serverless functions
 ├── vault/  models/  admin/
@@ -149,6 +150,14 @@ The older `css/style.css` is still used by `devos.html`, `vault/*` and a few pag
 
 > [!WARNING]
 > The repository root is the deploy root. Do not run `git add .` or `git add -A` blindly. Stage files by explicit path and check `git status` first, so internal folders and secrets cannot reach the public site.
+
+---
+
+## WordKing · محرر النصوص WordKing
+
+**English.** The WordKing word processor by **Alking.ai** lives in [`apps/wordking/`](apps/wordking/): a Rust workspace with a native desktop app, a CLI and a web build, plus packaging for Windows, macOS, Linux and FreeBSD. Start with [`apps/wordking/README.md`](apps/wordking/README.md). Released under the **WordKing Community License 1.0** — free to use for everyone, no modification without written permission ([`apps/wordking/LICENSE`](apps/wordking/LICENSE)).
+
+**العربية.** محرّر النصوص **WordKing** من **Alking.ai** موجود في المجلد [`apps/wordking/`](apps/wordking/): مشروع Rust يضم تطبيق سطح مكتب أصلي وأداة سطر أوامر ونسخة ويب، مع حزم لويندوز وماك ولينكس وFreeBSD. ابدأ من [`apps/wordking/README.ar.md`](apps/wordking/README.ar.md). الرخصة: **WordKing Community License 1.0** — الاستخدام مجاني للجميع، والتعديل بإذن كتابي فقط ([`apps/wordking/LICENSE`](apps/wordking/LICENSE)).
 
 ---
 
