@@ -12,9 +12,14 @@
 -- المشكلة: grant execute on function add_admin_user() to authenticated;
 -- الحل: إلغاء التفعيل للمستخدمين العاديين، والاحتفاظ فقط للمالك (owner)
 
-revoke all on function public.add_admin_user() from public;
-revoke execute on function public.add_admin_user() from authenticated;
-revoke execute on function public.add_admin_user() from anon;
+-- SUPABASE_SETUP_FIXED.sql may already have dropped the function: then there
+-- is nothing to revoke, and the file must still run (it is documented as safe
+-- to re-run).
+do $$ begin
+  revoke all on function public.add_admin_user() from public;
+  revoke execute on function public.add_admin_user() from authenticated;
+  revoke execute on function public.add_admin_user() from anon;
+exception when undefined_function then null; end $$;
 
 -- ملاحظة: فقط owner قاعدة البيانات (service_role) يمكنه تنفيذ add_admin_user الآن
 -- هذا يعني أن إضافة Admin جديدة تتم عبر Supabase Dashboard فقط

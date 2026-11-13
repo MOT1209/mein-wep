@@ -11,12 +11,13 @@ Rashid's personal site, deployed to https://rashid-wep.vercel.app: a portfolio, 
 ```bash
 npm ci            # Node 20–24
 npm start         # dev server with live reload
+npm run lint      # syntax of first-party JS, no secrets or service-role key in api/
 npm run build     # eleventy build to dist/
 npm run verify    # URL-surface gate: dist/ must equal the tracked, servable files
 npm test          # node:test suites; run `npm run build` first, the dist checks skip without it
 ```
 
-Before saying a change is done, run `npm run build && npm run verify && npm test` and report the real results. If you changed UI, also look at it in a browser at about 375px and 1280px wide (Playwright is fine); passing tests do not prove a layout works.
+Before saying a change is done, run `npm run lint && npm run build && npm run verify && npm test` and report the real results. If you changed UI, also look at it in a browser at about 375px and 1280px wide (Playwright is fine); passing tests do not prove a layout works.
 
 ## Rules that must not be broken
 

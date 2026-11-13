@@ -50,3 +50,29 @@
 2. The owner presses **Publish site**. `POST /api/admin/publish {action:'run'}` → Vercel Deploy Hook.
 3. Vercel builds: `fetch-cms.mjs` reads the public rows → Eleventy renders → `npm run verify`-style checks run in CI on PRs.
 4. The new static pages are live.
+
+## Service boundaries (Phase 02)
+
+| Layer | Module | Rule |
+|---|---|---|
+| Public functions | `api/gemini.js`, `api/evaluate.js`, `api/contact.js`, `api/github.js`, `api/rss.js` | validate input, then `api/_lib/public-api.js` (`allowOrigin`, `checkLimits`, `callGemini`); generic errors to the client, details to the log |
+| Admin functions | `api/admin/*` | `requireAdmin()` first; data through `api/_lib/supabase-rest.js` as the admin |
+| Shared HTTP | `api/_lib/http.js` | limiter, cookies, CSRF, shared rate limit (`sharedLimited`) |
+| Database | `supabase/migrations/*` | every table RLS-on, writes `is_admin()` only, each migration has a PGlite test |
+| Browser config | `js/supabase-config.js` | URL and publishable key only; read-only pages use a plain `fetch` (see `js/learning.js`) instead of loading supabase-js |
+| Headers | `vercel.json` | CSP as a header; `tests/csp.test.mjs` keeps it in step with the pages |
+
+## Patterns for new modules
+
+The planned modules (dashboard, developer hub, AI center, agents, MCP, project management, knowledge base, vault, learning, analytics) should reuse these patterns rather than add new ones:
+
+1. **Data:** a migration in `supabase/migrations/` (tables, RLS, grants), plus a case in a PGlite test that tries anon, a signed-in non-admin and the admin.
+2. **Admin operations:** a handler group in `api/_lib/cms-handlers.js`, routed by `api/admin/[resource].js` (this keeps within the 12-function limit), with an allow-list validator in `cms-validate.js`.
+3. **Public reads:** rendered at build time from `scripts/cms/source.mjs` when possible; otherwise a small `fetch` to PostgREST with the publishable key.
+4. **Anything that spends money or quota** (AI providers): go through `checkLimits` and one shared daily cap.
+5. **Long-running work** (agents, MCP servers): not in a Vercel function (30 s limit). Run it elsewhere and talk to it through one authenticated admin endpoint.
+
+## Tooling
+
+- `npm run lint` is a dependency-free syntax check of the first-party JavaScript plus secret rules for `api/`. ESLint and TypeScript checking were deliberately **not** added in Phase 02 (no new dependencies without a written reason). If the code base grows, the next step is `// @ts-check` with JSDoc types on `api/` using a dev-only `typescript`, run in CI.
+- Legacy layers still present by design: `admin/dashboard.html` with `js/admin.js` (legacy tables), `css/style.css` (unmigrated pages, served minified), `src/js/main.js` and `src/js/modules/*` (used by the KingCraft showcase and the service worker precache). Remove them only after their pages are migrated.

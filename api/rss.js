@@ -27,12 +27,16 @@ async function cmsPosts() {
       headers: { apikey: env.anonKey, Accept: 'application/json' },
       signal: AbortSignal.timeout(2500),
     });
-    if (!r.ok) return [];
+    if (!r.ok) {
+      console.warn('rss: CMS posts unavailable, status', r.status);
+      return [];
+    }
     const rows = await r.json();
     return rows
       .filter((p) => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(p.slug ?? ''))
       .map((p) => ({ id: p.slug, title: p.title, description: p.description ?? '', published_at: p.published_at, date: String(p.published_at).slice(0, 10), categories: p.categories ?? [] }));
-  } catch {
+  } catch (err) {
+    console.warn('rss: CMS posts unavailable:', err.name);
     return [];
   }
 }
@@ -47,6 +51,8 @@ export default async function(req, res) {
     res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
     res.status(200).send(xml);
   } catch (err) {
+    console.error('rss: feed generation failed:', err.message);
+    res.setHeader('Content-Type', 'application/xml; charset=utf-8');
     res.status(500).send('<?xml version="1.0"?><error>Failed to generate RSS feed.</error>');
   }
 };

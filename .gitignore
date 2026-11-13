@@ -88,3 +88,7 @@ apps/chat-app/.pgdata*/
 
 # Build-time copy of the published CMS content (scripts/fetch-cms.mjs)
 .cms-cache/
+
+# Python bytecode
+__pycache__/
+*.pyc

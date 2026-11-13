@@ -37,9 +37,10 @@ on:
           - games/rust-game
           - games/farm-game
 
+# contents: write publishes the Release assets and commits version.json.
+# No id-token: nothing in this workflow uses OIDC.
 permissions:
   contents: write
-  id-token: write
 
 jobs:
   detect:
@@ -274,6 +275,11 @@ jobs:
           else
             echo "No release keystore configured — skipping AAB build (APK-only temp-signed build already produced above)."
           fi
+
+      - name: Remove signing keys from the runner
+        if: always()
+        working-directory: ${{ matrix.project }}
+        run: rm -f release-key.jks temp-key.jks
 
       - name: Upload AAB artifact (Google Play only — quran-app)
         if: matrix.project == 'apps/quran-app'

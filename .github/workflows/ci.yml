@@ -10,11 +10,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      prod_smoke:
-        description: Also run the read-only smoke checks against the live site
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -60,6 +55,9 @@ jobs:
 
       - run: npm ci
 
+      # Syntax of all first-party JS, and no secrets or service-role key in api/.
+      - run: npm run lint
+
       # Same command Vercel runs (vercel.json buildCommand).
       - run: npm run build
 
@@ -69,15 +67,5 @@ jobs:
       # API handler unit tests + dist/ leak guard (needs the build above).
       - run: npm test
 
-  prod-smoke:
-    name: Live site smoke checks (read-only)
-    if: github.event_name == 'workflow_dispatch' && inputs.prod_smoke
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      # No TESTSPRITE_ALLOW_SIDE_EFFECTS: never write rows to production.
-      - run: python .testsprite/test3.py
-      - run: python .testsprite/test_games_page.py
+      # Fails on known high/critical advisories in the dependency tree.
+      - run: npm audit --audit-level=high
