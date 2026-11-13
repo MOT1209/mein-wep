@@ -15,6 +15,10 @@
 | 7 | [`SUPABASE_FARM_GAME.sql`](db/SUPABASE_FARM_GAME.sql) | جداول لعبة Farm Empire (`game_saves` وغيرها) — مستقلة عن ترقيم 1-6، تُشغَّل عند تفعيل حفظ اللعبة على الخادم | نعم — تضيف جداول جديدة فقط، لا تلمس القائمة الحالية |
 | 8 | [`SUPABASE_PHASE1_FIX.sql`](db/SUPABASE_PHASE1_FIX.sql) | قراءة `vault_items` الخاصة للأدمن فقط (كانت لأي مستخدم مسجَّل) + حدود طول لـ `contact_messages` | نعم (idempotent) |
 
+| 9 | [`supabase/migrations/`](supabase/migrations/) | **بعد كل ما سبق:** المخطط المُرقَّم (CMS، حدود الطلبات، و`20261113120000_legacy_rls_hardening.sql` الذي يغلق سياسات الكتابة المفتوحة على الجداول القديمة، ومنها `models`). مُختبَر على PGlite في `tests/db.test.mjs` و`tests/db-legacy.test.mjs` | نعم (idempotent) |
+
+> ⚠️ **ثغرة مؤكَّدة في هذه الملفات وحدها:** إعادة تشغيل الملفات 1-6 و8 تترك جدول `models` قابلاً للكتابة من **أي** مستخدم مسجَّل (سياسات `"Admins can … models"` بشرط `true`). الإصلاح هو الخطوة 9. ملفات `db/` أرشيف تاريخي؛ أي تغيير جديد يذهب إلى `supabase/migrations/`.
+
 ## كيف تستخدم هذا الفهرس
 
 - **قاعدة بيانات جديدة تمامًا:** شغّل الملفات بالترتيب أعلاه من 1 إلى 6.
