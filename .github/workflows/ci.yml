@@ -55,6 +55,9 @@ jobs:
 
       - run: npm ci
 
+      # Syntax of all first-party JS, and no secrets or service-role key in api/.
+      - run: npm run lint
+
       # Same command Vercel runs (vercel.json buildCommand).
       - run: npm run build
 
