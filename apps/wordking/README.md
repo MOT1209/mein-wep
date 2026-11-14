@@ -261,7 +261,7 @@ check and the wasm build. Contributor and agent instructions: [AGENTS.md](AGENTS
 
 ## Roadmap
 
-WordKing is in **alpha**. It has commands for 97% of the ribbon and menu features in its feature catalog
+WordKing is in **alpha**. It has commands for 98% of the ribbon and menu features in its feature catalog
 ([`docs/parity-checklist.md`](docs/parity-checklist.md)) today; counting
 depth, file fidelity, stability and the rest, we estimate it is about 60% ready for real work,
 about 55% for a typical professional's weekly work and about 63% for everyday essentials. Beta
