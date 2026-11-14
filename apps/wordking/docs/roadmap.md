@@ -33,7 +33,7 @@ every day, checked end to end on the main platform (macOS desktop), including sa
 
 | Core workflow | Works end to end? | Evidence | Hours to pass |
 |---|---|---|---|
-| Write and format a document: type, fonts, paragraph formatting, styles, lists, undo, find/replace; save as .docx and reopen | yes | 422 commands, typing parity pinned by `tests/typing.rs`, DOCX round-trip tests (`crates/docx/tests/it/roundtrip.rs`) | 0 |
+| Write and format a document: type, fonts, paragraph formatting, styles, lists, undo, find/replace; save as .docx and reopen | yes | 672 commands, typing parity pinned by `tests/typing.rs`, DOCX round-trip tests (`crates/docx/tests/it/roundtrip.rs`) | 0 |
 | Open a .docx someone sent, edit it, send back a .docx Word opens | partial (not blocking) | Word opens our files; typical text/table/picture documents work; never tested on a real-world corpus; charts, SmartArt and OLE dropped silently, move tracking lost (gaps #1, #2, #5) | 0 (beta work: 50–80) |
 | Build a structured document: tables, pictures, headers/footers, page numbers, sections, columns | yes | Tables with row splitting and floating tables (#137), floating pictures (#136), first/odd/even headers; columns don't balance (gap #4) | 0 |
 | Review with others: comments, track changes, accept/reject, compare | yes | Margin balloons, tracked insert/delete incl. paragraph marks (#125, #244), formatting revisions (#41), compare | 0 |
@@ -74,6 +74,7 @@ languages, screen-reader access, ecosystem decisions (VBA, add-ins, cloud), an i
 
 | Date | Change | Summary |
 |---|---|---|
+| 2026-11-14 | trivial | Command count restated as 672 (measured from the engine registry); previously 422. No estimate changed |
 | 2026-11-03 | trivial | DOCX text-frame anchor locks survive JSON and two save/reopen cycles, including position and size edits |
 | 2026-11-03 | minor | M15: Arabic mirrored interface (#1195); 28 UI languages from craft-i18n; Hebrew UI, native-speaker review and native IME acceptance (#155–#164) remain open |
 | 2026-10-31 | minor | #3398: persistent screen-only green, cream and gray paper presets, with document backgrounds and export colors retained. Read Mode None follows the screen preset; Sepia/Inverse retain priority. |

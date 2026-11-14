@@ -38,7 +38,7 @@ agent control. This page is the summary; the assessment is
 | **Essentials user** | **~63%** | estimated: core-feature depth × discounts for launch (×0.90), discoverability (×0.95), opening received files (×0.92) |
 | Remaining to **beta** | **~150–230 h** of Opus 5.5 agent wall-clock (gaps #1–#7) | estimated |
 | Remaining to **full parity** with Word desktop | **~750–1,250 h** (70–80% parallelizable) | estimated |
-| Commands / tests / code | 433 commands · 855 tests + 10 property blocks · ~88,700 lines of Rust | measured (source) |
+| Commands / tests / code | 672 commands · 855 tests + 10 property blocks · ~88,700 lines of Rust | measured (source) |
 | Releases | v0.4.0 (2026-10-10): signed macOS universal DMG, Windows MSI x64/x86/arm64, Linux AppImage/deb/rpm/Flatpak x86_64 + aarch64, FreeBSD, web | measured |
 
 Hours are calibrated from this repo's PRs (equations #191: ~9.7k lines in ~5 h; `.doc` reader
@@ -894,6 +894,8 @@ MATH glyphs that reference the same construction now share its immutable variant
 
 ## Revision history
 
+> 2026-11-14 · Command count restated as 672 across README, this page and docs/roadmap (measured from `cmd::registry()`); the earlier 422 and 433 figures were stale. No readiness estimate changed.
+>
 > 2026-11-08 · Progress log: `convert --strict` refuses a PDF or PNG that would silently lack a character or a picture (#6005).
 >
 > 2026-11-08 · Progress log: turned inline pictures without a recorded effect extent keep their line to the frame, as in Word.
