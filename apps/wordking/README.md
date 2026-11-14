@@ -106,7 +106,7 @@ Every screenshot below is WordKing itself, rendered offscreen by its own UI test
   1.4 ms; pages render on demand.
 - **Everywhere.** One Rust codebase for macOS, Windows, Linux, BSD and the web. No Electron, no
   Tauri: native [egui](https://github.com/emilk/egui) on the GPU.
-- **Built for agents.** Every action is a command with an id. The same 422 commands drive the
+- **Built for agents.** Every action is a command with an id. The same 672 commands drive the
   ribbon, keyboard shortcuts, the command search, a command-line tool, a JSON control channel and
   an MCP server.
 - **Private.** Spelling, grammar and everything else work offline.
@@ -251,7 +251,7 @@ covers every target starting with it (`wordcraft*=debug`). The logger is
 | L1 | `wordcraft-doc`, `wordcraft-fonts`, `wordcraft-proof` ([`craft-proof`](https://github.com/storytold/craft-libs/tree/main/crates/proof) from craft-libs) | document model and editing; fonts and shaping; spelling, grammar, hyphenation (data: craft-i18n `language-data/`, `CRAFT_I18N_DIR`) |
 | L2 | `wordcraft-layout`, `wordcraft-docx`, `wordcraft-formats` | line breaking, pagination, tables, notes, hit testing; OOXML; ODT/RTF/HTML/Markdown/TXT |
 | L3 | `wordcraft-render`, `wordcraft-pdf` | rasteriser (vello_cpu); PDF ([craft-pdf](docs/shared-pdf.md), Krilla) |
-| L4 | `wordcraft-engine` | session, undo, 422 commands, document feature catalog |
+| L4 | `wordcraft-engine` | session, undo, 672 commands, document feature catalog |
 | L5 | `wordcraft-mcp` | MCP server |
 | L6 | `wordcraft-ui-egui` | the word processor front end (swappable) |
 | apps | `wordcraft`, `wordcraft-cli`, `wordcraft-web` | desktop, command line, browser |
@@ -261,7 +261,7 @@ check and the wasm build. Contributor and agent instructions: [AGENTS.md](AGENTS
 
 ## Roadmap
 
-WordKing is in **alpha**. It has commands for 97% of the ribbon and menu features in its feature catalog
+WordKing is in **alpha**. It has commands for 98% of the ribbon and menu features in its feature catalog
 ([`docs/parity-checklist.md`](docs/parity-checklist.md)) today; counting
 depth, file fidelity, stability and the rest, we estimate it is about 60% ready for real work,
 about 55% for a typical professional's weekly work and about 63% for everyday essentials. Beta
