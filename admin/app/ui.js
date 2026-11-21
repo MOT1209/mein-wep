@@ -45,9 +45,25 @@ export function toast(message, kind = 'ok') {
   setTimeout(() => item.remove(), kind === 'error' ? 8000 : 4000);
 }
 
+// Field keys the API sends back for an incomplete project (publishProblems in
+// api/_lib/cms-handlers.js), shown with the editor's own field labels.
+const PROBLEM_LABEL = {
+  title: 'studio.fTitle', section: 'studio.section', short_description: 'studio.fShort',
+  project_type: 'studio.type', status: 'studio.status', image_alt: 'studio.fCoverAlt',
+};
+/** "Missing: A, B" plus the Coming-Soon link rule, in the dashboard language. */
+export function problemText(problems) {
+  const missing = problems.filter((k) => PROBLEM_LABEL[k]).map((k) => t(PROBLEM_LABEL[k]));
+  const parts = [];
+  if (missing.length) parts.push(t('error.incompleteMissing', { fields: missing.join(t('list.sep')) }));
+  if (problems.includes('launch_url_coming_soon')) parts.push(t('error.comingSoonLink'));
+  return parts.join(' ');
+}
+
 export function errorText(err) {
   if (!err) return t('error.generic');
   if (err.status === 0) return t('error.network');
+  if (err.status === 422 && Array.isArray(err.details)) return `${t('error.incomplete')} ${problemText(err.details)}`;
   if (err.status === 503 && /migration/i.test(err.message)) return t('error.migration');
   return err.message || t('error.generic');
 }

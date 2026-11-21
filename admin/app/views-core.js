@@ -1,7 +1,7 @@
 // Overview, security and activity views.
 import { call } from './api.js';
 import { t } from './i18n.js';
-import { badge, busy, el, empty, formatDate } from './ui.js';
+import { badge, busy, el, empty, formatDate, problemText } from './ui.js';
 
 const stat = (label, value, href) => el(href ? 'a' : 'div', { class: 'stat', href },
   el('span', { class: 'stat-value' }, String(value)), el('span', { class: 'stat-label' }, label));
@@ -13,8 +13,16 @@ export async function overviewView() {
   ]);
   const p = d.projects;
   const sync = d.github.lastSync;
+  const incomplete = d.incomplete ?? [];
   return el('div', { class: 'view' },
     el('h1', {}, t('overview.title')),
+    incomplete.length
+      ? el('section', { class: 'card card-alert', role: 'alert' },
+        el('h2', {}, t('overview.incompleteTitle')),
+        el('p', {}, t('overview.incompleteBody')),
+        el('ul', { class: 'plain-list' }, incomplete.map((r) => el('li', {},
+          el('a', { href: `#/studio/${r.id}` }, r.title), ' — ', problemText(r.problems)))))
+      : null,
     el('div', { class: 'stats' },
       stat(t('overview.total'), p.total, '#/studio'),
       stat(t('overview.published'), p.published, '#/studio'),

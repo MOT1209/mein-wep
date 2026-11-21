@@ -22,6 +22,32 @@ const PROJECT_SELECT = [
   'repo:github_repositories(id,full_name,html_url,language,is_archived,status,description)',
 ].join(',');
 
+/**
+ * What a public project still lacks for the site build to accept it. Mirrors
+ * the required fields and image rule of _data/kingStudio.js and the
+ * description fallback of scripts/cms/source.mjs (the linked repository's
+ * description). Without this check the dashboard published incomplete
+ * projects and every following deploy failed.
+ */
+export function publishProblems(p) {
+  const problems = [];
+  if (!p.title) problems.push('title');
+  if (!p.section) problems.push('section');
+  if (!p.short_description && !p.repo?.description) problems.push('short_description');
+  if (!p.project_type) problems.push('project_type');
+  if (!p.status) problems.push('status');
+  if (p.cover_image && !p.image_alt) problems.push('image_alt');
+  if (p.status === 'Coming Soon' && p.launch_url) problems.push('launch_url_coming_soon');
+  return problems;
+}
+
+function assertPublishable(p) {
+  const problems = publishProblems(p);
+  if (problems.length) {
+    throw Object.assign(new InputError('This project is incomplete and cannot be published yet'), { status: 422, details: problems });
+  }
+}
+
 const one = (rows, what = 'Item') => {
   if (!rows?.length) throw Object.assign(new InputError(`${what} not found`), { status: 404 });
   return rows[0];
@@ -43,7 +69,7 @@ async function freeSlug(db, wanted) {
 const overview = {
   async get({ db }) {
     const [projects, pending, lastSync, activity, lastPublish, posts] = await Promise.all([
-      db.select('studio_projects', 'select=id,title,slug,section,visibility,status,featured,deleted_at,updated_at&order=updated_at.desc'),
+      db.select('studio_projects', 'select=id,title,slug,section,visibility,status,featured,deleted_at,updated_at,short_description,project_type,cover_image,image_alt,launch_url,repo:github_repositories(description)&order=updated_at.desc'),
       db.select('github_repositories', 'select=id&review_state=eq.pending'),
       db.select('github_sync_logs', 'select=*&order=started_at.desc&limit=1'),
       db.select('activity_logs', 'select=id,actor_email,action,entity,entity_id,details,created_at&order=created_at.desc&limit=10'),
@@ -64,7 +90,12 @@ const overview = {
         published: posts.filter((p) => !p.deleted_at && p.status === 'published').length,
         drafts: posts.filter((p) => !p.deleted_at && p.status === 'draft').length,
       },
-      recentlyChanged: live.slice(0, 5),
+      recentlyChanged: live.slice(0, 5).map(({ id, title, slug, section, visibility, status, featured, updated_at }) => ({ id, title, slug, section, visibility, status, featured, updated_at })),
+      // Public projects the site build would reject: each one stops every deploy.
+      incomplete: live
+        .filter((p) => p.visibility === 'public')
+        .map((p) => ({ id: p.id, title: p.title, slug: p.slug, problems: publishProblems(p) }))
+        .filter((p) => p.problems.length),
       github: { pending: pending.length, lastSync: lastSync[0] ?? null },
       activity,
       lastPublish: lastPublish[0] ?? null,
@@ -101,6 +132,9 @@ const projects = {
     const f = validate('studio_projects', fields ?? {}, { required: ['title', 'section'] });
     f.slug = f.slug ? f.slug : await freeSlug(db, f.title);
     f.visibility ??= 'hidden';
+    // Check what the row will hold: the table fills an omitted type and
+    // status with these defaults (supabase/migrations/…_admin_cms.sql).
+    if (f.visibility === 'public') assertPublishable({ project_type: 'App', status: 'In Development', ...f });
     if (f.sort_order === undefined) {
       const last = await db.select('studio_projects', 'select=sort_order&order=sort_order.desc&limit=1');
       f.sort_order = (last[0]?.sort_order ?? 0) + 10;
@@ -113,6 +147,10 @@ const projects = {
   async update({ db, log }, { id, fields }) {
     const pid = requireUuid(id);
     const f = validate('studio_projects', fields ?? {}, { partial: true });
+    // A public project must stay complete after this change: publishing it,
+    // or editing one that is already public (e.g. clearing its description).
+    const [current] = await db.select('studio_projects', `select=${PROJECT_SELECT}&id=${eq(pid)}`);
+    if (current && (f.visibility ?? current.visibility) === 'public') assertPublishable({ ...current, ...f });
     const [row] = await db.update('studio_projects', `id=${eq(pid)}`, f);
     if (!row) throw Object.assign(new InputError('Project not found'), { status: 404 });
     await log('update', 'project', pid, { fields: Object.keys(f) });
