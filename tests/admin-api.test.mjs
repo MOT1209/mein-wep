@@ -21,6 +21,7 @@ let tables;     // table -> rows returned for GET
 let githubRepos;
 let sharedLimitReached = false;
 let adminRole = 'owner';
+let vercelApi;   // path -> JSON the fake api.vercel.com returns
 const realFetch = globalThis.fetch;
 
 function reply(status, body, headers = {}) {
@@ -35,6 +36,10 @@ function fakeFetch(url, init = {}) {
   const call = { url: String(url), method, headers: init.headers || {}, body: init.body };
   calls.push(call);
   const bearer = (init.headers?.Authorization || '').replace(/^Bearer /, '');
+  if (u.host === 'api.vercel.com' && !u.pathname.startsWith('/v1/integrations/')) {
+    const body = vercelApi[u.pathname];
+    return body === undefined ? reply(404, {}) : reply(200, body);
+  }
   if (u.host === 'api.github.com') {
     return reply(200, githubRepos.slice((Number(u.searchParams.get('page')) - 1) * 100, Number(u.searchParams.get('page')) * 100));
   }
@@ -66,6 +71,10 @@ beforeEach(() => {
   delete process.env.VERCEL_DEPLOY_HOOK_URL;
   delete process.env.CRON_SECRET;
   delete process.env.GITHUB_TOKEN;
+  delete process.env.VERCEL_API_TOKEN;
+  delete process.env.VERCEL_PROJECT_ID;
+  delete process.env.VERCEL_TEAM_ID;
+  vercelApi = {};
   calls = [];
   tables = {};
   githubRepos = [];
@@ -340,6 +349,42 @@ test('publish needs a real Vercel deploy hook and calls it', async () => {
   assert.ok(calls.some((c) => c.url === HOOK && c.method === 'POST'));
 });
 
+test('deploy status: off without settings; shows a failure with the build reason, never the token', async () => {
+  assert.deepEqual((await api('publish', { action: 'status' })).body.data, { configured: false });
+  process.env.VERCEL_API_TOKEN = 'vercel-test-token-123';
+  process.env.VERCEL_PROJECT_ID = 'not-a-project-id';
+  assert.deepEqual((await api('publish', { action: 'status' })).body.data, { configured: false });
+
+  process.env.VERCEL_PROJECT_ID = 'prj_abc123';
+  vercelApi['/v6/deployments'] = { deployments: [{ uid: 'dpl_1', state: 'ERROR', created: 1795290550000, inspectorUrl: 'https://vercel.com/team/rashid-wep/dpl_1', meta: { githubCommitMessage: 'feat: x\n\nbody' } }] };
+  vercelApi['/v3/deployments/dpl_1/events'] = [
+    { type: 'stderr', text: 'Error: [BUILD_UTILS_SPAWN_1] Command "npm run build" exited with 1' },
+    { type: 'stderr', text: '[11ty]     at fail (file:///vercel/path0/_data/kingStudio.js:43:9)' },
+    { type: 'stderr', text: '[11ty] [king-studio] king-skills: missing required field "description"' },
+    { type: 'stderr', text: '[11ty] [king-studio] king-skills: missing required field "description"' },
+    { type: 'stdout', text: 'css/style.min.css: 109249 -> 104910 bytes' },
+  ];
+  const r = await api('publish', { action: 'status' });
+  assert.equal(r.statusCode, 200);
+  const d = r.body.data.deployment;
+  assert.equal(d.state, 'ERROR');
+  assert.equal(d.commit, 'feat: x');
+  assert.deepEqual(d.errors, ['[king-studio] king-skills: missing required field "description"']);
+  assert.ok(!JSON.stringify(r.body).includes('vercel-test-token-123'), 'token never leaves the server');
+  const vercelCalls = calls.filter((c) => c.url.startsWith('https://api.vercel.com/v'));
+  assert.ok(vercelCalls.every((c) => c.headers.Authorization === 'Bearer vercel-test-token-123' && (c.method ?? 'GET') === 'GET'));
+  assert.match(vercelCalls[0].url, /projectId=prj_abc123&target=production/);
+
+  // A live deployment needs no log lookup.
+  calls = [];
+  vercelApi['/v6/deployments'] = { deployments: [{ uid: 'dpl_2', state: 'READY', created: 1795290550000 }] };
+  const ok = await api('publish', { action: 'status' });
+  assert.equal(ok.body.data.deployment.state, 'READY');
+  assert.deepEqual(ok.body.data.deployment.errors, []);
+  assert.ok(!calls.some((c) => c.url.includes('/events')));
+  assert.equal((await api('overview', { action: 'get' })).body.data.config.deployStatus, true);
+});
+
 test('publish, sync and uploads are also limited across instances (shared limit)', async () => {
   process.env.VERCEL_DEPLOY_HOOK_URL = HOOK;
   sharedLimitReached = true;
@@ -391,7 +436,7 @@ test('overview reports config as booleans only', async () => {
   process.env.GITHUB_TOKEN = 'github_pat_secretvalue';
   const r = await api('overview', { action: 'get' });
   assert.equal(r.statusCode, 200);
-  assert.deepEqual(r.body.data.config, { deployHook: true, githubToken: true, cronSecret: false });
+  assert.deepEqual(r.body.data.config, { deployHook: true, githubToken: true, cronSecret: false, deployStatus: false });
   assert.ok(!JSON.stringify(r.body).includes('secretvalue'));
   assert.ok(!JSON.stringify(r.body).includes('hook123'));
 });

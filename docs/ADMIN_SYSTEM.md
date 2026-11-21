@@ -139,6 +139,6 @@ Arabic by default (RTL), English and German. Built from the site tokens, mobile 
 | `content` | `settings_list`, `settings_set`, `settings_delete`, `pages_get`, `pages_set`, `nav_list`, `nav_create`, `nav_update`, `nav_delete`, `nav_reorder` |
 | `blog` | `list`, `get`, `create`, `update`, `publish`, `unpublish`, `delete`, `restore`, `purge` |
 | `activity` | `list` |
-| `publish` | `run` |
+| `publish` | `run`, `status` |
 | `messages` | `list`, `delete` |
 | `updates` | `list`, `save` |

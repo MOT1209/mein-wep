@@ -94,6 +94,9 @@ Leave it unset for Preview if you want previews to build without Supabase.
 | `SUPABASE_URL` | everything with the CMS, contact form | Production, Preview |
 | `SUPABASE_ANON_KEY` | the same (publishable key only; the server refuses a secret key) | Production, Preview |
 | `VERCEL_DEPLOY_HOOK_URL` | Publish button, rebuild after the daily sync | Production |
+| `VERCEL_API_TOKEN` | optional: the overview shows whether the latest site update is live or failed, with the build's reason. Vercel has no read-only tokens; create one scoped to this team, type *Sensitive*. Only ever sent to `api.vercel.com`, never returned | Production |
+| `VERCEL_PROJECT_ID` | with the token: the `prj_…` id of the `rashid-wep` project (Project → Settings → General) | Production |
+| `VERCEL_TEAM_ID` | with the token, when the project belongs to a team: the `team_…` id | Production |
 | `CRON_SECRET` | daily GitHub sync | Production |
 | `GITHUB_TOKEN` | private repos in the sync (optional) | Production |
 | `CMS_REQUIRED` | optional: `1` = every CMS failure is fatal, `0` = always fall back (production default: stop on failures, see §6) | Production |

@@ -6,10 +6,38 @@ import { badge, busy, el, empty, formatDate, problemText } from './ui.js';
 const stat = (label, value, href) => el(href ? 'a' : 'div', { class: 'stat', href },
   el('span', { class: 'stat-value' }, String(value)), el('span', { class: 'stat-label' }, label));
 
+// Vercel deployment states → label and badge tone.
+const DEPLOY_STATE = {
+  READY: ['overview.deployReady', 'ok'], ERROR: ['overview.deployFailed', 'danger'], CANCELED: ['overview.deployCanceled', 'warn'],
+  BUILDING: ['overview.deployBuilding', 'warn'], QUEUED: ['overview.deployBuilding', 'warn'], INITIALIZING: ['overview.deployBuilding', 'warn'],
+};
+
+/** The latest site update: live, building or failed (with the build's own reason). */
+function deployCard(s) {
+  if (!s.configured) {
+    return el('section', { class: 'card' }, el('h2', {}, t('overview.deployTitle')), el('p', { class: 'muted' }, t('overview.deployNotSetUp')));
+  }
+  const dep = s.deployment;
+  if (s.unavailable || !dep) {
+    return el('section', { class: 'card' }, el('h2', {}, t('overview.deployTitle')), el('p', { class: 'muted' }, t('overview.deployUnknown')));
+  }
+  const [label, tone] = DEPLOY_STATE[dep.state] ?? ['overview.deployUnknown', ''];
+  const failed = dep.state === 'ERROR';
+  return el('section', { class: failed ? 'card card-alert' : 'card', role: failed ? 'alert' : null },
+    el('h2', {}, t('overview.deployTitle')),
+    el('p', {}, badge(t(label), tone), dep.createdAt ? el('span', { class: 'muted' }, ` · ${formatDate(dep.createdAt)}`) : null),
+    dep.commit ? el('p', { class: 'muted' }, dep.commit) : null,
+    failed ? el('p', {}, t('overview.deployFailedBody')) : null,
+    failed && dep.errors.length ? el('ul', { class: 'plain-list mono', dir: 'ltr' }, dep.errors.map((e) => el('li', {}, e))) : null,
+    dep.inspectorUrl ? el('p', {}, el('a', { href: dep.inspectorUrl, target: '_blank', rel: 'noopener noreferrer' }, t('overview.deployOpen'))) : null);
+}
+
 export async function overviewView() {
-  const [d, siteUp] = await Promise.all([
+  const [d, siteUp, deploy] = await Promise.all([
     call('overview', 'get'),
     fetch('/', { method: 'HEAD', cache: 'no-store' }).then((r) => r.ok).catch(() => false),
+    // Never blocks the overview: a Vercel API problem shows as "unknown".
+    call('publish', 'status').catch(() => ({ configured: true, unavailable: true })),
   ]);
   const p = d.projects;
   const sync = d.github.lastSync;
@@ -23,6 +51,7 @@ export async function overviewView() {
         el('ul', { class: 'plain-list' }, incomplete.map((r) => el('li', {},
           el('a', { href: `#/studio/${r.id}` }, r.title), ' — ', problemText(r.problems)))))
       : null,
+    deployCard(deploy),
     el('div', { class: 'stats' },
       stat(t('overview.total'), p.total, '#/studio'),
       stat(t('overview.published'), p.published, '#/studio'),
@@ -44,7 +73,7 @@ export async function overviewView() {
       el('section', { class: 'card' },
         el('h2', {}, t('overview.config')),
         el('ul', { class: 'checklist' },
-          [['configDeployHook', d.config.deployHook], ['configGithubToken', d.config.githubToken], ['configCron', d.config.cronSecret]]
+          [['configDeployHook', d.config.deployHook], ['configDeployStatus', d.config.deployStatus], ['configGithubToken', d.config.githubToken], ['configCron', d.config.cronSecret]]
             .map(([k, on]) => el('li', {}, badge(on ? t('overview.ok') : t('overview.missing'), on ? 'ok' : 'warn'), ' ', t(`overview.${k}`)))))),
     el('div', { class: 'grid-2' },
       el('section', { class: 'card' },
