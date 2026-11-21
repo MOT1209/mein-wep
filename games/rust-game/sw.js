@@ -1,5 +1,5 @@
 // Rust Game Service Worker
-const CACHE_NAME = 'rust-game-v2';
+const CACHE_NAME = 'rust-game-v3';
 const STATIC_ASSETS = [
     '/games/rust-game/',
     '/games/rust-game/index.html',

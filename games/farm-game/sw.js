@@ -1,5 +1,5 @@
 // Farm Game Service Worker
-const CACHE_NAME = 'farm-game-v2_5_0';
+const CACHE_NAME = 'farm-game-v2_5_1';
 const STATIC_ASSETS = [
     '/games/farm-game/',
     '/games/farm-game/index.html',
