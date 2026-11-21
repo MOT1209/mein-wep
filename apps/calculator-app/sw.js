@@ -1,5 +1,5 @@
 ﻿// Calculator Vault Service Worker
-const CACHE_NAME = 'calculator-app-v3';
+const CACHE_NAME = 'calculator-app-v4';
 const STATIC_ASSETS = [
     '/apps/calculator-app/',
     '/apps/calculator-app/index.html',

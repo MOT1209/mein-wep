@@ -1,6 +1,14 @@
 (function () {
   'use strict';
 
+  // Only inside the installed Android (Capacitor) app. In a browser there is
+  // nothing installed to update, and every first visit used to see an
+  // "update available" banner because no version was stored yet.
+  const isNative = !!(window.Capacitor &&
+    typeof window.Capacitor.isNativePlatform === 'function' &&
+    window.Capacitor.isNativePlatform());
+  if (!isNative) return;
+
   const VERSION_URL = './version.json';
   const STORAGE_KEY = 'app_latest_version';
   const DISMISS_KEY = 'app_update_dismissed';

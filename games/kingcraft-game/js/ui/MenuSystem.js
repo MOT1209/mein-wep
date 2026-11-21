@@ -167,6 +167,18 @@ export class MenuSystem {
       this.showScreen(this.menu);
     });
 
+    // "Quit Game" ends with window.close(), which a browser tab ignores, so
+    // the button only makes sense inside the installed Android app.
+    const isNative = !!(window.Capacitor &&
+      typeof window.Capacitor.isNativePlatform === "function" &&
+      window.Capacitor.isNativePlatform());
+    // style.display, not the hidden attribute: .btn-mc sets display:flex,
+    // which would override [hidden].
+    if (!isNative) {
+      document.getElementById("btn-quit").style.display = "none";
+      document.getElementById("btn-quit-game").style.display = "none";
+    }
+
     document.getElementById("btn-quit-game").addEventListener("click", () => {
       document.getElementById("modal-quit").classList.remove("hidden");
     });
