@@ -2,7 +2,7 @@
   "projects": [
     {
       "id": "kingcraft",
-      "hidden": true,
+      "hidden": false,
       "section": "games",
       "title": "KingCraft",
       "description": "3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive.",

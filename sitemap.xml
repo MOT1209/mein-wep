@@ -229,6 +229,12 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>https://rashid-wep.vercel.app/king-studio/games/kingcraft/</loc>
+        <lastmod>2026-11-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
         <loc>https://rashid-wep.vercel.app/king-studio/apps/calculator-vault/</loc>
         <lastmod>2026-10-17</lastmod>
         <changefreq>monthly</changefreq>
@@ -265,6 +271,12 @@
         <priority>0.5</priority>
     </url>
     <url>
+        <loc>https://rashid-wep.vercel.app/de/king-studio/games/kingcraft/</loc>
+        <lastmod>2026-11-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
         <loc>https://rashid-wep.vercel.app/de/king-studio/apps/calculator-vault/</loc>
         <lastmod>2026-10-24</lastmod>
         <changefreq>monthly</changefreq>
@@ -299,6 +311,12 @@
         <lastmod>2026-10-24</lastmod>
         <changefreq>monthly</changefreq>
         <priority>0.5</priority>
+    </url>
+    <url>
+        <loc>https://rashid-wep.vercel.app/ar/king-studio/games/kingcraft/</loc>
+        <lastmod>2026-11-21</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
     </url>
     <url>
         <loc>https://rashid-wep.vercel.app/ar/king-studio/apps/calculator-vault/</loc>

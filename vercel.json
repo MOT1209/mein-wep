@@ -95,8 +95,6 @@
   ],
   "redirects": [
     { "source": "/quran-app", "destination": "/quran-app/", "permanent": true },
-    { "source": "/king-studio/games/kingcraft/", "destination": "/king-studio/", "permanent": false },
-    { "source": "/king-studio/games/kingcraft", "destination": "/king-studio/", "permanent": false },
     { "source": "/king-studio/games/rust-construction/", "destination": "/king-studio/", "permanent": false },
     { "source": "/king-studio/games/rust-construction", "destination": "/king-studio/", "permanent": false },
     { "source": "/king-studio/games/farm-empire/", "destination": "/king-studio/", "permanent": false },
