@@ -29,7 +29,7 @@ insert into public.studio_projects (slug, section, title, short_description, pro
 select 'kingcraft', 'games', 'KingCraft', '3D voxel sandbox kingdom builder. Mine, craft, build, fight mobs, and survive.', 'Game',
   (select id from public.project_categories where slug = 'sandbox-survival'),
   array['Browser', 'Android']::text[], array['Three.js', 'Voxel', 'PWA']::text[], array['Mine and gather resources', 'Craft items and tools', 'Build structures', 'Fight mobs and survive']::text[], 'Available', true,
-  'hidden', 10, 'images/screenshots/kingcraft.svg', 'KingCraft artwork: a voxel landscape',
+  'public', 10, 'images/screenshots/kingcraft.svg', 'KingCraft artwork: a voxel landscape',
   'games/kingcraft-game/', 'com.rashid.kingcraft', '{}'::jsonb
 on conflict (slug) do nothing;
 insert into public.studio_projects (slug, section, title, short_description, project_type, category_id,
