@@ -110,6 +110,7 @@ function configFlags() {
     deployHook: !!process.env.VERCEL_DEPLOY_HOOK_URL,
     githubToken: !!process.env.GITHUB_TOKEN,
     cronSecret: (process.env.CRON_SECRET || '').length >= 32,
+    deployStatus: !!process.env.VERCEL_API_TOKEN && /^prj_[A-Za-z0-9]+$/.test(process.env.VERCEL_PROJECT_ID || ''),
   };
 }
 
@@ -630,6 +631,54 @@ const publish = {
     const job = await r.json().catch(() => ({}));
     await log('publish', 'site', null, { job: job?.job?.id ?? null });
     return { started: true, job: job?.job?.id ?? null };
+  },
+
+  /**
+   * The latest production deployment: building, live or failed, and for a
+   * failure the build's own error lines. Reads the Vercel API with
+   * VERCEL_API_TOKEN (server only, never returned) for VERCEL_PROJECT_ID
+   * (and VERCEL_TEAM_ID for a team project). Without them: { configured:false }.
+   */
+  async status() {
+    const token = process.env.VERCEL_API_TOKEN || '';
+    const project = process.env.VERCEL_PROJECT_ID || '';
+    const team = process.env.VERCEL_TEAM_ID || '';
+    if (!token || !/^prj_[A-Za-z0-9]+$/.test(project) || (team && !/^team_[A-Za-z0-9]+$/.test(team))) return { configured: false };
+    const scope = team ? `&teamId=${q(team)}` : '';
+    const get = async (path) => {
+      const r = await fetch(`https://api.vercel.com${path}`, { headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(8000) });
+      if (!r.ok) throw Object.assign(new Error(`Vercel API answered ${r.status}`), { status: 502 });
+      return r.json();
+    };
+    const list = await get(`/v6/deployments?projectId=${q(project)}&target=production&limit=1${scope}`);
+    const d = list?.deployments?.[0];
+    if (!d) return { configured: true, deployment: null };
+    const state = String(d.state || d.readyState || 'UNKNOWN');
+    let errors = [];
+    if (state === 'ERROR') {
+      const events = await get(`/v3/deployments/${q(d.uid || d.id)}/events?builds=1&direction=backward&limit=200${scope}`).catch(() => []);
+      // The build's own messages (e.g. "[king-studio] x: missing required field"),
+      // newest first; stack-trace lines and duplicates dropped.
+      errors = [...new Set((Array.isArray(events) ? events : [])
+        // Events carry the line as `text`, older API versions as `payload.text`.
+        .map((e) => ({ type: e?.type, text: e?.text ?? e?.payload?.text }))
+        .filter((e) => e.type === 'stderr' && typeof e.text === 'string')
+        .map((e) => e.text.replace(/^\[11ty\]\s*/, '').trim())
+        .filter((t) => t && !/^at\s/.test(t) && !/^(Original error stack trace:|Error: \[BUILD_UTILS_SPAWN)/.test(t))
+        .filter((t) => /error|fail|missing|not found|\[king-studio\]|\[cms\]/i.test(t)))]
+        .slice(0, 5)
+        .map((t) => t.slice(0, 300));
+    }
+    return {
+      configured: true,
+      deployment: {
+        state,
+        createdAt: d.created ? new Date(d.created).toISOString() : null,
+        commit: typeof d.meta?.githubCommitMessage === 'string' ? d.meta.githubCommitMessage.split('\n')[0].slice(0, 120) : null,
+        inspectorUrl: typeof d.inspectorUrl === 'string' && d.inspectorUrl.startsWith('https://vercel.com/') ? d.inspectorUrl : null,
+        errors,
+      },
+    };
   },
 };
 
