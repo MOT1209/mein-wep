@@ -13,19 +13,31 @@ const CAUSES: Readonly<Record<DamageSource, string>> = {
 export class DeathScreen {
   private readonly root: HTMLElement;
   private readonly cause: HTMLElement;
+  private readonly titleEl: HTMLElement;
+  private readonly itemsEl: HTMLElement;
+  private readonly respawnBtn: HTMLButtonElement;
 
   constructor(parent: HTMLElement, onRespawn: () => void) {
     injectUiStyles();
     this.root = el("div", "bw-screen hidden", parent);
     this.root.style.background = "rgba(90,10,10,.55)";
     const menu = el("div", "bw-panel bw-menu", this.root);
-    el("h1", "", menu).textContent = tr("ui.death_title");
+    this.titleEl = el("h1", "", menu);
+    this.titleEl.textContent = tr("ui.death_title");
     this.cause = el("p", "", menu);
-    el("p", "", menu).textContent = tr("game.death_items");
+    this.itemsEl = el("p", "", menu);
+    this.itemsEl.textContent = tr("game.death_items");
     const button = el("button", "bw-btn primary", menu);
     button.type = "button";
     button.textContent = tr("ui.respawn");
     button.addEventListener("click", onRespawn);
+    this.respawnBtn = button;
+  }
+
+  relabel(): void {
+    this.titleEl.textContent = tr("ui.death_title");
+    this.itemsEl.textContent = tr("game.death_items");
+    this.respawnBtn.textContent = tr("ui.respawn");
   }
 
   get isVisible(): boolean {

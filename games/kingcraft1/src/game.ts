@@ -11,13 +11,16 @@ import { DropManager, rollDrops } from "./gameplay/drops";
 import { applyGrowthBoost, randomTick } from "./gameplay/farming";
 import { furnaceTick } from "./gameplay/furnace";
 import { breakUnsupported, interact, type InteractResult, type Position } from "./gameplay/interactive";
+import { Equipment } from "./gameplay/equipment";
 import { Inventory, type InventorySave } from "./gameplay/inventory";
+import { campChestLoot } from "./gameplay/loot";
+import { ProjectileManager } from "./gameplay/projectiles";
 import { MiningState, type MiningEvent } from "./gameplay/mining";
 import { tryPlace, tryUseItem, type PlaceFailure } from "./gameplay/place";
 import { raycastVoxel, type RayHit } from "./physics/raycast";
 import { PlayerController, type MoveInput } from "./player/controller";
 import { PlayerStats, takeAllItems, type DamageSource } from "./player/stats";
-import type { SaveFile, SaveInput } from "./save/saveLoad";
+import { buildSave, ChunkEncoder, type SaveFile, type SaveInput } from "./save/saveLoad";
 import { ChunkRenderer } from "./render/chunkRenderer";
 import { DropRenderer, type IconSource } from "./render/dropRenderer";
 import { EntityRenderer } from "./render/entityRenderer";
@@ -37,6 +40,8 @@ const SPAWN_RADIUS = 1;
 const MAX_FRAME_SECONDS = 0.25;
 const RANDOM_TICKS_PER_CHUNK = 6;
 const PLAYER_ATTACK_COOLDOWN = 0.45;
+const BOW_COOLDOWN_SECONDS = 0.6;
+const PROJECTILE_TRAIL_SECONDS = 0.05;
 const HAND_DAMAGE = 1;
 const PLAYER_KNOCKBACK = 7;
 const STEP_DISTANCE = 1.7;
@@ -83,13 +88,18 @@ export class Game {
   readonly playerPosition = new THREE.Vector3();
   readonly mode: GameMode;
   inventory = new Inventory();
+  equipment = new Equipment();
   readonly mining = new MiningState();
   readonly drops = new DropManager();
+  readonly projectiles = new ProjectileManager();
+  private readonly chunkEncoder = new ChunkEncoder();
   containers = new ContainerStore();
   readonly entities: EntityManager;
   stats = new PlayerStats();
   private readonly entityRenderer: EntityRenderer;
   private attackCooldown = 0;
+  private bowCooldown = 0;
+  private trailTimer = 0;
   readonly particles = new ParticleSystem(0);
   private particleRenderer: ParticleRenderer | null = null;
   private blockColors: BlockColors | null = null;
@@ -192,20 +202,31 @@ export class Game {
       player: { x: position.x, y: position.y, z: position.z, yaw, pitch, respawn: this.respawnPoint },
       stats: this.stats.toJSON(),
       inventory: this.inventory.toJSON(),
+      armor: this.equipment.toJSON(),
       containers: this.containers.toJSON(),
       entities: this.entities.toJSON(),
       chunks: this.world.modifiedChunkData()
     };
   }
 
+  /** Builds the save payload, re-encoding only the chunks changed since the last call. */
+  saveFile(): SaveFile {
+    const input = this.snapshot();
+    const save = buildSave(input, (key, blocks) => this.chunkEncoder.encode(key, this.world.chunkRevision(key), blocks));
+    this.chunkEncoder.retain(input.chunks.keys());
+    return save;
+  }
+
   restore(save: SaveFile): void {
     this.world.time = save.time;
     this.inventory = Inventory.fromJSON(save.inventory as InventorySave);
+    this.equipment = Equipment.fromJSON(save.armor);
     this.stats = PlayerStats.fromJSON(save.stats);
     this.containers = ContainerStore.fromJSON(save.containers);
     this.entities.load(save.entities);
     this.respawnPoint = save.player.respawn;
     this.drops.clear();
+    this.projectiles.clear();
     this.mining.reset();
     this.player.spawnAt(save.player);
     this.player.state.yaw = save.player.yaw;
@@ -253,13 +274,42 @@ export class Game {
     } else {
       this.mining.reset();
     }
-    this.drops.tick(this.world, dt, { x, y, z }, (stack) => {
-      const leftover = this.inventory.add(stack);
-      if (!leftover || leftover.count < stack.count) this.sound("pickup", "plant");
-      return leftover;
-    });
+    if (input.active) {
+      this.drops.tick(this.world, dt, { x, y, z }, (stack) => {
+        const leftover = this.inventory.add(stack);
+        if (!leftover || leftover.count < stack.count) this.sound("pickup", "plant");
+        return leftover;
+      });
+      this.tickProjectiles(dt);
+    }
     this.particles.step(dt, this.world);
     if (input.active) this.footsteps(dt);
+  }
+
+  private tickProjectiles(dt: number): void {
+    if (this.projectiles.count === 0) return;
+    this.trailTimer += dt;
+    if (this.trailTimer >= PROJECTILE_TRAIL_SECONDS) {
+      this.trailTimer = 0;
+      for (const p of this.projectiles.list) this.trailParticle(p.x, p.y, p.z);
+    }
+    const hits = this.projectiles.tick(this.world, dt, (from, dir, distance) => {
+      const hit = this.entities.raycast(from, dir, distance);
+      if (!hit) return false;
+      this.entities.damage(hit.entity, from.damage, from.x, from.z);
+      this.sound("hurt", "wool");
+      return true;
+    });
+    for (const hit of hits) {
+      if (!hit.blocked) continue;
+      this.particles.burst(hit.x, hit.y, hit.z, [0xe8e2cf], this.rng, 3);
+    }
+  }
+
+  private trailParticle(x: number, y: number, z: number): void {
+    const particles = this.particles;
+    if (particles.cap <= 0 || particles.particles.length >= particles.cap) return;
+    particles.particles.push({ x, y, z, vx: 0, vy: 0, vz: 0, life: 0.16, maxLife: 0.16, color: 0xe8e2cf, size: 0.06 });
   }
 
   private sound(kind: SfxKind, material: MaterialKind): void {
@@ -325,8 +375,10 @@ export class Game {
 
   hurtPlayer(amount: number, source: DamageSource, attacker: Entity | null = null): void {
     if (this.creative || this.stats.dead) return;
+    this.syncArmor();
     const event = this.stats.damage(amount, source);
     if (event.amount <= 0) return;
+    if ((event.absorbed ?? 0) > 0) this.equipment.wear();
     this.events.onPlayerDamaged?.(event.amount, source, attacker);
     this.sound("hurt", "wool");
     if (event.died) this.die();
@@ -334,7 +386,10 @@ export class Game {
 
   private die(): void {
     const { x, y, z } = this.player.state.position;
-    for (const stack of takeAllItems(this.inventory)) {
+    const loot = takeAllItems(this.inventory);
+    for (const stack of this.equipment.slots) if (stack) loot.push(stack);
+    this.equipment.clear();
+    for (const stack of loot) {
       this.drops.spawn(stack, x + this.rng.range(-0.6, 0.6), y + 1, z + this.rng.range(-0.6, 0.6), this.rng.range(2, 5), 1.5);
     }
     this.mining.reset();
@@ -349,8 +404,14 @@ export class Game {
     this.syncCamera();
   }
 
+  private syncArmor(): void {
+    this.stats.armorPoints = this.equipment.points;
+    this.stats.armorToughness = this.equipment.toughness;
+  }
+
   private tickStats(dt: number, move: MoveInput): void {
     if (this.creative || this.stats.dead) return;
+    this.syncArmor();
     const state = this.player.state;
     const eye = this.player.eyePosition();
     const events = this.stats.tick(dt, {
@@ -363,6 +424,7 @@ export class Game {
       sprinting: state.sprinting
     });
     for (const event of events) {
+      if ((event.absorbed ?? 0) > 0) this.equipment.wear();
       this.events.onPlayerDamaged?.(event.amount, event.source, null);
       this.sound("hurt", "wool");
       if (event.died) this.die();
@@ -389,6 +451,7 @@ export class Game {
   private interact(input: FrameInput, dt: number): void {
     const held = this.inventory.selected?.item ?? null;
     this.attackCooldown = Math.max(0, this.attackCooldown - dt);
+    this.bowCooldown = Math.max(0, this.bowCooldown - dt);
     if (input.attack && this.hitEntity()) {
       this.mining.reset();
     } else if (input.attack) {
@@ -402,7 +465,41 @@ export class Game {
     } else {
       this.mining.reset();
     }
-    for (let i = 0; i < input.uses && this.target; i++) this.use(this.target, input.move.sneak);
+    if (input.uses > 0 && itemById(held ?? "")?.useAction === "bow") this.fireArrow();
+    else for (let i = 0; i < input.uses && this.target; i++) this.use(this.target, input.move.sneak);
+  }
+
+  private fireArrow(): void {
+    if (this.bowCooldown > 0) return;
+    const projectile = itemById("bow")?.projectile;
+    if (!projectile) return;
+    if (!this.creative && !this.inventory.consume("arrow", 1)) return;
+    this.bowCooldown = BOW_COOLDOWN_SECONDS;
+    const eye = this.player.eyePosition();
+    const dir = this.player.lookDirection();
+    this.projectiles.shoot(
+      { x: eye.x + dir.x * 0.4, y: eye.y + dir.y * 0.4, z: eye.z + dir.z * 0.4 },
+      dir,
+      projectile.speed,
+      projectile.damage
+    );
+    this.sound("place", "wood");
+  }
+
+  private fumeBurst(at: Position): void {
+    this.particles.burst(at.x + 0.5, at.y + 1.05, at.z + 0.5, [0xb9c2c9], this.rng, 10);
+    this.sound("dig", "stone");
+  }
+
+  private seedCampChest(hit: RayHit): void {
+    if (!this.world.isCampChest(hit.x, hit.y, hit.z) || this.containers.get(hit.x, hit.y, hit.z)) return;
+    const chest = this.containers.open("chest", hit.x, hit.y, hit.z);
+    if (chest.kind !== "chest") return;
+    let slot = 0;
+    for (const stack of campChestLoot(this.rng)) {
+      if (slot >= chest.slots.length) break;
+      chest.slots[slot++] = stack;
+    }
   }
 
   private onMiningEvent(event: MiningEvent): void {
@@ -426,9 +523,11 @@ export class Game {
 
   private use(hit: RayHit, sneaking: boolean): void {
     if (!sneaking) {
+      this.seedCampChest(hit);
       const result = interact(this.world, this.containers, hit);
       if (result) {
         if (result.kind === "bed") this.respawnPoint = result.spawn;
+        if (result.kind === "fume") this.fumeBurst(result.at);
         this.events.onInteract?.(result);
         return;
       }

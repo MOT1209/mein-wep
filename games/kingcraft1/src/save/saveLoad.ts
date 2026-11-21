@@ -20,6 +20,7 @@ export interface SaveFile {
   player: SavedPlayer;
   stats: unknown;
   inventory: unknown;
+  armor: unknown;
   containers: unknown;
   entities: unknown;
   chunks: Record<string, string>;
@@ -32,6 +33,7 @@ export interface SaveInput {
   player: SavedPlayer;
   stats: unknown;
   inventory: unknown;
+  armor?: unknown;
   containers: unknown;
   entities: unknown;
   chunks: ReadonlyMap<string, Uint8Array>;
@@ -86,11 +88,41 @@ export function fromBase64(text: string): Uint8Array {
   return out;
 }
 
-export function buildSave(input: SaveInput): SaveFile {
+export type ChunkEncoderFn = (key: string, blocks: Uint8Array) => string;
+
+/**
+ * Caches the encoded text of each chunk by revision, so an autosave only re-encodes
+ * the chunks touched since the previous save instead of every modified chunk.
+ */
+export class ChunkEncoder {
+  private readonly cache = new Map<string, { revision: number; text: string }>();
+  private encoded = 0;
+
+  encode(key: string, revision: number, blocks: Uint8Array): string {
+    const hit = this.cache.get(key);
+    if (hit && hit.revision === revision) return hit.text;
+    const text = toBase64(rleEncode(blocks));
+    this.cache.set(key, { revision, text });
+    this.encoded++;
+    return text;
+  }
+
+  get encodedCount(): number {
+    return this.encoded;
+  }
+
+  /** Drops cache entries for chunks the world no longer holds. */
+  retain(keys: Iterable<string>): void {
+    const keep = new Set(keys);
+    for (const key of [...this.cache.keys()]) if (!keep.has(key)) this.cache.delete(key);
+  }
+}
+
+export function buildSave(input: SaveInput, encode?: ChunkEncoderFn): SaveFile {
   const chunks: Record<string, string> = {};
   for (const key of [...input.chunks.keys()].sort()) {
     const blocks = input.chunks.get(key);
-    if (blocks) chunks[key] = toBase64(rleEncode(blocks));
+    if (blocks) chunks[key] = encode ? encode(key, blocks) : toBase64(rleEncode(blocks));
   }
   return {
     version: SAVE_FORMAT_VERSION,
@@ -100,6 +132,7 @@ export function buildSave(input: SaveInput): SaveFile {
     player: input.player,
     stats: input.stats,
     inventory: input.inventory,
+    armor: input.armor ?? null,
     containers: input.containers,
     entities: input.entities,
     chunks
@@ -146,6 +179,7 @@ export function migrate(raw: unknown): SaveFile {
         player: readPlayer(save.player),
         stats: save.stats ?? null,
         inventory: save.inventory ?? null,
+        armor: save.armor ?? null,
         containers: save.containers ?? [],
         entities: save.entities ?? [],
         chunks

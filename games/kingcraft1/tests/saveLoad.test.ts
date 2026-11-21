@@ -163,7 +163,7 @@ describe("schema and migration", () => {
     const b = buildSave(input(world));
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
     expect(Object.keys(a).sort()).toEqual(
-      ["chunks", "containers", "entities", "inventory", "mode", "player", "seed", "stats", "time", "version"].sort()
+      ["armor", "chunks", "containers", "entities", "inventory", "mode", "player", "seed", "stats", "time", "version"].sort()
     );
     expect(a.version).toBe(SAVE_FORMAT_VERSION);
     expect(JSON.stringify(a)).not.toMatch(/date|timestamp|savedAt/i);

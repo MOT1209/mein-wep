@@ -28,7 +28,7 @@ export interface ItemDef {
   tool?: ToolStats;
   armor?: ArmorStats;
   fuelSeconds?: number;
-  useAction?: "eat" | "plant" | "bone_meal" | "name_tag" | "shears" | "bow";
+  useAction?: "eat" | "plant" | "bone_meal" | "bow";
   projectile?: { damage: number; speed: number };
 }
 
@@ -77,7 +77,6 @@ export const ITEM_MATERIALS = [
   "leather",
   "feather",
   "bone",
-  "ground_bone",
   "wheat",
   "seeds",
   "cobbled_understone"
@@ -137,7 +136,6 @@ for (const t of TOOL_TIERS) {
 
 item("ferrite_shears", "tool", {
   stackSize: 1,
-  useAction: "shears",
   tool: { kind: "shears", tier: 3, efficiency: 5, damage: 1, durability: 238 }
 });
 
@@ -181,7 +179,7 @@ item("bow", "misc", {
 
 item("arrow", "misc", { stackSize: 64 });
 
-item("name_tag", "misc", { stackSize: 16, useAction: "name_tag" });
+item("name_tag", "misc", { stackSize: 16 });
 item("ground_bone", "misc", { stackSize: 64, useAction: "bone_meal" });
 
 item("bucket", "misc", { stackSize: 1 });

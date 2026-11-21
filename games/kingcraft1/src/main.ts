@@ -8,7 +8,7 @@ import { Sfx } from "./audio/sfx";
 import { GameLoop } from "./render/loop";
 import { FrameTimer, perfLines } from "./render/perfPanel";
 import { openBackend } from "./save/db";
-import { Autosaver, buildSave, decodeChunks, loadWorld, saveWorld, slotKey, type SaveFile } from "./save/saveLoad";
+import { Autosaver, decodeChunks, loadWorld, saveWorld, slotKey, type SaveFile } from "./save/saveLoad";
 import { createPaletteSection } from "./ui/creativePalette";
 import { DeathScreen } from "./ui/deathScreen";
 import { Hud } from "./ui/hud";
@@ -106,11 +106,12 @@ async function boot(): Promise<void> {
     if (touchOn) setLocked(input, false, hudEvents);
     else if (document.pointerLockElement === canvas) document.exitPointerLock();
   };
+  const pauseInfo = (): string =>
+    `${tr(game.mode === "creative" ? "ui.creative" : "ui.survival")} · ${tr("ui.seed")} ${world.seedInt} · ` +
+    `${tr(backend.persistent ? (saved ? "game.info_save_loaded" : "game.info_new_world") : "game.info_no_saving")}\n\n${tr("game.controls_desktop")}`;
   const pause = new PauseMenu(uiRoot, {
     title: tr("game.title"),
-    info:
-      `${tr(game.mode === "creative" ? "ui.creative" : "ui.survival")} · ${tr("ui.seed")} ${world.seedInt} · ` +
-      `${tr(backend.persistent ? (saved ? "game.info_save_loaded" : "game.info_new_world") : "game.info_no_saving")}\n\n${tr("game.controls_desktop")}`,
+    info: pauseInfo(),
     onResume: lockPointer
   });
   pause.show(tr("ui.play"));
@@ -119,6 +120,12 @@ async function boot(): Promise<void> {
     const { x, y, z } = game.player.state.position;
     game.drops.spawn(stack, x, y + 1.2, z);
   };
+
+  const armorSection = (): ExtraSection => ({
+    title: tr("ui.armor"),
+    slots: game.equipment.slots,
+    accepts: (index, stack) => game.equipment.accepts(index, stack)
+  });
 
   const openInventory = (craftSize: 2 | 3, title: string, extra?: ExtraSection): void => {
     mode = "inventory";
@@ -176,7 +183,7 @@ async function boot(): Promise<void> {
     else if (reason === "wrong-soil") hud.toast(tr("game.toast_wrong_soil"));
   };
 
-  const touch = attachTouch(uiRoot, input, hudEvents, { canFly: game.player.canFly, onPause: releasePointer });
+  let touch = attachTouch(uiRoot, input, hudEvents, { canFly: game.player.canFly, onPause: releasePointer });
   const settingsPanel = new SettingsPanel(
     uiRoot,
     settings,
@@ -185,8 +192,17 @@ async function boot(): Promise<void> {
       settings = next;
       saveSettings(store, settings);
       if (languageChanged) {
-        loop.stop();
-        void autosaver.now().finally(() => window.location.reload());
+        setLocale(settings.language);
+        pause.relabel();
+        pause.setInfo(pauseInfo());
+        pause.setButtons(pauseButtons());
+        hud.relabel();
+        death.relabel();
+        settingsPanel.relabel();
+        encyclopedia.setLocale(settings.language);
+        touch.detach();
+        touch = attachTouch(uiRoot, input, hudEvents, { canFly: game.player.canFly, onPause: releasePointer });
+        touch.setVisible(touchOn && mode === "playing");
         return;
       }
       game.setRenderDistance(settings.renderDistance);
@@ -202,7 +218,7 @@ async function boot(): Promise<void> {
       pause.show();
     }
   );
-  const autosaver = new Autosaver(AUTOSAVE_INTERVAL_SECONDS, () => saveWorld(backend, saveKey, buildSave(game.snapshot())));
+  const autosaver = new Autosaver(AUTOSAVE_INTERVAL_SECONDS, () => saveWorld(backend, saveKey, game.saveFile()));
   let bookFromPause = false;
   const encyclopedia = new EncyclopediaScreen(uiRoot, icons, settings.language, () => closeBook());
   const openBook = (fromPause: boolean): void => {
@@ -219,7 +235,7 @@ async function boot(): Promise<void> {
     if (bookFromPause) pause.show();
     else lockPointer();
   };
-  pause.setButtons([
+  const pauseButtons = (): { label: string; onClick: () => void }[] => [
     {
       label: tr("ui.encyclopedia"),
       onClick: () => openBook(true)
@@ -248,7 +264,8 @@ async function boot(): Promise<void> {
         void backend.delete(saveKey).finally(() => window.location.reload());
       }
     }
-  ]);
+  ];
+  pause.setButtons(pauseButtons());
   if (loadProblem) hud.toast(tr("game.toast_load_failed"));
   inventoryScreen.setCloseHandler(() => closeInventory());
   inventoryScreen.setCraftHandler(() => sfx.play("craft", "wood"));
@@ -257,7 +274,7 @@ async function boot(): Promise<void> {
   hudEvents.onToggleDebug = () => hud.toggleDebug();
   hudEvents.onToggleInventory = () => {
     if (inventoryScreen.isOpen) closeInventory();
-    else if (mode === "playing") openInventory(2, tr("ui.inventory"), game.creative ? createPaletteSection() : undefined);
+    else if (mode === "playing") openInventory(2, tr("ui.inventory"), game.creative ? createPaletteSection() : armorSection());
   };
   hudEvents.onPauseChange = (paused) => {
     touch.setVisible(touchOn && !paused);

@@ -20,7 +20,8 @@ export type InteractResult =
   | { kind: "door"; open: boolean }
   | { kind: "crafting" }
   | { kind: "container"; state: ContainerState; at: Position }
-  | { kind: "bed"; slept: boolean; spawn: Position };
+  | { kind: "bed"; slept: boolean; spawn: Position }
+  | { kind: "fume"; at: Position };
 
 export function interact(world: InteractWorld, containers: ContainerStore, at: Position): InteractResult | null {
   const id = world.getBlock(at.x, at.y, at.z);
@@ -37,6 +38,8 @@ export function interact(world: InteractWorld, containers: ContainerStore, at: P
       return { kind: "container", state: containers.open("chest", at.x, at.y, at.z), at };
     case "furnace":
       return { kind: "container", state: containers.open("furnace", at.x, at.y, at.z), at };
+    case "fume":
+      return { kind: "fume", at };
     case "bed": {
       const spawn = { x: at.x + 0.5, y: at.y + 1, z: at.z + 0.5 };
       if (!world.isNight) return { kind: "bed", slept: false, spawn };

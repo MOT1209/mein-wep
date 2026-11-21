@@ -10,8 +10,10 @@ export interface ChunkMaterials {
 const vertexShader = `
 attribute float sky;
 attribute float block;
+attribute float ao;
 varying float vSky;
 varying float vBlock;
+varying float vAo;
 varying float vShade;
 varying vec2 vUv;
 varying vec3 vWorldPosition;
@@ -19,6 +21,7 @@ void main() {
   vec3 n = normalize(mat3(modelMatrix) * normal);
   vSky = sky;
   vBlock = block;
+  vAo = ao;
   vShade = n.y > 0.5 ? 1.0 : n.y < -0.5 ? 0.5 : abs(n.z) > 0.5 ? 0.8 : 0.6;
   vUv = uv;
   vec4 worldPosition = modelMatrix * vec4(position, 1.0);
@@ -40,6 +43,7 @@ uniform float uWaterAlpha;
 uniform float uAlphaTest;
 varying float vSky;
 varying float vBlock;
+varying float vAo;
 varying float vShade;
 varying vec2 vUv;
 varying vec3 vWorldPosition;
@@ -47,7 +51,7 @@ void main() {
   vec4 tex = texture2D(uAtlas, vUv);
   if (tex.a < uAlphaTest) discard;
   float light = max(max(uDay * vSky, vBlock), uMinLight);
-  vec3 litColor = tex.rgb * light * vShade;
+  vec3 litColor = tex.rgb * light * vShade * vAo;
   float fogStart = uFogDistance * uFogStartFactor;
   float fogRange = max(uFogDistance - fogStart, 0.0001);
   float fogProgress = clamp((distance(vWorldPosition, uCameraPosition) - fogStart) / fogRange, 0.0, 1.0);

@@ -178,12 +178,14 @@ export class EncyclopediaScreen {
   private readonly listEl: HTMLElement;
   private readonly detailEl: HTMLElement;
   private readonly searchEl: HTMLInputElement;
+  private readonly headingEl: HTMLElement;
+  private readonly closeBtn: HTMLButtonElement;
   private readonly tabs = new Map<EntryCategory | "all", HTMLElement>();
   private entries: Entry[] = [];
   private category: EntryCategory | "all" = "all";
   private selected: string | null = null;
 
-  constructor(parent: HTMLElement, private readonly icons: IconFactory, private readonly locale: Locale, onClose: () => void) {
+  constructor(parent: HTMLElement, private readonly icons: IconFactory, private locale: Locale, onClose: () => void) {
     injectUiStyles();
     if (!document.getElementById("bw-ency-styles")) {
       const style = document.createElement("style");
@@ -194,7 +196,8 @@ export class EncyclopediaScreen {
     this.root = el("div", "bw-screen hidden", parent);
     const win = el("div", "bw-panel bw-ency", this.root);
     const head = el("div", "bw-ency-head", win);
-    el("h2", "", head).textContent = tr("ui.encyclopedia");
+    this.headingEl = el("h2", "", head);
+    this.headingEl.textContent = tr("ui.encyclopedia");
     this.searchEl = el("input", "", head);
     this.searchEl.type = "search";
     this.searchEl.placeholder = tr("game.search_placeholder");
@@ -204,6 +207,7 @@ export class EncyclopediaScreen {
     close.type = "button";
     close.textContent = tr("game.close");
     close.addEventListener("click", onClose);
+    this.closeBtn = close;
     const tabs = el("div", "bw-ency-tabs", win);
     const labels: [EntryCategory | "all", string][] = [
       ["all", tr("ui.all")],
@@ -231,6 +235,31 @@ export class EncyclopediaScreen {
 
   get isOpen(): boolean {
     return !this.root.classList.contains("hidden");
+  }
+
+  setLocale(locale: Locale): void {
+    if (locale === this.locale) return;
+    this.locale = locale;
+    this.entries = [];
+    this.headingEl.textContent = tr("ui.encyclopedia");
+    this.searchEl.placeholder = tr("game.search_placeholder");
+    this.searchEl.setAttribute("aria-label", tr("ui.search"));
+    this.closeBtn.textContent = tr("game.close");
+    const labels: [EntryCategory | "all", string][] = [
+      ["all", tr("ui.all")],
+      ["blocks", tr("ui.blocks")],
+      ["items", tr("ui.items")],
+      ["creatures", tr("ui.creatures")],
+      ["recipes", tr("game.recipes")]
+    ];
+    for (const [key, label] of labels) {
+      const tab = this.tabs.get(key);
+      if (tab) tab.textContent = label;
+    }
+    if (this.isOpen) {
+      this.entries = buildEntries(locale);
+      this.renderList();
+    }
   }
 
   open(): void {

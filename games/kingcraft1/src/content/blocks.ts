@@ -15,7 +15,7 @@ export type MaterialKind =
   | "liquid"
   | "gem";
 export type RenderKind = "cube" | "cross" | "liquid";
-export type InteractionKind = "crafting" | "furnace" | "chest" | "door" | "bed" | "fume" | "lantern";
+export type InteractionKind = "crafting" | "furnace" | "chest" | "door" | "bed" | "fume";
 
 export interface BlockDrop {
   item: string;

@@ -14,6 +14,7 @@ const UNDERSTONE_OFFSET = 909;
 
 export class WorldGenerator {
   readonly seedInt: number;
+  readonly campChests = new Set<string>();
   private pHeight: Perlin;
   private pDetail: Perlin;
   private pRidge: Perlin;
@@ -431,6 +432,7 @@ export class WorldGenerator {
         chunk.setBlockRaw(x + 1, groundY + 1, z, B.LOG);
         chunk.setBlockRaw(x - 1, groundY + 1, z, B.LOG);
         chunk.setBlockRaw(x + 2, groundY + 1, z + 2, B.CHEST);
+        this.campChests.add(`${chunk.cx * CHUNK_SX + x + 2},${groundY + 1},${chunk.cz * CHUNK_SZ + z + 2}`);
       }
     }
   }
