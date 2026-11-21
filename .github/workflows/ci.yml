@@ -28,10 +28,14 @@ jobs:
       - name: Check for exposed API keys
         run: |
           set -o pipefail
-          KEY_PATTERN='AIza[0-9A-Za-z_-]{35}|sk-(proj|ant)-[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}'
+          # Token formats: Google, OpenAI/Anthropic, AWS, GitHub (classic and
+          # fine-grained), Hugging Face, Supabase secret keys, PEM private keys.
+          KEY_PATTERN='AIza[0-9A-Za-z_-]{35}|sk-(proj|ant)-[A-Za-z0-9_-]{10,}|AKIA[0-9A-Z]{16}|gh[pousr]_[A-Za-z0-9]{36}|github_pat_[A-Za-z0-9_]{60,}|hf_[A-Za-z0-9]{30,}|sb_secret_[A-Za-z0-9_-]{10,}|-----BEGIN ([A-Z]+ )?PRIVATE KEY-----'
           SECRET_ASSIGN_PATTERN='(SERVICE_ROLE|SECRET)[A-Za-z_]*[[:space:]]*[:=][[:space:]]*['"'"'"]'
-          MATCHES=$( { grep -rEn "$KEY_PATTERN" --include="*.js" --include="*.html" \
-              --exclude-dir=node_modules --exclude-dir=.git .
+          # Token formats are searched in every tracked text file (any
+          # extension: .py, .json, .yml, .sql, .md ...), since all of them are
+          # public in this repository; -I skips binaries such as APKs.
+          MATCHES=$( { git grep -nIE "$KEY_PATTERN"
             grep -rEn "$SECRET_ASSIGN_PATTERN" --include="*.js" --include="*.html" \
               --exclude-dir=node_modules --exclude-dir=.git . ; } 2>/dev/null \
             | grep -v "gemini-config.example" || true)
