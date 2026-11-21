@@ -132,7 +132,9 @@ const projects = {
     const f = validate('studio_projects', fields ?? {}, { required: ['title', 'section'] });
     f.slug = f.slug ? f.slug : await freeSlug(db, f.title);
     f.visibility ??= 'hidden';
-    if (f.visibility === 'public') assertPublishable(f);
+    // Check what the row will hold: the table fills an omitted type and
+    // status with these defaults (supabase/migrations/…_admin_cms.sql).
+    if (f.visibility === 'public') assertPublishable({ project_type: 'App', status: 'In Development', ...f });
     if (f.sort_order === undefined) {
       const last = await db.select('studio_projects', 'select=sort_order&order=sort_order.desc&limit=1');
       f.sort_order = (last[0]?.sort_order ?? 0) + 10;

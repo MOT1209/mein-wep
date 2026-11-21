@@ -168,9 +168,13 @@ test('an incomplete project cannot be published (the site build would reject it)
   assert.equal(writes().length, 0);
   assert.deepEqual((await api('projects', { action: 'update', id, fields: { cover_image: 'images/x.webp' } })).body.details, ['image_alt']);
 
-  // Created directly as public: checked too.
+  // Created directly as public: checked too, with the table's defaults for
+  // an omitted type and status (only the description is really missing).
   const created = await api('projects', { action: 'create', fields: { title: 'New', section: 'labs', visibility: 'public' } });
   assert.equal(created.statusCode, 422);
+  assert.deepEqual(created.body.details, ['short_description']);
+  const ok = await api('projects', { action: 'create', fields: { title: 'New', section: 'labs', short_description: 'A tool', visibility: 'public' } });
+  assert.equal(ok.statusCode, 200);
 });
 
 test('the overview lists published projects the build would reject', async () => {
