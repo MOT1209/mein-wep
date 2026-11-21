@@ -14,6 +14,8 @@ const PANEL_CSS = `
 export class SettingsPanel {
   private readonly root: HTMLElement;
   private readonly body: HTMLElement;
+  private readonly heading: HTMLElement;
+  private readonly backBtn: HTMLButtonElement;
   private settings: Settings;
 
   constructor(parent: HTMLElement, initial: Settings, private readonly onChange: (settings: Settings) => void, onBack: () => void) {
@@ -27,12 +29,20 @@ export class SettingsPanel {
     this.settings = initial;
     this.root = el("div", "bw-screen hidden", parent);
     const menu = el("div", "bw-panel bw-menu bw-settings", this.root);
-    el("h1", "", menu).textContent = tr("ui.settings");
+    this.heading = el("h1", "", menu);
+    this.heading.textContent = tr("ui.settings");
     this.body = el("div", "", menu);
     const back = el("button", "bw-btn primary", menu);
     back.type = "button";
     back.textContent = tr("ui.back");
     back.addEventListener("click", onBack);
+    this.backBtn = back;
+  }
+
+  relabel(): void {
+    this.heading.textContent = tr("ui.settings");
+    this.backBtn.textContent = tr("ui.back");
+    if (this.isVisible) this.render();
   }
 
   get isVisible(): boolean {

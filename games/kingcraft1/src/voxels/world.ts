@@ -19,6 +19,7 @@ export class World implements LightWorld {
   readonly generator: WorldGenerator;
   readonly chunks = new Map<string, Chunk>();
   readonly storedChunks = new Map<string, Uint8Array>();
+  private readonly revisions = new Map<string, number>();
   time = 0;
 
   private readonly cacheKeys = new Float64Array(16).fill(Number.NaN);
@@ -67,6 +68,7 @@ export class World implements LightWorld {
       chunk.blocks.set(stored);
       chunk.modified = true;
       chunk.recomputeAllHeights();
+      this.storedChunks.delete(key);
     }
     this.chunks.set(key, chunk);
     this.invalidateChunkCache();
@@ -95,6 +97,10 @@ export class World implements LightWorld {
     return chunk.blocks[localIndex(x - cx * CHUNK_SX, y, z - cz * CHUNK_SZ)];
   }
 
+  isCampChest(x: number, y: number, z: number): boolean {
+    return this.generator.campChests.has(`${x},${y},${z}`);
+  }
+
   isBlockLoaded(x: number, z: number): boolean {
     return this.isChunkLoaded(Math.floor(x / CHUNK_SX), Math.floor(z / CHUNK_SZ));
   }
@@ -114,6 +120,7 @@ export class World implements LightWorld {
     this.markMeshArea(x, z);
     updateSkyColumn(this, x, z);
     applyBlockLightChange(this, x, y, z, lightEmitOf(id));
+    this.bumpRevision(chunkKey(cx, cz));
     return true;
   }
 
@@ -178,6 +185,7 @@ export class World implements LightWorld {
     const chunk = this.ensureChunk(cx, cz);
     chunk.blocks.set(blocks);
     chunk.modified = true;
+    this.bumpRevision(chunkKey(cx, cz));
     chunk.recomputeAllHeights();
     this.relightChunk(chunk);
     chunk.meshDirty = true;
@@ -209,18 +217,16 @@ export class World implements LightWorld {
   }
 
   findSpawn(): SpawnPoint {
-    const offsets: [number, number][] = [[0, 0]];
-    for (let r = 0; r <= 48; r += 8) {
-      for (const [ox, oz] of offsets) {
-        const x = ox;
-        const z = oz;
-        const h = this.generator.columnHeight(x, z);
-        const biome = this.generator.biomeAtColumn(x, z, h);
-        if (biome === BIOME.OCEAN || h <= SEA_LEVEL + 1) continue;
-        return { x: x + 0.5, y: h + 1.02, z: z + 0.5 };
-      }
-      offsets.length = 0;
-      offsets.push(
+    const at = (x: number, z: number): SpawnPoint | null => {
+      const h = this.generator.columnHeight(x, z);
+      const biome = this.generator.biomeAtColumn(x, z, h);
+      if (biome === BIOME.OCEAN || h <= SEA_LEVEL + 1) return null;
+      return { x: x + 0.5, y: h + 1.02, z: z + 0.5 };
+    };
+    const center = at(0, 0);
+    if (center) return center;
+    for (let r = 1; r <= 48; r++) {
+      const ring: [number, number][] = [
         [r, 0],
         [-r, 0],
         [0, r],
@@ -229,7 +235,11 @@ export class World implements LightWorld {
         [-r, r],
         [r, -r],
         [-r, -r]
-      );
+      ];
+      for (const [x, z] of ring) {
+        const hit = at(x, z);
+        if (hit) return hit;
+      }
     }
     return { x: 0.5, y: SEA_LEVEL + 2, z: 0.5 };
   }
@@ -258,6 +268,15 @@ export class World implements LightWorld {
 
   skipToMorning(): void {
     this.time = (Math.floor(this.time / DAY_TICKS) + 1) * DAY_TICKS;
+  }
+
+  /** Counter that changes whenever the chunk's blocks change, so saves can avoid re-encoding untouched chunks. */
+  chunkRevision(key: string): number {
+    return this.revisions.get(key) ?? 0;
+  }
+
+  private bumpRevision(key: string): void {
+    this.revisions.set(key, (this.revisions.get(key) ?? 0) + 1);
   }
 
   modifiedChunkData(): Map<string, Uint8Array> {

@@ -38,6 +38,7 @@ function createGeometry(arrays: MeshArrays): THREE.BufferGeometry {
   geometry.setAttribute("uv", new THREE.BufferAttribute(arrays.uvs, 2));
   geometry.setAttribute("sky", new THREE.BufferAttribute(arrays.sky, 1));
   geometry.setAttribute("block", new THREE.BufferAttribute(arrays.block, 1));
+  geometry.setAttribute("ao", new THREE.BufferAttribute(arrays.ao, 1));
   geometry.setIndex(new THREE.BufferAttribute(arrays.indices, 1));
   return geometry;
 }

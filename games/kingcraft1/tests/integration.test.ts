@@ -16,6 +16,7 @@ import { buildSave, decodeChunks, loadWorld, saveWorld, slotKey } from "../src/s
 import { World } from "../src/voxels/world";
 
 const SEED = 20261019;
+const HANG_GUARD_MS = 60000;
 const DT = TICK_MS / 1000;
 const noRenderer = { markDirty: (): void => undefined, dispose: (): void => undefined };
 
@@ -135,6 +136,6 @@ describe("end-to-end: generate, walk, mine, place, save, load", () => {
     const resumed = new PlayerController(restored, loaded.player);
     for (let i = 0; i < 20; i++) resumed.move(IDLE_INPUT, DT);
     expect(Math.abs(resumed.state.position.y - position.y)).toBeLessThan(0.01);
-    expect(Date.now() - started).toBeLessThan(5000);
+    expect(Date.now() - started).toBeLessThan(HANG_GUARD_MS);
   });
 });

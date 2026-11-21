@@ -105,6 +105,7 @@ export class Hud {
   private readonly progressFill: HTMLElement;
   private readonly vitals: HTMLElement;
   private readonly bars: { health: HTMLElement; hunger: HTMLElement; air: HTMLElement; airRow: HTMLElement };
+  private readonly labels: { health: HTMLElement; hunger: HTMLElement; air: HTMLElement };
   private readonly slots: HTMLElement[] = [];
   private readonly debug: HTMLElement;
   private readonly toastEl: HTMLElement;
@@ -119,17 +120,19 @@ export class Hud {
     this.progressFill = el("i", "", this.progress);
     const bottom = el("div", "bw-bottom", this.root);
     this.vitals = el("div", "bw-vitals", bottom);
-    const bar = (label: string, color: string): { row: HTMLElement; fill: HTMLElement } => {
+    const bar = (label: string, color: string): { row: HTMLElement; fill: HTMLElement; label: HTMLElement } => {
       const row = el("div", "bw-bar", this.vitals);
-      el("span", "", row).textContent = label;
+      const labelEl = el("span", "", row);
+      labelEl.textContent = label;
       const fill = el("i", "", el("b", "", row));
       fill.style.background = color;
-      return { row, fill };
+      return { row, fill, label: labelEl };
     };
     const health = bar(tr("ui.health"), "#d8443a");
     const hunger = bar(tr("game.food"), "#c98a3a");
     const air = bar(tr("game.air"), "#5aa8e0");
     this.bars = { health: health.fill, hunger: hunger.fill, air: air.fill, airRow: air.row };
+    this.labels = { health: health.label, hunger: hunger.label, air: air.label };
     const hotbar = el("div", "bw-hotbar", bottom);
     for (let i = 0; i < HOTBAR_SIZE; i++) {
       const slot = el("div", "bw-slot", hotbar);
@@ -173,6 +176,12 @@ export class Hud {
     this.bars.hunger.style.width = pct(vitals.hunger, vitals.maxHunger);
     this.bars.air.style.width = pct(vitals.air, vitals.maxAir);
     this.bars.airRow.classList.toggle("hidden", !vitals.showAir);
+  }
+
+  relabel(): void {
+    this.labels.health.textContent = tr("ui.health");
+    this.labels.hunger.textContent = tr("game.food");
+    this.labels.air.textContent = tr("game.air");
   }
 
   setMiningProgress(progress: number): void {

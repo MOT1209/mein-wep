@@ -242,9 +242,10 @@ for (const f of ITEM_FOODS) {
 }
 
 en.set("item.bow", "Shortbow");
-ar.set("item.bow", "قوس قصير");
-en.set("item.arrow", "Arrow");
-ar.set("item.arrow", "سهم");
+ar.set("item.bow", "قوس قصير");  en.set("item.arrow", "Arrow");
+  ar.set("item.arrow", "سهم");
+  en.set("item.ground_bone", "Ground Bone");
+  ar.set("item.ground_bone", "عظم مطحون");
 en.set("item.name_tag", "Name Tag");
 ar.set("item.name_tag", "بطاقة تسمية");
 en.set("item.bucket", "Bucket");
@@ -618,7 +619,7 @@ const GAME_EN: Record<string, string> = {
   "game.auto": "Auto",
   "game.sound": "Sound",
   "game.settings_note": "Quality sets the default view distance and pixel density. Settings are saved in this browser.",
-  "game.language_note": "Changing the language saves the world and reloads the page.",
+  "game.language_note": "The new language applies instantly, without saving and reloading.",
   "game.touch_bag": "Bag",
   "game.touch_pause": "Pause",
   "game.touch_sneak": "Sneak",
@@ -711,7 +712,7 @@ const GAME_AR: Record<string, string> = {
   "game.auto": "تلقائي",
   "game.sound": "الصوت",
   "game.settings_note": "تحدد الجودة مدى الرؤية الافتراضي ودقة العرض. تُحفظ الإعدادات في هذا المتصفح.",
-  "game.language_note": "تغيير اللغة يحفظ العالم ثم يعيد تحميل الصفحة.",
+  "game.language_note": "اللغة الجديدة تُطبَّق فورًا، دون حفظ الصفحة ولا إعادة تحميلها.",
   "game.touch_bag": "الحقيبة",
   "game.touch_pause": "إيقاف",
   "game.touch_sneak": "تسلل",

@@ -230,7 +230,10 @@ export class InventoryScreen {
         const stack = inventory.slots[ref.index];
         if (!stack) return;
         const index = this.extra.slots.findIndex((_, i) => !this.extra?.readOnly?.includes(i) && (this.extra?.accepts?.(i, stack) ?? true));
-        if (index < 0) return;
+        if (index < 0) {
+          quickMove(inventory.slots, ref.index);
+          return;
+        }
         const leftover = insertInto(this.extra.slots, stack, index, this.extra.accepts ? index + 1 : this.extra.slots.length);
         inventory.slots[ref.index] = leftover;
         this.extra.onChange?.();

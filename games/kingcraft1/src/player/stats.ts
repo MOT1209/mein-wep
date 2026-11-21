@@ -7,6 +7,7 @@ import {
   RESPAWN_HEALTH
 } from "../config";
 import { foodValue } from "../content/items";
+import { armorAbsorb } from "../gameplay/equipment";
 
 export type DamageSource = "mob" | "fall" | "drown" | "starve" | "void";
 
@@ -48,6 +49,7 @@ export interface DamageEvent {
   amount: number;
   source: DamageSource;
   died: boolean;
+  absorbed?: number;
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -69,6 +71,8 @@ export class PlayerStats {
   saturation = STARTING_SATURATION;
   air = MAX_AIR;
   exhaustion = 0;
+  armorPoints = 0;
+  armorToughness = 0;
   lastDamage: DamageSource | null = null;
   private peakY: number | null = null;
   private drownTimer = 0;
@@ -81,9 +85,13 @@ export class PlayerStats {
 
   damage(amount: number, source: DamageSource): DamageEvent {
     if (this.dead || amount <= 0) return { amount: 0, source, died: false };
-    this.health = Math.max(0, this.health - amount);
+    const absorbed = source === "mob" || source === "fall" ? armorAbsorb(this.armorPoints, this.armorToughness, amount) : 0;
+    const taken = Math.round((amount - absorbed) * 10) / 10;
+    this.health = Math.max(0, this.health - taken);
     this.lastDamage = source;
-    return { amount, source, died: this.dead };
+    const event: DamageEvent = { amount: taken, source, died: this.dead };
+    if (absorbed > 0) event.absorbed = absorbed;
+    return event;
   }
 
   heal(amount: number): void {

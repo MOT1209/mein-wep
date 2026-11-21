@@ -54,6 +54,15 @@ export class PauseMenu {
     this.infoEl.textContent = text;
   }
 
+  setTitle(text: string): void {
+    this.heading.textContent = text;
+  }
+
+  relabel(): void {
+    this.resume.textContent = tr("ui.resume");
+    this.setTitle(tr("game.title"));
+  }
+
   setButtons(buttons: readonly MenuButton[]): void {
     this.extras.replaceChildren();
     for (const button of buttons) {
