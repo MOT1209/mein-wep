@@ -137,6 +137,54 @@ test('create validates fields, defaults to hidden and logs the change', async ()
   assert.ok(calls.some((c) => c.url.includes('/rest/v1/activity_logs') && JSON.parse(c.body).action === 'create'));
 });
 
+test('an incomplete project cannot be published (the site build would reject it)', async () => {
+  const id = '00000000-0000-4000-8000-000000000001';
+  const bare = { id, slug: 'king-skills', title: 'KING SKILLS', section: 'labs', status: 'In Development', visibility: 'hidden', short_description: null, project_type: null, repo: null };
+
+  // Publishing: refused with the missing fields, nothing written.
+  tables.studio_projects = [bare];
+  const refused = await api('projects', { action: 'set_visibility', id, visibility: 'public' });
+  assert.equal(refused.statusCode, 422);
+  assert.deepEqual(refused.body.details, ['short_description', 'project_type']);
+  assert.equal(writes().length, 0);
+
+  // The linked repository's description counts, as it does in the build.
+  tables.studio_projects = [{ ...bare, project_type: 'Tool', repo: { description: 'Agent skills' } }];
+  assert.equal((await api('projects', { action: 'set_visibility', id, visibility: 'public' })).statusCode, 200);
+
+  // Hiding is always allowed; so is editing a hidden, incomplete project.
+  tables.studio_projects = [{ ...bare, visibility: 'public' }];
+  assert.equal((await api('projects', { action: 'set_visibility', id, visibility: 'hidden' })).statusCode, 200);
+  tables.studio_projects = [bare];
+  assert.equal((await api('projects', { action: 'update', id, fields: { title: 'KING SKILLS 2' } })).statusCode, 200);
+
+  // A public project cannot lose its description, or keep a cover without alt text.
+  const complete = { ...bare, visibility: 'public', short_description: 'Skills', project_type: 'Tool' };
+  tables.studio_projects = [complete];
+  calls = [];
+  const cleared = await api('projects', { action: 'update', id, fields: { short_description: '' } });
+  assert.equal(cleared.statusCode, 422);
+  assert.deepEqual(cleared.body.details, ['short_description']);
+  assert.equal(writes().length, 0);
+  assert.deepEqual((await api('projects', { action: 'update', id, fields: { cover_image: 'images/x.webp' } })).body.details, ['image_alt']);
+
+  // Created directly as public: checked too.
+  const created = await api('projects', { action: 'create', fields: { title: 'New', section: 'labs', visibility: 'public' } });
+  assert.equal(created.statusCode, 422);
+});
+
+test('the overview lists published projects the build would reject', async () => {
+  tables.studio_projects = [
+    { id: 'a', title: 'KingAgent', slug: 'kingagent', visibility: 'public', status: 'In Development', section: 'labs', project_type: null, short_description: null, repo: null },
+    { id: 'b', title: 'Fine', slug: 'fine', visibility: 'public', status: 'Available', section: 'apps', project_type: 'App', short_description: 'ok', repo: null },
+    { id: 'c', title: 'Hidden', slug: 'hidden', visibility: 'hidden', status: 'Available', section: 'apps', project_type: null, short_description: null, repo: null },
+  ];
+  const r = await api('overview', { action: 'get' });
+  assert.equal(r.statusCode, 200);
+  assert.deepEqual(r.body.data.incomplete, [{ id: 'a', title: 'KingAgent', slug: 'kingagent', problems: ['short_description', 'project_type'] }]);
+  assert.ok(!('short_description' in r.body.data.recentlyChanged[0]), 'recent list keeps its small shape');
+});
+
 test('delete is a soft delete; purge only works from the trash', async () => {
   await api('projects', { action: 'delete', id: '00000000-0000-4000-8000-000000000001' });
   const soft = writes().find((c) => c.method === 'PATCH');
