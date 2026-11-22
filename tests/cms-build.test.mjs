@@ -42,8 +42,13 @@ const CONTENT = {
     'social.links': { value: [{ label: 'LinkedIn', url: 'https://linkedin.com/in/x' }, { label: 'Bad', url: 'javascript:alert(1)' }] },
   },
   pages: [
-    { page_key: 'home', locale: 'en', content: { headline: 'CMS <b>headline</b>', ctaWork: 'Hire me' } },
-    { page_key: 'home', locale: 'ar', content: { headline: 'عنوان من لوحة التحكم' } },
+    { page_key: 'home', locale: 'en', content: {
+      headline: 'CMS <b>headline</b>', ctaWork: 'Hire me',
+      service1Title: 'Robots', service1Text: 'I build <robots>.', service3Title: 'Teaching',
+      skills: ['Rust', 'Go'], aboutTitle: 'Who I am', photo: 'images/cms-photo.webp', photoAlt: 'Me at work',
+      seoTitle: 'Rashid — CMS title', seoDescription: 'Described "in" the CMS',
+    } },
+    { page_key: 'home', locale: 'ar', content: { headline: 'عنوان من لوحة التحكم', photo: 'javascript:alert(1)' } },
     { page_key: 'footer', locale: 'en', content: { text: 'Made by Rashid' } },
     { page_key: 'about', locale: 'en', content: { who: 'I build <things>.', subtitle: 'Maker' } },
     { page_key: 'contact', locale: 'ar', content: { subtitle: 'راسلني الآن' } },
@@ -141,6 +146,53 @@ test('menu, brand, home texts and footer come from the CMS; unsafe links are dro
   assert.match(page('ar/index.html'), />ابدأ</);
   // German has no CMS headline: the built-in text stays.
   assert.ok(!page('de/index.html').includes('CMS &lt;b&gt;'));
+});
+
+test('every homepage section, the photo and the Google title come from the CMS, escaped, with fallbacks', () => {
+  const home = page('index.html');
+  // Service cards: only the filled ones, in order; a card without text has no paragraph.
+  const between = (html, start, end) => html.slice(html.indexOf(start), html.indexOf(end, html.indexOf(start)));
+  const services = between(home, '<ul class="home-services">', '</ul>');
+  assert.ok(services.includes('<h3>Robots</h3>') && services.includes('<h3>Teaching</h3>'));
+  assert.ok(services.indexOf('Robots') < services.indexOf('Teaching'), 'cards keep their order');
+  assert.ok(services.includes('<p>I build &lt;robots&gt;.</p>'), 'card text is escaped');
+  assert.equal(services.split('<p>').length - 1, 1, 'a card without text has no paragraph');
+  assert.ok(!services.includes('AI integration'), 'CMS cards replace the built-in ones');
+  // Skills replace the built-in tags; empty fields keep the built-in text.
+  const stack = between(home, '<ul class="home-stack"', '</ul>');
+  assert.ok(stack.includes('<li class="tag">Rust</li>') && stack.includes('<li class="tag">Go</li>'));
+  assert.ok(!stack.includes('Godot'), 'CMS skills replace the built-in tags');
+  assert.ok(home.includes('<h2 id="about-title">Who I am</h2>'));
+  assert.ok(home.includes('<h2 id="writing-title">Latest from the blog</h2>'), 'empty field keeps the built-in heading');
+  // Photo: a site path from the CMS; shared by languages that set none.
+  assert.ok(home.includes('<img class="home-avatar" src="images/cms-photo.webp" alt="Me at work"'));
+  assert.ok(page('de/index.html').includes('<img class="home-avatar" src="../images/cms-photo.webp"'));
+  // An unsafe photo link is dropped: Arabic falls back to the English one.
+  const ar = page('ar/index.html');
+  assert.ok(!ar.includes('javascript:'), 'no javascript: photo');
+  assert.ok(ar.includes('<img class="home-avatar" src="../images/cms-photo.webp"'));
+  // Google title and description, escaped in the head.
+  assert.ok(home.includes('<title>Rashid — CMS title</title>'));
+  assert.ok(home.includes('<meta name="description" content="Described &quot;in&quot; the CMS">'));
+  assert.ok(!page('de/index.html').includes('CMS title'), 'German keeps its own title');
+  // The email comes from the website settings.
+  assert.ok(home.includes('<a href="mailto:hello@example.com" class="card home-channel">'));
+});
+
+test('one homepage photo for every language, from whichever language set it; https in any case', () => {
+  const file = path.join(TMP, 'photo-cache.json');
+  fs.writeFileSync(file, JSON.stringify({ pages: [
+    { page_key: 'home', locale: 'de', content: { photo: 'HTTPS://cdn.example.com/me.webp' } },
+    { page_key: 'home', locale: 'ar', content: { photo: 'javascript:alert(1)' } },
+  ] }));
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e',
+    "const { default: cms } = await import('./_data/cms.js'); const h = cms().pages.home; console.log(JSON.stringify(['en','de','ar'].map((l) => [h[l].photo, h[l].photoExternal])));"],
+  { env: { ...process.env, CMS_CACHE_FILE: file }, encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  // German set it; English and Arabic (whose own value was unsafe) share it, unprefixed.
+  assert.deepEqual(JSON.parse(r.stdout), [
+    ['HTTPS://cdn.example.com/me.webp', true], ['HTTPS://cdn.example.com/me.webp', true], ['HTTPS://cdn.example.com/me.webp', true],
+  ]);
 });
 
 test('About and Contact texts come from the CMS per language, escaped, with fallbacks', () => {

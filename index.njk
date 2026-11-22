@@ -4,9 +4,9 @@ legacyShell: true
 locale: en
 translationKey: home
 eleventyComputed:
-  title: "{{ i18n.en.home.title | safe }}"
-  metaDescription: "{{ i18n.en.home.metaDescription | safe }}"
-  ogDescription: "{{ i18n.en.home.ogDescription | safe }}"
+  title: "{{ (cms.pages.home.en.seoTitle or i18n.en.home.title) | safe }}"
+  metaDescription: "{{ (cms.pages.home.en.seoDescription or i18n.en.home.metaDescription) | safe }}"
+  ogDescription: "{{ (cms.pages.home.en.seoDescription or i18n.en.home.ogDescription) | safe }}"
 metaKeywords: "Rashid Ali, MOT1209, Full-Stack Developer, AI Engineer, King Studio, JavaScript, Python, Godot, Unity, Supabase, Portfolio"
 canonical: "https://rashid-wep.vercel.app/"
 activeNav: home

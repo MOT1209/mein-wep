@@ -24,6 +24,31 @@ export default function () {
       pages[row.page_key][row.locale] = row.content;
     }
   }
+  // Homepage extras, prepared here because Nunjucks cannot build lists in a
+  // loop: up to four "What I do" cards from serviceNTitle/serviceNText, and a
+  // photo that is only used when it is an https:// link or a site path.
+  for (const l of LOCALES) {
+    const h = { ...pages.home[l] };
+    h.services = [
+      ['service1Title', 'service1Text'], ['service2Title', 'service2Text'],
+      ['service3Title', 'service3Text'], ['service4Title', 'service4Text'],
+    ]
+      .map(([title, text]) => ({ title: h[title], text: h[text] }))
+      .filter((s) => typeof s.title === 'string' && s.title.trim());
+    if (h.photo !== undefined && !(https(h.photo) || (sitePath(h.photo) && h.photo !== '' && !h.photo.startsWith('/')))) delete h.photo;
+    if (h.skills !== undefined && !Array.isArray(h.skills)) delete h.skills;
+    pages.home[l] = h;
+  }
+  // One photo for every language: a language without its own uses the first
+  // one set (English, then Arabic, then German). photoExternal tells the
+  // template whether to prefix the site root, using the same (case-
+  // insensitive) https test as the check above.
+  const sharedPhoto = ['en', 'ar', 'de'].map((l) => pages.home[l].photo).find(Boolean);
+  for (const l of LOCALES) {
+    const h = pages.home[l];
+    if (!h.photo && sharedPhoto) h.photo = sharedPhoto;
+    h.photoExternal = !!h.photo && https(h.photo);
+  }
 
   const nav = c?.nav?.length
     ? c.nav

@@ -61,6 +61,8 @@
 @media (min-width: 640px) { .home-posts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1024px) {
   .home-services, .home-posts { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* Four cards from the dashboard: two rows of two, not three and a lone one. */
+  .home-services:has(> :nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 .home-services h3, .home-posts h3 { font-size: 1.125rem; }
 .home-services p, .home-posts p { color: var(--ink-muted); margin: var(--s-2) 0 0; }
