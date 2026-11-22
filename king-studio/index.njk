@@ -12,8 +12,8 @@ studioPage: index
 permalink: /king-studio/index.html
 canonical: "https://rashid-wep.vercel.app/king-studio/"
 eleventyComputed:
-  title: "{{ i18n.en.studio.title | safe }}"
-  metaDescription: "{{ i18n.en.studio.metaDescription | safe }}"
+  title: "{{ (cms.pages.studio.en.seoTitle or i18n.en.studio.title) | safe }}"
+  metaDescription: "{{ (cms.pages.studio.en.seoDescription or i18n.en.studio.metaDescription) | safe }}"
 metaKeywords: "King Studio, Rashid Ali, MOT1209, Apps, PWA, Android"
 ---
 {% include "studio/index.njk" %}

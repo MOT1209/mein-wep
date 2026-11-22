@@ -18,7 +18,13 @@ export const PAGE_FIELDS = {
     ['contactEyebrow', 'text'], ['contactTitle', 'text'], ['contactNote', 'textarea'],
     ['seoTitle', 'text'], ['seoDescription', 'textarea'],
   ],
-  studio: [['eyebrow', 'text'], ['headline', 'text'], ['tagline', 'text'], ['lede', 'textarea']],
+  studio: [
+    ['eyebrow', 'text'], ['headline', 'text'], ['tagline', 'text'], ['lede', 'textarea'], ['featuredTitle', 'text'],
+    ['ctaTitle', 'text'], ['ctaText', 'textarea'], ['seoTitle', 'text'], ['seoDescription', 'textarea'],
+    ['appsTitle', 'text'], ['appsLede', 'textarea'], ['appsEmpty', 'text'], ['appsSeoTitle', 'text'], ['appsSeoDescription', 'textarea'],
+    ['gamesTitle', 'text'], ['gamesLede', 'textarea'], ['gamesEmpty', 'text'], ['gamesSeoTitle', 'text'], ['gamesSeoDescription', 'textarea'],
+    ['labsTitle', 'text'], ['labsLede', 'textarea'], ['labsEmpty', 'text'], ['labsSeoTitle', 'text'], ['labsSeoDescription', 'textarea'],
+  ],
   about: [['subtitle', 'text'], ['who', 'textarea'], ['build', 'textarea']],
   contact: [['subtitle', 'textarea']],
   footer: [['text', 'text']],
@@ -28,8 +34,13 @@ const LOCALES = ['ar', 'en', 'de'];
 // in the order of the page itself.
 const PAGE_GROUPS = {
   home: { photo: 'hero', workEyebrow: 'work', servicesEyebrow: 'services', aboutEyebrow: 'about', writingEyebrow: 'writing', contactEyebrow: 'contact', seoTitle: 'seo' },
+  studio: { eyebrow: 'studioMain', ctaTitle: 'studioCta', seoTitle: 'seo', appsTitle: 'studioApps', gamesTitle: 'studioGames', labsTitle: 'studioLabs' },
 };
-const FIELD_HINT = { photo: 'pages.photoHint', seoTitle: 'pages.seoHint', service1Title: 'pages.servicesHint' };
+const FIELD_HINT = {
+  photo: 'pages.photoHint', seoTitle: 'pages.seoHint', service1Title: 'pages.servicesHint',
+  appsSeoTitle: 'pages.seoHint', gamesSeoTitle: 'pages.seoHint', labsSeoTitle: 'pages.seoHint',
+  gamesTitle: 'pages.sectionTitleHint', labsTitle: 'pages.sectionTitleHint', appsEmpty: 'pages.emptyHint', gamesEmpty: 'pages.emptyHint', labsEmpty: 'pages.emptyHint',
+};
 
 /** One page-text input; an image field gets a "choose from the media library" button. */
 function pageField(page, k, kind, value, dir) {

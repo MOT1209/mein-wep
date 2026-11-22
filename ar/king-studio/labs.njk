@@ -13,8 +13,8 @@ studioSection: labs
 permalink: /ar/king-studio/labs/index.html
 canonical: "https://rashid-wep.vercel.app/ar/king-studio/labs/"
 eleventyComputed:
-  title: "{{ i18n.ar.studio.labsMetaTitle | safe }}"
-  metaDescription: "{{ i18n.ar.studio.labsMeta | safe }}"
+  title: "{{ (cms.pages.studio.ar.labsSeoTitle or i18n.ar.studio.labsMetaTitle) | safe }}"
+  metaDescription: "{{ (cms.pages.studio.ar.labsSeoDescription or i18n.ar.studio.labsMeta) | safe }}"
 metaKeywords: "King Studio, Rashid Ali, labs"
 ---
 {% include "studio/section.njk" %}

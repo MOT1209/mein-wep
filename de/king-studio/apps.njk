@@ -13,8 +13,8 @@ studioSection: apps
 permalink: /de/king-studio/apps/index.html
 canonical: "https://rashid-wep.vercel.app/de/king-studio/apps/"
 eleventyComputed:
-  title: "{{ i18n.de.studio.appsMetaTitle | safe }}"
-  metaDescription: "{{ i18n.de.studio.appsMeta | safe }}"
+  title: "{{ (cms.pages.studio.de.appsSeoTitle or i18n.de.studio.appsMetaTitle) | safe }}"
+  metaDescription: "{{ (cms.pages.studio.de.appsSeoDescription or i18n.de.studio.appsMeta) | safe }}"
 metaKeywords: "King Studio, Rashid Ali, apps"
 ---
 {% include "studio/section.njk" %}
