@@ -30,6 +30,8 @@ function loadDotEnv(): void {
 
 loadDotEnv();
 
+const DEV_JWT_SECRET = 'dev-only-insecure-secret-change-me-0000000000';
+
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().max(65535).default(4000),
@@ -37,7 +39,7 @@ const schema = z.object({
   JWT_SECRET: z
     .string()
     .min(32, 'JWT_SECRET must be at least 32 characters')
-    .default('dev-only-insecure-secret-change-me-0000000000'),
+    .default(DEV_JWT_SECRET),
   ACCESS_TOKEN_TTL: z.string().default('15m'),
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().int().positive().default(30),
   CORS_ORIGINS: z.string().default('http://localhost:5173,http://localhost:3000'),
@@ -55,6 +57,14 @@ if (!parsed.success) {
     .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
     .join('\n');
   throw new Error(`Invalid environment configuration:\n${issues}`);
+}
+
+// The default secret is public (it is in this file): a server running with it
+// would accept tokens anyone can forge. It is allowed only when NODE_ENV is
+// set explicitly to development or test (.env.example and the test config do
+// that), so a server started without NODE_ENV cannot fall back to it.
+if (parsed.data.JWT_SECRET === DEV_JWT_SECRET && !['development', 'test'].includes(process.env.NODE_ENV ?? '')) {
+  throw new Error('Invalid environment configuration:\n  - JWT_SECRET: set a real secret (the built-in default is allowed only with NODE_ENV=development or test)');
 }
 
 export const env = parsed.data;

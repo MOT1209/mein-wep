@@ -405,7 +405,7 @@ GAME.DayNightCycle = {
     this._syncWithTimeSystem();
 
     // تحديث الفترة الحالية
-    var periodChanged = this._updatePeriod();
+    var periodChanged = this._updatePeriod(dt);
 
     // تحديث الإضاءة
     this._updateLighting(dt);
@@ -441,7 +441,7 @@ GAME.DayNightCycle = {
   // ══════════════════════════════════════════════════════
   // 🕐 تحديث الفترة الحالية
   // ══════════════════════════════════════════════════════
-  _updatePeriod: function() {
+  _updatePeriod: function(dt) {
     var newPeriod = this._getPeriodForHour(this.currentHour);
 
     if (newPeriod !== this.currentPeriod) {

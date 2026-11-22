@@ -13,12 +13,13 @@
 // CI: rebuild trigger after JDK 21 upgrade + race-safe APK push for Capacitor 8.
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..');
 
-const DIRS_TO_COPY = ['css', 'js', 'icons', 'images', 'screenshots', 'fonts'];
+// assets/: Farm World loads its textures from assets/textures/ at runtime.
+const DIRS_TO_COPY = ['css', 'js', 'icons', 'images', 'screenshots', 'fonts', 'assets'];
 const FILES_TO_COPY = ['index.html', 'manifest.json', 'sw.js', 'version.json'];
 
 function copyDir(src, dest) {
@@ -40,6 +41,19 @@ function copyFile(src, dest) {
     fs.mkdirSync(path.dirname(dest), { recursive: true });
     fs.copyFileSync(src, dest);
   }
+}
+
+/**
+ * Shared site scripts referenced as "../../js/<path>.js" (also in a sub-folder,
+ * such as ../../js/vendor/admob.js). Returns the HTML with those references
+ * pointing into www/js/ and the list of paths (relative to the repo's js/) to
+ * copy there. Path segments must start with a word character, so ".." can
+ * never climb out of js/.
+ */
+export function rewriteSharedRefs(html) {
+  const ref = /((?:src|href)=")\.\.\/\.\.\/js\/(\w[\w.-]*(?:\/\w[\w.-]*)*\.js)"/g;
+  const files = [...new Set([...html.matchAll(ref)].map((m) => m[2]))];
+  return { html: html.replace(ref, '$1js/$2"'), files };
 }
 
 function main() {
@@ -108,15 +122,14 @@ function main() {
   const indexHtmlDest = path.join(wwwDir, 'index.html');
   if (fs.existsSync(indexHtmlDest)) {
     let html = fs.readFileSync(indexHtmlDest, 'utf8');
-    const sharedRefs = [...html.matchAll(/(?:src|href)="\.\.\/\.\.\/js\/([\w.-]+\.js)"/g)];
-    if (sharedRefs.length) {
-      for (const [, filename] of sharedRefs) {
-        const sharedSrc = path.join(ROOT, 'js', filename);
-        copyFile(sharedSrc, path.join(wwwDir, 'js', filename));
+    const shared = rewriteSharedRefs(html);
+    if (shared.files.length) {
+      for (const rel of shared.files) {
+        copyFile(path.join(ROOT, 'js', rel), path.join(wwwDir, 'js', rel));
       }
-      html = html.replace(/((?:src|href)=")\.\.\/\.\.\/js\/([\w.-]+\.js)"/g, '$1js/$2"');
+      html = shared.html;
       fs.writeFileSync(indexHtmlDest, html);
-      console.log(`🔗 Rewrote ${sharedRefs.length} shared js/ reference(s) for native bundling`);
+      console.log(`🔗 Rewrote ${shared.files.length} shared js/ reference(s) for native bundling`);
     }
   }
 
@@ -124,4 +137,5 @@ function main() {
   console.log(`   ${fs.readdirSync(wwwDir).length} items copied`);
 }
 
-main();
+// Run only as a script, so tests can import rewriteSharedRefs.
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) main();
