@@ -22,6 +22,8 @@ const MUST_SERVE = [
   'index.html', 'about.html', 'contact.html', 'privacy.html', 'terms.html',
   '404.html', 'sitemap.xml', 'robots.txt', 'llms.txt', 'okf/index.md',
   'blog/posts.json', 'src/js/main.js', 'js/vendor/supabase-2.117.2.js',
+  // Block World: the vite build of games/kingcraft1 (npm run build:block-world).
+  'games/block-world/index.html',
 ];
 
 test('dist/ contains no internal files', { skip: !built && 'run npm run build first' }, () => {
