@@ -17,6 +17,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { CACHE_FILE } from './cms/source.mjs';
 
 const TIMEOUT_MS = 10_000;
@@ -129,7 +130,10 @@ export async function run(env = process.env) {
   return 'cms';
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// pathToFileURL, not `file://${argv[1]}`: the hand-built form never matched on
+// Windows (backslashes, drive letter) or in a path with spaces (%20), so the
+// prebuild silently did nothing there and the build used the git content.
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
   run().catch((err) => {
     console.error(`[cms] ${err.message}`);
     process.exit(1);
