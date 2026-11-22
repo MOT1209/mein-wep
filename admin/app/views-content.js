@@ -21,7 +21,7 @@ export const PAGE_FIELDS = {
   studio: [
     ['eyebrow', 'text'], ['headline', 'text'], ['tagline', 'text'], ['lede', 'textarea'], ['featuredTitle', 'text'],
     ['ctaTitle', 'text'], ['ctaText', 'textarea'], ['seoTitle', 'text'], ['seoDescription', 'textarea'],
-    ['appsTitle', 'text'], ['appsLede', 'textarea'], ['appsSeoTitle', 'text'], ['appsSeoDescription', 'textarea'],
+    ['appsTitle', 'text'], ['appsLede', 'textarea'], ['appsEmpty', 'text'], ['appsSeoTitle', 'text'], ['appsSeoDescription', 'textarea'],
     ['gamesTitle', 'text'], ['gamesLede', 'textarea'], ['gamesEmpty', 'text'], ['gamesSeoTitle', 'text'], ['gamesSeoDescription', 'textarea'],
     ['labsTitle', 'text'], ['labsLede', 'textarea'], ['labsEmpty', 'text'], ['labsSeoTitle', 'text'], ['labsSeoDescription', 'textarea'],
   ],
@@ -39,7 +39,7 @@ const PAGE_GROUPS = {
 const FIELD_HINT = {
   photo: 'pages.photoHint', seoTitle: 'pages.seoHint', service1Title: 'pages.servicesHint',
   appsSeoTitle: 'pages.seoHint', gamesSeoTitle: 'pages.seoHint', labsSeoTitle: 'pages.seoHint',
-  gamesTitle: 'pages.sectionTitleHint', labsTitle: 'pages.sectionTitleHint', gamesEmpty: 'pages.emptyHint', labsEmpty: 'pages.emptyHint',
+  gamesTitle: 'pages.sectionTitleHint', labsTitle: 'pages.sectionTitleHint', appsEmpty: 'pages.emptyHint', gamesEmpty: 'pages.emptyHint', labsEmpty: 'pages.emptyHint',
 };
 
 /** One page-text input; an image field gets a "choose from the media library" button. */
