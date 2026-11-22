@@ -115,6 +115,12 @@ Leave it unset for Preview if you want previews to build without Supabase.
 4. Change a project's short description, press **Publish site**, wait about a minute, and check the King Studio page.
 5. Vercel → Logs: no `[cms] WARNING` line in the build log and no runtime errors on `/api/admin/*`.
 
+## Supabase keep-alive
+
+On the free plan Supabase pauses the project after about a week without activity, and a paused project stops every production deploy (the CMS fetch fails). `.github/workflows/supabase-keepalive.yml` reads one public row every three days with the public anon key from `js/supabase-config.js`, and fails (GitHub emails the owner) if the project is already paused: then restore it in the Supabase dashboard.
+
+GitHub turns off scheduled workflows after 60 days without commits. If that happens, the owner re-enables it under **Actions → Supabase keep-alive → Enable workflow** (or `gh workflow enable supabase-keepalive.yml`).
+
 ## Rollback
 
 - **Content:** hidden or trashed items can be restored in the dashboard, and every change is in the activity log.
