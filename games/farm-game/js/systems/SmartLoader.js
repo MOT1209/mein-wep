@@ -20,7 +20,7 @@
     // ── Service Worker Registration ──────────────────────────────
     setupCache: function () {
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js').catch(function () {
+        navigator.serviceWorker.register('sw.js').catch(function () {
           // SW not available — graceful degradation
         });
       }

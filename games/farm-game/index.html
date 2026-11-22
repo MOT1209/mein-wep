@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#2d5a27">
   <meta name="description" content="3D Farm Game v2.1 — Grow crops, raise animals, build your dream farm. Enhanced terrain, grass, wind, and visuals.">
   <link rel="manifest" href="manifest.json">
-  <link rel="canonical" href="https://rashid-wep.vercel.app/farm-game/">
+  <link rel="canonical" href="https://rashid-wep.vercel.app/games/farm-game/">
   <meta property="og:title" content="Farm Game 3D">
   <meta property="og:description" content="3D Farm Game — Grow crops, raise animals, build your dream farm.">
   <meta property="og:image" content="../../images/logo.png">
@@ -384,12 +384,12 @@
   <script src="js/systems/AchievementSystem.js?v=2.5.0"></script>
   <script src="js/systems/LeaderboardSystem.js?v=2.5.0"></script>
   <script src="js/systems/NotificationSystem.js?v=2.5.0"></script>
-  <script src="js/systems/AudioManager.js?v=2.5.1"></script>
+  <script src="js/systems/AudioManager.js?v=2.5.2"></script>
   <script src="js/systems/WeatherSystem.js?v=2.5.0"></script>
-  <script src="js/systems/DayNightCycle.js?v=2.5.0"></script>
+  <script src="js/systems/DayNightCycle.js?v=2.5.1"></script>
   <!-- Phase 3: Performance Optimization Systems -->
   <script src="js/systems/PerformanceOptimizer.js?v=3.0.0"></script>
-  <script src="js/systems/SmartLoader.js?v=3.0.0"></script>
+  <script src="js/systems/SmartLoader.js?v=3.0.1"></script>
   <script src="js/systems/MemoryManager.js?v=3.0.0"></script>
   <script src="js/systems/NetworkOptimizer.js?v=3.0.0"></script>
   <script src="js/systems/LODSystem.js?v=3.0.0"></script>
@@ -409,8 +409,12 @@
   <script src="js/aiAgent.js?v=2.0.9"></script>
   <script src="js/achievements.js?v=2.1.0"></script>
   <script src="js/main.js?v=2.0.12"></script>
-  <script src="js/update-checker.js"></script>
-  <!-- OTA update checker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () {}); });
+    }
+  </script>
+  <!-- OTA update checker: the shared one only (it runs inside the Android app only, and asks the server for the latest version) -->
   <script>window.RASHID_APP={id:'com.rashid.farmempire',version:'2.5.0',name:'Farm Empire'};</script>
   <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
 </body>

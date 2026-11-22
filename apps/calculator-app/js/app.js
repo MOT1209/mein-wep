@@ -1,11 +1,42 @@
+// The vault code is stored as a SHA-256 hash, never as plain text. A code
+// saved by an older version (plain text under "vaultPassword") is converted
+// the first time the app starts.
+const CODE_KEY = 'vaultCodeHash';
+const LEGACY_CODE_KEY = 'vaultPassword';
+const canHash = !!(window.crypto && crypto.subtle && window.TextEncoder);
+
+async function hashCode(code) {
+    const data = new TextEncoder().encode('rashid-vault:' + code);
+    const buf = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function saveCode(code) {
+    if (canHash) {
+        localStorage.setItem(CODE_KEY, await hashCode(code));
+        localStorage.removeItem(LEGACY_CODE_KEY);
+    } else {
+        localStorage.setItem(LEGACY_CODE_KEY, code);
+    }
+}
+
+async function codeMatches(input) {
+    const hashed = localStorage.getItem(CODE_KEY);
+    if (hashed && canHash) return (await hashCode(input)) === hashed;
+    return input === localStorage.getItem(LEGACY_CODE_KEY);
+}
+
+if (canHash && localStorage.getItem(LEGACY_CODE_KEY) && !localStorage.getItem(CODE_KEY)) {
+    saveCode(localStorage.getItem(LEGACY_CODE_KEY)).catch(() => {});
+}
+
 class VaultCalculator {
     constructor() {
         this.prevElement = document.getElementById('previous-operand');
         this.currElement = document.getElementById('current-operand');
         this.clear();
 
-        this.secretCode = localStorage.getItem('vaultPassword');
-        this.isSetupMode = !this.secretCode;
+        this.isSetupMode = !(localStorage.getItem(CODE_KEY) || localStorage.getItem(LEGACY_CODE_KEY));
         this.setupStep = 0;
         this.tempCode = "";
 
@@ -75,13 +106,13 @@ class VaultCalculator {
         this.updateDisplay();
     }
 
-    handleEquals() {
+    async handleEquals() {
         if (this.isSetupMode) {
             this.handleSetupProcedure();
             return;
         }
 
-        if (this.currentOperand === this.secretCode) {
+        if (!this.isTextMode && await codeMatches(this.currentOperand)) {
             openVault();
             this.clear();
             this.updateDisplay();
@@ -113,8 +144,7 @@ class VaultCalculator {
 
         if (this.setupStep === 2) {
             if (input === this.tempCode) {
-                localStorage.setItem('vaultPassword', input);
-                this.secretCode = input;
+                saveCode(input).catch(() => showNotif("تعذّر حفظ الرمز"));
                 this.isSetupMode = false;
                 showNotif("تم ضبط الرمز بنجاح!");
                 this.showTextDisplay("SAVED");
@@ -232,9 +262,10 @@ document.querySelector('.add-btn').addEventListener('click', () => {
         vaultFileInput.accept = 'image/*,video/*,.pdf,.doc,.docx,.txt';
         document.body.appendChild(vaultFileInput);
         vaultFileInput.addEventListener('change', () => {
-            const files = vaultFileInput.files;
-            if (files.length > 0) {
-                showNotification(`تمت إضافة ${files.length} ملف(ملفات)`, 'success');
+            // Storing files in the vault is not built yet: say so instead of
+            // pretending they were added.
+            if (vaultFileInput.files.length > 0) {
+                showNotification('حفظ الملفات في الخزنة — قيد التطوير، لم يُحفظ أي ملف', 'info');
             }
             vaultFileInput.value = '';
         });

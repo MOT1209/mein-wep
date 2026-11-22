@@ -1,5 +1,5 @@
 // Farm Game Service Worker
-const CACHE_NAME = 'farm-game-v2_5_1';
+const CACHE_NAME = 'farm-game-v2_5_2';
 const STATIC_ASSETS = [
     '/games/farm-game/',
     '/games/farm-game/index.html',
@@ -42,7 +42,8 @@ self.addEventListener('activate', (event) => {
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames
-                    .filter(name => name !== CACHE_NAME)
+                    // Only this app's old caches: the other apps on this site keep theirs.
+                    .filter(name => name.startsWith('farm-game-') && name !== CACHE_NAME)
                     .map(name => caches.delete(name))
             );
         })

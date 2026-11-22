@@ -38,11 +38,6 @@
     }
   </script>
 
-  <!-- تفريغ Cache الـ Service Worker -->
-  <script>
-    if ('caches' in window) { caches.keys().then(function(ks) { ks.forEach(function(k) { caches.delete(k); }); }); }
-    if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(function(rs) { rs.forEach(function(r) { r.unregister(); }); }); }
-  </script>
 
   <!-- Three.js importmap (للاستخدام المباشر بدون Vite) -->
   <script type="importmap">
@@ -260,8 +255,7 @@
 
   <script src="../../js/unified-game-controls.js"></script>
   <script type="module" src="js/main.js"></script>
-  <script src="js/update-checker.js"></script>
-  <!-- OTA update checker -->
+  <!-- OTA update checker: the shared one only (it runs inside the Android app only, and asks the server for the latest version) -->
   <script>window.RASHID_APP={id:'com.rashid.kingcraft',version:'0.6.0',name:'Voxel Realm'};</script>
   <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
   <!-- AdMob Ads -->

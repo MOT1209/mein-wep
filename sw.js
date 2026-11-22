@@ -65,7 +65,8 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keyList) => {
             return Promise.all(keyList.map((key) => {
-                if (key !== CACHE_NAME) {
+                // Only the site's own old caches (current and earlier names): the games and apps keep theirs.
+                if (/^(Rashid-|rashid-portfolio-|fromliten-)/.test(key) && key !== CACHE_NAME) {
                     console.log('[Service Worker] Removing old cache', key);
                     return caches.delete(key);
                 }

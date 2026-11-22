@@ -197,6 +197,9 @@ GAME.AudioManager = {
     }
   },
 
+  // Sound files that answered with an error (not on the server).
+  _missing: {},
+
   _preloadCriticalAssets: function() {
     // تحميل الأصوات المهمة مسبقاً
     var criticalSfx = ['click', 'success', 'error', 'coins'];
@@ -213,7 +216,7 @@ GAME.AudioManager = {
    */
   _loadSFX: function(name) {
     var sfxData = this.sfx[name];
-    if (!sfxData || !this._audioContext || this._cache[sfxData.file]) return;
+    if (!sfxData || !this._audioContext || this._cache[sfxData.file] || this._missing[sfxData.file]) return;
 
     var self = this;
     var request = new XMLHttpRequest();
@@ -221,6 +224,7 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
 
     request.onload = function() {
+      if (request.status !== 200) { self._missing[sfxData.file] = true; return; }
       self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
       }, function(error) {
@@ -665,6 +669,9 @@ GAME.AudioManager = {
   _playSFXWebAudio: function(sfxData, volume, options) {
     var self = this;
     
+    // A file that is not on the server: stay silent, do not ask again.
+    if (this._missing[sfxData.file]) return;
+
     // التحقق من الكاش
     if (this._cache[sfxData.file]) {
       this._playSFXBuffer(this._cache[sfxData.file], volume, sfxData.id, options);
@@ -677,6 +684,7 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
     
     request.onload = function() {
+      if (request.status !== 200) { self._missing[sfxData.file] = true; return; }
       self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
         self._playSFXBuffer(buffer, volume, sfxData.id, options);
@@ -745,6 +753,7 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
     
     request.onload = function() {
+      if (request.status !== 200) { self._missing[sfxData.file] = true; return; }
       self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
         self._startAmbientLoop(buffer, volume, name);

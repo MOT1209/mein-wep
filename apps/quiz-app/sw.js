@@ -1,7 +1,7 @@
 ﻿// Quiz App Service Worker
 // غيّر هذا الوسم عند أي تعديل على الأصول لإبطال الكاش القديم.
 // مفصول عمداً عن رقم إصدار التطبيق (version.json) الذي يخص إصدار الـ APK.
-const CACHE_NAME = 'quiz-app-cache-2';
+const CACHE_NAME = 'quiz-app-cache-3';
 const STATIC_ASSETS = [
     '/apps/quiz-app/',
     '/apps/quiz-app/index.html',
@@ -38,7 +38,8 @@ self.addEventListener('activate', (event) => {
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames
-                    .filter(name => name !== CACHE_NAME)
+                    // Only this app's old caches: the other apps on this site keep theirs.
+                    .filter(name => name.startsWith('quiz-app-') && name !== CACHE_NAME)
                     .map(name => caches.delete(name))
             );
         })
@@ -52,7 +53,7 @@ const OFFLINE_PAGE = `<!DOCTYPE html>
 <head><meta charset="UTF-8"><title>Offline - اسألني</title></head>
 <body style="text-align:center;font-family:sans-serif;padding:50px;background:#0a0a0a;color:#fff;">
     <h1>🧠 أنت في وضع عدم الاتصال</h1>
-    <p>Offline Mode - تحتاج إنترنت لتحميل الأسئلة</p>
+    <p>افتح التطبيق مرة واحدة وأنت متصل بالإنترنت، وبعدها يعمل بلا إنترنت (الأسئلة موجودة داخل التطبيق).</p>
 </body>
 </html>`;
 

@@ -1,5 +1,5 @@
 ﻿// Calculator Vault Service Worker
-const CACHE_NAME = 'calculator-app-v4';
+const CACHE_NAME = 'calculator-app-v5';
 const STATIC_ASSETS = [
     '/apps/calculator-app/',
     '/apps/calculator-app/index.html',
@@ -26,7 +26,8 @@ self.addEventListener('activate', (event) => {
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames
-                    .filter(name => name !== CACHE_NAME)
+                    // Only this app's old caches: the other apps on this site keep theirs.
+                    .filter(name => name.startsWith('calculator-app-') && name !== CACHE_NAME)
                     .map(name => caches.delete(name))
             );
         })

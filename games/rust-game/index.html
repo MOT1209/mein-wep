@@ -316,9 +316,9 @@
                 .catch(err => console.log('[Rust Game] SW registration failed:', err));
         }
     </script>
-  <script src="js/update-checker.js"></script>
-  <!-- OTA update checker (local only — no remote duplicate) -->
+  <!-- OTA update checker: the shared one only (it runs inside the Android app only, and asks the server for the latest version) -->
   <script>window.RASHID_APP={id:'com.rashid.rustsurvival',version:'1.1.0',name:'Rust Construction'};</script>
+  <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
   <!-- AdMob Ads -->
   <script src="../../js/vendor/capacitor.js"></script>
   <script src="../../js/vendor/admob.js"></script>

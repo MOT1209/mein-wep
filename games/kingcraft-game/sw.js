@@ -1,5 +1,5 @@
 // Service Worker — تخزين مؤقت للأصول المحلية (لا يخزّن CDN لتفادي مشاكل التحديث)
-const CACHE = "kingcraft-v4";
+const CACHE = "kingcraft-v5";
 const ASSETS = [
   "./index.html",
   "./manifest.json",
@@ -48,7 +48,8 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))
+      Promise.all(// Only this game's old caches: the other apps on this site keep theirs.
+      keys.filter((k) => k.startsWith("kingcraft-") && k !== CACHE).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
