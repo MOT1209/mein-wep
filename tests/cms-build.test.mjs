@@ -50,6 +50,7 @@ const CONTENT = {
     } },
     { page_key: 'home', locale: 'ar', content: { headline: 'عنوان من لوحة التحكم', photo: 'javascript:alert(1)' } },
     { page_key: 'footer', locale: 'en', content: { text: 'Made by Rashid' } },
+    { page_key: 'studio', locale: 'en', content: { labsTitle: 'AI <Lab>', labsLede: 'Agents and models.', labsSeoTitle: 'AI Lab — King Studio', labsSeoDescription: 'Agents "and" models', ctaTitle: 'Let us talk' } },
     { page_key: 'about', locale: 'en', content: { who: 'I build <things>.', subtitle: 'Maker' } },
     { page_key: 'contact', locale: 'ar', content: { subtitle: 'راسلني الآن' } },
   ],
@@ -193,6 +194,21 @@ test('one homepage photo for every language, from whichever language set it; htt
   assert.deepEqual(JSON.parse(r.stdout), [
     ['HTTPS://cdn.example.com/me.webp', true], ['HTTPS://cdn.example.com/me.webp', true], ['HTTPS://cdn.example.com/me.webp', true],
   ]);
+});
+
+test('King Studio page texts and Google titles come from the CMS, escaped, with fallbacks', () => {
+  const labs = page('king-studio/labs/index.html');
+  assert.ok(labs.includes('<h1>AI &lt;Lab&gt;</h1>'), 'section heading, escaped');
+  assert.ok(labs.includes('<p class="ks-lede">Agents and models.</p>'));
+  assert.ok(labs.includes('<title>AI Lab — King Studio</title>'));
+  assert.ok(labs.includes('<meta name="description" content="Agents &quot;and&quot; models">'));
+  // The main page uses the same heading for its Labs section, and the CTA title.
+  const main = page('king-studio/index.html');
+  assert.ok(main.includes('<h2 id="ks-labs-h">AI &lt;Lab&gt;</h2>'));
+  assert.ok(main.includes('<h2 id="ks-cta-h">Let us talk</h2>'));
+  // Empty fields and other languages keep the built-in text.
+  assert.ok(page('king-studio/apps/index.html').includes('<h1>Applications</h1>'));
+  assert.ok(!page('de/king-studio/labs/index.html').includes('AI &lt;Lab&gt;'), 'German keeps its own heading');
 });
 
 test('About and Contact texts come from the CMS per language, escaped, with fallbacks', () => {

@@ -2,11 +2,12 @@
 {%- set L = locale or "en" %}
 {%- set S = i18n[L].studio %}
 {%- set studio = site.translations.studio[L] %}
+{#- C: texts from the admin dashboard (cms.pages.studio), each falling back to S. #}
+{%- set C = cms.pages.studio[L] %}
 <div class="ks">
 <section class="ks-hero" aria-labelledby="ks-title">
   <div class="wrap">
     <p class="ks-brand"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7z"/></svg><span dir="ltr">KING STUDIO</span></p>
-{%- set C = cms.pages.studio[L] %}
     <p class="eyebrow">{{ C.eyebrow or S.eyebrow }}</p>
     <h1 id="ks-title" class="ks-title">{{ C.headline or S.headline }}</h1>
     <p class="ks-tagline"><span dir="{{ 'auto' if C.tagline else 'ltr' }}">{{ C.tagline or S.tagline }}</span></p>
@@ -26,7 +27,7 @@
 <section class="ks-section" aria-labelledby="ks-{{ key }}-h">
   <div class="wrap">
     <div class="ks-section-head">
-      <h2 id="ks-{{ key }}-h">{{ S.featuredTitle if key == "apps" else S.sections[key] }}</h2>
+      <h2 id="ks-{{ key }}-h">{{ (C.featuredTitle or S.featuredTitle) if key == "apps" else ((C.gamesTitle or S.sections.games) if key == "games" else (C.labsTitle or S.sections.labs)) }}</h2>
       <a class="ks-more" href="{{ root }}{{ studio }}{{ key }}/">{{ S.backTo[key] }}<span aria-hidden="true"> &rarr;</span></a>
     </div>
     <ul class="ks-grid">
@@ -51,8 +52,8 @@
 
 <section class="ks-section ks-cta" aria-labelledby="ks-cta-h">
   <div class="wrap">
-    <h2 id="ks-cta-h">{{ S.ctaTitle }}</h2>
-    <p>{{ S.ctaText }}</p>
+    <h2 id="ks-cta-h">{{ C.ctaTitle or S.ctaTitle }}</h2>
+    <p>{{ C.ctaText or S.ctaText }}</p>
     <div class="ks-actions">
       <a class="btn btn-primary" href="{{ root }}{{ site.translations.contact[L] }}">{{ S.ctaContact }}</a>
     </div>

@@ -13,8 +13,8 @@ studioSection: games
 permalink: /king-studio/games/index.html
 canonical: "https://rashid-wep.vercel.app/king-studio/games/"
 eleventyComputed:
-  title: "{{ i18n.en.studio.gamesMetaTitle | safe }}"
-  metaDescription: "{{ i18n.en.studio.gamesMeta | safe }}"
+  title: "{{ (cms.pages.studio.en.gamesSeoTitle or i18n.en.studio.gamesMetaTitle) | safe }}"
+  metaDescription: "{{ (cms.pages.studio.en.gamesSeoDescription or i18n.en.studio.gamesMeta) | safe }}"
 metaKeywords: "King Studio, Rashid Ali, games"
 ---
 {% include "studio/section.njk" %}

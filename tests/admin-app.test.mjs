@@ -81,18 +81,25 @@ test('the dashboard edits exactly the page texts the templates read', async () =
   const cms = fs.readFileSync(new URL('../_data/cms.js', import.meta.url), 'utf8');
   const pages = JSON.parse(cms.match(/const PAGES = (\[[^\]]+\])/)[1].replace(/'/g, '"'));
   assert.deepEqual(Object.keys(PAGE_FIELDS).sort(), pages.sort());
-  const tpl = ['_includes/pages/home.njk', '_includes/studio/index.njk', '_includes/partials/site-footer.njk',
+  const tpl = ['_includes/pages/home.njk', '_includes/studio/index.njk', '_includes/studio/section.njk', '_includes/partials/site-footer.njk',
     'about.njk', 'de/about.njk', 'ar/about.njk', 'contact.njk', 'de/contact.njk', 'ar/contact.njk']
     .map((f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
   // Homepage fields can also be read by the page front matter (title and
   // description) or turned into a list in _data/cms.js (the service cards).
   const homeFront = ['index.njk', 'de/index.njk', 'ar/index.njk']
     .map((f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
+  // King Studio: the section pages read their texts as C[sec ~ "Title"], and
+  // every King Studio page reads its Google title in the front matter.
+  const studioFront = ['', 'de/', 'ar/'].flatMap((d) => ['index', 'apps', 'games', 'labs'].map((p) => `${d}king-studio/${p}.njk`))
+    .map((f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
   for (const [page, fields] of Object.entries(PAGE_FIELDS)) {
     for (const [k] of fields) {
       const prefix = { footer: 'cms.pages.footer[L].', about: 'CA.', contact: 'CC.' }[page] ?? 'C.';
+      const sectionKey = k.match(/^(?:apps|games|labs)(Title|Lede|Empty)$/);
       const used = tpl.includes(`${prefix}${k}`)
-        || (page === 'home' && (homeFront.includes(`cms.pages.home.en.${k}`) || cms.includes(`'${k}'`)));
+        || (page === 'home' && (homeFront.includes(`cms.pages.home.en.${k}`) || cms.includes(`'${k}'`)))
+        || (page === 'studio' && ((sectionKey && tpl.includes(`C[sec ~ "${sectionKey[1]}"]`))
+          || ['en', 'de', 'ar'].every((l) => studioFront.includes(`cms.pages.studio.${l}.${k}`))));
       assert.ok(used, `${page}.${k} is offered in the dashboard but no template reads it`);
     }
   }
