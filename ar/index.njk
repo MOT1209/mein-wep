@@ -6,9 +6,9 @@ root: "../"
 translationKey: home
 permalink: /ar/index.html
 eleventyComputed:
-  title: "{{ i18n.ar.home.title | safe }}"
-  metaDescription: "{{ i18n.ar.home.metaDescription | safe }}"
-  ogDescription: "{{ i18n.ar.home.ogDescription | safe }}"
+  title: "{{ (cms.pages.home.ar.seoTitle or i18n.ar.home.title) | safe }}"
+  metaDescription: "{{ (cms.pages.home.ar.seoDescription or i18n.ar.home.metaDescription) | safe }}"
+  ogDescription: "{{ (cms.pages.home.ar.seoDescription or i18n.ar.home.ogDescription) | safe }}"
 metaKeywords: "راشد علي, MOT1209, مطور Full-Stack, مهندس ذكاء اصطناعي, King Studio, JavaScript, Python, Godot, Unity, Supabase, عمل حر, معرض أعمال"
 canonical: "https://rashid-wep.vercel.app/ar/"
 activeNav: home

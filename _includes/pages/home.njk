@@ -7,11 +7,16 @@
 {%- set S = i18n[L].settings %}
 {%- set enOnly = (' lang="en"' ~ (' dir="ltr"' if i18n[L].dir == "rtl" else "")) if L != "en" else "" %}
 {%- set work = kingStudio.featured.games.concat(kingStudio.featured.apps) %}
+{#- C: texts from the admin dashboard (cms.pages.home), each falling back to
+    the built-in text in T. The photo is shared by all languages (set in any). #}
+{%- set C = cms.pages.home[L] %}
+{%- set photo = C.photo or cms.pages.home.en.photo %}
+{%- set services = C.services if C.services and C.services.length else T.services %}
+{%- set contactEmail = cms.contactEmail or "zwnt45602@gmail.com" %}
 <section class="home-hero" aria-labelledby="home-title">
     <div class="wrap home-hero-grid">
-        <img class="home-avatar" src="{{ root }}images/rashid-ali.webp" alt="{{ T.photoAlt }}" width="168" height="168" fetchpriority="high">
+        <img class="home-avatar" src="{% if photo %}{{ photo if photo.startsWith('https://') else (root or "") ~ photo }}{% else %}{{ root }}images/rashid-ali.webp{% endif %}" alt="{{ C.photoAlt or T.photoAlt }}" width="168" height="168" fetchpriority="high">
         <div>
-{%- set C = cms.pages.home[L] %}
         <span class="eyebrow">{{ C.eyebrow or T.eyebrow }}</span>
         <h1 id="home-title" class="home-title">{{ C.headline or T.headline }}</h1>
         {%- if C.lede %}
@@ -32,8 +37,8 @@
     <div class="wrap">
         <div class="home-section-head">
             <div>
-                <span class="eyebrow">{{ T.workEyebrow }}</span>
-                <h2 id="work-title">{{ T.workTitle }}</h2>
+                <span class="eyebrow">{{ C.workEyebrow or T.workEyebrow }}</span>
+                <h2 id="work-title">{{ C.workTitle or T.workTitle }}</h2>
             </div>
             <a class="home-more" href="{{ root }}{{ site.translations.studio[L] }}">{{ T.workMore }}<span aria-hidden="true"> &rarr;</span></a>
         </div>
@@ -49,15 +54,17 @@
     <div class="wrap">
         <div class="home-section-head">
             <div>
-                <span class="eyebrow">{{ T.servicesEyebrow }}</span>
-                <h2 id="services-title">{{ T.servicesTitle }}</h2>
+                <span class="eyebrow">{{ C.servicesEyebrow or T.servicesEyebrow }}</span>
+                <h2 id="services-title">{{ C.servicesTitle or T.servicesTitle }}</h2>
             </div>
         </div>
         <ul class="home-services">
-{%- for service in T.services %}
+{%- for service in services %}
             <li class="card">
                 <h3>{{ service.title }}</h3>
+{%- if service.text %}
                 <p>{{ service.text }}</p>
+{%- endif %}
             </li>
 {%- endfor %}
         </ul>
@@ -67,15 +74,14 @@
 <section id="about" class="home-section" aria-labelledby="about-title">
     <div class="wrap home-about">
         <div>
-            <span class="eyebrow">{{ T.aboutEyebrow }}</span>
-            <h2 id="about-title">{{ T.aboutTitle }}</h2>
-            <p>{{ T.aboutText }}</p>
+            <span class="eyebrow">{{ C.aboutEyebrow or T.aboutEyebrow }}</span>
+            <h2 id="about-title">{{ C.aboutTitle or T.aboutTitle }}</h2>
+            <p>{{ C.aboutText or T.aboutText }}</p>
             <p>{{ T.aboutSourceBefore }} <a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer">GitHub</a>{{ T.aboutSourceAfter }}</p>
             <ul class="home-stack" aria-label="{{ T.stackLabel }}">
-{%- for tool in ["HTML", "CSS", "JavaScript", "Python", "Supabase", "Godot", "Unity"] %}
+{%- for tool in (C.skills if C.skills and C.skills.length else ["HTML", "CSS", "JavaScript", "Python", "Supabase", "Godot", "Unity", T.stackAi]) %}
                 <li class="tag">{{ tool }}</li>
 {%- endfor %}
-                <li class="tag">{{ T.stackAi }}</li>
             </ul>
             <a class="home-more" href="{{ root }}{{ site.translations.about[L] }}">{{ T.aboutMore }}<span aria-hidden="true"> &rarr;</span></a>
         </div>
@@ -83,7 +89,7 @@
             <div><dt>{{ T.factProjects }}</dt><dd>{{ kingStudio.projects | length }}</dd></div>
             <div><dt>{{ T.factAndroid }}</dt><dd>{{ releases.items | length }}</dd></div>
             <div><dt>{{ T.factRelease }}</dt><dd>{{ releases.updatedAt }}</dd></div>
-            <div><dt>{{ T.factLanguages }}</dt><dd class="home-fact-text">{{ T.factLanguagesValue }}</dd></div>
+            <div><dt>{{ T.factLanguages }}</dt><dd class="home-fact-text">{{ C.factLanguagesValue or T.factLanguagesValue }}</dd></div>
         </dl>
     </div>
 </section>
@@ -92,10 +98,10 @@
     <div class="wrap">
         <div class="home-section-head">
             <div>
-                <span class="eyebrow">{{ T.writingEyebrow }}</span>
-                <h2 id="writing-title">{{ T.writingTitle }}</h2>
-{%- if T.writingNote %}
-                <p class="home-section-note">{{ T.writingNote }}</p>
+                <span class="eyebrow">{{ C.writingEyebrow or T.writingEyebrow }}</span>
+                <h2 id="writing-title">{{ C.writingTitle or T.writingTitle }}</h2>
+{%- if C.writingNote or T.writingNote %}
+                <p class="home-section-note">{{ C.writingNote or T.writingNote }}</p>
 {%- endif %}
             </div>
             <a class="home-more" href="{{ root }}blog/">{{ T.writingMore }}<span aria-hidden="true"> &rarr;</span></a>
@@ -116,13 +122,13 @@
     <div class="wrap">
         <div class="home-section-head">
             <div>
-                <span class="eyebrow">{{ T.contactEyebrow }}</span>
-                <h2 id="contact-title">{{ T.contactTitle }}</h2>
-                <p class="home-section-note">{{ T.contactNote }}</p>
+                <span class="eyebrow">{{ C.contactEyebrow or T.contactEyebrow }}</span>
+                <h2 id="contact-title">{{ C.contactTitle or T.contactTitle }}</h2>
+                <p class="home-section-note">{{ C.contactNote or T.contactNote }}</p>
             </div>
         </div>
         <ul class="home-channels">
-            <li><a href="mailto:zwnt45602@gmail.com" class="card home-channel"><i class="fas fa-envelope" aria-hidden="true"></i><span>{{ T.channelEmail }}</span><small dir="ltr">zwnt45602@gmail.com</small></a></li>
+            <li><a href="mailto:{{ contactEmail }}" class="card home-channel"><i class="fas fa-envelope" aria-hidden="true"></i><span>{{ T.channelEmail }}</span><small dir="ltr">{{ contactEmail }}</small></a></li>
             <li><a href="https://github.com/MOT1209" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-github" aria-hidden="true"></i><span>GitHub</span><small dir="ltr">@MOT1209</small></a></li>
             <li><a href="https://youtube.com/@مختبرالبرمجه" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-youtube" aria-hidden="true"></i><span>YouTube</span><small dir="auto">مختبر البرمجه</small></a></li>
             <li><a href="https://www.tiktok.com/@programmierlabor" target="_blank" rel="noopener noreferrer" class="card home-channel"><i class="fab fa-tiktok" aria-hidden="true"></i><span>TikTok</span><small dir="ltr">@programmierlabor</small></a></li>

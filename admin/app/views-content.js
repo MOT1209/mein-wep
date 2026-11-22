@@ -7,13 +7,46 @@ import { pickImage } from './views-media.js';
 // Which texts each page takes from the CMS (mirrors _data/cms.js). Lists are
 // one item per line.
 export const PAGE_FIELDS = {
-  home: [['eyebrow', 'text'], ['headline', 'text'], ['lede', 'textarea'], ['availability', 'text'], ['ctaWork', 'text'], ['ctaStudio', 'text']],
+  home: [
+    ['photo', 'image'], ['photoAlt', 'text'], ['eyebrow', 'text'], ['headline', 'text'], ['lede', 'textarea'], ['availability', 'text'], ['ctaWork', 'text'], ['ctaStudio', 'text'],
+    ['workEyebrow', 'text'], ['workTitle', 'text'],
+    ['servicesEyebrow', 'text'], ['servicesTitle', 'text'],
+    ['service1Title', 'text'], ['service1Text', 'textarea'], ['service2Title', 'text'], ['service2Text', 'textarea'],
+    ['service3Title', 'text'], ['service3Text', 'textarea'], ['service4Title', 'text'], ['service4Text', 'textarea'],
+    ['aboutEyebrow', 'text'], ['aboutTitle', 'text'], ['aboutText', 'textarea'], ['skills', 'list'], ['factLanguagesValue', 'text'],
+    ['writingEyebrow', 'text'], ['writingTitle', 'text'], ['writingNote', 'text'],
+    ['contactEyebrow', 'text'], ['contactTitle', 'text'], ['contactNote', 'textarea'],
+    ['seoTitle', 'text'], ['seoDescription', 'textarea'],
+  ],
   studio: [['eyebrow', 'text'], ['headline', 'text'], ['tagline', 'text'], ['lede', 'textarea']],
   about: [['subtitle', 'text'], ['who', 'textarea'], ['build', 'textarea']],
   contact: [['subtitle', 'textarea']],
   footer: [['text', 'text']],
 };
 const LOCALES = ['ar', 'en', 'de'];
+// A heading in the form before these fields, so the long homepage form reads
+// in the order of the page itself.
+const PAGE_GROUPS = {
+  home: { photo: 'hero', workEyebrow: 'work', servicesEyebrow: 'services', aboutEyebrow: 'about', writingEyebrow: 'writing', contactEyebrow: 'contact', seoTitle: 'seo' },
+};
+const FIELD_HINT = { photo: 'pages.photoHint', seoTitle: 'pages.seoHint', service1Title: 'pages.servicesHint' };
+
+/** One page-text input; an image field gets a "choose from the media library" button. */
+function pageField(page, k, kind, value, dir) {
+  const f = field({
+    label: t(`pages.f.${k}`), name: k, dir: kind === 'image' ? 'ltr' : dir,
+    type: kind === 'text' || kind === 'image' ? 'text' : 'textarea',
+    rows: kind === 'list' ? 6 : 3,
+    value: kind === 'list' ? (value ?? []).join('\n') : value,
+    hint: FIELD_HINT[k] ? t(FIELD_HINT[k]) : undefined,
+  });
+  if (kind === 'image') {
+    const input = f.querySelector('input');
+    f.append(el('button', { type: 'button', class: 'btn btn-sm', onclick: async () => { const u = await pickImage(); if (u) input.value = u; } }, t('action.choose')));
+  }
+  const group = PAGE_GROUPS[page]?.[k];
+  return group ? [el('h3', { class: 'form-group-title' }, t(`pages.g.${group}`)), f] : f;
+}
 
 // ---------------------------------------------------------------------------
 // Pages
@@ -30,12 +63,7 @@ export async function pagesView(params) {
     const dir = loc === 'ar' ? 'rtl' : 'ltr';
     const form = el('form', { class: 'card form', novalidate: true, lang: loc, dir },
       el('h2', {}, t(`lang.${loc}`)),
-      PAGE_FIELDS[page].map(([k, kind]) => field({
-        label: t(`pages.f.${k}`), name: k, dir,
-        type: kind === 'text' ? 'text' : 'textarea',
-        rows: kind === 'list' ? 6 : 3,
-        value: kind === 'list' ? (c[k] ?? []).join('\n') : c[k],
-      })),
+      PAGE_FIELDS[page].map(([k, kind]) => pageField(page, k, kind, c[k], dir)),
       el('div', { class: 'form-actions' }, el('button', { type: 'submit', class: 'btn btn-primary' }, t('action.save'))));
     form.addEventListener('submit', async (e) => {
       e.preventDefault();

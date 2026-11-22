@@ -154,6 +154,9 @@ input[type="search"].input { flex: 1 1 200px; }
 
 /* --- forms -------------------------------------------------------------- */
 .form { display: block; }
+/* A section heading inside a long form (the homepage texts). */
+.form-group-title { margin-block: var(--s-5) var(--s-2); padding-block-start: var(--s-3); border-block-start: 1px solid var(--rule); font-size: 1rem; }
+.form-group-title:first-of-type { margin-block-start: var(--s-2); }
 .field { display: flex; flex-direction: column; gap: var(--s-1); margin-block-end: var(--s-4); min-width: 0; }
 .field label { font-size: 0.875rem; font-weight: 600; color: var(--ink-soft); }
 .field input, .field select, .field textarea {

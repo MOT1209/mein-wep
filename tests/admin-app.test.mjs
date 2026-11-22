@@ -84,10 +84,15 @@ test('the dashboard edits exactly the page texts the templates read', async () =
   const tpl = ['_includes/pages/home.njk', '_includes/studio/index.njk', '_includes/partials/site-footer.njk',
     'about.njk', 'de/about.njk', 'ar/about.njk', 'contact.njk', 'de/contact.njk', 'ar/contact.njk']
     .map((f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
+  // Homepage fields can also be read by the page front matter (title and
+  // description) or turned into a list in _data/cms.js (the service cards).
+  const homeFront = ['index.njk', 'de/index.njk', 'ar/index.njk']
+    .map((f) => fs.readFileSync(new URL(`../${f}`, import.meta.url), 'utf8')).join('\n');
   for (const [page, fields] of Object.entries(PAGE_FIELDS)) {
     for (const [k] of fields) {
       const prefix = { footer: 'cms.pages.footer[L].', about: 'CA.', contact: 'CC.' }[page] ?? 'C.';
-      const used = tpl.includes(`${prefix}${k}`);
+      const used = tpl.includes(`${prefix}${k}`)
+        || (page === 'home' && (homeFront.includes(`cms.pages.home.en.${k}`) || cms.includes(`'${k}'`)));
       assert.ok(used, `${page}.${k} is offered in the dashboard but no template reads it`);
     }
   }

@@ -6,9 +6,9 @@ root: "../"
 translationKey: home
 permalink: /de/index.html
 eleventyComputed:
-  title: "{{ i18n.de.home.title | safe }}"
-  metaDescription: "{{ i18n.de.home.metaDescription | safe }}"
-  ogDescription: "{{ i18n.de.home.ogDescription | safe }}"
+  title: "{{ (cms.pages.home.de.seoTitle or i18n.de.home.title) | safe }}"
+  metaDescription: "{{ (cms.pages.home.de.seoDescription or i18n.de.home.metaDescription) | safe }}"
+  ogDescription: "{{ (cms.pages.home.de.seoDescription or i18n.de.home.ogDescription) | safe }}"
 metaKeywords: "Rashid Ali, MOT1209, Full-Stack-Entwickler, KI-Engineer, King Studio, JavaScript, Python, Godot, Unity, Supabase, Portfolio, Freelancer"
 canonical: "https://rashid-wep.vercel.app/de/"
 activeNav: home
