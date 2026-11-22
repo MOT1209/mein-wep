@@ -303,8 +303,7 @@
                 .catch(err => console.log('[Vault] SW registration failed:', err));
         }
     </script>
-  <script src="js/update-checker.js"></script>
-  <!-- OTA update checker -->
+  <!-- OTA update checker: the shared one only (it runs inside the Android app only, and asks the server for the latest version) -->
   <script>window.RASHID_APP={id:'com.rashid.smartvault',version:'1.0.1',name:'Calculator Vault'};</script>
   <script src="https://rashid-wep.vercel.app/js/update-checker.js" defer></script>
 </body>

@@ -15,6 +15,7 @@ const MUST_NOT_SERVE = [
   'apps/chat-app', 'king-colab-MCP', 'linguaverse', 'denkmalen',
   'روابط-الإدارة.txt', 'تقرير-مراجعة-المشروع.html',
   'api', 'scripts', 'vercel.json', 'games/kingcraft1', 'supabase',
+  'apps/wordking', 'games/rust-game/rust-1',
 ];
 
 const MUST_SERVE = [

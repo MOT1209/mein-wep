@@ -23,12 +23,13 @@ p{margin:8px 0;color:#aaa}
   var s = document.getElementById('status');
   try {
     if ('caches' in window) {
-      var keys = await caches.keys();
+      // This game's caches only: the other games and apps on the site keep theirs.
+      var keys = (await caches.keys()).filter(function(k) { return k.indexOf('kingcraft-') === 0; });
       await Promise.all(keys.map(function(k) { return caches.delete(k); }));
       s.textContent = '✓ تم مسح ' + keys.length + ' كاش';
     }
     if ('serviceWorker' in navigator) {
-      var regs = await navigator.serviceWorker.getRegistrations();
+      var regs = (await navigator.serviceWorker.getRegistrations()).filter(function(r) { return r.scope.indexOf('/games/kingcraft-game/') > -1; });
       await Promise.all(regs.map(function(r) { return r.unregister(); }));
       s.textContent += ' ✓ تم إلغاء ' + regs.length + ' Service Worker';
     }

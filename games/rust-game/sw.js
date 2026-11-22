@@ -1,5 +1,5 @@
 // Rust Game Service Worker
-const CACHE_NAME = 'rust-game-v3';
+const CACHE_NAME = 'rust-game-v4';
 const STATIC_ASSETS = [
     '/games/rust-game/',
     '/games/rust-game/index.html',
@@ -26,7 +26,8 @@ self.addEventListener('activate', (event) => {
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames
-                    .filter(name => name !== CACHE_NAME)
+                    // Only this app's old caches: the other apps on this site keep theirs.
+                    .filter(name => name.startsWith('rust-game-') && name !== CACHE_NAME)
                     .map(name => caches.delete(name))
             );
         })

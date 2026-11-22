@@ -43,6 +43,8 @@ const NOT_SERVED = [
   // Raw Vite/TypeScript source with no build step: the page loads /src/main.ts
   // and cannot run. Serve it again only as `vite build` output.
   /^games\/kingcraft1\//,
+  // An old, unused Godot project inside the Rust game: nothing loads it.
+  /^games\/rust-game\/rust-1\//,
 ];
 
 // Mirror .vercelignore exclusion patterns applied to the git-tracked tree.

@@ -676,11 +676,12 @@ requestAnimationFrame(loop);
 window.addEventListener("resize", () => { camera.aspect = window.innerWidth / window.innerHeight; camera.updateProjectionMatrix(); renderer.setSize(window.innerWidth, window.innerHeight); });
 
 // ===== PWA =====
+// Register this game's own worker only. Old versions of this page deleted
+// every cache and unregistered every service worker on the whole site, which
+// also broke the other games' offline copies; sw.js itself removes this
+// game's outdated "kingcraft-*" caches when a new version activates.
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    if ("caches" in window) { const names = await caches.keys(); await Promise.all(names.map((n) => caches.delete(n))); }
-    const regs = await navigator.serviceWorker.getRegistrations();
-    await Promise.all(regs.map((r) => r.unregister()));
+  window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch((err) => { console.warn("Voxel Realm: فشل تسجيل Service Worker", err); });
   });
 }
