@@ -10,12 +10,12 @@
 {#- C: texts from the admin dashboard (cms.pages.home), each falling back to
     the built-in text in T. The photo is shared by all languages (set in any). #}
 {%- set C = cms.pages.home[L] %}
-{%- set photo = C.photo or cms.pages.home.en.photo %}
+{%- set photo = C.photo %}
 {%- set services = C.services if C.services and C.services.length else T.services %}
 {%- set contactEmail = cms.contactEmail or "zwnt45602@gmail.com" %}
 <section class="home-hero" aria-labelledby="home-title">
     <div class="wrap home-hero-grid">
-        <img class="home-avatar" src="{% if photo %}{{ photo if photo.startsWith('https://') else (root or "") ~ photo }}{% else %}{{ root }}images/rashid-ali.webp{% endif %}" alt="{{ C.photoAlt or T.photoAlt }}" width="168" height="168" fetchpriority="high">
+        <img class="home-avatar" src="{% if photo %}{{ photo if C.photoExternal else (root or "") ~ photo }}{% else %}{{ root }}images/rashid-ali.webp{% endif %}" alt="{{ C.photoAlt or T.photoAlt }}" width="168" height="168" fetchpriority="high">
         <div>
         <span class="eyebrow">{{ C.eyebrow or T.eyebrow }}</span>
         <h1 id="home-title" class="home-title">{{ C.headline or T.headline }}</h1>

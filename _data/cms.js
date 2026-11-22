@@ -39,6 +39,16 @@ export default function () {
     if (h.skills !== undefined && !Array.isArray(h.skills)) delete h.skills;
     pages.home[l] = h;
   }
+  // One photo for every language: a language without its own uses the first
+  // one set (English, then Arabic, then German). photoExternal tells the
+  // template whether to prefix the site root, using the same (case-
+  // insensitive) https test as the check above.
+  const sharedPhoto = ['en', 'ar', 'de'].map((l) => pages.home[l].photo).find(Boolean);
+  for (const l of LOCALES) {
+    const h = pages.home[l];
+    if (!h.photo && sharedPhoto) h.photo = sharedPhoto;
+    h.photoExternal = !!h.photo && https(h.photo);
+  }
 
   const nav = c?.nav?.length
     ? c.nav

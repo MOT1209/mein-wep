@@ -37,7 +37,8 @@ function pageField(page, k, kind, value, dir) {
     label: t(`pages.f.${k}`), name: k, dir: kind === 'image' ? 'ltr' : dir,
     type: kind === 'text' || kind === 'image' ? 'text' : 'textarea',
     rows: kind === 'list' ? 6 : 3,
-    value: kind === 'list' ? (value ?? []).join('\n') : value,
+    // A list saved in another shape (e.g. a single text) must not break the page.
+    value: kind === 'list' ? (Array.isArray(value) ? value.join('\n') : (value ?? '')) : value,
     hint: FIELD_HINT[k] ? t(FIELD_HINT[k]) : undefined,
   });
   if (kind === 'image') {

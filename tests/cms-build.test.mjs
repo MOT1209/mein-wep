@@ -179,6 +179,22 @@ test('every homepage section, the photo and the Google title come from the CMS, 
   assert.ok(home.includes('<a href="mailto:hello@example.com" class="card home-channel">'));
 });
 
+test('one homepage photo for every language, from whichever language set it; https in any case', () => {
+  const file = path.join(TMP, 'photo-cache.json');
+  fs.writeFileSync(file, JSON.stringify({ pages: [
+    { page_key: 'home', locale: 'de', content: { photo: 'HTTPS://cdn.example.com/me.webp' } },
+    { page_key: 'home', locale: 'ar', content: { photo: 'javascript:alert(1)' } },
+  ] }));
+  const r = spawnSync(process.execPath, ['--input-type=module', '-e',
+    "const { default: cms } = await import('./_data/cms.js'); const h = cms().pages.home; console.log(JSON.stringify(['en','de','ar'].map((l) => [h[l].photo, h[l].photoExternal])));"],
+  { env: { ...process.env, CMS_CACHE_FILE: file }, encoding: 'utf8' });
+  assert.equal(r.status, 0, r.stderr);
+  // German set it; English and Arabic (whose own value was unsafe) share it, unprefixed.
+  assert.deepEqual(JSON.parse(r.stdout), [
+    ['HTTPS://cdn.example.com/me.webp', true], ['HTTPS://cdn.example.com/me.webp', true], ['HTTPS://cdn.example.com/me.webp', true],
+  ]);
+});
+
 test('About and Contact texts come from the CMS per language, escaped, with fallbacks', () => {
   const about = page('about.html');
   assert.match(about, /<p>I build &lt;things&gt;\.<\/p>/);
