@@ -1,0 +1,46 @@
+# Keeps the Supabase project awake.
+#
+# On the free plan Supabase pauses a project after about a week without
+# activity. A paused project breaks the site: the CMS fetch in the build fails,
+# so every production deploy stops until someone restores the project by hand.
+# This makes one small public read every three days, with the same public
+# (anon) key the website already ships in js/supabase-config.js. It writes
+# nothing, needs no secret, and fails loudly (GitHub emails the owner) if the
+# project is already paused.
+
+name: Supabase keep-alive
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Ping Supabase
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: js/supabase-config.js
+          sparse-checkout-cone-mode: false
+
+      - name: Read one public row
+        run: |
+          set -euo pipefail
+          cfg=js/supabase-config.js
+          url=$(grep -oE "url: *'https://[a-z0-9]+\.supabase\.co'" "$cfg" | grep -oE "https://[^']+")
+          key=$(grep -oE "anonKey: *'[^']+'" "$cfg" | sed -E "s/anonKey: *'([^']+)'/\1/")
+          test -n "$url" && test -n "$key" || { echo "Could not read the public Supabase config from $cfg"; exit 1; }
+          code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 30 \
+            -H "apikey: $key" -H "Authorization: Bearer $key" \
+            "$url/rest/v1/studio_projects?select=slug&limit=1")
+          echo "Supabase answered HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "::error::Supabase did not answer (HTTP $code). The project may be paused: restore it in the Supabase dashboard."
+            exit 1
+          fi
