@@ -39,6 +39,10 @@ class VaultCalculator {
         this.isSetupMode = !(localStorage.getItem(CODE_KEY) || localStorage.getItem(LEGACY_CODE_KEY));
         this.setupStep = 0;
         this.tempCode = "";
+        // True while the code check or the code save is running (both are
+        // async): keys pressed meanwhile are ignored, so they cannot change
+        // the number that is being checked or computed.
+        this.busy = false;
 
         if (this.isSetupMode) {
             this.showTextDisplay("SET CODE");
@@ -59,6 +63,7 @@ class VaultCalculator {
     }
 
     delete() {
+        if (this.busy) return;
         if (this.isTextMode) { this.clear(); this.updateDisplay(); return; }
         if (this.currentOperand === "0") return;
         this.currentOperand = this.currentOperand.toString().slice(0, -1) || "0";
@@ -66,6 +71,7 @@ class VaultCalculator {
     }
 
     appendNumber(number) {
+        if (this.busy) return;
         if (this.isTextMode) this.clear();
         if (number === "." && this.currentOperand.includes(".")) return;
         if (this.currentOperand === "0") {
@@ -77,7 +83,7 @@ class VaultCalculator {
     }
 
     chooseOperation(op) {
-        if (this.isTextMode) return;
+        if (this.busy || this.isTextMode) return;
         if (this.currentOperand === "0") return;
         if (this.previousOperand !== "") this.compute();
         this.operation = op;
@@ -107,12 +113,18 @@ class VaultCalculator {
     }
 
     async handleEquals() {
+        if (this.busy) return;
         if (this.isSetupMode) {
-            this.handleSetupProcedure();
+            await this.handleSetupProcedure();
             return;
         }
 
-        if (!this.isTextMode && await codeMatches(this.currentOperand)) {
+        let matches = false;
+        if (!this.isTextMode) {
+            this.busy = true;
+            try { matches = await codeMatches(this.currentOperand); } finally { this.busy = false; }
+        }
+        if (matches) {
             openVault();
             this.clear();
             this.updateDisplay();
@@ -122,7 +134,7 @@ class VaultCalculator {
         this.compute();
     }
 
-    handleSetupProcedure() {
+    async handleSetupProcedure() {
         const input = this.currentOperand;
 
         if (this.setupStep === 0 || this.isTextMode) {
@@ -144,7 +156,19 @@ class VaultCalculator {
 
         if (this.setupStep === 2) {
             if (input === this.tempCode) {
-                saveCode(input).catch(() => showNotif("تعذّر حفظ الرمز"));
+                // Finish setup only once the code is really stored; if the
+                // save fails (storage full), stay in setup so it can be retried.
+                this.busy = true;
+                try {
+                    await saveCode(input);
+                } catch {
+                    showNotif("تعذّر حفظ الرمز، حاول مجدداً");
+                    this.setupStep = 1;
+                    this.showTextDisplay("RE-ENTER");
+                    return;
+                } finally {
+                    this.busy = false;
+                }
                 this.isSetupMode = false;
                 showNotif("تم ضبط الرمز بنجاح!");
                 this.showTextDisplay("SAVED");

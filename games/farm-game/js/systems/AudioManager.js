@@ -224,7 +224,11 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
 
     request.onload = function() {
-      if (request.status !== 200) { self._missing[sfxData.file] = true; return; }
+      if (request.status !== 200) {
+        // Not on the server: stop asking. Other errors (busy server) may be retried later.
+        if (request.status === 404 || request.status === 410) self._missing[sfxData.file] = true;
+        return;
+      }
       self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
       }, function(error) {
@@ -684,7 +688,11 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
     
     request.onload = function() {
-      if (request.status !== 200) { self._missing[sfxData.file] = true; return; }
+      if (request.status !== 200) {
+        // Not on the server: stop asking. Other errors (busy server) may be retried later.
+        if (request.status === 404 || request.status === 410) self._missing[sfxData.file] = true;
+        return;
+      }
       self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
         self._playSFXBuffer(buffer, volume, sfxData.id, options);
@@ -753,7 +761,11 @@ GAME.AudioManager = {
     request.responseType = 'arraybuffer';
     
     request.onload = function() {
-      if (request.status !== 200) { self._missing[sfxData.file] = true; return; }
+      if (request.status !== 200) {
+        // Not on the server: stop asking. Other errors (busy server) may be retried later.
+        if (request.status === 404 || request.status === 410) self._missing[sfxData.file] = true;
+        return;
+      }
       self._audioContext.decodeAudioData(request.response, function(buffer) {
         self._cache[sfxData.file] = buffer;
         self._startAmbientLoop(buffer, volume, name);

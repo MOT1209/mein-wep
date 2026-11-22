@@ -59,10 +59,12 @@ if (!parsed.success) {
   throw new Error(`Invalid environment configuration:\n${issues}`);
 }
 
-// The default secret is public (it is in this file): a production server
-// running with it would accept tokens anyone can forge.
-if (parsed.data.NODE_ENV === 'production' && parsed.data.JWT_SECRET === DEV_JWT_SECRET) {
-  throw new Error('Invalid environment configuration:\n  - JWT_SECRET: set a real secret in production (the built-in development default is not allowed)');
+// The default secret is public (it is in this file): a server running with it
+// would accept tokens anyone can forge. It is allowed only when NODE_ENV is
+// set explicitly to development or test (.env.example and the test config do
+// that), so a server started without NODE_ENV cannot fall back to it.
+if (parsed.data.JWT_SECRET === DEV_JWT_SECRET && !['development', 'test'].includes(process.env.NODE_ENV ?? '')) {
+  throw new Error('Invalid environment configuration:\n  - JWT_SECRET: set a real secret (the built-in default is allowed only with NODE_ENV=development or test)');
 }
 
 export const env = parsed.data;
